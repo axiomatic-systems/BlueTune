@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloFrame.h
+|   File: FloFrame.h
 |
-|      Fluo - Frames
+|   Fluo - Frames
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,13 +16,13 @@
 #define _FLO_FRAME_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 #include "FloSyntax.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     unsigned char id;
@@ -51,7 +51,7 @@ typedef struct {
 } FLO_FrameInfo;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 extern void       FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, 
                                           FLO_FrameInfo*   info);

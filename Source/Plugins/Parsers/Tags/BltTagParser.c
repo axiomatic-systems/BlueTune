@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltTagParser.c
+|   File: BltTagParser.c
 |
-|      Tag Parser Module
+|   Tag Parser Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 

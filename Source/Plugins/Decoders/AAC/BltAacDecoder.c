@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltAacDecoder.c
+|   File: BltAacDecoder.c
 |
-|      AAC Decoder Module
+|   AAC Decoder Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "Fluo.h"
@@ -28,7 +28,7 @@
 #include "faad.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_BITRATE_AVERAGING_SHORT_SCALE     7
 #define BLT_BITRATE_AVERAGING_SHORT_WINDOW    32
@@ -39,7 +39,7 @@
 #define BLT_AAC_DECODER_INPUT_BUFFER_SIZE     8192
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
 static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface;
@@ -217,7 +217,7 @@ AacDecoderInputPort_BLT_PacketConsumerInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderInputPort)
 ATX_INTERFACE_MAP_ADD(AacDecoderInputPort, BLT_MediaPort)
@@ -459,7 +459,7 @@ AacDecoderOutputPort_BLT_PacketProducerInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderOutputPort)
 ATX_INTERFACE_MAP_ADD(AacDecoderOutputPort, BLT_MediaPort)
@@ -591,7 +591,7 @@ AacDecoder_Destroy(AacDecoder* decoder)
 }
                     
 /*----------------------------------------------------------------------
-|       AacDecoder_GetPortByName
+|   AacDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 AacDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
@@ -664,13 +664,13 @@ AacDecoder_BLT_MediaNodeInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AacDecoder, 
                                              base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
 ATX_INTERFACE_MAP_ADD(AacDecoder, BLT_MediaNode)
@@ -678,7 +678,7 @@ ATX_INTERFACE_MAP_ADD(AacDecoder, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
 
 /*----------------------------------------------------------------------
-|       AacDecoderModule_Attach
+|   AacDecoderModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
 AacDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
@@ -712,7 +712,7 @@ AacDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
 }
 
 /*----------------------------------------------------------------------
-|       AacDecoderModule_Probe
+|   AacDecoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 AacDecoderModule_Probe(BLT_ModuleInstance*      instance, 
@@ -784,13 +784,13 @@ AacDecoderModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   template instantiations
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AacDecoder)
 BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AacDecoder, "AAC Decoder", 0)
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface = {
     AacDecoderModule_GetInterface,
@@ -801,7 +801,7 @@ static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define AacDecoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
@@ -810,7 +810,7 @@ ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AacDecoderModule,
                                              base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule) 
@@ -819,7 +819,7 @@ ATX_INTERFACE_MAP_ADD(AacDecoderModule, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_AacDecoderModule_GetModuleObject(BLT_Module* object)

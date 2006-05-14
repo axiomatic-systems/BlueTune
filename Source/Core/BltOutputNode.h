@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltOutputNode.h
+|   File: BltOutputNode.h
 |
-|      BlueTune - Output Node Interface
+|   BlueTune - Output Node Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_OUTPUT_NODE_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -25,7 +25,7 @@
 #include "BltTime.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_TimeStamp time_stamp;
@@ -33,7 +33,7 @@ typedef struct {
 } BLT_OutputNodeStatus;
 
 /*----------------------------------------------------------------------
-|       BLT_OutputNode Interface
+|   BLT_OutputNode Interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_OutputNode)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputNode)
@@ -42,7 +42,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputNode)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_OutputNode_GetStatus(object, status) \
 ATX_INTERFACE(object)->GetStatus(object, status)

@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltPcm.h
+|   File: BltPcm.h
 |
-|      BlueTune - PCM Utilities
+|   BlueTune - PCM Utilities
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_PCM_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -28,7 +28,7 @@
 #include "BltCore.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_MediaType base;
@@ -39,7 +39,7 @@ typedef struct {
 } BLT_PcmMediaType;
 
 /*----------------------------------------------------------------------
-|       macros
+|   macros
 +---------------------------------------------------------------------*/
 #define BLT_PCM_MEDIA_TYPE_EXTENSION_CLEAR(_e)  \
 do {                                            \
@@ -50,7 +50,7 @@ do {                                            \
 } while(0);
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 
 /* PCM sample format IDs */
@@ -121,12 +121,12 @@ do {                                            \
 #endif
 
 /*----------------------------------------------------------------------
-|       globals
+|   globals
 +---------------------------------------------------------------------*/
 extern const BLT_MediaType BLT_GenericPcmMediaType;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 extern void
 BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type);

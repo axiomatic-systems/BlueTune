@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaPacket.h
+|   File: BltMediaPacket.h
 |
-|      BlueTune - Media Packet Interface
+|   BlueTune - Media Packet Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_MEDIA_PACKET_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -26,12 +26,12 @@
 #include "BltTime.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct BLT_MediaPacket BLT_MediaPacket;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 /**
  * This flag indicates that this packet contains the start of a stream
@@ -61,7 +61,7 @@ typedef struct BLT_MediaPacket BLT_MediaPacket;
 #define BLT_MEDIA_PACKET_FLAG_STREAM_METADATA           0x08
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_MediaPacket_AddReference(BLT_MediaPacket* packet);
 BLT_Result BLT_MediaPacket_Release(BLT_MediaPacket* packet);

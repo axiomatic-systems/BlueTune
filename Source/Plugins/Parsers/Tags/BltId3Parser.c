@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltId3Parser.c
+|   File: BltId3Parser.c
 |
-|      ID3 Parser Library
+|   ID3 Parser Library
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -20,7 +20,7 @@
 #include "BltId3Parser.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_ID3V1_TAG_SIZE                    128
 #define BLT_ID3V1_TAG_MAX_STRING_LENGTH       30
@@ -124,7 +124,7 @@ static const char *const BLT_Id3GenreTable[] = {
 };
 
 /*----------------------------------------------------------------------
-|       BLT_Id3Parser_TrimString
+|   BLT_Id3Parser_TrimString
 +---------------------------------------------------------------------*/
 static void
 BLT_Id3Parser_TrimString(char* buffer, BLT_Size max_size)
@@ -141,7 +141,7 @@ BLT_Id3Parser_TrimString(char* buffer, BLT_Size max_size)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Id3Parser_ParseV1
+|   BLT_Id3Parser_ParseV1
 +---------------------------------------------------------------------*/
 static BLT_Result
 BLT_Id3Parser_ParseV1(ATX_InputStream* stream, 
@@ -254,7 +254,7 @@ BLT_Id3Parser_ParseV1(ATX_InputStream* stream,
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Id3Parser_ParseV2
+|   BLT_Id3Parser_ParseV2
 +---------------------------------------------------------------------*/
 static BLT_Result
 BLT_Id3Parser_ParseV2(ATX_InputStream* stream, 
@@ -310,7 +310,7 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Id3Parser_ParseStream
+|   BLT_Id3Parser_ParseStream
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Id3Parser_ParseStream(ATX_InputStream* stream, 

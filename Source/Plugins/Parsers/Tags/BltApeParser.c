@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltApeParser.c
+|   File: BltApeParser.c
 |
-|      APE TAG Parser Library
+|   APE TAG Parser Library
 |
-|      (c) 2002-2004 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2004 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -20,7 +20,7 @@
 #include "BltId3Parser.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_APE_TAG_HEADER_SIZE 32
 #define BLT_APE_TAG_FOOTER_SIZE 32
@@ -34,7 +34,7 @@
 #define BLT_APE_MAX_TAG_SIZE          4096
 
 /*----------------------------------------------------------------------
-|       BLT_ApeParser_ParseStream
+|   BLT_ApeParser_ParseStream
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_ApeParser_ParseStream(ATX_InputStream* stream, 

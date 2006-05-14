@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloConfig.h
+|   File: FloConfig.h
 |
-|      Fluo - Configuration
+|   Fluo - Configuration
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _FLO_CONFIG_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 
 #endif /* _FLO_CONFIG_H_ */

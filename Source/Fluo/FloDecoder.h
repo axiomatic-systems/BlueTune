@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloDecoder.h
+|   File: FloDecoder.h
 |
-|      Fluo - Decoder API
+|   Fluo - Decoder API
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,12 +16,12 @@
 #define _FLO_DECODER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloFrame.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct FLO_Decoder FLO_Decoder;
 
@@ -66,7 +66,7 @@ typedef struct {
 } FLO_DecoderStatus;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define FLO_DECODER_BUFFER_IS_DISCONTINUOUS     0x01
 #define FLO_DECODER_BUFFER_IS_START_OF_STREAM   0x02
@@ -81,7 +81,7 @@ typedef struct {
 #define FLO_REPLAY_GAIN_HAS_ALBUM_VALUE 2
 
 /*----------------------------------------------------------------------
-|       error codes
+|   error codes
 +---------------------------------------------------------------------*/
 #define FLO_ERROR_INVALID_DECODER_STATE (FLO_ERROR_BASE_DECODER - 0)
 #define FLO_ERROR_FRAME_SKIPPED         (FLO_ERROR_BASE_DECODER - 1)
@@ -89,7 +89,7 @@ typedef struct {
 #define FLO_ERROR_NO_MORE_SAMPLES       (FLO_ERROR_BASE_DECODER - 3)
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 FLO_Result FLO_Decoder_Create(FLO_Decoder** decoder);
 FLO_Result FLO_Decoder_Destroy(FLO_Decoder* decoder);

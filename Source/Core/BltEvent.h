@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltEvent.h
+|   File: BltEvent.h
 |
-|      BlueTune - Events Definitions
+|   BlueTune - Events Definitions
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_EVENT_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -23,7 +23,7 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     BLT_EVENT_TYPE_USER,

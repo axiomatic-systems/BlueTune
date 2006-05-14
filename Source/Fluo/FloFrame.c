@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: FloFrame.c
+|   File: FloFrame.c
 |
-|      Fluo - Frame
+|   Fluo - Frame
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloConfig.h"
 #include "FloTypes.h"
@@ -19,7 +19,7 @@
 #include "FloTables.h"
 
 /*----------------------------------------------------------------------
-|       FLO_FrameHeader_GetInfo
+|   FLO_FrameHeader_GetInfo
 +---------------------------------------------------------------------*/
 void
 FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, FLO_FrameInfo* info)
@@ -95,7 +95,7 @@ FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, FLO_FrameInfo* info)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_FrameHeader_Unpack
+|   FLO_FrameHeader_Unpack
 +---------------------------------------------------------------------*/
 void
 FLO_FrameHeader_Unpack(unsigned long packed, FLO_FrameHeader* header)
@@ -119,7 +119,7 @@ FLO_FrameHeader_Unpack(unsigned long packed, FLO_FrameHeader* header)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_FrameHeader_Check
+|   FLO_FrameHeader_Check
 +---------------------------------------------------------------------*/
 FLO_Result
 FLO_FrameHeader_Check(FLO_FrameHeader* header)

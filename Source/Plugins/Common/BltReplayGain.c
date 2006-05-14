@@ -1,21 +1,21 @@
 /*****************************************************************
 |
-|      File: BltReplayGain.c
+|   File: BltReplayGain.c
 |
-|      ReplayGain common functions
+|   ReplayGain common functions
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
 ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltReplayGain.h"
 
 /*----------------------------------------------------------------------
-|       BLT_ReplayGain_SetStreamProperties
+|   BLT_ReplayGain_SetStreamProperties
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,

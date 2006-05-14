@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltModule.c
+|   File: BltModule.c
 |
-|      BlueTune - Module Interface
+|   BlueTune - Module Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltConfig.h"
 #include "BltDefs.h"
@@ -18,13 +18,13 @@
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|       forward references
+|   forward references
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(BLT_BaseModule, BLT_Module)
 ATX_DECLARE_INTERFACE_MAP(BLT_BaseModule, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_Construct
+|   BLT_BaseModule_Construct
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_BaseModule_Construct(BLT_BaseModule* module, 
@@ -49,7 +49,7 @@ BLT_BaseModule_Construct(BLT_BaseModule* module,
 }
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_Destruct
+|   BLT_BaseModule_Destruct
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_BaseModule_Destruct(BLT_BaseModule* module)
@@ -62,7 +62,7 @@ BLT_BaseModule_Destruct(BLT_BaseModule* module)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_Create
+|   BLT_BaseModule_Create
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_BaseModule_Create(BLT_CString                name, 
@@ -93,7 +93,7 @@ BLT_BaseModule_Create(BLT_CString                name,
 }
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_Destroy
+|   BLT_BaseModule_Destroy
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_BaseModule_Destroy(BLT_BaseModule* module)
@@ -105,7 +105,7 @@ BLT_BaseModule_Destroy(BLT_BaseModule* module)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_GetInfo
+|   BLT_BaseModule_GetInfo
 +---------------------------------------------------------------------*/
 BLT_DIRECT_METHOD
 BLT_BaseModule_GetInfo(BLT_Module* _self, BLT_ModuleInfo* info)
@@ -122,7 +122,7 @@ BLT_BaseModule_GetInfo(BLT_Module* _self, BLT_ModuleInfo* info)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_BaseModule_Attach
+|   BLT_BaseModule_Attach
 +---------------------------------------------------------------------*/
 BLT_DIRECT_METHOD
 BLT_BaseModule_Attach(BLT_Module* _self, BLT_Core* core)

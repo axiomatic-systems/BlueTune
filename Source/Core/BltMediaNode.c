@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaNode.c
+|   File: BltMediaNode.c
 |
-|      BlueTune - MediaNode Objects
+|   BlueTune - MediaNode Objects
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file

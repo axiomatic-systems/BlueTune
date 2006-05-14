@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMedia.c
+|   File: BltMedia.c
 |
-|      BlueTune - Media Utilities
+|   BlueTune - Media Utilities
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -24,7 +24,7 @@
 #include "BltDebug.h"
 
 /*----------------------------------------------------------------------
-|       global constants
+|   global constants
 +---------------------------------------------------------------------*/
 const BLT_MediaType BLT_MediaType_None = {
     BLT_MEDIA_TYPE_ID_NONE, /* id             */
@@ -39,7 +39,7 @@ const BLT_MediaType BLT_MediaType_Unknown = {
 };
 
 /*----------------------------------------------------------------------
-|       BLT_MediaType_Init
+|   BLT_MediaType_Init
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id)
@@ -52,7 +52,7 @@ BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_MediaType_Clone
+|   BLT_MediaType_Clone
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to)
@@ -70,7 +70,7 @@ BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_MediaType_Free
+|   BLT_MediaType_Free
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_MediaType_Free(BLT_MediaType* type)

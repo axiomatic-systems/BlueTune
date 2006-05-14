@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|      Silence Remover Module
+|   Silence Remover Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "Fluo.h"
@@ -531,7 +531,7 @@ SilenceRemover_Destroy(SilenceRemover* self)
 }
                     
 /*----------------------------------------------------------------------
-|       SilenceRemover_GetPortByName
+|   SilenceRemover_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 SilenceRemover_GetPortByName(BLT_MediaNode*  _self,
@@ -604,7 +604,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SilenceRemover,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       SilenceRemoverModule_Probe
+|   SilenceRemoverModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 SilenceRemoverModule_Probe(BLT_Module*              self,  

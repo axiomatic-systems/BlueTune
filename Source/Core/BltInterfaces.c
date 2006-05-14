@@ -1,21 +1,21 @@
 /*****************************************************************
 |
-|      File: BltInterfaces.c
+|   File: BltInterfaces.c
 |
-|      BlueTune - Interface Constants
+|   BlueTune - Interface Constants
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 
 /*----------------------------------------------------------------------
-|       interface constants
+|   interface constants
 +---------------------------------------------------------------------*/
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_Module)               = {0x0101, 0x0001};
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_Core)                 = {0x0102, 0x0001};

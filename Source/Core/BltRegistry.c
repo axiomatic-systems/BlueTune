@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltRegistry.c
+|   File: BltRegistry.c
 |
-|      BlueTune - Registry Object
+|   BlueTune - Registry Object
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -851,7 +851,7 @@ Registry_GetMediaTypeIdForExtension(BLT_Registry*    self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Registry)
     ATX_GET_INTERFACE_ACCEPT(Registry, BLT_Registry)

@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltTypes.h
+|   File: BltTypes.h
 |
-|      BlueTune - Types
+|   BlueTune - Types
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,13 +13,13 @@
 #define _BLT_TYPES_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
 
 /*----------------------------------------------------------------------
-|       import some Atomix types
+|   import some Atomix types
 +---------------------------------------------------------------------*/
 typedef ATX_UInt32       BLT_UInt32;
 typedef ATX_Int32        BLT_Int32;
@@ -46,7 +46,7 @@ typedef ATX_Size         BLT_Size;
 typedef ATX_Boolean      BLT_Boolean;
 
 /*----------------------------------------------------------------------
-|       import some Neptune types
+|   import some Neptune types
 +---------------------------------------------------------------------*/
 #ifdef __cplusplus
 

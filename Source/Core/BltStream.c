@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltStream.c
+|   File: BltStream.c
 |
-|      BlueTune - Stream Objects
+|   BlueTune - Stream Objects
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -2140,7 +2140,7 @@ Stream_OnEvent(BLT_EventListener* _self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Stream)
     ATX_GET_INTERFACE_ACCEPT(Stream, BLT_Stream)

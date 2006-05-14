@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltTime.h
+|   File: BltTime.h
 |
-|      BlueTune - Time Definitions
+|   BlueTune - Time Definitions
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_TIME_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -24,7 +24,7 @@
 #include "BltErrors.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_UInt8 h;
@@ -41,14 +41,14 @@ typedef struct {
 typedef BLT_TimeStamp BLT_Time;
 
 /*----------------------------------------------------------------------
-|       macros
+|   macros
 +---------------------------------------------------------------------*/
 #define BLT_TimeStamp_Set(t, s, n) \
     do {(t).seconds = (s); (t).nanoseconds = (n);} while(0)
 
 #define BLT_TimeStamp_IsLater(t0,t1)           \
 (                                              \
-    ((t0).seconds > (t1).seconds) ||           \
+    ((t0).seconds > (t1).seconds) ||    \
     (                                          \
         (t0).seconds == (t1).seconds &&        \
         (t0).nanoseconds > (t1).nanoseconds    \
@@ -60,9 +60,9 @@ typedef BLT_TimeStamp BLT_Time;
     (                                             \
         (t0).seconds == (t1).seconds &&           \
         (t0).nanoseconds == (t1).nanoseconds      \
-    ) ||                                          \
+    ) ||                                   \
     (                                             \
-        ((t0).seconds > (t1).seconds) ||          \
+        ((t0).seconds > (t1).seconds) ||   \
         (                                         \
             (t0).seconds == (t1).seconds &&       \
             (t0).nanoseconds > (t1).nanoseconds   \
@@ -95,7 +95,7 @@ typedef BLT_TimeStamp BLT_Time;
 } while (0)
 
 /*----------------------------------------------------------------------
-|       functions
+|   functions
 +---------------------------------------------------------------------*/
 void BLT_TimeStamp_FromSamples(BLT_TimeStamp* time_stamp, 
                                ATX_Int64      sample_count,

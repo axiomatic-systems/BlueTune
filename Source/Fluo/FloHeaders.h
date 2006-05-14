@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloHeaders.h
+|   File: FloHeaders.h
 |
-|      Fluo - Headers (VBR and other Headers)
+|   Fluo - Headers (VBR and other Headers)
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _FLO_HEADERS_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 #include "FloSyntax.h"
@@ -25,7 +25,7 @@
 #include "FloDecoder.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef unsigned long FLO_VbrTableEntry;
 
@@ -35,7 +35,7 @@ typedef struct {
 } FLO_VbrToc;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 extern FLO_Result FLO_Headers_Parse(FLO_FrameInfo*     frame_info,
                                     FLO_BitStream*     bits,

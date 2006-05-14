@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDecoderServer.h
+|   File: BltDecoderServer.h
 |
-|      BlueTune - Async Layer
+|   BlueTune - Async Layer
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,18 +13,18 @@
 #define _BLT_DECODER_SERVER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Neptune.h"
 #include "BltDecoder.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 const BLT_Size BLT_DECODER_SERVER_DEFAULT_POSITION_UPDATE_RANGE = 400;
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_MessageHandler
+|   BLT_DecoderServer_MessageHandler
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_MessageHandler
 {
@@ -43,7 +43,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_Message
+|   BLT_DecoderServer_Message
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_Message : public NPT_Message
 {
@@ -87,7 +87,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_SetInputCommandMessage
+|   BLT_DecoderServer_SetInputCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_SetInputCommandMessage :
     public BLT_DecoderServer_Message
@@ -110,7 +110,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_SetOutputCommandMessage
+|   BLT_DecoderServer_SetOutputCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_SetOutputCommandMessage :
     public BLT_DecoderServer_Message
@@ -133,7 +133,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_PlayCommandMessage
+|   BLT_DecoderServer_PlayCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_PlayCommandMessage : public BLT_DecoderServer_Message
 {
@@ -148,7 +148,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_StopCommandMessage
+|   BLT_DecoderServer_StopCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_StopCommandMessage : public BLT_DecoderServer_Message
 {
@@ -163,7 +163,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_PauseCommandMessage
+|   BLT_DecoderServer_PauseCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_PauseCommandMessage : public BLT_DecoderServer_Message
 {
@@ -178,7 +178,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_PingCommandMessage
+|   BLT_DecoderServer_PingCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_PingCommandMessage : public BLT_DecoderServer_Message
 {
@@ -197,7 +197,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_SeekToTimeCommandMessage
+|   BLT_DecoderServer_SeekToTimeCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_SeekToTimeCommandMessage : public BLT_DecoderServer_Message
 {
@@ -217,7 +217,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_SeekToPositionCommandMessage
+|   BLT_DecoderServer_SeekToPositionCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_SeekToPositionCommandMessage : public BLT_DecoderServer_Message
 {
@@ -239,7 +239,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_RegisterModuleCommandMessage
+|   BLT_DecoderServer_RegisterModuleCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_RegisterModuleCommandMessage : public BLT_DecoderServer_Message
 {
@@ -259,7 +259,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_AddNodeCommandMessage
+|   BLT_DecoderServer_AddNodeCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_AddNodeCommandMessage : public BLT_DecoderServer_Message
 {
@@ -279,7 +279,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer
+|   BLT_DecoderServer
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer : public NPT_Thread,
                           public NPT_MessageReceiver,

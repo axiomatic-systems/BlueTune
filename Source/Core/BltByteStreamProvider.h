@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltByteStreamProvider.h
+|   File: BltByteStreamProvider.h
 |
-|      BlueTune - InputStreamProvider & OutputStreamProvider
+|   BlueTune - InputStreamProvider & OutputStreamProvider
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,14 +13,14 @@
 #define _BLT_BYTE_STREAM_PROVIDER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTypes.h"
 #include "BltMedia.h"
 
 /*----------------------------------------------------------------------
-|       BLT_InputStreamProvider
+|   BLT_InputStreamProvider
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_InputStreamProvider)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_InputStreamProvider)
@@ -29,14 +29,14 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_InputStreamProvider)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_InputStreamProvider_GetStream(object, stream) \
 ATX_INTERFACE(object)->GetStream(object, stream)
 
 
 /*----------------------------------------------------------------------
-|       BLT_OutputStreamProvider
+|   BLT_OutputStreamProvider
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_OutputStreamProvider)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputStreamProvider)
@@ -46,7 +46,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputStreamProvider)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_OutputStreamProvider_GetStream(object, stream, media_type) \
 ATX_INTERFACE(object)->GetStream(object, stream, media_type)

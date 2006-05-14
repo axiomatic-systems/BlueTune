@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|      Wave Formatter Module
+|   Wave Formatter Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -62,13 +62,13 @@ typedef struct {
 } WaveFormatter;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define WAVE_FORMAT_PCM 1
 #define BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE 44
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(WaveFormatterModule, BLT_Module)
 ATX_DECLARE_INTERFACE_MAP(WaveFormatter, BLT_MediaNode)
@@ -221,7 +221,7 @@ WaveFormatterInput_QueryMediaType(BLT_MediaPort*        _self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveFormatterInput)
     ATX_GET_INTERFACE_ACCEPT(WaveFormatterInput, BLT_MediaPort)
@@ -285,7 +285,7 @@ WaveFormatterOutput_QueryMediaType(BLT_MediaPort*        _self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveFormatterOutput)
     ATX_GET_INTERFACE_ACCEPT(WaveFormatterOutput, BLT_MediaPort)
@@ -400,7 +400,7 @@ WaveFormatter_Destroy(WaveFormatter* self)
 }
 
 /*----------------------------------------------------------------------
-|       WaveFormatter_GetPortByName
+|   WaveFormatter_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 WaveFormatter_GetPortByName(BLT_MediaNode*  _self,
@@ -422,7 +422,7 @@ WaveFormatter_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveFormatter)
     ATX_GET_INTERFACE_ACCEPT_EX(WaveFormatter, BLT_BaseMediaNode, BLT_MediaNode)
@@ -445,14 +445,14 @@ ATX_BEGIN_INTERFACE_MAP_EX(WaveFormatter, BLT_BaseMediaNode, BLT_MediaNode)
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WaveFormatter, 
                                          BLT_BaseMediaNode, 
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       WaveFormatterModule_Attach
+|   WaveFormatterModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
 WaveFormatterModule_Attach(BLT_Module* _self, BLT_Core* core)
@@ -486,7 +486,7 @@ WaveFormatterModule_Attach(BLT_Module* _self, BLT_Core* core)
 }
 
 /*----------------------------------------------------------------------
-|       WaveFormatterModule_Probe
+|   WaveFormatterModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 WaveFormatterModule_Probe(BLT_Module*              _self, 
@@ -558,7 +558,7 @@ WaveFormatterModule_Probe(BLT_Module*              _self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveFormatterModule)
     ATX_GET_INTERFACE_ACCEPT_EX(WaveFormatterModule, BLT_BaseModule, BLT_Module)
@@ -566,12 +566,12 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveFormatterModule)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       node factory
+|   node factory
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(WaveFormatterModule, WaveFormatter)
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP_EX(WaveFormatterModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
@@ -581,7 +581,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(WaveFormatterModule, BLT_BaseModule, BLT_Module)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define WaveFormatterModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
@@ -591,12 +591,12 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WaveFormatterModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       node constructor
+|   node constructor
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(WaveFormatterModule, "Wave Formatter", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_WaveFormatterModule_GetModuleObject(BLT_Module** object)

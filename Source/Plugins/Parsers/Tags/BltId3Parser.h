@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      ID3 Parser Library
+|   ID3 Parser Library
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,7 +11,7 @@
 #define _BLT_ID3_PARSER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTypes.h"
@@ -19,7 +19,7 @@
 #include "BltEventListener.h"
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_Id3Parser_ParseStream(ATX_InputStream* stream,
                                      BLT_Offset       stream_start,

@@ -759,7 +759,7 @@ MpegAudioDecoder_Destroy(MpegAudioDecoder* self)
 }
                     
 /*----------------------------------------------------------------------
-|       MpegAudioDecoder_GetPortByName
+|   MpegAudioDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 MpegAudioDecoder_GetPortByName(BLT_MediaNode*  _self,

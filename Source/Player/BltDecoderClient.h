@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDecoderClient.h
+|   File: BltDecoderClient.h
 |
-|      BlueTune - Async Layer
+|   BlueTune - Async Layer
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_DECODER_CLIENT_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Neptune.h"
 #include "BltDecoder.h"
@@ -21,7 +21,7 @@
 #include "BltDecoderServer.h"
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_MessageHandler
+|   BLT_DecoderClient_MessageHandler
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_MessageHandler
 {
@@ -39,7 +39,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_Message
+|   BLT_DecoderClient_Message
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_Message : public NPT_Message
 {
@@ -64,7 +64,7 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_AckNotificationMessage
+|   BLT_DecoderClient_AckNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_AckNotificationMessage :
     public BLT_DecoderClient_Message
@@ -85,7 +85,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_NackNotificationMessage
+|   BLT_DecoderClient_NackNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_NackNotificationMessage :
     public BLT_DecoderClient_Message
@@ -107,7 +107,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_PongNotificationMessage
+|   BLT_DecoderClient_PongNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_PongNotificationMessage :
     public BLT_DecoderClient_Message
@@ -127,7 +127,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_DecoderStateNotificationMessage
+|   BLT_DecoderClient_DecoderStateNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_DecoderStateNotificationMessage :
     public BLT_DecoderClient_Message
@@ -148,7 +148,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_StreamTimeCodeNotificationMessage
+|   BLT_DecoderClient_StreamTimeCodeNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_StreamTimeCodeNotificationMessage :
     public BLT_DecoderClient_Message
@@ -168,7 +168,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_StreamPositionNotificationMessage
+|   BLT_DecoderClient_StreamPositionNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_StreamPositionNotificationMessage :
     public BLT_DecoderClient_Message
@@ -188,7 +188,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient_StreamInfoNotificationMessage
+|   BLT_DecoderClient_StreamInfoNotificationMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient_StreamInfoNotificationMessage :
     public BLT_DecoderClient_Message
@@ -210,7 +210,7 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderClient
+|   BLT_DecoderClient
 +---------------------------------------------------------------------*/
 class BLT_DecoderClient : public NPT_MessageReceiver,
                           public NPT_MessageHandler,

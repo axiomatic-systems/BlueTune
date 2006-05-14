@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: Fluo.h
+|   File: Fluo.h
 |
-|      Fluo - Top Level Header
+|   Fluo - Top Level Header
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _FLUO_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 #include "FloErrors.h"

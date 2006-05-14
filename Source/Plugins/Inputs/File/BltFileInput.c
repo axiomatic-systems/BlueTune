@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|      File Input Module
+|   File Input Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -191,7 +191,7 @@ FileInput_Destroy(FileInput* self)
 }
 
 /*----------------------------------------------------------------------
-|       FileInput_GetPortByName
+|   FileInput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 FileInput_GetPortByName(BLT_MediaNode*  _self,
@@ -229,7 +229,7 @@ FileInput_QueryMediaType(BLT_MediaPort*        _self,
 }
 
 /*----------------------------------------------------------------------
-|       FileInput_GetStream
+|   FileInput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
 FileInput_GetStream(BLT_InputStreamProvider* _self,
@@ -271,7 +271,7 @@ FileInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FileInput)
     ATX_GET_INTERFACE_ACCEPT_EX(FileInput, BLT_BaseMediaNode, BLT_MediaNode)
@@ -317,14 +317,14 @@ ATX_BEGIN_INTERFACE_MAP(FileInput, BLT_InputStreamProvider)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FileInput, 
                                          BLT_BaseMediaNode, 
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       FileInputModule_Probe
+|   FileInputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 FileInputModule_Probe(BLT_Module*              self, 
@@ -383,7 +383,7 @@ FileInputModule_Probe(BLT_Module*              self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
     ATX_GET_INTERFACE_ACCEPT_EX(FileInputModule, BLT_BaseModule, BLT_Module)
@@ -391,12 +391,12 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       node factory
+|   node factory
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FileInputModule, FileInput)
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP_EX(FileInputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
@@ -406,7 +406,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(FileInputModule, BLT_BaseModule, BLT_Module)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define FileInputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
@@ -416,7 +416,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FileInputModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_FileInputModule_GetModuleObject(BLT_Module** object)

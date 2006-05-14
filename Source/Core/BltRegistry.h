@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltRegistry.h
+|   File: BltRegistry.h
 |
-|      BlueTune - Registry API
+|   BlueTune - Registry API
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_REGISTRY_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -25,7 +25,7 @@
 #include "BltMedia.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct BLT_RegistryKey BLT_RegistryKey;
 
@@ -50,7 +50,7 @@ typedef union {
 } BLT_RegistryValue;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_REGISTRY_KEY_ROOT                       ((BLT_RegistryKey*)0)
 #define BLT_REGISTRY_KEY_PUBLIC                     "BLT_PUBLIC"
@@ -61,7 +61,7 @@ typedef union {
 #define BLT_ERROR_KEY_VALUE_TYPE_MISMATCH (BLT_ERROR_BASE_REGISTRY - 1)
 
 /*----------------------------------------------------------------------
-|       BLT_Registry Interface
+|   BLT_Registry Interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_Registry)
 /**
@@ -114,7 +114,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Registry)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Registry_CreateKey(object, parent, name, key) \
 ATX_INTERFACE(object)->CreateKey(object, parent, name, key)

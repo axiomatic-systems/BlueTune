@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloBitStream.h
+|   File: FloBitStream.h
 |
-|      Fluo - Bit Streams
+|   Fluo - Bit Streams
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,14 +16,14 @@
 #define _FLO_BIT_STREAM_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 #include "FloErrors.h"
 #include "FloFrame.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 
 /* smallest power of 2 that can hold any type of frame */
@@ -37,7 +37,7 @@
 #define FLO_ERROR_CORRUPTED_BITSTREAM  (FLO_ERROR_BASE_BITSTREAM - 1)
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     unsigned char* buffer;
@@ -47,7 +47,7 @@ typedef struct {
 } FLO_BitStream;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 FLO_Result   FLO_BitStream_Create(FLO_BitStream* bits);
 FLO_Result   FLO_BitStream_Destroy(FLO_BitStream* bits);

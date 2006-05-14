@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltPlayer.h
+|   File: BltPlayer.h
 |
-|      BlueTune - Async Layer
+|   BlueTune - Async Layer
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_PLAYER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Neptune.h"
 #include "BltDecoder.h"
@@ -21,7 +21,7 @@
 #include "BltDecoderServer.h"
 
 /*----------------------------------------------------------------------
-|       BLT_Player
+|   BLT_Player
 +---------------------------------------------------------------------*/
 class BLT_Player : public BLT_DecoderClient
 {

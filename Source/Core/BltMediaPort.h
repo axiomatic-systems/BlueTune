@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaPort.h
+|   File: BltMediaPort.h
 |
-|      BlueTune - Media Port Interface
+|   BlueTune - Media Port Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_MEDIA_PORT_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -25,14 +25,14 @@
 #include "BltMedia.h"
 
 /*----------------------------------------------------------------------
-|       error codes
+|   error codes
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_NO_SUCH_PORT       (BLT_ERROR_BASE_MEDIA_PORT - 0)
 #define BLT_ERROR_PORT_HAS_NO_DATA   (BLT_ERROR_BASE_MEDIA_PORT - 1)
 #define BLT_ERROR_PORT_HAS_NO_STREAM (BLT_ERROR_BASE_MEDIA_PORT - 2)
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     BLT_MEDIA_PORT_PROTOCOL_ANY,
@@ -54,7 +54,7 @@ typedef struct {
 } BLT_MediaPortInterfaceSpec;
 
 /*----------------------------------------------------------------------
-|       BLT_MediaPort Interface
+|   BLT_MediaPort Interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_MediaPort)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaPort)
@@ -69,7 +69,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaPort)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_MediaPort_GetName(object, name)\
 ATX_INTERFACE(object)->GetProtocol(object, name)
@@ -84,7 +84,7 @@ ATX_INTERFACE(object)->GetDirection(object, direction)
 ATX_INTERFACE(object)->QueryMediaType(object, index, media_type)
 
 /*----------------------------------------------------------------------
-|       templates
+|   templates
 +---------------------------------------------------------------------*/
 #define xxBLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_NAME(port, n)             \
 BLT_METHOD port##_GetName(BLT_MediaPortInstance* instance,              \
@@ -137,7 +137,7 @@ BLT_METHOD port##_GetDirection(BLT_MediaPort*          self,            \
 
 
 /*----------------------------------------------------------------------
-|       functions
+|   functions
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPort*         self,

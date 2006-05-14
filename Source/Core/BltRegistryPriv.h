@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltRegistryPriv.h
+|   File: BltRegistryPriv.h
 |
-|      BlueTune - Registry Private API
+|   BlueTune - Registry Private API
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_REGISTRY_PRIV_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -22,7 +22,7 @@
 #include "BltRegistry.h"
 
 /*----------------------------------------------------------------------
-|       Registry_Create
+|   Registry_Create
 +---------------------------------------------------------------------*/
 BLT_Result Registry_Create(BLT_Registry** registry);
 

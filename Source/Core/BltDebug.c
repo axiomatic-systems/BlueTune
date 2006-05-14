@@ -1,23 +1,23 @@
 /*****************************************************************
 |
-|      File: BltDebug.c
+|   File: BltDebug.c
 |
-|      BlueTune - Debug Support
+|   BlueTune - Debug Support
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include <stdarg.h>
 #include "Atomix.h"
 #include "BltDebug.h"
 
 /*----------------------------------------------------------------------
-|       globals
+|   globals
 +---------------------------------------------------------------------*/
 int BLT_LogLevels[BLT_LOG_CHANNEL_OTHER+1] = {
     1, 1, 1

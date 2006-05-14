@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltCore.h
+|   File: BltCore.h
 |
-|      BlueTune - Core API
+|   BlueTune - Core API
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_CORE_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -26,7 +26,7 @@
 #include "BltMediaPacket.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_MODULE_CATEGORY_INPUT     0x01
 #define BLT_MODULE_CATEGORY_PARSER    0x02
@@ -37,7 +37,7 @@
 #define BLT_MODULE_CATEGORY_OUTPUT    0x40
 
 /*----------------------------------------------------------------------
-|       references
+|   references
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_Stream)
 ATX_DECLARE_INTERFACE(BLT_Module)
@@ -45,7 +45,7 @@ ATX_DECLARE_INTERFACE(BLT_MediaNode)
 typedef struct BLT_MediaNodeConstructor BLT_MediaNodeConstructor;
 
 /*----------------------------------------------------------------------
-|       BLT_Core Interface
+|   BLT_Core Interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_Core)
 /**
@@ -71,7 +71,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Core)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Core_CreateStream(object, stream) \
 ATX_INTERFACE(object)->CreateStream(object, stream)
@@ -100,7 +100,7 @@ ATX_INTERFACE(object)->CreateMediaPacket(object, size, type, packet)
 #define BLT_Core_Destroy(object) ATX_DESTROY_OBJECT(object)
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_Init(BLT_Core** core);
 BLT_Result BLT_Terminate(void);

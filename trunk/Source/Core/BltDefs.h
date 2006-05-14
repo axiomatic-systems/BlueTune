@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDefs.h
+|   File: BltDefs.h
 |
-|      BlueTune - Common Definitions
+|   BlueTune - Common Definitions
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,19 +16,19 @@
 #define _BLT_DEFS_H_
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
 
 /*----------------------------------------------------------------------
-|       macros
+|   macros
 +---------------------------------------------------------------------*/
 #define BLT_SAFE_STRING(s) ((s) == NULL ? "" : s)
 
 /*----------------------------------------------------------------------
-|       import some Atomix definitions
+|   import some Atomix definitions
 +---------------------------------------------------------------------*/
 #define BLT_METHOD        ATX_METHOD
 #define BLT_VOID_METHOD   ATX_VOID_METHOD

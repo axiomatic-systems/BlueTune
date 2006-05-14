@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      BlueTune - InputStreamUser & OutputStreamUser
+|   BlueTune - InputStreamUser & OutputStreamUser
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,14 +11,14 @@
 #define _BLT_BYTE_STREAM_USER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTypes.h"
 #include "BltMedia.h"
 
 /*----------------------------------------------------------------------
-|       BLT_InputStreamUser
+|   BLT_InputStreamUser
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_InputStreamUser)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_InputStreamUser)
@@ -28,13 +28,13 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_InputStreamUser)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_InputStreamUser_SetStream(object, stream, media_type) \
 ATX_INTERFACE(object)->SetStream(object, stream, media_type)
 
 /*----------------------------------------------------------------------
-|       BLT_OutputStreamUser
+|   BLT_OutputStreamUser
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_OutputStreamUser)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputStreamUser)
@@ -43,7 +43,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputStreamUser)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_OutputStreamUser_SetStream(object, stream) \
 ATX_INTERFACE(object)->SetStream(object, stream)

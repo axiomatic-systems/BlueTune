@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDecoderServer.c
+|   File: BltDecoderServer.c
 |
-|      BlueTune - Decoder Server
+|   BlueTune - Decoder Server
 |
-|      (c) 2002-2005 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2005 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -25,7 +25,7 @@
 #include "BltDecoderClient.h"
 
 /*----------------------------------------------------------------------
-|       BLT_DecoderServer_Message::MessageType
+|   BLT_DecoderServer_Message::MessageType
 +---------------------------------------------------------------------*/
 NPT_Message::Type 
 BLT_DecoderServer_Message::MessageType = "BLT_DecoderServer Message";

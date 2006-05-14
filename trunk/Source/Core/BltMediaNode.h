@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaNode.h
+|   File: BltMediaNode.h
 |
-|      BlueTune - Media Node Interface
+|   BlueTune - Media Node Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_MEDIA_NODE_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -29,12 +29,12 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_NO_SUCH_MEDIA_NODE (BLT_ERROR_BASE_MEDIA_NODE - 0)
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     BLT_MEDIA_NODE_STATE_RESET,
@@ -72,7 +72,7 @@ typedef struct {
 } BLT_BaseMediaNode;
 
 /*----------------------------------------------------------------------
-|       BLT_MediaNode Interface
+|   BLT_MediaNode Interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaNode)
     BLT_Result (*GetInfo)(BLT_MediaNode* self, BLT_MediaNodeInfo* info);
@@ -91,7 +91,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaNode)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_MediaNode_GetInfo(object, info) \
 ATX_INTERFACE(object)->GetInfo(object, info)
@@ -121,7 +121,7 @@ ATX_INTERFACE(object)->Resume(object)
 ATX_INTERFACE(object)->Seek(object, mode, point)
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_BaseMediaNode_Construct(BLT_BaseMediaNode* self,
                                        BLT_Module*        module,
@@ -141,7 +141,7 @@ BLT_Result BLT_BaseMediaNode_Seek(BLT_MediaNode* self,
                                   BLT_SeekPoint* point);
 
 /*----------------------------------------------------------------------
-|       template macros
+|   template macros
 +---------------------------------------------------------------------*/
 #define BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(_module_type, _class)    \
 BLT_METHOD                                                              \

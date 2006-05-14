@@ -78,7 +78,7 @@ ATX_DECLARE_INTERFACE_MAP(StreamPacketizer, BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(StreamPacketizer, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|       StreamPacketizerInput_SetStream
+|   StreamPacketizerInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
 StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
@@ -135,7 +135,7 @@ StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(StreamPacketizerInput)
     ATX_GET_INTERFACE_ACCEPT(StreamPacketizerInput, BLT_MediaPort)
@@ -349,7 +349,7 @@ StreamPacketizer_Destroy(StreamPacketizer* self)
 }
 
 /*----------------------------------------------------------------------
-|       StreamPacketizer_GetPortByName
+|   StreamPacketizer_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 StreamPacketizer_GetPortByName(BLT_MediaNode*  _self,

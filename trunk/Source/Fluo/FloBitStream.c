@@ -1,21 +1,21 @@
 /*****************************************************************
 |
-|      File: FloBitStream.c
+|   File: FloBitStream.c
 |
-|      Fluo - Bit Streams
+|   Fluo - Bit Streams
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       For efficiency reasons, this bitstream library only handles
-|       data buffers that are a power of 2 in size
+|   For efficiency reasons, this bitstream library only handles
+|   data buffers that are a power of 2 in size
 +---------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "FloConfig.h"
@@ -24,7 +24,7 @@
 #include "FloFrame.h"
 
 /*----------------------------------------------------------------------
-|       macros
+|   macros
 +---------------------------------------------------------------------*/
 #define FLO_BITSTREAM_POINTER_VAL(offset) \
     ((offset)&(FLO_BITSTREAM_BUFFER_SIZE-1))
@@ -39,12 +39,12 @@
 #define FLO_BITSTREAM_HEADER_COMPAT_MASK 0xFFFF0D0F
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define FLO_FHG_VBRI_OFFSET 36
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_Create
+|   FLO_BitStream_Create
 +---------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_Create(FLO_BitStream* bits)
@@ -59,7 +59,7 @@ FLO_BitStream_Create(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_Destroy
+|   FLO_BitStream_Destroy
 +---------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_Destroy(FLO_BitStream* bits)
@@ -74,7 +74,7 @@ FLO_BitStream_Destroy(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_Reset
+|   FLO_BitStream_Reset
 +---------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_Reset(FLO_BitStream* bits)
@@ -87,7 +87,7 @@ FLO_BitStream_Reset(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_Attach
+|   FLO_BitStream_Attach
 +---------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_Attach(FLO_BitStream* bits, FLO_BitStream* shadow)
@@ -97,7 +97,7 @@ FLO_BitStream_Attach(FLO_BitStream* bits, FLO_BitStream* shadow)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_GetContiguousBytesFree
+|   FLO_BitStream_GetContiguousBytesFree
 +---------------------------------------------------------------------*/
 unsigned int 
 FLO_BitStream_GetContiguousBytesFree(FLO_BitStream* bits)
@@ -109,7 +109,7 @@ FLO_BitStream_GetContiguousBytesFree(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_GetBytesFree
+|   FLO_BitStream_GetBytesFree
 +---------------------------------------------------------------------*/
 unsigned int 
 FLO_BitStream_GetBytesFree(FLO_BitStream* bits)
@@ -121,7 +121,7 @@ FLO_BitStream_GetBytesFree(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_WriteBytes
+|    FLO_BitStream_WriteBytes
 +----------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_WriteBytes(FLO_BitStream*       bits, 
@@ -152,7 +152,7 @@ FLO_BitStream_WriteBytes(FLO_BitStream*       bits,
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_GetContiguousBytesAvailable
+|   FLO_BitStream_GetContiguousBytesAvailable
 +---------------------------------------------------------------------*/
 unsigned int 
 FLO_BitStream_GetContiguousBytesAvailable(FLO_BitStream* bits)
@@ -164,7 +164,7 @@ FLO_BitStream_GetContiguousBytesAvailable(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_BitStream_GetBytesAvailable
+|   FLO_BitStream_GetBytesAvailable
 +---------------------------------------------------------------------*/
 unsigned int 
 FLO_BitStream_GetBytesAvailable(FLO_BitStream* bits)
@@ -176,7 +176,7 @@ FLO_BitStream_GetBytesAvailable(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_ReadBytes
+|    FLO_BitStream_ReadBytes
 +----------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_ReadBytes(FLO_BitStream* bits, 
@@ -208,7 +208,7 @@ FLO_BitStream_ReadBytes(FLO_BitStream* bits,
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_SkipBytes
+|    FLO_BitStream_SkipBytes
 +----------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_SkipBytes(FLO_BitStream* bits, unsigned int byte_count)
@@ -218,7 +218,7 @@ FLO_BitStream_SkipBytes(FLO_BitStream* bits, unsigned int byte_count)
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_AlignToByte
+|    FLO_BitStream_AlignToByte
 +----------------------------------------------------------------------*/
 static FLO_Result
 FLO_BitStream_AlignToByte(FLO_BitStream* bits)
@@ -228,7 +228,7 @@ FLO_BitStream_AlignToByte(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_FindHeader
+|    FLO_BitStream_FindHeader
 +----------------------------------------------------------------------*/
 static FLO_Result
 FLO_BitStream_FindHeader(FLO_BitStream* bits, unsigned long* header)
@@ -280,7 +280,7 @@ FLO_BitStream_FindHeader(FLO_BitStream* bits, unsigned long* header)
 }
 
 /*----------------------------------------------------------------------+
-|        FLO_BitStream_FindFrame
+|    FLO_BitStream_FindFrame
 +----------------------------------------------------------------------*/
 FLO_Result
 FLO_BitStream_FindFrame(FLO_BitStream* bits, FLO_FrameInfo* frame_info)

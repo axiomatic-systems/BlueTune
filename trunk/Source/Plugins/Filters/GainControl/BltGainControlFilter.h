@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      Gain Control Filter Module
+|   Gain Control Filter Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,13 +11,13 @@
 #define _BLT_GAIN_CONTROL_FILTER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltTypes.h"
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_GAIN_CONTROL_FILTER_OPTION_DO_REPLAY_GAIN "Plugins/GainControlFilter/DoReplayGain"
 
@@ -27,7 +27,7 @@
 #define BLT_REPLAY_GAIN_ALBUM_PEAK_VALUE  "ReplayGain/AlbumPeak"
 
 /*----------------------------------------------------------------------
-|       module
+|   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_GainControlFilterModule_GetModuleObject(BLT_Module** module);
 

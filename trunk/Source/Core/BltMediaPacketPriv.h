@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaPacketPriv.h
+|   File: BltMediaPacketPriv.h
 |
-|      BlueTune - Media Packet Private Interface
+|   BlueTune - Media Packet Private Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,12 +16,12 @@
 #define _BLT_MEDIA_PACKET_PRIV_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltMediaPacket.h"
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_MediaPacket_Create(BLT_Size             size, 
                                   const BLT_MediaType* type,

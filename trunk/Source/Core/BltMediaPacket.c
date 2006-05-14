@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltMediaPacket.c
+|   File: BltMediaPacket.c
 |
-|      BlueTune - MediaPacket Objects
+|   BlueTune - MediaPacket Objects
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file

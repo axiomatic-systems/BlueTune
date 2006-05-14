@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltPacketConsumer.h
+|   File: BltPacketConsumer.h
 |
-|      BlueTune - Packet Consumer Interface
+|   BlueTune - Packet Consumer Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_PACKET_CONSUMER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -27,7 +27,7 @@
 #include "BltMedia.h"
 
 /*----------------------------------------------------------------------
-|       BLT_PacketConsumer Interface
+|   BLT_PacketConsumer Interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_PacketConsumer)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_PacketConsumer)
@@ -36,7 +36,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_PacketConsumer)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_PacketConsumer_PutPacket(object, packet) \
 ATX_INTERFACE(object)->PutPacket(object, packet)

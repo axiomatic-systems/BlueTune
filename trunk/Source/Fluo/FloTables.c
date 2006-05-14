@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: FloTables.c
+|   File: FloTables.c
 |
-|      Fluo - Data Tables
+|   Fluo - Data Tables
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloConfig.h"
 #include "FloTypes.h"
@@ -18,7 +18,7 @@
 #include "FloTables.h"
 
 /*----------------------------------------------------------------------
-|       FLO_MpegBitrates
+|   FLO_MpegBitrates
 +---------------------------------------------------------------------*/
 const unsigned short FLO_MpegBitrates[3][3][16] = {
     /* MPEG2 */
@@ -86,7 +86,7 @@ const unsigned short FLO_MpegBitrates[3][3][16] = {
 };
 
 /*----------------------------------------------------------------------
-|       FLO_MpegSamplingFrequencies
+|   FLO_MpegSamplingFrequencies
 +---------------------------------------------------------------------*/
 const unsigned FLO_MpegSamplingFrequencies[3][4] = {
     {22050, 24000, 16000, 0}, /* MPEG2   */

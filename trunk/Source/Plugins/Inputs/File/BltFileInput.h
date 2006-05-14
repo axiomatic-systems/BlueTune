@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      File Input Module
+|   File Input Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,13 +11,13 @@
 #define _BLT_FILE_INPUT_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltTypes.h"
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|       module
+|   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_FileInputModule_GetModuleObject(BLT_Module** module);
 

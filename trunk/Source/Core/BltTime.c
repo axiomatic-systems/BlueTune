@@ -1,22 +1,22 @@
 /*****************************************************************
 |
-|      File: BltTime.c
+|   File: BltTime.c
 |
-|      BlueTune - Time Library
+|   BlueTune - Time Library
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTime.h"
 
 /*----------------------------------------------------------------------
-|       functions
+|   functions
 +---------------------------------------------------------------------*/
 void 
 BLT_TimeStamp_FromSamples(BLT_TimeStamp* time_stamp, 

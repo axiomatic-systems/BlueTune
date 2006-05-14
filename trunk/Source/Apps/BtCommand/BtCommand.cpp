@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltCommand.cpp
+|   File: BltCommand.cpp
 |
-|      BlueTune - Command Player
+|   BlueTune - Command Player
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file 

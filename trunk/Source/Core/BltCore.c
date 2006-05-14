@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltCore.c
+|   File: BltCore.c
 |
-|      BlueTune - Core Object
+|   BlueTune - Core Object
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -275,7 +275,7 @@ Core_CreateMediaPacket(BLT_Core*            self,
 }
 
 /*----------------------------------------------------------------------
-|       GetInterface implementation
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Core)
     ATX_GET_INTERFACE_ACCEPT(Core, BLT_Core)
@@ -297,7 +297,7 @@ ATX_BEGIN_INTERFACE_MAP(Core, BLT_Core)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_DESTROYABLE_INTERFACE(Core)
 

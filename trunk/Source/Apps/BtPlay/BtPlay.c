@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltPlay.c
+|   File: BltPlay.c
 |
-|      BlueTune - Command-Line Player
+|   BlueTune - Command-Line Player
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file 
@@ -275,7 +275,7 @@ BLTP_OnEvent(BLT_EventListener* self,
 }
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLTP)
     ATX_GET_INTERFACE_ACCEPT(BLTP, BLT_EventListener)

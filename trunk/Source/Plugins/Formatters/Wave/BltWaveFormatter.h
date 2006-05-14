@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      WaveFormatter Module
+|   WaveFormatter Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,13 +11,13 @@
 #define _BLT_WAVE_FORMATTER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltTypes.h"
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|       module
+|   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_WaveFormatterModule_GetModuleObject(BLT_Module** module);
 

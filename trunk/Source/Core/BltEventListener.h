@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltEventListener.h
+|   File: BltEventListener.h
 |
-|      BlueTune - Event Listener Interface
+|   BlueTune - Event Listener Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_EVENT_LISTENER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -22,7 +22,7 @@
 #include "BltEvent.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_EventListener)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_EventListener)
@@ -33,7 +33,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_EventListener)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 /**
  * Convenience macro used to call the OnEvent() method on objects 

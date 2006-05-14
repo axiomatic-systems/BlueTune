@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltCorePriv.h
+|   File: BltCorePriv.h
 |
-|      BlueTune - Core Private API
+|   BlueTune - Core Private API
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,19 +16,19 @@
 #define _BLT_CORE_PRIV_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltCore.h"
 #include "BltMediaNode.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct Core Core;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 
 #endif /* _BLT_CORE_PRIV_H_ */

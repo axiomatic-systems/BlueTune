@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltErrors.h
+|   File: BltErrors.h
 |
-|      BlueTune - Error Constants
+|   BlueTune - Error Constants
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file

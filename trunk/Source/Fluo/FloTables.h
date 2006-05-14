@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloTables.h
+|   File: FloTables.h
 |
-|      Fluo - Constant Tables
+|   Fluo - Constant Tables
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,12 +16,12 @@
 #define _FLO_TABLES_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 extern const unsigned short FLO_MpegBitrates[3][3][16];
 extern const unsigned       FLO_MpegSamplingFrequencies[3][4];

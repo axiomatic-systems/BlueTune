@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      Network: BltNetworkInput.cpp
+|   Network: BltNetworkInput.cpp
 |
-|      Network Input Module
+|   Network Input Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -211,7 +211,7 @@ NetworkInput_Destroy(NetworkInput* input)
 }
 
 /*----------------------------------------------------------------------
-|       NetworkInput_GetPortByName
+|   NetworkInput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 NetworkInput_GetPortByName(BLT_MediaNodeInstance* instance,
@@ -230,7 +230,7 @@ NetworkInput_GetPortByName(BLT_MediaNodeInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|       NetworkInput_GetStream
+|   NetworkInput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
 NetworkInput_GetStream(BLT_ByteStreamProviderInstance* instance,
@@ -288,12 +288,12 @@ NetworkInput_Deactivate(BLT_MediaNodeInstance* instance)
 }
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(NetworkInput, base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
 ATX_INTERFACE_MAP_ADD(NetworkInput, BLT_MediaNode)
@@ -303,7 +303,7 @@ ATX_INTERFACE_MAP_ADD(NetworkInput, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
 
 /*----------------------------------------------------------------------
-|       NetworkInputModule_Probe
+|   NetworkInputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 NetworkInputModule_Probe(BLT_ModuleInstance*      /*instance*/, 
@@ -356,7 +356,7 @@ NetworkInputModule_Probe(BLT_ModuleInstance*      /*instance*/,
 }
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
 BLT_Result 
@@ -375,7 +375,7 @@ NetworkInputModule_Probe(BLT_ModuleInstance*      module,
                          BLT_Cardinal*            match);
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 static const BLT_ModuleInterface NetworkInputModule_BLT_ModuleInterface = {
     NetworkInputModule_GetInterface,
@@ -386,12 +386,12 @@ static const BLT_ModuleInterface NetworkInputModule_BLT_ModuleInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   template instantiations
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(NetworkInput)
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define NetworkInputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
@@ -400,7 +400,7 @@ ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(NetworkInputModule,
                                              base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule) 
@@ -409,7 +409,7 @@ ATX_INTERFACE_MAP_ADD(NetworkInputModule, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_NetworkInputModule_GetModuleObject(BLT_Module* object)

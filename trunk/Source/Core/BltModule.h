@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltModule.h
+|   File: BltModule.h
 |
-|      BlueTune - Module Interface
+|   BlueTune - Module Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file 
@@ -16,14 +16,14 @@
 #define _BLT_MODULE_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTypes.h"
 #include "BltCore.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR
@@ -48,7 +48,7 @@ typedef struct {
 } BLT_BaseModule;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_MODULE_PROBE_MATCH_DEFAULT 0
 #define BLT_MODULE_PROBE_MATCH_MIN     1
@@ -60,12 +60,12 @@ typedef struct {
 #define BLT_MODULE_PROBE_MATCH_FORCE   255
 
 /*----------------------------------------------------------------------
-|       error codes
+|   error codes
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_NO_MATCHING_MODULE (BLT_ERROR_BASE_MODULE - 0)
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 /**
  * @brief Interface implemented by objects that create other objects
@@ -102,7 +102,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Module)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Module_GetInfo(object, info) \
 ATX_INTERFACE(object)->GetInfo(object, info)
@@ -122,7 +122,7 @@ ATX_INTERFACE(object)->CreateInstance(object,               \
 ATX_INTERFACE(object)->Probe(object, core, type, query, match)
 
 /*----------------------------------------------------------------------
-|       base methods
+|   base methods
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_BaseModule_Construct(BLT_BaseModule* self, 
@@ -151,7 +151,7 @@ BLT_DIRECT_METHOD
 BLT_BaseModule_Attach(BLT_Module* self, BLT_Core* core);
 
 /*----------------------------------------------------------------------
-|       template macros
+|   template macros
 +---------------------------------------------------------------------*/
 #define BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(_module_class,      \
                                                 _module_name,       \

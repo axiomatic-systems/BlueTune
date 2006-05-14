@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: FloDecoder.c
+|   File: FloDecoder.c
 |
-|      Fluo - Decoder
+|   Fluo - Decoder
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "FloConfig.h"
@@ -21,7 +21,7 @@
 #include "FloHeaders.h"
 
 /*----------------------------------------------------------------------
-|       external decoder engine
+|   external decoder engine
 +---------------------------------------------------------------------*/
 #define FLO_DECODER_ENGINE_MPG123 1
 #define FLO_DECODER_ENGINE_FFMPEG 2
@@ -37,7 +37,7 @@
 #endif
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define FLO_INPUT_BUFFER_SIZE   2048
 #if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
@@ -49,7 +49,7 @@
 #define FLO_LAYER2_DECODER_DELAY 240
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     /* in this state, we are looking for a frame */
@@ -80,7 +80,7 @@ struct FLO_Decoder {
 };
 
 /*----------------------------------------------------------------------
-|       FLO_UpdateBufferSize
+|   FLO_UpdateBufferSize
 +---------------------------------------------------------------------*/
 static void
 FLO_UpdateBufferSize(FLO_SampleBuffer* buffer)
@@ -92,7 +92,7 @@ FLO_UpdateBufferSize(FLO_SampleBuffer* buffer)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_Create
+|   FLO_Decoder_Create
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_Create(FLO_Decoder** decoder)
@@ -127,7 +127,7 @@ FLO_Decoder_Create(FLO_Decoder** decoder)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_Destroy
+|   FLO_Decoder_Destroy
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_Destroy(FLO_Decoder* decoder)
@@ -145,7 +145,7 @@ FLO_Decoder_Destroy(FLO_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_GetStatus
+|   FLO_Decoder_GetStatus
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_GetStatus(FLO_Decoder* decoder, FLO_DecoderStatus** status)
@@ -155,7 +155,7 @@ FLO_Decoder_GetStatus(FLO_Decoder* decoder, FLO_DecoderStatus** status)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_Feed
+|   FLO_Decoder_Feed
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_Feed(FLO_Decoder*   decoder, 
@@ -182,7 +182,7 @@ FLO_Decoder_Feed(FLO_Decoder*   decoder,
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_Flush
+|   FLO_Decoder_Flush
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_Flush(FLO_Decoder* decoder)
@@ -194,7 +194,7 @@ FLO_Decoder_Flush(FLO_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_SetSample
+|   FLO_Decoder_SetSample
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_SetSample(FLO_Decoder* decoder, FLO_Int64 sample)
@@ -204,7 +204,7 @@ FLO_Decoder_SetSample(FLO_Decoder* decoder, FLO_Int64 sample)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_CallExternalEngine
+|   FLO_Decoder_CallExternalEngine
 +---------------------------------------------------------------------*/
 static FLO_Result
 FLO_Decoder_CallExternalEngine(FLO_Decoder* decoder, FLO_SampleBuffer* buffer)
@@ -275,7 +275,7 @@ FLO_Decoder_CallExternalEngine(FLO_Decoder* decoder, FLO_SampleBuffer* buffer)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_ResetExternalEngine
+|   FLO_Decoder_ResetExternalEngine
 +---------------------------------------------------------------------*/
 static void
 FLO_Decoder_ResetExternalEngine(FLO_Decoder* decoder)
@@ -292,7 +292,7 @@ FLO_Decoder_ResetExternalEngine(FLO_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_FindFrame
+|   FLO_Decoder_FindFrame
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_FindFrame(FLO_Decoder* decoder, FLO_FrameInfo* frame_info)
@@ -382,7 +382,7 @@ FLO_Decoder_FindFrame(FLO_Decoder* decoder, FLO_FrameInfo* frame_info)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_SkipFrame
+|   FLO_Decoder_SkipFrame
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_SkipFrame(FLO_Decoder* decoder)
@@ -410,7 +410,7 @@ FLO_Decoder_SkipFrame(FLO_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_DecodeFrame
+|   FLO_Decoder_DecodeFrame
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder, 
@@ -496,7 +496,7 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Decoder_Reset
+|   FLO_Decoder_Reset
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Decoder_Reset(FLO_Decoder* decoder)

@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDecoder.h
+|   File: BltDecoder.h
 |
-|      BlueTune - Sync Layer
+|   BlueTune - Sync Layer
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,7 +13,7 @@
 #define _BLT_DECODER_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltDefs.h"
 #include "BltTypes.h"
@@ -22,12 +22,12 @@
 #include "BltEventListener.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_DECODER_DEFAULT_OUTPUT_NAME "!default"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct BLT_Decoder BLT_Decoder;
 typedef struct {
@@ -37,7 +37,7 @@ typedef struct {
 } BLT_DecoderStatus;
 
 /*----------------------------------------------------------------------
-|       prototypes
+|   prototypes
 +---------------------------------------------------------------------*/
 #ifdef __cplusplus
 extern "C" {

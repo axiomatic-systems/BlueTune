@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltCrossFader.c
+|   File: BltCrossFader.c
 |
-|      Cross Fader Module
+|   Cross Fader Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "Fluo.h"
@@ -28,7 +28,7 @@
 #include <math.h>
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderModule)
 static const BLT_ModuleInterface CrossFaderModule_BLT_ModuleInterface;
@@ -337,7 +337,7 @@ CrossFaderInputPort_BLT_PacketConsumerInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderInputPort)
 ATX_INTERFACE_MAP_ADD(CrossFaderInputPort, BLT_MediaPort)
@@ -411,7 +411,7 @@ CrossFaderOutputPort_BLT_PacketProducerInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderOutputPort)
 ATX_INTERFACE_MAP_ADD(CrossFaderOutputPort, BLT_MediaPort)
@@ -582,7 +582,7 @@ CrossFader_Deactivate(BLT_MediaNodeInstance* instance)
 }
 
 /*----------------------------------------------------------------------
-|       CrossFader_GetPortByName
+|   CrossFader_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 CrossFader_GetPortByName(BLT_MediaNodeInstance* instance,
@@ -667,12 +667,12 @@ CrossFader_ATX_PropertyListenerInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(CrossFader, base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFader)
 ATX_INTERFACE_MAP_ADD(CrossFader, BLT_MediaNode)
@@ -681,7 +681,7 @@ ATX_INTERFACE_MAP_ADD(CrossFader, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFader)
 
 /*----------------------------------------------------------------------
-|       CrossFaderModule_Probe
+|   CrossFaderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 CrossFaderModule_Probe(BLT_ModuleInstance*      instance, 
@@ -749,12 +749,12 @@ CrossFaderModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   template instantiations
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(CrossFader)
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   BLT_Module interface
 +---------------------------------------------------------------------*/
 static const BLT_ModuleInterface CrossFaderModule_BLT_ModuleInterface = {
     CrossFaderModule_GetInterface,
@@ -765,7 +765,7 @@ static const BLT_ModuleInterface CrossFaderModule_BLT_ModuleInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define CrossFaderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
@@ -774,7 +774,7 @@ ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(CrossFaderModule,
                                              base.reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderModule)
 ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderModule) 
@@ -783,7 +783,7 @@ ATX_INTERFACE_MAP_ADD(CrossFaderModule, ATX_Referenceable)
 ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderModule)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_CrossFaderModule_GetModuleObject(BLT_Module* object)

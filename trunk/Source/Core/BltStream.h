@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltStream.h
+|   File: BltStream.h
 |
-|      BlueTune - Stream Interface
+|   BlueTune - Stream Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_STREAM_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -25,12 +25,12 @@
 #include "BltTime.h"
 
 /*----------------------------------------------------------------------
-|       error codes
+|   error codes
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_STREAM_NO_COMPATIBLE_NODE (BLT_ERROR_BASE_STREAM - 0)
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_STREAM_INFO_MASK_ALL             0xFFFF
 
@@ -54,7 +54,7 @@
 #define BLT_STREAM_NODE_FLAG_TRANSIENT 1
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_Mask    mask;             /**< Mask indicating which fields are valid */
@@ -91,7 +91,7 @@ typedef struct {
 } BLT_SeekPoint;
 
 /*----------------------------------------------------------------------
-|       more includes
+|   more includes
 +---------------------------------------------------------------------*/
 #include "BltEventListener.h"
 #include "BltModule.h"
@@ -101,7 +101,7 @@ typedef struct {
 #include "BltOutputNode.h"
 
 /*----------------------------------------------------------------------
-|       more types
+|   more types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_MediaNode* media_node;
@@ -123,7 +123,7 @@ typedef struct {
 } BLT_StreamStatus;
 
 /*----------------------------------------------------------------------
-|       BLT_Stream Interface
+|   BLT_Stream Interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
     BLT_Result (*SetEventListener)(BLT_Stream*        self,
@@ -175,7 +175,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Stream_SetEventListener(object, listener) \
 ATX_INTERFACE(object)->SetEventListener(object, listener)

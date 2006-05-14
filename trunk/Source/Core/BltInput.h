@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltInput.h
+|   File: BltInput.h
 |
-|      BlueTune - Input Interface
+|   BlueTune - Input Interface
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,7 +16,7 @@
 #define _BLT_INPUT_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltDefs.h"
@@ -24,7 +24,7 @@
 #include "BltErrors.h"
 
 /*----------------------------------------------------------------------
-|       BLT_Input interface
+|   BLT_Input interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_Input)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Input)
@@ -33,7 +33,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Input)
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
-|       convenience macros
+|   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Input_GetByteStream(object, stream) \
 ATX_INTERFACE(object)->GetByteStream(ATX_INSTANCE(object), count)

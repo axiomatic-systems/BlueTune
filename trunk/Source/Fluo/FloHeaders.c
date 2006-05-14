@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: FloVbr.c
+|   File: FloVbr.c
 |
-|      Fluo - Vbr (Variable Bitrate)
+|   Fluo - Vbr (Variable Bitrate)
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "FloConfig.h"
@@ -19,7 +19,7 @@
 #include "FloBitStream.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define FLO_FHG_VBR_HEADER_OFFSET               36
 #define FLO_FHG_VBR_HEADER_SIZE                 26
@@ -47,7 +47,7 @@
 #define FLO_REPLAYGAIN_MAX_VALUE                 200  /* +20.0dB */
 
 /*----------------------------------------------------------------------
-|       FLO_Vbr_ComputeDurationAndBitrate
+|   FLO_Vbr_ComputeDurationAndBitrate
 +---------------------------------------------------------------------*/
 static void
 FLO_Vbr_ComputeDurationAndBitrate(FLO_FrameInfo*     frame_info,
@@ -90,7 +90,7 @@ FLO_Vbr_ComputeDurationAndBitrate(FLO_FrameInfo*     frame_info,
 }        
 
 /*----------------------------------------------------------------------
-|       FLO_Vbr_ParseFhg
+|   FLO_Vbr_ParseFhg
 +---------------------------------------------------------------------*/
 static FLO_Result 
 FLO_Vbr_ParseFhg(FLO_FrameInfo*     frame_info,
@@ -155,7 +155,7 @@ FLO_Vbr_ParseFhg(FLO_FrameInfo*     frame_info,
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Headers_ParseXingOrLame
+|   FLO_Headers_ParseXingOrLame
 +---------------------------------------------------------------------*/
 static FLO_Result 
 FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
@@ -353,7 +353,7 @@ done:
 }
 
 /*----------------------------------------------------------------------
-|       FLO_Headers_Parse
+|   FLO_Headers_Parse
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Headers_Parse(FLO_FrameInfo*     frame_info,

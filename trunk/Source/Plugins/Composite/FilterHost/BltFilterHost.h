@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      Filter Host Module
+|   Filter Host Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -11,13 +11,13 @@
 #define _BLT_FILTER_HOST_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltTypes.h"
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|       module
+|   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_FilterHostModule_GetModuleObject(BLT_Module** module);
 

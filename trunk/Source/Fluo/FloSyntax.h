@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloSyntax.h
+|   File: FloSyntax.h
 |
-|      Fluo - MPEG Syntax
+|   Fluo - MPEG Syntax
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,12 +16,12 @@
 #define _FLO_SYNTAX_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
 
 /*----------------------------------------------------------------------
-|       types
+|   types
 +---------------------------------------------------------------------*/
 typedef enum {
     FLO_MPEG_LEVEL_MPEG_2   = 0,
@@ -45,7 +45,7 @@ typedef enum {
 } FLO_MpegMode;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define FLO_SYNTAX_MPEG_SYNC_WORD_BIT_LENGTH               11
 #define FLO_SYNTAX_MPEG_SYNC_WORD                          0x000007FFL

@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: FloDefs.h
+|   File: FloDefs.h
 |
-|      BlueTune - General Types
+|   BlueTune - General Types
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -13,12 +13,12 @@
 #define _FLO_TYPES_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "AtxTypes.h"
 
 /*----------------------------------------------------------------------
-|       import some Atomix types
+|   import some Atomix types
 +---------------------------------------------------------------------*/
 typedef ATX_UInt32       FLO_UInt32;
 typedef ATX_Int32        FLO_Int32;

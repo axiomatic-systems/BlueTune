@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltDebug.h
+|   File: BltDebug.h
 |
-|      BlueTune - Debug Support
+|   BlueTune - Debug Support
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2003 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -16,17 +16,17 @@
 #define _BLT_DEBUG_H_
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 
 /*----------------------------------------------------------------------
-|       import atomix functions
+|   import atomix functions
 +---------------------------------------------------------------------*/
 #define BLT_Debug ATX_Debug
 
 /*----------------------------------------------------------------------
-|       logging
+|   logging
 +---------------------------------------------------------------------*/
 typedef enum {
     BLT_LOG_CHANNEL_CORE = 0,

@@ -1,11 +1,11 @@
 /*****************************************************************
 |
-|      File: BltPcm.c
+|   File: BltPcm.c
 |
-|      BlueTune - PCM Utilities
+|   BlueTune - PCM Utilities
 |
-|      (c) 2002-2005 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2005 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
@@ -13,12 +13,12 @@
  */
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "BltPcm.h"
 
 /*----------------------------------------------------------------------
-|       global constants
+|   global constants
 +---------------------------------------------------------------------*/
 const BLT_MediaType BLT_GenericPcmMediaType = {
     BLT_MEDIA_TYPE_ID_AUDIO_PCM, /* id             */
@@ -27,7 +27,7 @@ const BLT_MediaType BLT_GenericPcmMediaType = {
 };
 
 /*----------------------------------------------------------------------
-|       BLT_PcmMediaType_Init
+|   BLT_PcmMediaType_Init
 +---------------------------------------------------------------------*/
 void
 BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type)
@@ -44,7 +44,7 @@ BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type)
 
 #if BLT_CONFIG_CPU_BYTE_ORDER == BLT_CPU_LITTLE_ENDIAN
 /*----------------------------------------------------------------------
-|       BLT_Pcm_ReadSignedIntBE
+|   BLT_Pcm_ReadSignedIntBE
 +---------------------------------------------------------------------*/
 static BLT_Int32
 BLT_Pcm_ReadSignedIntBE(const void* buffer, unsigned int width)
@@ -59,7 +59,7 @@ BLT_Pcm_ReadSignedIntBE(const void* buffer, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_ReadSignedIntLE
+|   BLT_Pcm_ReadSignedIntLE
 +---------------------------------------------------------------------*/
 static BLT_Int32
 BLT_Pcm_ReadSignedIntLE(const void* buffer, unsigned int width)
@@ -74,7 +74,7 @@ BLT_Pcm_ReadSignedIntLE(const void* buffer, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_WriteSignedIntBE
+|   BLT_Pcm_WriteSignedIntBE
 +---------------------------------------------------------------------*/
 static void
 BLT_Pcm_WriteSignedIntBE(void* buffer, BLT_Int32 sample, unsigned int width)
@@ -87,7 +87,7 @@ BLT_Pcm_WriteSignedIntBE(void* buffer, BLT_Int32 sample, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_WriteSignedIntLE
+|   BLT_Pcm_WriteSignedIntLE
 +---------------------------------------------------------------------*/
 static void
 BLT_Pcm_WriteSignedIntLE(void* buffer, BLT_Int32 sample, unsigned int width)
@@ -100,7 +100,7 @@ BLT_Pcm_WriteSignedIntLE(void* buffer, BLT_Int32 sample, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_ReadFloatBE
+|   BLT_Pcm_ReadFloatBE
 +---------------------------------------------------------------------*/
 static BLT_Int32
 BLT_Pcm_ReadFloatBE(const void* buffer, unsigned int width)
@@ -127,7 +127,7 @@ BLT_Pcm_ReadFloatBE(const void* buffer, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_ReadFloatLE
+|   BLT_Pcm_ReadFloatLE
 +---------------------------------------------------------------------*/
 static BLT_Int32
 BLT_Pcm_ReadFloatLE(const void* buffer, unsigned int width)
@@ -146,7 +146,7 @@ BLT_Pcm_ReadFloatLE(const void* buffer, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_WriteFloatBE
+|   BLT_Pcm_WriteFloatBE
 +---------------------------------------------------------------------*/
 static void
 BLT_Pcm_WriteFloatBE(void* buffer, BLT_Int32 sample, unsigned int width)
@@ -163,7 +163,7 @@ BLT_Pcm_WriteFloatBE(void* buffer, BLT_Int32 sample, unsigned int width)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_WriteFloatLE
+|   BLT_Pcm_WriteFloatLE
 +---------------------------------------------------------------------*/
 static void
 BLT_Pcm_WriteFloatLE(void* buffer, BLT_Int32 sample, unsigned int width)
@@ -178,7 +178,7 @@ BLT_Pcm_WriteFloatLE(void* buffer, BLT_Int32 sample, unsigned int width)
 #endif
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_CanConvert
+|   BLT_Pcm_CanConvert
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
@@ -233,7 +233,7 @@ BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
 }
 
 /*----------------------------------------------------------------------
-|       BLT_Pcm_ConvertMediaPacket
+|   BLT_Pcm_ConvertMediaPacket
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Pcm_ConvertMediaPacket(BLT_Core*          core,

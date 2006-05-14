@@ -1,9 +1,9 @@
 /*****************************************************************
 |
-|      Gain Control Filter Module
+|   Gain Control Filter Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
@@ -599,14 +599,14 @@ ATX_BEGIN_INTERFACE_MAP(GainControlFilter, ATX_PropertyListener)
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(GainControlFilter, 
                                          BLT_BaseMediaNode, 
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|       GainControlFilterModule_Probe
+|   GainControlFilterModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
 GainControlFilterModule_Probe(BLT_Module*              self,  
@@ -706,7 +706,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(GainControlFilterModule, reference_count)
 
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_GainControlFilterModule_GetModuleObject(BLT_Module** object)

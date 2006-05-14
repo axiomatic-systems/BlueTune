@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|      Null Output Module
+|   Null Output Module
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -154,7 +154,7 @@ NullOutput_Destroy(NullOutput* self)
 }
 
 /*----------------------------------------------------------------------
-|       NullOutput_GetPortByName
+|   NullOutput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
 NullOutput_GetPortByName(BLT_MediaNode*  _self,
@@ -316,7 +316,7 @@ BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(NullOutputModule, "Null Output", 0)
 
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_NullOutputModule_GetModuleObject(BLT_Module** object)

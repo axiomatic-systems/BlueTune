@@ -1,16 +1,14 @@
 /****************************************************************
 |
-|      File: BltVorbisDecoder.c
+|   Vorbis Decoder Module
 |
-|      Vorbis Decoder Module
-|
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -29,66 +27,74 @@
 #include "vorbis/vorbisfile.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderModule)
-static const BLT_ModuleInterface VorbisDecoderModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoder)
-static const BLT_MediaNodeInterface VorbisDecoder_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderInputPort)
-static const BLT_MediaPortInterface VorbisDecoderInputPort_BLT_MediaPortInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderOutputPort)
-static const BLT_MediaPortInterface VorbisDecoderOutputPort_BLT_MediaPortInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
-    BLT_UInt32     ogg_type_id;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 ogg_type_id;
 } VorbisDecoderModule;
 
 typedef struct {
-    ATX_InputStream stream;
-    BLT_MediaTypeId media_type_id;
-    BLT_Size        size;
-    OggVorbis_File  vorbis_file;
-    BLT_Boolean     eos;
-} VorbisDecoderInputPort;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamUser);
+
+    /* members */
+    BLT_Boolean      eos;
+    ATX_InputStream* stream;
+    BLT_Size         size;
+    BLT_MediaTypeId  media_type_id;
+    OggVorbis_File   vorbis_file;
+} VorbisDecoderInput;
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketProducer);
+
+    /* members */
     BLT_PcmMediaType media_type;
     BLT_Cardinal     packet_count;
     ATX_Int64        sample_count;
-} VorbisDecoderOutputPort;
+} VorbisDecoderOutput;
 
 typedef struct {
-    BLT_BaseMediaNode       base;
-    VorbisDecoderInputPort  input;
-    VorbisDecoderOutputPort output;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    VorbisDecoderInput  input;
+    VorbisDecoderOutput output;
 } VorbisDecoder;
 
 /*----------------------------------------------------------------------
-|       constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_VORBIS_DECODER_PACKET_SIZE 4096
 
 /*----------------------------------------------------------------------
-|       VorbisDecoder_ReadCallback
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(VorbisDecoderModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(VorbisDecoder, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(VorbisDecoder, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|   VorbisDecoder_ReadCallback
 +---------------------------------------------------------------------*/
 static size_t
 VorbisDecoder_ReadCallback(void *ptr, size_t size, size_t nbelem, void *datasource)
 {
-    VorbisDecoder* decoder = (VorbisDecoder*)datasource;
+    VorbisDecoder* self = (VorbisDecoder*)datasource;
     BLT_Size       bytes_to_read;
     BLT_Size       bytes_read;
     BLT_Result     result;
 
     bytes_to_read = (BLT_Size)size*nbelem;
-    result = ATX_InputStream_Read(&decoder->input.stream, ptr, bytes_to_read, &bytes_read);
+    result = ATX_InputStream_Read(self->input.stream, ptr, bytes_to_read, &bytes_read);
     if (BLT_SUCCEEDED(result)) {
         return bytes_read;
     } else if (result == BLT_ERROR_EOS) {
@@ -99,27 +105,27 @@ VorbisDecoder_ReadCallback(void *ptr, size_t size, size_t nbelem, void *datasour
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoder_SeekCallback
+|   VorbisDecoder_SeekCallback
 +---------------------------------------------------------------------*/
 static int
 VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
 {
-    VorbisDecoder* decoder = (VorbisDecoder *)datasource;
+    VorbisDecoder* self = (VorbisDecoder *)datasource;
     BLT_Offset     where;
     BLT_Result     result;
 
     /* compute where to seek */
     if (whence == SEEK_CUR) {
         BLT_Offset current;
-        ATX_InputStream_Tell(&decoder->input.stream, &current);
-        if (current+offset <= decoder->input.size) {
+        ATX_InputStream_Tell(self->input.stream, &current);
+        if (current+offset <= self->input.size) {
             where = current+(long)offset;
         } else {
-            where = decoder->input.size;
+            where = self->input.size;
         }
     } else if (whence == SEEK_END) {
-        if (offset <= decoder->input.size) {
-            where = decoder->input.size - (long)offset;
+        if (offset <= self->input.size) {
+            where = self->input.size - (long)offset;
         } else {
             where = 0;
         }
@@ -130,10 +136,10 @@ VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
     }
 
     /* clear the eos flag */
-    decoder->input.eos = BLT_FALSE;
+    self->input.eos = BLT_FALSE;
 
     /* perform the seek */
-    result = ATX_InputStream_Seek(&decoder->input.stream, where);
+    result = ATX_InputStream_Seek(self->input.stream, where);
     if (BLT_FAILED(result)) {
         return -1;
     } else {
@@ -142,7 +148,7 @@ VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoder_CloseCallback
+|   VorbisDecoder_CloseCallback
 +---------------------------------------------------------------------*/
 static int
 VorbisDecoder_CloseCallback(void *datasource)
@@ -153,16 +159,16 @@ VorbisDecoder_CloseCallback(void *datasource)
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoder_TellCallback
+|   VorbisDecoder_TellCallback
 +---------------------------------------------------------------------*/
 static long
 VorbisDecoder_TellCallback(void *datasource)
 {
-    VorbisDecoder *decoder = (VorbisDecoder *)datasource;
+    VorbisDecoder *self = (VorbisDecoder *)datasource;
     BLT_Offset     offset;
     BLT_Result     result;
 
-    result = ATX_InputStream_Tell(&decoder->input.stream, &offset);
+    result = ATX_InputStream_Tell(self->input.stream, &offset);
     if (BLT_SUCCEEDED(result)) {
         return offset;
     } else {
@@ -171,10 +177,10 @@ VorbisDecoder_TellCallback(void *datasource)
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoder_OpenStream
+|   VorbisDecoder_OpenStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoder_OpenStream(VorbisDecoder* decoder)
+VorbisDecoder_OpenStream(VorbisDecoder* self)
 {
     ov_callbacks    callbacks;
     vorbis_info*    info;
@@ -182,15 +188,15 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
     int             result;
     
     /* check that we have a stream */
-    if (ATX_OBJECT_IS_NULL(&decoder->input.stream)) {
+    if (self->input.stream == NULL) {
         return BLT_FAILURE;
     }
 
     /* clear the eos flag */
-    decoder->input.eos = BLT_FALSE;
+    self->input.eos = BLT_FALSE;
 
     /* get input stream size */
-    ATX_InputStream_GetSize(&decoder->input.stream, &decoder->input.size);
+    ATX_InputStream_GetSize(self->input.stream, &self->input.size);
 
     /* setup callbacks */
     callbacks.read_func  = VorbisDecoder_ReadCallback;
@@ -199,26 +205,26 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
     callbacks.tell_func  = VorbisDecoder_TellCallback;
 
     /* initialize the vorbis file structure */
-    result = ov_open_callbacks(decoder, 
-                               &decoder->input.vorbis_file, 
+    result = ov_open_callbacks(self, 
+                               &self->input.vorbis_file, 
                                NULL, 
                                0, 
                                callbacks);
     if (result < 0) {
-        decoder->input.vorbis_file.dataoffsets = NULL;
+        self->input.vorbis_file.dataoffsets = NULL;
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* get info about the stream */
-    info = ov_info(&decoder->input.vorbis_file, -1);
+    info = ov_info(&self->input.vorbis_file, -1);
     if (info == NULL) return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    decoder->output.media_type.sample_rate     = info->rate;
-    decoder->output.media_type.channel_count   = info->channels;
-    decoder->output.media_type.bits_per_sample = 16;
-    decoder->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    self->output.media_type.sample_rate     = info->rate;
+    self->output.media_type.channel_count   = info->channels;
+    self->output.media_type.bits_per_sample = 16;
+    self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
 
     /* update the stream info */
-    if (!ATX_OBJECT_IS_NULL(&decoder->base.context)) {
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
         BLT_StreamInfo stream_info;
 
         /* start with no info */
@@ -242,7 +248,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
 
         /* average bitrate */
         {
-            long bitrate = ov_bitrate(&decoder->input.vorbis_file, -1);
+            long bitrate = ov_bitrate(&self->input.vorbis_file, -1);
             if (bitrate > 0) {
                 stream_info.average_bitrate = bitrate;
             } else {
@@ -258,18 +264,18 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
         if (info->rate) {
             stream_info.duration = 
                 (long)(1000.0f*
-                       (float)ov_pcm_total(&decoder->input.vorbis_file,-1)/
+                       (float)ov_pcm_total(&self->input.vorbis_file,-1)/
                        (float)info->rate);
             stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
         } else {
             stream_info.duration = 0;
         }   
 
-        BLT_Stream_SetInfo(&decoder->base.context, &stream_info);
+        BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     }
 
     /* process the comments */
-    comment = ov_comment(&decoder->input.vorbis_file, -1);
+    comment = ov_comment(&self->input.vorbis_file, -1);
     if (comment) {
         int i;
         ATX_String   string = ATX_EMPTY_STRING;
@@ -277,8 +283,8 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
         ATX_String   value  = ATX_EMPTY_STRING;
         float        track_gain = 0.0f;
         float        album_gain = 0.0f;
-        ATX_Boolean  track_gain_set = ATX_FALSE;
-        ATX_Boolean  album_gain_set = ATX_FALSE;
+        BLT_ReplayGainSetMode track_gain_mode = BLT_REPLAY_GAIN_SET_MODE_IGNORE;
+        BLT_ReplayGainSetMode album_gain_mode = BLT_REPLAY_GAIN_SET_MODE_IGNORE;
 
         for (i=0; i<comment->comments; i++) {
             int sep;
@@ -294,17 +300,17 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
             ATX_String_ToUppercase(&key);
             if (ATX_String_Equals(&key, BLT_VORBIS_COMMENT_REPLAY_GAIN_TRACK_GAIN, ATX_FALSE)) {
                 ATX_String_ToFloat(&value, &track_gain, ATX_TRUE);
-                track_gain_set = ATX_TRUE;
+                track_gain_mode = BLT_REPLAY_GAIN_SET_MODE_UPDATE;
             } else if (ATX_String_Equals(&key, BLT_VORBIS_COMMENT_REPLAY_GAIN_ALBUM_GAIN, ATX_FALSE)) {
                 ATX_String_ToFloat(&value, &album_gain, ATX_TRUE);
-                album_gain_set = ATX_TRUE;
+                album_gain_mode = BLT_REPLAY_GAIN_SET_MODE_UPDATE;
             }
         }
 
         /* update the stream info */
-        BLT_ReplayGain_SetStreamProperties(&decoder->base.context,
-                                           track_gain, track_gain_set,
-                                           album_gain, album_gain_set);
+        BLT_ReplayGain_SetStreamProperties(ATX_BASE(self, BLT_BaseMediaNode).context,
+                                           track_gain, track_gain_mode,
+                                           album_gain, album_gain_mode);
 
         ATX_String_Destruct(&string);
         ATX_String_Destruct(&key);
@@ -315,37 +321,37 @@ VorbisDecoder_OpenStream(VorbisDecoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoderInputPort_SetStream
+|   VorbisDecoderInput_SetStream
 +---------------------------------------------------------------------*/
 static BLT_Result
-VorbisDecoderInputPort_SetStream(BLT_InputStreamUserInstance* instance, 
-                                 ATX_InputStream*             stream,
-                                 const BLT_MediaType*         media_type)
+VorbisDecoderInput_SetStream(BLT_InputStreamUser* _self, 
+                             ATX_InputStream*     stream,
+                             const BLT_MediaType* media_type)
 {
-    VorbisDecoder* decoder = (VorbisDecoder*)instance;
+    VorbisDecoder* self = ATX_SELF_M(input, VorbisDecoder, BLT_InputStreamUser);
     BLT_Result     result;
 
     /* check the stream's media type */
     if (media_type == NULL || 
-        media_type->id != decoder->input.media_type_id) {
+        media_type->id != self->input.media_type_id) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* if we had a stream, release it */
-    ATX_RELEASE_OBJECT(&decoder->input.stream);
+    ATX_RELEASE_OBJECT(self->input.stream);
 
     /* reset counters and flags */
-    decoder->input.size = 0;
-    decoder->input.eos  = BLT_FALSE;
-    decoder->output.packet_count = 0;
-    ATX_Int64_Set_Int32(decoder->output.sample_count, 0);
+    self->input.size = 0;
+    self->input.eos  = BLT_FALSE;
+    self->output.packet_count = 0;
+    ATX_Int64_Set_Int32(self->output.sample_count, 0);
 
     /* open the stream */
-    decoder->input.stream = *stream;
-    result = VorbisDecoder_OpenStream(decoder);
+    self->input.stream = stream;
+    result = VorbisDecoder_OpenStream(self);
     if (BLT_FAILED(result)) {
-        ATX_CLEAR_OBJECT(&decoder->input.stream);
-        BLT_Debug("VorbisDecoderInputPort::SetStream - failed\n");
+        self->input.stream = NULL;
+        BLT_Debug("VorbisDecoderInput::SetStream - failed\n");
         return result;
     }
 
@@ -353,67 +359,63 @@ VorbisDecoderInputPort_SetStream(BLT_InputStreamUserInstance* instance,
     ATX_REFERENCE_OBJECT(stream);
 
     /* get stream size */
-    ATX_InputStream_GetSize(stream, &decoder->input.size);
+    ATX_InputStream_GetSize(stream, &self->input.size);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(VorbisDecoderInputPort,
-                                         "input",
-                                         STREAM_PULL,
-                                         IN)
-static const BLT_MediaPortInterface
-VorbisDecoderInputPort_BLT_MediaPortInterface = {
-    VorbisDecoderInputPort_GetInterface,
-    VorbisDecoderInputPort_GetName,
-    VorbisDecoderInputPort_GetProtocol,
-    VorbisDecoderInputPort_GetDirection,
-    BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderInput)
+    ATX_GET_INTERFACE_ACCEPT(VorbisDecoderInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(VorbisDecoderInput, BLT_InputStreamUser)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamUser interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamUserInterface
-VorbisDecoderInputPort_BLT_InputStreamUserInterface = {
-    VorbisDecoderInputPort_GetInterface,
-    VorbisDecoderInputPort_SetStream
-};
+ATX_BEGIN_INTERFACE_MAP(VorbisDecoderInput, BLT_InputStreamUser)
+    VorbisDecoderInput_SetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderInputPort)
-ATX_INTERFACE_MAP_ADD(VorbisDecoderInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(VorbisDecoderInputPort, BLT_InputStreamUser)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderInputPort)
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(VorbisDecoderInput,
+                                         "input",
+                                         STREAM_PULL,
+                                         IN)
+ATX_BEGIN_INTERFACE_MAP(VorbisDecoderInput, BLT_MediaPort)
+    VorbisDecoderInput_GetName,
+    VorbisDecoderInput_GetProtocol,
+    VorbisDecoderInput_GetDirection,
+    BLT_MediaPort_DefaultQueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    VorbisDecoderOutputPort_GetPacket
+|    VorbisDecoderOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
-                                  BLT_MediaPacket**           packet)
+VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
+                              BLT_MediaPacket**   packet)
 {
-    VorbisDecoder* decoder = (VorbisDecoder*)instance;
-    BLT_Any     buffer;
-    int         current_section;
-    long        bytes_read;
-    BLT_Result  result;
+    VorbisDecoder* self = ATX_SELF_M(output, VorbisDecoder, BLT_PacketProducer);
+    BLT_Any        buffer;
+    int            current_section;
+    long           bytes_read;
+    BLT_Result     result;
     
     /* check for EOS */
-    if (decoder->input.eos) {
+    if (self->input.eos) {
         *packet = NULL;
         return BLT_ERROR_EOS;
     }
 
     /* get a packet from the core */
-    result = BLT_Core_CreateMediaPacket(&decoder->base.core,
+    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
                                         BLT_VORBIS_DECODER_PACKET_SIZE,
-                                        (BLT_MediaType*)&decoder->output.media_type,
+                                        (BLT_MediaType*)&self->output.media_type,
                                         packet);
     if (BLT_FAILED(result)) return result;
 
@@ -422,13 +424,13 @@ VorbisDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 
     /* decode some audio samples */
     do {
-        bytes_read = ov_read(&decoder->input.vorbis_file,
+        bytes_read = ov_read(&self->input.vorbis_file,
                              buffer,
                              BLT_VORBIS_DECODER_PACKET_SIZE,
                              0, 2, 1, &current_section);
     } while (bytes_read == OV_HOLE);
     if (bytes_read == 0) {
-        decoder->input.eos = BLT_TRUE;
+        self->input.eos = BLT_TRUE;
         BLT_MediaPacket_SetFlags(*packet, 
                                  BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);    
     } else if (bytes_read < 0) {
@@ -441,69 +443,65 @@ VorbisDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
     BLT_MediaPacket_SetPayloadSize(*packet, bytes_read);
 
     /* set flags */     
-    if (decoder->output.packet_count == 0) {
+    if (self->output.packet_count == 0) {
         /* this is the first packet */
         BLT_MediaPacket_SetFlags(*packet,
                                  BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
     }
 
     /* update the sample count and timestamp */
-    if (decoder->output.media_type.channel_count   != 0 && 
-        decoder->output.media_type.bits_per_sample != 0 &&
-        decoder->output.media_type.sample_rate     != 0) {
+    if (self->output.media_type.channel_count   != 0 && 
+        self->output.media_type.bits_per_sample != 0 &&
+        self->output.media_type.sample_rate     != 0) {
         BLT_UInt32 sample_count;
 
             /* compute time stamp */
         BLT_TimeStamp time_stamp;
         BLT_TimeStamp_FromSamples(&time_stamp, 
-                                  decoder->output.sample_count,
-                                  decoder->output.media_type.sample_rate);
+                                  self->output.sample_count,
+                                  self->output.media_type.sample_rate);
         BLT_MediaPacket_SetTimeStamp(*packet, time_stamp);
 
         /* update sample count */
-        sample_count = bytes_read/(decoder->output.media_type.channel_count*
-                                   decoder->output.media_type.bits_per_sample/8);
-        ATX_Int64_Add_Int32(decoder->output.sample_count, sample_count);
+        sample_count = bytes_read/(self->output.media_type.channel_count*
+                                   self->output.media_type.bits_per_sample/8);
+        ATX_Int64_Add_Int32(self->output.sample_count, sample_count);
     } 
 
     /* update the packet count */
-    decoder->output.packet_count++;
+    self->output.packet_count++;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderOutput)
+    ATX_GET_INTERFACE_ACCEPT(VorbisDecoderOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(VorbisDecoderOutput, BLT_PacketProducer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(VorbisDecoderOutputPort,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(VorbisDecoderOutput,
                                          "output",
                                          PACKET,
                                          OUT)
-static const BLT_MediaPortInterface
-VorbisDecoderOutputPort_BLT_MediaPortInterface = {
-    VorbisDecoderOutputPort_GetInterface,
-    VorbisDecoderOutputPort_GetName,
-    VorbisDecoderOutputPort_GetProtocol,
-    VorbisDecoderOutputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(VorbisDecoderOutput, BLT_MediaPort)
+    VorbisDecoderOutput_GetName,
+    VorbisDecoderOutput_GetProtocol,
+    VorbisDecoderOutput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketProducerInterface
-VorbisDecoderOutputPort_BLT_PacketProducerInterface = {
-    VorbisDecoderOutputPort_GetInterface,
-    VorbisDecoderOutputPort_GetPacket
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderOutputPort)
-ATX_INTERFACE_MAP_ADD(VorbisDecoderOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(VorbisDecoderOutputPort, BLT_PacketProducer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderOutputPort)
+ATX_BEGIN_INTERFACE_MAP(VorbisDecoderOutput, BLT_PacketProducer)
+    VorbisDecoderOutput_GetPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    VorbisDecoder_Create
@@ -513,7 +511,7 @@ VorbisDecoder_Create(BLT_Module*              module,
                      BLT_Core*                core, 
                      BLT_ModuleParametersType parameters_type,
                      BLT_CString              parameters, 
-                     ATX_Object*              object)
+                     BLT_MediaNode**          object)
 {
     VorbisDecoder* decoder;
 
@@ -528,21 +526,25 @@ VorbisDecoder_Create(BLT_Module*              module,
     /* allocate memory for the object */
     decoder = ATX_AllocateZeroMemory(sizeof(VorbisDecoder));
     if (decoder == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&decoder->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(decoder, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    decoder->input.media_type_id = 
-        ((VorbisDecoderModule*)ATX_INSTANCE(module))->ogg_type_id;
+    decoder->input.media_type_id = ATX_SELF_EX_O(module, VorbisDecoderModule, BLT_BaseModule, BLT_Module)->ogg_type_id;
     BLT_PcmMediaType_Init(&decoder->output.media_type);
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)decoder;
-    ATX_INTERFACE(object) = (ATX_Interface*)&VorbisDecoder_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(decoder, VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(decoder, VorbisDecoder, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&decoder->input,  VorbisDecoderInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&decoder->input,  VorbisDecoderInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&decoder->output, VorbisDecoderOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&decoder->output, VorbisDecoderOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(decoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -551,47 +553,45 @@ VorbisDecoder_Create(BLT_Module*              module,
 |    VorbisDecoder_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-VorbisDecoder_Destroy(VorbisDecoder* decoder)
+VorbisDecoder_Destroy(VorbisDecoder* self)
 {
     BLT_Debug("VorbisDecoder::Destroy\n");
 
     /* free the vorbis decoder */
-    if (!ATX_OBJECT_IS_NULL(&decoder->input.stream)) {
-        ov_clear(&decoder->input.vorbis_file);
+    if (self->input.stream) {
+        ov_clear(&self->input.vorbis_file);
     }
 
     /* release the input stream */
-    ATX_RELEASE_OBJECT(&decoder->input.stream);
+    ATX_RELEASE_OBJECT(self->input.stream);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&decoder->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(decoder);
+    ATX_FreeMemory((void*)self);
 
     return BLT_SUCCESS;
 }
                     
 /*----------------------------------------------------------------------
-|       VorbisDecoder_GetPortByName
+|   VorbisDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
-                            BLT_CString            name,
-                            BLT_MediaPort*         port)
+VorbisDecoder_GetPortByName(BLT_MediaNode*  _self,
+                            BLT_CString     name,
+                            BLT_MediaPort** port)
 {
-    VorbisDecoder* decoder = (VorbisDecoder*)instance;
+    VorbisDecoder* self = ATX_SELF_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &VorbisDecoderInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &VorbisDecoderOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -600,31 +600,31 @@ VorbisDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
 |    VorbisDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoder_Seek(BLT_MediaNodeInstance* instance,
-                   BLT_SeekMode*          mode,
-                   BLT_SeekPoint*         point)
+VorbisDecoder_Seek(BLT_MediaNode* _self,
+                   BLT_SeekMode*  mode,
+                   BLT_SeekPoint* point)
 {
-    VorbisDecoder* decoder = (VorbisDecoder*)instance;
+    VorbisDecoder* self = ATX_SELF_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode);
     double         time;
     int            ov_result;
 
     /* estimate the seek point in time_stamp mode */
-    if (ATX_OBJECT_IS_NULL(&decoder->base.context)) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(&decoder->base.context, *mode, point);
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
     if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) ||
         !(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
         return BLT_FAILURE;
     }
 
     /* update the output sample count */
-    decoder->output.sample_count = point->sample;
+    self->output.sample_count = point->sample;
 
     /* seek to the target time */
     time = 
         (double)point->time_stamp.seconds +
         (double)point->time_stamp.nanoseconds/1000000000.0f;
     BLT_Debug("VorbisDecoder::Seek - sample = %f\n", time);
-    ov_result = ov_time_seek(&decoder->input.vorbis_file, time);
+    ov_result = ov_time_seek(&self->input.vorbis_file, time);
     if (ov_result != 0) return BLT_FAILURE;
 
     /* set the mode so that the nodes down the chaine know the seek has */
@@ -635,11 +635,17 @@ VorbisDecoder_Seek(BLT_MediaNodeInstance* instance,
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(VorbisDecoder)
+    ATX_GET_INTERFACE_ACCEPT_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(VorbisDecoder, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-VorbisDecoder_BLT_MediaNodeInterface = {
-    VorbisDecoder_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     VorbisDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -649,67 +655,60 @@ VorbisDecoder_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     VorbisDecoder_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(VorbisDecoder, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(VorbisDecoder, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoder)
-ATX_INTERFACE_MAP_ADD(VorbisDecoder, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(VorbisDecoder, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoder)
-
-/*----------------------------------------------------------------------
-|       VorbisDecoderModule_Attach
+|   VorbisDecoderModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+VorbisDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    VorbisDecoderModule* module = (VorbisDecoderModule*)instance;
-    BLT_Registry      registry;
-    BLT_Result        result;
+    VorbisDecoderModule* self = ATX_SELF_EX(VorbisDecoderModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*        registry;
+    BLT_Result           result;
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
 
     /* register the ".ogg" file extension */
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".ogg",
                                             "application/x-ogg");
     if (BLT_FAILED(result)) return result;
 
     /* register the "application/x-ogg" type */
     result = BLT_Registry_RegisterName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "application/x-ogg",
-        &module->ogg_type_id);
+        &self->ogg_type_id);
     if (BLT_FAILED(result)) return result;
     
     BLT_Debug("VorbisDecoderModule::Attach (application/ogg type = %d)\n", 
-              module->ogg_type_id);
+              self->ogg_type_id);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       VorbisDecoderModule_Probe
+|   VorbisDecoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-VorbisDecoderModule_Probe(BLT_ModuleInstance*      instance, 
+VorbisDecoderModule_Probe(BLT_Module*              _self, 
                           BLT_Core*                core,
                           BLT_ModuleParametersType parameters_type,
                           BLT_AnyConst             parameters,
                           BLT_Cardinal*            match)
 {
-    VorbisDecoderModule* module = (VorbisDecoderModule*)instance;
+    VorbisDecoderModule* self = ATX_SELF_EX(VorbisDecoderModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -733,7 +732,7 @@ VorbisDecoderModule_Probe(BLT_ModuleInstance*      instance,
 
             /* the input type should be audio/x-ogg */
             if (constructor->spec.input.media_type->id != 
-                module->ogg_type_id) {
+                self->ogg_type_id) {
                 return BLT_FAILURE;
             }
 
@@ -773,45 +772,48 @@ VorbisDecoderModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(VorbisDecoder)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(VorbisDecoder, "Vorbis Decoder", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(VorbisDecoderModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(VorbisDecoderModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface VorbisDecoderModule_BLT_ModuleInterface = {
-    VorbisDecoderModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(VorbisDecoderModule, VorbisDecoder)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(VorbisDecoderModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     VorbisDecoderModule_Attach,
     VorbisDecoderModule_CreateInstance,
     VorbisDecoderModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define VorbisDecoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(VorbisDecoderModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(VorbisDecoderModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderModule) 
-ATX_INTERFACE_MAP_ADD(VorbisDecoderModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(VorbisDecoderModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(VorbisDecoderModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(VorbisDecoderModule, "Vorbis Decoder", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_VorbisDecoderModule_GetModuleObject(BLT_Module* object)
+BLT_VorbisDecoderModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

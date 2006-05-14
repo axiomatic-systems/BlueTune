@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltFilterHost.c
-|
 |      Filter Host Module
 |
 |      (c) 2002-2006 Gilles Boccon-Gibod
@@ -10,7 +8,7 @@
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -25,73 +23,67 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostModule)
-static const BLT_ModuleInterface FilterHostModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHost)
-static const BLT_MediaNodeInterface FilterHost_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostInputPort)
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostOutputPort)
-
-/*----------------------------------------------------------------------
-|    constants
-+---------------------------------------------------------------------*/
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
-typedef struct {
-    BLT_BaseModule base;
-} FilterHostModule;
+typedef BLT_BaseModule FilterHostModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    BLT_MediaPacket*  packet;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+} FilterHostInput;
+
+typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketProducer);
+
+    /* members */
+    BLT_PcmMediaType pcm_type;
+    BLT_MediaPacket* packet;
+} FilterHostOutput;
+
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    FilterHostInput  input;
+    FilterHostOutput output;
 } FilterHost;
 
 /*----------------------------------------------------------------------
-|    FilterHostInputPort_PutPacket
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(FilterHostModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(FilterHost, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(FilterHost, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|    FilterHostInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHostInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                              BLT_MediaPacket*            packet)
+FilterHostInput_PutPacket(BLT_PacketConsumer* _self,
+                          BLT_MediaPacket*    packet)
 {
-    FilterHost* filter = (FilterHost*)instance;
-    BLT_PcmMediaType*  media_type;
-    BLT_Result         result;
-
-    /*BLT_Debug("FilterHostInputPort_PutPacket\n");*/
-
-    /* get the media type */
-    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-    if (BLT_FAILED(result)) return result;
-
-    /* check the media type */
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    }
+    FilterHost* self = ATX_SELF_M(input, FilterHost, BLT_PacketConsumer);
     
-    /* keep the packet */
-    filter->packet = packet;
-    BLT_MediaPacket_AddReference(packet);
-
-    /* exit now if we're inactive */
-    return BLT_SUCCESS;
+    /* transform the packet data */
+    return BLT_Pcm_ConvertMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                      packet, 
+                                      &self->output.pcm_type, 
+                                      &self->output.packet);
 }
 
 /*----------------------------------------------------------------------
-|   FilterHost_QueryMediaType
+|   FilterHostInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHostInputPort_QueryMediaType(
-    BLT_MediaPortInstance* instance,
-    BLT_Ordinal            index,
-    const BLT_MediaType**  media_type)
+FilterHostInput_QueryMediaType(BLT_MediaPort*         self,
+                               BLT_Ordinal            index,
+                               const BLT_MediaType**  media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     if (index == 0) {
         *media_type = &BLT_GenericPcmMediaType;
         return BLT_SUCCESS;
@@ -102,50 +94,46 @@ FilterHostInputPort_QueryMediaType(
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FilterHostInputPort,
-                                         "input",
-                                         PACKET,
-                                         IN)
-static const BLT_MediaPortInterface
-FilterHostInputPort_BLT_MediaPortInterface = {
-    FilterHostInputPort_GetInterface,
-    FilterHostInputPort_GetName,
-    FilterHostInputPort_GetProtocol,
-    FilterHostInputPort_GetDirection,
-    FilterHostInputPort_QueryMediaType
-};
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FilterHostInput)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostInput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-FilterHostInputPort_BLT_PacketConsumerInterface = {
-    FilterHostInputPort_GetInterface,
-    FilterHostInputPort_PutPacket
-};
+ATX_BEGIN_INTERFACE_MAP(FilterHostInput, BLT_PacketConsumer)
+    FilterHostInput_PutPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostInputPort)
-ATX_INTERFACE_MAP_ADD(FilterHostInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(FilterHostInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostInputPort)
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FilterHostInput,
+                                         "input",
+                                         PACKET,
+                                         IN)
+ATX_BEGIN_INTERFACE_MAP(FilterHostInput, BLT_MediaPort)
+    FilterHostInput_GetName,
+    FilterHostInput_GetProtocol,
+    FilterHostInput_GetDirection,
+    FilterHostInput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    FilterHostOutputPort_GetPacket
+|    FilterHostOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHostOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
-                               BLT_MediaPacket**           packet)
+FilterHostOutput_GetPacket(BLT_PacketProducer* _self,
+                           BLT_MediaPacket**   packet)
 {
-    FilterHost* filter = (FilterHost*)instance;
+    FilterHost* self = ATX_SELF_M(output, FilterHost, BLT_PacketProducer);
 
-    if (filter->packet) {
-        *packet = filter->packet;
-        filter->packet = NULL;
+    if (self->output.packet) {
+        *packet = self->output.packet;
+        self->output.packet = NULL;
         return BLT_SUCCESS;
     } else {
         *packet = NULL;
@@ -154,15 +142,14 @@ FilterHostOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|   FilterHostOutputPort_QueryMediaType
+|   FilterHostOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHostOutputPort_QueryMediaType(
-    BLT_MediaPortInstance* instance,
-    BLT_Ordinal            index,
-    const BLT_MediaType**  media_type)
+FilterHostOutput_QueryMediaType(BLT_MediaPort*        self,
+                                BLT_Ordinal           index,
+                                const BLT_MediaType** media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     if (index == 0) {
         *media_type = &BLT_GenericPcmMediaType;
         return BLT_SUCCESS;
@@ -173,37 +160,33 @@ FilterHostOutputPort_QueryMediaType(
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FilterHostOutput)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostOutput, BLT_PacketProducer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FilterHostOutputPort,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FilterHostOutput,
                                          "output",
                                          PACKET,
                                          OUT)
-static const BLT_MediaPortInterface
-FilterHostOutputPort_BLT_MediaPortInterface = {
-    FilterHostOutputPort_GetInterface,
-    FilterHostOutputPort_GetName,
-    FilterHostOutputPort_GetProtocol,
-    FilterHostOutputPort_GetDirection,
-    FilterHostOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(FilterHostOutput, BLT_MediaPort)
+    FilterHostOutput_GetName,
+    FilterHostOutput_GetProtocol,
+    FilterHostOutput_GetDirection,
+    FilterHostOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketProducerInterface
-FilterHostOutputPort_BLT_PacketProducerInterface = {
-    FilterHostOutputPort_GetInterface,
-    FilterHostOutputPort_GetPacket
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostOutputPort)
-ATX_INTERFACE_MAP_ADD(FilterHostOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(FilterHostOutputPort, BLT_PacketProducer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostOutputPort)
+ATX_BEGIN_INTERFACE_MAP(FilterHostOutput, BLT_PacketProducer)
+    FilterHostOutput_GetPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    FilterHost_Create
@@ -212,10 +195,11 @@ static BLT_Result
 FilterHost_Create(BLT_Module*              module,
                   BLT_Core*                core, 
                   BLT_ModuleParametersType parameters_type,
-                  BLT_CString              parameters, 
-                  ATX_Object*              object)
+                  BLT_AnyConst             parameters, 
+                  BLT_MediaNode**          object)
 {
-    FilterHost* filter;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
+    FilterHost*               self;
 
     BLT_Debug("FilterHost::Create\n");
 
@@ -226,18 +210,31 @@ FilterHost_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    filter = ATX_AllocateZeroMemory(sizeof(FilterHost));
-    if (filter == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(FilterHost));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&filter->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)filter;
-    ATX_INTERFACE(object) = (ATX_Interface*)&FilterHost_BLT_MediaNodeInterface;
+    /* check the media type */
+    if (constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    /* construct the object */
+    self->output.pcm_type = *(BLT_PcmMediaType*)constructor->spec.output.media_type;
+
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, FilterHost, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, FilterHost, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  FilterHostInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  FilterHostInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, FilterHostOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, FilterHostOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -246,54 +243,58 @@ FilterHost_Create(BLT_Module*              module,
 |    FilterHost_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-FilterHost_Destroy(FilterHost* filter)
+FilterHost_Destroy(FilterHost* self)
 { 
     BLT_Debug("FilterHost::Destroy\n");
 
     /* release any input packet we may hold */
-    if (filter->packet) {
-        BLT_MediaPacket_Release(filter->packet);
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
     }
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&filter->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(filter);
+    ATX_FreeMemory((void*)self);
 
     return BLT_SUCCESS;
 }
                     
 /*----------------------------------------------------------------------
-|       FilterHost_GetPortByName
+|   FilterHost_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHost_GetPortByName(BLT_MediaNodeInstance* instance,
-                         BLT_CString            name,
-                         BLT_MediaPort*         port)
+FilterHost_GetPortByName(BLT_MediaNode*  _self,
+                         BLT_CString     name,
+                         BLT_MediaPort** port)
 {
-    FilterHost* filter = (FilterHost*)instance;
+    FilterHost* self = ATX_SELF_EX(FilterHost, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)filter;
-        ATX_INTERFACE(port) = &FilterHostInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)filter;
-        ATX_INTERFACE(port) = &FilterHostOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FilterHost)
+    ATX_GET_INTERFACE_ACCEPT_EX(FilterHost, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(FilterHost, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-FilterHost_BLT_MediaNodeInterface = {
-    FilterHost_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(FilterHost, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     FilterHost_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -306,31 +307,24 @@ FilterHost_BLT_MediaNodeInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(FilterHost, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FilterHost, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHost)
-ATX_INTERFACE_MAP_ADD(FilterHost, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(FilterHost, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHost)
-
-/*----------------------------------------------------------------------
-|       FilterHostModule_Probe
+|   FilterHostModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FilterHostModule_Probe(BLT_ModuleInstance*      instance, 
+FilterHostModule_Probe(BLT_Module*              self,  
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
                        BLT_Cardinal*            match)
 {
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
-    BLT_COMPILER_UNUSED(instance);
 
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:
@@ -338,42 +332,57 @@ FilterHostModule_Probe(BLT_ModuleInstance*      instance,
             BLT_MediaNodeConstructor* constructor = 
                 (BLT_MediaNodeConstructor*)parameters;
 
-            /* we need a name */
-            if (constructor->name == NULL ||
-                !ATX_StringsEqual(constructor->name, "FilterHost")) {
-                return BLT_FAILURE;
-            }
+            /* compute match based on specified name */
+            if (constructor->name == NULL) {
+                *match = BLT_MODULE_PROBE_MATCH_DEFAULT;
 
-            /* the input and output protocols should be PACKET */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
-                return BLT_FAILURE;
-            }
+                /* the input protocol should be PACKET */
+                if (constructor->spec.input.protocol != 
+                    BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+                    return BLT_FAILURE;
+                }
 
-            /* the input type should be unspecified, or audio/pcm */
-            if (!(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.input.media_type->id ==
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
-                return BLT_FAILURE;
-            }
+                /* output protocol should be PACKET */
+                if (constructor->spec.output.protocol != 
+                    BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+                    return BLT_FAILURE;
+                }
 
-            /* the output type should be unspecified, or audio/pcm */
-            if (!(constructor->spec.output.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.output.media_type->id ==
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
-                return BLT_FAILURE;
-            }
+                /* check that the in and out formats are supported */
+                if (BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
+                                       constructor->spec.output.media_type)) {
+                    return BLT_FAILURE;
+                }
+            } else {
+                /* if a name is a specified, it needs to match exactly */
+                if (!ATX_StringsEqual(constructor->name, "FilterHost")) {
+                    return BLT_FAILURE;
+                } else {
+                    *match = BLT_MODULE_PROBE_MATCH_EXACT;
+                }
 
-            /* match level is always exact */
-            *match = BLT_MODULE_PROBE_MATCH_EXACT;
+                /* the input protocol should be PACKET or ANY */
+                if (constructor->spec.input.protocol !=
+                    BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                    constructor->spec.input.protocol != 
+                    BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+                    return BLT_FAILURE;
+                }
+
+                /* output protocol should be PACKET or ANY */
+                if ((constructor->spec.output.protocol !=
+                    BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                    constructor->spec.output.protocol != 
+                    BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
+                    return BLT_FAILURE;
+                }
+
+                /* check that the in and out formats are supported */
+                if (BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
+                                       constructor->spec.output.media_type)) {
+                    return BLT_FAILURE;
+                }
+            }
 
             BLT_Debug("FilterHostModule::Probe - Ok [%d]\n", *match);
             return BLT_SUCCESS;
@@ -388,48 +397,46 @@ FilterHostModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FilterHost)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FilterHostModule)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT(FilterHostModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface FilterHostModule_BLT_ModuleInterface = {
-    FilterHostModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FilterHostModule, FilterHost)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(FilterHostModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     FilterHostModule_CreateInstance,
     FilterHostModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define FilterHostModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(FilterHostModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(FilterHostModule, reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostModule) 
-ATX_INTERFACE_MAP_ADD(FilterHostModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(FilterHostModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FilterHostModule)
-
-/*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_FilterHostModule_GetModuleObject(BLT_Module* object)
+BLT_FilterHostModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("Filter Host", NULL, 0,
-                                 &FilterHostModule_BLT_ModuleInterface,
+    return BLT_BaseModule_Create("Filter Hostr", NULL, 0, 
+                                 &FilterHostModule_BLT_ModuleInterface, 
+                                 &FilterHostModule_ATX_ReferenceableInterface, 
                                  object);
 }

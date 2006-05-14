@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltFilterHost.h
-|
 |      Filter Host Module
 |
 |      (c) 2002-2006 Gilles Boccon-Gibod
@@ -21,6 +19,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_FilterHostModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_FilterHostModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_FILTER_HOST_H_ */

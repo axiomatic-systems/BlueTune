@@ -53,60 +53,56 @@ ATX_DECLARE_INTERFACE(BLT_Core)
  *  
  */
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Core)
-    BLT_Result (*CreateStream)(BLT_CoreInstance* core, BLT_Stream* stream);
-    BLT_Result (*RegisterModule)(BLT_CoreInstance* core, const BLT_Module* module);
-    BLT_Result (*UnRegisterModule)(BLT_CoreInstance* core, BLT_Module* module);
-    BLT_Result (*EnumerateModules)(BLT_CoreInstance* core,
-                                   BLT_Mask          categories,
-                                   ATX_Iterator*     iterator);
-    BLT_Result (*GetRegistry)(BLT_CoreInstance* core, BLT_Registry* registry);
-    BLT_Result (*GetSettings)(BLT_CoreInstance* stream, 
-                              ATX_Properties*   settings);
-    BLT_Result (*CreateCompatibleMediaNode)(BLT_CoreInstance*         core,
+    BLT_Result (*CreateStream)(BLT_Core* self, BLT_Stream** stream);
+    BLT_Result (*RegisterModule)(BLT_Core* self, BLT_Module* module);
+    BLT_Result (*UnRegisterModule)(BLT_Core* self, BLT_Module* module);
+    BLT_Result (*EnumerateModules)(BLT_Core*      self,
+                                   BLT_Mask       categories,
+                                   ATX_Iterator** iterator);
+    BLT_Result (*GetRegistry)(BLT_Core* self, BLT_Registry** registry);
+    BLT_Result (*GetSettings)(BLT_Core* stream, ATX_Properties** settings);
+    BLT_Result (*CreateCompatibleMediaNode)(BLT_Core*                 self,
                                             BLT_MediaNodeConstructor* constructor,
-                                            BLT_MediaNode*            node);
-    BLT_Result (*CreateMediaPacket)(BLT_CoreInstance*    core, 
+                                            BLT_MediaNode**           node);
+    BLT_Result (*CreateMediaPacket)(BLT_Core*            self, 
                                     BLT_Size             size, 
                                     const BLT_MediaType* type,
                                     BLT_MediaPacket**    packet);
-ATX_END_INTERFACE_DEFINITION(BLT_Core)
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Core_CreateStream(object, stream) \
-ATX_INTERFACE(object)->CreateStream(ATX_INSTANCE(object), stream)
+ATX_INTERFACE(object)->CreateStream(object, stream)
 
 #define BLT_Core_RegisterModule(object, module) \
-ATX_INTERFACE(object)->RegisterModule(ATX_INSTANCE(object), module)
+ATX_INTERFACE(object)->RegisterModule(object, module)
 
 #define BLT_Core_UnRegisterModule(object, module) \
-ATX_INTERFACE(object)->UnRegisterModule(ATX_INSTANCE(object), module)
+ATX_INTERFACE(object)->UnRegisterModule(object, module)
 
 #define BLT_Core_EnumerateModules(object, categories, iterator) \
-ATX_INTERFACE(object)->EnumerateModules(ATX_INSTANCE(object), categories\
-                                        iterator)
+ATX_INTERFACE(object)->EnumerateModules(object, categories, iterator)
 
 #define BLT_Core_GetRegistry(object, registry) \
-ATX_INTERFACE(object)->GetRegistry(ATX_INSTANCE(object), registry)
+ATX_INTERFACE(object)->GetRegistry(object, registry)
 
 #define BLT_Core_GetSettings(object, settings) \
-ATX_INTERFACE(object)->GetSettings(ATX_INSTANCE(object), settings)
+ATX_INTERFACE(object)->GetSettings(object, settings)
 
 #define BLT_Core_CreateCompatibleMediaNode(object, constructor, node) \
-ATX_INTERFACE(object)->CreateCompatibleMediaNode(ATX_INSTANCE(object), \
-constructor, node)
+ATX_INTERFACE(object)->CreateCompatibleMediaNode(object, constructor, node)
 
 #define BLT_Core_CreateMediaPacket(object, size, type, packet)\
-ATX_INTERFACE(object)->CreateMediaPacket(ATX_INSTANCE(object), size, \
-type, packet)
+ATX_INTERFACE(object)->CreateMediaPacket(object, size, type, packet)
 
 #define BLT_Core_Destroy(object) ATX_DESTROY_OBJECT(object)
 
 /*----------------------------------------------------------------------
 |       prototypes
 +---------------------------------------------------------------------*/
-BLT_Result BLT_Init(BLT_Core* core);
+BLT_Result BLT_Init(BLT_Core** core);
 BLT_Result BLT_Terminate(void);
 
 #endif /* _BLT_CORE_H_ */

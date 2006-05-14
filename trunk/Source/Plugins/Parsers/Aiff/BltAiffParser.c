@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltAiffParser.c
-|
 |      AIFF Parser Module
 |
-|      (c) 2002-2005 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -25,45 +23,46 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserModule)
-static const BLT_ModuleInterface AiffParserModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParser)
-static const BLT_MediaNodeInterface AiffParser_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserInputPort)
-static const BLT_MediaPortInterface AiffParserInputPort_BLT_MediaPortInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserOutputPort)
-static const BLT_MediaPortInterface AiffParserOutputPort_BLT_MediaPortInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef unsigned long AiffChunkType;
 
 typedef struct {
-    BLT_BaseModule base;
-    BLT_UInt32     aiff_type_id;
-    BLT_UInt32     x_aiff_type_id;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 aiff_type_id;
+    BLT_UInt32 x_aiff_type_id;
 } AiffParserModule;
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamUser);
+
+    /* members */
     BLT_MediaType media_type;
-} AiffParserInputPort;
+} AiffParserInput;
 
 typedef struct {
-    ATX_InputStream  stream;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamProvider);
+
+    /* members */
+    ATX_InputStream* stream;
     BLT_Size         size;
     BLT_PcmMediaType media_type;
-} AiffParserOutputPort;
+} AiffParserOutput;
 
 typedef struct {
-    BLT_BaseMediaNode    base;
-    AiffParserInputPort  input;
-    AiffParserOutputPort output;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    AiffParserInput  input;
+    AiffParserOutput output;
 } AiffParser;
 
 /*----------------------------------------------------------------------
@@ -76,12 +75,19 @@ typedef struct {
 #define BLT_AIFF_CHUNK_TYPE_COMM         0x434F4D4D  /* 'COMM' */
 #define BLT_AIFF_CHUNK_TYPE_SSND         0x53534E44  /* 'SSND' */
 
-#define BLT_AIFF_COMM_CHUNK_MIN_DATA_SIZE    18
-#define BLT_AIFC_COMM_CHUNK_MIN_DATA_SIZE    22
-#define BLT_AIFF_SSND_CHUNK_MIN_SIZE     8
+#define BLT_AIFF_COMM_CHUNK_MIN_DATA_SIZE  18
+#define BLT_AIFC_COMM_CHUNK_MIN_DATA_SIZE  22
+#define BLT_AIFF_SSND_CHUNK_MIN_SIZE       8
 
 /*----------------------------------------------------------------------
-|       Aiff_ReadChunkHeader
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(AiffParserModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(AiffParser, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(AiffParser, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|   Aiff_ReadChunkHeader
 +---------------------------------------------------------------------*/
 static BLT_Result
 Aiff_ReadChunkHeader(ATX_InputStream* stream,
@@ -109,7 +115,7 @@ Aiff_ReadChunkHeader(ATX_InputStream* stream,
 }
 
 /*----------------------------------------------------------------------
-|       Aiff_ParseExtended
+|   Aiff_ParseExtended
 +---------------------------------------------------------------------*/
 static unsigned long 
 Aiff_ParseExtended(unsigned char * buffer)
@@ -129,10 +135,10 @@ Aiff_ParseExtended(unsigned char * buffer)
 }
 
 /*----------------------------------------------------------------------
-|       AiffParser_OnCommChunk
+|   AiffParser_OnCommChunk
 +---------------------------------------------------------------------*/
 static BLT_Result
-AiffParser_OnCommChunk(AiffParser*      parser, 
+AiffParser_OnCommChunk(AiffParser*      self, 
                        ATX_InputStream* stream, 
                        ATX_Size         data_size, 
                        BLT_Boolean      is_aifc)
@@ -186,24 +192,24 @@ AiffParser_OnCommChunk(AiffParser*      parser,
     /* compute sample format */
     sample_size = 8*((sample_size+7)/8);
     if (is_float) {
-        parser->output.media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_FLOAT_BE;
+        self->output.media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_FLOAT_BE;
     } else {
-        parser->output.media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE;
+        self->output.media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE;
     }
 
     /* update the format */
-    parser->output.media_type.channel_count   = num_channels;
-    parser->output.media_type.bits_per_sample = (BLT_UInt8)sample_size;
-    parser->output.media_type.sample_rate     = sample_rate;
+    self->output.media_type.channel_count   = num_channels;
+    self->output.media_type.bits_per_sample = (BLT_UInt8)sample_size;
+    self->output.media_type.sample_rate     = sample_rate;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       AiffParser_OnSsndChunk
+|   AiffParser_OnSsndChunk
 +---------------------------------------------------------------------*/
 static BLT_Result
-AiffParser_OnSsndChunk(AiffParser* parser, ATX_InputStream* stream, BLT_Size size)
+AiffParser_OnSsndChunk(AiffParser* self, ATX_InputStream* stream, BLT_Size size)
 {
     unsigned char ssnd_buffer[BLT_AIFF_SSND_CHUNK_MIN_SIZE];
     unsigned long offset;
@@ -224,19 +230,19 @@ AiffParser_OnSsndChunk(AiffParser* parser, ATX_InputStream* stream, BLT_Size siz
     if (ATX_FAILED(result)) return result;
 
     /* create a sub stream */
-    parser->output.size = size;
+    self->output.size = size;
     return ATX_SubInputStream_Create(stream, 
                                      position+offset, 
                                      size,
                                      NULL,
-                                     &parser->output.stream);
+                                     &self->output.stream);
 }
 
 /*----------------------------------------------------------------------
-|       AiffParser_ParseChunks
+|   AiffParser_ParseChunks
 +---------------------------------------------------------------------*/
 static BLT_Result
-AiffParser_ParseChunks(AiffParser*      parser, 
+AiffParser_ParseChunks(AiffParser*      self, 
                        ATX_InputStream* stream)
 {
     AiffChunkType  chunk_type;
@@ -250,7 +256,7 @@ AiffParser_ParseChunks(AiffParser*      parser,
     BLT_Result     result;
     
     /* check that we have a stream */
-    if (ATX_OBJECT_IS_NULL(stream)) {
+    if (stream == NULL) {
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
@@ -306,7 +312,7 @@ AiffParser_ParseChunks(AiffParser*      parser,
                 }
 
                 /* process the chunk */
-                result = AiffParser_OnCommChunk(parser, stream, data_size, is_aifc);
+                result = AiffParser_OnCommChunk(self, stream, data_size, is_aifc);
                 if (BLT_FAILED(result)) return result;
                 have_comm = BLT_TRUE;
                 break;
@@ -330,7 +336,7 @@ AiffParser_ParseChunks(AiffParser*      parser,
                 }
 
                 /* process the chunk */
-                result = AiffParser_OnSsndChunk(parser, stream, data_size);
+                result = AiffParser_OnSsndChunk(self, stream, data_size);
                 if (BLT_FAILED(result)) return result;
                 have_ssnd = BLT_TRUE;
                 
@@ -355,14 +361,14 @@ AiffParser_ParseChunks(AiffParser*      parser,
         BLT_STREAM_INFO_MASK_SAMPLE_RATE   |
         BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
         BLT_STREAM_INFO_MASK_DATA_TYPE;
-    stream_info.sample_rate   = parser->output.media_type.sample_rate;
-    stream_info.channel_count = parser->output.media_type.channel_count;
+    stream_info.sample_rate   = self->output.media_type.sample_rate;
+    stream_info.channel_count = self->output.media_type.channel_count;
     stream_info.data_type     = "PCM";
     stream_info.size          = data_size;
     bytes_per_second = 
-        parser->output.media_type.channel_count *
-        parser->output.media_type.sample_rate   *
-        parser->output.media_type.bits_per_sample/8;
+        self->output.media_type.channel_count *
+        self->output.media_type.sample_rate   *
+        self->output.media_type.bits_per_sample/8;
 
     if (stream_info.size != 0 && bytes_per_second != 0) {
         ATX_Int64 duration;
@@ -381,100 +387,96 @@ AiffParser_ParseChunks(AiffParser*      parser,
         BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
         BLT_STREAM_INFO_MASK_AVERAGE_BITRATE |
         BLT_STREAM_INFO_MASK_INSTANT_BITRATE;
-    if (stream_info.mask && !ATX_OBJECT_IS_NULL(&parser->base.context)) {
-        BLT_Stream_SetInfo(&parser->base.context, &stream_info);
+    if (stream_info.mask && ATX_BASE(self, BLT_BaseMediaNode).context) {
+        BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     }
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       AiffParserInputPort_SetStream
+|   AiffParserInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
-                              ATX_InputStream*             stream,
-                              const BLT_MediaType*         media_type)
+AiffParserInput_SetStream(BLT_InputStreamUser* _self,
+                          ATX_InputStream*     stream,
+                          const BLT_MediaType* media_type)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_M(input, AiffParser, BLT_InputStreamUser);
     BLT_COMPILER_UNUSED(media_type);
 
     /* check media type */
-    if (media_type == NULL || media_type->id != parser->input.media_type.id) {
+    if (media_type == NULL || media_type->id != self->input.media_type.id) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* if we had a stream, release it */
-    ATX_RELEASE_OBJECT(&parser->output.stream);
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     /* parse the chunks */
-    return AiffParser_ParseChunks(parser, stream);
+    return AiffParser_ParseChunks(self, stream);
 }
 
 /*----------------------------------------------------------------------
-|    AiffParserInputPort_QueryMediaType
+|    AiffParserInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserInputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                   BLT_Ordinal            index,
-                                   const BLT_MediaType**  media_type)
+AiffParserInput_QueryMediaType(BLT_MediaPort*        _self,
+                               BLT_Ordinal           index,
+                               const BLT_MediaType** media_type)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_M(input, AiffParser, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = &parser->input.media_type;
+        *media_type = &self->input.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
         return BLT_FAILURE;
     }
 }
+
+/*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AiffParserInput)
+    ATX_GET_INTERFACE_ACCEPT(AiffParserInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(AiffParserInput, BLT_InputStreamUser)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamUser interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamUserInterface
-AiffParserInputPort_BLT_InputStreamUserInterface = {
-    AiffParserInputPort_GetInterface,
-    AiffParserInputPort_SetStream
-};
+ATX_BEGIN_INTERFACE_MAP(AiffParserInput, BLT_InputStreamUser)
+    AiffParserInput_SetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AiffParserInputPort, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AiffParserInput, 
                                          "input",
                                          STREAM_PULL,
                                          IN)
-static const BLT_MediaPortInterface
-AiffParserInputPort_BLT_MediaPortInterface = {
-    AiffParserInputPort_GetInterface,
-    AiffParserInputPort_GetName,
-    AiffParserInputPort_GetProtocol,
-    AiffParserInputPort_GetDirection,
-    AiffParserInputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(AiffParserInput, BLT_MediaPort)
+    AiffParserInput_GetName,
+    AiffParserInput_GetProtocol,
+    AiffParserInput_GetDirection,
+    AiffParserInput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserInputPort)
-ATX_INTERFACE_MAP_ADD(AiffParserInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(AiffParserInputPort, BLT_InputStreamUser)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserInputPort)
-
-/*----------------------------------------------------------------------
-|    AiffParserOutputPort_QueryMediaType
+|    AiffParserOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                    BLT_Ordinal            index,
-                                    const BLT_MediaType**  media_type)
+AiffParserOutput_QueryMediaType(BLT_MediaPort*        _self,
+                                BLT_Ordinal           index,
+                                const BLT_MediaType** media_type)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_M(output, AiffParser, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = (BLT_MediaType*)&parser->output.media_type;
+        *media_type = (BLT_MediaType*)&self->output.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -483,56 +485,52 @@ AiffParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|       AiffParserOutputPort_GetStream
+|   AiffParserOutput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserOutputPort_GetStream(BLT_InputStreamProviderInstance* instance,
-                               ATX_InputStream*                 stream)
+AiffParserOutput_GetStream(BLT_InputStreamProvider* _self,
+                           ATX_InputStream**        stream)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_M(output, AiffParser, BLT_InputStreamProvider);
 
     /* ensure we're at the start of the stream */
-    ATX_InputStream_Seek(&parser->output.stream, 0);
+    ATX_InputStream_Seek(self->output.stream, 0);
 
     /* return the stream */
-    *stream = parser->output.stream;
-    ATX_REFERENCE_OBJECT(stream);
+    *stream = self->output.stream;
+    ATX_REFERENCE_OBJECT(*stream);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AiffParserOutput)
+    ATX_GET_INTERFACE_ACCEPT(AiffParserOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(AiffParserOutput, BLT_InputStreamProvider)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AiffParserOutputPort, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AiffParserOutput, 
                                          "output",
                                          STREAM_PULL,
                                          OUT)
-static const BLT_MediaPortInterface
-AiffParserOutputPort_BLT_MediaPortInterface = {
-    AiffParserOutputPort_GetInterface,
-    AiffParserOutputPort_GetName,
-    AiffParserOutputPort_GetProtocol,
-    AiffParserOutputPort_GetDirection,
-    AiffParserOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(AiffParserOutput, BLT_MediaPort)
+    AiffParserOutput_GetName,
+    AiffParserOutput_GetProtocol,
+    AiffParserOutput_GetDirection,
+    AiffParserOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamProvider interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamProviderInterface
-AiffParserOutputPort_BLT_InputStreamProviderInterface = {
-    AiffParserOutputPort_GetInterface,
-    AiffParserOutputPort_GetStream
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserOutputPort)
-ATX_INTERFACE_MAP_ADD(AiffParserOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(AiffParserOutputPort, BLT_InputStreamProvider)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserOutputPort)
+ATX_BEGIN_INTERFACE_MAP(AiffParserOutput, BLT_InputStreamProvider)
+    AiffParserOutput_GetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    AiffParser_Create
@@ -542,7 +540,7 @@ AiffParser_Create(BLT_Module*              module,
                   BLT_Core*                core, 
                   BLT_ModuleParametersType parameters_type,
                   BLT_CString              parameters, 
-                  ATX_Object*              object)
+                  BLT_MediaNode**          object)
 {
     AiffParser* parser;
 
@@ -551,28 +549,34 @@ AiffParser_Create(BLT_Module*              module,
     /* check parameters */
     if (parameters == NULL || 
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
+        *object = NULL;
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
     /* allocate memory for the object */
     parser = ATX_AllocateZeroMemory(sizeof(AiffParser));
     if (parser == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&parser->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(parser, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
     BLT_MediaType_Init(&parser->input.media_type, 
-                       ((AiffParserModule*)ATX_INSTANCE(module))->aiff_type_id);
-    ATX_CLEAR_OBJECT(&parser->output.stream);
+                       ((AiffParserModule*)module)->aiff_type_id);
+    parser->output.stream = NULL;
     BLT_PcmMediaType_Init(&parser->output.media_type);
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)parser;
-    ATX_INTERFACE(object) = (ATX_Interface*)&AiffParser_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(parser, AiffParser, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(parser, AiffParser, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&parser->input,  AiffParserInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&parser->input,  AiffParserInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&parser->output, AiffParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&parser->output, AiffParserOutput, BLT_InputStreamProvider);
+    *object = &ATX_BASE_EX(parser, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -581,42 +585,40 @@ AiffParser_Create(BLT_Module*              module,
 |    AiffParser_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-AiffParser_Destroy(AiffParser* parser)
+AiffParser_Destroy(AiffParser* self)
 {
     BLT_Debug("AiffParser::Destroy\n");
 
     /* release the byte stream */
-    ATX_RELEASE_OBJECT(&parser->output.stream);
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&parser->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(parser);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       AiffParser_GetPortByName
+|   AiffParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParser_GetPortByName(BLT_MediaNodeInstance* instance,
-                         BLT_CString            name,
-                         BLT_MediaPort*         port)
+AiffParser_GetPortByName(BLT_MediaNode*  _self,
+                         BLT_CString     name,
+                         BLT_MediaPort** port)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &AiffParserInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &AiffParserOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -625,26 +627,25 @@ AiffParser_GetPortByName(BLT_MediaNodeInstance* instance,
 |    AiffParser_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParser_Seek(BLT_MediaNodeInstance* instance,
-                BLT_SeekMode*          mode,
-                BLT_SeekPoint*         point)
+AiffParser_Seek(BLT_MediaNode* _self,
+                BLT_SeekMode*  mode,
+                BLT_SeekPoint* point)
 {
-    AiffParser* parser = (AiffParser*)instance;
+    AiffParser* self = ATX_SELF_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* estimate the seek point */
-    if (ATX_OBJECT_IS_NULL(&parser->base.context)) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(&parser->base.context, *mode, point);
-    if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE) ||
-        !(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+    if (!(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
         return BLT_FAILURE;
     }
 
     /* align the offset to the nearest sample */
-    point->offset -= point->offset%4;
+    point->offset -= point->offset%8;
 
     /* seek to the estimated offset */
     /* seek into the input stream (ignore return value) */
-    ATX_InputStream_Seek(&parser->output.stream, point->offset);
+    ATX_InputStream_Seek(self->output.stream, point->offset);
     
     /* set the mode so that the nodes down the chaine know the seek has */
     /* already been done on the stream                                  */
@@ -654,11 +655,17 @@ AiffParser_Seek(BLT_MediaNodeInstance* instance,
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AiffParser)
+    ATX_GET_INTERFACE_ACCEPT_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(AiffParser, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-AiffParser_BLT_MediaNodeInterface = {
-    AiffParser_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     AiffParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -671,26 +678,20 @@ AiffParser_BLT_MediaNodeInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AiffParser, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AiffParser, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParser)
-ATX_INTERFACE_MAP_ADD(AiffParser, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(AiffParser, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParser)
-
-/*----------------------------------------------------------------------
-|       AiffParserModule_Attach
+|   AiffParserModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+AiffParserModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    AiffParserModule* module = (AiffParserModule*)instance;
-    BLT_Registry      registry;
+    AiffParserModule* self = ATX_SELF_EX(AiffParserModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*     registry;
     BLT_Result        result;
 
     /* get the registry */
@@ -698,51 +699,51 @@ AiffParserModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
     if (BLT_FAILED(result)) return result;
 
     /* register the file extensions */
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".aif",
                                             "audio/aiff");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".aiff",
                                             "audio/aiff");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".aifc",
                                             "audio/aiff");
     if (BLT_FAILED(result)) return result;
 
     /* get the type id for "audio/aiff" and "audio/x-aiff" */
     result = BLT_Registry_GetIdForName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/aiff",
-        &module->aiff_type_id);
+        &self->aiff_type_id);
     if (BLT_FAILED(result)) return result;
     
     result = BLT_Registry_RegisterName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/x-aiff",
-        &module->x_aiff_type_id);
+        &self->x_aiff_type_id);
     if (BLT_FAILED(result)) return result;
 
     BLT_Debug("AiffParserModule::Attach (audio/aiff type = %d\n",
-              module->aiff_type_id);
+              self->aiff_type_id);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       AiffParserModule_Probe
+|   AiffParserModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AiffParserModule_Probe(BLT_ModuleInstance*      instance, 
+AiffParserModule_Probe(BLT_Module*              _self, 
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
                        BLT_Cardinal*            match)
 {
-    AiffParserModule* module = (AiffParserModule*)instance;
+    AiffParserModule* self = ATX_SELF_EX(AiffParserModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -765,8 +766,8 @@ AiffParserModule_Probe(BLT_ModuleInstance*      instance,
             }
 
             /* we need the input media type to be 'audio/aiff' or 'audio/x-aiff' */
-            if (constructor->spec.input.media_type->id != module->aiff_type_id &&
-                constructor->spec.input.media_type->id != module->x_aiff_type_id) {
+            if (constructor->spec.input.media_type->id != self->aiff_type_id &&
+                constructor->spec.input.media_type->id != self->x_aiff_type_id) {
                 return BLT_FAILURE;
             }
 
@@ -804,45 +805,48 @@ AiffParserModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AiffParser)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AiffParser, "AIFF Parser", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AiffParserModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(AiffParserModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(AiffParserModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface AiffParserModule_BLT_ModuleInterface = {
-    AiffParserModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AiffParserModule, AiffParser)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(AiffParserModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     AiffParserModule_Attach,
     AiffParserModule_CreateInstance,
     AiffParserModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define AiffParserModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AiffParserModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AiffParserModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserModule) 
-ATX_INTERFACE_MAP_ADD(AiffParserModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(AiffParserModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AiffParserModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AiffParserModule, "AIFF Parser", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_AiffParserModule_GetModuleObject(BLT_Module* object)
+BLT_AiffParserModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

@@ -29,6 +29,12 @@ typedef struct {
     BLT_CString output_type;
 } BLTP_Options;
 
+typedef struct  {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_EventListener);
+    ATX_IMPLEMENTS(ATX_PropertyListener);
+} BLTP;
+
 /*----------------------------------------------------------------------
 |    macros
 +---------------------------------------------------------------------*/
@@ -43,7 +49,6 @@ do {                                                            \
 /*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(BLTP)
 
 /*----------------------------------------------------------------------
 |    BLTP_PrintUsageAndExit
@@ -96,12 +101,12 @@ BLTP_ParseCommandLine(char** args, BLTP_Options* options)
 |    BLTP_OnStreamPropertyChanged
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD
-BLTP_OnStreamPropertyChanged(ATX_PropertyListenerInstance* instance,
-                             ATX_CString                   name,
-                             ATX_PropertyType              type,
-                             const ATX_PropertyValue*      value)    
+BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
+                             ATX_CString              name,
+                             ATX_PropertyType         type,
+                             const ATX_PropertyValue* value)    
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
 
     if (name == NULL) {
         BLT_Debug("BLTP::OnStreamPropertyChanged - All Properties Cleared\n");
@@ -128,38 +133,28 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListenerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    ATX_PropertyListener interface
-+---------------------------------------------------------------------*/
-static const ATX_PropertyListenerInterface
-BLTP_ATX_PropertyListenerInterface = {
-    BLTP_GetInterface,
-    BLTP_OnStreamPropertyChanged,
-};
-
-/*----------------------------------------------------------------------
 |    BLTP_ShowStreamTopology
 +---------------------------------------------------------------------*/
 static void
-BLTP_ShowStreamTopology(const ATX_Polymorphic* source)
+BLTP_ShowStreamTopology(ATX_Object* source)
 {
-    BLT_Stream         stream;
-    BLT_MediaNode      node;
+    BLT_Stream*        stream;
+    BLT_MediaNode*     node;
     BLT_StreamNodeInfo s_info;
     BLT_Result         result;
 
     /* cast the source object to a stream object */
-    if (BLT_FAILED(ATX_CAST_OBJECT(source, &stream, BLT_Stream))) {
-        return;
-    }
+    stream = ATX_CAST(source, BLT_Stream);
+    if (stream == NULL) return;
 
-    result = BLT_Stream_GetFirstNode(&stream, &node);
+    result = BLT_Stream_GetFirstNode(stream, &node);
     if (BLT_FAILED(result)) return;
-    while (!ATX_INSTANCE_IS_NULL(&node)) {
+    while (node) {
         const char* name;
         BLT_MediaNodeInfo n_info;
-        result = BLT_Stream_GetStreamNodeInfo(&stream, &node, &s_info);
+        result = BLT_Stream_GetStreamNodeInfo(stream, node, &s_info);
         if (BLT_FAILED(result)) break;
-        result = BLT_MediaNode_GetInfo(&node, &n_info);
+        result = BLT_MediaNode_GetInfo(node, &n_info);
         if (BLT_SUCCEEDED(result)) {
             name = n_info.name ? n_info.name : "?";
         } else {
@@ -206,7 +201,7 @@ BLTP_ShowStreamTopology(const ATX_Polymorphic* source)
             BLT_Debug(".");
         }
 
-        result = BLT_Stream_GetNextNode(&stream, &node, &node);
+        result = BLT_Stream_GetNextNode(stream, node, &node);
         if (BLT_FAILED(result)) break;
     }
     BLT_Debug("\n");
@@ -216,12 +211,12 @@ BLTP_ShowStreamTopology(const ATX_Polymorphic* source)
 |    BLTP_OnEvent
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD 
-BLTP_OnEvent(BLT_EventListenerInstance* instance,
-             const ATX_Object*          source,
-             BLT_EventType              type,
-             const BLT_Event*           event)
+BLTP_OnEvent(BLT_EventListener* self,
+             ATX_Object*        source,
+             BLT_EventType      type,
+             const BLT_Event*   event)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_Debug("BLTP::OnEvent - type = %d\n", (int)type);
     if (type == BLT_EVENT_TYPE_STREAM_INFO) {
         const BLT_StreamInfoEvent* e = (BLT_StreamInfoEvent*)event;
@@ -275,26 +270,31 @@ BLTP_OnEvent(BLT_EventListenerInstance* instance,
           default:
             break;
         }
-        BLTP_ShowStreamTopology((const ATX_Polymorphic*)source);
+        BLTP_ShowStreamTopology(source);
     }
 }
 
 /*----------------------------------------------------------------------
-|    BLT_EventListener interface
-+---------------------------------------------------------------------*/
-static const BLT_EventListenerInterface
-BLTP_BLT_EventListenerInterface = {
-    BLTP_GetInterface,
-    BLTP_OnEvent
-};
-
-/*----------------------------------------------------------------------
 |       standard GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(BLTP)
-ATX_INTERFACE_MAP_ADD(BLTP, BLT_EventListener)
-ATX_INTERFACE_MAP_ADD(BLTP, ATX_PropertyListener)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(BLTP)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLTP)
+    ATX_GET_INTERFACE_ACCEPT(BLTP, BLT_EventListener)
+    ATX_GET_INTERFACE_ACCEPT(BLTP, ATX_PropertyListener)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|    ATX_PropertyListener interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLTP, ATX_PropertyListener)
+    BLTP_OnStreamPropertyChanged
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_EventListener interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_EventListener)
+    BLTP_OnEvent
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    main
@@ -306,6 +306,7 @@ main(int argc, char** argv)
     BLT_Decoder* decoder;
     BLT_CString  input_name;
     BLT_CString  input_type = NULL;
+    BLTP         player;
     BLT_Result   result;
 
     /*mtrace();*/
@@ -319,22 +320,18 @@ main(int argc, char** argv)
     result = BLT_Decoder_Create(&decoder);
     BLTP_CHECK(result);
 
+    /* setup our interfaces */
+    ATX_SET_INTERFACE(&player, BLTP, BLT_EventListener);
+    ATX_SET_INTERFACE(&player, BLTP, ATX_PropertyListener);
+
     /* listen to stream events */
-    {
-        BLT_EventListener self;
-        ATX_INSTANCE(&self)  = NULL;
-        ATX_INTERFACE(&self) = &BLTP_BLT_EventListenerInterface;
-        BLT_Decoder_SetEventListener(decoder, &self);
-    }
+    BLT_Decoder_SetEventListener(decoder, &ATX_BASE(&player, BLT_EventListener));
              
     /* listen to stream properties events */
     {
-        ATX_PropertyListener self;
-        ATX_Properties       properties;
-        ATX_INSTANCE(&self) = NULL;
-        ATX_INTERFACE(&self) = &BLTP_ATX_PropertyListenerInterface;
+        ATX_Properties* properties;
         BLT_Decoder_GetStreamProperties(decoder, &properties);
-        ATX_Properties_AddListener(&properties, NULL, &self, NULL);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
     }
 
     /* register builtin modules */
@@ -349,6 +346,9 @@ main(int argc, char** argv)
         fprintf(stderr, "SetOutput failed (%d)\n", result);
         exit(1);
     }
+
+    /* enable the gain control filter */
+    BLT_Decoder_AddNodeByName(decoder, NULL, "GainControlFilter");
 
     /* by default, add a filter host module */
     BLT_Decoder_AddNodeByName(decoder, NULL, "FilterHost");

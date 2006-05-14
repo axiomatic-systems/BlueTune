@@ -321,13 +321,16 @@ class BLT_DecoderServer : public NPT_Thread,
     void OnPingCommand(const void* cookie);
     void OnSeekToTimeCommand(BLT_Cardinal time);
     void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range);
-    void OnRegisterModuleCommand(const BLT_Module* module);
+    void OnRegisterModuleCommand(BLT_Module* module);
     void OnAddNodeCommand(BLT_CString name);
 
     // BLT_EventListener methods
     virtual BLT_Result OnEvent(const ATX_Object* source,
                                BLT_EventType     type,
                                const BLT_Event*  event);
+
+    // ATX-style interfaces
+    ATX_IMPLEMENTS(BLT_EventListener);
 
  private:
     // methods

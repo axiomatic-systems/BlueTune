@@ -26,11 +26,11 @@
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_EventListener)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_EventListener)
-    void (*OnEvent)(BLT_EventListenerInstance* listener,
-                    const ATX_Object*          source,
-                    BLT_EventType              type,
-                    const BLT_Event*           event);
-ATX_END_INTERFACE_DEFINITION(BLT_EventListener)
+    void (*OnEvent)(BLT_EventListener* self,
+                    ATX_Object*        source,
+                    BLT_EventType      type,
+                    const BLT_Event*   event);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
@@ -40,7 +40,7 @@ ATX_END_INTERFACE_DEFINITION(BLT_EventListener)
  * that implement the BLT_EventListener interface 
  */
 #define BLT_EventListener_OnEvent(object, source, type, event) \
-ATX_INTERFACE(object)->OnEvent(ATX_INSTANCE(object), source, type, event)
+ATX_INTERFACE(object)->OnEvent(object, source, type, event)
 
 
 #endif /* _BLT_EVENT_LISTENER_H_ */

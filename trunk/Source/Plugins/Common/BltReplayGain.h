@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltReplayGain.h
-|
 |      ReplayGain common definitions
 |
 |      (c) 2002-2006 Gilles Boccon-Gibod
@@ -20,6 +18,15 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
+|       types
++---------------------------------------------------------------------*/
+typedef enum {
+    BLT_REPLAY_GAIN_SET_MODE_UPDATE,
+    BLT_REPLAY_GAIN_SET_MODE_REMOVE,
+    BLT_REPLAY_GAIN_SET_MODE_IGNORE
+} BLT_ReplayGainSetMode;
+
+/*----------------------------------------------------------------------
 |       constants
 +---------------------------------------------------------------------*/
 #define BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN "ReplayGain/TrackGain"
@@ -31,11 +38,11 @@
 /*----------------------------------------------------------------------
 |       functions
 +---------------------------------------------------------------------*/
-extern BLT_Result
-BLT_ReplayGain_SetStreamProperties(BLT_Stream* stream,
-                                   float       track_gain,
-                                   BLT_Boolean track_gain_set,
-                                   float       album_gain,
-                                   BLT_Boolean album_gain_set);
+BLT_Result
+BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
+                                   float                 track_gain,
+                                   BLT_ReplayGainSetMode track_gain_mode,
+                                   float                 album_gain,
+                                   BLT_ReplayGainSetMode album_gain_mode);
 
 #endif /* _BLT_REPLAY_GAIN_H_ */

@@ -24,6 +24,6 @@
 /*----------------------------------------------------------------------
 |       Stream_Create
 +---------------------------------------------------------------------*/
-BLT_Result Stream_Create(BLT_Core* core, BLT_Stream* stream);
+BLT_Result Stream_Create(BLT_Core* core, BLT_Stream** stream);
 
 #endif /* _BLT_STREAM_PRIV_H_ */

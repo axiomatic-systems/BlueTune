@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltTagParser.h
-|
 |      Tag Parser Module
 |
 |      (c) 2002-2003 Gilles Boccon-Gibod
@@ -21,6 +19,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_TagParserModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_TagParserModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_TAG_PARSER_H_ */

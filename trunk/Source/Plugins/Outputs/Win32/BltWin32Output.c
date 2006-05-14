@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltWin32Output.c
-|
 |      Win32 Output Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #ifndef STRICT
 #define STRICT
@@ -31,7 +29,7 @@
 #include "BltMediaPacket.h"
 
 /*----------------------------------------------------------------------
-|       options
+|   options
 +---------------------------------------------------------------------*/
 #define BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE 
 
@@ -44,17 +42,17 @@ const static GUID  BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM =
 #endif
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32OutputModule)
-static const BLT_ModuleInterface Win32OutputModule_BLT_ModuleInterface;
+ATX_DECLARE_INTERFACE_MAP(Win32OutputModule, BLT_Module)
 
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32Output)
-static const BLT_MediaNodeInterface Win32Output_BLT_MediaNodeInterface;
-static const BLT_MediaPortInterface Win32Output_BLT_MediaPortInterface;
-static const BLT_PacketConsumerInterface Win32Output_BLT_PacketConsumerInterface;
+ATX_DECLARE_INTERFACE_MAP(Win32Output, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(Win32Output, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(Win32Output, BLT_OutputNode)
+ATX_DECLARE_INTERFACE_MAP(Win32Output, BLT_MediaPort)
+ATX_DECLARE_INTERFACE_MAP(Win32Output, BLT_PacketConsumer)
 
-BLT_METHOD Win32Output_Resume(BLT_MediaNodeInstance* instance);
+BLT_METHOD Win32Output_Resume(BLT_MediaNode* self);
 
 /*----------------------------------------------------------------------
 |    types
@@ -65,11 +63,20 @@ typedef struct {
 } QueueBuffer;
 
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } Win32OutputModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
+    /* base class */
+    ATX_EXTENDS   (BLT_BaseMediaNode);
+
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+    ATX_IMPLEMENTS(BLT_OutputNode);
+    ATX_IMPLEMENTS(BLT_MediaPort);
+
+    /* members */
     UINT              device_id;
     HWAVEOUT          device_handle;
     BLT_PcmMediaType  expected_media_type;
@@ -99,14 +106,14 @@ typedef struct {
 |    Win32Output_FreeQueueItem
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_FreeQueueItem(Win32Output* output, ATX_ListItem* item)
+Win32Output_FreeQueueItem(Win32Output* self, ATX_ListItem* item)
 {
     QueueBuffer* queue_buffer = ATX_ListItem_GetData(item);
 
     /* unprepare the header */
     if (queue_buffer->wave_header.dwFlags & WHDR_PREPARED) {
         assert(queue_buffer->wave_header.dwFlags & WHDR_DONE);
-        waveOutUnprepareHeader(output->device_handle, 
+        waveOutUnprepareHeader(self->device_handle, 
                                &queue_buffer->wave_header,
                                sizeof(WAVEHDR));
     }
@@ -122,7 +129,7 @@ Win32Output_FreeQueueItem(Win32Output* output, ATX_ListItem* item)
     queue_buffer->wave_header.reserved        = 0;
 
     /* put the item on the free queue */
-    ATX_List_AddItem(output->free_queue.packets, item);
+    ATX_List_AddItem(self->free_queue.packets, item);
 
     return BLT_SUCCESS;
 }
@@ -131,12 +138,12 @@ Win32Output_FreeQueueItem(Win32Output* output, ATX_ListItem* item)
 |    Win32Output_ReleaseQueueItem
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_ReleaseQueueItem(Win32Output* output, ATX_ListItem* item)
+Win32Output_ReleaseQueueItem(Win32Output* self, ATX_ListItem* item)
 {
     QueueBuffer* queue_buffer = ATX_ListItem_GetData(item);
 
     /* free the queue item first */
-    Win32Output_FreeQueueItem(output, item);
+    Win32Output_FreeQueueItem(self, item);
 
     /* release the media packet */
     /* NOTE: this needs to be done after the call to wavUnprepareHeader    */
@@ -154,11 +161,11 @@ Win32Output_ReleaseQueueItem(Win32Output* output, ATX_ListItem* item)
 |    Win32Output_WaitForQueueItem
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_WaitForQueueItem(Win32Output* output, ATX_ListItem** item)
+Win32Output_WaitForQueueItem(Win32Output* self, ATX_ListItem** item)
 {
     ATX_Cardinal watchdog = BLT_WIN32_OUTPUT_QUEUE_WAIT_WATCHDOG;
 
-    *item = ATX_List_GetFirstItem(output->pending_queue.packets);
+    *item = ATX_List_GetFirstItem(self->pending_queue.packets);
     if (*item) {
         QueueBuffer* queue_buffer = (QueueBuffer*)ATX_ListItem_GetData(*item);
         DWORD volatile* flags = &queue_buffer->wave_header.dwFlags;
@@ -169,14 +176,14 @@ Win32Output_WaitForQueueItem(Win32Output* output, ATX_ListItem** item)
         }
 
         /* pop the item from the pending queue */
-        ATX_List_DetachItem(output->pending_queue.packets, *item);
-        output->pending_queue.buffered -= queue_buffer->wave_header.dwBufferLength;
+        ATX_List_DetachItem(self->pending_queue.packets, *item);
+        self->pending_queue.buffered -= queue_buffer->wave_header.dwBufferLength;
 
         /*BLT_Debug("WaitForQueueItem: pending = %d (%d/%d buff), free = %d\n",
-                  ATX_List_GetItemCount(output->pending_queue.packets),
-                  output->pending_queue.buffered,
-                  output->pending_queue.max_buffered,
-                  ATX_List_GetItemCount(output->free_queue.packets));*/
+                  ATX_List_GetItemCount(self->pending_queue.packets),
+                  self->pending_queue.buffered,
+                  self->pending_queue.max_buffered,
+                  ATX_List_GetItemCount(self->free_queue.packets));*/
     }
 
     return BLT_SUCCESS;
@@ -186,17 +193,17 @@ Win32Output_WaitForQueueItem(Win32Output* output, ATX_ListItem** item)
 |    Win32Output_RequestQueueItem
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_RequestQueueItem(Win32Output* output, ATX_ListItem** item)
+Win32Output_RequestQueueItem(Win32Output* self, ATX_ListItem** item)
 {
     ATX_Cardinal watchdog = BLT_WIN32_OUTPUT_QUEUE_REQUEST_WATCHDOG;
 
     /* wait to the total pending buffers to be less than the max duration */
-    while (output->pending_queue.buffered > 
-           output->pending_queue.max_buffered) {
+    while (self->pending_queue.buffered > 
+           self->pending_queue.max_buffered) {
         BLT_Result    result;
 
         /* wait for the head of the queue to free up */
-        result = Win32Output_WaitForQueueItem(output, item);
+        result = Win32Output_WaitForQueueItem(self, item);
         if (BLT_FAILED(result)) {
             *item = NULL;
             return result;
@@ -204,15 +211,15 @@ Win32Output_RequestQueueItem(Win32Output* output, ATX_ListItem** item)
         /* the item should not be NULL */
         if (item == NULL) return BLT_ERROR_INTERNAL;
 
-        Win32Output_ReleaseQueueItem(output, *item);
+        Win32Output_ReleaseQueueItem(self, *item);
 
         if (watchdog-- == 0) return BLT_ERROR_INTERNAL;
     }
 
     /* if there is a buffer available in the free queue, return it */
-    *item = ATX_List_GetLastItem(output->free_queue.packets);
+    *item = ATX_List_GetLastItem(self->free_queue.packets);
     if (*item) {
-        ATX_List_DetachItem(output->free_queue.packets, *item);
+        ATX_List_DetachItem(self->free_queue.packets, *item);
         return BLT_SUCCESS;
     }
 
@@ -224,7 +231,7 @@ Win32Output_RequestQueueItem(Win32Output* output, ATX_ListItem** item)
             *item = NULL;
             return BLT_ERROR_OUT_OF_MEMORY;
         }
-        *item = ATX_List_CreateItem(output->free_queue.packets);
+        *item = ATX_List_CreateItem(self->free_queue.packets);
         if (*item == NULL) {
             ATX_FreeMemory(queue_buffer);
             return BLT_ERROR_OUT_OF_MEMORY;
@@ -239,18 +246,18 @@ Win32Output_RequestQueueItem(Win32Output* output, ATX_ListItem** item)
 |    Win32Output_Drain
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_Drain(Win32Output* output)
+Win32Output_Drain(Win32Output* self)
 {
     ATX_ListItem* item;
     BLT_Result    result;
     
     /* make sure we're not paused */
-    Win32Output_Resume((BLT_MediaNodeInstance*)output);
+    Win32Output_Resume(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
 
     do {
-        result = Win32Output_WaitForQueueItem(output, &item);
+        result = Win32Output_WaitForQueueItem(self, &item);
         if (BLT_SUCCEEDED(result) && item != NULL) {
-            Win32Output_ReleaseQueueItem(output, item);
+            Win32Output_ReleaseQueueItem(self, item);
         }
     } while (BLT_SUCCEEDED(result) && item != NULL);
 
@@ -261,7 +268,7 @@ Win32Output_Drain(Win32Output* output)
 |    Win32Output_Open
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_Open(Win32Output* output)
+Win32Output_Open(Win32Output* self)
 {
     MMRESULT     mm_result;
     BLT_Cardinal retry;
@@ -274,7 +281,7 @@ Win32Output_Open(Win32Output* output)
 #endif
 
     /* check current state */
-    if (output->device_handle) {
+    if (self->device_handle) {
         /* the device is already open */
         return BLT_SUCCESS;
     }
@@ -282,16 +289,16 @@ Win32Output_Open(Win32Output* output)
     /* fill in format structure */
 #if defined(BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
     format.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-    format.Format.nChannels = output->media_type.channel_count;
-    format.Format.nSamplesPerSec = output->media_type.sample_rate;
-    format.Format.nBlockAlign = output->media_type.channel_count *
-                                output->media_type.bits_per_sample/8;
+    format.Format.nChannels = self->media_type.channel_count;
+    format.Format.nSamplesPerSec = self->media_type.sample_rate;
+    format.Format.nBlockAlign = self->media_type.channel_count *
+                                self->media_type.bits_per_sample/8;
     format.Format.nAvgBytesPerSec = format.Format.nBlockAlign *
                                     format.Format.nSamplesPerSec;
-    format.Format.wBitsPerSample = output->media_type.bits_per_sample;
+    format.Format.wBitsPerSample = self->media_type.bits_per_sample;
     format.Format.cbSize = 22;
-    format.Samples.wValidBitsPerSample = output->media_type.bits_per_sample;
-    switch (output->media_type.channel_count) {
+    format.Samples.wValidBitsPerSample = self->media_type.bits_per_sample;
+    switch (self->media_type.channel_count) {
         case 1:
             format.dwChannelMask = KSAUDIO_SPEAKER_MONO;
             break;
@@ -323,19 +330,19 @@ Win32Output_Open(Win32Output* output)
     format.SubFormat = BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM; 
 #else
     format.wFormatTag      = WAVE_FORMAT_PCM;
-    format.nChannels       = output->media_type.channel_count; 
-    format.nSamplesPerSec  = output->media_type.sample_rate;
-    format.nBlockAlign     = output->media_type.channel_count *
-                             output->media_type.bits_per_sample/8;
+    format.nChannels       = self->media_type.channel_count; 
+    format.nSamplesPerSec  = self->media_type.sample_rate;
+    format.nBlockAlign     = self->media_type.channel_count *
+                             self->media_type.bits_per_sample/8;
     format.nAvgBytesPerSec = format.nBlockAlign*format.nSamplesPerSec;
-    format.wBitsPerSample  = output->media_type.bits_per_sample;
+    format.wBitsPerSample  = self->media_type.bits_per_sample;
     format.cbSize          = 0;
 #endif
 
     /* try to open the device */
     for (retry = 0; retry < BLT_WIN32_OUTPUT_MAX_OPEN_RETRIES; retry++) {
-        mm_result = waveOutOpen(&output->device_handle, 
-                                output->device_id, 
+        mm_result = waveOutOpen(&self->device_handle, 
+                                self->device_id, 
                                 (const struct tWAVEFORMATEX*)&format,
                                 0, 0, WAVE_ALLOWSYNC);
         if (mm_result != MMSYSERR_ALLOCATED) break;
@@ -343,20 +350,20 @@ Win32Output_Open(Win32Output* output)
     }
 
     if (mm_result == MMSYSERR_ALLOCATED) {
-        output->device_handle = NULL;
+        self->device_handle = NULL;
         return BLT_ERROR_DEVICE_BUSY;
     }
     if (mm_result == MMSYSERR_BADDEVICEID || 
         mm_result == MMSYSERR_NODRIVER) {
-        output->device_handle = NULL;
+        self->device_handle = NULL;
         return BLT_ERROR_NO_SUCH_DEVICE;
     }
     if (mm_result == WAVERR_BADFORMAT) {
-        output->device_handle = NULL;
+        self->device_handle = NULL;
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
     if (mm_result != MMSYSERR_NOERROR) {
-        output->device_handle = NULL;
+        self->device_handle = NULL;
         return BLT_ERROR_OPEN_FAILED;
     }
 
@@ -367,33 +374,33 @@ Win32Output_Open(Win32Output* output)
 |    Win32Output_Close
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_Close(Win32Output* output)
+Win32Output_Close(Win32Output* self)
 {
     /* shortcut */
-    if (output->device_handle == NULL) {
+    if (self->device_handle == NULL) {
         return BLT_SUCCESS;
     }
 
     /* wait for all buffers to be played */
-    Win32Output_Drain(output);
+    Win32Output_Drain(self);
 
     /* reset device */
-    waveOutReset(output->device_handle);
+    waveOutReset(self->device_handle);
 
     /* close the device */
-    waveOutClose(output->device_handle);
+    waveOutClose(self->device_handle);
 
     /* release all queued packets */
     {
         ATX_ListItem* item;
-        while ((item = ATX_List_GetFirstItem(output->pending_queue.packets))) {
-            ATX_List_DetachItem(output->pending_queue.packets, item);
-            Win32Output_ReleaseQueueItem(output, item);
+        while ((item = ATX_List_GetFirstItem(self->pending_queue.packets))) {
+            ATX_List_DetachItem(self->pending_queue.packets, item);
+            Win32Output_ReleaseQueueItem(self, item);
         }
     }
 
     /* clear the device handle */
-    output->device_handle = NULL;
+    self->device_handle = NULL;
 
     return BLT_SUCCESS;
 }
@@ -402,10 +409,10 @@ Win32Output_Close(Win32Output* output)
 |    Win32Output_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
-                      BLT_MediaPacket*            packet)
+Win32Output_PutPacket(BLT_PacketConsumer* _self,
+                      BLT_MediaPacket*    packet)
 {
-    Win32Output*      output = (Win32Output*)instance;
+    Win32Output*      self = ATX_SELF(Win32Output, BLT_PacketConsumer);
     BLT_PcmMediaType* media_type;
     QueueBuffer*      queue_buffer = NULL;
     ATX_ListItem*     queue_item = NULL;
@@ -428,9 +435,9 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
     }
 
     /* compare the media format with the current format */
-    if (media_type->sample_rate     != output->media_type.sample_rate   ||
-        media_type->channel_count   != output->media_type.channel_count ||
-        media_type->bits_per_sample != output->media_type.bits_per_sample) {
+    if (media_type->sample_rate     != self->media_type.sample_rate   ||
+        media_type->channel_count   != self->media_type.channel_count ||
+        media_type->bits_per_sample != self->media_type.bits_per_sample) {
         /* new format */
 
         /* check the format */
@@ -452,29 +459,29 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
         }
 
         /* copy the format */
-        output->media_type = *media_type;
+        self->media_type = *media_type;
 
         /* recompute the max queue buffer size */
-        output->pending_queue.max_buffered = 
+        self->pending_queue.max_buffered = 
             BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION *
             media_type->sample_rate *
             media_type->channel_count *
             (media_type->bits_per_sample/8);
 
         /* close the device */
-        result = Win32Output_Close(output);
+        result = Win32Output_Close(self);
         if (BLT_FAILED(result)) goto failed;
     }
 
     /* ensure that the device is open */
-    result = Win32Output_Open(output);
+    result = Win32Output_Open(self);
     if (BLT_FAILED(result)) goto failed;
 
     /* ensure we're not paused */
-    Win32Output_Resume((BLT_MediaNodeInstance*)instance);
+    Win32Output_Resume(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
 
     /* wait for space in the queue */
-    result = Win32Output_RequestQueueItem(output, &queue_item);
+    result = Win32Output_RequestQueueItem(self, &queue_item);
     if (BLT_FAILED(result)) goto failed;
     queue_buffer = ATX_ListItem_GetData(queue_item);
 
@@ -484,7 +491,7 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
     queue_buffer->wave_header.dwBufferLength = 
         BLT_MediaPacket_GetPayloadSize(packet);
     assert((queue_buffer->wave_header.dwFlags & WHDR_PREPARED) == 0);
-    mm_result = waveOutPrepareHeader(output->device_handle, 
+    mm_result = waveOutPrepareHeader(self->device_handle, 
                                      &queue_buffer->wave_header, 
                                      sizeof(WAVEHDR));
     if (mm_result != MMSYSERR_NOERROR) {
@@ -495,7 +502,7 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
     /* send the sample buffer to the driver */
     assert((queue_buffer->wave_header.dwFlags & WHDR_DONE) == 0);
     assert(queue_buffer->wave_header.dwFlags & WHDR_PREPARED);
-    mm_result = waveOutWrite(output->device_handle, 
+    mm_result = waveOutWrite(self->device_handle, 
                              &queue_buffer->wave_header,
                              sizeof(WAVEHDR));
     if (mm_result != MMSYSERR_NOERROR) {
@@ -503,8 +510,8 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
     }
 
     /* queue the packet */
-    ATX_List_AddItem(output->pending_queue.packets, queue_item);
-    output->pending_queue.buffered += queue_buffer->wave_header.dwBufferLength;
+    ATX_List_AddItem(self->pending_queue.packets, queue_item);
+    self->pending_queue.buffered += queue_buffer->wave_header.dwBufferLength;
 
     /* keep a reference to the packet */
     BLT_MediaPacket_AddReference(packet);
@@ -513,7 +520,7 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
 
     failed:
         if (queue_item) {
-            Win32Output_FreeQueueItem(output, queue_item);
+            Win32Output_FreeQueueItem(self, queue_item);
         }
         return result;
 }
@@ -522,14 +529,14 @@ Win32Output_PutPacket(BLT_PacketConsumerInstance* instance,
 |    Win32Output_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_QueryMediaType(BLT_MediaPortInstance* instance,
-                           BLT_Ordinal            index,
-                           const BLT_MediaType**  media_type)
+Win32Output_QueryMediaType(BLT_MediaPort*        _self,
+                           BLT_Ordinal           index,
+                           const BLT_MediaType** media_type)
 {
-    Win32Output* output = (Win32Output*)instance;
+    Win32Output* self = ATX_SELF(Win32Output, BLT_MediaPort);
 
     if (index == 0) {
-        *media_type = (const BLT_MediaType*)&output->expected_media_type;
+        *media_type = (const BLT_MediaType*)&self->expected_media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -545,9 +552,9 @@ Win32Output_Create(BLT_Module*              module,
                    BLT_Core*                core, 
                    BLT_ModuleParametersType parameters_type,
                    BLT_CString              parameters, 
-                   ATX_Object*              object)
+                   BLT_MediaNode**          object)
 {
-    Win32Output* output;
+    Win32Output* self;
     /*
     BLT_MediaNodeConstructor* constructor = 
     (BLT_MediaNodeConstructor*)parameters; */
@@ -559,33 +566,37 @@ Win32Output_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    output = ATX_AllocateZeroMemory(sizeof(Win32Output));
-    if (output == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(Win32Output));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&output->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    output->device_id                  = WAVE_MAPPER;
-    output->device_handle              = NULL;
-    output->media_type.sample_rate     = 0;
-    output->media_type.channel_count   = 0;
-    output->media_type.bits_per_sample = 0;
-    output->pending_queue.buffered     = 0;
-    output->pending_queue.max_buffered = 0;
-    ATX_List_Create(&output->free_queue.packets);
-    ATX_List_Create(&output->pending_queue.packets);
+    self->device_id                  = WAVE_MAPPER;
+    self->device_handle              = NULL;
+    self->media_type.sample_rate     = 0;
+    self->media_type.channel_count   = 0;
+    self->media_type.bits_per_sample = 0;
+    self->pending_queue.buffered     = 0;
+    self->pending_queue.max_buffered = 0;
+    ATX_List_Create(&self->free_queue.packets);
+    ATX_List_Create(&self->pending_queue.packets);
 
     /* setup the expected media type */
-    BLT_PcmMediaType_Init(&output->expected_media_type);
-    output->expected_media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    BLT_PcmMediaType_Init(&self->expected_media_type);
+    self->expected_media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)output;
-    ATX_INTERFACE(object) = (ATX_Interface*)&Win32Output_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, Win32Output, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(self, Win32Output, BLT_PacketConsumer);
+    ATX_SET_INTERFACE(self, Win32Output, BLT_OutputNode);
+    ATX_SET_INTERFACE(self, Win32Output, BLT_MediaPort);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -594,36 +605,35 @@ Win32Output_Create(BLT_Module*              module,
 |    Win32Output_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32Output_Destroy(Win32Output* output)
+Win32Output_Destroy(Win32Output* self)
 {
     /* close the handle */
-    Win32Output_Close(output);
+    Win32Output_Close(self);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&output->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(output);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
                 
 /*----------------------------------------------------------------------
-|       Win32Output_GetPortByName
+|   Win32Output_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_GetPortByName(BLT_MediaNodeInstance* instance,
-                          BLT_CString            name,
-                          BLT_MediaPort*         port)
+Win32Output_GetPortByName(BLT_MediaNode*  _self,
+                          BLT_CString     name,
+                          BLT_MediaPort** port)
 {
-    Win32Output* output = (Win32Output*)instance;
+    Win32Output* self = ATX_SELF_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)output;
-        ATX_INTERFACE(port) = &Win32Output_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(self, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -632,16 +642,16 @@ Win32Output_GetPortByName(BLT_MediaNodeInstance* instance,
 |    Win32Output_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_Seek(BLT_MediaNodeInstance* instance,
-                 BLT_SeekMode*          mode,
-                 BLT_SeekPoint*         point)
+Win32Output_Seek(BLT_MediaNode* _self,
+                 BLT_SeekMode*  mode,
+                 BLT_SeekPoint* point)
 {
-    Win32Output* output = (Win32Output*)instance;
+    Win32Output* self = ATX_SELF_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
     /* reset the device */
-    waveOutReset(output->device_handle);
+    waveOutReset(self->device_handle);
 
     return BLT_SUCCESS;
 }
@@ -650,11 +660,11 @@ Win32Output_Seek(BLT_MediaNodeInstance* instance,
 |    Win32Output_GetStatus
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_GetStatus(BLT_OutputNodeInstance* instance,
-                      BLT_OutputNodeStatus*   status)
+Win32Output_GetStatus(BLT_OutputNode*       self,
+                      BLT_OutputNodeStatus* status)
 {
-    /*Win32Output* output = (Win32Output*)instance;*/
-    BLT_COMPILER_UNUSED(instance);
+    /*Win32Output* self = (Win32Output*)instance;*/
+    BLT_COMPILER_UNUSED(self);
 
     status->delay.seconds = 0;
     status->delay.nanoseconds = 0;
@@ -666,10 +676,10 @@ Win32Output_GetStatus(BLT_OutputNodeInstance* instance,
 |    Win32Output_Stop
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_Stop(BLT_MediaNodeInstance* instance)
+Win32Output_Stop(BLT_MediaNode* _self)
 {
-    Win32Output* output = (Win32Output*)instance;
-    waveOutReset(output->device_handle);
+    Win32Output* self = ATX_SELF_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
+    waveOutReset(self->device_handle);
 
     return BLT_SUCCESS;
 }
@@ -678,12 +688,12 @@ Win32Output_Stop(BLT_MediaNodeInstance* instance)
 |    Win32Output_Pause
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_Pause(BLT_MediaNodeInstance* instance)
+Win32Output_Pause(BLT_MediaNode* _self)
 {
-    Win32Output* output = (Win32Output*)instance;
-    if (!output->paused) {
-        waveOutPause(output->device_handle);
-        output->paused = BLT_TRUE;
+    Win32Output* self = ATX_SELF_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
+    if (!self->paused) {
+        waveOutPause(self->device_handle);
+        self->paused = BLT_TRUE;
     }
     return BLT_SUCCESS;
 }
@@ -692,44 +702,49 @@ Win32Output_Pause(BLT_MediaNodeInstance* instance)
 |    Win32Output_Resume
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_Resume(BLT_MediaNodeInstance* instance)
+Win32Output_Resume(BLT_MediaNode* _self)
 {
-    Win32Output* output = (Win32Output*)instance;
-    if (output->paused) {
-        waveOutRestart(output->device_handle);
-        output->paused = BLT_FALSE;
+    Win32Output* self = ATX_SELF_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode);
+    if (self->paused) {
+        waveOutRestart(self->device_handle);
+        self->paused = BLT_FALSE;
     }
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Win32Output)
+    ATX_GET_INTERFACE_ACCEPT_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(Win32Output, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT(Win32Output, BLT_OutputNode)
+    ATX_GET_INTERFACE_ACCEPT(Win32Output, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(Win32Output, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
 BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(Win32Output, "input", PACKET, IN)
-static const BLT_MediaPortInterface
-Win32Output_BLT_MediaPortInterface = {
-    Win32Output_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(Win32Output, BLT_MediaPort)
     Win32Output_GetName,
     Win32Output_GetProtocol,
     Win32Output_GetDirection,
     Win32Output_QueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-Win32Output_BLT_PacketConsumerInterface = {
-    Win32Output_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(Win32Output, BLT_PacketConsumer)
     Win32Output_PutPacket
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-Win32Output_BLT_MediaNodeInterface = {
-    Win32Output_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(Win32Output, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     Win32Output_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -739,44 +754,33 @@ Win32Output_BLT_MediaNodeInterface = {
     Win32Output_Pause,
     Win32Output_Resume,
     Win32Output_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
-static const BLT_OutputNodeInterface
-Win32Output_BLT_OutputNodeInterface = {
-    Win32Output_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(Win32Output, BLT_OutputNode)
     Win32Output_GetStatus
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(Win32Output, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Win32Output, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32Output)
-ATX_INTERFACE_MAP_ADD(Win32Output, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(Win32Output, BLT_OutputNode)
-ATX_INTERFACE_MAP_ADD(Win32Output, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(Win32Output, BLT_PacketConsumer)
-ATX_INTERFACE_MAP_ADD(Win32Output, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32Output)
-
-/*----------------------------------------------------------------------
-|       Win32OutputModule_Probe
+|   Win32OutputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32OutputModule_Probe(BLT_ModuleInstance*      instance, 
+Win32OutputModule_Probe(BLT_Module*              self, 
                         BLT_Core*                core,
                         BLT_ModuleParametersType parameters_type,
                         BLT_AnyConst             parameters,
                         BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -827,48 +831,53 @@ Win32OutputModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(Win32Output)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Win32OutputModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(Win32OutputModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(Win32OutputModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface Win32OutputModule_BLT_ModuleInterface = {
-    Win32OutputModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(Win32OutputModule, Win32Output)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(Win32OutputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     Win32OutputModule_CreateInstance,
     Win32OutputModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define Win32OutputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(Win32OutputModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Win32OutputModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32OutputModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32OutputModule) 
-ATX_INTERFACE_MAP_ADD(Win32OutputModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(Win32OutputModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Win32OutputModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(Win32OutputModule, "Win32 Output", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_Win32OutputModule_GetModuleObject(BLT_Module* object)
+BLT_Win32OutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("Win32 Output", NULL, 0, 
                                  &Win32OutputModule_BLT_ModuleInterface,
+                                 &Win32OutputModule_ATX_ReferenceableInterface,
                                  object);
 }

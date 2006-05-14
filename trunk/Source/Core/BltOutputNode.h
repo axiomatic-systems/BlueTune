@@ -37,14 +37,14 @@ typedef struct {
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_OutputNode)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputNode)
-    BLT_Result (*GetStatus)(BLT_OutputNodeInstance* instance, 
-                            BLT_OutputNodeStatus*   status);
-ATX_END_INTERFACE_DEFINITION(BLT_OutputNode)
+    BLT_Result (*GetStatus)(BLT_OutputNode*       self, 
+                            BLT_OutputNodeStatus* status);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_OutputNode_GetStatus(object, status) \
-ATX_INTERFACE(object)->GetStatus(ATX_INSTANCE(object), status)
+ATX_INTERFACE(object)->GetStatus(object, status)
 
 #endif /* _BLT_OUTPUT_NODE_H_ */

@@ -146,14 +146,14 @@ static BLT_CString BLT_BUILTINS_DEFAULT_OUTPUT_TYPE="audio/pcm";
 BLT_Result
 BLT_Builtins_RegisterModules(BLT_Core* core)
 {
-    BLT_Result result;
-    BLT_Module module;
+    BLT_Result  result;
+    BLT_Module* module;
 
     /* file input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_INPUT)
     result = BLT_FileInputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -161,7 +161,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT)
     result = BLT_CddaInputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -169,7 +169,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT)
     result = BLT_AlsaInputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -177,7 +177,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER)
     result = BLT_StreamPacketizerModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -185,7 +185,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER)
     result = BLT_PacketStreamerModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -193,7 +193,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_CROSS_FADER)
     result = BLT_CrossFaderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -201,7 +201,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER)
     result = BLT_SilenceRemoverModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -209,7 +209,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER)
     result = BLT_WaveParserModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -217,7 +217,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER)
     result = BLT_AiffParserModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -225,7 +225,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_TAG_PARSER)
     result = BLT_TagParserModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -233,7 +233,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
     result = BLT_WaveFormatterModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -241,7 +241,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER)
     result = BLT_GainControlFilterModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -249,7 +249,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILTER_HOST)
     result = BLT_FilterHostModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -257,7 +257,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER)
     result = BLT_PcmAdapterModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -265,7 +265,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER)
     result = BLT_MpegAudioDecoderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -273,7 +273,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER)
     result = BLT_VorbisDecoderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -281,7 +281,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER)
     result = BLT_FlacDecoderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -289,7 +289,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_AAC_DECODER)
     result = BLT_AacDecoderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -297,7 +297,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT)
     result = BLT_Win32OutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -305,7 +305,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT)
     result = BLT_OssOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -313,7 +313,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT)
     result = BLT_AlsaOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -321,7 +321,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_NEUTRINO_OUTPUT)
     result = BLT_NeutrinoOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -329,7 +329,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT)
     result = BLT_DebugOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -337,7 +337,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT)
     result = BLT_FileOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 
@@ -345,7 +345,7 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT)
     result = BLT_NullOutputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, &module);
+    result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;
 #endif
 

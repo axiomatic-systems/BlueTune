@@ -32,14 +32,14 @@
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_PacketProducer)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_PacketProducer)
-    BLT_Result (*GetPacket)(BLT_PacketProducerInstance* producer, 
-                            BLT_MediaPacket**           packet);
-ATX_END_INTERFACE_DEFINITION(BLT_PacketProducer)
+    BLT_Result (*GetPacket)(BLT_PacketProducer* self, 
+                            BLT_MediaPacket**   packet);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_PacketProducer_GetPacket(object, packet) \
-ATX_INTERFACE(object)->GetPacket(ATX_INSTANCE(object), packet)
+ATX_INTERFACE(object)->GetPacket(object, packet)
 
 #endif /* _BLT_PACKET_PRODUCER_H_ */

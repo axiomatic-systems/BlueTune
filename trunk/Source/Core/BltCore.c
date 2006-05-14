@@ -33,22 +33,27 @@
 |    types
 +---------------------------------------------------------------------*/
 struct Core {
-    BLT_Registry   registry;
-    ATX_Properties settings;
-    ATX_List*      modules;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_Core);
+    ATX_IMPLEMENTS(ATX_Destroyable);
+
+    /* members */
+    BLT_Registry*   registry;
+    ATX_Properties* settings;
+    ATX_List*       modules;
 };
 
 /*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Core)
-static const BLT_CoreInterface Core_BLT_CoreInterface;
+ATX_DECLARE_INTERFACE_MAP(Core, BLT_Core)
+ATX_DECLARE_INTERFACE_MAP(Core, ATX_Destroyable)
 
 /*----------------------------------------------------------------------
 |    Core_Create
 +---------------------------------------------------------------------*/
 static BLT_Result
-Core_Create(BLT_Core* object)
+Core_Create(BLT_Core** object)
 {
     Core*      core;
     BLT_Result result;
@@ -56,14 +61,14 @@ Core_Create(BLT_Core* object)
     /* allocate memory for the object */
     core = ATX_AllocateZeroMemory(sizeof(Core));
     if (core == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* create the registry */
     result = Registry_Create(&core->registry);
     if (BLT_FAILED(result)) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         ATX_FreeMemory(core);
         return result;
     }
@@ -74,15 +79,16 @@ Core_Create(BLT_Core* object)
     /* create the module list */
     result = ATX_List_Create(&core->modules);
     if (BLT_FAILED(result)) {
-        ATX_DESTROY_OBJECT(&core->registry);
-        ATX_CLEAR_OBJECT(object);
+        ATX_DESTROY_OBJECT(core->registry);
+        *object = NULL;
         ATX_FreeMemory(core);
         return result;
     }
 
-    /* construct reference */
-    ATX_INSTANCE(object) = (BLT_CoreInstance*)core;
-    ATX_INTERFACE(object) = &Core_BLT_CoreInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE(core, Core, BLT_Core);
+    ATX_SET_INTERFACE(core, Core, ATX_Destroyable);
+    *object = &ATX_BASE(core, BLT_Core);
 
     return BLT_SUCCESS;
 }
@@ -91,24 +97,29 @@ Core_Create(BLT_Core* object)
 |    Core_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-Core_Destroy(ATX_DestroyableInstance* instance)
+Core_Destroy(ATX_Destroyable* _self)
 {
-    Core* core = (Core*)instance;
+    Core* core = ATX_SELF(Core, ATX_Destroyable);
 
     /* release the modules in the list */
-    ATX_List_ReleaseObjects(core->modules);
+    ATX_ListItem* item = ATX_List_GetFirstItem(core->modules);
+    while (item) {
+        BLT_Module* module = (BLT_Module*)ATX_ListItem_GetData(item);
+        ATX_RELEASE_OBJECT(module);
+        item = ATX_ListItem_GetNext(item);
+    }
 
     /* delete the module list */
     ATX_List_Destroy(core->modules);
 
     /* destroy the settings */
-    ATX_DESTROY_OBJECT(&core->settings);
+    ATX_DESTROY_OBJECT(core->settings);
 
     /* destroy the registry */
-    BLT_Registry_Destroy(&core->registry);
+    BLT_Registry_Destroy(core->registry);
 
     /* free the object memory */
-    ATX_FreeMemory(core);
+    ATX_FreeMemory((void*)core);
 
     return BLT_SUCCESS;
 }
@@ -117,35 +128,27 @@ Core_Destroy(ATX_DestroyableInstance* instance)
 |    Core_CreateStream
 +---------------------------------------------------------------------*/
 BLT_METHOD 
-Core_CreateStream(BLT_CoreInstance* instance, BLT_Stream* stream)
+Core_CreateStream(BLT_Core* self, BLT_Stream** stream)
 {
     /* create a stream and return */
-    BLT_Core core_object;
-    ATX_INSTANCE(&core_object)  = instance;
-    ATX_INTERFACE(&core_object) = &Core_BLT_CoreInterface;
-    return Stream_Create(&core_object, stream);
+    return Stream_Create(self, stream);
 }
 
 /*----------------------------------------------------------------------
 |    Core_RegisterModule
 +---------------------------------------------------------------------*/
 BLT_METHOD 
-Core_RegisterModule(BLT_CoreInstance* instance, const BLT_Module* module)
+Core_RegisterModule(BLT_Core* _self, BLT_Module* module)
 {
-    Core*      core = (Core*)instance;
-    BLT_Core   core_object;
+    Core*      self = ATX_SELF(Core, BLT_Core);
     BLT_Result result;
 
-    /* make a reference to the core */
-    ATX_INSTANCE(&core_object)  = instance;
-    ATX_INTERFACE(&core_object) = &Core_BLT_CoreInterface;
-
     /* add the module object to the list */
-    result = ATX_List_AddObject(core->modules, (ATX_Object*)module);
+    result = ATX_List_AddData(self->modules, (ATX_Object*)module);
     if (BLT_FAILED(result)) return result;
 
     /* attach the module to the core */
-    result = BLT_Module_Attach(module, &core_object);
+    result = BLT_Module_Attach(module, _self);
     if (BLT_FAILED(result)) return result;
     
     return BLT_SUCCESS;
@@ -155,25 +158,26 @@ Core_RegisterModule(BLT_CoreInstance* instance, const BLT_Module* module)
 |    Core_UnRegisterModule
 +---------------------------------------------------------------------*/
 BLT_METHOD 
-Core_UnRegisterModule(BLT_CoreInstance* instance, BLT_Module* module)
+Core_UnRegisterModule(BLT_Core* _self, BLT_Module* module)
 {
-    Core* core = (Core*)instance;
+    Core* self = ATX_SELF(Core, BLT_Core);
 
     /* remove the module object from the list */
-    return ATX_List_RemoveObject(core->modules, (ATX_Object*)module);
+    return ATX_List_RemoveData(self->modules, (ATX_Object*)module);
 }
 
 /*----------------------------------------------------------------------
 |    Core_EnumerateModules
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_EnumerateModules(BLT_CoreInstance* instance, 
-                      BLT_Mask          categories,
-                      ATX_Iterator*     iterator)
+Core_EnumerateModules(BLT_Core*      self, 
+                      BLT_Mask       categories,
+                      ATX_Iterator** iterator)
 {
-    BLT_COMPILER_UNUSED(instance);
+    /* NOT IMPLEMENTED YET */
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(categories);
-    BLT_COMPILER_UNUSED(iterator);
+    *iterator = NULL;
     return BLT_FAILURE;
 }
 
@@ -181,11 +185,10 @@ Core_EnumerateModules(BLT_CoreInstance* instance,
 |    Core_GetRegistry
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_GetRegistry(BLT_CoreInstance* instance, BLT_Registry* registry)
+Core_GetRegistry(BLT_Core* _self, BLT_Registry** registry)
 {
-    Core* core = (Core*)instance;
-
-    *registry = core->registry;
+    Core* self = ATX_SELF(Core, BLT_Core);
+    *registry = self->registry;
 
     return BLT_SUCCESS;
 }
@@ -194,10 +197,10 @@ Core_GetRegistry(BLT_CoreInstance* instance, BLT_Registry* registry)
 |    Core_GetSettings
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_GetSettings(BLT_CoreInstance* instance, ATX_Properties* settings)
+Core_GetSettings(BLT_Core* _self, ATX_Properties** settings)
 {
-    Core* core = (Core*)instance;
-    *settings = core->settings;
+    Core* self = ATX_SELF(Core, BLT_Core);
+    *settings = self->settings;
     return BLT_SUCCESS;
 }
 
@@ -205,34 +208,28 @@ Core_GetSettings(BLT_CoreInstance* instance, ATX_Properties* settings)
 |    Core_CreateCompatibleNode
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_CreateCompatibleNode(BLT_CoreInstance*         instance, 
+Core_CreateCompatibleNode(BLT_Core*                 _self, 
                           BLT_MediaNodeConstructor* constructor,
-                          BLT_MediaNode*            node)
+                          BLT_MediaNode**           node)
 {
-    Core*         core       = (Core*)instance;
+    Core*         core = ATX_SELF(Core, BLT_Core);
     ATX_ListItem* item       = ATX_List_GetFirstItem(core->modules);
     int           best_match = -1;
-    BLT_Module    best_module;
-    BLT_Core      core_object;
-    
-    /* setup core reference */
-    ATX_INSTANCE(&core_object)  = (BLT_CoreInstance*)core;
-    ATX_INTERFACE(&core_object) = &Core_BLT_CoreInterface;
-        
+    BLT_Module*   best_module;
+            
     /* find a module that responds to the probe */
     while (item) {
         BLT_Result   result;
-        BLT_Module   module;
+        BLT_Module*  module;
         BLT_Cardinal match;
 
         /* get the module object from the list */
-        result = ATX_ListItem_GetObject(item, (ATX_Object*)&module);
-        if (BLT_FAILED(result)) return result;
+        module = (BLT_Module*)ATX_ListItem_GetData(item);
 
         /* probe the module */
         result = BLT_Module_Probe(
-            &module, 
-            &core_object,
+            module, 
+            _self,
             BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR,
             constructor,
             &match);
@@ -256,33 +253,39 @@ Core_CreateCompatibleNode(BLT_CoreInstance*         instance,
 
     /* create a node instance */
     return BLT_Module_CreateInstance(
-        &best_module, 
-        &core_object, 
+        best_module, 
+        _self, 
         BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR, 
         constructor,
         &ATX_INTERFACE_ID__BLT_MediaNode,
-        (ATX_Object*)node);
+        (ATX_Object**)node);
 }
 
 /*----------------------------------------------------------------------
 |    Core_CreateMediaPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_CreateMediaPacket(BLT_CoreInstance*    instance,
+Core_CreateMediaPacket(BLT_Core*            self,
                        BLT_Size             size,
                        const BLT_MediaType* type,
                        BLT_MediaPacket**    packet)
 {       
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     return BLT_MediaPacket_Create(size, type, packet);
 }
 
 /*----------------------------------------------------------------------
+|       GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Core)
+    ATX_GET_INTERFACE_ACCEPT(Core, BLT_Core)
+    ATX_GET_INTERFACE_ACCEPT(Core, ATX_Destroyable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_Core interface
 +---------------------------------------------------------------------*/
-static const BLT_CoreInterface
-Core_BLT_CoreInterface = {
-    Core_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(Core, BLT_Core)
     Core_CreateStream,
     Core_RegisterModule,
     Core_UnRegisterModule,
@@ -291,26 +294,18 @@ Core_BLT_CoreInterface = {
     Core_GetSettings,
     Core_CreateCompatibleNode,
     Core_CreateMediaPacket
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_DESTROYABLE_INTERFACE(Core)
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Core)
-ATX_INTERFACE_MAP_ADD(Core, BLT_Core)
-ATX_INTERFACE_MAP_ADD(Core, ATX_Destroyable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Core)
+ATX_IMPLEMENT_DESTROYABLE_INTERFACE(Core)
 
 /*----------------------------------------------------------------------
 |    BLT_Init
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Init(BLT_Core* core)
+BLT_Init(BLT_Core** core)
 {
     return Core_Create(core);
 }

@@ -24,6 +24,6 @@
 /*----------------------------------------------------------------------
 |       Registry_Create
 +---------------------------------------------------------------------*/
-BLT_Result Registry_Create(BLT_Registry* registry);
+BLT_Result Registry_Create(BLT_Registry** registry);
 
 #endif /* _BLT_REGISTRY_PRIV_H_ */

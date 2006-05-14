@@ -28,11 +28,11 @@
 |    BLT_MediaPort_DefaultQueryMediaType
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPortInstance* instance,
-                                    BLT_Ordinal            index,
-                                    const BLT_MediaType**  media_type)
+BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPort*        self,
+                                    BLT_Ordinal           index,
+                                    const BLT_MediaType** media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(index);
     BLT_COMPILER_UNUSED(media_type);
     return BLT_ERROR_NOT_IMPLEMENTED;

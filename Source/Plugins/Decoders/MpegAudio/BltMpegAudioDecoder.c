@@ -1,16 +1,16 @@
 /*****************************************************************
 |
-|      File: BltMpegAudioDecoder.c
+|   File: BltMpegAudioDecoder.c
 |
-|      MpegAudio Decoder Module
+|   Mpeg Audio Decoder Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "Fluo.h"
@@ -27,7 +27,67 @@
 #include "BltReplayGain.h"
 
 /*----------------------------------------------------------------------
-|       constants
+|    types
++---------------------------------------------------------------------*/
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 mpeg_audio_type_id;
+} MpegAudioDecoderModule;
+
+typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+
+    /* members */
+    BLT_Boolean eos;
+    ATX_List*   packets;
+} MpegAudioDecoderInput;
+
+typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketProducer);
+
+    /* members */
+    BLT_Boolean      eos;
+    BLT_PcmMediaType media_type;
+    BLT_TimeStamp    time_stamp;
+    ATX_Int64        sample_count;
+} MpegAudioDecoderOutput;
+
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    BLT_Module             module;
+    MpegAudioDecoderInput  input;
+    MpegAudioDecoderOutput output;
+    FLO_Decoder*           fluo;
+    struct {
+        BLT_Cardinal nominal_bitrate;
+        BLT_Cardinal average_bitrate;
+        ATX_Int64    average_bitrate_accumulator;
+        BLT_Cardinal instant_bitrate;
+        ATX_Int64    instant_bitrate_accumulator;
+    }                      stream_info;
+    struct {
+        ATX_Flags flags;
+        ATX_Int32 track_gain;
+        ATX_Int32 album_gain;
+    }                      replay_gain_info;
+    struct {
+        unsigned int level;
+        unsigned int layer;
+    }                      mpeg_info;
+} MpegAudioDecoder;
+
+/*----------------------------------------------------------------------
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_BITRATE_AVERAGING_SHORT_SCALE     7
 #define BLT_BITRATE_AVERAGING_SHORT_WINDOW    32
@@ -36,96 +96,46 @@
 #define BLT_BITRATE_AVERAGING_PRECISION       4000
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderModule)
-static const BLT_ModuleInterface MpegAudioDecoderModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoder)
-static const BLT_MediaNodeInterface MpegAudioDecoder_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderInputPort)
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderOutputPort)
+ATX_DECLARE_INTERFACE_MAP(MpegAudioDecoderModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(MpegAudioDecoder, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(MpegAudioDecoder, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|    types
-+---------------------------------------------------------------------*/
-typedef struct {
-    BLT_BaseModule base;
-    BLT_UInt32     mpeg_audio_type_id;
-} MpegAudioDecoderModule;
-
-typedef struct {
-    BLT_Boolean eos;
-    ATX_List*   packets;
-} MpegAudioDecoderInputPort;
-
-typedef struct {
-    BLT_Boolean      eos;
-    BLT_PcmMediaType media_type;
-    BLT_TimeStamp    time_stamp;
-    ATX_Int64        sample_count;
-} MpegAudioDecoderOutputPort;
-
-typedef struct {
-    BLT_BaseMediaNode          base;
-    BLT_Module                 module;
-    MpegAudioDecoderInputPort  input;
-    MpegAudioDecoderOutputPort output;
-    FLO_Decoder*               fluo;
-    struct {
-        BLT_Cardinal nominal_bitrate;
-        BLT_Cardinal average_bitrate;
-        ATX_Int64    average_bitrate_accumulator;
-        BLT_Cardinal instant_bitrate;
-        ATX_Int64    instant_bitrate_accumulator;
-    }                          stream_info;
-    struct {
-        ATX_Flags flags;
-        ATX_Int32 track_gain;
-        ATX_Int32 album_gain;
-    }                          replay_gain_info;
-    struct {
-        unsigned int level;
-        unsigned int layer;
-    }                          mpeg_info;
-} MpegAudioDecoder;
-
-/*----------------------------------------------------------------------
-|    MpegAudioDecoderInputPort_Flush
+|   MpegAudioDecoderInput_Flush
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoderInputPort_Flush(MpegAudioDecoder* decoder)
+MpegAudioDecoderInput_Flush(MpegAudioDecoder* self)
 {
     ATX_ListItem* item;
-    while ((item = ATX_List_GetFirstItem(decoder->input.packets))) {
+    while ((item = ATX_List_GetFirstItem(self->input.packets))) {
         BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
         if (packet) BLT_MediaPacket_Release(packet);
-        ATX_List_RemoveItem(decoder->input.packets, item);
+        ATX_List_RemoveItem(self->input.packets, item);
     }
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoderInputPort_PutPacket
+|   MpegAudioDecoderInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                                    BLT_MediaPacket*            packet)
+MpegAudioDecoderInput_PutPacket(BLT_PacketConsumer* _self,
+                                BLT_MediaPacket*    packet)
 {
-    MpegAudioDecoder* decoder = (MpegAudioDecoder*)instance;
+    MpegAudioDecoder* self = ATX_SELF_M(input, MpegAudioDecoder, BLT_PacketConsumer);
     ATX_Result        result;
 
     /* check to see if this is the end of a stream */
     if (BLT_MediaPacket_GetFlags(packet) & 
         BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
-        decoder->input.eos = BLT_TRUE;
+        self->input.eos = BLT_TRUE;
     }
 
     /* add the packet to the input list */
-    result = ATX_List_AddData(decoder->input.packets, packet);
+    result = ATX_List_AddData(self->input.packets, packet);
     if (ATX_SUCCEEDED(result)) {
         BLT_MediaPacket_AddReference(packet);
     }
@@ -134,70 +144,66 @@ MpegAudioDecoderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(MpegAudioDecoderInputPort, 
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderInput)
+    ATX_GET_INTERFACE_ACCEPT(MpegAudioDecoderInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(MpegAudioDecoderInput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_PacketConsumer interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(MpegAudioDecoderInput, BLT_PacketConsumer)
+    MpegAudioDecoderInput_PutPacket
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(MpegAudioDecoderInput, 
                                          "input",
                                          PACKET,
                                          IN)
-static const BLT_MediaPortInterface
-MpegAudioDecoderInputPort_BLT_MediaPortInterface = {
-    MpegAudioDecoderInputPort_GetInterface,
-    MpegAudioDecoderInputPort_GetName,
-    MpegAudioDecoderInputPort_GetProtocol,
-    MpegAudioDecoderInputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(MpegAudioDecoderInput, BLT_MediaPort)
+    MpegAudioDecoderInput_GetName,
+    MpegAudioDecoderInput_GetProtocol,
+    MpegAudioDecoderInput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    BLT_PacketConsumer interface
-+---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-MpegAudioDecoderInputPort_BLT_PacketConsumerInterface = {
-    MpegAudioDecoderInputPort_GetInterface,
-    MpegAudioDecoderInputPort_PutPacket
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderInputPort)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderInputPort)
-
-/*----------------------------------------------------------------------
-|    MpegAudioDecoder_UpdateInfo
+|   MpegAudioDecoder_UpdateInfo
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* decoder,     
+MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* self,     
                             FLO_FrameInfo*    frame_info)
 {
     /* check if the media format has changed */
-    if (frame_info->sample_rate   != decoder->output.media_type.sample_rate   ||
-        frame_info->channel_count != decoder->output.media_type.channel_count ||
-        frame_info->level         != decoder->mpeg_info.level             ||
-        frame_info->layer         != decoder->mpeg_info.layer) {
+    if (frame_info->sample_rate   != self->output.media_type.sample_rate   ||
+        frame_info->channel_count != self->output.media_type.channel_count ||
+        frame_info->level         != self->mpeg_info.level             ||
+        frame_info->layer         != self->mpeg_info.layer) {
 
-        if (decoder->output.media_type.sample_rate   != 0 ||
-            decoder->output.media_type.channel_count != 0) {
+        if (self->output.media_type.sample_rate   != 0 ||
+            self->output.media_type.channel_count != 0) {
             /* format change, discard the packet */
             BLT_Debug("MpegAudioDecoder::UpdateInfo - "
                       "format change, discarding frame\n");
-            FLO_Decoder_SkipFrame(decoder->fluo);
+            FLO_Decoder_SkipFrame(self->fluo);
             return FLO_ERROR_NOT_ENOUGH_DATA;
         }
 
         /* keep the new info */
-        decoder->mpeg_info.layer = frame_info->layer;
-        decoder->mpeg_info.level = frame_info->level;
+        self->mpeg_info.layer = frame_info->layer;
+        self->mpeg_info.level = frame_info->level;
 
         /* set the output type extensions */
-        BLT_PcmMediaType_Init(&decoder->output.media_type);
-        decoder->output.media_type.channel_count   = (BLT_UInt16)frame_info->channel_count;
-        decoder->output.media_type.sample_rate     = frame_info->sample_rate;
-        decoder->output.media_type.bits_per_sample = 16;
-        decoder->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+        BLT_PcmMediaType_Init(&self->output.media_type);
+        self->output.media_type.channel_count   = (BLT_UInt16)frame_info->channel_count;
+        self->output.media_type.sample_rate     = frame_info->sample_rate;
+        self->output.media_type.bits_per_sample = 16;
+        self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
         
         {
             BLT_StreamInfo info;
@@ -209,12 +215,12 @@ MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* decoder,
             info.sample_rate     = frame_info->sample_rate;
             info.channel_count   = (BLT_UInt16)frame_info->channel_count;
 
-            if (!ATX_OBJECT_IS_NULL(&decoder->base.context)) {
+            if (ATX_BASE(self, BLT_BaseMediaNode).context) {
                 info.mask = 
                     BLT_STREAM_INFO_MASK_DATA_TYPE    |
                     BLT_STREAM_INFO_MASK_SAMPLE_RATE  |
                     BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
-                BLT_Stream_SetInfo(&decoder->base.context, &info);
+                BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
             }
         }
     }
@@ -223,7 +229,7 @@ MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* decoder,
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoder_UpdateBitrateAverage
+|   MpegAudioDecoder_UpdateBitrateAverage
 +---------------------------------------------------------------------*/
 static BLT_Cardinal
 MpegAudioDecoder_UpdateBitrateAverage(BLT_Cardinal previous_bitrate,
@@ -261,24 +267,24 @@ MpegAudioDecoder_UpdateBitrateAverage(BLT_Cardinal previous_bitrate,
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoder_UpdateDurationAndBitrate
+|   MpegAudioDecoder_UpdateDurationAndBitrate
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  decoder,  
+MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  self,  
                                           FLO_DecoderStatus* fluo_status,
                                           FLO_FrameInfo*     frame_info)
 {
     BLT_StreamInfo info;
     BLT_Result     result;
     
-    if (ATX_OBJECT_IS_NULL(&decoder->base.context)) return BLT_SUCCESS;
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_SUCCESS;
 
     /* get the decoder status */
-    result = FLO_Decoder_GetStatus(decoder->fluo, &fluo_status);
+    result = FLO_Decoder_GetStatus(self->fluo, &fluo_status);
     if (BLT_FAILED(result)) return result;
 
     /* get current info */
-    BLT_Stream_GetInfo(&decoder->base.context, &info);
+    BLT_Stream_GetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
     info.mask = 
         BLT_STREAM_INFO_MASK_DURATION        |
         BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
@@ -296,21 +302,21 @@ MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  decoder,
         info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
     } else {
         /* nominal bitrate */
-        if (decoder->stream_info.nominal_bitrate == 0) {
+        if (self->stream_info.nominal_bitrate == 0) {
             info.nominal_bitrate = frame_info->bitrate;
-            decoder->stream_info.nominal_bitrate = frame_info->bitrate;
+            self->stream_info.nominal_bitrate = frame_info->bitrate;
             info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
         } 
         
         /* average bitrate */
         {
             info.average_bitrate = MpegAudioDecoder_UpdateBitrateAverage(
-                decoder->stream_info.average_bitrate,
+                self->stream_info.average_bitrate,
                 frame_info->bitrate,
-                &decoder->stream_info.average_bitrate_accumulator,
+                &self->stream_info.average_bitrate_accumulator,
                 BLT_BITRATE_AVERAGING_LONG_WINDOW,
                 BLT_BITRATE_AVERAGING_LONG_SCALE);
-            decoder->stream_info.average_bitrate = info.average_bitrate;
+            self->stream_info.average_bitrate = info.average_bitrate;
         }   
 
         /* compute the duration */
@@ -328,87 +334,87 @@ MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  decoder,
     /* the instant bitrate is a short window average */
     {
         info.instant_bitrate = MpegAudioDecoder_UpdateBitrateAverage(
-            decoder->stream_info.instant_bitrate,
+            self->stream_info.instant_bitrate,
             frame_info->bitrate,
-            &decoder->stream_info.instant_bitrate_accumulator,
+            &self->stream_info.instant_bitrate_accumulator,
             BLT_BITRATE_AVERAGING_SHORT_WINDOW,
             BLT_BITRATE_AVERAGING_SHORT_SCALE);
-        decoder->stream_info.instant_bitrate = info.instant_bitrate;
+        self->stream_info.instant_bitrate = info.instant_bitrate;
         info.mask |= BLT_STREAM_INFO_MASK_INSTANT_BITRATE;
     }
 
     /* update the stream info */
-    BLT_Stream_SetInfo(&decoder->base.context, &info);
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoder_UpdateReplayGainInfo
+|   MpegAudioDecoder_UpdateReplayGainInfo
 +---------------------------------------------------------------------*/
 static void
-MpegAudioDecoder_UpdateReplayGainInfo(MpegAudioDecoder*  decoder,  
+MpegAudioDecoder_UpdateReplayGainInfo(MpegAudioDecoder*  self,  
                                       FLO_DecoderStatus* fluo_status)
 {
     BLT_Boolean update = BLT_FALSE;
 
     if (fluo_status->flags & FLO_DECODER_STATUS_STREAM_HAS_REPLAY_GAIN) {
         /* the stream has replay gain info */
-        if (decoder->replay_gain_info.flags != 
+        if (self->replay_gain_info.flags != 
             fluo_status->replay_gain_info.flags) {
             /* those are new values */
             update = BLT_TRUE;
 
             /* set the track gain value */
-            decoder->replay_gain_info.track_gain = 
+            self->replay_gain_info.track_gain = 
                 10 * fluo_status->replay_gain_info.track_gain;
 
             /* set the album gain value */
-            decoder->replay_gain_info.album_gain = 
+            self->replay_gain_info.album_gain = 
                 10 * fluo_status->replay_gain_info.album_gain;
 
             /* copy the flags */
-            decoder->replay_gain_info.flags = fluo_status->replay_gain_info.flags;
+            self->replay_gain_info.flags = fluo_status->replay_gain_info.flags;
         }
     } else {
         /* the stream has no replay gain info */
-        if (decoder->replay_gain_info.flags != 0) {
+        if (self->replay_gain_info.flags != 0) {
             /* we had values, clear them */
             update = BLT_TRUE;
         }
-        decoder->replay_gain_info.flags      = 0; 
-        decoder->replay_gain_info.album_gain = 0;
-        decoder->replay_gain_info.track_gain = 0;
+        self->replay_gain_info.flags      = 0; 
+        self->replay_gain_info.album_gain = 0;
+        self->replay_gain_info.track_gain = 0;
     }
 
     /* update the stream properties if necessary */
     if (update == BLT_TRUE) {
-        ATX_Properties properties;
+        ATX_Properties* properties;
 
         /* get a reference to the stream properties */
-        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(&decoder->base.context, 
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
             ATX_PropertyValue property_value;
-            if (decoder->replay_gain_info.flags &
+            if (self->replay_gain_info.flags &
                 FLO_REPLAY_GAIN_HAS_TRACK_VALUE) {
-                property_value.integer = decoder->replay_gain_info.track_gain;
-                ATX_Properties_SetProperty(&properties,
+                property_value.integer = self->replay_gain_info.track_gain;
+                ATX_Properties_SetProperty(properties,
                                            BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
                                            ATX_PROPERTY_TYPE_INTEGER,
                                            &property_value);
             } else {
-                ATX_Properties_UnsetProperty(&properties,
+                ATX_Properties_UnsetProperty(properties,
                                              BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN);
             }
-            if (decoder->replay_gain_info.flags &
+            if (self->replay_gain_info.flags &
                 FLO_REPLAY_GAIN_HAS_ALBUM_VALUE) {
-                property_value.integer = decoder->replay_gain_info.album_gain;
-                ATX_Properties_SetProperty(&properties,
+                property_value.integer = self->replay_gain_info.album_gain;
+                ATX_Properties_SetProperty(properties,
                                            BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
                                            ATX_PROPERTY_TYPE_INTEGER,
                                            &property_value);
             } else {
-                ATX_Properties_UnsetProperty(&properties,
+                ATX_Properties_UnsetProperty(properties,
                                              BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN);
             }
         }
@@ -416,10 +422,10 @@ MpegAudioDecoder_UpdateReplayGainInfo(MpegAudioDecoder*  decoder,
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoder_DecodeFrame
+|   MpegAudioDecoder_DecodeFrame
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* decoder,
+MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* self,
                              BLT_MediaPacket** packet)
 {
     FLO_SampleBuffer   sample_buffer;
@@ -429,32 +435,32 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* decoder,
     FLO_Result         result;
     
     /* try to find a frame */
-    result = FLO_Decoder_FindFrame(decoder->fluo, &frame_info);
+    result = FLO_Decoder_FindFrame(self->fluo, &frame_info);
     if (FLO_FAILED(result)) return result;
 
     /* setup default return value */
     *packet = NULL;
 
     /* update the stream info */
-    result = MpegAudioDecoder_UpdateInfo(decoder, &frame_info);
+    result = MpegAudioDecoder_UpdateInfo(self, &frame_info);
     if (BLT_FAILED(result)) return result;
 
     /* get the decoder status */
-    result = FLO_Decoder_GetStatus(decoder->fluo, &fluo_status);
+    result = FLO_Decoder_GetStatus(self->fluo, &fluo_status);
     if (BLT_FAILED(result)) return result;
 
     /* update the bitrate */
-    result = MpegAudioDecoder_UpdateDurationAndBitrate(decoder, fluo_status, &frame_info);
+    result = MpegAudioDecoder_UpdateDurationAndBitrate(self, fluo_status, &frame_info);
     if (BLT_FAILED(result)) return result;
 
     /* update the replay gain info */
-    MpegAudioDecoder_UpdateReplayGainInfo(decoder, fluo_status);
+    MpegAudioDecoder_UpdateReplayGainInfo(self, fluo_status);
 
     /* get a packet from the core */
     sample_buffer.size = frame_info.sample_count*frame_info.channel_count*2;
-    result = BLT_Core_CreateMediaPacket(&decoder->base.core,
+    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
                                         sample_buffer.size,
-                                        (const BLT_MediaType*)&decoder->output.media_type,
+                                        (const BLT_MediaType*)&self->output.media_type,
                                         packet);
     if (BLT_FAILED(result)) return result;
 
@@ -462,14 +468,14 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* decoder,
     sample_buffer.samples = BLT_MediaPacket_GetPayloadBuffer(*packet);
 
     /* decode the frame */
-    result = FLO_Decoder_DecodeFrame(decoder->fluo, 
+    result = FLO_Decoder_DecodeFrame(self->fluo, 
                                      &sample_buffer,
                                      &samples_skipped);
     if (FLO_FAILED(result)) {
         /* check fluo result */
         if (result == FLO_ERROR_NO_MORE_SAMPLES) {
             /* we have already decoded everything */
-            decoder->output.eos = BLT_TRUE;
+            self->output.eos = BLT_TRUE;
         }
 
         /* release the packet */
@@ -488,13 +494,13 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* decoder,
     }
 
     /* update the sample count */
-    decoder->output.sample_count = fluo_status->sample_count;
+    self->output.sample_count = fluo_status->sample_count;
 
     /* set start of stream packet flags */
     {
         ATX_Int64 zero;
         ATX_Int64_Zero(zero);
-        if (ATX_Int64_Equal(zero, decoder->output.sample_count)) {
+        if (ATX_Int64_Equal(zero, self->output.sample_count)) {
             BLT_MediaPacket_SetFlags(*packet, 
                                      BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
         }
@@ -505,23 +511,23 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* decoder,
         frame_info.sample_rate               != 0 &&
         sample_buffer.format.bits_per_sample != 0) {
         /* compute time stamp */
-        BLT_TimeStamp_FromSamples(&decoder->output.time_stamp, 
-                                  decoder->output.sample_count,
+        BLT_TimeStamp_FromSamples(&self->output.time_stamp, 
+                                  self->output.sample_count,
                                   frame_info.sample_rate);
-        BLT_MediaPacket_SetTimeStamp(*packet, decoder->output.time_stamp);
+        BLT_MediaPacket_SetTimeStamp(*packet, self->output.time_stamp);
     } 
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    MpegAudioDecoderOutputPort_GetPacket
+|   MpegAudioDecoderOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
-                                     BLT_MediaPacket**           packet)
+MpegAudioDecoderOutput_GetPacket(BLT_PacketProducer* _self,
+                                 BLT_MediaPacket**   packet)
 {
-    MpegAudioDecoder* decoder = (MpegAudioDecoder*)instance;
+    MpegAudioDecoder* self = ATX_SELF_M(output, MpegAudioDecoder, BLT_PacketProducer);
     ATX_ListItem*     item;
     BLT_Any           payload_buffer;
     BLT_Size          payload_size;
@@ -532,13 +538,13 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
     *packet = NULL;
 
     /* check for EOS */
-    if (decoder->output.eos) {
+    if (self->output.eos) {
         return BLT_ERROR_EOS;
     }
 
     do {
         /* try to decode a frame */
-        result = MpegAudioDecoder_DecodeFrame(decoder, packet);
+        result = MpegAudioDecoder_DecodeFrame(self, packet);
         if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
         if (FLO_ERROR_IS_FATAL(result)) {
             return result;
@@ -546,7 +552,7 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 
         /* not enough data, try to feed some more */
         try_again = BLT_FALSE;
-        if ((item = ATX_List_GetFirstItem(decoder->input.packets))) {
+        if ((item = ATX_List_GetFirstItem(self->input.packets))) {
             BLT_MediaPacket* input = ATX_ListItem_GetData(item);
             BLT_Size         feed_size;
             FLO_Flags        flags = 0;
@@ -556,9 +562,9 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
             payload_size   = BLT_MediaPacket_GetPayloadSize(input);
 
             /* compute the flags */
-            if (ATX_List_GetItemCount(decoder->input.packets) == 0) {
+            if (ATX_List_GetItemCount(self->input.packets) == 0) {
                 /* no more packets */
-                if (decoder->input.eos) {
+                if (self->input.eos) {
                     /* end of stream */
                     flags |= FLO_DECODER_BUFFER_IS_END_OF_STREAM;
                 }
@@ -570,14 +576,14 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 
             /* feed the decoder */
             feed_size = payload_size;
-            result = FLO_Decoder_Feed(decoder->fluo, 
+            result = FLO_Decoder_Feed(self->fluo, 
                                       payload_buffer, 
                                       &feed_size, flags);
             if (BLT_FAILED(result)) return result;
 
             if (feed_size == payload_size) {
                 /* we're done with the packet */
-                ATX_List_RemoveItem(decoder->input.packets, item);
+                ATX_List_RemoveItem(self->input.packets, item);
                 BLT_MediaPacket_Release(input);
             } else {
                 /* we can't feed anymore, there's some leftovers */
@@ -592,15 +598,15 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 
     /* if we've reached the end of stream, generate an empty packet with */
     /* a flag to indicate that situation                                 */
-    if (decoder->input.eos) {
-        result = BLT_Core_CreateMediaPacket(&decoder->base.core,
+    if (self->input.eos) {
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
                                             0,
-                                            (const BLT_MediaType*)&decoder->output.media_type,
+                                            (const BLT_MediaType*)&self->output.media_type,
                                             packet);
         if (BLT_FAILED(result)) return result;
         BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
-        BLT_MediaPacket_SetTimeStamp(*packet, decoder->output.time_stamp);
-        decoder->output.eos = BLT_TRUE;
+        BLT_MediaPacket_SetTimeStamp(*packet, self->output.time_stamp);
+        self->output.eos = BLT_TRUE;
         return BLT_SUCCESS;
     }
     
@@ -608,58 +614,54 @@ MpegAudioDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(MpegAudioDecoderOutputPort, 
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderOutput)
+    ATX_GET_INTERFACE_ACCEPT(MpegAudioDecoderOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(MpegAudioDecoderOutput, BLT_PacketProducer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(MpegAudioDecoderOutput, 
                                          "output",
                                          PACKET,
                                          OUT)
-static const BLT_MediaPortInterface
-MpegAudioDecoderOutputPort_BLT_MediaPortInterface = {
-    MpegAudioDecoderOutputPort_GetInterface,
-    MpegAudioDecoderOutputPort_GetName,
-    MpegAudioDecoderOutputPort_GetProtocol,
-    MpegAudioDecoderOutputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(MpegAudioDecoderOutput, BLT_MediaPort)
+    MpegAudioDecoderOutput_GetName,
+    MpegAudioDecoderOutput_GetProtocol,
+    MpegAudioDecoderOutput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    BLT_PacketProducer interface
+|   BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketProducerInterface
-MpegAudioDecoderOutputPort_BLT_PacketProducerInterface = {
-    MpegAudioDecoderOutputPort_GetInterface,
-    MpegAudioDecoderOutputPort_GetPacket
-};
+ATX_BEGIN_INTERFACE_MAP(MpegAudioDecoderOutput, BLT_PacketProducer)
+    MpegAudioDecoderOutput_GetPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderOutputPort)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderOutputPort, BLT_PacketProducer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderOutputPort)
-
-/*----------------------------------------------------------------------
-|    MpegAudioDecoder_SetupPorts
+|   MpegAudioDecoder_SetupPorts
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoder_SetupPorts(MpegAudioDecoder* decoder)
+MpegAudioDecoder_SetupPorts(MpegAudioDecoder* self)
 {
     ATX_Result result;
 
     /* init the input port */
-    decoder->input.eos = BLT_FALSE;
+    self->input.eos = BLT_FALSE;
 
     /* create a list of input packets */
-    result = ATX_List_Create(&decoder->input.packets);
+    result = ATX_List_Create(&self->input.packets);
     if (ATX_FAILED(result)) return result;
     
     /* setup the output port */
-    decoder->output.eos = BLT_FALSE;
-    BLT_PcmMediaType_Init(&decoder->output.media_type);
-    ATX_Int64_Set_Int32(decoder->output.sample_count, 0);
-    BLT_TimeStamp_Set(decoder->output.time_stamp, 0, 0);
+    self->output.eos = BLT_FALSE;
+    BLT_PcmMediaType_Init(&self->output.media_type);
+    ATX_Int64_Set_Int32(self->output.sample_count, 0);
+    BLT_TimeStamp_Set(self->output.time_stamp, 0, 0);
 
     return BLT_SUCCESS;
 }
@@ -672,9 +674,9 @@ MpegAudioDecoder_Create(BLT_Module*              module,
                         BLT_Core*                core, 
                         BLT_ModuleParametersType parameters_type,
                         BLT_CString              parameters, 
-                        ATX_Object*              object)
+                        BLT_MediaNode**          object)
 {
-    MpegAudioDecoder* decoder;
+    MpegAudioDecoder* self;
     BLT_Result        result;
 
     BLT_Debug("MpegAudioDecoder::Create\n");
@@ -686,34 +688,39 @@ MpegAudioDecoder_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    decoder = ATX_AllocateZeroMemory(sizeof(MpegAudioDecoder));
-    if (decoder == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(MpegAudioDecoder));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&decoder->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* create the fluo decoder */
-    result = FLO_Decoder_Create(&decoder->fluo);
+    result = FLO_Decoder_Create(&self->fluo);
     if (FLO_FAILED(result)) {
-        ATX_FreeMemory(decoder);
-        ATX_CLEAR_OBJECT(object);
+        ATX_FreeMemory(self);
+        *object = NULL;
         return result;
     }
 
     /* setup the input and output ports */
-    result = MpegAudioDecoder_SetupPorts(decoder);
+    result = MpegAudioDecoder_SetupPorts(self);
     if (BLT_FAILED(result)) {
-        ATX_FreeMemory(decoder);
-        ATX_CLEAR_OBJECT(object);
+        ATX_FreeMemory(self);
+        *object = NULL;
         return result;
     }
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)decoder;
-    ATX_INTERFACE(object) = (ATX_Interface*)&MpegAudioDecoder_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, MpegAudioDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, MpegAudioDecoder, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  MpegAudioDecoderInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  MpegAudioDecoderInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, MpegAudioDecoderOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, MpegAudioDecoderOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -722,14 +729,14 @@ MpegAudioDecoder_Create(BLT_Module*              module,
 |    MpegAudioDecoder_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-MpegAudioDecoder_Destroy(MpegAudioDecoder* decoder)
+MpegAudioDecoder_Destroy(MpegAudioDecoder* self)
 { 
     ATX_ListItem* item;
 
     BLT_Debug("MpegAudioDecoder::Destroy\n");
 
     /* release any packet we may hold */
-    item = ATX_List_GetFirstItem(decoder->input.packets);
+    item = ATX_List_GetFirstItem(self->input.packets);
     while (item) {
         BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
         if (packet) {
@@ -737,16 +744,16 @@ MpegAudioDecoder_Destroy(MpegAudioDecoder* decoder)
         }
         item = ATX_ListItem_GetNext(item);
     }
-    ATX_List_Destroy(decoder->input.packets);
+    ATX_List_Destroy(self->input.packets);
     
     /* destroy the fluo decoder */
-    FLO_Decoder_Destroy(decoder->fluo);
+    FLO_Decoder_Destroy(self->fluo);
     
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&decoder->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(decoder);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
@@ -755,22 +762,20 @@ MpegAudioDecoder_Destroy(MpegAudioDecoder* decoder)
 |       MpegAudioDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
-                               BLT_CString            name,
-                               BLT_MediaPort*         port)
+MpegAudioDecoder_GetPortByName(BLT_MediaNode*  _self,
+                               BLT_CString     name,
+                               BLT_MediaPort** port)
 {
-    MpegAudioDecoder* decoder = (MpegAudioDecoder*)instance;
+    MpegAudioDecoder* self = ATX_SELF_EX(MpegAudioDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &MpegAudioDecoderInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &MpegAudioDecoderOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -779,44 +784,50 @@ MpegAudioDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
 |    MpegAudioDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoder_Seek(BLT_MediaNodeInstance* instance,
-                      BLT_SeekMode*          mode,
-                      BLT_SeekPoint*         point)
+MpegAudioDecoder_Seek(BLT_MediaNode* _self,
+                      BLT_SeekMode*  mode,
+                      BLT_SeekPoint* point)
 {
-    MpegAudioDecoder* decoder = (MpegAudioDecoder*)instance;
+    MpegAudioDecoder* self = ATX_SELF_EX(MpegAudioDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* flush pending input packets */
-    MpegAudioDecoderInputPort_Flush(decoder);
+    MpegAudioDecoderInput_Flush(self);
 
     /* clear the eos flag */
-    decoder->input.eos  = BLT_FALSE;
-    decoder->output.eos = BLT_FALSE;
+    self->input.eos  = BLT_FALSE;
+    self->output.eos = BLT_FALSE;
 
     /* flush and reset the decoder */
-    FLO_Decoder_Flush(decoder->fluo);
-    FLO_Decoder_Reset(decoder->fluo);
+    FLO_Decoder_Flush(self->fluo);
+    FLO_Decoder_Reset(self->fluo);
 
     /* estimate the seek point in time_stamp mode */
-    if (ATX_OBJECT_IS_NULL(&decoder->base.context)) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(&decoder->base.context, *mode, point);
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
     if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
         return BLT_FAILURE;
     }
 
     /* update the decoder's sample position */
-    decoder->output.sample_count = point->sample;
-    decoder->output.time_stamp = point->time_stamp;
-    FLO_Decoder_SetSample(decoder->fluo, point->sample);
+    self->output.sample_count = point->sample;
+    self->output.time_stamp = point->time_stamp;
+    FLO_Decoder_SetSample(self->fluo, point->sample);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaNode interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-MpegAudioDecoder_BLT_MediaNodeInterface = {
-    MpegAudioDecoder_GetInterface,
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoder)
+    ATX_GET_INTERFACE_ACCEPT_EX(MpegAudioDecoder, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(MpegAudioDecoder, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_MediaNode interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(MpegAudioDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     MpegAudioDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -826,30 +837,23 @@ MpegAudioDecoder_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     MpegAudioDecoder_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(MpegAudioDecoder, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(MpegAudioDecoder, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoder)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoder, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoder, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoder)
-
-/*----------------------------------------------------------------------
-|       MpegAudioDecoderModule_Attach
+|   MpegAudioDecoderModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+MpegAudioDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    MpegAudioDecoderModule* module = (MpegAudioDecoderModule*)instance;
-    BLT_Registry            registry;
+    MpegAudioDecoderModule* self = ATX_SELF_EX(MpegAudioDecoderModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*           registry;
     BLT_Result              result;
 
     /* get the registry */
@@ -857,52 +861,52 @@ MpegAudioDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
     if (BLT_FAILED(result)) return result;
 
     /* register the .mp2, .mp1, .mp3 .mpa and .mpg file extensions */
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mp3",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mp2",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mp1",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mpa",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mpg",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
 
     /* register the "audio/mpeg" type */
     result = BLT_Registry_RegisterName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/mpeg",
-        &module->mpeg_audio_type_id);
+        &self->mpeg_audio_type_id);
     if (BLT_FAILED(result)) return result;
     
     BLT_Debug("MpegAudioDecoderModule::Attach (audio/mpeg type = %d)\n", 
-              module->mpeg_audio_type_id);
+              self->mpeg_audio_type_id);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       MpegAudioDecoderModule_Probe
+|   MpegAudioDecoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MpegAudioDecoderModule_Probe(BLT_ModuleInstance*      instance, 
+MpegAudioDecoderModule_Probe(BLT_Module*              _self, 
                              BLT_Core*                core,
                              BLT_ModuleParametersType parameters_type,
                              BLT_AnyConst             parameters,
                              BLT_Cardinal*            match)
 {
-    MpegAudioDecoderModule* module = (MpegAudioDecoderModule*)instance;
+    MpegAudioDecoderModule* self = ATX_SELF_EX(MpegAudioDecoderModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
     
     switch (parameters_type) {
@@ -925,7 +929,7 @@ MpegAudioDecoderModule_Probe(BLT_ModuleInstance*      instance,
 
             /* the input type should be audio/mpeg */
             if (constructor->spec.input.media_type->id != 
-                module->mpeg_audio_type_id) {
+                self->mpeg_audio_type_id) {
                 return BLT_FAILURE;
             }
 
@@ -965,46 +969,48 @@ MpegAudioDecoderModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(MpegAudioDecoder)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(MpegAudioDecoder, 
-                                        "MPEG Audio Decoder", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(MpegAudioDecoderModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(MpegAudioDecoderModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface MpegAudioDecoderModule_BLT_ModuleInterface = {
-    MpegAudioDecoderModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(MpegAudioDecoderModule, MpegAudioDecoder)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(MpegAudioDecoderModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     MpegAudioDecoderModule_Attach,
     MpegAudioDecoderModule_CreateInstance,
     MpegAudioDecoderModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define MpegAudioDecoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(MpegAudioDecoderModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(MpegAudioDecoderModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderModule) 
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(MpegAudioDecoderModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(MpegAudioDecoderModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(MpegAudioDecoderModule, "MPEG Audio Decoder", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_MpegAudioDecoderModule_GetModuleObject(BLT_Module* object)
+BLT_MpegAudioDecoderModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

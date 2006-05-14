@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltPacketStreamer.c
+|      Packet Streamer Module
 |
-|      Debug Output Module
-|
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -23,60 +21,75 @@
 #include "BltByteStreamUser.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerModule)
-static const BLT_ModuleInterface PacketStreamerModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamer)
-static const BLT_MediaNodeInterface PacketStreamer_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerInputPort)
-static const BLT_MediaPortInterface PacketStreamerInputPort_BLT_MediaPortInterface;
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerOutputPort)
-static const BLT_MediaPortInterface PacketStreamerOutputPort_BLT_MediaPortInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } PacketStreamerModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    ATX_List*         packets;
-    ATX_OutputStream  stream;
-    BLT_MediaType*    media_type;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+
+    /* members */
+    ATX_List* packets;
+} PacketStreamerInput;
+
+typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_OutputStreamUser);
+
+    /* members */
+    ATX_OutputStream*  stream;
+    BLT_MediaType*     media_type;
+} PacketStreamerOutput;
+
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    PacketStreamerInput  input;
+    PacketStreamerOutput output;
 } PacketStreamer;
 
 /*----------------------------------------------------------------------
-|    PacketStreamerInputPort_PutPacket
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(PacketStreamerModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(PacketStreamer, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(PacketStreamer, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|    PacketStreamerInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-PacketStreamerInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                                  BLT_MediaPacket*            packet)
+PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
+                              BLT_MediaPacket*    packet)
 {
-    PacketStreamer*      streamer = (PacketStreamer*)instance;
+    PacketStreamer*      self = ATX_SELF_M(input, PacketStreamer, BLT_PacketConsumer);
     const BLT_MediaType* media_type;
     BLT_Size             size;
     BLT_Any              payload;
 
     /* check the media type */
     BLT_MediaPacket_GetMediaType(packet, &media_type);
-    if (streamer->media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
-        BLT_MediaType_Free(streamer->media_type);
-        BLT_MediaType_Clone(media_type, &streamer->media_type);
+    if (self->output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
+        BLT_MediaType_Free(self->output.media_type);
+        BLT_MediaType_Clone(media_type, &self->output.media_type);
     } else {
-        if (streamer->media_type->id != media_type->id) {
+        if (self->output.media_type->id != media_type->id) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
     }
 
     /* just buffer the packets if we have no stream yet */
-    if (ATX_OBJECT_IS_NULL(&streamer->stream)) {
+    if (self->output.stream == NULL) {
         /* add the packet to the input list */
-        BLT_Result result = ATX_List_AddData(streamer->packets, packet);
+        BLT_Result result = ATX_List_AddData(self->input.packets, packet);
         if (ATX_SUCCEEDED(result)) {
             BLT_MediaPacket_AddReference(packet);
         }
@@ -87,20 +100,20 @@ PacketStreamerInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     /* flush any pending packets */
     {
         ATX_ListItem* item;
-        while ((item = ATX_List_GetFirstItem(streamer->packets))) {
+        while ((item = ATX_List_GetFirstItem(self->input.packets))) {
             BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
             if (packet) {
                 size    = BLT_MediaPacket_GetPayloadSize(packet);
                 payload = BLT_MediaPacket_GetPayloadBuffer(packet);
                 if (size != 0 && payload != NULL) {
-                    ATX_OutputStream_Write(&streamer->stream, 
+                    ATX_OutputStream_Write(self->output.stream, 
                                            payload, 
                                            size, 
                                            NULL);
                 }
                 BLT_MediaPacket_Release(packet);
             }
-            ATX_List_RemoveItem(streamer->packets, item);
+            ATX_List_RemoveItem(self->input.packets, item);
         }
     }
 
@@ -110,70 +123,65 @@ PacketStreamerInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     if (size == 0 || payload == NULL) return BLT_SUCCESS;
 
     /* write packet to the output stream */
-    return ATX_OutputStream_Write(&streamer->stream, payload, size, NULL);
+    return ATX_OutputStream_Write(self->output.stream, payload, size, NULL);
 }
+
+/*----------------------------------------------------------------------
+|   standard GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(PacketStreamerInput)
+    ATX_GET_INTERFACE_ACCEPT(PacketStreamerInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(PacketStreamerInput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(PacketStreamerInputPort,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(PacketStreamerInput,
                                          "input",
                                          PACKET,
                                          IN)
-static const BLT_MediaPortInterface
-PacketStreamerInputPort_BLT_MediaPortInterface = {
-    PacketStreamerInputPort_GetInterface,
-    PacketStreamerInputPort_GetName,
-    PacketStreamerInputPort_GetProtocol,
-    PacketStreamerInputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(PacketStreamerInput, BLT_MediaPort)
+    PacketStreamerInput_GetName,
+    PacketStreamerInput_GetProtocol,
+    PacketStreamerInput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-PacketStreamerInputPort_BLT_PacketConsumerInterface = {
-    PacketStreamerInputPort_GetInterface,
-    PacketStreamerInputPort_PutPacket
-};
+ATX_BEGIN_INTERFACE_MAP(PacketStreamerInput, BLT_PacketConsumer)
+    PacketStreamerInput_PutPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerInputPort)
-ATX_INTERFACE_MAP_ADD(PacketStreamerInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(PacketStreamerInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerInputPort)
-
-/*----------------------------------------------------------------------
-|    PacketStreamerOutputPort_SetStream
+|    PacketStreamerOutput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-PacketStreamerOutputPort_SetStream(BLT_OutputStreamUserInstance* instance,
-                                   ATX_OutputStream*             stream)
+PacketStreamerOutput_SetStream(BLT_OutputStreamUser* _self,
+                               ATX_OutputStream*     stream)
 {
-    PacketStreamer* streamer = (PacketStreamer*)instance;
+    PacketStreamer* self = ATX_SELF_M(output, PacketStreamer, BLT_OutputStreamUser);
 
     /* keep a reference to the stream */
-    streamer->stream = *stream;
+    self->output.stream = stream;
     ATX_REFERENCE_OBJECT(stream);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    PacketStreamerOutputPort_QueryMediaType
+|    PacketStreamerOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-PacketStreamerOutputPort_QueryMediaType(
-    BLT_MediaPortInstance* instance,
-    BLT_Ordinal            index,
-    const BLT_MediaType**  media_type)
+PacketStreamerOutput_QueryMediaType(BLT_MediaPort*        _self,
+                                    BLT_Ordinal           index,
+                                    const BLT_MediaType** media_type)
 {
-    PacketStreamer* streamer = (PacketStreamer*)instance;
+    PacketStreamer* self = ATX_SELF_M(output, PacketStreamer, BLT_MediaPort);
     if (index == 0) {
-        *media_type = streamer->media_type;
+        *media_type = self->output.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -182,37 +190,33 @@ PacketStreamerOutputPort_QueryMediaType(
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(PacketStreamerOutput)
+    ATX_GET_INTERFACE_ACCEPT(PacketStreamerOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(PacketStreamerOutput, BLT_OutputStreamUser)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(PacketStreamerOutputPort,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(PacketStreamerOutput,
                                          "output",
                                          STREAM_PUSH,
                                          OUT)
-static const BLT_MediaPortInterface
-PacketStreamerOutputPort_BLT_MediaPortInterface = {
-    PacketStreamerOutputPort_GetInterface,
-    PacketStreamerOutputPort_GetName,
-    PacketStreamerOutputPort_GetProtocol,
-    PacketStreamerOutputPort_GetDirection,
-    PacketStreamerOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(PacketStreamerOutput, BLT_MediaPort)
+    PacketStreamerOutput_GetName,
+    PacketStreamerOutput_GetProtocol,
+    PacketStreamerOutput_GetDirection,
+    PacketStreamerOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_OutputStreamUser interface
 +---------------------------------------------------------------------*/
-static const BLT_OutputStreamUserInterface
-PacketStreamerOutputPort_BLT_OutputStreamUserInterface = {
-    PacketStreamerOutputPort_GetInterface,
-    PacketStreamerOutputPort_SetStream
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerOutputPort)
-ATX_INTERFACE_MAP_ADD(PacketStreamerOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(PacketStreamerOutputPort, BLT_OutputStreamUser)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerOutputPort)
+ATX_BEGIN_INTERFACE_MAP(PacketStreamerOutput, BLT_OutputStreamUser)
+    PacketStreamerOutput_SetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    PacketStreamer_Create
@@ -222,9 +226,9 @@ PacketStreamer_Create(BLT_Module*              module,
                       BLT_Core*                core, 
                       BLT_ModuleParametersType parameters_type,
                       BLT_CString              parameters, 
-                      ATX_Object*              object)
+                      BLT_MediaNode**          object)
 {
-    PacketStreamer*           streamer;
+    PacketStreamer*           self;
     BLT_MediaNodeConstructor* constructor = 
         (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
@@ -238,26 +242,32 @@ PacketStreamer_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    streamer = ATX_AllocateZeroMemory(sizeof(PacketStreamer));
-    if (streamer == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(PacketStreamer));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&streamer->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* create a list of input packets */
-    result = ATX_List_Create(&streamer->packets);
+    result = ATX_List_Create(&self->input.packets);
     if (ATX_FAILED(result)) return result;
 
     /* keep the media type info */
     BLT_MediaType_Clone(constructor->spec.input.media_type,
-                        &streamer->media_type);
+                        &self->output.media_type);
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)streamer;
-    ATX_INTERFACE(object) = (ATX_Interface*)&PacketStreamer_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, PacketStreamer, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  PacketStreamerInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  PacketStreamerInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, PacketStreamerOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, PacketStreamerOutput, BLT_OutputStreamUser);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
+
 
     return BLT_SUCCESS;
 }
@@ -266,17 +276,17 @@ PacketStreamer_Create(BLT_Module*              module,
 |    PacketStreamer_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-PacketStreamer_Destroy(PacketStreamer* streamer)
+PacketStreamer_Destroy(PacketStreamer* self)
 {
     ATX_ListItem* item;
 
     BLT_Debug("PacketStreamer::Destroy\n");
 
     /* release the stream */
-    ATX_RELEASE_OBJECT(&streamer->stream);
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     /* destroy the input packet list */
-    item = ATX_List_GetFirstItem(streamer->packets);
+    item = ATX_List_GetFirstItem(self->input.packets);
     while (item) {
         BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
         if (packet) {
@@ -284,50 +294,54 @@ PacketStreamer_Destroy(PacketStreamer* streamer)
         }
         item = ATX_ListItem_GetNext(item);
     }
-    ATX_List_Destroy(streamer->packets);
+    ATX_List_Destroy(self->input.packets);
 
     /* free the media type extensions */
-    BLT_MediaType_Free(streamer->media_type);
+    BLT_MediaType_Free(self->output.media_type);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&streamer->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(streamer);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       PacketStreamer_GetPortByName
+|   PacketStreamer_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-PacketStreamer_GetPortByName(BLT_MediaNodeInstance* instance,
-                             BLT_CString            name,
-                             BLT_MediaPort*         port)
+PacketStreamer_GetPortByName(BLT_MediaNode*  _self,
+                             BLT_CString     name,
+                             BLT_MediaPort** port)
 {
-    PacketStreamer* streamer = (PacketStreamer*)instance;
+    PacketStreamer* self = ATX_SELF_EX(PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)streamer;
-        ATX_INTERFACE(port) = &PacketStreamerInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port) = (BLT_MediaPortInstance*)streamer;
-        ATX_INTERFACE(port)= &PacketStreamerOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(PacketStreamer)
+ATX_GET_INTERFACE_ACCEPT_EX(PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode)
+ATX_GET_INTERFACE_ACCEPT_EX(PacketStreamer, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-PacketStreamer_BLT_MediaNodeInterface = {
-    PacketStreamer_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     PacketStreamer_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -337,26 +351,20 @@ PacketStreamer_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     BLT_BaseMediaNode_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(PacketStreamer, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(PacketStreamer, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamer)
-ATX_INTERFACE_MAP_ADD(PacketStreamer, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(PacketStreamer, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamer)
-
-/*----------------------------------------------------------------------
-|       PacketStreamerModule_Probe
+|   PacketStreamerModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-PacketStreamerModule_Probe(BLT_ModuleInstance*      instance, 
+PacketStreamerModule_Probe(BLT_Module*              self, 
                            BLT_Core*                core,
                            BLT_ModuleParametersType parameters_type,
                            BLT_AnyConst             parameters,
@@ -437,48 +445,48 @@ PacketStreamerModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(PacketStreamer)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(PacketStreamerModule)
+ATX_GET_INTERFACE_ACCEPT_EX(PacketStreamerModule, BLT_BaseModule, BLT_Module)
+ATX_GET_INTERFACE_ACCEPT_EX(PacketStreamerModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface PacketStreamerModule_BLT_ModuleInterface = {
-    PacketStreamerModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(PacketStreamerModule, PacketStreamer)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(PacketStreamerModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     PacketStreamerModule_CreateInstance,
     PacketStreamerModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define PacketStreamerModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(PacketStreamerModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(PacketStreamerModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerModule) 
-ATX_INTERFACE_MAP_ADD(PacketStreamerModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(PacketStreamerModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(PacketStreamerModule)
-
-/*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_PacketStreamerModule_GetModuleObject(BLT_Module* object)
+BLT_PacketStreamerModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("Packet Streamer", NULL, 0,
                                  &PacketStreamerModule_BLT_ModuleInterface,
+                                 &PacketStreamerModule_ATX_ReferenceableInterface,
                                  object);
 }

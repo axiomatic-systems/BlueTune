@@ -4,13 +4,13 @@
 |
 |      Tag Parser Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -27,41 +27,39 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserModule)
-static const BLT_ModuleInterface TagParserModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParser)
-static const BLT_MediaNodeInterface TagParser_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserInputPort)
-static const BLT_MediaPortInterface TagParserInputPort_BLT_MediaPortInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserOutputPort)
-static const BLT_MediaPortInterface TagParserOutputPort_BLT_MediaPortInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
-    BLT_UInt32     mpeg_audio_type_id;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 mpeg_audio_type_id;
 } TagParserModule;
 
 typedef struct {
-    BLT_MediaType   media_type;
-    ATX_InputStream stream;
-} TagParserInputPort;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamUser);
+
+    /* members */
+    BLT_MediaType    media_type;
+    ATX_InputStream* stream;
+} TagParserInput;
 
 typedef struct {
-    BLT_MediaType media_type;
-} TagParserOutputPort;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamProvider);
+} TagParserOutput;
 
 typedef struct {
-    BLT_BaseMediaNode   base;
-    TagParserInputPort  input;
-    TagParserOutputPort output;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    TagParserInput  input;
+    TagParserOutput output;
 } TagParser;
 
 /*----------------------------------------------------------------------
@@ -70,35 +68,42 @@ typedef struct {
 #define BLT_TAG_PARSER_MEDIA_TYPE_FLAGS_PARSED 1
 
 /*----------------------------------------------------------------------
-|       TagParserInputPort_SetStream
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(TagParserModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(TagParser, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(TagParser, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|   TagParserInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
-                             ATX_InputStream*             stream,
-                             const BLT_MediaType*         media_type)
+TagParserInput_SetStream(BLT_InputStreamUser* _self,
+                         ATX_InputStream*     stream,
+                         const BLT_MediaType* media_type)
 {
-    TagParser*     parser = (TagParser*)instance;
-    BLT_Size       id3_header_size  = 0;
-    BLT_Size       id3_trailer_size = 0;
+    TagParser*      self = ATX_SELF_M(input, TagParser, BLT_InputStreamUser);
+    BLT_Size        id3_header_size  = 0;
+    BLT_Size        id3_trailer_size = 0;
     /*BLT_Size       ape_trailer_size = 0;*/
-    BLT_Size       header_size      = 0;
-    BLT_Size       trailer_size     = 0;
-    BLT_Offset     stream_start;
-    BLT_Size       stream_size;
-    ATX_Properties stream_properties;
-    BLT_Result     result;
+    BLT_Size        header_size      = 0;
+    BLT_Size        trailer_size     = 0;
+    BLT_Offset      stream_start;
+    BLT_Size        stream_size;
+    ATX_Properties* stream_properties;
+    BLT_Result      result;
 
     /* check media type */
-    if (media_type == NULL || media_type->id != parser->output.media_type.id) {
+    if (media_type == NULL || media_type->id != self->input.media_type.id) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* get a reference to the stream properties */
-    result = BLT_Stream_GetProperties(&parser->base.context, &stream_properties);
+    result = BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_properties);
     if (BLT_FAILED(result)) return result;
 
     /* if we had a stream, release it */
-    ATX_RELEASE_OBJECT(&parser->input.stream);
+    ATX_RELEASE_OBJECT(self->input.stream);
 
     /* remember the start of the stream */
     result = ATX_InputStream_Tell(stream, &stream_start);
@@ -118,7 +123,7 @@ TagParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
                                        stream_size,
                                        &id3_header_size,
                                        &id3_trailer_size,
-                                       &stream_properties);
+                                       stream_properties);
     if (BLT_SUCCEEDED(result)) {
         header_size = id3_header_size;
         trailer_size = id3_trailer_size;
@@ -144,27 +149,27 @@ TagParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
 
     if (header_size != 0 || trailer_size != 0) {
         /* create a sub stream without the header and the trailer */
-        BLT_Debug("TagParserInputPort_SetStream: substream %ld [%ld - %ld]\n",
+        BLT_Debug("TagParserInput_SetStream: substream %ld [%ld - %ld]\n",
                   stream_size, header_size, trailer_size);
         result = ATX_SubInputStream_Create(stream, 
                                            header_size, 
                                            stream_size,
                                            NULL,
-                                           &parser->input.stream);        
+                                           &self->input.stream);        
         if (ATX_FAILED(result)) return result;
 
         /* update the stream info */
         {
             BLT_StreamInfo info;
             info.size = stream_size;
-            if (!ATX_OBJECT_IS_NULL(&parser->base.context)) {
+            if (ATX_BASE(self, BLT_BaseMediaNode).context) {
                 info.mask = BLT_STREAM_INFO_MASK_SIZE;
-                BLT_Stream_SetInfo(&parser->base.context, &info);
+                BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
             }
         }
     } else {
         /* keep a reference to this stream as-is */
-        parser->input.stream = *stream;
+        self->input.stream = stream;
         ATX_REFERENCE_OBJECT(stream);
     }
 
@@ -172,69 +177,65 @@ TagParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    TagParserInputPort_QueryMediaType
+|    TagParserInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserInputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                  BLT_Ordinal            index,
-                                  const BLT_MediaType**  media_type)
+TagParserInput_QueryMediaType(BLT_MediaPort*        _self,
+                              BLT_Ordinal           index,
+                              const BLT_MediaType** media_type)
 {
-    TagParser* parser = (TagParser*)instance;
-    
+    TagParser* self = ATX_SELF_M(input, TagParser, BLT_MediaPort);
+
     if (index == 0) {
-        *media_type = &parser->input.media_type;
+        *media_type = &self->input.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
         return BLT_FAILURE;
     }
 }
+
+/*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(TagParserInput)
+    ATX_GET_INTERFACE_ACCEPT(TagParserInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(TagParserInput, BLT_InputStreamUser)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamUser interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamUserInterface
-TagParserInputPort_BLT_InputStreamUserInterface = {
-    TagParserInputPort_GetInterface,
-    TagParserInputPort_SetStream
-};
+ATX_BEGIN_INTERFACE_MAP(TagParserInput, BLT_InputStreamUser)
+    TagParserInput_SetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(TagParserInputPort, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(TagParserInput, 
                                          "input",
                                          STREAM_PULL,
                                          IN)
-static const BLT_MediaPortInterface
-TagParserInputPort_BLT_MediaPortInterface = {
-    TagParserInputPort_GetInterface,
-    TagParserInputPort_GetName,
-    TagParserInputPort_GetProtocol,
-    TagParserInputPort_GetDirection,
-    TagParserInputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(TagParserInput, BLT_MediaPort)
+    TagParserInput_GetName,
+    TagParserInput_GetProtocol,
+    TagParserInput_GetDirection,
+    TagParserInput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserInputPort)
-ATX_INTERFACE_MAP_ADD(TagParserInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(TagParserInputPort, BLT_InputStreamUser)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserInputPort)
-
-/*----------------------------------------------------------------------
-|    TagParserOutputPort_QueryMediaType
+|    TagParserOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                   BLT_Ordinal            index,
-                                   const BLT_MediaType**  media_type)
+TagParserOutput_QueryMediaType(BLT_MediaPort*        _self,
+                               BLT_Ordinal           index,
+                               const BLT_MediaType** media_type)
 {
-    TagParser* parser = (TagParser*)instance;
-    
+    TagParser* self = ATX_SELF_M(output, TagParser, BLT_MediaPort);
+
     if (index == 0) {
-        *media_type = &parser->output.media_type;
+        *media_type = (BLT_MediaType*)&self->input.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -243,52 +244,49 @@ TagParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|       TagParserOutputPort_GetStream
+|   TagParserOutput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserOutputPort_GetStream(BLT_InputStreamProviderInstance* instance,
-                              ATX_InputStream*                 stream)
+TagParserOutput_GetStream(BLT_InputStreamProvider* _self,
+                          ATX_InputStream**        stream)
 {
-    TagParser* parser = (TagParser*)instance;
+    TagParser* self = ATX_SELF_M(output, TagParser, BLT_InputStreamProvider);
 
-    *stream = parser->input.stream;
-    ATX_REFERENCE_OBJECT(stream);
+    /* return the stream */
+    *stream = self->input.stream;
+    ATX_REFERENCE_OBJECT(*stream);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(TagParserOutput)
+    ATX_GET_INTERFACE_ACCEPT(TagParserOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(TagParserOutput, BLT_InputStreamProvider)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(TagParserOutputPort, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(TagParserOutput, 
                                          "output",
                                          STREAM_PULL,
                                          OUT)
-static const BLT_MediaPortInterface
-TagParserOutputPort_BLT_MediaPortInterface = {
-    TagParserOutputPort_GetInterface,
-    TagParserOutputPort_GetName,
-    TagParserOutputPort_GetProtocol,
-    TagParserOutputPort_GetDirection,
-    TagParserOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(TagParserOutput, BLT_MediaPort)
+    TagParserOutput_GetName,
+    TagParserOutput_GetProtocol,
+    TagParserOutput_GetDirection,
+    TagParserOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamProvider interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamProviderInterface
-TagParserOutputPort_BLT_InputStreamProviderInterface = {
-    TagParserOutputPort_GetInterface,
-    TagParserOutputPort_GetStream
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserOutputPort)
-ATX_INTERFACE_MAP_ADD(TagParserOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(TagParserOutputPort, BLT_InputStreamProvider)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserOutputPort)
+ATX_BEGIN_INTERFACE_MAP(TagParserOutput, BLT_InputStreamProvider)
+    TagParserOutput_GetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    TagParser_Create
@@ -298,7 +296,7 @@ TagParser_Create(BLT_Module*              module,
                  BLT_Core*                core, 
                  BLT_ModuleParametersType parameters_type,
                  BLT_CString              parameters, 
-                 ATX_Object*              object)
+                 BLT_MediaNode**          object)
 {
     TagParser* parser;
 
@@ -307,30 +305,35 @@ TagParser_Create(BLT_Module*              module,
     /* check parameters */
     if (parameters == NULL || 
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
+        *object = NULL;
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
     /* allocate memory for the object */
     parser = ATX_AllocateZeroMemory(sizeof(TagParser));
     if (parser == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&parser->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(parser, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    BLT_MediaType_Init(&parser->input.media_type,
-                       ((TagParserModule*)
-                        ATX_INSTANCE(module))->mpeg_audio_type_id);
-    ATX_CLEAR_OBJECT(&parser->input.stream);
-    parser->output.media_type = parser->input.media_type;
-    parser->output.media_type.flags = BLT_TAG_PARSER_MEDIA_TYPE_FLAGS_PARSED;
+    BLT_MediaType_Init(&parser->input.media_type, 
+                       ((TagParserModule*)module)->mpeg_audio_type_id);
+    parser->input.stream = NULL;
+    parser->input.media_type = parser->input.media_type;
+    parser->input.media_type.flags = BLT_TAG_PARSER_MEDIA_TYPE_FLAGS_PARSED;
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)parser;
-    ATX_INTERFACE(object) = (ATX_Interface*)&TagParser_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(parser, TagParser, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(parser, TagParser, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&parser->input,  TagParserInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&parser->input,  TagParserInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&parser->output, TagParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&parser->output, TagParserOutput, BLT_InputStreamProvider);
+    *object = &ATX_BASE_EX(parser, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -339,42 +342,40 @@ TagParser_Create(BLT_Module*              module,
 |    TagParser_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-TagParser_Destroy(TagParser* parser)
+TagParser_Destroy(TagParser* self)
 {
     BLT_Debug("TagParser::Destroy\n");
 
     /* release the reference to the stream */
-    ATX_RELEASE_OBJECT(&parser->input.stream);
+    ATX_RELEASE_OBJECT(self->input.stream);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&parser->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(parser);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       TagParser_GetPortByName
+|   TagParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParser_GetPortByName(BLT_MediaNodeInstance* instance,
-                        BLT_CString            name,
-                        BLT_MediaPort*         port)
+TagParser_GetPortByName(BLT_MediaNode*  _self,
+                        BLT_CString     name,
+                        BLT_MediaPort** port)
 {
-    TagParser* parser = (TagParser*)instance;
+    TagParser* self = ATX_SELF_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &TagParserInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &TagParserOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -383,21 +384,24 @@ TagParser_GetPortByName(BLT_MediaNodeInstance* instance,
 |    TagParser_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParser_Seek(BLT_MediaNodeInstance* instance,
-               BLT_SeekMode*          mode,
-               BLT_SeekPoint*         point)
+TagParser_Seek(BLT_MediaNode* _self,
+               BLT_SeekMode*  mode,
+               BLT_SeekPoint* point)
 {
-    TagParser* parser = (TagParser*)instance;
+    TagParser* self = ATX_SELF_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode);
     BLT_Result result;
 
     /* estimate the seek offset from the other stream parameters */
-    result = BLT_Stream_EstimateSeekPoint(&parser->base.context, *mode, point);
+    result = BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
     if (BLT_FAILED(result)) return result;
+    if (!(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
+        return BLT_FAILURE;
+    }
 
     BLT_Debug("TagParser_Seek: seek offset = %d\n", (int)point->offset);
 
     /* seek into the input stream (ignore return value) */
-    ATX_InputStream_Seek(&parser->input.stream, point->offset);
+    ATX_InputStream_Seek(self->input.stream, point->offset);
 
     /* set the mode so that the nodes down the chaine know the seek has */
     /* already been done on the stream                                  */
@@ -407,11 +411,17 @@ TagParser_Seek(BLT_MediaNodeInstance* instance,
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(TagParser)
+    ATX_GET_INTERFACE_ACCEPT_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(TagParser, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-TagParser_BLT_MediaNodeInterface = {
-    TagParser_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     TagParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -424,63 +434,57 @@ TagParser_BLT_MediaNodeInterface = {
 };
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(TagParser, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(TagParser, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParser)
-ATX_INTERFACE_MAP_ADD(TagParser, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(TagParser, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParser)
-
-/*----------------------------------------------------------------------
-|       TagParserModule_Attach
+|   TagParserModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+TagParserModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    TagParserModule* module = (TagParserModule*)instance;
-    BLT_Registry      registry;
-    BLT_Result        result;
+    TagParserModule* self = ATX_SELF_EX(TagParserModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*    registry;
+    BLT_Result       result;
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
 
     /* register the ".mp3" file extension */
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".mp3",
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
 
     /* get the type id for "audio/mpeg" */
     result = BLT_Registry_GetIdForName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/mpeg",
-        &module->mpeg_audio_type_id);
+        &self->mpeg_audio_type_id);
     if (BLT_FAILED(result)) return result;
     
     BLT_Debug("TagParserModule::Attach (audio/mpeg type = %d)\n",
-              module->mpeg_audio_type_id);
+              self->mpeg_audio_type_id);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       TagParserModule_Probe
+|   TagParserModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-TagParserModule_Probe(BLT_ModuleInstance*      instance, 
+TagParserModule_Probe(BLT_Module*              _self, 
                       BLT_Core*                core,
                       BLT_ModuleParametersType parameters_type,
                       BLT_AnyConst             parameters,
                       BLT_Cardinal*            match)
 {
-    TagParserModule* module = (TagParserModule*)instance;
+    TagParserModule* self = ATX_SELF_EX(TagParserModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -504,7 +508,7 @@ TagParserModule_Probe(BLT_ModuleInstance*      instance,
 
             /* the input type should be 'audio/mpeg' */
             if (constructor->spec.input.media_type->id != 
-                module->mpeg_audio_type_id) {
+                self->mpeg_audio_type_id) {
                 return BLT_FAILURE;
             }
 
@@ -520,7 +524,7 @@ TagParserModule_Probe(BLT_ModuleInstance*      instance,
             if (!(constructor->spec.output.media_type->id ==
                   BLT_MEDIA_TYPE_ID_UNKNOWN) &&
                 !(constructor->spec.output.media_type->id ==
-                  module->mpeg_audio_type_id)) {
+                  self->mpeg_audio_type_id)) {
                 return BLT_FAILURE;
             }
 
@@ -552,45 +556,48 @@ TagParserModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(TagParser)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(TagParser, "Tag Parser", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(TagParserModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(TagParserModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(TagParserModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface TagParserModule_BLT_ModuleInterface = {
-    TagParserModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(TagParserModule, TagParser)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(TagParserModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     TagParserModule_Attach,
     TagParserModule_CreateInstance,
     TagParserModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define TagParserModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(TagParserModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(TagParserModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserModule) 
-ATX_INTERFACE_MAP_ADD(TagParserModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(TagParserModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(TagParserModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(TagParserModule, "Tag Parser", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_TagParserModule_GetModuleObject(BLT_Module* object)
+BLT_TagParserModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

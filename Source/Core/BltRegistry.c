@@ -43,6 +43,11 @@ struct BLT_RegistryKey {
 };
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_Registry);
+    ATX_IMPLEMENTS(ATX_Destroyable);
+    
+    /* members */
     Key*       root;
     BLT_UInt32 id_base;
 } Registry;
@@ -59,19 +64,19 @@ typedef struct {
 /*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Registry)
-static const BLT_RegistryInterface Registry_BLT_RegistryInterface;
+ATX_DECLARE_INTERFACE_MAP(Registry, BLT_Registry)
+ATX_DECLARE_INTERFACE_MAP(Registry, ATX_Destroyable)
 static BLT_Result Registry_RegisterNameAndId(Registry* registry, 
                                              BLT_CString category, 
                                              BLT_CString name, BLT_UInt32 id);
-BLT_METHOD Registry_CreateKey(BLT_RegistryInstance* instance,
-                              BLT_RegistryKey*      parent,
-                              BLT_CString           name,
-                              BLT_RegistryKey**     key);
-BLT_METHOD Registry_GetIdForName(BLT_RegistryInstance* instance, 
-                                 BLT_CString           category,
-                                 BLT_CString           name,
-                                 BLT_UInt32*           id);
+BLT_METHOD Registry_CreateKey(BLT_Registry*     self,
+                              BLT_RegistryKey*  parent,
+                              BLT_CString       name,
+                              BLT_RegistryKey** key);
+BLT_METHOD Registry_GetIdForName(BLT_Registry* instance, 
+                                 BLT_CString   category,
+                                 BLT_CString   name,
+                                 BLT_UInt32*  id);
 
 /*----------------------------------------------------------------------
 |    ComputeHash
@@ -279,14 +284,14 @@ Registry_Initialize(Registry* registry)
     }
 
     /* create the media type namespace key */
-    result = Registry_CreateKey((BLT_RegistryInstance*)registry, 
+    result = Registry_CreateKey(&ATX_BASE(registry, BLT_Registry),
                                 BLT_REGISTRY_KEY_ROOT,
                                 BLT_REGISTRY_KEY_PUBLIC "/"
                                 BLT_REGISTRY_ID_TO_NAME_NAMESPACE "/"
                                 BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                 NULL);
     if (BLT_FAILED(result)) return result;
-    result = Registry_CreateKey((BLT_RegistryInstance*)registry, 
+    result = Registry_CreateKey(&ATX_BASE(registry, BLT_Registry), 
                                 BLT_REGISTRY_KEY_ROOT,
                                 BLT_REGISTRY_KEY_PUBLIC "/"
                                 BLT_REGISTRY_NAME_TO_ID_NAMESPACE "/"
@@ -306,7 +311,7 @@ Registry_Initialize(Registry* registry)
                                "audio/pcm", 2);
 
     /* create the file extensions namespace key */
-    result = Registry_CreateKey((BLT_RegistryInstance*)registry, 
+    result = Registry_CreateKey(&ATX_BASE(registry, BLT_Registry), 
                                 BLT_REGISTRY_KEY_ROOT,
                                 BLT_REGISTRY_KEY_PUBLIC "/"
                                 BLT_REGISTRY_FILE_EXTENSIONS_NAMESPACE,
@@ -320,7 +325,7 @@ Registry_Initialize(Registry* registry)
 |    Registry_Create
 +---------------------------------------------------------------------*/
 BLT_Result
-Registry_Create(BLT_Registry* object)
+Registry_Create(BLT_Registry** object)
 {
     Registry*  registry;
     BLT_Result result;
@@ -328,7 +333,7 @@ Registry_Create(BLT_Registry* object)
     /* allocate memory for the object */
     registry = ATX_AllocateZeroMemory(sizeof(Registry));
     if (registry == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
@@ -336,13 +341,14 @@ Registry_Create(BLT_Registry* object)
     result = Registry_Initialize(registry);
     if (BLT_FAILED(result)) {
         ATX_FreeMemory(registry);
-        ATX_CLEAR_OBJECT(object);
+        object = NULL;
         return result;
     }
 
-    /* construct reference */
-    ATX_INSTANCE(object) = (BLT_RegistryInstance*)registry;
-    ATX_INTERFACE(object) = &Registry_BLT_RegistryInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE(registry, Registry, BLT_Registry);
+    ATX_SET_INTERFACE(registry, Registry, ATX_Destroyable);
+    *object = &ATX_BASE(registry, BLT_Registry);
 
     return BLT_SUCCESS;
 }
@@ -351,15 +357,15 @@ Registry_Create(BLT_Registry* object)
 |    Registry_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-Registry_Destroy(ATX_DestroyableInstance* instance)
+Registry_Destroy(ATX_Destroyable* _self)
 {
-    Registry* registry = (Registry*)instance;
+    Registry* self = ATX_SELF(Registry, ATX_Destroyable);
 
     /* destroy to root key table */
-    Key_Destroy(registry->root);
+    Key_Destroy(self->root);
 
     /* free the object memory */
-    ATX_FreeMemory(registry);
+    ATX_FreeMemory((void*)self);
 
     return BLT_SUCCESS;
 }
@@ -410,15 +416,15 @@ Registry_FindKeyByName(Registry*   registry,
 |    Registry_CreateKey
 +---------------------------------------------------------------------*/
 BLT_METHOD 
-Registry_CreateKey(BLT_RegistryInstance* instance,
-                   BLT_RegistryKey*      parent,
-                   BLT_CString           name,
-                   BLT_RegistryKey**     key)
+Registry_CreateKey(BLT_Registry*     _self,
+                   BLT_RegistryKey*  parent,
+                   BLT_CString       name,
+                   BLT_RegistryKey** key)
 {
-    Registry* registry = (Registry*)instance;
+    Registry* self = ATX_SELF(Registry, BLT_Registry);
     Key*      new_key;
 
-    new_key = Registry_FindKeyByName(registry, parent, name, BLT_TRUE);
+    new_key = Registry_FindKeyByName(self, parent, name, BLT_TRUE);
     if (key) *key = new_key;
     if (new_key == NULL) {
         return BLT_FAILURE;
@@ -433,10 +439,9 @@ Registry_CreateKey(BLT_RegistryInstance* instance,
 |    Registry_DestroyKey
 +---------------------------------------------------------------------*/
 BLT_METHOD 
-Registry_DestroyKey(BLT_RegistryInstance* instance, 
-                    BLT_RegistryKey*      key)
+Registry_DestroyKey(BLT_Registry* self, BLT_RegistryKey* key)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     return Key_Destroy(key);
 }
 
@@ -444,14 +449,14 @@ Registry_DestroyKey(BLT_RegistryInstance* instance,
 |    Registry_GetKey
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_GetKey(BLT_RegistryInstance* instance,
-                BLT_RegistryKey*      parent,
-                BLT_CString           name,
-                BLT_RegistryKey**     key)
+Registry_GetKey(BLT_Registry*     _self,
+                BLT_RegistryKey*  parent,
+                BLT_CString       name,
+                BLT_RegistryKey** key)
 {
-    Registry* registry = (Registry*)instance;
+    Registry* self = ATX_SELF(Registry, BLT_Registry);
 
-    *key = Registry_FindKeyByName(registry, parent, name, BLT_FALSE);
+    *key = Registry_FindKeyByName(self, parent, name, BLT_FALSE);
     if (*key) {
         return BLT_SUCCESS;
     } else {
@@ -463,17 +468,17 @@ Registry_GetKey(BLT_RegistryInstance* instance,
 |    Registry_SetKeyValue
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_SetKeyValue(BLT_RegistryInstance* instance,
+Registry_SetKeyValue(BLT_Registry*         _self,
                      BLT_RegistryKey*      parent,
                      BLT_CString           name,
                      BLT_RegistryValueType value_type,
                      BLT_RegistryValue*    value)
 {
-    Registry* registry = (Registry*)instance;
+    Registry* self = ATX_SELF(Registry, BLT_Registry);
     Key*      key;
 
     /* get the key */
-    key = Registry_FindKeyByName(registry, parent, name, BLT_TRUE);
+    key = Registry_FindKeyByName(self, parent, name, BLT_TRUE);
     if (key == NULL) return BLT_FAILURE;
     
     /* reset the value of the key */
@@ -519,17 +524,17 @@ Registry_SetKeyValue(BLT_RegistryInstance* instance,
 |    Registry_GetKeyValue
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_GetKeyValue(BLT_RegistryInstance*  instance,
+Registry_GetKeyValue(BLT_Registry*          _self,
                      BLT_RegistryKey*       parent,
                      BLT_CString            name,
                      BLT_RegistryValueType* value_type,
                      BLT_RegistryValue*     value)
 {
-    Registry* registry = (Registry*)instance;
+    Registry* self = ATX_SELF(Registry, BLT_Registry);
     Key*      key;
 
     /* get the key */
-    key = Registry_FindKeyByName(registry, parent, name, BLT_FALSE);
+    key = Registry_FindKeyByName(self, parent, name, BLT_FALSE);
     if (key == NULL) return BLT_FAILURE;
     
     /* return the value */
@@ -573,7 +578,7 @@ Registry_RegisterNameAndId(Registry*   registry,
     BLT_Result       result;
 
     /* get the key for the namespace */
-    result = Registry_GetKey((BLT_RegistryInstance*)registry, 
+    result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_NAME_TO_ID_NAMESPACE,
@@ -581,14 +586,14 @@ Registry_RegisterNameAndId(Registry*   registry,
     if (BLT_FAILED(result)) return result;
 
     /* get the key for the category */
-    result = Registry_GetKey((BLT_RegistryInstance*)registry, 
+    result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
                              namespace_key, 
                              category, 
                              &category_key);
     if (BLT_FAILED(result)) return result;
         
     /* set the value for the key */
-    result = Registry_SetKeyValue((BLT_RegistryInstance*)registry,
+    result = Registry_SetKeyValue(&ATX_BASE(registry, BLT_Registry),
                                   category_key, 
                                   name,
                                   BLT_REGISTRY_VALUE_TYPE_INTEGER, 
@@ -596,13 +601,13 @@ Registry_RegisterNameAndId(Registry*   registry,
     if (BLT_FAILED(result)) return result;
 
     /* create the key for the reverse mapping */
-    result = Registry_GetKey((BLT_RegistryInstance*)registry, 
+    result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_ID_TO_NAME_NAMESPACE,
                              &namespace_key);
     if (BLT_FAILED(result)) return result;
-    result = Registry_GetKey((BLT_RegistryInstance*)registry, 
+    result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
                              namespace_key, 
                              category, 
                              &category_key);
@@ -611,7 +616,7 @@ Registry_RegisterNameAndId(Registry*   registry,
         char id_name[8+1];
         id_name[8] = '\0';
         IdToName(id, id_name);
-        result = Registry_SetKeyValue((BLT_RegistryInstance*)registry, 
+        result = Registry_SetKeyValue(&ATX_BASE(registry, BLT_Registry), 
                                       category_key, 
                                       id_name,
                                       BLT_REGISTRY_VALUE_TYPE_STRING, 
@@ -626,36 +631,36 @@ Registry_RegisterNameAndId(Registry*   registry,
 |    Registry_RegisterName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_RegisterName(BLT_RegistryInstance* instance, 
-                      BLT_CString           category,
-                      BLT_CString           name,
-                      BLT_UInt32*           id)
+Registry_RegisterName(BLT_Registry* _self, 
+                      BLT_CString   category,
+                      BLT_CString   name,
+                      BLT_UInt32*   id)
 {
-    Registry*  registry = (Registry*)instance;
+    Registry*  self = ATX_SELF(Registry, BLT_Registry);
     BLT_Result result;
 
     /* check if the name has already been registered */
-    result = Registry_GetIdForName(instance, category, name, id);
+    result = Registry_GetIdForName(_self, category, name, id);
     if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
 
     /* the name is no register, register it now */
     if (id) {
-        *id = registry->id_base;
+        *id = self->id_base;
     }
-    return Registry_RegisterNameAndId(registry, 
+    return Registry_RegisterNameAndId(self, 
                                       category, 
                                       name, 
-                                      registry->id_base++);
+                                      self->id_base++);
 }
 
 /*----------------------------------------------------------------------
 |    Registry_GetNameForId
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_GetNameForId(BLT_RegistryInstance* instance, 
-                      BLT_CString           category,
-                      BLT_UInt32            id,
-                      BLT_CString*          name)
+Registry_GetNameForId(BLT_Registry* self, 
+                      BLT_CString   category,
+                      BLT_UInt32    id,
+                      BLT_CString*  name)
 {
     BLT_RegistryKey*      category_key;
     BLT_RegistryKey*      namespace_key;
@@ -669,7 +674,7 @@ Registry_GetNameForId(BLT_RegistryInstance* instance,
     IdToName(id, id_name);
 
     /* get the key for the namespace */
-    result = Registry_GetKey(instance,
+    result = Registry_GetKey(self,
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_ID_TO_NAME_NAMESPACE,
@@ -677,14 +682,14 @@ Registry_GetNameForId(BLT_RegistryInstance* instance,
     if (BLT_FAILED(result)) return result;
 
     /* get the key for the category */
-    result = Registry_GetKey(instance,
+    result = Registry_GetKey(self,
                              namespace_key, 
                              category, 
                              &category_key);
     if (BLT_FAILED(result)) return result;
 
     /* get the key value */
-    result = Registry_GetKeyValue(instance, 
+    result = Registry_GetKeyValue(self, 
                                   category_key, 
                                   id_name, 
                                   &key_value_type,
@@ -706,10 +711,10 @@ Registry_GetNameForId(BLT_RegistryInstance* instance,
 |    Registry_GetIdForName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_GetIdForName(BLT_RegistryInstance* instance, 
-                      BLT_CString           category,
-                      BLT_CString           name,
-                      BLT_UInt32*           id)
+Registry_GetIdForName(BLT_Registry* self, 
+                      BLT_CString   category,
+                      BLT_CString   name,
+                      BLT_UInt32*   id)
 {
     BLT_RegistryKey*      category_key;
     BLT_RegistryKey*      namespace_key;
@@ -718,7 +723,7 @@ Registry_GetIdForName(BLT_RegistryInstance* instance,
     BLT_Result            result;
 
     /* get the key for the namespace */
-    result = Registry_GetKey(instance,
+    result = Registry_GetKey(self,
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_NAME_TO_ID_NAMESPACE,
@@ -726,14 +731,14 @@ Registry_GetIdForName(BLT_RegistryInstance* instance,
     if (BLT_FAILED(result)) return result;
 
     /* get the key for the category */
-    result = Registry_GetKey(instance,
+    result = Registry_GetKey(self,
                              namespace_key, 
                              category, 
                              &category_key);
     if (BLT_FAILED(result)) return result;
 
     /* get the key value */
-    result = Registry_GetKeyValue(instance, 
+    result = Registry_GetKeyValue(self, 
                                   category_key, 
                                   name, 
                                   &key_value_type,
@@ -755,9 +760,9 @@ Registry_GetIdForName(BLT_RegistryInstance* instance,
 |    Registry_RegisterExtension
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_RegisterExtension(BLT_RegistryInstance* instance, 
-                           BLT_CString           extension,
-                           BLT_CString           media_type)
+Registry_RegisterExtension(BLT_Registry* self, 
+                           BLT_CString   extension,
+                           BLT_CString   media_type)
 {
     BLT_RegistryKey*  namespace_key;
     BLT_RegistryKey*  extension_key;
@@ -766,14 +771,14 @@ Registry_RegisterExtension(BLT_RegistryInstance* instance,
     BLT_Result        result;
 
     /* make sure that the media type is registered */
-    result = Registry_RegisterName(instance, 
+    result = Registry_RegisterName(self, 
                                    BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                    media_type,
                                    &type_id);
     if (BLT_FAILED(result)) return result;
 
     /* get the namespace key */
-    result = Registry_GetKey(instance, 
+    result = Registry_GetKey(self, 
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_FILE_EXTENSIONS_NAMESPACE,
@@ -781,7 +786,7 @@ Registry_RegisterExtension(BLT_RegistryInstance* instance,
     if (BLT_FAILED(result)) return result;
 
     /* create/get the key for the file extension */
-    result = Registry_CreateKey(instance,
+    result = Registry_CreateKey(self,
                                 namespace_key,
                                 extension,
                                 &extension_key);
@@ -789,7 +794,7 @@ Registry_RegisterExtension(BLT_RegistryInstance* instance,
 
     /* set the value for the media type subkey */
     value.integer = type_id;
-    result =  Registry_SetKeyValue(instance, 
+    result =  Registry_SetKeyValue(self, 
                                    extension_key, 
                                    BLT_REGISTRY_MEDIA_TYPE_SUBKEY,
                                    BLT_REGISTRY_VALUE_TYPE_INTEGER, 
@@ -803,9 +808,9 @@ Registry_RegisterExtension(BLT_RegistryInstance* instance,
 |    Registry_GetMediaTypeIdForExtension
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Registry_GetMediaTypeIdForExtension(BLT_RegistryInstance* instance, 
-                                    BLT_CString           extension,
-                                    BLT_MediaTypeId*      type_id)
+Registry_GetMediaTypeIdForExtension(BLT_Registry*    self, 
+                                    BLT_CString      extension,
+                                    BLT_MediaTypeId* type_id)
 {
     BLT_RegistryKey*      namespace_key;
     BLT_RegistryKey*      extension_key;
@@ -817,7 +822,7 @@ Registry_GetMediaTypeIdForExtension(BLT_RegistryInstance* instance,
     *type_id = BLT_MEDIA_TYPE_ID_NONE;
 
     /* get the namespace key */
-    result = Registry_GetKey(instance, 
+    result = Registry_GetKey(self, 
                              BLT_REGISTRY_KEY_ROOT,
                              BLT_REGISTRY_KEY_PUBLIC "/"
                              BLT_REGISTRY_FILE_EXTENSIONS_NAMESPACE,
@@ -825,12 +830,12 @@ Registry_GetMediaTypeIdForExtension(BLT_RegistryInstance* instance,
     if (BLT_FAILED(result)) return result;
 
     /* get the key for the file extension */
-    result = Registry_GetKey(instance, namespace_key, 
+    result = Registry_GetKey(self, namespace_key, 
                              extension, &extension_key);
     if (BLT_FAILED(result)) return result;
 
     /* get the media type id */
-    result = Registry_GetKeyValue(instance, extension_key,
+    result = Registry_GetKeyValue(self, extension_key,
                                   BLT_REGISTRY_MEDIA_TYPE_SUBKEY,
                                   &value_type,
                                   &value);
@@ -846,11 +851,17 @@ Registry_GetMediaTypeIdForExtension(BLT_RegistryInstance* instance,
 }
 
 /*----------------------------------------------------------------------
+|       GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Registry)
+    ATX_GET_INTERFACE_ACCEPT(Registry, BLT_Registry)
+    ATX_GET_INTERFACE_ACCEPT(Registry, ATX_Destroyable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_Registry interface
 +---------------------------------------------------------------------*/
-static const BLT_RegistryInterface
-Registry_BLT_RegistryInterface = {
-    Registry_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(Registry, BLT_Registry)
     Registry_CreateKey,
     Registry_DestroyKey,
     Registry_GetKey,
@@ -861,18 +872,10 @@ Registry_BLT_RegistryInterface = {
     Registry_GetIdForName,
     Registry_RegisterExtension,
     Registry_GetMediaTypeIdForExtension
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_Destroyable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_DESTROYABLE_INTERFACE(Registry)
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Registry)
-ATX_INTERFACE_MAP_ADD(Registry, BLT_Registry)
-ATX_INTERFACE_MAP_ADD(Registry, ATX_Destroyable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(Registry)
+ATX_IMPLEMENT_DESTROYABLE_INTERFACE(Registry)
 

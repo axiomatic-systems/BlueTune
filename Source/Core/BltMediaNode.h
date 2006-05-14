@@ -44,7 +44,7 @@ typedef enum {
 } BLT_MediaNodeState;
 
 typedef struct {
-    BLT_Module  module;
+    BLT_Module* module;
     BLT_CString name;
     BLT_Flags   flags;
 } BLT_MediaNodeInfo;
@@ -60,9 +60,14 @@ struct BLT_MediaNodeConstructor {
 };
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaNode);
+    ATX_IMPLEMENTS(ATX_Referenceable);
+
+    /* members */
     BLT_Cardinal      reference_count;
-    BLT_Core          core;
-    BLT_Stream        context;
+    BLT_Core*         core;
+    BLT_Stream*       context;
     BLT_MediaNodeInfo info;
 } BLT_BaseMediaNode;
 
@@ -70,99 +75,93 @@ typedef struct {
 |       BLT_MediaNode Interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaNode)
-    BLT_Result (*GetInfo)(BLT_MediaNodeInstance* instance, 
-                          BLT_MediaNodeInfo*     info);
-    BLT_Result (*GetPortByName)(BLT_MediaNodeInstance* node, 
-                                BLT_CString            name,
-                                BLT_MediaPort*         port);
-    BLT_Result (*Activate)(BLT_MediaNodeInstance* node,
-                           BLT_Stream*            stream);
-    BLT_Result (*Deactivate)(BLT_MediaNodeInstance* node);
-    BLT_Result (*Start)(BLT_MediaNodeInstance* node);
-    BLT_Result (*Stop)(BLT_MediaNodeInstance* node);
-    BLT_Result (*Pause)(BLT_MediaNodeInstance* node);
-    BLT_Result (*Resume)(BLT_MediaNodeInstance* node);
-    BLT_Result (*Seek)(BLT_MediaNodeInstance* node, 
-                       BLT_SeekMode*          mode,
-                       BLT_SeekPoint*         point);
-ATX_END_INTERFACE_DEFINITION(BLT_MediaNode)
+    BLT_Result (*GetInfo)(BLT_MediaNode* self, BLT_MediaNodeInfo* info);
+    BLT_Result (*GetPortByName)(BLT_MediaNode*  self, 
+                                BLT_CString     name,
+                                BLT_MediaPort** port);
+    BLT_Result (*Activate)(BLT_MediaNode* self, BLT_Stream* stream);
+    BLT_Result (*Deactivate)(BLT_MediaNode* self);
+    BLT_Result (*Start)(BLT_MediaNode* self);
+    BLT_Result (*Stop)(BLT_MediaNode* self);
+    BLT_Result (*Pause)(BLT_MediaNode* self);
+    BLT_Result (*Resume)(BLT_MediaNode* self);
+    BLT_Result (*Seek)(BLT_MediaNode* self, 
+                       BLT_SeekMode*  mode,
+                       BLT_SeekPoint* point);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_MediaNode_GetInfo(object, info) \
-ATX_INTERFACE(object)->GetInfo(ATX_INSTANCE(object), info)
+ATX_INTERFACE(object)->GetInfo(object, info)
 
 #define BLT_MediaNode_GetPortByName(object, name, port) \
-ATX_INTERFACE(object)->GetPortByName(ATX_INSTANCE(object), name, port)
+ATX_INTERFACE(object)->GetPortByName(object, name, port)
 
 #define BLT_MediaNode_Activate(object, stream) \
-ATX_INTERFACE(object)->Activate(ATX_INSTANCE(object), stream)
+ATX_INTERFACE(object)->Activate(object, stream)
 
 #define BLT_MediaNode_Deactivate(object) \
-ATX_INTERFACE(object)->Deactivate(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Deactivate(object)
 
 #define BLT_MediaNode_Start(object) \
-ATX_INTERFACE(object)->Start(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Start(object)
 
 #define BLT_MediaNode_Stop(object) \
-ATX_INTERFACE(object)->Stop(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Stop(object)
 
 #define BLT_MediaNode_Pause(object) \
-ATX_INTERFACE(object)->Pause(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Pause(object)
 
 #define BLT_MediaNode_Resume(object) \
-ATX_INTERFACE(object)->Resume(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Resume(object)
 
 #define BLT_MediaNode_Seek(object, mode, point) \
-ATX_INTERFACE(object)->Seek(ATX_INSTANCE(object), mode, point)
+ATX_INTERFACE(object)->Seek(object, mode, point)
 
 /*----------------------------------------------------------------------
 |       prototypes
 +---------------------------------------------------------------------*/
-BLT_Result BLT_BaseMediaNode_Construct(BLT_BaseMediaNode* node,
+BLT_Result BLT_BaseMediaNode_Construct(BLT_BaseMediaNode* self,
                                        BLT_Module*        module,
                                        BLT_Core*          core);
-BLT_Result BLT_BaseMediaNode_Destruct(BLT_BaseMediaNode* node);
-BLT_Result BLT_BaseMediaNode_GetInfo(BLT_MediaNodeInstance* instance,
-                                      BLT_MediaNodeInfo*     info);
-BLT_Result BLT_BaseMediaNode_Activate(BLT_MediaNodeInstance* instance,
-                                      BLT_Stream*            stream);
-BLT_Result BLT_BaseMediaNode_Deactivate(BLT_MediaNodeInstance* instance);
-BLT_Result BLT_BaseMediaNode_Start(BLT_MediaNodeInstance* instance);
-BLT_Result BLT_BaseMediaNode_Stop(BLT_MediaNodeInstance* instance);
-BLT_Result BLT_BaseMediaNode_Pause(BLT_MediaNodeInstance* instance);
-BLT_Result BLT_BaseMediaNode_Resume(BLT_MediaNodeInstance* instance);
-BLT_Result BLT_BaseMediaNode_Seek(BLT_MediaNodeInstance* instance, 
-                                  BLT_SeekMode*          mode,
-                                  BLT_SeekPoint*         point);
+BLT_Result BLT_BaseMediaNode_Destruct(BLT_BaseMediaNode* self);
+BLT_Result BLT_BaseMediaNode_GetInfo(BLT_MediaNode*     self,
+                                     BLT_MediaNodeInfo* info);
+BLT_Result BLT_BaseMediaNode_Activate(BLT_MediaNode* self,
+                                      BLT_Stream*    stream);
+BLT_Result BLT_BaseMediaNode_Deactivate(BLT_MediaNode* self);
+BLT_Result BLT_BaseMediaNode_Start(BLT_MediaNode* self);
+BLT_Result BLT_BaseMediaNode_Stop(BLT_MediaNode* self);
+BLT_Result BLT_BaseMediaNode_Pause(BLT_MediaNode* self);
+BLT_Result BLT_BaseMediaNode_Resume(BLT_MediaNode* self);
+BLT_Result BLT_BaseMediaNode_Seek(BLT_MediaNode* self, 
+                                  BLT_SeekMode*  mode,
+                                  BLT_SeekPoint* point);
 
 /*----------------------------------------------------------------------
 |       template macros
 +---------------------------------------------------------------------*/
-#define BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(_module_type)    \
+#define BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(_module_type, _class)    \
 BLT_METHOD                                                              \
-_module_type##Module_CreateInstance(BLT_ModuleInstance*      instance,  \
+_module_type##_CreateInstance(BLT_Module*        self,                  \
                               BLT_Core*                core,            \
                               BLT_ModuleParametersType parameters_type, \
                               BLT_AnyConst             parameters,      \
                               const ATX_InterfaceId*   interface_id,    \
-                              ATX_Object*              object)          \
+                              ATX_Object**             object)          \
 {                                                                       \
-    BLT_Module me;                                                      \
-    ATX_INSTANCE(&me)  = instance;                                      \
-    ATX_INTERFACE(&me) = &_module_type##Module_BLT_ModuleInterface;     \
     if (ATX_INTERFACE_IDS_EQUAL(interface_id,                           \
                                 &ATX_INTERFACE_ID__BLT_MediaNode)) {    \
-        return _module_type##_Create(&me,                               \
-                                     core,                              \
-                                     parameters_type,                   \
-                                     parameters,                        \
-                                     object);                           \
+        return _class##_Create(self,                                    \
+                               core,                                    \
+                               parameters_type,                         \
+                               parameters,                              \
+                               (BLT_MediaNode**)object);                \
     } else {                                                            \
         return BLT_ERROR_INVALID_INTERFACE;                             \
     }                                                                   \
 }                                                                       \
-
 
 #endif /* _BLT_MEDIA_NODE_H_ */

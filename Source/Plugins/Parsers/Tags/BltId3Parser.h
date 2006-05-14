@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltId3Parser.h
-|
 |      ID3 Parser Library
 |
 |      (c) 2002-2003 Gilles Boccon-Gibod

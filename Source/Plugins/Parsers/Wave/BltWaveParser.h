@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltWaveParser.h
-|
 |      WaveParser Module
 |
 |      (c) 2002-2003 Gilles Boccon-Gibod
@@ -21,6 +19,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_WaveParserModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_WaveParserModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_WAVE_PARSER_H_ */

@@ -104,8 +104,8 @@ typedef struct {
 |       more types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_MediaNode media_node;
-    BLT_Flags     flags;
+    BLT_MediaNode* media_node;
+    BLT_Flags      flags;
     struct {
         BLT_Boolean           connected;
         BLT_MediaPortProtocol protocol;
@@ -126,127 +126,121 @@ typedef struct {
 |       BLT_Stream Interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
-    BLT_Result (*SetEventListener)(BLT_StreamInstance*      instance,
-                                   const BLT_EventListener* listener);
-    BLT_Result (*ResetInput)(BLT_StreamInstance* stream);
-    BLT_Result (*SetInput)(BLT_StreamInstance* stream, 
-                           BLT_CString         name,
-                           BLT_CString         type);
-    BLT_Result (*SetInputNode)(BLT_StreamInstance*  stream,
-			                   BLT_CString          name,
-                               const BLT_MediaNode* node);
-    BLT_Result (*GetInputNode)(BLT_StreamInstance* stream,
-                               BLT_MediaNode*      node);
-    BLT_Result (*ResetOutput)(BLT_StreamInstance* stream);
-    BLT_Result (*SetOutput)(BLT_StreamInstance* stream, 
-                            BLT_CString         name,
-                            BLT_CString         type);
-    BLT_Result (*SetOutputNode)(BLT_StreamInstance*  stream,
-				                BLT_CString          name,
-                                const BLT_MediaNode* node);
-    BLT_Result (*GetOutputNode)(BLT_StreamInstance* stream,
-                                BLT_MediaNode*      node);
-    BLT_Result (*AddNode)(BLT_StreamInstance*  stream,
-                          const BLT_MediaNode* where,
-                          const BLT_MediaNode* node);
-    BLT_Result (*AddNodeByName)(BLT_StreamInstance*  stream, 
-                                const BLT_MediaNode* where,
-                                BLT_CString          name);
-    BLT_Result (*GetStreamNodeInfo)(BLT_StreamInstance*  stream,
-                                    const BLT_MediaNode* node,
-                                    BLT_StreamNodeInfo*  info);
-    BLT_Result (*GetFirstNode)(BLT_StreamInstance* stream,
-                               BLT_MediaNode*      node);
-    BLT_Result (*GetNextNode)(BLT_StreamInstance* stream,
+    BLT_Result (*SetEventListener)(BLT_Stream*        self,
+                                   BLT_EventListener* listener);
+    BLT_Result (*ResetInput)(BLT_Stream* self);
+    BLT_Result (*SetInput)(BLT_Stream* self, 
+                           BLT_CString name,
+                           BLT_CString type);
+    BLT_Result (*SetInputNode)(BLT_Stream*    self,
+			                   BLT_CString    name,
+                               BLT_MediaNode* node);
+    BLT_Result (*GetInputNode)(BLT_Stream* self, BLT_MediaNode** node);
+    BLT_Result (*ResetOutput)(BLT_Stream* self);
+    BLT_Result (*SetOutput)(BLT_Stream* self, 
+                            BLT_CString name,
+                            BLT_CString type);
+    BLT_Result (*SetOutputNode)(BLT_Stream*    self,
+				                BLT_CString    name,
+                                BLT_MediaNode* node);
+    BLT_Result (*GetOutputNode)(BLT_Stream* stream, BLT_MediaNode** node);
+    BLT_Result (*AddNode)(BLT_Stream*    self, 
+                          BLT_MediaNode* where,
+                          BLT_MediaNode* node);
+    BLT_Result (*AddNodeByName)(BLT_Stream*    self, 
+                                BLT_MediaNode* where,
+                                BLT_CString    name);
+    BLT_Result (*GetStreamNodeInfo)(BLT_Stream*         self,
+                                    BLT_MediaNode*      node,
+                                    BLT_StreamNodeInfo* info);
+    BLT_Result (*GetFirstNode)(BLT_Stream*         self,
+                               BLT_MediaNode**     node);
+    BLT_Result (*GetNextNode)(BLT_Stream*         self,
                               BLT_MediaNode*      node,
-                              BLT_MediaNode*      next);
-    BLT_Result (*PumpPacket)(BLT_StreamInstance* stream);
-    BLT_Result (*Stop)(BLT_StreamInstance* stream);
-    BLT_Result (*Pause)(BLT_StreamInstance* stream);
-    BLT_Result (*SetInfo)(BLT_StreamInstance*   stream,
-                          const BLT_StreamInfo* info);
-    BLT_Result (*GetInfo)(BLT_StreamInstance* stream,
-                          BLT_StreamInfo*     info);
-    BLT_Result (*GetStatus)(BLT_StreamInstance* stream,
-                            BLT_StreamStatus*   status);
-    BLT_Result (*GetProperties)(BLT_StreamInstance* stream, 
-                                ATX_Properties*     settings);
-    BLT_Result (*EstimateSeekPoint)(BLT_StreamInstance* stream,
-                                    BLT_SeekMode        mode,
-                                    BLT_SeekPoint*      point);
-    BLT_Result (*SeekToTime)(BLT_StreamInstance* stream, BLT_Cardinal time);
-    BLT_Result (*SeekToPosition)(BLT_StreamInstance* stream,
-                                 BLT_Size            offset,
-                                 BLT_Size            range);
-ATX_END_INTERFACE_DEFINITION(BLT_Stream)
+                              BLT_MediaNode**     next);
+    BLT_Result (*PumpPacket)(BLT_Stream* self);
+    BLT_Result (*Stop)(BLT_Stream* self);
+    BLT_Result (*Pause)(BLT_Stream* self);
+    BLT_Result (*SetInfo)(BLT_Stream* self, const BLT_StreamInfo* info);
+    BLT_Result (*GetInfo)(BLT_Stream* self, BLT_StreamInfo* info);
+    BLT_Result (*GetStatus)(BLT_Stream* self, BLT_StreamStatus* status);
+    BLT_Result (*GetProperties)(BLT_Stream* self, ATX_Properties** settings);
+    BLT_Result (*EstimateSeekPoint)(BLT_Stream*    self,
+                                    BLT_SeekMode   mode,
+                                    BLT_SeekPoint* point);
+    BLT_Result (*SeekToTime)(BLT_Stream* self, BLT_Cardinal time);
+    BLT_Result (*SeekToPosition)(BLT_Stream* self,
+                                 BLT_Size    offset,
+                                 BLT_Size    range);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Stream_SetEventListener(object, listener) \
-ATX_INTERFACE(object)->SetEventListener(ATX_INSTANCE(object), listener)
+ATX_INTERFACE(object)->SetEventListener(object, listener)
 
 #define BLT_Stream_ResetInput(object) \
-ATX_INTERFACE(object)->ResetInput(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->ResetInput(object)
 
 #define BLT_Stream_SetInput(object, name, media_type) \
-ATX_INTERFACE(object)->SetInput(ATX_INSTANCE(object), name, media_type)
+ATX_INTERFACE(object)->SetInput(object, name, media_type)
 
 #define BLT_Stream_SetInputNode(object, node) \
-ATX_INTERFACE(object)->SetInputNode(ATX_INSTANCE(object), node)
+ATX_INTERFACE(object)->SetInputNode(object, node)
 
 #define BLT_Stream_GetInputNode(object, node) \
-ATX_INTERFACE(object)->GetInputNode(ATX_INSTANCE(object), node)
+ATX_INTERFACE(object)->GetInputNode(object, node)
 
 #define BLT_Stream_ResetOutput(object) \
-ATX_INTERFACE(object)->ResetOutput(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->ResetOutput(object)
 
 #define BLT_Stream_SetOutput(object, name, media_type) \
-ATX_INTERFACE(object)->SetOutput(ATX_INSTANCE(object), name, media_type)
+ATX_INTERFACE(object)->SetOutput(object, name, media_type)
 
 #define BLT_Stream_AddNodeByName(object, where, name) \
-ATX_INTERFACE(object)->AddNodeByName(ATX_INSTANCE(object), where, name)
+ATX_INTERFACE(object)->AddNodeByName(object, where, name)
 
 #define BLT_Stream_GetStreamNodeInfo(object, node, info) \
-ATX_INTERFACE(object)->GetStreamNodeInfo(ATX_INSTANCE(object), node, info)
+ATX_INTERFACE(object)->GetStreamNodeInfo(object, node, info)
 
 #define BLT_Stream_GetFirstNode(object, node) \
-ATX_INTERFACE(object)->GetFirstNode(ATX_INSTANCE(object), node)
+ATX_INTERFACE(object)->GetFirstNode(object, node)
 
 #define BLT_Stream_GetNextNode(object, node, next) \
-ATX_INTERFACE(object)->GetNextNode(ATX_INSTANCE(object), node, next)
+ATX_INTERFACE(object)->GetNextNode(object, node, next)
 
 #define BLT_Stream_PumpPacket(object) \
-ATX_INTERFACE(object)->PumpPacket(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->PumpPacket(object)
 
 #define BLT_Stream_Stop(object) \
-ATX_INTERFACE(object)->Stop(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Stop(object)
 
 #define BLT_Stream_Pause(object) \
-ATX_INTERFACE(object)->Pause(ATX_INSTANCE(object))
+ATX_INTERFACE(object)->Pause(object)
 
 #define BLT_Stream_SetInfo(object, info) \
-ATX_INTERFACE(object)->SetInfo(ATX_INSTANCE(object), info)
+ATX_INTERFACE(object)->SetInfo(object, info)
 
 #define BLT_Stream_GetInfo(object, info) \
-ATX_INTERFACE(object)->GetInfo(ATX_INSTANCE(object), info)
+ATX_INTERFACE(object)->GetInfo(object, info)
 
 #define BLT_Stream_GetStatus(object, status) \
-ATX_INTERFACE(object)->GetStatus(ATX_INSTANCE(object), status)
+ATX_INTERFACE(object)->GetStatus(object, status)
 
 #define BLT_Stream_GetProperties(object, properties) \
-ATX_INTERFACE(object)->GetProperties(ATX_INSTANCE(object), properties)
+ATX_INTERFACE(object)->GetProperties(object, properties)
 
 #define BLT_Stream_GetSettings(object, settings) \
-ATX_INTERFACE(object)->GetSettings(ATX_INSTANCE(object), settings)
+ATX_INTERFACE(object)->GetSettings(object, settings)
 
 #define BLT_Stream_EstimateSeekPoint(object, mode, point) \
-ATX_INTERFACE(object)->EstimateSeekPoint(ATX_INSTANCE(object), mode, point)
+ATX_INTERFACE(object)->EstimateSeekPoint(object, mode, point)
 
 #define BLT_Stream_SeekToTime(object, time) \
-ATX_INTERFACE(object)->SeekToTime(ATX_INSTANCE(object), time)
+ATX_INTERFACE(object)->SeekToTime(object, time)
 
 #define BLT_Stream_SeekToPosition(object, offset, range) \
-ATX_INTERFACE(object)->SeekToPosition(ATX_INSTANCE(object), offset, range)
+ATX_INTERFACE(object)->SeekToPosition(object, offset, range)
 
 #endif /* _BLT_STREAM_H_ */

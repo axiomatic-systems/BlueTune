@@ -31,14 +31,14 @@
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_PacketConsumer)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_PacketConsumer)
-    BLT_Result (*PutPacket)(BLT_PacketConsumerInstance* consumer, 
-                            BLT_MediaPacket*            packet);
-ATX_END_INTERFACE_DEFINITION(BLT_PacketConsumer)
+    BLT_Result (*PutPacket)(BLT_PacketConsumer* self, 
+                            BLT_MediaPacket*    packet);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_PacketConsumer_PutPacket(object, packet) \
-ATX_INTERFACE(object)->PutPacket(ATX_INSTANCE(object), packet)
+ATX_INTERFACE(object)->PutPacket(object, packet)
 
 #endif /* _BLT_PACKET_CONSUMER_H_ */

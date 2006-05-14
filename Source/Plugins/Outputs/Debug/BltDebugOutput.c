@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltDebugOutput.c
-|
 |      Debug Output Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -23,44 +21,51 @@
 #include "BltPacketConsumer.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutputModule)
-static const BLT_ModuleInterface DebugOutputModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutput)
-static const BLT_MediaNodeInterface DebugOutput_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutput)
-static const BLT_MediaPortInterface DebugOutput_BLT_MediaPortInterface;
-static const BLT_PacketConsumerInterface DebugOutput_BLT_PacketConsumerInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } DebugOutputModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    BLT_MediaType*    expected_media_type;
+    /* base class */
+    ATX_EXTENDS   (BLT_BaseMediaNode);
+
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+    ATX_IMPLEMENTS(BLT_OutputNode);
+    ATX_IMPLEMENTS(BLT_MediaPort);
+
+    /* members */
+    BLT_MediaType* expected_media_type;
 } DebugOutput;
+
+/*----------------------------------------------------------------------
+|    forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(DebugOutputModule, BLT_Module)
+
+ATX_DECLARE_INTERFACE_MAP(DebugOutput, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(DebugOutput, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(DebugOutput, BLT_OutputNode)
+ATX_DECLARE_INTERFACE_MAP(DebugOutput, BLT_MediaPort)
+ATX_DECLARE_INTERFACE_MAP(DebugOutput, BLT_PacketConsumer)
 
 /*----------------------------------------------------------------------
 |    DebugOutput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-DebugOutput_PutPacket(BLT_PacketConsumerInstance* instance,
-                      BLT_MediaPacket*            packet)
+DebugOutput_PutPacket(BLT_PacketConsumer* _self,
+                      BLT_MediaPacket*    packet)
 {
-    DebugOutput*         output = (DebugOutput*)instance;
+    DebugOutput*         self = ATX_SELF(DebugOutput, BLT_PacketConsumer);
     const BLT_MediaType* media_type;
 
     /* check the media type */
     BLT_MediaPacket_GetMediaType(packet, &media_type);
-    if (output->expected_media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN &&
-        output->expected_media_type->id != media_type->id) {
+    if (self->expected_media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN &&
+        self->expected_media_type->id != media_type->id) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
@@ -84,14 +89,14 @@ DebugOutput_PutPacket(BLT_PacketConsumerInstance* instance,
 |    DebugOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-DebugOutput_QueryMediaType(BLT_MediaPortInstance* instance,
-                           BLT_Ordinal            index,
-                           const BLT_MediaType**  media_type)
+DebugOutput_QueryMediaType(BLT_MediaPort*        _self,
+                           BLT_Ordinal           index,
+                           const BLT_MediaType** media_type)
 {
-    DebugOutput* output = (DebugOutput*)instance;
+    DebugOutput* self = ATX_SELF(DebugOutput, BLT_MediaPort);
 
     if (index == 0) {
-        *media_type = output->expected_media_type;
+        *media_type = self->expected_media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -107,9 +112,9 @@ DebugOutput_Create(BLT_Module*              module,
                    BLT_Core*                core, 
                    BLT_ModuleParametersType parameters_type,
                    BLT_CString              parameters, 
-                   ATX_Object*              object)
+                   BLT_MediaNode**          object)
 {
-    DebugOutput*              output;
+    DebugOutput*              self;
     BLT_MediaNodeConstructor* constructor = 
         (BLT_MediaNodeConstructor*)parameters;
     
@@ -122,22 +127,26 @@ DebugOutput_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    output = ATX_AllocateZeroMemory(sizeof(DebugOutput));
-    if (output == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(DebugOutput));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&output->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* keep the media type info */
     BLT_MediaType_Clone(constructor->spec.input.media_type, 
-                        &output->expected_media_type); 
+                        &self->expected_media_type); 
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)output;
-    ATX_INTERFACE(object) = (ATX_Interface*)&DebugOutput_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, DebugOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, DebugOutput, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(self, DebugOutput, BLT_PacketConsumer);
+    ATX_SET_INTERFACE(self, DebugOutput, BLT_OutputNode);
+    ATX_SET_INTERFACE(self, DebugOutput, BLT_MediaPort);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -146,73 +155,74 @@ DebugOutput_Create(BLT_Module*              module,
 |    DebugOutput_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-DebugOutput_Destroy(DebugOutput* output)
+DebugOutput_Destroy(DebugOutput* self)
 {
     BLT_Debug("DebugOutput::Destroy\n");
 
     /* free the media type extensions */
-    BLT_MediaType_Free(output->expected_media_type);
+    BLT_MediaType_Free(self->expected_media_type);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&output->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(output);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       DebugOutput_GetPortByName
+|   DebugOutput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-DebugOutput_GetPortByName(BLT_MediaNodeInstance* instance,
-                          BLT_CString            name,
-                          BLT_MediaPort*         port)
+DebugOutput_GetPortByName(BLT_MediaNode*  _self,
+                          BLT_CString     name,
+                          BLT_MediaPort** port)
 {
-    DebugOutput* output = (DebugOutput*)instance;
+    DebugOutput* self = ATX_SELF_EX(DebugOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)output;
-        ATX_INTERFACE(port) = &DebugOutput_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(self, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(DebugOutput)
+    ATX_GET_INTERFACE_ACCEPT_EX(DebugOutput, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(DebugOutput, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT(DebugOutput, BLT_OutputNode)
+    ATX_GET_INTERFACE_ACCEPT(DebugOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(DebugOutput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(DebugOutput, 
-                                         "input",
-                                         PACKET,
-                                         IN)
-static const BLT_MediaPortInterface
-DebugOutput_BLT_MediaPortInterface = {
-    DebugOutput_GetInterface,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(DebugOutput, "input", PACKET, IN)
+ATX_BEGIN_INTERFACE_MAP(DebugOutput, BLT_MediaPort)
     DebugOutput_GetName,
     DebugOutput_GetProtocol,
     DebugOutput_GetDirection,
     DebugOutput_QueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-DebugOutput_BLT_PacketConsumerInterface = {
-    DebugOutput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(DebugOutput, BLT_PacketConsumer)
     DebugOutput_PutPacket
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-DebugOutput_BLT_MediaNodeInterface = {
-    DebugOutput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(DebugOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     DebugOutput_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -222,28 +232,20 @@ DebugOutput_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     BLT_BaseMediaNode_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(DebugOutput, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(DebugOutput, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutput)
-ATX_INTERFACE_MAP_ADD(DebugOutput, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(DebugOutput, ATX_Referenceable)
-ATX_INTERFACE_MAP_ADD(DebugOutput, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(DebugOutput, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutput)
-
-/*----------------------------------------------------------------------
-|       DebugOutputModule_Probe
+|   DebugOutputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-DebugOutputModule_Probe(BLT_ModuleInstance*      instance, 
+DebugOutputModule_Probe(BLT_Module*              self, 
                         BLT_Core*                core,
                         BLT_ModuleParametersType parameters_type,
                         BLT_AnyConst             parameters,
@@ -273,7 +275,7 @@ DebugOutputModule_Probe(BLT_ModuleInstance*      instance,
 
             /* the name should be 'debug:<level>' */
             if (constructor->name == NULL ||
-                !ATX_StringsEqualN(constructor->name, "debug:", 6)) {
+                !ATX_StringsEqual(constructor->name, "debug")) {
                 return BLT_FAILURE;
             }
 
@@ -293,48 +295,54 @@ DebugOutputModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(DebugOutput)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(DebugOutputModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(DebugOutputModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(DebugOutputModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface DebugOutputModule_BLT_ModuleInterface = {
-    DebugOutputModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(DebugOutputModule, DebugOutput)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(DebugOutputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     DebugOutputModule_CreateInstance,
     DebugOutputModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define DebugOutputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(DebugOutputModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(DebugOutputModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutputModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutputModule) 
-ATX_INTERFACE_MAP_ADD(DebugOutputModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(DebugOutputModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(DebugOutputModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(DebugOutputModule, "Debug Output", 0)
+
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_DebugOutputModule_GetModuleObject(BLT_Module* object)
+BLT_DebugOutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("Debug Output", NULL, 0,
                                  &DebugOutputModule_BLT_ModuleInterface,
+                                 &DebugOutputModule_ATX_ReferenceableInterface,
                                  object);
 }

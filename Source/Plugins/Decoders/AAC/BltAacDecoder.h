@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltAacDecoder.h
-|
 |      AAC Decoder Module
 |
 |      (c) 2002-2003 Gilles Boccon-Gibod
@@ -21,6 +19,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_AacDecoderModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_AacDecoderModule_GetModuleObject(BLT_Module* module);
 
 #endif /* _BLT_AAC_DECODER_H_ */

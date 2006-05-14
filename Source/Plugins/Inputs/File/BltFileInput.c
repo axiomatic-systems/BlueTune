@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|      File: BltFileInput.c
-|
 |      File Input Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -23,45 +21,45 @@
 #include "BltByteStreamProvider.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
-static const BLT_ModuleInterface FileInputModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInput)
-static const BLT_InputStreamProviderInterface FileInput_BLT_InputStreamProviderInterface;
-
-/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } FileInputModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    ATX_File          file;
-    ATX_InputStream   stream;
-    BLT_MediaType*    media_type;
+    /* interfaces */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamProvider);
+
+    /* members */
+    ATX_File*        file;
+    ATX_InputStream* stream;
+    BLT_MediaType*   media_type;
 } FileInput;
 
 /*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInput)
-static const BLT_MediaNodeInterface FileInput_BLT_MediaNodeInterface;
-static const BLT_MediaPortInterface FileInput_BLT_MediaPortInterface;
-static BLT_Result FileInput_Destroy(FileInput* input);
+ATX_DECLARE_INTERFACE_MAP(FileInputModule, BLT_Module)
+
+ATX_DECLARE_INTERFACE_MAP(FileInput, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(FileInput, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(FileInput, BLT_MediaPort)
+ATX_DECLARE_INTERFACE_MAP(FileInput, BLT_InputStreamProvider)
+static BLT_Result FileInput_Destroy(FileInput* self);
 
 /*----------------------------------------------------------------------
 |    FileInput_DecideMediaType
 +---------------------------------------------------------------------*/
 static BLT_Result
-FileInput_DecideMediaType(FileInput* input, BLT_CString name)
+FileInput_DecideMediaType(FileInput* self, BLT_CString name)
 {
-    BLT_Registry registry;
-    BLT_CString  extension;
-    BLT_Result   result;
+    BLT_Registry* registry;
+    BLT_CString   extension;
+    BLT_Result    result;
 
     /* compute file extension */
     extension = NULL;
@@ -74,13 +72,13 @@ FileInput_DecideMediaType(FileInput* input, BLT_CString name)
     if (extension == NULL) return BLT_SUCCESS;
 
     /* get the registry */
-    result = BLT_Core_GetRegistry(&input->base.core, &registry);
+    result = BLT_Core_GetRegistry(ATX_BASE(self, BLT_BaseMediaNode).core, &registry);
     if (BLT_FAILED(result)) return result;
 
     /* query the registry */
-    return BLT_Registry_GetMediaTypeIdForExtension(&registry, 
+    return BLT_Registry_GetMediaTypeIdForExtension(registry, 
                                                    extension, 
-                                                   &input->media_type->id);
+                                                   &self->media_type->id);
 }
 
 /*----------------------------------------------------------------------
@@ -91,7 +89,7 @@ FileInput_Create(BLT_Module*              module,
                  BLT_Core*                core, 
                  BLT_ModuleParametersType parameters_type,
                  BLT_CString              parameters, 
-                 ATX_Object*              object)
+                 BLT_MediaNode**          object)
 {
     FileInput*                input;
     BLT_MediaNodeConstructor* constructor = 
@@ -110,12 +108,12 @@ FileInput_Create(BLT_Module*              module,
     /* allocate memory for the object */
     input = ATX_AllocateZeroMemory(sizeof(FileInput));
     if (input == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&input->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(input, BLT_BaseMediaNode), module, core);
     
     /* strip the "file:" prefix if it is present */
     if (ATX_StringsEqualN(constructor->name, "file:", 5)) {
@@ -125,18 +123,18 @@ FileInput_Create(BLT_Module*              module,
     /* create the file object */
     result = ATX_File_Create(constructor->name, &input->file);
     if (ATX_FAILED(result)) {
-        ATX_CLEAR_OBJECT(&input->file);
+        input->file = NULL;
         goto failure;
     }
 
     /* open the file */
-    result = ATX_File_Open(&input->file, ATX_FILE_OPEN_MODE_READ);
+    result = ATX_File_Open(input->file, ATX_FILE_OPEN_MODE_READ);
     if (ATX_FAILED(result)) goto failure;
 
     /* get the input stream */
-    result = ATX_File_GetInputStream(&input->file, &input->stream);
+    result = ATX_File_GetInputStream(input->file, &input->stream);
     if (ATX_FAILED(result)) {
-        ATX_CLEAR_OBJECT(&input->stream);
+        input->stream = NULL;
         goto failure;
     }
 
@@ -152,14 +150,17 @@ FileInput_Create(BLT_Module*              module,
     }
 
     /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)input;
-    ATX_INTERFACE(object) = (ATX_Interface*)&FileInput_BLT_MediaNodeInterface;
+    ATX_SET_INTERFACE_EX(input, FileInput, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(input, FileInput, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE   (input, FileInput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (input, FileInput, BLT_InputStreamProvider);
+    *object = &ATX_BASE_EX(input, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 
 failure:
     FileInput_Destroy(input);
-    ATX_CLEAR_OBJECT(object);
+    object = NULL;
     return result;
 }
 
@@ -167,24 +168,24 @@ failure:
 |    FileInput_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-FileInput_Destroy(FileInput* input)
+FileInput_Destroy(FileInput* self)
 {
     BLT_Debug("FileInput::Destroy\n");
 
     /* release the byte stream */
-    ATX_RELEASE_OBJECT(&input->stream);
+    ATX_RELEASE_OBJECT(self->stream);
     
     /* destroy the file */
-    ATX_DESTROY_OBJECT(&input->file);
+    ATX_DESTROY_OBJECT(self->file);
 
     /* free the media type extensions */
-    BLT_MediaType_Free(input->media_type);
+    BLT_MediaType_Free(self->media_type);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&input->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(input);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
@@ -193,17 +194,17 @@ FileInput_Destroy(FileInput* input)
 |       FileInput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileInput_GetPortByName(BLT_MediaNodeInstance* instance,
-                        BLT_CString            name,
-                        BLT_MediaPort*         port)
+FileInput_GetPortByName(BLT_MediaNode*  _self,
+                        BLT_CString     name,
+                        BLT_MediaPort** port)
 {
+    FileInput* self = ATX_SELF_EX(FileInput, BLT_BaseMediaNode, BLT_MediaNode);
     if (ATX_StringsEqual(name, "output")) {
         /* we implement the BLT_MediaPort interface ourselves */
-        ATX_INSTANCE(port) = (BLT_MediaPortInstance*)instance;
-        ATX_INTERFACE(port) = &FileInput_BLT_MediaPortInterface;
+        *port = &ATX_BASE(self, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -212,14 +213,14 @@ FileInput_GetPortByName(BLT_MediaNodeInstance* instance,
 |    FileInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileInput_QueryMediaType(BLT_MediaPortInstance* instance,
-                         BLT_Ordinal            index,
-                         const BLT_MediaType**  media_type)
+FileInput_QueryMediaType(BLT_MediaPort*        _self,
+                         BLT_Ordinal           index,
+                         const BLT_MediaType** media_type)
 {
-    FileInput* input = (FileInput*)instance;
+    FileInput* self = ATX_SELF(FileInput, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = input->media_type;
+        *media_type = self->media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -231,14 +232,14 @@ FileInput_QueryMediaType(BLT_MediaPortInstance* instance,
 |       FileInput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileInput_GetStream(BLT_InputStreamProviderInstance* instance,
-                    ATX_InputStream*                 stream)
+FileInput_GetStream(BLT_InputStreamProvider* _self,
+                    ATX_InputStream**        stream)
 {
-    FileInput* input = (FileInput*)instance;
+    FileInput* self = ATX_SELF(FileInput, BLT_InputStreamProvider);
 
     /* return our stream object */
-    *stream = input->stream;
-    ATX_REFERENCE_OBJECT(stream);
+    *stream = self->stream;
+    ATX_REFERENCE_OBJECT(*stream);
 
     return BLT_SUCCESS;
 }
@@ -247,16 +248,16 @@ FileInput_GetStream(BLT_InputStreamProviderInstance* instance,
 |    FileInput_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileInput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
+FileInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
-    FileInput* input = (FileInput*)instance;
+    FileInput* self = ATX_SELF_EX(FileInput, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* update the stream info */
     {
         BLT_StreamInfo info;
         BLT_Result     result;
 
-        result = ATX_File_GetSize(&input->file, &info.size);
+        result = ATX_File_GetSize(self->file, &info.size);
         if (BLT_SUCCEEDED(result)) {
             info.mask = BLT_STREAM_INFO_MASK_SIZE;
             BLT_Stream_SetInfo(stream, &info);
@@ -264,17 +265,25 @@ FileInput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
     }
     
     /* keep the stream as our context */
-    input->base.context = *stream;
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|       GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FileInput)
+    ATX_GET_INTERFACE_ACCEPT_EX(FileInput, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(FileInput, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT   (FileInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT   (FileInput, BLT_InputStreamProvider)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-FileInput_BLT_MediaNodeInterface = {
-    FileInput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(FileInput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     FileInput_GetPortByName,
     FileInput_Activate,
@@ -284,7 +293,7 @@ FileInput_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     BLT_BaseMediaNode_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
 |    BLT_MediaPort interface
@@ -293,50 +302,38 @@ BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FileInput,
                                          "output", 
                                          STREAM_PULL, 
                                          OUT)
-static const BLT_MediaPortInterface
-FileInput_BLT_MediaPortInterface = {
-    FileInput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(FileInput, BLT_MediaPort)
     FileInput_GetName,
     FileInput_GetProtocol,
     FileInput_GetDirection,
     FileInput_QueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    BLT_InputStreamProvider interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamProviderInterface
-FileInput_BLT_InputStreamProviderInterface = {
-    FileInput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(FileInput, BLT_InputStreamProvider)
     FileInput_GetStream
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(FileInput, base.reference_count)
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInput)
-ATX_INTERFACE_MAP_ADD(FileInput, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(FileInput, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(FileInput, BLT_InputStreamProvider)
-ATX_INTERFACE_MAP_ADD(FileInput, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInput)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FileInput, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |       FileInputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileInputModule_Probe(BLT_ModuleInstance*      instance, 
+FileInputModule_Probe(BLT_Module*              self, 
                       BLT_Core*                core,
                       BLT_ModuleParametersType parameters_type,
                       BLT_AnyConst             parameters,
                       BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -386,20 +383,27 @@ FileInputModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|       GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FileInput)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(FileInputModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(FileInputModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|       node factory
++---------------------------------------------------------------------*/
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FileInputModule, FileInput)
 
 /*----------------------------------------------------------------------
 |       BLT_Module interface
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface FileInputModule_BLT_ModuleInterface = {
-    FileInputModule_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(FileInputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     FileInputModule_CreateInstance,
     FileInputModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface
@@ -407,27 +411,20 @@ static const BLT_ModuleInterface FileInputModule_BLT_ModuleInterface = {
 #define FileInputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(FileInputModule, 
-                                             base.reference_count)
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInputModule) 
-ATX_INTERFACE_MAP_ADD(FileInputModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(FileInputModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(FileInputModule)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FileInputModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |       module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_FileInputModule_GetModuleObject(BLT_Module* object)
+BLT_FileInputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("File Input", NULL, 0,
                                  &FileInputModule_BLT_ModuleInterface,
+                                 &FileInputModule_ATX_ReferenceableInterface,
                                  object);
 }

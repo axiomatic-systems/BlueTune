@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltGainControlFilter.c
-|
 |      Gain Control Filter Module
 |
-|      (c) 2002-2003 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include <math.h>
 
@@ -27,21 +25,6 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterModule)
-static const BLT_ModuleInterface GainControlFilterModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilter)
-static const BLT_MediaNodeInterface GainControlFilter_BLT_MediaNodeInterface;
-static const ATX_PropertyListenerInterface 
-GainControlFilter_ATX_PropertyListenerInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterInputPort)
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterOutputPort)
-
-/*----------------------------------------------------------------------
 |    constants
 +---------------------------------------------------------------------*/
 #define BLT_GAIN_CONTROL_FILTER_FACTOR_RANGE 1024
@@ -56,9 +39,7 @@ ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterOutputPort)
 /*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
-typedef struct {
-    BLT_BaseModule base;
-} GainControlFilterModule;
+typedef BLT_BaseModule GainControlFilterModule;
 
 typedef enum {
     BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE,
@@ -67,33 +48,63 @@ typedef enum {
 } GainControlMode;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    BLT_MediaPacket*  packet;
-    GainControlMode   mode;
-    unsigned short    factor;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+} GainControlFilterInput;
+
+typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketProducer);
+
+    /* members */
+    BLT_MediaPacket* packet;
+} GainControlFilterOutput;
+
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* interfaces */
+    ATX_IMPLEMENTS(ATX_PropertyListener);
+
+    /* members */
+    GainControlFilterInput  input;
+    GainControlFilterOutput output;
+    GainControlMode         mode;
+    unsigned short          factor;
     struct {
         BLT_Flags flags;
         int       track_gain;
         int       album_gain;
-    }                 replay_gain_info;
+    } replay_gain_info;
     ATX_PropertyListenerHandle track_gain_listener_handle;
     ATX_PropertyListenerHandle album_gain_listener_handle;
 } GainControlFilter;
 
 /*----------------------------------------------------------------------
-|    GainControlFilterInputPort_PutPacket
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(GainControlFilterModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(GainControlFilter, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(GainControlFilter, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(GainControlFilter, ATX_PropertyListener)
+
+/*----------------------------------------------------------------------
+|    GainControlFilterInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilterInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                                     BLT_MediaPacket*            packet)
+GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
+                                 BLT_MediaPacket*    packet)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF_M(input, GainControlFilter, BLT_PacketConsumer);
     BLT_PcmMediaType*  media_type;
     BLT_Cardinal       sample_count;
     short*             pcm;
     BLT_Result         result;
 
-    /*BLT_Debug("GainControlFilterInputPort_PutPacket\n");*/
+    /*BLT_Debug("GainControlFilterInput_PutPacket\n");*/
 
     /* get the media type */
     result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
@@ -105,12 +116,12 @@ GainControlFilterInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     }
     
     /* keep the packet */
-    filter->packet = packet;
+    self->output.packet = packet;
     BLT_MediaPacket_AddReference(packet);
 
     /* exit now if we're inactive */
-    if (filter->mode == BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE ||
-        filter->factor == 0) {
+    if (self->mode == BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE ||
+        self->factor == 0) {
         return BLT_SUCCESS;
     }
 
@@ -122,14 +133,14 @@ GainControlFilterInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     /* adjust the gain */
     pcm = (short*)BLT_MediaPacket_GetPayloadBuffer(packet);
     sample_count = BLT_MediaPacket_GetPayloadSize(packet)/2;
-    if (filter->mode == BLT_GAIN_CONTROL_FILTER_MODE_AMPLIFY) {
-        register unsigned short factor = filter->factor;
+    if (self->mode == BLT_GAIN_CONTROL_FILTER_MODE_AMPLIFY) {
+        register unsigned short factor = self->factor;
         while (sample_count--) {
             *pcm = (*pcm * factor) / BLT_GAIN_CONTROL_FILTER_FACTOR_RANGE;
             pcm++;
         }
     } else {
-        register unsigned short factor = filter->factor;
+        register unsigned short factor = self->factor;
         while (sample_count--) {
             *pcm = (*pcm * BLT_GAIN_CONTROL_FILTER_FACTOR_RANGE)/factor;
             pcm++;
@@ -140,15 +151,14 @@ GainControlFilterInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|   GainControlFilter_QueryMediaType
+|   GainControlFilterInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilterInputPort_QueryMediaType(
-    BLT_MediaPortInstance* instance,
-    BLT_Ordinal            index,
-    const BLT_MediaType**  media_type)
+GainControlFilterInput_QueryMediaType(BLT_MediaPort*         self,
+                               BLT_Ordinal            index,
+                               const BLT_MediaType**  media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     if (index == 0) {
         *media_type = &BLT_GenericPcmMediaType;
         return BLT_SUCCESS;
@@ -157,52 +167,47 @@ GainControlFilterInputPort_QueryMediaType(
         return BLT_FAILURE;
     }
 }
-
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(GainControlFilterInputPort,
-                                         "input",
-                                         PACKET,
-                                         IN)
-static const BLT_MediaPortInterface
-GainControlFilterInputPort_BLT_MediaPortInterface = {
-    GainControlFilterInputPort_GetInterface,
-    GainControlFilterInputPort_GetName,
-    GainControlFilterInputPort_GetProtocol,
-    GainControlFilterInputPort_GetDirection,
-    GainControlFilterInputPort_QueryMediaType
-};
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(GainControlFilterInput)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterInput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |    BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-GainControlFilterInputPort_BLT_PacketConsumerInterface = {
-    GainControlFilterInputPort_GetInterface,
-    GainControlFilterInputPort_PutPacket
-};
+ATX_BEGIN_INTERFACE_MAP(GainControlFilterInput, BLT_PacketConsumer)
+    GainControlFilterInput_PutPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterInputPort)
-ATX_INTERFACE_MAP_ADD(GainControlFilterInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(GainControlFilterInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterInputPort)
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(GainControlFilterInput,
+                                         "input",
+                                         PACKET,
+                                         IN)
+ATX_BEGIN_INTERFACE_MAP(GainControlFilterInput, BLT_MediaPort)
+    GainControlFilterInput_GetName,
+    GainControlFilterInput_GetProtocol,
+    GainControlFilterInput_GetDirection,
+    GainControlFilterInput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    GainControlFilterOutputPort_GetPacket
+|    GainControlFilterOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilterOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
-                                      BLT_MediaPacket**           packet)
+GainControlFilterOutput_GetPacket(BLT_PacketProducer* _self,
+                           BLT_MediaPacket**   packet)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF_M(output, GainControlFilter, BLT_PacketProducer);
 
-    if (filter->packet) {
-        *packet = filter->packet;
-        filter->packet = NULL;
+    if (self->output.packet) {
+        *packet = self->output.packet;
+        self->output.packet = NULL;
         return BLT_SUCCESS;
     } else {
         *packet = NULL;
@@ -211,15 +216,14 @@ GainControlFilterOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|   GainControlFilterOutputPort_QueryMediaType
+|   GainControlFilterOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilterOutputPort_QueryMediaType(
-    BLT_MediaPortInstance* instance,
-    BLT_Ordinal            index,
-    const BLT_MediaType**  media_type)
+GainControlFilterOutput_QueryMediaType(BLT_MediaPort*         self,
+                                BLT_Ordinal            index,
+                                const BLT_MediaType**  media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     if (index == 0) {
         *media_type = &BLT_GenericPcmMediaType;
         return BLT_SUCCESS;
@@ -230,37 +234,34 @@ GainControlFilterOutputPort_QueryMediaType(
 }
 
 /*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(GainControlFilterOutput)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterOutput, BLT_PacketProducer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(GainControlFilterOutputPort,
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(GainControlFilterOutput,
                                          "output",
                                          PACKET,
                                          OUT)
-static const BLT_MediaPortInterface
-GainControlFilterOutputPort_BLT_MediaPortInterface = {
-    GainControlFilterOutputPort_GetInterface,
-    GainControlFilterOutputPort_GetName,
-    GainControlFilterOutputPort_GetProtocol,
-    GainControlFilterOutputPort_GetDirection,
-    GainControlFilterOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(GainControlFilterOutput, BLT_MediaPort)
+    GainControlFilterOutput_GetName,
+    GainControlFilterOutput_GetProtocol,
+    GainControlFilterOutput_GetDirection,
+    GainControlFilterOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
+
 
 /*----------------------------------------------------------------------
 |    BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketProducerInterface
-GainControlFilterOutputPort_BLT_PacketProducerInterface = {
-    GainControlFilterOutputPort_GetInterface,
-    GainControlFilterOutputPort_GetPacket
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterOutputPort)
-ATX_INTERFACE_MAP_ADD(GainControlFilterOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(GainControlFilterOutputPort, BLT_PacketProducer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterOutputPort)
+ATX_BEGIN_INTERFACE_MAP(GainControlFilterOutput, BLT_PacketProducer)
+    GainControlFilterOutput_GetPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |    GainControlFilter_Create
@@ -269,10 +270,10 @@ static BLT_Result
 GainControlFilter_Create(BLT_Module*              module,
                          BLT_Core*                core, 
                          BLT_ModuleParametersType parameters_type,
-                         BLT_CString              parameters, 
-                         ATX_Object*              object)
+                         BLT_AnyConst             parameters, 
+                         BLT_MediaNode**          object)
 {
-    GainControlFilter* filter;
+    GainControlFilter* self;
 
     BLT_Debug("GainControlFilter::Create\n");
 
@@ -283,18 +284,24 @@ GainControlFilter_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    filter = ATX_AllocateZeroMemory(sizeof(GainControlFilter));
-    if (filter == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(GainControlFilter));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&filter->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)filter;
-    ATX_INTERFACE(object) = (ATX_Interface*)&GainControlFilter_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, GainControlFilter, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(self, GainControlFilter, ATX_PropertyListener);
+    ATX_SET_INTERFACE(&self->input,  GainControlFilterInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  GainControlFilterInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, GainControlFilterOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, GainControlFilterOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -303,44 +310,42 @@ GainControlFilter_Create(BLT_Module*              module,
 |    GainControlFilter_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-GainControlFilter_Destroy(GainControlFilter* filter)
+GainControlFilter_Destroy(GainControlFilter* self)
 { 
     BLT_Debug("GainControlFilter::Destroy\n");
 
     /* release any input packet we may hold */
-    if (filter->packet) {
-        BLT_MediaPacket_Release(filter->packet);
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
     }
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&filter->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(filter);
+    ATX_FreeMemory((void*)self);
 
     return BLT_SUCCESS;
 }
                     
 /*----------------------------------------------------------------------
-|       GainControlFilter_GetPortByName
+|   GainControlFilter_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilter_GetPortByName(BLT_MediaNodeInstance* instance,
-                                BLT_CString            name,
-                                BLT_MediaPort*         port)
+GainControlFilter_GetPortByName(BLT_MediaNode*  _self,
+                         BLT_CString     name,
+                         BLT_MediaPort** port)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)filter;
-        ATX_INTERFACE(port) = &GainControlFilterInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)filter;
-        ATX_INTERFACE(port) = &GainControlFilterOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -369,13 +374,13 @@ GainControlFilter_DbToFactor(int gain)
 |    GainControlFilter_UpdateReplayGain
 +---------------------------------------------------------------------*/
 static void
-GainControlFilter_UpdateReplayGain(GainControlFilter* filter)
+GainControlFilter_UpdateReplayGain(GainControlFilter* self)
 {
     int gain_value = 0;
-    if (filter->replay_gain_info.flags & BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET) {
-        gain_value = filter->replay_gain_info.album_gain;   
-    } else if (filter->replay_gain_info.flags & BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET) {
-        gain_value = filter->replay_gain_info.track_gain;
+    if (self->replay_gain_info.flags & BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET) {
+        gain_value = self->replay_gain_info.album_gain;   
+    } else if (self->replay_gain_info.flags & BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET) {
+        gain_value = self->replay_gain_info.track_gain;
     } else {
         gain_value = 0;
     }
@@ -383,23 +388,23 @@ GainControlFilter_UpdateReplayGain(GainControlFilter* filter)
     /* if the gain is 0, deactivate the filter */
     if (gain_value == 0) {
         /* disable the filter */
-        if (filter->factor != 0) {
+        if (self->factor != 0) {
             BLT_Debug("GainControlFilter::UpdateReplayGain - filter now inactive\n");
         }
-        filter->factor = 0;
-        filter->mode = BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE;
+        self->factor = 0;
+        self->mode = BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE;
         return;
     }
 
     /* convert the gain value into a mode and a factor */
     if (gain_value > 0) {
-        filter->mode = BLT_GAIN_CONTROL_FILTER_MODE_AMPLIFY;
-        filter->factor = GainControlFilter_DbToFactor(gain_value);
-        BLT_Debug("GainControlFilter::UpdateReplayGain - filter amplification = %d\n", filter->factor);
+        self->mode = BLT_GAIN_CONTROL_FILTER_MODE_AMPLIFY;
+        self->factor = GainControlFilter_DbToFactor(gain_value);
+        BLT_Debug("GainControlFilter::UpdateReplayGain - filter amplification = %d\n", self->factor);
     } else {
-        filter->mode = BLT_GAIN_CONTROL_FILTER_MODE_ATTENUATE;
-        filter->factor = GainControlFilter_DbToFactor(-gain_value);
-        BLT_Debug("GainControlFilter::UpdateReplayGain - filter attenuation = %d\n", filter->factor);
+        self->mode = BLT_GAIN_CONTROL_FILTER_MODE_ATTENUATE;
+        self->factor = GainControlFilter_DbToFactor(-gain_value);
+        BLT_Debug("GainControlFilter::UpdateReplayGain - filter attenuation = %d\n", self->factor);
     }
 }
 
@@ -407,83 +412,80 @@ GainControlFilter_UpdateReplayGain(GainControlFilter* filter)
 |    GainControlFilter_UpdateReplayGainTrackValue
 +---------------------------------------------------------------------*/
 static void
-GainControlFilter_UpdateReplayGainTrackValue(GainControlFilter*       filter,
+GainControlFilter_UpdateReplayGainTrackValue(GainControlFilter*       self,
                                              const ATX_PropertyValue* value)
 {
     if (value) {
-        filter->replay_gain_info.track_gain = value->integer;
-        filter->replay_gain_info.flags |= BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET;
+        self->replay_gain_info.track_gain = value->integer;
+        self->replay_gain_info.flags |= BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET;
     } else {
-        filter->replay_gain_info.track_gain = 0;
-        filter->replay_gain_info.flags &= ~BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET;
+        self->replay_gain_info.track_gain = 0;
+        self->replay_gain_info.flags &= ~BLT_GAIN_CONTROL_REPLAY_GAIN_TRACK_VALUE_SET;
     }
-    GainControlFilter_UpdateReplayGain(filter);
+    GainControlFilter_UpdateReplayGain(self);
 }
 
 /*----------------------------------------------------------------------
 |    GainControlFilter_UpdateReplayGainAlbumValue
 +---------------------------------------------------------------------*/
 static void
-GainControlFilter_UpdateReplayGainAlbumValue(GainControlFilter*       filter,
+GainControlFilter_UpdateReplayGainAlbumValue(GainControlFilter*       self,
                                              const ATX_PropertyValue* value)
 {
     if (value) {
-        filter->replay_gain_info.album_gain = value->integer;
-        filter->replay_gain_info.flags |= BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET;
+        self->replay_gain_info.album_gain = value->integer;
+        self->replay_gain_info.flags |= BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET;
     } else {
-        filter->replay_gain_info.album_gain = 0;
-        filter->replay_gain_info.flags &= ~BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET;
+        self->replay_gain_info.album_gain = 0;
+        self->replay_gain_info.flags &= ~BLT_GAIN_CONTROL_REPLAY_GAIN_ALBUM_VALUE_SET;
     }
-    GainControlFilter_UpdateReplayGain(filter);
+    GainControlFilter_UpdateReplayGain(self);
 }
 
 /*----------------------------------------------------------------------
 |    GainControlFilter_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilter_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
+GainControlFilter_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* keep a reference to the stream */
-    filter->base.context = *stream;
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
 
     /* listen to settings on the new stream */
-    if (!ATX_OBJECT_IS_NULL(&filter->base.context)) {
-        ATX_Properties properties;
-        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(&filter->base.context, 
+    if (stream) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
             ATX_Property         property;
-            ATX_PropertyListener me;
-            ATX_INSTANCE(&me)  = (ATX_PropertyListenerInstance*)filter;
-            ATX_INTERFACE(&me) = &GainControlFilter_ATX_PropertyListenerInterface;
-            ATX_Properties_AddListener(&properties, 
+            ATX_Properties_AddListener(properties, 
                                        BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
-                                       &me,
-                                       &filter->track_gain_listener_handle);
-            ATX_Properties_AddListener(&properties, 
+                                       &ATX_BASE(self, ATX_PropertyListener),
+                                       &self->track_gain_listener_handle);
+            ATX_Properties_AddListener(properties, 
                                        BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE,
-                                       &me,
-                                       &filter->album_gain_listener_handle);
+                                       &ATX_BASE(self, ATX_PropertyListener),
+                                       &self->album_gain_listener_handle);
 
             /* read the initial values of the replay gain info */
-            filter->replay_gain_info.flags = 0;
-            filter->replay_gain_info.track_gain = 0;
-            filter->replay_gain_info.album_gain = 0;
+            self->replay_gain_info.flags = 0;
+            self->replay_gain_info.track_gain = 0;
+            self->replay_gain_info.album_gain = 0;
 
             if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
-                    &properties,
+                    properties,
                     BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                     &property)) &&
                 property.type == ATX_PROPERTY_TYPE_INTEGER) {
-                GainControlFilter_UpdateReplayGainTrackValue(filter, &property.value);
+                GainControlFilter_UpdateReplayGainTrackValue(self, &property.value);
             }
             if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
-                    &properties,
+                    properties,
                     BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                     &property)) &&
                 property.type == ATX_PROPERTY_TYPE_INTEGER) {
-                GainControlFilter_UpdateReplayGainAlbumValue(filter, &property.value);
+                GainControlFilter_UpdateReplayGainAlbumValue(self, &property.value);
             }
         }
     }
@@ -495,39 +497,67 @@ GainControlFilter_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
 |    GainControlFilter_Deactivate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilter_Deactivate(BLT_MediaNodeInstance* instance)
+GainControlFilter_Deactivate(BLT_MediaNode* _self)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* reset the replay gain info */
-    filter->replay_gain_info.flags      = 0;
-    filter->replay_gain_info.album_gain = 0;
-    filter->replay_gain_info.track_gain = 0;
+    self->replay_gain_info.flags      = 0;
+    self->replay_gain_info.album_gain = 0;
+    self->replay_gain_info.track_gain = 0;
 
     /* remove our listener */
-    if (!ATX_OBJECT_IS_NULL(&filter->base.context)) {
-        ATX_Properties properties;
-        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(&filter->base.context, 
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
-            ATX_Properties_RemoveListener(&properties, 
-                                          &filter->track_gain_listener_handle);
-            ATX_Properties_RemoveListener(&properties, 
-                                          &filter->album_gain_listener_handle);
+            ATX_Properties_RemoveListener(properties, 
+                                          &self->track_gain_listener_handle);
+            ATX_Properties_RemoveListener(properties, 
+                                          &self->album_gain_listener_handle);
         }
     }
 
     /* we're detached from the stream */
-    ATX_CLEAR_OBJECT(&filter->base.context);
+    ATX_BASE(self, BLT_BaseMediaNode).context = NULL;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|    GainControlFilter_Seek
++---------------------------------------------------------------------*/
+BLT_METHOD
+GainControlFilter_Seek(BLT_MediaNode* _self,
+                       BLT_SeekMode*  mode,
+                       BLT_SeekPoint* point)
+{
+    GainControlFilter* self = ATX_SELF_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
+
+    BLT_COMPILER_UNUSED(mode);
+    BLT_COMPILER_UNUSED(point);
+
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
+        self->output.packet = NULL;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(GainControlFilter)
+    ATX_GET_INTERFACE_ACCEPT_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(GainControlFilter, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilter, ATX_PropertyListener)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-GainControlFilter_BLT_MediaNodeInterface = {
-    GainControlFilter_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     GainControlFilter_GetPortByName,
     GainControlFilter_Activate,
@@ -536,27 +566,27 @@ GainControlFilter_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    GainControlFilter_Seek
 };
 
 /*----------------------------------------------------------------------
 |    GainControlFilter_OnPropertyChanged
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD
-GainControlFilter_OnPropertyChanged(ATX_PropertyListenerInstance* instance,
+GainControlFilter_OnPropertyChanged(ATX_PropertyListener* _self,
                                     ATX_CString                   name,
                                     ATX_PropertyType              type,
                                     const ATX_PropertyValue*      value)
 {
-    GainControlFilter* filter = (GainControlFilter*)instance;
+    GainControlFilter* self = ATX_SELF(GainControlFilter, ATX_PropertyListener);
 
     if (name != NULL && 
         (type == ATX_PROPERTY_TYPE_INTEGER || 
          type == ATX_PROPERTY_TYPE_NONE)) {
         if (ATX_StringsEqual(name, BLT_REPLAY_GAIN_TRACK_GAIN_VALUE)) {
-            GainControlFilter_UpdateReplayGainTrackValue(filter, value);
+            GainControlFilter_UpdateReplayGainTrackValue(self, value);
         } else if (ATX_StringsEqual(name, BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE)) {
-            GainControlFilter_UpdateReplayGainAlbumValue(filter, value);
+            GainControlFilter_UpdateReplayGainAlbumValue(self, value);
         }
     }
 }
@@ -564,38 +594,28 @@ GainControlFilter_OnPropertyChanged(ATX_PropertyListenerInstance* instance,
 /*----------------------------------------------------------------------
 |    ATX_PropertyListener interface
 +---------------------------------------------------------------------*/
-static const ATX_PropertyListenerInterface
-GainControlFilter_ATX_PropertyListenerInterface = {
-    GainControlFilter_GetInterface,
+ATX_BEGIN_INTERFACE_MAP(GainControlFilter, ATX_PropertyListener)
     GainControlFilter_OnPropertyChanged,
 };
 
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(GainControlFilter, 
-                                             base.reference_count)
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilter)
-ATX_INTERFACE_MAP_ADD(GainControlFilter, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(GainControlFilter, ATX_PropertyListener)
-ATX_INTERFACE_MAP_ADD(GainControlFilter, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilter)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(GainControlFilter, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |       GainControlFilterModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-GainControlFilterModule_Probe(BLT_ModuleInstance*      instance, 
+GainControlFilterModule_Probe(BLT_Module*              self,  
                               BLT_Core*                core,
                               BLT_ModuleParametersType parameters_type,
                               BLT_AnyConst             parameters,
                               BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(core);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(instance);
 
     switch (parameters_type) {
@@ -654,48 +674,47 @@ GainControlFilterModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(GainControlFilter)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(GainControlFilterModule)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT(GainControlFilterModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface GainControlFilterModule_BLT_ModuleInterface = {
-    GainControlFilterModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(GainControlFilterModule, GainControlFilter)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(GainControlFilterModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     GainControlFilterModule_CreateInstance,
     GainControlFilterModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define GainControlFilterModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(GainControlFilterModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(GainControlFilterModule, reference_count)
 
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterModule) 
-ATX_INTERFACE_MAP_ADD(GainControlFilterModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(GainControlFilterModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(GainControlFilterModule)
 
 /*----------------------------------------------------------------------
 |       module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_GainControlFilterModule_GetModuleObject(BLT_Module* object)
+BLT_GainControlFilterModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("Gain Control Filter", NULL, 0,
-                                 &GainControlFilterModule_BLT_ModuleInterface,
+                                 &GainControlFilterModule_BLT_ModuleInterface, 
+                                 &GainControlFilterModule_ATX_ReferenceableInterface, 
                                  object);
 }

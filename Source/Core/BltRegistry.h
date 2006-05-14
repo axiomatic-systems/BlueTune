@@ -69,87 +69,87 @@ ATX_DECLARE_INTERFACE(BLT_Registry)
  *  
  */
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Registry)
-    BLT_Result (*CreateKey)(BLT_RegistryInstance* registry,
-                            BLT_RegistryKey*      parent,
-                            BLT_CString           name,
-                            BLT_RegistryKey**     key);
+    BLT_Result (*CreateKey)(BLT_Registry*     self,
+                            BLT_RegistryKey*  parent,
+                            BLT_CString       name,
+                            BLT_RegistryKey** key);
 
-    BLT_Result (*DestroyKey)(BLT_RegistryInstance* registry,
-                             BLT_RegistryKey*      key);
+    BLT_Result (*DestroyKey)(BLT_Registry*    self,
+                             BLT_RegistryKey* key);
 
-    BLT_Result (*GetKey)(BLT_RegistryInstance* registry,
-                         BLT_RegistryKey*      parent,
-                         BLT_CString           name,
-                         BLT_RegistryKey**     key);
+    BLT_Result (*GetKey)(BLT_Registry*     self,
+                         BLT_RegistryKey*  parent,
+                         BLT_CString       name,
+                         BLT_RegistryKey** key);
 
-    BLT_Result (*SetKeyValue)(BLT_RegistryInstance* registry,
+    BLT_Result (*SetKeyValue)(BLT_Registry*         self,
                               BLT_RegistryKey*      parent,
                               BLT_CString           name,
                               BLT_RegistryValueType value_type,
                               BLT_RegistryValue*    value);
 
-    BLT_Result (*GetKeyValue)(BLT_RegistryInstance*  registry,
+    BLT_Result (*GetKeyValue)(BLT_Registry*          self,
                               BLT_RegistryKey*       parent,
                               BLT_CString            name,
                               BLT_RegistryValueType* value_type,
                               BLT_RegistryValue*     value);
-    BLT_Result (*RegisterName)(BLT_RegistryInstance* registry, 
+    BLT_Result (*RegisterName)(BLT_Registry*         self, 
                                BLT_CString           category,
                                BLT_CString           name,
                                BLT_UInt32*           id);
-    BLT_Result (*GetNameForId)(BLT_RegistryInstance* registry, 
+    BLT_Result (*GetNameForId)(BLT_Registry*         self, 
                                BLT_CString           category,
                                BLT_UInt32            id,
                                BLT_CString*          name);
-    BLT_Result (*GetIdForName)(BLT_RegistryInstance* registry, 
+    BLT_Result (*GetIdForName)(BLT_Registry*         self, 
                                BLT_CString           category,
                                BLT_CString           name,
                                BLT_UInt32*           id);
-    BLT_Result (*RegisterExtension)(BLT_RegistryInstance* registry,
+    BLT_Result (*RegisterExtension)(BLT_Registry*         self,
                                     BLT_CString           extension,
                                     BLT_CString           media_type);
-    BLT_Result (*GetMediaTypeIdForExtension)(BLT_RegistryInstance* registry,
-                                             BLT_CString           extension,
-                                             BLT_MediaTypeId*      type_id);
-ATX_END_INTERFACE_DEFINITION(BLT_Registry)
+    BLT_Result (*GetMediaTypeIdForExtension)(BLT_Registry*    self,
+                                             BLT_CString      extension,
+                                             BLT_MediaTypeId* type_id);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_Registry_CreateKey(object, parent, name, key) \
-ATX_INTERFACE(object)->CreateKey(ATX_INSTANCE(object), parent, name, key)
+ATX_INTERFACE(object)->CreateKey(object, parent, name, key)
 
 #define BLT_Registry_DestroyKey(object, key) \
-ATX_INTERFACE(object)->DestroyKey(ATX_INSTANCE(object), key)
+ATX_INTERFACE(object)->DestroyKey(object, key)
 
 #define BLT_Registry_GetKey(object, parent, name, key) \
-ATX_INTERFACE(object)->GetKey(ATX_INSTANCE(object), parent, name, key)
+ATX_INTERFACE(object)->GetKey(object, parent, name, key)
 
 #define BLT_Registry_SetKeyValue(object, parent, name, value_type, value) \
-ATX_INTERFACE(object)->SetKeyValue(ATX_INSTANCE(object), \
+ATX_INTERFACE(object)->SetKeyValue(object, \
 parent, name, value_type, value)
 
 #define BLT_Registry_GetKeyValue(object, parent, name, value_type, value) \
-ATX_INTERFACE(object)->GetKeyValue(ATX_INSTANCE(object), \
+ATX_INTERFACE(object)->GetKeyValue(object, \
 parent, name, value_type, value)
 
 #define BLT_Registry_RegisterName(object, category, name, id) \
-ATX_INTERFACE(object)->RegisterName(ATX_INSTANCE(object), category, \
+ATX_INTERFACE(object)->RegisterName(object, category, \
 name, id)
 
 #define BLT_Registry_GetNameForId(object, category, name, id) \
-ATX_INTERFACE(object)->GetNameForId(ATX_INSTANCE(object), category, name, id)
+ATX_INTERFACE(object)->GetNameForId(object, category, name, id)
 
 #define BLT_Registry_GetIdForName(object, category, name, id) \
-ATX_INTERFACE(object)->GetIdForName(ATX_INSTANCE(object), category, \
+ATX_INTERFACE(object)->GetIdForName(object, category, \
 name, id)
 
 #define BLT_Registry_RegisterExtension(object, extension, media_type) \
-ATX_INTERFACE(object)->RegisterExtension(ATX_INSTANCE(object), \
+ATX_INTERFACE(object)->RegisterExtension(object, \
 extension, media_type)
 
 #define BLT_Registry_GetMediaTypeIdForExtension(object, extension, type_id) \
-ATX_INTERFACE(object)->GetMediaTypeIdForExtension(ATX_INSTANCE(object), \
+ATX_INTERFACE(object)->GetMediaTypeIdForExtension(object, \
 extension, type_id)
 
 #define BLT_Registry_Destroy(object) ATX_DESTROY_OBJECT(object)

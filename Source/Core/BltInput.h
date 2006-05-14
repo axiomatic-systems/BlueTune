@@ -30,7 +30,7 @@ ATX_DECLARE_INTERFACE(BLT_Input)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Input)
     BLT_Result (*GetByteStream)(BLT_InputInstance* instance,
                                 ATX_ByteStream*    stream);
-ATX_END_INTERFACE_DEFINITION(BLT_Input)
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros

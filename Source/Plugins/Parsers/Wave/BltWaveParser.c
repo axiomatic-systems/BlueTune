@@ -1,16 +1,14 @@
 /*****************************************************************
 |
-|      File: BltWaveParser.c
+|   Wave Parser Module
 |
-|      Wave Parser Module
-|
-|      (c) 2002-2003 Gilles Boccon-Gibod
-|      Author: Gilles Boccon-Gibod (bok@bok.net)
+|   (c) 2002-2006 Gilles Boccon-Gibod
+|   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
 /*----------------------------------------------------------------------
-|       includes
+|   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -25,47 +23,48 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserModule)
-static const BLT_ModuleInterface WaveParserModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParser)
-static const BLT_MediaNodeInterface WaveParser_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserInputPort)
-static const BLT_MediaPortInterface WaveParserInputPort_BLT_MediaPortInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserOutputPort)
-static const BLT_MediaPortInterface WaveParserOutputPort_BLT_MediaPortInterface;
-
-/*----------------------------------------------------------------------
-|    types
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule  base;
-    BLT_UInt32      wav_type_id;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 wav_type_id;
 } WaveParserModule;
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamUser);
+
+    /* members */
     BLT_MediaType media_type;
-} WaveParserInputPort;
+} WaveParserInput;
 
 typedef struct {
-    ATX_InputStream stream;
-    BLT_Size        size;
-    BLT_MediaType*  media_type;
-    unsigned int    block_size;
-} WaveParserOutputPort;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamProvider);
+
+    /* members */
+    ATX_InputStream* stream;
+    BLT_Size         size;
+    BLT_MediaType*   media_type;
+    unsigned int     block_size;
+} WaveParserOutput;
 
 typedef struct {
-    BLT_BaseMediaNode    base;
-    WaveParserInputPort  input;
-    WaveParserOutputPort output;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    WaveParserInput  input;
+    WaveParserOutput output;
 } WaveParser;
 
 /*----------------------------------------------------------------------
-|    constants
+|   constants
 +---------------------------------------------------------------------*/
 #define BLT_WAVE_HEADER_BUFFER_SIZE      32
 #define BLT_WAVE_HEADER_RIFF_LOOKUP_SIZE 12
@@ -73,7 +72,7 @@ typedef struct {
 #define BLT_WAVE_HEADER_MAX_LOOKUP       524288
 
 /*----------------------------------------------------------------------
-|    WAVE tags
+|   WAVE tags
 +---------------------------------------------------------------------*/
 #define BLT_WAVE_FORMAT_UNKNOWN            0x0000
 #define BLT_WAVE_FORMAT_PCM                0x0001
@@ -86,22 +85,28 @@ typedef struct {
 #define BLT_WAVE_FORMAT_DEVELOPMENT        0xFFFF
 
 /*----------------------------------------------------------------------
-|       WaveParser_ParseHeader
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(WaveParserModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(WaveParser, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(WaveParser, ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|   WaveParser_ParseHeader
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParser_ParseHeader(WaveParser*      parser, 
+WaveParser_ParseHeader(WaveParser*      self, 
                        ATX_InputStream* stream,
                        BLT_Size*        header_size,
                        BLT_StreamInfo*  stream_info)
 {
     unsigned char buffer[BLT_WAVE_HEADER_BUFFER_SIZE];
-    BLT_Size      bytes_read;
     BLT_Offset    position;
     BLT_Cardinal  bytes_per_second = 0;
     BLT_Result    result;
     
     /* check that we have a stream */
-    if (ATX_OBJECT_IS_NULL(stream)) {
+    if (stream == NULL) {
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
@@ -114,10 +119,9 @@ WaveParser_ParseHeader(WaveParser*      parser,
     stream_info->mask = 0;
 
     /* read the wave header */
-    result = ATX_InputStream_Read(stream, buffer, 
-                                  BLT_WAVE_HEADER_RIFF_LOOKUP_SIZE,
-                                  &bytes_read);
-    if (BLT_FAILED(result) || bytes_read != BLT_WAVE_HEADER_RIFF_LOOKUP_SIZE) {
+    result = ATX_InputStream_ReadFully(stream, buffer, 
+                                       BLT_WAVE_HEADER_RIFF_LOOKUP_SIZE);
+    if (BLT_FAILED(result)) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
     position += BLT_WAVE_HEADER_RIFF_LOOKUP_SIZE;
@@ -140,8 +144,8 @@ WaveParser_ParseHeader(WaveParser*      parser,
     do {
         unsigned long chunk_size;
         unsigned int  format_tag;
-        result = ATX_InputStream_Read(stream, buffer, 8, &bytes_read);
-        if (BLT_FAILED(result) || bytes_read != 8) {
+        result = ATX_InputStream_ReadFully(stream, buffer, 8);
+        if (BLT_FAILED(result)) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
         position += 8;
@@ -152,11 +156,9 @@ WaveParser_ParseHeader(WaveParser*      parser,
             buffer[2] == 't' &&
             buffer[3] == ' ') {
             /* 'fmt ' chunk */
-            result = ATX_InputStream_Read(stream, buffer, 
-                                          BLT_WAVE_HEADER_FMT_LOOKUP_SIZE, 
-                                          &bytes_read);
-            if (BLT_FAILED(result) || 
-                bytes_read != BLT_WAVE_HEADER_FMT_LOOKUP_SIZE) {
+            result = ATX_InputStream_ReadFully(stream, buffer, 
+                                               BLT_WAVE_HEADER_FMT_LOOKUP_SIZE);
+            if (BLT_FAILED(result)) {
                 return BLT_ERROR_INVALID_MEDIA_FORMAT;
             }
             position += BLT_WAVE_HEADER_FMT_LOOKUP_SIZE;
@@ -169,7 +171,7 @@ WaveParser_ParseHeader(WaveParser*      parser,
                     /* read the media type */
                     BLT_PcmMediaType media_type;
                     BLT_PcmMediaType_Init(&media_type);
-                    BLT_MediaType_Free(parser->output.media_type);
+                    BLT_MediaType_Free(self->output.media_type);
                     media_type.channel_count   = ATX_BytesToInt16Le(buffer+2);
                     media_type.sample_rate     = ATX_BytesToInt32Le(buffer+4);
                     media_type.bits_per_sample = (BLT_UInt8)(8*((ATX_BytesToInt16Le(buffer+14)+7)/8));
@@ -178,10 +180,10 @@ WaveParser_ParseHeader(WaveParser*      parser,
                     } else {
                         media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
                     }
-                    BLT_MediaType_Clone((const BLT_MediaType*)&media_type, &parser->output.media_type);
+                    BLT_MediaType_Clone((const BLT_MediaType*)&media_type, &self->output.media_type);
 
                     /* compute the block size */
-                    parser->output.block_size = media_type.channel_count*media_type.bits_per_sample/8;
+                    self->output.block_size = media_type.channel_count*media_type.bits_per_sample/8;
 
                     /* update the stream info */
                     stream_info->sample_rate   = media_type.sample_rate;
@@ -208,7 +210,7 @@ WaveParser_ParseHeader(WaveParser*      parser,
                    buffer[2] == 't' &&
                    buffer[3] == 'a') {
             /* 'data' chunk */
-            parser->output.size = chunk_size;
+            self->output.size = chunk_size;
             *header_size = position;
 
             /* compute stream info */
@@ -247,59 +249,60 @@ WaveParser_ParseHeader(WaveParser*      parser,
 }
 
 /*----------------------------------------------------------------------
-|       WaveParserInputPort_SetStream
+|   WaveParserInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserInputPort_SetStream(BLT_InputStreamUserInstance* instance,
-                              ATX_InputStream*             stream,
-                              const BLT_MediaType*         media_type)
+WaveParserInput_SetStream(BLT_InputStreamUser* _self,
+                          ATX_InputStream*     stream,
+                          const BLT_MediaType* media_type)
 {
-    WaveParser*    parser = (WaveParser*)instance;
+    WaveParser*    self = ATX_SELF_M(input, WaveParser, BLT_InputStreamUser);
     BLT_Size       header_size;
     BLT_StreamInfo stream_info;
     BLT_Result     result;
     BLT_COMPILER_UNUSED(media_type);
 
     /* check media type */
-    if (media_type == NULL || media_type->id != parser->input.media_type.id) {
+    if (media_type == NULL || media_type->id != self->input.media_type.id) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* if we had a stream, release it */
-    ATX_RELEASE_OBJECT(&parser->output.stream);
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     /* parse the stream header */
-    result = WaveParser_ParseHeader(parser, 
+    result = WaveParser_ParseHeader(self, 
                                     stream, 
                                     &header_size,
                                     &stream_info);
     if (BLT_FAILED(result)) return result;
 
     /* update the stream info */
-    if (stream_info.mask && !ATX_OBJECT_IS_NULL(&parser->base.context)) {
-        BLT_Stream_SetInfo(&parser->base.context, &stream_info);
+    if (stream_info.mask && ATX_BASE(self, BLT_BaseMediaNode).context) {
+        BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, 
+                           &stream_info);
     }
 
     /* create a substream */
     return ATX_SubInputStream_Create(stream, 
                                      header_size, 
-                                     parser->output.size,
+                                     self->output.size,
                                      NULL,
-                                     &parser->output.stream);
+                                     &self->output.stream);
 }
 
 /*----------------------------------------------------------------------
-|    WaveParserInputPort_QueryMediaType
+|   WaveParserInput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserInputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                   BLT_Ordinal            index,
-                                   const BLT_MediaType**  media_type)
+WaveParserInput_QueryMediaType(BLT_MediaPort*        _self,
+                               BLT_Ordinal           index,
+                               const BLT_MediaType** media_type)
 {
-    WaveParser* parser = (WaveParser*)instance;
+    WaveParser* self = ATX_SELF_M(input, WaveParser, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = &parser->input.media_type;
+        *media_type = &self->input.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -308,50 +311,46 @@ WaveParserInputPort_QueryMediaType(BLT_MediaPortInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    BLT_InputStreamUser interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamUserInterface
-WaveParserInputPort_BLT_InputStreamUserInterface = {
-    WaveParserInputPort_GetInterface,
-    WaveParserInputPort_SetStream
-};
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveParserInput)
+    ATX_GET_INTERFACE_ACCEPT(WaveParserInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(WaveParserInput, BLT_InputStreamUser)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   BLT_InputStreamUser interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(WaveParserInputPort, 
+ATX_BEGIN_INTERFACE_MAP(WaveParserInput, BLT_InputStreamUser)
+    WaveParserInput_SetStream
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(WaveParserInput, 
                                          "input",
                                          STREAM_PULL,
                                          IN)
-static const BLT_MediaPortInterface
-WaveParserInputPort_BLT_MediaPortInterface = {
-    WaveParserInputPort_GetInterface,
-    WaveParserInputPort_GetName,
-    WaveParserInputPort_GetProtocol,
-    WaveParserInputPort_GetDirection,
-    WaveParserInputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(WaveParserInput, BLT_MediaPort)
+    WaveParserInput_GetName,
+    WaveParserInput_GetProtocol,
+    WaveParserInput_GetDirection,
+    WaveParserInput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserInputPort)
-ATX_INTERFACE_MAP_ADD(WaveParserInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(WaveParserInputPort, BLT_InputStreamUser)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserInputPort)
-
-/*----------------------------------------------------------------------
-|       WaveParserOutputPort_QueryMediaType
+|   WaveParserOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                    BLT_Ordinal            index,
-                                    const BLT_MediaType**  media_type)
+WaveParserOutput_QueryMediaType(BLT_MediaPort*        _self,
+                                BLT_Ordinal           index,
+                                const BLT_MediaType** media_type)
 {
-    WaveParser* parser = (WaveParser*)instance;
+    WaveParser* self = ATX_SELF_M(output, WaveParser, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = parser->output.media_type;
+        *media_type = self->output.media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -360,64 +359,60 @@ WaveParserOutputPort_QueryMediaType(BLT_MediaPortInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|       WaveParserOutputPort_GetStream
+|   WaveParserOutput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserOutputPort_GetStream(BLT_InputStreamProviderInstance* instance,
-                               ATX_InputStream*                 stream)
+WaveParserOutput_GetStream(BLT_InputStreamProvider* _self,
+                           ATX_InputStream**        stream)
 {
-    WaveParser* parser = (WaveParser*)instance;
+    WaveParser* self = ATX_SELF_M(output, WaveParser, BLT_InputStreamProvider);
 
-    *stream = parser->output.stream;
-    ATX_REFERENCE_OBJECT(stream);
+    *stream = self->output.stream;
+    ATX_REFERENCE_OBJECT(*stream);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(WaveParserOutputPort, 
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveParserOutput)
+    ATX_GET_INTERFACE_ACCEPT(WaveParserOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(WaveParserOutput, BLT_InputStreamProvider)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(WaveParserOutput, 
                                          "output",
                                          STREAM_PULL,
                                          OUT)
-static const BLT_MediaPortInterface
-WaveParserOutputPort_BLT_MediaPortInterface = {
-    WaveParserOutputPort_GetInterface,
-    WaveParserOutputPort_GetName,
-    WaveParserOutputPort_GetProtocol,
-    WaveParserOutputPort_GetDirection,
-    WaveParserOutputPort_QueryMediaType
-};
+ATX_BEGIN_INTERFACE_MAP(WaveParserOutput, BLT_MediaPort)
+    WaveParserOutput_GetName,
+    WaveParserOutput_GetProtocol,
+    WaveParserOutput_GetDirection,
+    WaveParserOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    BLT_InputStreamProvider interface
+|   BLT_InputStreamProvider interface
 +---------------------------------------------------------------------*/
-static const BLT_InputStreamProviderInterface
-WaveParserOutputPort_BLT_InputStreamProviderInterface = {
-    WaveParserOutputPort_GetInterface,
-    WaveParserOutputPort_GetStream
-};
+ATX_BEGIN_INTERFACE_MAP(WaveParserOutput, BLT_InputStreamProvider)
+    WaveParserOutput_GetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserOutputPort)
-ATX_INTERFACE_MAP_ADD(WaveParserOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(WaveParserOutputPort, BLT_InputStreamProvider)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserOutputPort)
-
-/*----------------------------------------------------------------------
-|    WaveParser_Create
+|   WaveParser_Create
 +---------------------------------------------------------------------*/
 static BLT_Result
 WaveParser_Create(BLT_Module*              module,
                   BLT_Core*                core, 
                   BLT_ModuleParametersType parameters_type,
                   BLT_CString              parameters, 
-                  ATX_Object*              object)
+                  BLT_MediaNode**          object)
 {
-    WaveParser* parser;
+    WaveParser* self;
 
     BLT_Debug("WaveParser::Create\n");
 
@@ -428,98 +423,100 @@ WaveParser_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    parser = ATX_AllocateZeroMemory(sizeof(WaveParser));
-    if (parser == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(WaveParser));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&parser->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    BLT_MediaType_Init(&parser->input.media_type,
-                       ((WaveParserModule*)ATX_INSTANCE(module))->wav_type_id);
-    ATX_CLEAR_OBJECT(&parser->output.stream);
+    BLT_MediaType_Init(&self->input.media_type,
+                       ((WaveParserModule*)module)->wav_type_id);
+    self->output.stream = NULL;
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)parser;
-    ATX_INTERFACE(object) = (ATX_Interface*)&WaveParser_BLT_MediaNodeInterface;
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, WaveParser, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, WaveParser, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  WaveParserInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  WaveParserInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&self->output, WaveParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, WaveParserOutput, BLT_InputStreamProvider);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    WaveParser_Destroy
+|   WaveParser_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-WaveParser_Destroy(WaveParser* parser)
+WaveParser_Destroy(WaveParser* self)
 {
     BLT_Debug("WaveParser::Destroy\n");
 
     /* release the byte stream */
-    ATX_RELEASE_OBJECT(&parser->output.stream);
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     /* free the media type extensions */
-    BLT_MediaType_Free(parser->output.media_type);
+    BLT_MediaType_Free(self->output.media_type);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&parser->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(parser);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       WaveParser_GetPortByName
+|   WaveParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParser_GetPortByName(BLT_MediaNodeInstance* instance,
-                         BLT_CString            name,
-                         BLT_MediaPort*         port)
+WaveParser_GetPortByName(BLT_MediaNode*  _self,
+                         BLT_CString     name,
+                         BLT_MediaPort** port)
 {
-    WaveParser* parser = (WaveParser*)instance;
+    WaveParser* self = ATX_SELF_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &WaveParserInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)parser;
-        ATX_INTERFACE(port) = &WaveParserOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
 
 /*----------------------------------------------------------------------
-|    WaveParser_Seek
+|   WaveParser_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParser_Seek(BLT_MediaNodeInstance* instance,
-                BLT_SeekMode*          mode,
-                BLT_SeekPoint*         point)
+WaveParser_Seek(BLT_MediaNode* _self,
+                BLT_SeekMode*  mode,
+                BLT_SeekPoint* point)
 {
-    WaveParser* parser = (WaveParser*)instance;
+    WaveParser* self = ATX_SELF_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* estimate the seek point */
-    if (ATX_OBJECT_IS_NULL(&parser->base.context)) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(&parser->base.context, *mode, point);
-    if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE) ||
-        !(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+    if (!(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
         return BLT_FAILURE;
     }
 
     /* align the offset to the nearest sample */
-    point->offset -= point->offset%(parser->output.block_size);
+    point->offset -= point->offset%(self->output.block_size);
 
     /* seek to the estimated offset */
     /* seek into the input stream (ignore return value) */
-    ATX_InputStream_Seek(&parser->output.stream, point->offset);
+    ATX_InputStream_Seek(self->output.stream, point->offset);
     
     /* set the mode so that the nodes down the chaine know the seek has */
     /* already been done on the stream                                  */
@@ -529,11 +526,17 @@ WaveParser_Seek(BLT_MediaNodeInstance* instance,
 }
 
 /*----------------------------------------------------------------------
+|    GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveParser)
+    ATX_GET_INTERFACE_ACCEPT_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(WaveParser, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-WaveParser_BLT_MediaNodeInterface = {
-    WaveParser_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     WaveParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -543,29 +546,23 @@ WaveParser_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     WaveParser_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(WaveParser, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WaveParser, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParser)
-ATX_INTERFACE_MAP_ADD(WaveParser, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(WaveParser, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParser)
-
-/*----------------------------------------------------------------------
-|       WaveParserModule_Attach
+|   WaveParserModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+WaveParserModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    WaveParserModule* module = (WaveParserModule*)instance;
-    BLT_Registry      registry;
+    WaveParserModule* self = ATX_SELF_EX(WaveParserModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*     registry;
     BLT_Result        result;
 
     /* get the registry */
@@ -573,36 +570,36 @@ WaveParserModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
     if (BLT_FAILED(result)) return result;
 
     /* register the ".wav" file extension */
-    result = BLT_Registry_RegisterExtension(&registry, 
+    result = BLT_Registry_RegisterExtension(registry, 
                                             ".wav",
                                             "audio/wav");
     if (BLT_FAILED(result)) return result;
 
     /* get the type id for "audio/wav" */
     result = BLT_Registry_GetIdForName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/wav",
-        &module->wav_type_id);
+        &self->wav_type_id);
     if (BLT_FAILED(result)) return result;
     
     BLT_Debug("Wave Parser Module::Attach (audio/wav type = %d\n",
-              module->wav_type_id);
+              self->wav_type_id);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|       WaveParserModule_Probe
+|   WaveParserModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-WaveParserModule_Probe(BLT_ModuleInstance*      instance, 
+WaveParserModule_Probe(BLT_Module*              _self, 
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
                        BLT_Cardinal*            match)
 {
-    WaveParserModule* module = (WaveParserModule*)instance;
+    WaveParserModule* self = ATX_SELF_EX(WaveParserModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -625,7 +622,7 @@ WaveParserModule_Probe(BLT_ModuleInstance*      instance,
             }
 
             /* we need the input media type to be 'audio/wav' */
-            if (constructor->spec.input.media_type->id != module->wav_type_id) {
+            if (constructor->spec.input.media_type->id != self->wav_type_id) {
                 return BLT_FAILURE;
             }
 
@@ -663,45 +660,48 @@ WaveParserModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(WaveParser)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(WaveParser, "Wave Parser", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(WaveParserModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(WaveParserModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(WaveParserModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface WaveParserModule_BLT_ModuleInterface = {
-    WaveParserModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(WaveParserModule, WaveParser)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(WaveParserModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     WaveParserModule_Attach,
     WaveParserModule_CreateInstance,
     WaveParserModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define WaveParserModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(WaveParserModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WaveParserModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserModule) 
-ATX_INTERFACE_MAP_ADD(WaveParserModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(WaveParserModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(WaveParserModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(WaveParserModule, "Wave Parser", 0)
 
 /*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_WaveParserModule_GetModuleObject(BLT_Module* object)
+BLT_WaveParserModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

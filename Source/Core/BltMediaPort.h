@@ -58,32 +58,30 @@ typedef struct {
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_MediaPort)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_MediaPort)
-    BLT_Result (*GetName)(BLT_MediaPortInstance*  instance, 
-                          BLT_CString*            name);
-    BLT_Result (*GetProtocol)(BLT_MediaPortInstance* instance, 
+    BLT_Result (*GetName)(BLT_MediaPort*  self, BLT_CString* name);
+    BLT_Result (*GetProtocol)(BLT_MediaPort*         self, 
                               BLT_MediaPortProtocol* protocol);
-    BLT_Result (*GetDirection)(BLT_MediaPortInstance* instance, 
+    BLT_Result (*GetDirection)(BLT_MediaPort*          self, 
                                BLT_MediaPortDirection* direction);
-    BLT_Result (*QueryMediaType)(BLT_MediaPortInstance* instance,
-                                 BLT_Ordinal            index,
-                                 const BLT_MediaType**  media_type);
-ATX_END_INTERFACE_DEFINITION(BLT_MediaPort)
+    BLT_Result (*QueryMediaType)(BLT_MediaPort*        self,
+                                 BLT_Ordinal           index,
+                                 const BLT_MediaType** media_type);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_MediaPort_GetName(object, name)\
-ATX_INTERFACE(object)->GetProtocol(ATX_INSTANCE(object), name)
+ATX_INTERFACE(object)->GetProtocol(object, name)
 
 #define BLT_MediaPort_GetProtocol(object, protocol)\
-ATX_INTERFACE(object)->GetProtocol(ATX_INSTANCE(object), protocol)
+ATX_INTERFACE(object)->GetProtocol(object, protocol)
 
 #define BLT_MediaPort_GetDirection(object, direction)\
-ATX_INTERFACE(object)->GetDirection(ATX_INSTANCE(object), direction)
+ATX_INTERFACE(object)->GetDirection(object, direction)
 
 #define BLT_MediaPort_QueryMediaType(object, index, media_type)\
-ATX_INTERFACE(object)->QueryMediaType(ATX_INSTANCE(object), \
-index, media_type)
+ATX_INTERFACE(object)->QueryMediaType(object, index, media_type)
 
 /*----------------------------------------------------------------------
 |       templates
@@ -116,24 +114,23 @@ BLT_METHOD port##_GetDirection(BLT_MediaPortInstance*  instance,        \
 }
 
 #define BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(port, n, proto, dir)   \
-BLT_METHOD port##_GetName(BLT_MediaPortInstance* instance,              \
-                          BLT_CString*            name)                 \
+BLT_METHOD port##_GetName(BLT_MediaPort* self, BLT_CString* name)       \
 {                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
+    BLT_COMPILER_UNUSED(self);                                          \
     *name = (n);                                                        \
     return BLT_SUCCESS;                                                 \
 }                                                                       \
-BLT_METHOD port##_GetProtocol(BLT_MediaPortInstance* instance,          \
+BLT_METHOD port##_GetProtocol(BLT_MediaPort*         self,              \
                               BLT_MediaPortProtocol* protocol)          \
 {                                                                       \
     BLT_COMPILER_UNUSED(instance);                                      \
     *protocol = BLT_MEDIA_PORT_PROTOCOL_##proto;                        \
     return BLT_SUCCESS;                                                 \
 }                                                                       \
-BLT_METHOD port##_GetDirection(BLT_MediaPortInstance*  instance,        \
+BLT_METHOD port##_GetDirection(BLT_MediaPort*          self,            \
                                BLT_MediaPortDirection* direction)       \
 {                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
+    BLT_COMPILER_UNUSED(self);                                          \
     *direction = BLT_MEDIA_PORT_DIRECTION_##dir;                        \
     return BLT_SUCCESS;                                                 \
 }
@@ -143,7 +140,7 @@ BLT_METHOD port##_GetDirection(BLT_MediaPortInstance*  instance,        \
 |       functions
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPortInstance* instance,
+BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPort*         self,
                                     BLT_Ordinal            index,
                                     const BLT_MediaType**  media_type);
 

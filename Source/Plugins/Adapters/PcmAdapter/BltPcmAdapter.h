@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|      File: BltPcmAdapter.h
-|
 |      PCM Adapter Module
 |
 |      (c) 2002-2005 Gilles Boccon-Gibod
@@ -21,6 +19,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_PcmAdapterModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_PcmAdapterModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_PCM_ADAPTER_H_ */

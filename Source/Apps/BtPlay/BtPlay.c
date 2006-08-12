@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltPlay.c
-|
 |   BlueTune - Command-Line Player
 |
 |   (c) 2002-2003 Gilles Boccon-Gibod

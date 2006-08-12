@@ -166,7 +166,6 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
 
         /* set a stream property for this item */
         {
-            ATX_Object        source = {NULL, NULL};
             char              property_name[BLT_APE_MAX_ITEM_SIZE+32] = "Tags/APE/";
             char              property_value_string[BLT_APE_MAX_ITEM_SIZE+1];
             ATX_PropertyValue property_value;

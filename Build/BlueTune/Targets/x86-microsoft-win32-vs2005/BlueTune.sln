@@ -1,18 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltPlugins", "..\..\..\Plugins\Targets\x86-microsoft-win32-vs2003\BltPlugins.vcproj", "{9127F6E8-8440-4E53-B237-1E19A3C5BFFE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltPlugins", "..\..\..\Plugins\Targets\x86-microsoft-win32-vs2005\BltPlugins.vcproj", "{9127F6E8-8440-4E53-B237-1E19A3C5BFFE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{41AF9125-0501-49C6-8430-1F671BA87299} = {41AF9125-0501-49C6-8430-1F671BA87299}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fluo", "..\..\..\Fluo\Targets\x86-microsoft-win32-vs2003\Fluo.vcproj", "{41AF9125-0501-49C6-8430-1F671BA87299}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fluo", "..\..\..\Fluo\Targets\x86-microsoft-win32-vs2005\Fluo.vcproj", "{41AF9125-0501-49C6-8430-1F671BA87299}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltCore", "..\..\..\Core\Targets\x86-microsoft-win32-vs2003\BltCore.vcproj", "{1481FC7E-3859-4209-B6B1-F2AA3F6C21F6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltCore", "..\..\..\Core\Targets\x86-microsoft-win32-vs2005\BltCore.vcproj", "{1481FC7E-3859-4209-B6B1-F2AA3F6C21F6}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtPlay", "..\..\..\Apps\BtPlay\Targets\x86-microsoft-win32-vs2003\BtPlay.vcproj", "{8ACFBE03-D34C-464A-87B5-DA845025BAFA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtPlay", "..\..\..\Apps\BtPlay\Targets\x86-microsoft-win32-vs2005\BtPlay.vcproj", "{8ACFBE03-D34C-464A-87B5-DA845025BAFA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{088A3D43-2722-4FE1-9D07-EEF19F7BD434} = {088A3D43-2722-4FE1-9D07-EEF19F7BD434}
 		{AB4D6E4D-790B-4851-8E5F-129AA6D7E56F} = {AB4D6E4D-790B-4851-8E5F-129AA6D7E56F}
@@ -20,16 +20,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtPlay", "..\..\..\Apps\BtP
 		{9127F6E8-8440-4E53-B237-1E19A3C5BFFE} = {9127F6E8-8440-4E53-B237-1E19A3C5BFFE}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltDecoder", "..\..\..\Decoder\Targets\x86-microsoft-win32-vs2003\BltDecoder.vcproj", "{088A3D43-2722-4FE1-9D07-EEF19F7BD434}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltDecoder", "..\..\..\Decoder\Targets\x86-microsoft-win32-vs2005\BltDecoder.vcproj", "{088A3D43-2722-4FE1-9D07-EEF19F7BD434}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltPlayer", "..\..\..\Player\Targets\x86-microsoft-win32-vs2003\BltPlayer.vcproj", "{A9184349-F87C-4000-8994-9C0DCAA7067A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltPlayer", "..\..\..\Player\Targets\x86-microsoft-win32-vs2005\BltPlayer.vcproj", "{A9184349-F87C-4000-8994-9C0DCAA7067A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{088A3D43-2722-4FE1-9D07-EEF19F7BD434} = {088A3D43-2722-4FE1-9D07-EEF19F7BD434}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtCommand", "..\..\..\Apps\BtCommand\Targets\x86-microsoft-win32-vs2003\BtCommand.vcproj", "{21BA7A9D-1838-440D-AC74-CC600D20CF50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtCommand", "..\..\..\Apps\BtCommand\Targets\x86-microsoft-win32-vs2005\BtCommand.vcproj", "{21BA7A9D-1838-440D-AC74-CC600D20CF50}"
 	ProjectSection(ProjectDependencies) = postProject
 		{41AF9125-0501-49C6-8430-1F671BA87299} = {41AF9125-0501-49C6-8430-1F671BA87299}
 		{088A3D43-2722-4FE1-9D07-EEF19F7BD434} = {088A3D43-2722-4FE1-9D07-EEF19F7BD434}
@@ -51,11 +51,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtMfcGui", "..\..\..\Apps\B
 		{9127F6E8-8440-4E53-B237-1E19A3C5BFFE} = {9127F6E8-8440-4E53-B237-1E19A3C5BFFE}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Atomix", "..\..\..\..\..\Atomix\Build\Atomix\Targets\x86-microsoft-win32-vs2003\Atomix.vcproj", "{AB4D6E4D-790B-4851-8E5F-129AA6D7E56F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Atomix", "..\..\..\..\..\Atomix\Build\Atomix\Targets\x86-microsoft-win32-vs2005\Atomix.vcproj", "{AB4D6E4D-790B-4851-8E5F-129AA6D7E56F}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Neptune", "..\..\..\..\..\Neptune\Build\Neptune\Targets\x86-microsoft-win32-vs2003\Neptune.vcproj", "{12AFF2E5-6D95-4809-9728-9551677C078A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Neptune", "..\..\..\..\..\Neptune\Build\Neptune\Targets\x86-microsoft-win32-vs2005\Neptune.vcproj", "{12AFF2E5-6D95-4809-9728-9551677C078A}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

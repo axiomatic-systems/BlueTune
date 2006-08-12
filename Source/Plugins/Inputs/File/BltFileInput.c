@@ -1,6 +1,6 @@
 /*****************************************************************
 |
-|   File Input Module
+|   BlueTune - File Input Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
@@ -106,7 +106,7 @@ FileInput_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    input = ATX_AllocateZeroMemory(sizeof(FileInput));
+    input = (FileInput*)ATX_AllocateZeroMemory(sizeof(FileInput));
     if (input == NULL) {
         *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;

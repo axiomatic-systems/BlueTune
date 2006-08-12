@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="BtPlay"
-	ProjectGUID="{8ACFBE03-D34C-464A-87B5-DA845025BAFA}"
+	Name="NetworkStreamTest"
+	ProjectGUID="{2E94377F-49E2-461F-8FEE-DAB69138AD3D}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,12 +19,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_DEBUG"
+				AdditionalIncludeDirectories="..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config;..\..\..\..\..\Source\Plugins\Inputs\Network"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -33,14 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				IgnoreImportLibrary="FALSE"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
-				OutputFile="$(OutDir)/BtPlay.exe"
+				OutputFile="$(OutDir)/NetworkStreamTest.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
-				IgnoreDefaultLibraryNames="MSVCRT.lib;LIBCMTD.lib;LIBCMT.lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/BtPlay.pdb"
+				ProgramDatabaseFile="$(OutDir)/NetworkStreamTest.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -72,14 +67,9 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32"
-				StringPooling="TRUE"
+				AdditionalIncludeDirectories="..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config;..\..\..\..\..\Source\Plugins\Inputs\Network"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -88,11 +78,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
-				OutputFile="$(OutDir)/BtPlay.exe"
+				OutputFile="$(OutDir)/NetworkStreamTest.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
-				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -125,18 +112,21 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\..\..\..\..\Source\Apps\BtPlay\BtPlay.c">
+				RelativePath="..\..\..\..\..\Source\Tests\NetworkStream\NetworkStreamTest.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
 	</Files>
 	<Globals>

@@ -1,8 +1,6 @@
 /*****************************************************************
 |
-|   File: BltMpegAudioDecoder.c
-|
-|   Mpeg Audio Decoder Module
+|   BlueTune - Mpeg Audio Decoder Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)

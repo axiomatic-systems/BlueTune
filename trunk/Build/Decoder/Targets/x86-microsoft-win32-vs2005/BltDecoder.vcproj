@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="BtPlay"
-	ProjectGUID="{8ACFBE03-D34C-464A-87B5-DA845025BAFA}"
+	Name="BltDecoder"
+	ProjectGUID="{088A3D43-2722-4FE1-9D07-EEF19F7BD434}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -14,13 +14,13 @@
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_DEBUG"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -32,17 +32,8 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				IgnoreImportLibrary="FALSE"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
-				OutputFile="$(OutDir)/BtPlay.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
-				IgnoreDefaultLibraryNames="MSVCRT.lib;LIBCMTD.lib;LIBCMT.lib"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/BtPlay.pdb"
-				SubSystem="1"
-				TargetMachine="1"/>
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/BltDecoder.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -58,8 +49,6 @@
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
@@ -68,15 +57,15 @@
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -87,17 +76,8 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
-				OutputFile="$(OutDir)/BtPlay.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
-				IgnoreDefaultLibraryNames="LIBCMT.lib"
-				GenerateDebugInformation="TRUE"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/BltDecoder.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -112,8 +92,6 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -127,12 +105,15 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath="..\..\..\..\..\Source\Apps\BtPlay\BtPlay.c">
+				RelativePath="..\..\..\..\Source\Decoder\BltDecoder.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
+			<File
+				RelativePath="..\..\..\..\Source\Decoder\BltDecoder.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

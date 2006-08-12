@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltTypes.h
-|
 |   BlueTune - Types
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -27,7 +25,6 @@ typedef ATX_UInt16       BLT_UInt16;
 typedef ATX_Int16        BLT_Int16;
 typedef ATX_UInt8        BLT_UInt8;
 typedef ATX_Int8         BLT_Int8;
-typedef ATX_Int          BLT_Int;
 
 typedef ATX_Result       BLT_Result;
 typedef ATX_Flags        BLT_Flags;

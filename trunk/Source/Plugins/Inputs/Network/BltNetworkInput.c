@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   Network: BltNetworkInput.cpp
+|   BlueTune - Network Input Module
 |
-|   Network Input Module
-|
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -27,80 +25,43 @@
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } NetworkInputModule;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    BLT_Stream        context;
-    ATX_ByteStream    stream;
-    BLT_MediaType     media_type;
+    /* interfaces */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_InputStreamProvider);
+
+    /* members */
+    ATX_InputStream* stream;
+    ATX_Flags        flags;
+    BLT_MediaType*   media_type;
 } NetworkInput;
 
 /*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
-BLT_METHOD NetworkInput_GetPortByName(BLT_MediaNodeInstance* instance,
-                                      BLT_String             name,
-                                      BLT_MediaPort*         port);
-BLT_METHOD NetworkInput_Activate(BLT_MediaNodeInstance* instance, 
-                                 BLT_Stream* stream);
-BLT_METHOD NetworkInput_Deactivate(BLT_MediaNodeInstance* instance);
-BLT_METHOD NetworkInput_GetStream(BLT_ByteStreamProviderInstance* instance,
-                                  ATX_ByteStream*                 stream,
-                                  BLT_MediaType*                  media_type);
+ATX_DECLARE_INTERFACE_MAP(NetworkInputModule, BLT_Module)
 
-/*----------------------------------------------------------------------
-|    BLT_MediaNode interface
-+---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-NetworkInput_BLT_MediaNodeInterface = {
-    NetworkInput_GetInterface,
-    BLT_BaseMediaNode_GetInfo,
-    NetworkInput_GetPortByName,
-    NetworkInput_Activate,
-    NetworkInput_Deactivate,
-    BLT_BaseMediaNode_Start,
-    BLT_BaseMediaNode_Stop,
-    BLT_BaseMediaNode_Pause,
-    BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
-};
-
-/*----------------------------------------------------------------------
-|    BLT_MediaPort interface
-+---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_PROTOCOL(NetworkInput, STREAM_PULL)
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_DIRECTION(NetworkInput, OUT)
-static const BLT_MediaPortInterface
-NetworkInput_BLT_MediaPortInterface = {
-    NetworkInput_GetInterface,
-    NetworkInput_GetProtocol,
-    NetworkInput_GetDirection,
-    BLT_MediaPort_DefaultGetExpectedMediaType
-};
-
-/*----------------------------------------------------------------------
-|    BLT_ByteStreamProducer interface
-+---------------------------------------------------------------------*/
-static const BLT_ByteStreamProviderInterface
-NetworkInput_BLT_ByteStreamProviderInterface = {
-    NetworkInput_GetInterface,
-    NetworkInput_GetStream
-};
+ATX_DECLARE_INTERFACE_MAP(NetworkInput, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(NetworkInput, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(NetworkInput, BLT_MediaPort)
+ATX_DECLARE_INTERFACE_MAP(NetworkInput, BLT_InputStreamProvider)
 
 /*----------------------------------------------------------------------
 |    NetworkInput_DecideMediaType
 +---------------------------------------------------------------------*/
 static BLT_Result
-NetworkInput_DecideMediaType(NetworkInput* input, BLT_String name)
+NetworkInput_DecideMediaType(NetworkInput* self, BLT_CString name)
 {
-    BLT_Registry registry;
-    BLT_String   extension;
-    BLT_Result   result;
+    BLT_Registry* registry;
+    BLT_CString   extension;
+    BLT_Result    result;
 
-    /* compute network extension */
+    /* compute file extension */
     extension = NULL;
     while (*name) {
         if (*name == '.') {
@@ -111,13 +72,13 @@ NetworkInput_DecideMediaType(NetworkInput* input, BLT_String name)
     if (extension == NULL) return BLT_SUCCESS;
 
     /* get the registry */
-    result = BLT_Core_GetRegistry(&input->base.core, &registry);
+    result = BLT_Core_GetRegistry(ATX_BASE(self, BLT_BaseMediaNode).core, &registry);
     if (BLT_FAILED(result)) return result;
 
     /* query the registry */
-    return BLT_Registry_GetMediaTypeIdForExtension(&registry, 
+    return BLT_Registry_GetMediaTypeIdForExtension(registry, 
                                                    extension, 
-                                                   &input->media_type.id);
+                                                   &self->media_type->id);
 }
 
 /*----------------------------------------------------------------------
@@ -127,8 +88,8 @@ static BLT_Result
 NetworkInput_Create(BLT_Module*              module,
                     BLT_Core*                core, 
                     BLT_ModuleParametersType parameters_type,
-                    BLT_AnyConst             parameters, 
-                    ATX_Object*              object)
+                    BLT_CString              parameters, 
+                    BLT_MediaNode**          object)
 {
     NetworkInput*             input;
     BLT_MediaNodeConstructor* constructor = 
@@ -147,42 +108,44 @@ NetworkInput_Create(BLT_Module*              module,
     /* allocate memory for the object */
     input = (NetworkInput*)ATX_AllocateZeroMemory(sizeof(NetworkInput));
     if (input == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&input->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(input, BLT_BaseMediaNode), module, core);
     
     /* create the network stream */
-    if (ATX_StringsEqualN(constructor->name, "tcp://", 7)) {
+    if (ATX_StringsEqualN(constructor->name, "tcp://", 6)) {
         /* create a TCP byte stream */
-        result = BLT_TcpNetworkStream::CreateStream(constructor->name+6, 
-                                                    &input->stream);
+        result = BLT_TcpNetworkStream_Create(constructor->name+6, &input->stream);
     } else {
         result = BLT_ERROR_INVALID_PARAMETERS;
     }
 
     if (ATX_FAILED(result)) {
-        ATX_CLEAR_OBJECT(object);
+        input->stream = NULL;
         ATX_FreeMemory(input);
         return result;
     }
 
     /* figure out the media type */
-    if (constructor->spec.output.media_type.id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
+    if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
         /* unknown type, try to figure it out from the network extension */
-        BLT_MediaType_Init(&input->media_type, BLT_MEDIA_TYPE_ID_UNKNOWN);
+        BLT_MediaType_Clone(&BLT_MediaType_Unknown, &input->media_type);
         NetworkInput_DecideMediaType(input, constructor->name);
     } else {
         /* use the media type from the output spec */
-        BLT_MediaType_Clone(&input->media_type, 
-                            &constructor->spec.output.media_type);
+        BLT_MediaType_Clone(constructor->spec.output.media_type, 
+                            &input->media_type);
     }
 
     /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)input;
-    ATX_INTERFACE(object) = (ATX_Interface*)&NetworkInput_BLT_MediaNodeInterface;
+    ATX_SET_INTERFACE_EX(input, NetworkInput, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(input, NetworkInput, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE   (input, NetworkInput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (input, NetworkInput, BLT_InputStreamProvider);
+    *object = &ATX_BASE_EX(input, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -191,21 +154,21 @@ NetworkInput_Create(BLT_Module*              module,
 |    NetworkInput_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-NetworkInput_Destroy(NetworkInput* input)
+NetworkInput_Destroy(NetworkInput* self)
 {
     BLT_Debug("NetworkInput::Destroy\n");
 
     /* release the byte stream */
-    ATX_RELEASE_OBJECT(&input->stream);
+    ATX_RELEASE_OBJECT(self->stream);
     
     /* free the media type extensions */
-    BLT_MediaType_Free(&input->media_type);
+    BLT_MediaType_Free(self->media_type);
 
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&input->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(input);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
@@ -214,18 +177,37 @@ NetworkInput_Destroy(NetworkInput* input)
 |   NetworkInput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-NetworkInput_GetPortByName(BLT_MediaNodeInstance* instance,
-                           BLT_String             name,
-                           BLT_MediaPort*         port)
+NetworkInput_GetPortByName(BLT_MediaNode*  _self,
+                           BLT_CString     name,
+                           BLT_MediaPort** port)
 {
+    NetworkInput* self = ATX_SELF_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode);
     if (ATX_StringsEqual(name, "output")) {
         /* we implement the BLT_MediaPort interface ourselves */
-        ATX_INSTANCE(port) = (BLT_MediaPortInstance*)instance;
-        ATX_INTERFACE(port) = &NetworkInput_BLT_MediaPortInterface;
+        *port = &ATX_BASE(self, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
+    }
+}
+
+/*----------------------------------------------------------------------
+|    NetworkInput_QueryMediaType
++---------------------------------------------------------------------*/
+BLT_METHOD
+NetworkInput_QueryMediaType(BLT_MediaPort*        _self,
+                            BLT_Ordinal           index,
+                            const BLT_MediaType** media_type)
+{
+    NetworkInput* self = ATX_SELF(NetworkInput, BLT_MediaPort);
+
+    if (index == 0) {
+        *media_type = self->media_type;
+        return BLT_SUCCESS;
+    } else {
+        *media_type = NULL;
+        return BLT_FAILURE;
     }
 }
 
@@ -233,17 +215,15 @@ NetworkInput_GetPortByName(BLT_MediaNodeInstance* instance,
 |   NetworkInput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-NetworkInput_GetStream(BLT_ByteStreamProviderInstance* instance,
-                       ATX_ByteStream*                 stream,
-                       BLT_MediaType*                  media_type)
+NetworkInput_GetStream(BLT_InputStreamProvider* _self,
+                       ATX_InputStream**        stream)
 {
-    NetworkInput* input = (NetworkInput*)instance;
+    NetworkInput* self = ATX_SELF(NetworkInput, BLT_InputStreamProvider);
 
-    *stream = input->stream;
-    ATX_REFERENCE_OBJECT(stream);
-    if (media_type) {
-        *media_type = input->media_type;
-    }
+    /* return our stream object */
+    *stream = self->stream;
+    ATX_REFERENCE_OBJECT(*stream);
+
     return BLT_SUCCESS;
 }
 
@@ -251,16 +231,16 @@ NetworkInput_GetStream(BLT_ByteStreamProviderInstance* instance,
 |    NetworkInput_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-NetworkInput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
+NetworkInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
-    NetworkInput* input = (NetworkInput*)instance;
+    NetworkInput* self = ATX_SELF_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* update the stream info */
     {
         BLT_StreamInfo info;
         BLT_Result     result;
 
-        result = ATX_ByteStream_GetSize(&input->stream, &info.size);
+        result = ATX_InputStream_GetSize(self->stream, &info.size);
         if (BLT_SUCCEEDED(result)) {
             info.mask = BLT_STREAM_INFO_MASK_SIZE;
             BLT_Stream_SetInfo(stream, &info);
@@ -268,79 +248,110 @@ NetworkInput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
     }
     
     /* keep the stream as our context */
-    input->context = *stream;
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    NetworkInput_Deactivate
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_METHOD
-NetworkInput_Deactivate(BLT_MediaNodeInstance* instance)
-{
-    NetworkInput* input = (NetworkInput*)instance;
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
+    ATX_GET_INTERFACE_ACCEPT_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(NetworkInput, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT   (NetworkInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT   (NetworkInput, BLT_InputStreamProvider)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
-    /* we're detached from the stream */
-    ATX_CLEAR_OBJECT(&input->context);
+/*----------------------------------------------------------------------
+|    BLT_MediaNode interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode)
+    BLT_BaseMediaNode_GetInfo,
+    NetworkInput_GetPortByName,
+    NetworkInput_Activate,
+    BLT_BaseMediaNode_Deactivate,
+    BLT_BaseMediaNode_Start,
+    BLT_BaseMediaNode_Stop,
+    BLT_BaseMediaNode_Pause,
+    BLT_BaseMediaNode_Resume,
+    BLT_BaseMediaNode_Seek
+ATX_END_INTERFACE_MAP_EX
 
-    return BLT_SUCCESS;
-}
+/*----------------------------------------------------------------------
+|    BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(NetworkInput, 
+                                         "output", 
+                                         STREAM_PULL, 
+                                         OUT)
+ATX_BEGIN_INTERFACE_MAP(NetworkInput, BLT_MediaPort)
+    NetworkInput_GetName,
+    NetworkInput_GetProtocol,
+    NetworkInput_GetDirection,
+    NetworkInput_QueryMediaType
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_InputStreamProvider interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(NetworkInput, BLT_InputStreamProvider)
+    NetworkInput_GetStream
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(NetworkInput, base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(NetworkInput, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
-/*----------------------------------------------------------------------
-|   standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
-ATX_INTERFACE_MAP_ADD(NetworkInput, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(NetworkInput, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(NetworkInput, BLT_ByteStreamProvider)
-ATX_INTERFACE_MAP_ADD(NetworkInput, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInput)
 
 /*----------------------------------------------------------------------
 |   NetworkInputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-NetworkInputModule_Probe(BLT_ModuleInstance*      /*instance*/, 
-                         BLT_Core*                /*core*/,
+NetworkInputModule_Probe(BLT_Module*              self, 
+                         BLT_Core*                core,
                          BLT_ModuleParametersType parameters_type,
                          BLT_AnyConst             parameters,
                          BLT_Cardinal*            match)
 {
+    BLT_COMPILER_UNUSED(self);
+    BLT_COMPILER_UNUSED(core);
+
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:
         {
             BLT_MediaNodeConstructor* constructor = 
                 (BLT_MediaNodeConstructor*)parameters;
 
-            /* we need a network name */
+            /* we need a file name */
             if (constructor->name == NULL) return BLT_FAILURE;
 
             /* the input protocol should be NONE, and the output */
             /* protocol should be STREAM_PULL                    */
             if ((constructor->spec.input.protocol !=
-                BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                constructor->spec.input.protocol != 
-                BLT_MEDIA_PORT_PROTOCOL_NONE) ||
+                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol != 
+                 BLT_MEDIA_PORT_PROTOCOL_NONE) ||
                 (constructor->spec.output.protocol !=
-                BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                constructor->spec.output.protocol != 
-                BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL)) {
+                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != 
+                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL)) {
                 return BLT_FAILURE;
             }
 
             /* check the name */
-            if (ATX_StringsEqualN(constructor->name, "tcp://", 7)) {
+            if (ATX_StringsEqualN(constructor->name, "tcp://", 6)) {
                 /* this is an exact match for us */
                 *match = BLT_MODULE_PROBE_MATCH_EXACT;
-            } else {
+            } else if (constructor->spec.input.protocol ==
+                       BLT_MEDIA_PORT_PROTOCOL_NONE) {
                 /* default match level */
                 *match = BLT_MODULE_PROBE_MATCH_DEFAULT;
+            } else {
+                return BLT_FAILURE;
             }
 
             BLT_Debug("NetworkInputModule::Probe - Ok [%d]\n", *match);
@@ -356,39 +367,27 @@ NetworkInputModule_Probe(BLT_ModuleInstance*      /*instance*/,
 }
 
 /*----------------------------------------------------------------------
-|   forward declarations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
-BLT_Result 
-NetworkInputModule_CreateInstance(BLT_ModuleInstance*      module,
-                                  BLT_Core*                core,
-                                  BLT_ModuleParametersType parameters_type,
-                                  BLT_AnyConst             parameters,
-                                  const ATX_InterfaceId*   interface_id,
-                                  ATX_Object*              object);
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(NetworkInputModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(NetworkInputModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
-BLT_Result 
-NetworkInputModule_Probe(BLT_ModuleInstance*      module,
-                         BLT_Core*                core,
-                         BLT_ModuleParametersType parameters_type,
-                         BLT_AnyConst             parameters,
-                         BLT_Cardinal*            match);
+/*----------------------------------------------------------------------
+|   node factory
++---------------------------------------------------------------------*/
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(NetworkInputModule, NetworkInput)
 
 /*----------------------------------------------------------------------
 |   BLT_Module interface
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface NetworkInputModule_BLT_ModuleInterface = {
-    NetworkInputModule_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(NetworkInputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     NetworkInputModule_CreateInstance,
     NetworkInputModule_Probe
-};
-
-/*----------------------------------------------------------------------
-|   template instantiations
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(NetworkInput)
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
@@ -396,27 +395,20 @@ BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(NetworkInput)
 #define NetworkInputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(NetworkInputModule, 
-                                             base.reference_count)
-
-/*----------------------------------------------------------------------
-|   standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule) 
-ATX_INTERFACE_MAP_ADD(NetworkInputModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(NetworkInputModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(NetworkInputModule)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(NetworkInputModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_NetworkInputModule_GetModuleObject(BLT_Module* object)
+BLT_NetworkInputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("Network Input", NULL, 0,
-        &NetworkInputModule_BLT_ModuleInterface,
-        object);
+                                 &NetworkInputModule_BLT_ModuleInterface,
+                                 &NetworkInputModule_ATX_ReferenceableInterface,
+                                 object);
 }

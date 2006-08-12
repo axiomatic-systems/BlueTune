@@ -681,14 +681,14 @@ VorbisDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     /* register the ".ogg" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".ogg",
-                                            "application/x-ogg");
+                                            "application/ogg");
     if (BLT_FAILED(result)) return result;
 
     /* register the "application/x-ogg" type */
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        "application/x-ogg",
+        "application/ogg",
         &self->ogg_type_id);
     if (BLT_FAILED(result)) return result;
     

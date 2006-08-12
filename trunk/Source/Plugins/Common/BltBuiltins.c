@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltBuiltins.c
-|
 |   BlueTune - Builtins Object
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -25,6 +23,10 @@
 /* inputs */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_INPUT)
 #include "BltFileInput.h"
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT)
+#include "BltNetworkInput.h"
 #endif
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT)
@@ -152,6 +154,14 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     /* file input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_INPUT)
     result = BLT_FileInputModule_GetModuleObject(&module);
+    if (BLT_FAILED(result)) return result;
+    result = BLT_Core_RegisterModule(core, module);
+    if (BLT_FAILED(result)) return result;
+#endif
+
+    /* network input module */
+#if defined(BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT)
+    result = BLT_NetworkInputModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
     result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;

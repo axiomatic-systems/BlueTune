@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: FloDefs.h
-|
 |   BlueTune - General Types
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -26,7 +24,6 @@ typedef ATX_UInt16       FLO_UInt16;
 typedef ATX_Int16        FLO_Int16;
 typedef ATX_UInt8        FLO_UInt8;
 typedef ATX_Int8         FLO_Int8;
-typedef ATX_Int          FLO_Int;
 
 typedef ATX_Result       FLO_Result;
 typedef ATX_Boolean      FLO_Boolean;

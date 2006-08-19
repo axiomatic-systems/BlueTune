@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: FloVbr.c
-|
 |   Fluo - Vbr (Variable Bitrate)
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/

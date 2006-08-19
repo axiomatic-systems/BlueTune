@@ -14,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltVorbisDecoder.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
@@ -25,6 +24,11 @@
 
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.vorbis")
 
 /*----------------------------------------------------------------------
 |    types
@@ -296,7 +300,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
             ATX_String_AssignN(&key, ATX_CSTR(string), sep);
             ATX_String_Assign(&value, ATX_CSTR(string)+sep+1);
 
-            BLT_Debug("  COMMENT %d : %s = %s\n", i, ATX_CSTR(key), ATX_CSTR(value));
+            ATX_LOG_FINE_3("  COMMENT %d : %s = %s", i, ATX_CSTR(key), ATX_CSTR(value));
             ATX_String_ToUppercase(&key);
             if (ATX_String_Equals(&key, BLT_VORBIS_COMMENT_REPLAY_GAIN_TRACK_GAIN, ATX_FALSE)) {
                 ATX_String_ToFloat(&value, &track_gain, ATX_TRUE);
@@ -351,7 +355,7 @@ VorbisDecoderInput_SetStream(BLT_InputStreamUser* _self,
     result = VorbisDecoder_OpenStream(self);
     if (BLT_FAILED(result)) {
         self->input.stream = NULL;
-        BLT_Debug("VorbisDecoderInput::SetStream - failed\n");
+        ATX_LOG_WARNING("VorbisDecoderInput::SetStream - failed");
         return result;
     }
 
@@ -515,7 +519,7 @@ VorbisDecoder_Create(BLT_Module*              module,
 {
     VorbisDecoder* decoder;
 
-    BLT_Debug("VorbisDecoder::Create\n");
+    ATX_LOG_FINE("VorbisDecoder::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -555,7 +559,7 @@ VorbisDecoder_Create(BLT_Module*              module,
 static BLT_Result
 VorbisDecoder_Destroy(VorbisDecoder* self)
 {
-    BLT_Debug("VorbisDecoder::Destroy\n");
+    ATX_LOG_FINE("VorbisDecoder::Destroy");
 
     /* free the vorbis decoder */
     if (self->input.stream) {
@@ -623,7 +627,7 @@ VorbisDecoder_Seek(BLT_MediaNode* _self,
     time = 
         (double)point->time_stamp.seconds +
         (double)point->time_stamp.nanoseconds/1000000000.0f;
-    BLT_Debug("VorbisDecoder::Seek - sample = %f\n", time);
+    ATX_LOG_FINER_1("VorbisDecoder::Seek - sample = %f", time);
     ov_result = ov_time_seek(&self->input.vorbis_file, time);
     if (ov_result != 0) return BLT_FAILURE;
 
@@ -692,8 +696,7 @@ VorbisDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->ogg_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("VorbisDecoderModule::Attach (application/ogg type = %d)\n", 
-              self->ogg_type_id);
+    ATX_LOG_FINE_1("VorbisDecoderModule::Attach (application/ogg type = %d)", self->ogg_type_id);
 
     return BLT_SUCCESS;
 }
@@ -759,7 +762,7 @@ VorbisDecoderModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("VorbisDecoderModule::Probe - Ok [%d]\n", *match); 
+            ATX_LOG_FINE_1("VorbisDecoderModule::Probe - Ok [%d]", *match); 
             return BLT_SUCCESS;
         }    
         break;

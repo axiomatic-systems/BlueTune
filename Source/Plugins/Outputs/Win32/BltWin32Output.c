@@ -19,7 +19,6 @@
 
 #include "Atomix.h"
 #include "BltConfig.h"
-#include "BltDebug.h"
 #include "BltWin32Output.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"

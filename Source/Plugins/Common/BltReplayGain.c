@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltReplayGain.c
-|
 |   ReplayGain common functions
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod

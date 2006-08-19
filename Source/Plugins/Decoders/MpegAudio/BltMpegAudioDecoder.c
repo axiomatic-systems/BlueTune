@@ -14,7 +14,6 @@
 #include "Fluo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMpegAudioDecoder.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -23,6 +22,11 @@
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
 #include "BltReplayGain.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.mpeg-audio")
 
 /*----------------------------------------------------------------------
 |    types
@@ -186,8 +190,8 @@ MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* self,
         if (self->output.media_type.sample_rate   != 0 ||
             self->output.media_type.channel_count != 0) {
             /* format change, discard the packet */
-            BLT_Debug("MpegAudioDecoder::UpdateInfo - "
-                      "format change, discarding frame\n");
+            ATX_LOG_FINER("MpegAudioDecoder::UpdateInfo - "
+                          "format change, discarding frame");
             FLO_Decoder_SkipFrame(self->fluo);
             return FLO_ERROR_NOT_ENOUGH_DATA;
         }
@@ -677,7 +681,7 @@ MpegAudioDecoder_Create(BLT_Module*              module,
     MpegAudioDecoder* self;
     BLT_Result        result;
 
-    BLT_Debug("MpegAudioDecoder::Create\n");
+    ATX_LOG_FINE("MpegAudioDecoder::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -731,7 +735,7 @@ MpegAudioDecoder_Destroy(MpegAudioDecoder* self)
 { 
     ATX_ListItem* item;
 
-    BLT_Debug("MpegAudioDecoder::Destroy\n");
+    ATX_LOG_FINE("MpegAudioDecoder::Destroy");
 
     /* release any packet we may hold */
     item = ATX_List_GetFirstItem(self->input.packets);
@@ -888,8 +892,7 @@ MpegAudioDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->mpeg_audio_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("MpegAudioDecoderModule::Attach (audio/mpeg type = %d)\n", 
-              self->mpeg_audio_type_id);
+    ATX_LOG_FINE_1("MpegAudioDecoderModule::Attach (audio/mpeg type = %d)", self->mpeg_audio_type_id);
 
     return BLT_SUCCESS;
 }
@@ -954,7 +957,7 @@ MpegAudioDecoderModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("MpegAudioDecoderModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("MpegAudioDecoderModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

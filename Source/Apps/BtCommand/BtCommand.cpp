@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltCommand.cpp
+|   BlueTune - Console Player
 |
-|   BlueTune - Command Player
-|
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -55,7 +53,7 @@ public:
 BtCommand::BtCommand()
 {
     // start our thread
-    BLT_Debug(">>> BtCommand: starting input thread\n");
+    ATX_Debug(">>> BtCommand: starting input thread\n");
     Start();
 }
 
@@ -64,7 +62,7 @@ BtCommand::BtCommand()
 +---------------------------------------------------------------------*/
 BtCommand::~BtCommand()
 {
-    BLT_Debug(">>> BtCommand::~BtCommand\n");
+    ATX_Debug(">>> BtCommand::~BtCommand\n");
 }
 
 /*----------------------------------------------------------------------
@@ -126,7 +124,7 @@ BtCommand::Run()
     bool       done = false;
     BLT_Result result;
 
-    BLT_Debug(">>> BtCommand: running\n");
+    ATX_Debug(">>> BtCommand: running\n");
 
     // create the command stream
     NPT_File standard_in(NPT_FILE_STANDARD_INPUT);
@@ -160,17 +158,17 @@ BtCommand::Run()
             } else if (NPT_StringsEqualN(buffer, "exit", 4)) {
                 done = BLT_TRUE;
             } else {
-                BLT_Debug("ERROR: invalid command\n");
+                ATX_Debug("ERROR: invalid command\n");
             }
         } else {
-            BLT_Debug("end: %d\n", result);
+            ATX_Debug("end: %d\n", result);
         }
     } while (BLT_SUCCEEDED(result) && !done);
 
     // terminate so that we can exit our message pump loop
     Terminate();
 
-    BLT_Debug(">>> BtCommand: done\n");
+    ATX_Debug(">>> BtCommand: done\n");
 }
 
 /*----------------------------------------------------------------------
@@ -179,7 +177,7 @@ BtCommand::Run()
 void
 BtCommand::OnAckNotification(BLT_DecoderServer_Message::CommandId id)
 {
-    BLT_Debug("BLT_Player::OnAckNotification (id=%d)\n", id);
+    ATX_Debug("BLT_Player::OnAckNotification (id=%d)\n", id);
 }
 
 /*----------------------------------------------------------------------
@@ -189,7 +187,7 @@ void
 BtCommand::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
                              BLT_Result                           result)
 {
-    BLT_Debug("BLT_Player::OnNackNotification (id=%d, result=%d)\n", 
+    ATX_Debug("BLT_Player::OnNackNotification (id=%d, result=%d)\n", 
               id, result);    
 }
 
@@ -199,27 +197,27 @@ BtCommand::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
 void
 BtCommand::OnDecoderStateNotification(BLT_DecoderServer::State state)
 {
-    BLT_Debug("BLT_Player::OnDecoderStateNotification state=");
+    ATX_ConsoleOutput("BLT_Player::OnDecoderStateNotification state=");
 
     switch (state) {
       case BLT_DecoderServer::STATE_STOPPED:
-        BLT_Debug("[STOPPED]\n");
+        ATX_ConsoleOutput("[STOPPED]\n");
         break;
 
       case BLT_DecoderServer::STATE_PLAYING:
-        BLT_Debug("[PLAYING]\n");
+        ATX_ConsoleOutput("[PLAYING]\n");
         break;
 
       case BLT_DecoderServer::STATE_PAUSED:
-        BLT_Debug("[PAUSED]\n");
+        ATX_ConsoleOutput("[PAUSED]\n");
         break;
 
       case BLT_DecoderServer::STATE_EOS:
-        BLT_Debug("[END OF STREAM]\n");
+        ATX_ConsoleOutput("[END OF STREAM]\n");
         break;
 
       default:
-        BLT_Debug("[UNKNOWN]\n");
+        ATX_ConsoleOutput("[UNKNOWN]\n");
         break;
     }
 }
@@ -235,7 +233,7 @@ BtCommand::OnStreamTimeCodeNotification(BLT_TimeCode time_code)
             time_code.h,
             time_code.m,
             time_code.s);
-    BLT_Debug("BtCommand::OnStreamTimeCodeNotification - %s\n", time);
+    ATX_ConsoleOutputF("BtCommand::OnStreamTimeCodeNotification - %s\n", time);
 }
 
 /*----------------------------------------------------------------------
@@ -245,25 +243,25 @@ void
 BtCommand::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {       
     if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-        BLT_Debug("Nominal Bitrate = %ld\n", info.nominal_bitrate);
+        ATX_ConsoleOutputF("Nominal Bitrate = %ld\n", info.nominal_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-        BLT_Debug("Average Bitrate = %ld\n", info.average_bitrate);
+        ATX_ConsoleOutputF("Average Bitrate = %ld\n", info.average_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-        BLT_Debug("Instant Bitrate = %ld\n", info.instant_bitrate);
+        ATX_ConsoleOutputF("Instant Bitrate = %ld\n", info.instant_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-        BLT_Debug("Sample Rate = %ld\n", info.sample_rate);
+        ATX_ConsoleOutputF("Sample Rate = %ld\n", info.sample_rate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
-        BLT_Debug("Channels = %d\n", info.channel_count);
+        ATX_ConsoleOutputF("Channels = %d\n", info.channel_count);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        BLT_Debug("Stream Size = %ld\n", info.size);
+        ATX_ConsoleOutputF("Stream Size = %ld\n", info.size);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
-        BLT_Debug("Data Type = %s\n", info.data_type);
+        ATX_ConsoleOutputF("Data Type = %s\n", info.data_type);
     }
 }
 
@@ -278,7 +276,7 @@ main(int /*argc*/, char** /*argv*/)
 
     // pump notification messages
     while (player->PumpMessage() == NPT_SUCCESS) {/* */}
-    BLT_Debug("BtCommand::main Received Terminate Message\n");
+    ATX_Debug("BtCommand::main Received Terminate Message\n");
 
     // delete the player
     delete player;

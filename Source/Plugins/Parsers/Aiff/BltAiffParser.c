@@ -14,13 +14,17 @@
 #include "BltConfig.h"
 #include "BltAiffParser.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
 #include "BltByteStreamProvider.h"
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.aiff")
 
 /*----------------------------------------------------------------------
 |    types
@@ -544,7 +548,7 @@ AiffParser_Create(BLT_Module*              module,
 {
     AiffParser* parser;
 
-    BLT_Debug("AiffParser::Create\n");
+    ATX_LOG_FINE("AiffParser::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -587,7 +591,7 @@ AiffParser_Create(BLT_Module*              module,
 static BLT_Result
 AiffParser_Destroy(AiffParser* self)
 {
-    BLT_Debug("AiffParser::Destroy\n");
+    ATX_LOG_FINE("AiffParser::Destroy");
 
     /* release the byte stream */
     ATX_RELEASE_OBJECT(self->output.stream);
@@ -727,8 +731,8 @@ AiffParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->x_aiff_type_id);
     if (BLT_FAILED(result)) return result;
 
-    BLT_Debug("AiffParserModule::Attach (audio/aiff type = %d\n",
-              self->aiff_type_id);
+    ATX_LOG_FINE_1("AiffParserModule::Attach (audio/aiff type = %d",
+                   self->aiff_type_id);
 
     return BLT_SUCCESS;
 }
@@ -792,7 +796,7 @@ AiffParserModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("AiffParserModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("AiffParserModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

@@ -166,7 +166,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
 |   BLT_NetworkStream_Seek
 +---------------------------------------------------------------------*/
 static ATX_Result 
-BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Offset position)
+BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
     ATX_Size           buffered = ATX_RingBuffer_GetAvailable(self->buffer);
@@ -195,7 +195,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Offset position)
 |   BLT_NetworkStream_Tell
 +---------------------------------------------------------------------*/
 static ATX_Result 
-BLT_NetworkStream_Tell(ATX_InputStream* _self, ATX_Offset* offset)
+BLT_NetworkStream_Tell(ATX_InputStream* _self, ATX_Position* offset)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
     *offset = self->position;

@@ -2,7 +2,7 @@
 |
 |   BlueTune - Command-Line Player
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -54,15 +54,16 @@ do {                                                            \
 static void
 BLTP_PrintUsageAndExit(int exit_code)
 {
-    BLT_Debug("usage: btplay [options] <input-spec> [<input-spec>..]\n"
-              "  each <input-spec> is either an input name (file or URL), or an input type\n"
-              "  (--input-type=<type>) followed by an input name\n"
-              "\n"
-              "options:\n"
-              "  -h\n"
-              "  --help\n" 
-              "  --output=<name>\n"
-              "  --output-type=<type>\n");
+    ATX_ConsoleOutput(
+        "usage: btplay [options] <input-spec> [<input-spec>..]\n"
+        "  each <input-spec> is either an input name (file or URL), or an input type\n"
+        "  (--input-type=<type>) followed by an input name\n"
+        "\n"
+        "options:\n"
+        "  -h\n"
+        "  --help\n" 
+        "  --output=<name>\n"
+        "  --output-type=<type>\n");
     exit(exit_code);
 }
 
@@ -107,24 +108,23 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
     BLT_COMPILER_UNUSED(self);
 
     if (name == NULL) {
-        BLT_Debug("BLTP::OnStreamPropertyChanged - All Properties Cleared\n");
+        ATX_ConsoleOutput("BLTP::OnStreamPropertyChanged - All Properties Cleared\n");
     } else {
         if (value == NULL) {
-            BLT_Debug("BLTP::OnStreamPropertyChanged - Property %s cleared\n",
-                      name);
+            ATX_ConsoleOutputF("BLTP::OnStreamPropertyChanged - Property %s cleared\n", name);
         } else {
-            BLT_Debug("BLTP::OnStreamPropretyChanged - %s = ", name);
+            ATX_ConsoleOutputF("BLTP::OnStreamPropretyChanged - %s = ", name);
             switch (type) {
               case ATX_PROPERTY_TYPE_STRING:
-                BLT_Debug("%s\n", value->string);
+                ATX_ConsoleOutputF("%s\n", value->string);
                 break;
 
               case ATX_PROPERTY_TYPE_INTEGER:
-                BLT_Debug("%d\n", value->integer);
+                ATX_ConsoleOutputF("%d\n", value->integer);
                 break;
 
               default:
-                BLT_Debug("\n");
+                ATX_ConsoleOutput("\n");
             }
         }
     }
@@ -160,49 +160,49 @@ BLTP_ShowStreamTopology(ATX_Object* source)
         }
 
         if (s_info.input.connected) {
-            BLT_Debug("-");
+            ATX_ConsoleOutput("-");
         } else {
-            BLT_Debug(".");
+            ATX_ConsoleOutput(".");
         }
 
         switch (s_info.input.protocol) {
           case BLT_MEDIA_PORT_PROTOCOL_NONE:
-            BLT_Debug("!"); break;
+            ATX_ConsoleOutput("!"); break;
           case BLT_MEDIA_PORT_PROTOCOL_PACKET:
-            BLT_Debug("#"); break;
+            ATX_ConsoleOutput("#"); break;
           case BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH:
-            BLT_Debug(">"); break;
+            ATX_ConsoleOutput(">"); break;
           case BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL:
-            BLT_Debug("<"); break;
+            ATX_ConsoleOutput("<"); break;
           default:
-            BLT_Debug("@"); break;
+            ATX_ConsoleOutput("@"); break;
         }
 
-        BLT_Debug("[%s]", name);
+        ATX_ConsoleOutputF("[%s]", name);
 
         switch (s_info.output.protocol) {
           case BLT_MEDIA_PORT_PROTOCOL_NONE:
-            BLT_Debug("!"); break;
+            ATX_ConsoleOutput("!"); break;
           case BLT_MEDIA_PORT_PROTOCOL_PACKET:
-            BLT_Debug("#"); break;
+            ATX_ConsoleOutput("#"); break;
           case BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH:
-            BLT_Debug(">"); break;
+            ATX_ConsoleOutput(">"); break;
           case BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL:
-            BLT_Debug("<"); break;
+            ATX_ConsoleOutput("<"); break;
           default:
-            BLT_Debug("@"); break;
+            ATX_ConsoleOutput("@"); break;
         }
 
         if (s_info.output.connected) {
-            BLT_Debug("-");
+            ATX_ConsoleOutput("-");
         } else {
-            BLT_Debug(".");
+            ATX_ConsoleOutput(".");
         }
 
         result = BLT_Stream_GetNextNode(stream, node, &node);
         if (BLT_FAILED(result)) break;
     }
-    BLT_Debug("\n");
+    ATX_ConsoleOutput("\n");
 }
 
 /*----------------------------------------------------------------------
@@ -215,55 +215,55 @@ BLTP_OnEvent(BLT_EventListener* self,
              const BLT_Event*   event)
 {
     BLT_COMPILER_UNUSED(self);
-    BLT_Debug("BLTP::OnEvent - type = %d\n", (int)type);
+    ATX_ConsoleOutputF("BLTP::OnEvent - type = %d\n", (int)type);
     if (type == BLT_EVENT_TYPE_STREAM_INFO) {
         const BLT_StreamInfoEvent* e = (BLT_StreamInfoEvent*)event;
-        BLT_Debug("BLTP::OnEvent - info update=%x\n", e->update_mask);
+        ATX_ConsoleOutputF("BLTP::OnEvent - info update=%x\n", e->update_mask);
 
         if (e->update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-            BLT_Debug("  nominal_bitrate = %ld\n", e->info.nominal_bitrate);
+            ATX_ConsoleOutputF("  nominal_bitrate = %ld\n", e->info.nominal_bitrate);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-            BLT_Debug("  average_bitrate = %ld\n", e->info.average_bitrate);
+            ATX_ConsoleOutputF("  average_bitrate = %ld\n", e->info.average_bitrate);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-            BLT_Debug("  instant_bitrate = %ld\n", e->info.instant_bitrate);
+            ATX_ConsoleOutputF("  instant_bitrate = %ld\n", e->info.instant_bitrate);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-            BLT_Debug("  size            = %ld\n", e->info.size);
+            ATX_ConsoleOutputF("  size            = %ld\n", e->info.size);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-            BLT_Debug("  duration        = %ld\n", e->info.duration);
+            ATX_ConsoleOutputF("  duration        = %ld\n", e->info.duration);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-            BLT_Debug("  sample_rate     = %ld\n", e->info.sample_rate);
+            ATX_ConsoleOutputF("  sample_rate     = %ld\n", e->info.sample_rate);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
-            BLT_Debug("  channel_count   = %ld\n", e->info.channel_count);
+            ATX_ConsoleOutputF("  channel_count   = %ld\n", e->info.channel_count);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_FLAGS) {
-            BLT_Debug("  flags           = %x", e->info.flags);
+            ATX_ConsoleOutputF("  flags           = %x", e->info.flags);
             if (e->info.flags & BLT_STREAM_INFO_FLAG_VBR) {
-                BLT_Debug(" (VBR)\n");
+                ATX_ConsoleOutputF(" (VBR)\n");
             } else {
-                BLT_Debug("\n");
+                ATX_ConsoleOutput("\n");
             }
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
-            BLT_Debug("  data_type       = %s\n", 
-                      e->info.data_type ? e->info.data_type : "");
+            ATX_ConsoleOutputF("  data_type       = %s\n", 
+                               e->info.data_type ? e->info.data_type : "");
         }
     } else if (type == BLT_EVENT_TYPE_STREAM_TOPOLOGY) {
         const BLT_StreamTopologyEvent* e = (BLT_StreamTopologyEvent*)event;
         switch (e->type) {
           case BLT_STREAM_TOPOLOGY_NODE_ADDED:
-            BLT_Debug("STREAM TOPOLOGY: node added\n");  
+            ATX_ConsoleOutput("STREAM TOPOLOGY: node added\n");  
             break;
           case BLT_STREAM_TOPOLOGY_NODE_REMOVED:
-            BLT_Debug("STREAM TOPOLOGY: node removes\n");
+            ATX_ConsoleOutput("STREAM TOPOLOGY: node removes\n");
             break;
           case BLT_STREAM_TOPOLOGY_NODE_CONNECTED:
-            BLT_Debug("STREAM TOPOLOGY: node connected\n");
+            ATX_ConsoleOutput("STREAM TOPOLOGY: node connected\n");
             break;
           default:
             break;
@@ -361,7 +361,7 @@ main(int argc, char** argv)
         /* set the input name */
         result = BLT_Decoder_SetInput(decoder, input_name, input_type);
         if (BLT_FAILED(result)) {
-            fprintf(stderr, "SetInput failed (%d)\n", result);
+            ATX_ConsoleOutputF("BtPlay:: SetInput failed (%d)\n", result);
             input_type = NULL;
             continue;
         }
@@ -370,7 +370,7 @@ main(int argc, char** argv)
         do {
             result = BLT_Decoder_PumpPacket(decoder);
         } while (BLT_SUCCEEDED(result));
-        BLT_Debug("BtPlay:: final result = %d\n", result);
+        ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
 
         /* reset input type */
         input_type = NULL;

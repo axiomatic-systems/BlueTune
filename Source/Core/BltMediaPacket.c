@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltMediaPacket.c
-|
 |   BlueTune - MediaPacket Objects
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -20,7 +18,6 @@
 #include "BltDefs.h"
 #include "BltErrors.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMedia.h"
 #include "BltMediaPacketPriv.h"
 

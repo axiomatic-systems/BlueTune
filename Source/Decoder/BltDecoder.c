@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltDecoder.c
-|
 |   BlueTune - Sync Layer
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "BltCore.h"
 #include "BltStream.h"
 #include "BltBuiltins.h"
-#include "BltDebug.h"
 
 /*----------------------------------------------------------------------
 |    types

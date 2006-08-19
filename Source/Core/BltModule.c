@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltModule.c
-|
 |   BlueTune - Module Interface
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -14,8 +12,12 @@
 +---------------------------------------------------------------------*/
 #include "BltConfig.h"
 #include "BltDefs.h"
-#include "BltDebug.h"
 #include "BltModule.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.core.module")
 
 /*----------------------------------------------------------------------
 |   forward references
@@ -85,8 +87,8 @@ BLT_BaseModule_Create(BLT_CString                name,
     BLT_BaseModule_Construct(module, name, id, flags);
 
     /* setup interfaces */
-    ATX_BASE(module, BLT_Module).interface = module_interface;
-    ATX_BASE(module, ATX_Referenceable).interface = referenceable_interface;
+    ATX_BASE(module, BLT_Module).iface = module_interface;
+    ATX_BASE(module, ATX_Referenceable).iface = referenceable_interface;
     *object = &ATX_BASE(module, BLT_Module);
 
     return BLT_SUCCESS;
@@ -129,7 +131,7 @@ BLT_BaseModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
     BLT_BaseModule* self = ATX_SELF(BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
-    BLT_Debug("%sModule::Attach\n", self->info.name?self->info.name:"");
+    ATX_LOG_FINE_1("%sModule::Attach", self->info.name?self->info.name:"");
     return BLT_SUCCESS;
 }
 

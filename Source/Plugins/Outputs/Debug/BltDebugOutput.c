@@ -14,11 +14,15 @@
 #include "BltConfig.h"
 #include "BltDebugOutput.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
 #include "BltPacketConsumer.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.debug")
 
 /*----------------------------------------------------------------------
 |    types
@@ -72,14 +76,13 @@ DebugOutput_PutPacket(BLT_PacketConsumer* _self,
     /* print type info extensions if they are known to us */
     if (media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         BLT_PcmMediaType* pcm_type = (BLT_PcmMediaType*)media_type;
-        BLT_Debug("DebugOutput::PutPacket - type=%d, sr=%ld, ch=%d, bps=%d\n",
-                   media_type->id,
-                   pcm_type->sample_rate,
-                   pcm_type->channel_count,
-                   pcm_type->bits_per_sample);
+        ATX_LOG_INFO_4("DebugOutput::PutPacket - type=%d, sr=%ld, ch=%d, bps=%d",
+                       media_type->id,
+                       pcm_type->sample_rate,
+                       pcm_type->channel_count,
+                       pcm_type->bits_per_sample);
     } else {
-        BLT_Debug("DebugOutput::PutPacket - type=%d\n",
-                  media_type->id);
+        ATX_LOG_INFO_1("DebugOutput::PutPacket - type=%d", media_type->id);
     }
 
     return BLT_SUCCESS;
@@ -118,7 +121,7 @@ DebugOutput_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = 
         (BLT_MediaNodeConstructor*)parameters;
     
-    BLT_Debug("DebugOutput::Create\n");
+    ATX_LOG_FINE("DebugOutput::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -157,7 +160,7 @@ DebugOutput_Create(BLT_Module*              module,
 static BLT_Result
 DebugOutput_Destroy(DebugOutput* self)
 {
-    BLT_Debug("DebugOutput::Destroy\n");
+    ATX_LOG_FINE("DebugOutput::Destroy");
 
     /* free the media type extensions */
     BLT_MediaType_Free(self->expected_media_type);
@@ -282,7 +285,7 @@ DebugOutputModule_Probe(BLT_Module*              self,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("DebugOutputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("DebugOutputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

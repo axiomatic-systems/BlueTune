@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltByteStreamProvider.h
-|
 |   BlueTune - InputStreamProvider & OutputStreamProvider
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod

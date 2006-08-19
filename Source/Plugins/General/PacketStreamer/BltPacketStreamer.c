@@ -14,11 +14,15 @@
 #include "BltConfig.h"
 #include "BltPacketStreamer.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPacketConsumer.h"
 #include "BltByteStreamUser.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.general.packet-streamer")
 
 /*----------------------------------------------------------------------
 |    types
@@ -93,7 +97,7 @@ PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
         if (ATX_SUCCEEDED(result)) {
             BLT_MediaPacket_AddReference(packet);
         }
-        BLT_Debug("PacketStreamerInputPort_PutPacket - buffer\n");
+        ATX_LOG_FINER("PacketStreamerInputPort_PutPacket - buffer");
         return BLT_SUCCESS;
     }
 
@@ -233,7 +237,7 @@ PacketStreamer_Create(BLT_Module*              module,
         (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
 
-    BLT_Debug("PacketStreamer::Create\n");
+    ATX_LOG_FINE("PacketStreamer::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -280,7 +284,7 @@ PacketStreamer_Destroy(PacketStreamer* self)
 {
     ATX_ListItem* item;
 
-    BLT_Debug("PacketStreamer::Destroy\n");
+    ATX_LOG_FINE("PacketStreamer::Destroy");
 
     /* release the stream */
     ATX_RELEASE_OBJECT(self->output.stream);
@@ -432,7 +436,7 @@ PacketStreamerModule_Probe(BLT_Module*              self,
                 }
             }
 
-            BLT_Debug("PacketStreamerModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("PacketStreamerModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

@@ -15,7 +15,6 @@
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltGainControlFilter.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -23,6 +22,11 @@
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.filters.gain-control")
 
 /*----------------------------------------------------------------------
 |    constants
@@ -275,7 +279,7 @@ GainControlFilter_Create(BLT_Module*              module,
 {
     GainControlFilter* self;
 
-    BLT_Debug("GainControlFilter::Create\n");
+    ATX_LOG_FINE("GainControlFilter::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -312,7 +316,7 @@ GainControlFilter_Create(BLT_Module*              module,
 static BLT_Result
 GainControlFilter_Destroy(GainControlFilter* self)
 { 
-    BLT_Debug("GainControlFilter::Destroy\n");
+    ATX_LOG_FINE("GainControlFilter::Destroy");
 
     /* release any input packet we may hold */
     if (self->output.packet) {
@@ -389,7 +393,7 @@ GainControlFilter_UpdateReplayGain(GainControlFilter* self)
     if (gain_value == 0) {
         /* disable the filter */
         if (self->factor != 0) {
-            BLT_Debug("GainControlFilter::UpdateReplayGain - filter now inactive\n");
+            ATX_LOG_FINE("GainControlFilter::UpdateReplayGain - filter now inactive");
         }
         self->factor = 0;
         self->mode = BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE;
@@ -400,11 +404,11 @@ GainControlFilter_UpdateReplayGain(GainControlFilter* self)
     if (gain_value > 0) {
         self->mode = BLT_GAIN_CONTROL_FILTER_MODE_AMPLIFY;
         self->factor = GainControlFilter_DbToFactor(gain_value);
-        BLT_Debug("GainControlFilter::UpdateReplayGain - filter amplification = %d\n", self->factor);
+        ATX_LOG_FINE_1("GainControlFilter::UpdateReplayGain - filter amplification = %d", self->factor);
     } else {
         self->mode = BLT_GAIN_CONTROL_FILTER_MODE_ATTENUATE;
         self->factor = GainControlFilter_DbToFactor(-gain_value);
-        BLT_Debug("GainControlFilter::UpdateReplayGain - filter attenuation = %d\n", self->factor);
+        ATX_LOG_FINE_1("GainControlFilter::UpdateReplayGain - filter attenuation = %d", self->factor);
     }
 }
 
@@ -661,7 +665,7 @@ GainControlFilterModule_Probe(BLT_Module*              self,
             /* match level is always exact */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("GainControlFilterModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("GainControlFilterModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

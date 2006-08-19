@@ -14,12 +14,16 @@
 #include "BltConfig.h"
 #include "BltWaveFormatter.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
 #include "BltByteStreamUser.h"
 #include "BltByteStreamProvider.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.formatters.wave")
 
 /*----------------------------------------------------------------------
 |    types
@@ -143,8 +147,7 @@ WaveFormatter_UpdateWavHeader(WaveFormatter* self)
     BLT_Result    result;
     unsigned char buffer[4];
 
-    BLT_Debug("WaveFormatter::UpdateWavHeader - size = %d\n", 
-              self->input.size);
+    ATX_LOG_FINER_1("WaveFormatter::UpdateWavHeader - size = %d", self->input.size);
 
     result = ATX_OutputStream_Seek(self->output.stream, 4);
     ATX_BytesFromInt32Le(buffer, self->input.size + 8+16+12);
@@ -156,7 +159,7 @@ WaveFormatter_UpdateWavHeader(WaveFormatter* self)
     ATX_BytesFromInt32Le(buffer, self->input.size);        
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 
-    BLT_Debug("WaveFormatter::UpdateWavHeader - updated\n");
+    ATX_LOG_FINER("WaveFormatter::UpdateWavHeader - updated");
 
     return BLT_SUCCESS;
 }
@@ -325,7 +328,7 @@ WaveFormatter_Create(BLT_Module*              module,
 {
     WaveFormatter* self;
 
-    BLT_Debug("WaveFormatter::Create\n");
+    ATX_LOG_FINE("WaveFormatter::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -369,7 +372,7 @@ WaveFormatter_Create(BLT_Module*              module,
 static BLT_Result
 WaveFormatter_Destroy(WaveFormatter* self)
 {
-    BLT_Debug("WaveFormatter::Destroy\n");
+    ATX_LOG_FINE("WaveFormatter::Destroy");
 
     /* update the header if needed */
     if (self->output.stream) {
@@ -479,8 +482,7 @@ WaveFormatterModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->wav_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("WaveFormatterModule::Attach (audio/wav type = %d)\n", 
-              self->wav_type_id);
+    ATX_LOG_FINE_1("WaveFormatterModule::Attach (audio/wav type = %d)", self->wav_type_id);
 
     return BLT_SUCCESS;
 }
@@ -545,7 +547,7 @@ WaveFormatterModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("WaveFormatterModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("WaveFormatterModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltPlayer.c
-|
 |   BlueTune - Async Layer
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "BltTypes.h"
 #include "BltDefs.h"
 #include "BltErrors.h"
-#include "BltDebug.h"
 #include "BltModule.h"
 #include "BltCore.h"
 #include "BltCorePriv.h"
@@ -25,6 +22,11 @@
 #include "BltRegistryPriv.h"
 #include "BltMediaPacketPriv.h"
 #include "BltPlayer.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.player")
 
 /*----------------------------------------------------------------------
 |    BLT_Player::BLT_Player
@@ -42,7 +44,7 @@ BLT_Player::BLT_Player(NPT_MessageQueue* queue) :
 BLT_Player::~BLT_Player()
 {
     // delete the server (the server thread will terminate by itself)
-    BLT_Debug("BLT_Player::~BLT_Player\n");
+    ATX_LOG_FINE("BLT_Player::~BLT_Player");
     delete m_Server;
 }
 
@@ -61,7 +63,7 @@ BLT_Player::PumpMessage(bool blocking)
 BLT_Result
 BLT_Player::Terminate()
 {
-    BLT_Debug("BLT_Player::Terminate\n");
+    ATX_LOG_FINE("BLT_Player::Terminate");
 
     // send ourself a termination message
     PostMessage(new NPT_TerminateMessage);
@@ -75,7 +77,7 @@ BLT_Player::Terminate()
 BLT_Result 
 BLT_Player::SetInput(BLT_CString name, BLT_CString type)
 {
-    BLT_Debug("BLT_Player::SetInput\n");
+    ATX_LOG_FINE_2("BLT_Player::SetInput - name=%s, type=%d", BLT_SAFE_STRING(name), type);
     return m_Server->SetInput(name, type);
 }
 
@@ -85,7 +87,7 @@ BLT_Player::SetInput(BLT_CString name, BLT_CString type)
 BLT_Result
 BLT_Player::SetOutput(BLT_CString name, BLT_CString type)
 {
-    BLT_Debug(" BLT_Player::SetOutput\n");
+    ATX_LOG_FINE_2(" BLT_Player::SetOutput - name=%s, type=%d", BLT_SAFE_STRING(name), type);
     return m_Server->SetOutput(name, type);
 }
 
@@ -95,7 +97,7 @@ BLT_Player::SetOutput(BLT_CString name, BLT_CString type)
 BLT_Result 
 BLT_Player::Play()
 {
-    BLT_Debug("BLT_Player::Play\n");
+    ATX_LOG_FINE("BLT_Player::Play");
     return m_Server->Play();
 }
 
@@ -105,7 +107,7 @@ BLT_Player::Play()
 BLT_Result
 BLT_Player::Stop()
 {
-    BLT_Debug("BLT_Player::Stop\n");
+    ATX_LOG_FINE("BLT_Player::Stop");
     return m_Server->Stop();
 }
 
@@ -115,7 +117,7 @@ BLT_Player::Stop()
 BLT_Result 
 BLT_Player::Pause()
 {
-    BLT_Debug("BLT_Player::Pause\n");
+    ATX_LOG_FINE("BLT_Player::Pause");
     return m_Server->Pause();
 }
 
@@ -125,7 +127,7 @@ BLT_Player::Pause()
 BLT_Result
 BLT_Player::SeekToTime(BLT_Cardinal time)
 {
-    BLT_Debug("BLT_Player::SeekToTime\n");
+    ATX_LOG_FINE_1("BLT_Player::SeekToTime - time=%d", time);
     return m_Server->SeekToTime(time);
 }
 
@@ -138,7 +140,7 @@ BLT_Player::SeekToTimeStamp(BLT_UInt8 h,
                             BLT_UInt8 s, 
                             BLT_UInt8 f)
 {
-    BLT_Debug("BLT_Player::SeekToTimeStamp\n");
+    ATX_LOG_FINE_4("BLT_Player::SeekToTimeStamp, %d:%d:%d:%d", h,m,s,f);
     return m_Server->SeekToTime(1000*(h*60*60+m*60+s)+10*f);
 }
 
@@ -148,7 +150,7 @@ BLT_Player::SeekToTimeStamp(BLT_UInt8 h,
 BLT_Result
 BLT_Player::SeekToPosition(BLT_Size offset, BLT_Size range)
 {
-    BLT_Debug("BLT_Player::SeekToPosition\n");
+    ATX_LOG_FINE_2("BLT_Player::SeekToPosition, offset=%d, range=%d", offset, range);
     return m_Server->SeekToPosition(offset, range);
 }
 
@@ -158,7 +160,7 @@ BLT_Player::SeekToPosition(BLT_Size offset, BLT_Size range)
 BLT_Result
 BLT_Player::RegisterModule(BLT_Module* module)
 {
-    BLT_Debug("BLT_Player::RegisterModule\n");
+    ATX_LOG_FINE("BLT_Player::RegisterModule");
     return m_Server->RegisterModule(module);
 }
 
@@ -168,6 +170,6 @@ BLT_Player::RegisterModule(BLT_Module* module)
 BLT_Result
 BLT_Player::AddNode(BLT_CString name)
 {
-    BLT_Debug("BLT_Player::AddNode\n");
+    ATX_LOG_FINE_1("BLT_Player::AddNode - name=%s", BLT_SAFE_STRING(name));
     return m_Server->AddNode(name);
 }

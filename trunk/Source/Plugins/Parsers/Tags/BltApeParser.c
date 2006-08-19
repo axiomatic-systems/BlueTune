@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltApeParser.c
-|
 |   APE TAG Parser Library
 |
 |   (c) 2002-2004 Gilles Boccon-Gibod
@@ -16,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltTypes.h"
 #include "BltErrors.h"
-#include "BltDebug.h"
 #include "BltId3Parser.h"
 
 /*----------------------------------------------------------------------

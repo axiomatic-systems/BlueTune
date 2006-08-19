@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltStreamPacketizer.c
-|
 |   Stream Packetizer Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
@@ -16,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltStreamPacketizer.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMediaPort.h"
 #include "BltMedia.h"
@@ -24,6 +21,11 @@
 #include "BltByteStreamUser.h"
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.general.stream-packetizer")
 
 /*----------------------------------------------------------------------
 |   types
@@ -288,7 +290,7 @@ StreamPacketizer_Create(BLT_Module*              module,
 {
     StreamPacketizer* self;
 
-    BLT_Debug("StreamPacketizer::Create\n");
+    ATX_LOG_FINE("StreamPacketizer::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -331,7 +333,7 @@ StreamPacketizer_Create(BLT_Module*              module,
 static BLT_Result
 StreamPacketizer_Destroy(StreamPacketizer* self)
 {
-    BLT_Debug("StreamPacketizer::Destroy\n");
+    ATX_LOG_FINE("StreamPacketizer::Destroy");
 
     /* release the reference to the stream */
     ATX_RELEASE_OBJECT(self->input.stream);
@@ -388,7 +390,7 @@ StreamPacketizer_Seek(BLT_MediaNode* _self,
     result = BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
     if (BLT_FAILED(result)) return result;
 
-    BLT_Debug("StreamPacketizer_Seek: seek offset = %d\n", (int)point->offset);
+    ATX_LOG_FINER_1("StreamPacketizer::Seek - seek offset = %d", (int)point->offset);
 
     /* seek into the input stream (ignore return value) */
     ATX_InputStream_Seek(self->input.stream, point->offset);
@@ -488,7 +490,7 @@ StreamPacketizerModule_Probe(BLT_Module*              self,
                 *match = BLT_MODULE_PROBE_MATCH_DEFAULT;
             }
 
-            BLT_Debug("StreamPacketizerModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("StreamPacketizerModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

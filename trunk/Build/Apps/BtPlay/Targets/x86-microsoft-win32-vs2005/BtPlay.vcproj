@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="BltDecoder"
-	ProjectGUID="{088A3D43-2722-4FE1-9D07-EEF19F7BD434}"
+	Name="BtPlay"
+	ProjectGUID="{8ACFBE03-D34C-464A-87B5-DA845025BAFA}"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -18,7 +18,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_DEBUG"
+				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
+				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,11 +61,23 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/BltDecoder.lib"
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="false"
+				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
+				OutputFile="$(OutDir)/BtPlay.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
+				IgnoreDefaultLibraryNames="MSVCRT.lib;LIBCMTD.lib;LIBCMT.lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/BtPlay.pdb"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -77,6 +89,12 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -84,7 +102,7 @@
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
@@ -108,8 +126,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\..\..\..\Source\BlueTune;..\..\..\..\..\Source\Decoder;..\..\..\..\..\Source\Config;..\..\..\..\..\Source\Core;..\..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\..\Atomix\Source\Config"
+				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -128,11 +146,23 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/BltDecoder.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib libfaad.lib ws2_32.lib"
+				OutputFile="$(OutDir)/BtPlay.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FAAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;"
+				IgnoreDefaultLibraryNames="LIBCMT.lib"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -142,6 +172,12 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -156,7 +192,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
-				RelativePath="..\..\..\..\Source\Decoder\BltDecoder.c"
+				RelativePath="..\..\..\..\..\Source\Apps\BtPlay\BtPlay.c"
 				>
 			</File>
 		</Filter>
@@ -164,10 +200,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
-			<File
-				RelativePath="..\..\..\..\Source\Decoder\BltDecoder.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -1,7 +1,5 @@
 /*****************************************************************
 |
-|   File: BltTagParser.c
-|
 |   Tag Parser Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
@@ -16,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltTagParser.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltByteStreamProvider.h"
@@ -25,6 +22,11 @@
 #include "BltApeParser.h"
 #include "BltEventListener.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.tag")
 
 /*----------------------------------------------------------------------
 |    types
@@ -149,8 +151,8 @@ TagParserInput_SetStream(BLT_InputStreamUser* _self,
 
     if (header_size != 0 || trailer_size != 0) {
         /* create a sub stream without the header and the trailer */
-        BLT_Debug("TagParserInput_SetStream: substream %ld [%ld - %ld]\n",
-                  stream_size, header_size, trailer_size);
+        ATX_LOG_FINER_3("TagParserInput_SetStream: substream %ld [%ld - %ld]",
+                         stream_size, header_size, trailer_size);
         result = ATX_SubInputStream_Create(stream, 
                                            header_size, 
                                            stream_size,
@@ -300,7 +302,7 @@ TagParser_Create(BLT_Module*              module,
 {
     TagParser* parser;
 
-    BLT_Debug("TagParser::Create\n");
+    ATX_LOG_FINE("TagParser::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -344,7 +346,7 @@ TagParser_Create(BLT_Module*              module,
 static BLT_Result
 TagParser_Destroy(TagParser* self)
 {
-    BLT_Debug("TagParser::Destroy\n");
+    ATX_LOG_FINE("TagParser::Destroy");
 
     /* release the reference to the stream */
     ATX_RELEASE_OBJECT(self->input.stream);
@@ -398,7 +400,7 @@ TagParser_Seek(BLT_MediaNode* _self,
         return BLT_FAILURE;
     }
 
-    BLT_Debug("TagParser_Seek: seek offset = %d\n", (int)point->offset);
+    ATX_LOG_FINER_1("TagParser::Seek - seek offset = %d", (int)point->offset);
 
     /* seek into the input stream (ignore return value) */
     ATX_InputStream_Seek(self->input.stream, point->offset);
@@ -468,8 +470,7 @@ TagParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->mpeg_audio_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("TagParserModule::Attach (audio/mpeg type = %d)\n",
-              self->mpeg_audio_type_id);
+    ATX_LOG_FINE_1("TagParserModule::Attach (audio/mpeg type = %d)", self->mpeg_audio_type_id);
 
     return BLT_SUCCESS;
 }
@@ -516,7 +517,7 @@ TagParserModule_Probe(BLT_Module*              _self,
             /* already parsed                                             */
             if (constructor->spec.input.media_type->flags &
                 BLT_TAG_PARSER_MEDIA_TYPE_FLAGS_PARSED) {
-                BLT_Debug("TagParserModule::Probe - Already parsed\n");
+                ATX_LOG_FINE("TagParserModule::Probe - Already parsed");
                 return BLT_FAILURE;
             }
 
@@ -543,7 +544,7 @@ TagParserModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 50;
             }
 
-            BLT_Debug("TagParserModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("TagParserModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

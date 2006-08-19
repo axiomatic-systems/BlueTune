@@ -13,7 +13,6 @@
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltFilterHost.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -21,6 +20,11 @@
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.composite.filter-host")
 
 /*----------------------------------------------------------------------
 |    types
@@ -201,7 +205,7 @@ FilterHost_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     FilterHost*               self;
 
-    BLT_Debug("FilterHost::Create\n");
+    ATX_LOG_FINE("FilterHost::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -245,7 +249,7 @@ FilterHost_Create(BLT_Module*              module,
 static BLT_Result
 FilterHost_Destroy(FilterHost* self)
 { 
-    BLT_Debug("FilterHost::Destroy\n");
+    ATX_LOG_FINE("FilterHost::Destroy");
 
     /* release any input packet we may hold */
     if (self->output.packet) {
@@ -384,7 +388,7 @@ FilterHostModule_Probe(BLT_Module*              self,
                 }
             }
 
-            BLT_Debug("FilterHostModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("FilterHostModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

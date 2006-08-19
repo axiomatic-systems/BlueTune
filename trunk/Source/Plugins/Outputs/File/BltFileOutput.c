@@ -14,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltFileOutput.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltByteStreamProvider.h"
@@ -142,7 +141,7 @@ FileOutput_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
 
-    BLT_Debug("FileOutput::Create\n");
+    ATX_LOG_FINE("FileOutput::Create");
 
     /* check parameters */
     *object = NULL;
@@ -225,7 +224,7 @@ FileOutput_Create(BLT_Module*              module,
 static BLT_Result
 FileOutput_Destroy(FileOutput* self)
 {
-    BLT_Debug("FileOutput::Destroy\n");
+    ATX_LOG_FINE("FileOutput::Destroy");
 
     /* release the stream */
     ATX_RELEASE_OBJECT(self->stream);
@@ -363,7 +362,7 @@ FileOutputModule_Probe(BLT_Module*              self,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("FileOutputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("FileOutputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

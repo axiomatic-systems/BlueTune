@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltFlacDecoder.c
-|
 |   Flac Decoder Module
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "BltConfig.h"
 #include "BltFlacDecoder.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
@@ -28,6 +25,11 @@
 
 #include "FLAC/stream_decoder.h"
 #include "FLAC/seekable_stream_decoder.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.flac")
 
 /*----------------------------------------------------------------------
 |    types
@@ -314,7 +316,7 @@ FlacDecoder_SeekCallback(const FLAC__SeekableStreamDecoder *decoder,
     self->output.eos = BLT_FALSE;
 
     /* seek */
-    BLT_Debug("FlacDecoder::SeekCallback - offset = %ld\n", offset);
+    ATX_LOG_FINER_1("FlacDecoder::SeekCallback - offset = %ld", offset);
     result = ATX_InputStream_Seek(self->input.stream, (ATX_Offset)offset);
     if (BLT_FAILED(result)) {
         return FLAC__SEEKABLE_STREAM_DECODER_SEEK_STATUS_ERROR;
@@ -588,7 +590,7 @@ FlacDecoder_HandleVorbisComment(
     ATX_String_AssignN(&string,
                        comment->vendor_string.entry,
                        comment->vendor_string.length);
-    BLT_Debug("VENDOR = %s\n", ATX_CSTR(string));
+    ATX_LOG_FINER_1("VENDOR = %s", ATX_CSTR(string));
     for (i=0; i<comment->num_comments; i++) {
         int sep;
         ATX_String_AssignN(&string, 
@@ -599,7 +601,7 @@ FlacDecoder_HandleVorbisComment(
         ATX_String_AssignN(&key, ATX_CSTR(string), sep);
         ATX_String_Assign(&value, ATX_CSTR(string)+sep+1);
 
-        BLT_Debug("  COMMENT %d : %s = %s\n", i, ATX_CSTR(key), ATX_CSTR(value));
+        ATX_LOG_FINER_3("  COMMENT %d : %s = %s", i, ATX_CSTR(key), ATX_CSTR(value));
         ATX_String_ToUppercase(&key);
         if (ATX_String_Equals(&key, BLT_VORBIS_COMMENT_REPLAY_GAIN_TRACK_GAIN, ATX_FALSE)) {
             ATX_String_ToFloat(&value, &track_gain, ATX_TRUE);
@@ -633,8 +635,6 @@ FlacDecoder_MetaDataCallback(const FLAC__SeekableStreamDecoder* decoder,
     
     /* unused parameters */
     BLT_COMPILER_UNUSED(decoder);
-
-    /*BLT_Debug("FlacDecoder::MetaDataCallback\n");*/
 
     /* get metadata block */
     switch (metadata->type) {
@@ -709,7 +709,7 @@ FlacDecoder_Create(BLT_Module*              module,
     FlacDecoder* self;
     BLT_Result   result;
 
-    BLT_Debug("FlacDecoder::Create\n");
+    ATX_LOG_FINE("FlacDecoder::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -786,7 +786,7 @@ FlacDecoder_Destroy(FlacDecoder* self)
 {
     ATX_ListItem* item;
     
-    BLT_Debug("FlacDecoder::Destroy\n");
+    ATX_LOG_FINE("FlacDecoder::Destroy");
 
     /* release the input stream */
     ATX_RELEASE_OBJECT(self->input.stream);
@@ -862,8 +862,7 @@ FlacDecoder_Seek(BLT_MediaNode* _self,
     self->output.sample_count = point->sample;
 
     /* seek to the target sample */
-    BLT_Debug("FlacDecoder::Seek - sample = %ld\n", 
-              (long)point->sample);
+    ATX_LOG_FINE_1("FlacDecoder::Seek - sample = %ld", (long)point->sample);
     FLAC__seekable_stream_decoder_seek_absolute(self->input.decoder, point->sample);
 
     /* set the mode so that the nodes down the chaine know the seek has */
@@ -931,8 +930,7 @@ FlacDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->flac_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("FlacDecoderModule::Attach (audio/x-flac type = %d)\n", 
-              self->flac_type_id);
+    ATX_LOG_FINE_1("FlacDecoderModule::Attach (audio/x-flac type = %d)", self->flac_type_id);
 
     return BLT_SUCCESS;
 }
@@ -998,7 +996,7 @@ FlacDecoderModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
             
-            BLT_Debug("FlacDecoderModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("FlacDecoderModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

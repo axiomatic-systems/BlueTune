@@ -14,10 +14,14 @@
 #include "BltConfig.h"
 #include "BltNullOutput.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPacketConsumer.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.null")
 
 /*----------------------------------------------------------------------
 |    types
@@ -264,7 +268,7 @@ NullOutputModule_Probe(BLT_Module*              self,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("NullOutputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("NullOutputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltStream.c
-|
 |   BlueTune - Stream Objects
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -19,7 +17,6 @@
 #include "BltConfig.h"
 #include "BltTypes.h"
 #include "BltDefs.h"
-#include "BltDebug.h"
 #include "BltErrors.h"
 #include "BltCore.h"
 #include "BltStream.h"
@@ -35,9 +32,9 @@
 #include "BltOutputNode.h"
 
 /*----------------------------------------------------------------------
-|    macros
+|   logging
 +---------------------------------------------------------------------*/
-#define STREAM_LOG(l, m) BLT_LOG(BLT_LOG_CHANNEL_STREAM, l, m)
+ATX_SET_LOCAL_LOGGER("bluetune.core.stream")
 
 /*----------------------------------------------------------------------
 |    types
@@ -1245,7 +1242,7 @@ Stream_GetNextNode(BLT_Stream*     _self,
 static void
 Stream_ConnectNodes(Stream* self, StreamNode* from, StreamNode* to)
 {
-    STREAM_LOG(0, ("Stream::ConnectNodes - connected\n"));
+    ATX_LOG_FINE("Stream::ConnectNodes - connected");
     from->output.connected = BLT_TRUE;
     to->input.connected    = BLT_TRUE;
     /* only notify of the connection of the 'from' node, as the other */
@@ -1253,12 +1250,13 @@ Stream_ConnectNodes(Stream* self, StreamNode* from, StreamNode* to)
     Stream_TopologyChanged(self, BLT_STREAM_TOPOLOGY_NODE_CONNECTED, from);
 }
 
-#define DBG_TRYING													      \
-STREAM_LOG(0, ("  Trying from %s:%s to %s:%s\n", 				    	  \
-        Stream_GetProtocolName(constructor.spec.input.protocol),	      \
-        Stream_GetTypeName(self, constructor.spec.input.media_type),	  \
-        Stream_GetProtocolName(constructor.spec.output.protocol),	      \
-        Stream_GetTypeName(self, constructor.spec.output.media_type)))  \
+#define DBG_TRYING												      \
+ATX_LOG_FINE_4(                                                       \
+    "  Trying from %s:%s to %s:%s\n", 				    	          \
+    Stream_GetProtocolName(constructor.spec.input.protocol),	      \
+    Stream_GetTypeName(self, constructor.spec.input.media_type),	  \
+    Stream_GetProtocolName(constructor.spec.output.protocol),	      \
+    Stream_GetTypeName(self, constructor.spec.output.media_type))     \
         
 /*----------------------------------------------------------------------
 |    Stream_CreateCompatibleMediaNode
@@ -1279,7 +1277,7 @@ Stream_CreateCompatibleMediaNode(Stream*              self,
     constructor.spec.input.media_type = from_type;
     constructor.name                  = NULL;
 
-    STREAM_LOG(0, ("Stream::CreateCompatibleMediaNode trying to create compatible node:\n"));
+    ATX_LOG_FINE("Stream::CreateCompatibleMediaNode trying to create compatible node:");
 
     /* first, try to join the to_node */
     if (to_node) {
@@ -1389,9 +1387,8 @@ Stream_DeliverPacket(Stream*          self,
     BLT_Result           result;
 
     if (BLT_MediaPacket_GetFlags(packet)) {
-        STREAM_LOG(0, 
-                   ("Stream::DeliverPacket - flags = %x --------------------\n", 
-                    BLT_MediaPacket_GetFlags(packet)));
+        ATX_LOG_FINE_1("Stream::DeliverPacket - flags = %x --------------------", 
+                      BLT_MediaPacket_GetFlags(packet));
     }
     
     /* set the recipient node */

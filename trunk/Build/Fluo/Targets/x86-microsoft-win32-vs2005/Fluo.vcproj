@@ -1,101 +1,151 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="Fluo"
 	ProjectGUID="{41AF9125-0501-49C6-8430-1F671BA87299}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\ThirdParty\mpg123\mpglib"
 				PreprocessorDefinitions="FLO_DECODER_ENGINE=FLO_DECODER_ENGINE_MPG123"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="TRUE"
+				BufferSecurityCheck="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/Fluo.lib"/>
+				OutputFile="$(OutDir)/Fluo.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
+				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Config,..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\ThirdParty\mpg123\mpglib"
 				PreprocessorDefinitions="FLO_DECODER_ENGINE=FLO_DECODER_ENGINE_MPG123"
-				StringPooling="TRUE"
+				StringPooling="true"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/Fluo.lib"/>
+				OutputFile="$(OutDir)/Fluo.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -103,147 +153,193 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
+			>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloBitStream.c">
+				RelativePath="..\..\..\..\Source\Fluo\FloBitStream.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloDecoder.c">
+				RelativePath="..\..\..\..\Source\Fluo\FloDecoder.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloFrame.c">
+				RelativePath="..\..\..\..\Source\Fluo\FloFrame.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.c">
+				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloTables.c">
+				RelativePath="..\..\..\..\Source\Fluo\FloTables.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc"
+			>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloBitStream.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloBitStream.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloConfig.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloConfig.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloDecoder.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloDecoder.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloErrors.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloErrors.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloFrame.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloFrame.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloSyntax.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloSyntax.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloTables.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloTables.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\FloTypes.h">
+				RelativePath="..\..\..\..\Source\Fluo\FloTypes.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Fluo\Fluo.h">
+				RelativePath="..\..\..\..\Source\Fluo\Fluo.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib_config.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib_config.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
 		</Filter>
 		<Filter
 			Name="mpglib"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.c">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.c">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.c">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.c"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						WarningLevel="1"/>
+						WarningLevel="1"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						WarningLevel="1"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.h">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\huffman.h">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\interface2.c">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\l2tables.h">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.c">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.h">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.c">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.h">
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="1"/>
+						WarningLevel="1"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpg123.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\huffman.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\interface2.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.c">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\l2tables.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.c"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						WarningLevel="1"/>
+						WarningLevel="1"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.h">
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpg123.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.h"
+				>
 			</File>
 		</Filter>
 	</Files>

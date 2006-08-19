@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltAacDecoder.c
-|
 |   AAC Decoder Module
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "Fluo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltAacDecoder.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -26,6 +23,11 @@
 #include "BltStream.h"
 
 #include "faad.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.aac")
 
 /*----------------------------------------------------------------------
 |   constants
@@ -315,7 +317,6 @@ AacDecoder_DecodeFrame(AacDecoder*       decoder,
                                   &frame_info,
                                   decoder->input.buffer.data,
                                   decoder->input.buffer.size);
-    BLT_Debug("%d\n", frame_info.bytesconsumed);
     AacDecoderInputPort_BytesUsed(decoder, frame_info.bytesconsumed);
 
     /* update the stream info */
@@ -510,7 +511,7 @@ AacDecoder_Create(BLT_Module*              module,
     AacDecoder* decoder;
     BLT_Result  result;
 
-    BLT_Debug("AacDecoder::Create\n");
+    ATX_LOG_FINE("AacDecoder::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -565,7 +566,7 @@ AacDecoder_Destroy(AacDecoder* decoder)
 { 
     ATX_ListItem* item;
 
-    BLT_Debug("AacDecoder::Destroy\n");
+    ATX_LOG_FINE("AacDecoder::Destroy");
 
     /* release any packet we may hold */
     item = ATX_List_GetFirstItem(decoder->input.packets);
@@ -705,8 +706,8 @@ AacDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
         &module->aac_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("AacDecoderModule::Attach (audio/x-aac type = %d)\n", 
-              module->aac_type_id);
+    ATX_LOG_FINE_1("AacDecoderModule::Attach (audio/x-aac type = %d)", 
+                   module->aac_type_id);
 
     return BLT_SUCCESS;
 }
@@ -771,7 +772,7 @@ AacDecoderModule_Probe(BLT_ModuleInstance*      instance,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("AacDecoderModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("AacDecoderModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

@@ -14,11 +14,15 @@
 #include "BltConfig.h"
 #include "BltFileInput.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltModule.h"
 #include "BltByteStreamProvider.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.file")
 
 /*----------------------------------------------------------------------
 |    types
@@ -96,7 +100,7 @@ FileInput_Create(BLT_Module*              module,
         (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
 
-    BLT_Debug("FileInput::Create\n");
+    ATX_LOG_FINE("FileInput::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -170,7 +174,7 @@ failure:
 static BLT_Result
 FileInput_Destroy(FileInput* self)
 {
-    BLT_Debug("FileInput::Destroy\n");
+    ATX_LOG_FINE("FileInput::Destroy");
 
     /* release the byte stream */
     ATX_RELEASE_OBJECT(self->stream);
@@ -370,7 +374,7 @@ FileInputModule_Probe(BLT_Module*              self,
                 return BLT_FAILURE;
             }
 
-            BLT_Debug("FileInputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("FileInputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

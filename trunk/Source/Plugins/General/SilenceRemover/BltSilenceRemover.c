@@ -14,7 +14,6 @@
 #include "Fluo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltSilenceRemover.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -22,6 +21,11 @@
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.general.silence-remover")
 
 /*----------------------------------------------------------------------
 |    types
@@ -143,7 +147,7 @@ SilenceRemover_TrimPending(SilenceRemover* self)
     /* quick check */
     if (!packet) return;
 
-    BLT_Debug("SilenceRemover: trimming pending packet\n");
+    ATX_LOG_FINER("SilenceRemover: trimming pending packet");
 
     /* remove silence at the end of the packet */
     pcm = (short*)BLT_MediaPacket_GetPayloadBuffer(packet);
@@ -175,9 +179,9 @@ SilenceRemover_AcceptPending(SilenceRemover* self)
             BLT_MediaPacket_Release(packet);
         }
         self->input.pending = NULL;
-        /*BLT_Debug("SilenceRemover: accepting pending packet\n");*/
+        ATX_LOG_FINER("SilenceRemover: accepting pending packet");
     } else {
-        /*BLT_Debug("SilenceRemover: no pending packet\n");*/
+        ATX_LOG_FINER("SilenceRemover: no pending packet");
     }
 }
 
@@ -187,7 +191,7 @@ SilenceRemover_AcceptPending(SilenceRemover* self)
 static void
 SilenceRemover_HoldPacket(SilenceRemover* self, BLT_MediaPacket* packet)
 {
-    BLT_Debug("SilenceRemover: holding packet\n");
+    ATX_LOG_FINER("SilenceRemover: holding packet");
 
     /* accept the previously pending packet if any */
     SilenceRemover_AcceptPending(self);
@@ -204,7 +208,7 @@ static void
 SilenceRemover_AcceptPacket(SilenceRemover* self, BLT_MediaPacket* packet)
 {
     BLT_Result result;
-    /*BLT_Debug("SilenceRemover: accepting packet\n");*/
+    ATX_LOG_FINER("SilenceRemover: accepting packet");
 
     /* first, use any pending packet */
     SilenceRemover_AcceptPending(self);
@@ -231,7 +235,7 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
     BLT_Size        payload_size;
     ATX_Result      result;
 
-    /*BLT_Debug("SilenceRemoverInput_PutPacket\n");*/
+    ATX_LOG_FINER("SilenceRemoverInput::PutPacket");
 
     /* get the packet info */
     packet_flags   = BLT_MediaPacket_GetFlags(packet);
@@ -243,8 +247,8 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
         result = ScanPacket(packet, &zero_head, &zero_tail);    
         if (BLT_FAILED(result)) return result;
         if (zero_head || zero_tail) {
-            BLT_Debug("SilenceRemover: packet: zero_head=%ld, zero_tail=%ld\n",
-                      zero_head, zero_tail);
+            ATX_LOG_FINER_2("SilenceRemoverInput::PutPacket zero_head=%ld, zero_tail=%ld",
+                            zero_head, zero_tail);
         }
     }
 
@@ -254,11 +258,11 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
             /* packet is all silence */
             if (packet_flags != 0) {
                 /* packet has flags, don't discard it, just empty it */
-                BLT_Debug("SilenceRemover: emptying packet\n");
+                ATX_LOG_FINER("SilenceRemover: emptying packet");
                 BLT_MediaPacket_SetPayloadSize(packet, 0);
                 SilenceRemover_AcceptPacket(self, packet);
             } else {
-                BLT_Debug("SilenceRemover: dropping packet\n");
+                ATX_LOG_FINER("SilenceRemover: dropping packet");
             }
         } else {
             /* remove silence at the start of the packet */
@@ -267,7 +271,7 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
 
             /* we're now in the stream unless this is also the end */
             if (!(packet_flags & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM)) {
-                BLT_Debug("SilenceRemover: new state = IN_STREAM\n");
+                ATX_LOG_FINER("SilenceRemover: new state = IN_STREAM");
                 self->state =  SILENCE_REMOVER_STATE_IN_STREAM;
             }
         }
@@ -275,31 +279,31 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
         /* in stream */
         if (zero_head == payload_size) {
             /* packet is all silence */
-            BLT_Debug("SilenceRemover: packet is all silence\n");
+            ATX_LOG_FINER("SilenceRemover: packet is all silence");
             if (packet_flags) {
                 /* packet has flags, don't discard it, just empty it */
                 SilenceRemover_TrimPending(self);
                 BLT_MediaPacket_SetPayloadSize(packet, 0);
                 SilenceRemover_AcceptPacket(self, packet);
             } else {
-                BLT_Debug("SilenceRemover: dropping packet\n");
+                ATX_LOG_FINER("SilenceRemover: dropping packet");
             }
         } else {
             /* accept the pending packet */
             SilenceRemover_AcceptPending(self);
             if (zero_tail) {
                 /* packet has some silence at the end */
-                BLT_Debug("SilenceRemover: packet has silence at end\n");
+                ATX_LOG_FINER("SilenceRemover: packet has silence at end");
                 SilenceRemover_HoldPacket(self, packet);
             } else {
                 /* packet has no silence at the end */
-                /*BLT_Debug("SilenceRemover: packet has no silence at end\n");*/
+                ATX_LOG_FINER("SilenceRemover: packet has no silence at end");
                 SilenceRemover_AcceptPacket(self, packet);
             }
         }
         if (packet_flags & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM ||
             packet_flags & BLT_MEDIA_PACKET_FLAG_START_OF_STREAM) {
-            BLT_Debug("SilenceRemover: new state = START_OF_STREAM\n");
+            ATX_LOG_FINER("SilenceRemover: new state = START_OF_STREAM");
             self->state = SILENCE_REMOVER_STATE_START_OF_STREAM;
         }
     }
@@ -453,7 +457,7 @@ SilenceRemover_Create(BLT_Module*              module,
     SilenceRemover* self;
     BLT_Result  result;
 
-    BLT_Debug("SilenceRemover::Create\n");
+    ATX_LOG_FINE("SilenceRemover::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -503,7 +507,7 @@ SilenceRemover_Destroy(SilenceRemover* self)
 { 
     ATX_ListItem* item;
 
-    BLT_Debug("SilenceRemover::Destroy\n");
+    ATX_LOG_FINE("SilenceRemover::Destroy");
 
     /* release any input packet we may hold */
     if (self->input.pending) {
@@ -659,7 +663,7 @@ SilenceRemoverModule_Probe(BLT_Module*              self,
             /* match level is always exact */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("SilenceRemoverModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("SilenceRemoverModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

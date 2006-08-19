@@ -13,7 +13,6 @@
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltPcmAdapter.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -21,6 +20,11 @@
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.adapters.pcm")
 
 /*----------------------------------------------------------------------
 |    types
@@ -201,7 +205,7 @@ PcmAdapter_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     PcmAdapter*               self;
 
-    BLT_Debug("PcmAdapter::Create\n");
+    ATX_LOG_FINE("PcmAdapter::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -245,7 +249,7 @@ PcmAdapter_Create(BLT_Module*              module,
 static BLT_Result
 PcmAdapter_Destroy(PcmAdapter* self)
 { 
-    BLT_Debug("PcmAdapter::Destroy\n");
+    ATX_LOG_FINE("PcmAdapter::Destroy");
 
     /* release any input packet we may hold */
     if (self->output.packet) {
@@ -384,7 +388,7 @@ PcmAdapterModule_Probe(BLT_Module*              self,
                 }
             }
 
-            BLT_Debug("PcmAdapterModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("PcmAdapterModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

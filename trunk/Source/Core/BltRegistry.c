@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltRegistry.c
-|
 |   BlueTune - Registry Object
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -20,11 +18,15 @@
 #include "BltTypes.h"
 #include "BltDefs.h"
 #include "BltErrors.h"
-#include "BltDebug.h"
 #include "BltRegistry.h"
 #include "BltRegistryPriv.h"
 #include "BltStreamPriv.h"
 #include "BltMediaNode.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.core.registry")
 
 /*----------------------------------------------------------------------
 |    types
@@ -230,40 +232,6 @@ Key_AddSubKey(Key* key, BLT_CString name, BLT_Size size)
     key->children = new_key;
 
     return new_key;
-}
-
-/*----------------------------------------------------------------------
-|    Key_Dump
-+---------------------------------------------------------------------*/
-static void
-Key_Dump(Key* key, int indent)
-{
-    int i;
-
-    if (key == NULL) return;
-
-    for (i=0; i<indent; i++) {
-        BLT_Debug(" ");
-    }
-    BLT_Debug("Key: name=%s, hash=%08lx, type=%d",
-              key->name, key->hash, key->value_type);
-    switch (key->value_type) {
-      case BLT_REGISTRY_VALUE_TYPE_STRING:
-        BLT_Debug(", value=%s", key->value.string);
-        break;
-
-      case BLT_REGISTRY_VALUE_TYPE_INTEGER:
-        BLT_Debug(", value=%ld", key->value.integer);
-        break;
-        
-      default:
-        break;
-    }
-    BLT_Debug("\n");
-
-    Key_Dump(key->children, indent+4);
-
-    Key_Dump(key->next, indent);
 }
 
 /*----------------------------------------------------------------------

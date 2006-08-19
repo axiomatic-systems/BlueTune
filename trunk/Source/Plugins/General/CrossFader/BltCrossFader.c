@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltCrossFader.c
-|
 |   Cross Fader Module
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "Fluo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltCrossFader.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
@@ -26,6 +23,11 @@
 #include "BltStream.h"
 
 #include <math.h>
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.general.cross-fader")
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -122,7 +124,7 @@ CrossFader_PromotePacket(CrossFader* fader, BLT_Size size)
     unsigned char*   payload;
     BLT_Result       result;
 
-    BLT_Debug("CrossFader::PromotePacket - size = %d\n", size);
+    ATX_LOG_FINER_1("CrossFader::PromotePacket - size = %d", size);
     
     /* create a packet */
     result = BLT_Core_CreateMediaPacket(&fader->base.core,
@@ -219,7 +221,7 @@ CrossFader_BufferPacket(CrossFader* fader, BLT_MediaPacket* packet)
     }
 
     /* copy the data to the input buffer */
-    BLT_Debug("CrossFader::BufferPacket - buffering %d\n", payload_size);
+    ATX_LOG_FINER_1("CrossFader::BufferPacket - buffering %d", payload_size);
     ATX_RingBuffer_Write(fader->input.buffer, payload_buffer, payload_size);
 
     return BLT_SUCCESS;
@@ -236,10 +238,10 @@ CrossFaderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     BLT_PcmMediaType* media_type;
     ATX_Result        result;
 
-    BLT_Debug("CrossFaderInputPort::PutPacket - state = %s\n",
-              fader->state == CROSS_FADER_STATE_IN_START ? "START" :
-              fader->state == CROSS_FADER_STATE_IN_MAIN ? "MAIN" :
-              "???");
+    ATX_LOG_FINER_1("CrossFaderInputPort::PutPacket - state = %s",
+                    fader->state == CROSS_FADER_STATE_IN_START ? "START" :
+                    fader->state == CROSS_FADER_STATE_IN_MAIN ? "MAIN" :
+                    "???");
 
     /* get the media type */
     result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
@@ -256,7 +258,7 @@ CrossFaderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
         media_type->bits_per_sample != fader->input.media_type.bits_per_sample ||
         media_type->sample_format   != fader->input.media_type.sample_format) {
         /* media type has changed */
-        BLT_Debug("CrossFaderInputPort::PutPacket - new media type\n");
+        ATX_LOG_FINER("CrossFaderInputPort::PutPacket - new media type");
         CrossFader_Flush(fader);
         result = CrossFader_SetupInput(fader, media_type);
         if (BLT_FAILED(result)) return result;
@@ -271,7 +273,7 @@ CrossFaderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
             short* samples = (short*)BLT_MediaPacket_GetPayloadBuffer(packet);
             float pos = (float)fader->input.position/(float)(44100*4*10);
             float factor = (float)pow(10.0f, -(30.0f-pos*30.0f)/20.0f);
-            BLT_Debug("factor = %f\n", factor);
+            ATX_LOG_FINDER_1("CrossFaderInputPort::PutPacket - factor = %f", factor);
             for (sample = 0; sample < size/2; sample++) {
                 *samples = (short)(((float)*samples)*factor);
                 samples++;
@@ -358,11 +360,11 @@ CrossFaderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
     if (item) {
         *packet = ATX_ListItem_GetData(item);
         ATX_List_RemoveItem(fader->output.packets, item);
-        BLT_Debug("CrossFaderInputPort_GetPacket - got one\n");
+        ATX_LOG_FINER("CrossFaderInputPort_GetPacket - got one");
         return BLT_SUCCESS;
     } else {
         *packet = NULL;
-        BLT_Debug("CrossFaderInputPort_GetPacket - no more data\n");
+        ATX_LOG_FINER("CrossFaderInputPort_GetPacket - no more data");
         return BLT_ERROR_PORT_HAS_NO_DATA;
     }
 }
@@ -450,7 +452,7 @@ CrossFader_Create(BLT_Module*              module,
     CrossFader* fader;
     BLT_Result  result;
 
-    BLT_Debug("CrossFader::Create\n");
+    ATX_LOG_FINE("CrossFader::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -495,7 +497,7 @@ CrossFader_Destroy(CrossFader* fader)
 { 
     ATX_ListItem* item;
 
-    BLT_Debug("CrossFader::Destroy\n");
+    ATX_LOG_FINE("CrossFader::Destroy");
 
     /* release any packet we may hold */
     item = ATX_List_GetFirstItem(fader->output.packets);
@@ -636,8 +638,8 @@ CrossFader_OnPropertyChanged(ATX_PropertyListenerInstance* instance,
     /*CrossFader* fader = (CrossFader*)instance;*/
     BLT_COMPILER_UNUSED(instance);
     BLT_COMPILER_UNUSED(type);
-    BLT_Debug("CrossFader::OnPropertyChanged - name=%s val=%d\n", 
-        name ? name : "*", value ? value->integer : 0);
+    ATX_LOG_FINE_2("CrossFader::OnPropertyChanged - name=%s val=%d", 
+                   name ? name : "*", value ? value->integer : 0);
 }
 
 /*----------------------------------------------------------------------
@@ -736,7 +738,7 @@ CrossFaderModule_Probe(BLT_ModuleInstance*      instance,
             /* match level is always exact */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("CrossFaderModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("CrossFaderModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

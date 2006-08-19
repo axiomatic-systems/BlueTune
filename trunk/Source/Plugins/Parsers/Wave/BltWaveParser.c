@@ -14,13 +14,17 @@
 #include "BltConfig.h"
 #include "BltWaveParser.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"
 #include "BltByteStreamProvider.h"
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.wave")
 
 /*----------------------------------------------------------------------
 |   types
@@ -414,7 +418,7 @@ WaveParser_Create(BLT_Module*              module,
 {
     WaveParser* self;
 
-    BLT_Debug("WaveParser::Create\n");
+    ATX_LOG_FINE("WaveParser::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -455,7 +459,7 @@ WaveParser_Create(BLT_Module*              module,
 static BLT_Result
 WaveParser_Destroy(WaveParser* self)
 {
-    BLT_Debug("WaveParser::Destroy\n");
+    ATX_LOG_FINE("WaveParser::Destroy");
 
     /* release the byte stream */
     ATX_RELEASE_OBJECT(self->output.stream);
@@ -583,8 +587,7 @@ WaveParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->wav_type_id);
     if (BLT_FAILED(result)) return result;
     
-    BLT_Debug("Wave Parser Module::Attach (audio/wav type = %d\n",
-              self->wav_type_id);
+    ATX_LOG_FINE_1("Wave Parser Module::Attach (audio/wav type = %d", self->wav_type_id);
 
     return BLT_SUCCESS;
 }
@@ -647,7 +650,7 @@ WaveParserModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            BLT_Debug("WaveParserModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("WaveParserModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

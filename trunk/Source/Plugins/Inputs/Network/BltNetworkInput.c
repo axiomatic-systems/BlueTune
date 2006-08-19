@@ -14,12 +14,16 @@
 #include "BltConfig.h"
 #include "BltNetworkInput.h"
 #include "BltCore.h"
-#include "BltDebug.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltModule.h"
 #include "BltByteStreamProvider.h"
 #include "BltTcpNetworkStream.h"
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.network")
 
 /*----------------------------------------------------------------------
 |    types
@@ -96,7 +100,7 @@ NetworkInput_Create(BLT_Module*              module,
         (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
 
-    BLT_Debug("NetworkInput::Create\n");
+    ATX_LOG_FINE("NetworkInput::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -156,7 +160,7 @@ NetworkInput_Create(BLT_Module*              module,
 static BLT_Result
 NetworkInput_Destroy(NetworkInput* self)
 {
-    BLT_Debug("NetworkInput::Destroy\n");
+    ATX_LOG_FINE("NetworkInput::Destroy");
 
     /* release the byte stream */
     ATX_RELEASE_OBJECT(self->stream);
@@ -354,7 +358,7 @@ NetworkInputModule_Probe(BLT_Module*              self,
                 return BLT_FAILURE;
             }
 
-            BLT_Debug("NetworkInputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("NetworkInputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

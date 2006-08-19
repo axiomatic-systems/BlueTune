@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|   File: BltDecoderClient.c
-|
 |   BlueTune - Decoder Client
 |
-|   (c) 2002-2003 Gilles Boccon-Gibod
+|   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,7 +14,6 @@
 #include "BltTypes.h"
 #include "BltDefs.h"
 #include "BltErrors.h"
-#include "BltDebug.h"
 #include "BltModule.h"
 #include "BltCore.h"
 #include "BltCorePriv.h"

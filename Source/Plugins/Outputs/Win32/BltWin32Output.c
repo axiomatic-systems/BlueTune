@@ -28,6 +28,11 @@
 #include "BltMediaPacket.h"
 
 /*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32")
+
+/*----------------------------------------------------------------------
 |   options
 +---------------------------------------------------------------------*/
 #define BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE 
@@ -861,11 +866,6 @@ ATX_END_INTERFACE_MAP
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Win32OutputModule, 
                                          BLT_BaseModule,
                                          reference_count)
-
-/*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(Win32OutputModule, "Win32 Output", 0)
 
 /*----------------------------------------------------------------------
 |   module object

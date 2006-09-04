@@ -23,8 +23,9 @@
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_CString output_name;
-    BLT_CString output_type;
+    BLT_CString  output_name;
+    BLT_CString  output_type;
+    unsigned int duration;
 } BLTP_Options;
 
 typedef struct  {
@@ -63,7 +64,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  -h\n"
         "  --help\n" 
         "  --output=<name>\n"
-        "  --output-type=<type>\n");
+        "  --output-type=<type>\n"
+        "  --duration=<n> (seconds)\n");
     exit(exit_code);
 }
 
@@ -78,7 +80,8 @@ BLTP_ParseCommandLine(char** args, BLTP_Options* options)
     /* setup default values for options */
     options->output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
     options->output_type = NULL;
-
+    options->duration    = 0;
+    
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
             ATX_StringsEqual(arg, "--help")) {
@@ -87,6 +90,10 @@ BLTP_ParseCommandLine(char** args, BLTP_Options* options)
             options->output_name = arg+9;
         } else if (ATX_StringsEqualN(arg, "--output-type=", 14)) {
             options->output_type = arg+14;
+        } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
+            long duration = 0;
+            ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
+            options->duration = duration;
         } else {
             return args;
         }
@@ -260,7 +267,7 @@ BLTP_OnEvent(BLT_EventListener* self,
             ATX_ConsoleOutput("STREAM TOPOLOGY: node added\n");  
             break;
           case BLT_STREAM_TOPOLOGY_NODE_REMOVED:
-            ATX_ConsoleOutput("STREAM TOPOLOGY: node removes\n");
+            ATX_ConsoleOutput("STREAM TOPOLOGY: node removed\n");
             break;
           case BLT_STREAM_TOPOLOGY_NODE_CONNECTED:
             ATX_ConsoleOutput("STREAM TOPOLOGY: node connected\n");
@@ -293,6 +300,23 @@ ATX_END_INTERFACE_MAP
 ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_EventListener)
     BLTP_OnEvent
 ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLTP_CheckElapsedTime
++---------------------------------------------------------------------*/
+static BLT_Result
+BLTP_CheckElapsedTime(BLT_Decoder* decoder, unsigned int duration)
+{
+    BLT_DecoderStatus status;
+    
+    if (duration == 0) return BLT_SUCCESS;
+    BLT_Decoder_GetStatus(decoder, &status);
+    if (status.time_stamp.seconds > (int)duration) {
+        ATX_ConsoleOutput("END of specified duration\n");
+        return BLT_FAILURE;
+    }
+    return BLT_SUCCESS;
+}
 
 /*----------------------------------------------------------------------
 |    main
@@ -368,7 +392,11 @@ main(int argc, char** argv)
 
         /* pump the packets */
         do {
+            /* process one packet */
             result = BLT_Decoder_PumpPacket(decoder);
+            
+            /* if a duration is specified, check if we have exceeded it */
+            if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, options.duration);
         } while (BLT_SUCCEEDED(result));
         ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
 

@@ -120,7 +120,7 @@ VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
 
     /* compute where to seek */
     if (whence == SEEK_CUR) {
-        BLT_Offset current;
+        ATX_Position current;
         ATX_InputStream_Tell(self->input.stream, &current);
         if (current+offset <= self->input.size) {
             where = current+(long)offset;
@@ -169,12 +169,12 @@ static long
 VorbisDecoder_TellCallback(void *datasource)
 {
     VorbisDecoder *self = (VorbisDecoder *)datasource;
-    BLT_Offset     offset;
+    ATX_Position   position;
     BLT_Result     result;
 
-    result = ATX_InputStream_Tell(self->input.stream, &offset);
+    result = ATX_InputStream_Tell(self->input.stream, &position);
     if (BLT_SUCCEEDED(result)) {
-        return offset;
+        return position;
     } else {
         return 0;
     }
@@ -579,6 +579,25 @@ VorbisDecoder_Destroy(VorbisDecoder* self)
 }
                     
 /*----------------------------------------------------------------------
+|    VorbisDecoder_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+VorbisDecoder_Deactivate(BLT_MediaNode* _self)
+{
+    VorbisDecoder* self = ATX_SELF_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("VorbisDecoder::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the input stream */
+    ATX_RELEASE_OBJECT(self->input.stream);
+
+    return BLT_SUCCESS;
+}
+                    
+/*----------------------------------------------------------------------
 |   VorbisDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -653,7 +672,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     VorbisDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    VorbisDecoder_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

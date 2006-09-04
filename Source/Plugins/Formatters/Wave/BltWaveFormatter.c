@@ -195,7 +195,7 @@ WaveFormatterInput_GetStream(BLT_OutputStreamProvider* _self,
     /* (this might be due to the fact that we're writing more than   */
     /*  one input stream into the same output stream                 */
     {
-        ATX_Offset where = 0;
+        ATX_Position where = 0;
         ATX_OutputStream_Tell(self->output.stream, &where);
         if (where == 0) { 
             WaveFormatter_WriteWavHeader(self, &self->input.media_type);
@@ -376,7 +376,7 @@ WaveFormatter_Destroy(WaveFormatter* self)
 
     /* update the header if needed */
     if (self->output.stream) {
-        ATX_Offset where = 0;
+        ATX_Position where = 0;
         ATX_OutputStream_Tell(self->output.stream, &where);
         self->input.size = where;
         if (self->input.size >= BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE) {
@@ -398,6 +398,25 @@ WaveFormatter_Destroy(WaveFormatter* self)
 
     /* free the object memory */
     ATX_FreeMemory(self);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    WaveFormatter_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+WaveFormatter_Deactivate(BLT_MediaNode* _self)
+{
+    WaveFormatter* self = ATX_SELF_EX(WaveFormatter, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("WaveFormatter::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the output stream */
+    ATX_RELEASE_OBJECT(self->output.stream);
 
     return BLT_SUCCESS;
 }
@@ -439,7 +458,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(WaveFormatter, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     WaveFormatter_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    WaveFormatter_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

@@ -20,7 +20,7 @@ BLT_INCLUDES_C += -I$(BLT_SOURCE_ROOT)/Config
 BLT_MODULE_SOURCES = \
 	BltInterfaces.c BltModule.c BltCore.c BltStream.c BltMediaNode.c \
 	BltMediaPort.c BltRegistry.c BltMedia.c BltPcm.c BltMediaPacket.c \
-	BltTime.c BltDebug.c
+	BltTime.c 
 
 BLT_MODULE_OBJECTS = $(BLT_MODULE_SOURCES:.c=.o)
 

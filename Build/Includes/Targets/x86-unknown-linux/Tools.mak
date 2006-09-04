@@ -12,7 +12,7 @@
 ##########################################################################
 BLT_COMPILE_C    = gcc
 BLT_FLAGS_C      = -ansi -pedantic -fno-strict-aliasing
-BLT_DEFINES_C    = -D_REENTRANT -D_BSD_SOURCE -D_POSIX_SOURCE -DBLT_TARGET=$(BLT_TARGET)
+BLT_DEFINES_C    = -D_REENTRANT -D_BSD_SOURCE -D_POSIX_SOURCE -DBLT_TARGET=$(BLT_TARGET) -DATX_CONFIG_ENABLE_LOGGING
 BLT_WARNINGS_C   = -Werror -Wall -W -Wundef -Wmissing-prototypes -Wmissing-declarations -Wno-long-long -Wunused
 BLT_AUTODEP_C    = gcc -MM
 BLT_LINK_C       = gcc

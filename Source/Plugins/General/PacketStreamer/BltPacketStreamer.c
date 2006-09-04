@@ -313,6 +313,25 @@ PacketStreamer_Destroy(PacketStreamer* self)
 }
 
 /*----------------------------------------------------------------------
+|    PacketStreamer_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+PacketStreamer_Deactivate(BLT_MediaNode* _self)
+{
+    PacketStreamer* self = ATX_SELF_EX(PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("PacketStreamer::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the output stream */
+    ATX_RELEASE_OBJECT(self->output.stream);
+
+    return BLT_SUCCESS;
+}
+                    
+/*----------------------------------------------------------------------
 |   PacketStreamer_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -349,7 +368,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     PacketStreamer_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    PacketStreamer_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
@@ -374,7 +393,7 @@ PacketStreamerModule_Probe(BLT_Module*              self,
                            BLT_AnyConst             parameters,
                            BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {

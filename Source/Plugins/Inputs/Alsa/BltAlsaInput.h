@@ -21,6 +21,6 @@
 /*----------------------------------------------------------------------
 |       module
 +---------------------------------------------------------------------*/
-extern BLT_Result BLT_AlsaInputModule_GetModuleObject(BLT_Module* module);
+extern BLT_Result BLT_AlsaInputModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_ALSA_INPUT_H_ */

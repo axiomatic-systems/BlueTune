@@ -218,7 +218,7 @@ AiffParser_OnSsndChunk(AiffParser* self, ATX_InputStream* stream, BLT_Size size)
     unsigned char ssnd_buffer[BLT_AIFF_SSND_CHUNK_MIN_SIZE];
     unsigned long offset;
     unsigned long block_size;
-    ATX_Offset    position;
+    ATX_Position  position;
     BLT_Result    result;
 
     /* read the chunk data */
@@ -327,8 +327,8 @@ AiffParser_ParseChunks(AiffParser*      self,
                     if (data_size == 0) {
                         /* this could be caused by a software that wrote a */
                         /* temporary header and was not able to update it  */
-                        ATX_Size   input_size;
-                        ATX_Offset position;
+                        ATX_Size     input_size;
+                        ATX_Position position;
                         ATX_InputStream_GetSize(stream, &input_size);
                         ATX_InputStream_Tell(stream, &position);
                         if (input_size > (ATX_Size)(position+8)) {
@@ -606,6 +606,25 @@ AiffParser_Destroy(AiffParser* self)
 }
 
 /*----------------------------------------------------------------------
+|    AiffParser_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+AiffParser_Deactivate(BLT_MediaNode* _self)
+{
+    AiffParser* self = ATX_SELF_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("AiffParser::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the output stream */
+    ATX_RELEASE_OBJECT(self->output.stream);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   AiffParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -673,7 +692,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(AiffParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     AiffParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    AiffParser_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

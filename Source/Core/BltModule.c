@@ -76,6 +76,8 @@ BLT_BaseModule_Create(BLT_CString                name,
 {
     BLT_BaseModule* module;
 
+    ATX_LOG_FINE_1("BLT_BaseModule::Create - name=%s", name);
+    
     /* allocate memory for the object */
     module = (BLT_BaseModule*)ATX_AllocateZeroMemory(sizeof(BLT_BaseModule));
     if (module == NULL) {
@@ -100,6 +102,8 @@ BLT_BaseModule_Create(BLT_CString                name,
 BLT_Result
 BLT_BaseModule_Destroy(BLT_BaseModule* module)
 {
+    ATX_LOG_FINE_1("BLT_BaseModule::Destroy - name=%s", module->info.name);
+
     BLT_BaseModule_Destruct(module);
     ATX_FreeMemory((void*)module);
     
@@ -129,9 +133,13 @@ BLT_BaseModule_GetInfo(BLT_Module* _self, BLT_ModuleInfo* info)
 BLT_DIRECT_METHOD
 BLT_BaseModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    BLT_BaseModule* self = ATX_SELF(BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
-    ATX_LOG_FINE_1("%sModule::Attach", self->info.name?self->info.name:"");
+#if defined(BLT_DEBUG)
+    {
+        BLT_BaseModule* self = ATX_SELF(BLT_BaseModule, BLT_Module);
+        ATX_LOG_FINE_1("%sModule::Attach", self->info.name?self->info.name:"");
+    }
+#endif
     return BLT_SUCCESS;
 }
 

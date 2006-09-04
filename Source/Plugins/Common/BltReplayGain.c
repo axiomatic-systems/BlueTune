@@ -46,6 +46,9 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
                     ATX_Properties_UnsetProperty(properties,
                         BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN);
                     break;
+                    
+                case BLT_REPLAY_GAIN_SET_MODE_IGNORE:
+                    break;
             }
             switch (track_gain_mode) {
                 case BLT_REPLAY_GAIN_SET_MODE_UPDATE:
@@ -61,6 +64,8 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
                         BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN);
                     break;
 
+                case BLT_REPLAY_GAIN_SET_MODE_IGNORE:
+                    break;
             }
         }
     }

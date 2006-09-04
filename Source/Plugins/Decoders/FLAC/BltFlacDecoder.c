@@ -334,7 +334,7 @@ FlacDecoder_TellCallback(const FLAC__SeekableStreamDecoder* flac,
                          void*                              client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
-    BLT_Offset   stream_offset;
+    ATX_Position stream_offset;
     BLT_Result   result;
 
     /* unused parameters */
@@ -588,13 +588,13 @@ FlacDecoder_HandleVorbisComment(
     BLT_ReplayGainSetMode album_gain_mode = BLT_REPLAY_GAIN_SET_MODE_IGNORE;
 
     ATX_String_AssignN(&string,
-                       comment->vendor_string.entry,
+                       (const char*)comment->vendor_string.entry,
                        comment->vendor_string.length);
     ATX_LOG_FINER_1("VENDOR = %s", ATX_CSTR(string));
     for (i=0; i<comment->num_comments; i++) {
         int sep;
         ATX_String_AssignN(&string, 
-                           comment->comments[i].entry,
+                           (const char*)comment->comments[i].entry,
                            comment->comments[i].length);
         sep = ATX_String_FindChar(&string, '=');
         if (sep == ATX_STRING_SEARCH_FAILED) continue;
@@ -815,6 +815,25 @@ FlacDecoder_Destroy(FlacDecoder* self)
 
     return BLT_SUCCESS;
 }
+           
+/*----------------------------------------------------------------------
+|    FlacDecoder_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+FlacDecoder_Deactivate(BLT_MediaNode* _self)
+{
+    FlacDecoder* self = ATX_SELF_EX(FlacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("FlacDecoder::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the input stream */
+    ATX_RELEASE_OBJECT(self->input.stream);
+
+    return BLT_SUCCESS;
+}
                     
 /*----------------------------------------------------------------------
 |   FlacDecoder_GetPortByName
@@ -887,7 +906,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(FlacDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     FlacDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    FlacDecoder_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

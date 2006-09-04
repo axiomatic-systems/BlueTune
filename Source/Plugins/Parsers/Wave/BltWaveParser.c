@@ -221,7 +221,9 @@ WaveParser_ParseHeader(WaveParser*      self,
             if (chunk_size) {
                 stream_info->size = chunk_size;
             } else {
-                ATX_InputStream_GetSize(stream, &stream_info->size);
+                ATX_Size stream_size = 0;
+                ATX_InputStream_GetSize(stream, &stream_size);
+                stream_info->size = stream_size;
             }
             stream_info->mask |= BLT_STREAM_INFO_MASK_SIZE;
             if (stream_info->size != 0 && bytes_per_second != 0) {
@@ -477,6 +479,25 @@ WaveParser_Destroy(WaveParser* self)
 }
 
 /*----------------------------------------------------------------------
+|    WaveParser_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+WaveParser_Deactivate(BLT_MediaNode* _self)
+{
+    WaveParser* self = ATX_SELF_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("WaveParser::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the stream */
+    ATX_RELEASE_OBJECT(self->output.stream);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   WaveParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -544,7 +565,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(WaveParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     WaveParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    WaveParser_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

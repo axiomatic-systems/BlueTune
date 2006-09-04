@@ -19,6 +19,6 @@
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
-BLT_Result BLT_CrossFaderModule_GetModuleObject(BLT_Module* module);
+BLT_Result BLT_CrossFaderModule_GetModuleObject(BLT_Module** module);
 
 #endif /* _BLT_CROSS_FADER_H_ */

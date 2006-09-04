@@ -523,6 +523,8 @@ Stream_Create(BLT_Core* core, BLT_Stream** object)
 {
     Stream* stream;
 
+    ATX_LOG_FINE("Stream::Create");
+ 
     /* allocate memory for the object */
     stream = ATX_AllocateZeroMemory(sizeof(Stream));
     if (stream == NULL) {
@@ -550,12 +552,24 @@ Stream_Create(BLT_Core* core, BLT_Stream** object)
 static BLT_Result
 Stream_Destroy(Stream* self)
 {
-    /* destroy the nodes */
+    ATX_LOG_FINE("Stream::Destroy");
+    
+    /* deactivate the nodes */
     {
         StreamNode* node = self->nodes.head;
         while (node) {
             StreamNode* next = node->next;
-            StreamNode_Destroy(node);
+            StreamNode_Deactivate(node);
+            node = next;
+        }
+    }
+
+    /* remove and destroy the nodes */
+    {
+        StreamNode* node = self->nodes.head;
+        while (node) {
+            StreamNode* next = node->next;
+            Stream_RemoveNode(self, node);
             node = next;
         }
     }
@@ -1252,7 +1266,7 @@ Stream_ConnectNodes(Stream* self, StreamNode* from, StreamNode* to)
 
 #define DBG_TRYING												      \
 ATX_LOG_FINE_4(                                                       \
-    "  Trying from %s:%s to %s:%s\n", 				    	          \
+    "  Trying from %s:%s to %s:%s", 				    	          \
     Stream_GetProtocolName(constructor.spec.input.protocol),	      \
     Stream_GetTypeName(self, constructor.spec.input.media_type),	  \
     Stream_GetProtocolName(constructor.spec.output.protocol),	      \

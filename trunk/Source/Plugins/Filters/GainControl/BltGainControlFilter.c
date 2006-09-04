@@ -620,7 +620,7 @@ GainControlFilterModule_Probe(BLT_Module*              self,
                               BLT_Cardinal*            match)
 {
     BLT_COMPILER_UNUSED(self);
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:

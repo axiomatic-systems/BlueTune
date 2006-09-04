@@ -254,7 +254,7 @@ DebugOutputModule_Probe(BLT_Module*              self,
                         BLT_AnyConst             parameters,
                         BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -331,12 +331,6 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(DebugOutputModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(DebugOutputModule, "Debug Output", 0)
-
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
@@ -344,7 +338,7 @@ BLT_DebugOutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("Debug Output", NULL, 0,
+    return BLT_BaseModule_Create("Debug Output", NULL, 0, 
                                  &DebugOutputModule_BLT_ModuleInterface,
                                  &DebugOutputModule_ATX_ReferenceableInterface,
                                  object);

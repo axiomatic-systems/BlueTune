@@ -148,9 +148,9 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
     BLT_Result (*AddNodeByName)(BLT_Stream*    self, 
                                 BLT_MediaNode* where,
                                 BLT_CString    name);
-    BLT_Result (*GetStreamNodeInfo)(BLT_Stream*         self,
-                                    BLT_MediaNode*      node,
-                                    BLT_StreamNodeInfo* info);
+    BLT_Result (*GetStreamNodeInfo)(BLT_Stream*          self,
+                                    const BLT_MediaNode* node,
+                                    BLT_StreamNodeInfo*  info);
     BLT_Result (*GetFirstNode)(BLT_Stream*         self,
                                BLT_MediaNode**     node);
     BLT_Result (*GetNextNode)(BLT_Stream*         self,

@@ -387,7 +387,7 @@ SilenceRemoverOutput_QueryMediaType(BLT_MediaPort*        self,
                                     BLT_Ordinal           index,
                                     const BLT_MediaType** media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     if (index == 0) {
         *media_type = &BLT_GenericPcmMediaType;
         return BLT_SUCCESS;
@@ -597,7 +597,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(SilenceRemover, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    SilenceRemover_Seek
 };
 
 /*----------------------------------------------------------------------
@@ -617,8 +617,8 @@ SilenceRemoverModule_Probe(BLT_Module*              self,
                            BLT_AnyConst             parameters,
                            BLT_Cardinal*            match)
 {
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
-    BLT_COMPILER_UNUSED(instance);
 
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:

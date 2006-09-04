@@ -27,6 +27,11 @@
 #include "BltMediaPacketPriv.h"
 
 /*----------------------------------------------------------------------
+|    logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.core")
+
+/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 struct Core {
@@ -55,6 +60,8 @@ Core_Create(BLT_Core** object)
     Core*      core;
     BLT_Result result;
 
+    ATX_LOG_FINE("Core::Create");
+    
     /* allocate memory for the object */
     core = ATX_AllocateZeroMemory(sizeof(Core));
     if (core == NULL) {
@@ -97,9 +104,11 @@ static BLT_Result
 Core_Destroy(ATX_Destroyable* _self)
 {
     Core* core = ATX_SELF(Core, ATX_Destroyable);
-
-    /* release the modules in the list */
     ATX_ListItem* item = ATX_List_GetFirstItem(core->modules);
+    
+    ATX_LOG_FINE("Core::Destroy");
+    
+    /* release the modules in the list */
     while (item) {
         BLT_Module* module = (BLT_Module*)ATX_ListItem_GetData(item);
         ATX_RELEASE_OBJECT(module);

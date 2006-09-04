@@ -90,7 +90,7 @@ TagParserInput_SetStream(BLT_InputStreamUser* _self,
     /*BLT_Size       ape_trailer_size = 0;*/
     BLT_Size        header_size      = 0;
     BLT_Size        trailer_size     = 0;
-    BLT_Offset      stream_start;
+    ATX_Position    stream_start;
     BLT_Size        stream_size;
     ATX_Properties* stream_properties;
     BLT_Result      result;
@@ -361,6 +361,25 @@ TagParser_Destroy(TagParser* self)
 }
 
 /*----------------------------------------------------------------------
+|    TagParser_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+TagParser_Deactivate(BLT_MediaNode* _self)
+{
+    TagParser* self = ATX_SELF_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode);
+
+    ATX_LOG_FINER("TagParser::Deactivate");
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+
+    /* release the input stream */
+    ATX_RELEASE_OBJECT(self->input.stream);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   TagParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -427,7 +446,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(TagParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     TagParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    TagParser_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

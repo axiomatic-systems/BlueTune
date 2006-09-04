@@ -122,12 +122,14 @@ StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
     /* update the stream info */
     {
         BLT_StreamInfo info;
+        ATX_Size       stream_size = 0;
         BLT_Result     result;
 
-        result = ATX_InputStream_GetSize(stream, &info.size);
+        result = ATX_InputStream_GetSize(stream, &stream_size);
         if (BLT_SUCCEEDED(result)) {
             if (ATX_BASE(self, BLT_BaseMediaNode).context) {
                 info.mask = BLT_STREAM_INFO_MASK_SIZE;
+                info.size = stream_size;
                 BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
             }
         }
@@ -335,8 +337,8 @@ StreamPacketizer_Destroy(StreamPacketizer* self)
 {
     ATX_LOG_FINE("StreamPacketizer::Destroy");
 
-    /* release the reference to the stream */
-    ATX_RELEASE_OBJECT(self->input.stream);
+    /* the input stream should have been released when we were deactivated */
+    ATX_ASSERT(self->input.stream == NULL);
 
     /* free the media type extensions */
     BLT_MediaType_Free(self->input.media_type);
@@ -351,10 +353,29 @@ StreamPacketizer_Destroy(StreamPacketizer* self)
 }
 
 /*----------------------------------------------------------------------
+|    StreamPacketizer_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+StreamPacketizer_Deactivate(BLT_MediaNode* _self)
+{
+    StreamPacketizer* self = ATX_SELF_EX(StreamPacketizer, BLT_BaseMediaNode, BLT_MediaNode);
+    
+    ATX_LOG_FINE("StreamPacketizer::Deactivate");
+    
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
+    
+    /* release the input stream */
+    ATX_RELEASE_OBJECT(self->input.stream);
+       
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   StreamPacketizer_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-StreamPacketizer_GetPortByName(BLT_MediaNode*  _self,
+StreamPacketizer_GetPortByName(BLT_MediaNode*  _self,   
                                BLT_CString     name,
                                BLT_MediaPort** port)
 {
@@ -418,7 +439,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(StreamPacketizer, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     StreamPacketizer_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    StreamPacketizer_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

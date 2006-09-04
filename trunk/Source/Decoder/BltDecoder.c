@@ -16,6 +16,11 @@
 #include "BltBuiltins.h"
 
 /*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.decoder")
+
+/*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 struct BLT_Decoder {
@@ -31,6 +36,8 @@ BLT_Result
 BLT_Decoder_Create(BLT_Decoder** decoder)
 {
     BLT_Result result;
+
+    ATX_LOG_FINE("BLT_Decoder::Create");
 
     /* allocate a new decoder object */
     *decoder = (BLT_Decoder*)ATX_AllocateZeroMemory(sizeof(BLT_Decoder));
@@ -60,6 +67,8 @@ BLT_Decoder_Create(BLT_Decoder** decoder)
 BLT_Result
 BLT_Decoder_Destroy(BLT_Decoder* decoder)
 {
+    ATX_LOG_FINE("BLT_Decoder::Destroy");
+    
     ATX_RELEASE_OBJECT(decoder->stream);
     BLT_Core_Destroy(decoder->core);
     BLT_Terminate();

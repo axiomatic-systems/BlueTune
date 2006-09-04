@@ -8,8 +8,6 @@
 #######################################################################
 BLT_PLUGINS = \
 	FileInput 		\
-	AlsaInput		\
-	OssOutput		\
 	AlsaOutput		\
 	MpegAudioDecoder\
 	StreamPacketizer\
@@ -27,6 +25,8 @@ BLT_PLUGINS = \
 	SilenceRemover	\
 	GainControlFilter \
 	PcmAdapter		\
-	CrossFader		
+	OssOutput		\
+	AlsaInput		\
+#	CrossFader		\
 
 BLT_FLAGS_C += -DBLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=\"alsa:default\"

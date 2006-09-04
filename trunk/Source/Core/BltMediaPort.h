@@ -84,33 +84,6 @@ ATX_INTERFACE(object)->QueryMediaType(object, index, media_type)
 /*----------------------------------------------------------------------
 |   templates
 +---------------------------------------------------------------------*/
-#define xxBLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_NAME(port, n)             \
-BLT_METHOD port##_GetName(BLT_MediaPortInstance* instance,              \
-                          BLT_CString*           name)                  \
-{                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
-    *name = (n);                                                        \
-    return BLT_SUCCESS;                                                 \
-}
-
-#define xxBLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_PROTOCOL(port, proto)     \
-BLT_METHOD port##_GetProtocol(BLT_MediaPortInstance* instance,          \
-                              BLT_MediaPortProtocol* protocol)          \
-{                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
-    *protocol = BLT_MEDIA_PORT_PROTOCOL_##proto;                        \
-    return BLT_SUCCESS;                                                 \
-}
-
-#define xxBLT_MEDIA_PORT_IMPLEMENT_SIMPLE_GET_DIRECTION(port, dir)      \
-BLT_METHOD port##_GetDirection(BLT_MediaPortInstance*  instance,        \
-                               BLT_MediaPortDirection* direction)       \
-{                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
-    *direction = BLT_MEDIA_PORT_DIRECTION_##dir;                        \
-    return BLT_SUCCESS;                                                 \
-}
-
 #define BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(port, n, proto, dir)   \
 BLT_METHOD port##_GetName(BLT_MediaPort* self, BLT_CString* name)       \
 {                                                                       \
@@ -121,7 +94,7 @@ BLT_METHOD port##_GetName(BLT_MediaPort* self, BLT_CString* name)       \
 BLT_METHOD port##_GetProtocol(BLT_MediaPort*         self,              \
                               BLT_MediaPortProtocol* protocol)          \
 {                                                                       \
-    BLT_COMPILER_UNUSED(instance);                                      \
+    BLT_COMPILER_UNUSED(self);                                          \
     *protocol = BLT_MEDIA_PORT_PROTOCOL_##proto;                        \
     return BLT_SUCCESS;                                                 \
 }                                                                       \

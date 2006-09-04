@@ -55,7 +55,7 @@ typedef struct {
     BLT_CddaTrackInfo* tracks;
 } BLT_CddaTableOfContents;
 
-typedef struct BLT_CddaTrack  BLT_CddaTrack;
+typedef struct BLT_CddaTrack BLT_CddaTrack;
 
 /*----------------------------------------------------------------------
 |       constants
@@ -68,45 +68,38 @@ typedef struct BLT_CddaTrack  BLT_CddaTrack;
 |       BLT_CddaDevice interface
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE(BLT_CddaDevice)
-/**
- * @brief Interface implemented by CDDA Devices
- *  
- */
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_CddaDevice)
-    BLT_Result (*GetTrackInfo)(BLT_CddaDeviceInstance* device, 
-                               BLT_Ordinal             index,
-                               BLT_CddaTrackInfo*      info);
-    BLT_Result (*GetTableOfContents)(BLT_CddaDeviceInstance*   device,
+    BLT_Result (*GetTrackInfo)(BLT_CddaDevice*    self, 
+                               BLT_Ordinal        index,
+                               BLT_CddaTrackInfo* info);
+    BLT_Result (*GetTableOfContents)(BLT_CddaDevice*           self,
                                      BLT_CddaTableOfContents** toc);
-    BLT_Result (*ReadFrames)(BLT_CddaDeviceInstance* device,
-                             BLT_CddaLba             addr,
-                             BLT_Cardinal            count,
-                             BLT_Any                 buffer);
-ATX_END_INTERFACE_DEFINITION(BLT_CddaDevice)
+    BLT_Result (*ReadFrames)(BLT_CddaDevice* self,
+                             BLT_CddaLba     addr,
+                             BLT_Cardinal    count,
+                             BLT_Any         buffer);
+ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
 |       convenience macros
 +---------------------------------------------------------------------*/
-#define BLT_CddaDevice_GetTrackInfo(instance, index, info) \
-ATX_INTERFACE(instance)->GetTrackInfo(ATX_INSTANCE(instance), index, info)
+#define BLT_CddaDevice_GetTrackInfo(self, index, info) \
+ATX_INTERFACE(self)->GetTrackInfo(self, index, info)
 
-#define BLT_CddaDevice_GetTableOfContents(instance, toc) \
-ATX_INTERFACE(instance)->GetTableOfContents(ATX_INSTANCE(instance), toc)
+#define BLT_CddaDevice_GetTableOfContents(self, toc) \
+ATX_INTERFACE(self)->GetTableOfContents(self, toc)
 
-#define BLT_CddaDevice_ReadFrames(instance, addr, count, samples) \
-ATX_INTERFACE(instance)->ReadFrames(ATX_INSTANCE(instance), addr, count, samples)
+#define BLT_CddaDevice_ReadFrames(self, addr, count, samples) \
+ATX_INTERFACE(self)->ReadFrames(self, addr, count, samples)
 
 
 /*----------------------------------------------------------------------
 |       prototypes
 +---------------------------------------------------------------------*/
 void       BLT_Cdda_FramesToMsf(BLT_CddaLba frames, BLT_CddaMsf* msf);
-BLT_Result BLT_CddaDevice_Create(BLT_String name, BLT_CddaDevice* device);
-BLT_Result BLT_CddaTrack_Create(BLT_CddaDevice* device,
-                                BLT_Ordinal     index,
-                                BLT_CddaTrack** track);
-BLT_Result BLT_CddaTrack_Destroy(BLT_CddaTrack* track);
-BLT_Result BLT_CddaTrack_GetStream(BLT_CddaTrack*   track, 
-                                   ATX_InputStream* stream);
+BLT_Result BLT_CddaDevice_Create(BLT_CString name, BLT_CddaDevice** device);
+BLT_Result BLT_CddaTrack_Create(BLT_CddaDevice*   device,
+                                BLT_Ordinal       index,
+                                ATX_InputStream** track);
 
 #endif /* _BLT_CDDA_DEVICE_H_ */

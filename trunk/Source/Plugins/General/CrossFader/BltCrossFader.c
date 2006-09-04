@@ -788,11 +788,12 @@ ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(CrossFaderModule)
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_CrossFaderModule_GetModuleObject(BLT_Module* object)
+BLT_CrossFaderModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("CrossFader", NULL, 0,
                                  &CrossFaderModule_BLT_ModuleInterface,
+                                 &CrossFaderModule_ATX_ReferenceableInterface,
                                  object);
 }

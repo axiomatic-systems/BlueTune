@@ -10,8 +10,9 @@
 #######################################################################
 # common stuff
 #######################################################################
-BLT_MODULE_SOURCES += BltBuiltins.c
+BLT_MODULE_SOURCES += BltBuiltins.c BltReplayGain.c
 VPATH += :$(BLT_SOURCE_ROOT)/Plugins/Common
+BLT_INCLUDES_C += -I$(BLT_SOURCE_ROOT)/Plugins/Common
 
 BLT_INCLUDE_MODULES :=
 BLT_IMPORT_MODULES :=
@@ -176,7 +177,7 @@ BLT_INCLUDES_C += -I$(BLT_SOURCE_ROOT)/Plugins/Outputs/OSS
 BLT_DEFINES_C += -DBLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT
 endif
 
-ifneq ($(findstring OssOutput, $(BLT_PLUGINS)),)
+ifneq ($(findstring AlsaOutput, $(BLT_PLUGINS)),)
 VPATH += :$(BLT_SOURCE_ROOT)/Plugins/Outputs/Alsa
 BLT_MODULE_SOURCES += BltAlsaOutput.c
 BLT_INCLUDES_C += -I$(BLT_SOURCE_ROOT)/Plugins/Outputs/Alsa

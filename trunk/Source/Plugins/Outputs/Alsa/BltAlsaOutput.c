@@ -1,10 +1,8 @@
 /*****************************************************************
 |
-|      File: BltAlsaOutput.c
-|
 |      ALSA Output Module
 |
-|      (c) 2002-2005 Gilles Boccon-Gibod
+|      (c) 2002-2006 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -24,20 +22,22 @@
 #include "BltCore.h"
 #include "BltPacketConsumer.h"
 #include "BltMediaPacket.h"
-#include "BltDebug.h"
 
 /*----------------------------------------------------------------------
-|       forward declarations
+|   logging
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputModule)
-static const BLT_ModuleInterface AlsaOutputModule_BLT_ModuleInterface;
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.alsa")
 
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutput)
-static const BLT_MediaNodeInterface AlsaOutput_BLT_MediaNodeInterface;
+/*----------------------------------------------------------------------
+|   forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(AlsaOutputModule, BLT_Module)
 
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputInputPort)
-static const BLT_MediaPortInterface AlsaOutputInputPort_BLT_MediaPortInterface;
-static const BLT_PacketConsumerInterface AlsaOutputInputPort_BLT_PacketConsumerInterface;
+ATX_DECLARE_INTERFACE_MAP(AlsaOutput, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(AlsaOutput, ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(AlsaOutput, BLT_OutputNode)
+ATX_DECLARE_INTERFACE_MAP(AlsaOutput, BLT_MediaPort)
+ATX_DECLARE_INTERFACE_MAP(AlsaOutput, BLT_PacketConsumer)
 
 /*----------------------------------------------------------------------
 |    constants
@@ -49,7 +49,8 @@ static const BLT_PacketConsumerInterface AlsaOutputInputPort_BLT_PacketConsumerI
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule base;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
 } AlsaOutputModule;
 
 typedef enum {
@@ -60,29 +61,38 @@ typedef enum {
 } AlsaOutputState;
 
 typedef struct {
-    BLT_BaseMediaNode base;
-    AlsaOutputState   state;
-    ATX_StringBuffer  device_name;
-    snd_pcm_t*        device_handle;
-    BLT_PcmMediaType  media_type;
+    /* base class */
+    ATX_EXTENDS   (BLT_BaseMediaNode);
+
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+    ATX_IMPLEMENTS(BLT_OutputNode);
+    ATX_IMPLEMENTS(BLT_MediaPort);
+
+    /* members */
+    AlsaOutputState  state;
+    ATX_String       device_name;
+    snd_pcm_t*       device_handle;
+    BLT_PcmMediaType expected_media_type;
+    BLT_PcmMediaType media_type;
 } AlsaOutput;
 
 /*----------------------------------------------------------------------
 |    prototypes
 +---------------------------------------------------------------------*/
-static BLT_Result AlsaOutput_Close(AlsaOutput* output);
+static BLT_Result AlsaOutput_Close(AlsaOutput* self);
 
 /*----------------------------------------------------------------------
 |    AlsaOutput_SetState
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_SetState(AlsaOutput* output, AlsaOutputState state)
+AlsaOutput_SetState(AlsaOutput* self, AlsaOutputState state)
 {
-    if (state != output->state) {
-        BLT_Debug("AlsaOutput::SetState - from %d to %d\n",
-                  output->state, state);
+    if (state != self->state) {
+        ATX_LOG_FINER_2("AlsaOutput::SetState - from %d to %d",
+                        self->state, state);
     }
-    output->state = state;
+    self->state = state;
     return BLT_SUCCESS;
 }
 
@@ -90,21 +100,21 @@ AlsaOutput_SetState(AlsaOutput* output, AlsaOutputState state)
 |    AlsaOutput_Open
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Open(AlsaOutput* output)
+AlsaOutput_Open(AlsaOutput* self)
 {
     int io_result;
 
-    BLT_Debug("AlsaOutput::Open\n");
+    ATX_LOG_FINE_1("AlsaOutput::Open - name=%s", ATX_CSTR(self->device_name));
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
-        BLT_Debug("AlsaOutput::Open - snd_pcm_open\n");
-        io_result = snd_pcm_open(&output->device_handle,
-                                 output->device_name,
+        ATX_LOG_FINER("AlsaOutput::Open - snd_pcm_open");
+        io_result = snd_pcm_open(&self->device_handle,
+                                 ATX_CSTR(self->device_name),
                                  SND_PCM_STREAM_PLAYBACK,
                                  0);
         if (io_result != 0) {
-            output->device_handle = NULL;
+            self->device_handle = NULL;
             return BLT_FAILURE;
         }
         break;
@@ -119,7 +129,7 @@ AlsaOutput_Open(AlsaOutput* output)
     }
 
     /* update the state */
-    AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_OPEN);
+    AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_OPEN);
 
     return BLT_SUCCESS;
 }
@@ -128,32 +138,32 @@ AlsaOutput_Open(AlsaOutput* output)
 |    AlsaOutput_Close
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Close(AlsaOutput* output)
+AlsaOutput_Close(AlsaOutput* self)
 {
-    BLT_Debug("AlsaOutput::Close\n");
+    ATX_LOG_FINER("AlsaOutput::Close");
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
         /* ignore */
         return BLT_SUCCESS;
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* wait for buffers to finish */
-        BLT_Debug("AlsaOutput::Close - snd_pcm_drain\n");
-        snd_pcm_drain(output->device_handle);
+        ATX_LOG_FINER("AlsaOutput::Close - snd_pcm_drain");
+        snd_pcm_drain(self->device_handle);
         /* FALLTHROUGH */
 
       case BLT_ALSA_OUTPUT_STATE_OPEN:
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
         /* close the device */
-        BLT_Debug("AlsaOutput::Close - snd_pcm_close\n");
-        snd_pcm_close(output->device_handle);
-        output->device_handle = NULL;
+        ATX_LOG_FINER("AlsaOutput::Close - snd_pcm_close");
+        snd_pcm_close(self->device_handle);
+        self->device_handle = NULL;
         break;
     }
 
     /* update the state */
-    AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_CLOSED);
+    AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CLOSED);
 
     return BLT_SUCCESS;
 }
@@ -162,11 +172,11 @@ AlsaOutput_Close(AlsaOutput* output)
 |    AlsaOutput_Drain
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Drain(AlsaOutput* output)
+AlsaOutput_Drain(AlsaOutput* self)
 {
-    BLT_Debug("AlsaOutput::Drain\n");
+    ATX_LOG_FINER("AlsaOutput::Drain");
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
       case BLT_ALSA_OUTPUT_STATE_OPEN:
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
@@ -175,8 +185,8 @@ AlsaOutput_Drain(AlsaOutput* output)
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* drain samples buffered by the driver (wait until they are played) */
-        BLT_Debug("AlsaOutput::Drain - snd_pcm_drain\n");
-        snd_pcm_drain(output->device_handle);
+        ATX_LOG_FINER("AlsaOutput::Drain - snd_pcm_drain");
+        snd_pcm_drain(self->device_handle);
         break;
     }
 
@@ -187,11 +197,11 @@ AlsaOutput_Drain(AlsaOutput* output)
 |    AlsaOutput_Reset
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Reset(AlsaOutput* output)
+AlsaOutput_Reset(AlsaOutput* self)
 {
-    BLT_Debug("AlsaOutput::Reset\n");
+    ATX_LOG_FINER("AlsaOutput::Reset");
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
       case BLT_ALSA_OUTPUT_STATE_OPEN:
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
@@ -199,9 +209,9 @@ AlsaOutput_Reset(AlsaOutput* output)
         return BLT_SUCCESS;
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
-        BLT_Debug("AlsaOutput::Reset - snd_pcm_drop\n");
-        snd_pcm_drop(output->device_handle);
-        AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
+        ATX_LOG_FINER("AlsaOutput::Reset - snd_pcm_drop");
+        snd_pcm_drop(self->device_handle);
+        AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
         break;
     }
 
@@ -212,11 +222,11 @@ AlsaOutput_Reset(AlsaOutput* output)
 |    AlsaOutput_Prepare
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Prepare(AlsaOutput* output)
+AlsaOutput_Prepare(AlsaOutput* self)
 {
     int ior;
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
       case BLT_ALSA_OUTPUT_STATE_OPEN:
     /* we need to be configured already for 'prepare' to work */
@@ -224,12 +234,11 @@ AlsaOutput_Prepare(AlsaOutput* output)
 
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
         /* prepare the device */
-        BLT_Debug("AlsaOutput::Prepare - snd_pcm_prepare\n");
+        ATX_LOG_FINER("AlsaOutput::Prepare - snd_pcm_prepare");
 
-        ior = snd_pcm_prepare(output->device_handle);
+        ior = snd_pcm_prepare(self->device_handle);
         if (ior != 0) {
-            BLT_Debug("AlsaOutput::Prepare: - snd_pcm_prepare failed (%d)\n",
-                      ior);
+            ATX_LOG_FINER_1("AlsaOutput::Prepare: - snd_pcm_prepare failed (%d)", ior);
             return BLT_FAILURE;
         }
         break;
@@ -240,7 +249,7 @@ AlsaOutput_Prepare(AlsaOutput* output)
     }
 
     /* update the state */
-    AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_PREPARED);
+    AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_PREPARED);
 
     return BLT_SUCCESS;
 }
@@ -249,13 +258,13 @@ AlsaOutput_Prepare(AlsaOutput* output)
 |    AlsaOutput_Unprepare
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Unprepare(AlsaOutput* output)
+AlsaOutput_Unprepare(AlsaOutput* self)
 {
     BLT_Result result;
 
-    BLT_Debug("AlsaOutput::Unprepare\n");
+    ATX_LOG_FINER("AlsaOutput::Unprepare");
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
       case BLT_ALSA_OUTPUT_STATE_OPEN:
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
@@ -264,11 +273,11 @@ AlsaOutput_Unprepare(AlsaOutput* output)
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* drain any pending samples */
-        result = AlsaOutput_Drain(output);
+        result = AlsaOutput_Drain(self);
         if (BLT_FAILED(result)) return result;
         
         /* update the state */
-        AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
+        AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
         break;
     }
 
@@ -279,7 +288,7 @@ AlsaOutput_Unprepare(AlsaOutput* output)
 |    AlsaOutput_Configure
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Configure(AlsaOutput*             output, 
+AlsaOutput_Configure(AlsaOutput*             self, 
                      const BLT_PcmMediaType* format)
 {
     snd_pcm_hw_params_t* hw_params;
@@ -292,10 +301,10 @@ AlsaOutput_Configure(AlsaOutput*             output,
     int                  ior;
     BLT_Result           result;
 
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
         /* first, we need to open the device */
-        result = AlsaOutput_Open(output);
+        result = AlsaOutput_Open(self);
         if (BLT_FAILED(result)) return result;
 
         /* FALLTHROUGH */
@@ -303,9 +312,9 @@ AlsaOutput_Configure(AlsaOutput*             output,
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* check to see if the format has changed */
-        if (format->sample_rate     != output->media_type.sample_rate   ||
-            format->channel_count   != output->media_type.channel_count ||
-            format->bits_per_sample != output->media_type.bits_per_sample) {
+        if (format->sample_rate     != self->media_type.sample_rate   ||
+            format->channel_count   != self->media_type.channel_count ||
+            format->bits_per_sample != self->media_type.bits_per_sample) {
             /* new format */
 
             /* check the format */
@@ -316,7 +325,7 @@ AlsaOutput_Configure(AlsaOutput*             output,
             }
         
             /* unprepare (forget current settings) */
-            result = AlsaOutput_Unprepare(output);
+            result = AlsaOutput_Unprepare(self);
             if (BLT_FAILED(result)) return result;
         } else {
             /* same format, do nothing */
@@ -327,45 +336,42 @@ AlsaOutput_Configure(AlsaOutput*             output,
 
       case BLT_ALSA_OUTPUT_STATE_OPEN:
         /* configure the device with the new format */
-        BLT_Debug("AlsaOutput::Configure\n");
+        ATX_LOG_FINER("AlsaOutput::Configure");
 
         /* copy the format */
-        output->media_type = *format;
+        self->media_type = *format;
 
-        BLT_Debug("AlsaOutput::Configure - new format: sr=%d, ch=%d, bps=%d\n",
-                  format->sample_rate,
-                  format->channel_count,
-                  format->bits_per_sample);
+        ATX_LOG_FINER_3("AlsaOutput::Configure - new format: sr=%d, ch=%d, bps=%d",
+                        format->sample_rate,
+                        format->channel_count,
+                        format->bits_per_sample);
 
         /* allocate a new blank configuration */
         snd_pcm_hw_params_alloca(&hw_params);
-        snd_pcm_hw_params_any(output->device_handle, hw_params);
+        snd_pcm_hw_params_any(self->device_handle, hw_params);
 
         /* use interleaved access */
-        ior = snd_pcm_hw_params_set_access(output->device_handle, hw_params, 
+        ior = snd_pcm_hw_params_set_access(self->device_handle, hw_params, 
                                            SND_PCM_ACCESS_RW_INTERLEAVED);
         if (ior != 0) {
-            BLT_Debug("AldaOutput::Configure - set 'access' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'access' failed (%d)", ior);
             return BLT_FAILURE;
         }
 
         /* set the sample rate */
-        ior = snd_pcm_hw_params_set_rate_near(output->device_handle, 
+        ior = snd_pcm_hw_params_set_rate_near(self->device_handle, 
                                               hw_params, 
                                               &rate, NULL);
         if (ior != 0) {
-            BLT_Debug("AldaOutput::Configure - set 'rate' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'rate' failed (%d)", ior);
             return BLT_FAILURE;
         }
 
         /* set the number of channels */
-        ior = snd_pcm_hw_params_set_channels(output->device_handle, hw_params,
+        ior = snd_pcm_hw_params_set_channels(self->device_handle, hw_params,
                                              format->channel_count);
         if (ior != 0) {
-            BLT_Debug("AldaOutput::Configure - set 'channels' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'channels' failed (%d)", ior);
             return BLT_FAILURE;
         }
 
@@ -423,34 +429,31 @@ AlsaOutput_Configure(AlsaOutput*             output,
         if (pcm_format_id == SND_PCM_FORMAT_UNKNOWN) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-        ior = snd_pcm_hw_params_set_format(output->device_handle, hw_params,
+        ior = snd_pcm_hw_params_set_format(self->device_handle, hw_params,
                                            pcm_format_id);
         if (ior != 0) {
-            BLT_Debug("AldaOutput::Configure - set 'format' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'format' failed (%d)", ior);
             return BLT_FAILURE;
         }
 
         /* set the period size */
-        ior = snd_pcm_hw_params_set_period_size_near(output->device_handle, 
+        ior = snd_pcm_hw_params_set_period_size_near(self->device_handle, 
                                                      hw_params,
                                                      &period_size,
                                                      NULL);
         if (ior != 0) {
-            BLT_Debug("AlsaOutput::Configure - set 'period size' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'period size' failed (%d)", ior);
             return BLT_FAILURE;
         }
         
                                                 
         /* set the buffer time (duration) */
-        ior = snd_pcm_hw_params_set_buffer_time_near(output->device_handle,
+        ior = snd_pcm_hw_params_set_buffer_time_near(self->device_handle,
                                                      hw_params, 
                                                      &buffer_time,
                                                      NULL);
         if (ior != 0) {
-            BLT_Debug("AlsaOutput::Configure - set 'buffer time' failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'buffer time' failed (%d)", ior);
             return BLT_FAILURE;
         }
 
@@ -458,57 +461,54 @@ AlsaOutput_Configure(AlsaOutput*             output,
         snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_size);
 
         /* activate this configuration */
-        ior = snd_pcm_hw_params(output->device_handle, hw_params);
+        ior = snd_pcm_hw_params(self->device_handle, hw_params);
         if (ior != 0) {
-            BLT_Debug("AlsaOutput::Configure: - snd_pcm_hw_params failed (%d)\n",
-                      ior);
+            ATX_LOG_WARNING_1("AlsaOutput::Configure: - snd_pcm_hw_params failed (%d)", ior);
             return BLT_FAILURE;
         }
 
         /* configure the software parameters */
         snd_pcm_sw_params_alloca(&sw_params);
-        snd_pcm_sw_params_current(output->device_handle, sw_params);
+        snd_pcm_sw_params_current(self->device_handle, sw_params);
 
         /* set the start threshold to 1/2 the buffer size */
-        snd_pcm_sw_params_set_start_threshold(output->device_handle, 
+        snd_pcm_sw_params_set_start_threshold(self->device_handle, 
                                               sw_params, 
                                               buffer_size/2);
 
         /* set the buffer alignment */
-        snd_pcm_sw_params_set_xfer_align(output->device_handle, 
+        snd_pcm_sw_params_set_xfer_align(self->device_handle, 
                                          sw_params, 1);
 
         /* activate the sofware parameters */
-        ior = snd_pcm_sw_params(output->device_handle, sw_params);
+        ior = snd_pcm_sw_params(self->device_handle, sw_params);
         if (ior != 0) {
-            BLT_Debug("AlsaOutput::Configure - snd_pcm_sw_params failed (%d)\n",
-                      ior);
+            ATX_LOG_SEVERE_1("AlsaOutput::Configure - snd_pcm_sw_params failed (%d)", ior);
             return BLT_FAILURE;
         }
 
         /* print status info */
         {
             snd_pcm_uframes_t val;
-            BLT_Debug("AlsaOutput::Configure - sample type = %x\n", pcm_format_id);
+            ATX_LOG_FINER_1("AlsaOutput::Configure - sample type = %x", pcm_format_id);
             if (rate != format->sample_rate) {
-                BLT_Debug("AlsaOutput::Configure - actual sample = %d\n", rate);
+                ATX_LOG_FINER_1("AlsaOutput::Configure - actual sample = %d", rate);
             }
-            BLT_Debug("AlsaOutput::Configure - actual buffer time = %d\n", 
-                      buffer_time);
-            BLT_Debug("AlsaOutput::Configure - buffer size = %d\n", buffer_size); 
+            ATX_LOG_FINER_1("AlsaOutput::Configure - actual buffer time = %d", buffer_time);
+            ATX_LOG_FINER_1("AlsaOutput::Configure - buffer size = %d", buffer_size); 
             snd_pcm_sw_params_get_start_threshold(sw_params, &val);
-            BLT_Debug("AlsaOutput::Configure - start threshold = %d\n", val); 
+            ATX_LOG_FINER_1("AlsaOutput::Configure - start threshold = %d", val); 
             snd_pcm_sw_params_get_stop_threshold(sw_params, &val);
-            BLT_Debug("AlsaOutput::Configure - stop threshold = %d\n", val); 
+            ATX_LOG_FINER_1("AlsaOutput::Configure - stop threshold = %d", val); 
             snd_pcm_hw_params_get_period_size(hw_params, &val, NULL);
-            BLT_Debug("AlsaOutput::Configure - period size = %d\n", val);
+            ATX_LOG_FINER_1("AlsaOutput::Configure - period size = %d", val);
         }
 
         break;
     }
 
     /* update the state */
-    AlsaOutput_SetState(output, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
+    AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
 
     return BLT_SUCCESS;
 }
@@ -517,7 +517,7 @@ AlsaOutput_Configure(AlsaOutput*             output,
 |    AlsaOutput_Write
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Write(AlsaOutput* output, void* buffer, BLT_Size size)
+AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
 {
     int          watchdog = 5;
     int          io_result;
@@ -525,16 +525,16 @@ AlsaOutput_Write(AlsaOutput* output, void* buffer, BLT_Size size)
     BLT_Result   result;
 
     /* ensure that the device is prepared */
-    result = AlsaOutput_Prepare(output);
+    result = AlsaOutput_Prepare(self);
     if (BLT_FAILED(result)) return result;
 
     /* compute the number of samples */
-    sample_count = size / (output->media_type.channel_count*
-                           output->media_type.bits_per_sample/8);
+    sample_count = size / (self->media_type.channel_count*
+                           self->media_type.bits_per_sample/8);
                            
     /* write samples to the device and handle underruns */       
     do {
-        io_result = snd_pcm_writei(output->device_handle, 
+        io_result = snd_pcm_writei(self->device_handle, 
                                    buffer, sample_count);        
         if (io_result == (int)sample_count) return BLT_SUCCESS;
 
@@ -544,40 +544,40 @@ AlsaOutput_Write(AlsaOutput* output, void* buffer, BLT_Size size)
             snd_pcm_state_t   state;
             snd_pcm_status_alloca(&status);
 
-            io_result = snd_pcm_status(output->device_handle, status);
+            io_result = snd_pcm_status(self->device_handle, status);
             if (io_result != 0) {
                 return BLT_FAILURE;
             }
             state = snd_pcm_status_get_state(status);
             if (state == SND_PCM_STATE_XRUN) {
-                BLT_Debug("AlsaOutput::Write - **** UNDERRUN *****\n");
+                ATX_LOG_WARNING("AlsaOutput::Write - **** UNDERRUN *****");
             
                 /* re-prepare the channel */
-                io_result = snd_pcm_prepare(output->device_handle);
+                io_result = snd_pcm_prepare(self->device_handle);
                 if (io_result != 0) {
                     return BLT_FAILURE;
                 }
             } else {
-                   BLT_Debug("AlsaOutput::Write - **** STATE = %d ****\n", state);
-                }
+               ATX_LOG_WARNING_1("AlsaOutput::Write - **** STATE = %d ****", state);
+            }
         }
         
-        BLT_Debug("AlsaOutput::Write - **** RETRY *****\n");
+        ATX_LOG_WARNING("AlsaOutput::Write - **** RETRY *****");
 
     } while(watchdog--);
 
-    BLT_Debug("AlsaOutput::Write - **** THE WATCHDOG BIT US ****\n");
+    ATX_LOG_SEVERE("AlsaOutput::Write - **** THE WATCHDOG BIT US ****");
     return BLT_FAILURE;
 }
 
 /*----------------------------------------------------------------------
-|    AlsaOutputInputPort_PutPacket
+|    AlsaOutput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutputInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                              BLT_MediaPacket*            packet)
+AlsaOutput_PutPacket(BLT_PacketConsumer* _self,
+                     BLT_MediaPacket*    packet)
 {
-    AlsaOutput*             output = (AlsaOutput*)instance;
+    AlsaOutput*             self = ATX_SELF(AlsaOutput, BLT_PacketConsumer);
     const BLT_PcmMediaType* media_type;
     BLT_ByteBuffer          buffer;
     BLT_Size                size;
@@ -603,64 +603,31 @@ AlsaOutputInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
     }
 
     /* configure the device for this format */
-    result = AlsaOutput_Configure(output, media_type);
+    result = AlsaOutput_Configure(self, media_type);
 	if (BLT_FAILED(result)) return result;
 	
     /* write the audio samples */
-    return AlsaOutput_Write(output, buffer, size);
+    return AlsaOutput_Write(self, buffer, size);
 }
 
 /*----------------------------------------------------------------------
-|    AlsaOutputInputPort_QueryMediaType
+|    AlsaOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutputInputPort_QueryMediaType(BLT_MediaPortInstance* instance,
-                                                   BLT_Ordinal            index,
-                                                   const BLT_MediaType**  media_type)
+AlsaOutput_QueryMediaType(BLT_MediaPort*        _self,
+                          BLT_Ordinal           index,
+                          const BLT_MediaType** media_type)
 {
-    BLT_COMPILER_UNUSED(instance);
-    /*AlsaOutput* output = (AlsaOutput*)instance;*/
+    AlsaOutput* self = ATX_SELF(AlsaOutput, BLT_MediaPort);
 
     if (index == 0) {
-        *media_type = &BLT_GenericPcmMediaType;
+        *media_type = (const BLT_MediaType*)&self->expected_media_type;
         return BLT_SUCCESS;
     } else {
+        *media_type = NULL;
         return BLT_FAILURE;
     }
 }
-
-/*----------------------------------------------------------------------
-|    BLT_MediaPort interface
-+---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AlsaOutputInputPort, 
-                                         "input", 
-                                         PACKET, 
-                                         IN)
-static const BLT_MediaPortInterface
-AlsaOutputInputPort_BLT_MediaPortInterface = {
-    AlsaOutputInputPort_GetInterface,
-    AlsaOutputInputPort_GetName,
-    AlsaOutputInputPort_GetProtocol,
-    AlsaOutputInputPort_GetDirection,
-    AlsaOutputInputPort_QueryMediaType
-};
-
-/*----------------------------------------------------------------------
-|    BLT_PacketConsumer interface
-+---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-AlsaOutputInputPort_BLT_PacketConsumerInterface = {
-    AlsaOutputInputPort_GetInterface,
-    AlsaOutputInputPort_PutPacket
-};
-
-/*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputInputPort)
-ATX_INTERFACE_MAP_ADD(AlsaOutputInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(AlsaOutputInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputInputPort)
 
 /*----------------------------------------------------------------------
 |    AlsaOutput_Create
@@ -669,12 +636,14 @@ static BLT_Result
 AlsaOutput_Create(BLT_Module*              module,
                   BLT_Core*                core, 
                   BLT_ModuleParametersType parameters_type,
-                  BLT_String               parameters, 
-                  ATX_Object*              object)
+                  BLT_AnyConst             parameters, 
+                  BLT_MediaNode**          object)
 {
-    AlsaOutput*           output;
+    AlsaOutput*               output;
     BLT_MediaNodeConstructor* constructor = 
         (BLT_MediaNodeConstructor*)parameters;
+
+    ATX_LOG_FINE("AlsaOutput::Create");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -685,12 +654,12 @@ AlsaOutput_Create(BLT_Module*              module,
     /* allocate memory for the object */
     output = ATX_AllocateZeroMemory(sizeof(AlsaOutput));
     if (output == NULL) {
-        ATX_CLEAR_OBJECT(object);
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&output->base, module, core);
+    BLT_BaseMediaNode_Construct(&ATX_BASE(output, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
     output->state                      = BLT_ALSA_OUTPUT_STATE_CLOSED;
@@ -701,14 +670,21 @@ AlsaOutput_Create(BLT_Module*              module,
 
     /* parse the name */
     if (constructor->name && ATX_StringLength(constructor->name) > 5) {
-        output->device_name = ATX_DuplicateString(constructor->name+5);
+        output->device_name = ATX_String_Create(constructor->name+5);
     } else {
-        output->device_name = ATX_DuplicateString("default");
+        output->device_name = ATX_String_Create("default");
     }
     
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)output;
-    ATX_INTERFACE(object) = (ATX_Interface*)&AlsaOutput_BLT_MediaNodeInterface;
+    /* setup the expected media type */
+    BLT_PcmMediaType_Init(&output->expected_media_type);
+
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(output, AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(output, AlsaOutput, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(output, AlsaOutput, BLT_PacketConsumer);
+    ATX_SET_INTERFACE(output, AlsaOutput, BLT_OutputNode);
+    ATX_SET_INTERFACE(output, AlsaOutput, BLT_MediaPort);
+    *object = &ATX_BASE_EX(output, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -717,19 +693,21 @@ AlsaOutput_Create(BLT_Module*              module,
 |    AlsaOutput_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-AlsaOutput_Destroy(AlsaOutput* output)
+AlsaOutput_Destroy(AlsaOutput* self)
 {
+    ATX_LOG_FINE("AlsaOutput::Destroy");
+
     /* close the device */
-    AlsaOutput_Close(output);
+    AlsaOutput_Close(self);
 
     /* free the name */
-    ATX_FreeMemory(output->device_name);
+    ATX_String_Destruct(&self->device_name);
 
-    /* call the base destructor */
-    BLT_BaseMediaNode_Destruct(&output->base);
+    /* destruct the inherited object */
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     /* free the object memory */
-    ATX_FreeMemory(output);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
@@ -738,15 +716,15 @@ AlsaOutput_Destroy(AlsaOutput* output)
 |       AlsaOutput_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
+AlsaOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
     BLT_COMPILER_UNUSED(stream);
         
-    BLT_Debug("AlsaOutput::Activate\n");
+    ATX_LOG_FINER("AlsaOutput::Activate");
 
     /* open the device */
-    AlsaOutput_Open(output);
+    AlsaOutput_Open(self);
 
     return BLT_SUCCESS;
 }
@@ -755,28 +733,14 @@ AlsaOutput_Activate(BLT_MediaNodeInstance* instance, BLT_Stream* stream)
 |       AlsaOutput_Deactivate
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Deactivate(BLT_MediaNodeInstance* instance)
+AlsaOutput_Deactivate(BLT_MediaNode* _self)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
-    BLT_Debug("AlsaOutput::Deactivate\n");
+    ATX_LOG_FINER("AlsaOutput::Deactivate");
 
     /* close the device */
-    AlsaOutput_Close(output);
-
-    return BLT_SUCCESS;
-}
-                    
-/*----------------------------------------------------------------------
-|       AlsaOutput_Start
-+---------------------------------------------------------------------*/
-BLT_METHOD
-AlsaOutput_Start(BLT_MediaNodeInstance* instance)
-{
-    BLT_COMPILER_UNUSED(instance);
-    BLT_Debug("AlsaOutput::Start\n");
-
-    /* do nothing here, as the device is already open (Activate) */
+    AlsaOutput_Close(self);
 
     return BLT_SUCCESS;
 }
@@ -785,14 +749,14 @@ AlsaOutput_Start(BLT_MediaNodeInstance* instance)
 |       AlsaOutput_Stop
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Stop(BLT_MediaNodeInstance* instance)
+AlsaOutput_Stop(BLT_MediaNode* _self)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
-    BLT_Debug("AlsaOutput::Stop\n");
+    ATX_LOG_FINER("AlsaOutput::Stop");
 
     /* reset the device */
-    AlsaOutput_Reset(output);
+    AlsaOutput_Reset(self);
 
     return BLT_SUCCESS;
 }
@@ -801,16 +765,16 @@ AlsaOutput_Stop(BLT_MediaNodeInstance* instance)
 |       AlsaOutput_Pause
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Pause(BLT_MediaNodeInstance* instance)
+AlsaOutput_Pause(BLT_MediaNode* _self)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
         
-    BLT_Debug("AlsaOutput::Pause\n");
+    ATX_LOG_FINER("AlsaOutput::Pause");
 
     /* pause the device */
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
-        snd_pcm_pause(output->device_handle, 1);
+        snd_pcm_pause(self->device_handle, 1);
         break;
 
       default:
@@ -825,16 +789,16 @@ AlsaOutput_Pause(BLT_MediaNodeInstance* instance)
 |       AlsaOutput_Resume
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Resume(BLT_MediaNodeInstance* instance)
+AlsaOutput_Resume(BLT_MediaNode* _self)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
         
-    BLT_Debug("AlsaOutput::Resume\n");
+    ATX_LOG_FINER("AlsaOutput::Resume");
 
     /* pause the device */
-    switch (output->state) {
+    switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
-        snd_pcm_pause(output->device_handle, 0);
+        snd_pcm_pause(self->device_handle, 0);
         break;
 
       default:
@@ -846,21 +810,20 @@ AlsaOutput_Resume(BLT_MediaNodeInstance* instance)
 }
 
 /*----------------------------------------------------------------------
-|       AlsaOutput_GetPortByName
+|   AlsaOutput_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_GetPortByName(BLT_MediaNodeInstance* instance,
-                         BLT_String             name,
-                         BLT_MediaPort*         port)
+AlsaOutput_GetPortByName(BLT_MediaNode*  _self,
+                          BLT_CString     name,
+                          BLT_MediaPort** port)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)output;
-        ATX_INTERFACE(port) = &AlsaOutputInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(self, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -869,66 +832,110 @@ AlsaOutput_GetPortByName(BLT_MediaNodeInstance* instance,
 |    AlsaOutput_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_Seek(BLT_MediaNodeInstance* instance,
-                    BLT_SeekMode*          mode,
-                    BLT_SeekPoint*         point)
+AlsaOutput_Seek(BLT_MediaNode* _self,
+                BLT_SeekMode*  mode,
+                BLT_SeekPoint* point)
 {
-    AlsaOutput* output = (AlsaOutput*)instance;
+    AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
     /* ignore unless we're prepared */
-    if (output->state != BLT_ALSA_OUTPUT_STATE_PREPARED) {
+    if (self->state != BLT_ALSA_OUTPUT_STATE_PREPARED) {
         return BLT_SUCCESS;
     }
 
     /* reset the device */
-    AlsaOutput_Reset(output);
+    AlsaOutput_Reset(self);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
+|    AlsaOutput_GetStatus
++---------------------------------------------------------------------*/
+BLT_METHOD
+AlsaOutput_GetStatus(BLT_OutputNode*       self,
+                      BLT_OutputNodeStatus* status)
+{
+    /*AlsaOutput* self = (AlsaOutput*)instance;*/
+    BLT_COMPILER_UNUSED(self);
+
+    status->delay.seconds = 0;
+    status->delay.nanoseconds = 0;
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AlsaOutput)
+    ATX_GET_INTERFACE_ACCEPT_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(AlsaOutput, BLT_BaseMediaNode, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT(AlsaOutput, BLT_OutputNode)
+    ATX_GET_INTERFACE_ACCEPT(AlsaOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(AlsaOutput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|    BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AlsaOutput, "input", PACKET, IN)
+ATX_BEGIN_INTERFACE_MAP(AlsaOutput, BLT_MediaPort)
+    AlsaOutput_GetName,
+    AlsaOutput_GetProtocol,
+    AlsaOutput_GetDirection,
+    AlsaOutput_QueryMediaType
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_PacketConsumer interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(AlsaOutput, BLT_PacketConsumer)
+    AlsaOutput_PutPacket
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
 |    BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-AlsaOutput_BLT_MediaNodeInterface = {
-    AlsaOutput_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     AlsaOutput_GetPortByName,
     AlsaOutput_Activate,
     AlsaOutput_Deactivate,
-    AlsaOutput_Start,
+    BLT_BaseMediaNode_Start,
     AlsaOutput_Stop,
     AlsaOutput_Pause,
     AlsaOutput_Resume,
     AlsaOutput_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AlsaOutput, base.reference_count)
+ATX_BEGIN_INTERFACE_MAP(AlsaOutput, BLT_OutputNode)
+    AlsaOutput_GetStatus
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutput)
-ATX_INTERFACE_MAP_ADD(AlsaOutput, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(AlsaOutput, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutput)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AlsaOutput, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |       AlsaOutputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutputModule_Probe(BLT_ModuleInstance*      instance, 
+AlsaOutputModule_Probe(BLT_Module*              self, 
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
                        BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(instance);
+    BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -967,7 +974,7 @@ AlsaOutputModule_Probe(BLT_ModuleInstance*      instance,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            BLT_Debug("AlsaOutputModule::Probe - Ok [%d]\n", *match);
+            ATX_LOG_FINE_1("AlsaOutputModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;
@@ -980,48 +987,48 @@ AlsaOutputModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|       template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AlsaOutput)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AlsaOutputModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(AlsaOutputModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(AlsaOutputModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       BLT_Module interface
+|   node factory
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface AlsaOutputModule_BLT_ModuleInterface = {
-    AlsaOutputModule_GetInterface,
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AlsaOutputModule, AlsaOutput)
+
+/*----------------------------------------------------------------------
+|   BLT_Module interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(AlsaOutputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     BLT_BaseModule_Attach,
     AlsaOutputModule_CreateInstance,
     AlsaOutputModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|       ATX_Referenceable interface
+|   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 #define AlsaOutputModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AlsaOutputModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AlsaOutputModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|       standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputModule) 
-ATX_INTERFACE_MAP_ADD(AlsaOutputModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(AlsaOutputModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AlsaOutputModule)
-
-/*----------------------------------------------------------------------
-|       module object
+|   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_AlsaOutputModule_GetModuleObject(BLT_Module* object)
+BLT_AlsaOutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
     return BLT_BaseModule_Create("ALSA Output", NULL, 0, 
                                  &AlsaOutputModule_BLT_ModuleInterface,
+                                 &AlsaOutputModule_ATX_ReferenceableInterface,
                                  object);
 }

@@ -33,8 +33,10 @@ typedef struct {
 } FileInputModule;
 
 typedef struct {
-    /* interfaces */
+    /* base class */
     ATX_EXTENDS(BLT_BaseMediaNode);
+    
+    /* interfaces */
     ATX_IMPLEMENTS(BLT_MediaPort);
     ATX_IMPLEMENTS(BLT_InputStreamProvider);
 
@@ -92,7 +94,7 @@ static BLT_Result
 FileInput_Create(BLT_Module*              module,
                  BLT_Core*                core, 
                  BLT_ModuleParametersType parameters_type,
-                 BLT_CString              parameters, 
+                 BLT_AnyConst             parameters, 
                  BLT_MediaNode**          object)
 {
     FileInput*                input;
@@ -259,11 +261,13 @@ FileInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     /* update the stream info */
     {
         BLT_StreamInfo info;
+        ATX_Size       file_size;
         BLT_Result     result;
 
-        result = ATX_File_GetSize(self->file, &info.size);
+        result = ATX_File_GetSize(self->file, &file_size);
         if (BLT_SUCCEEDED(result)) {
             info.mask = BLT_STREAM_INFO_MASK_SIZE;
+            info.size = (BLT_UInt32)file_size;
             BLT_Stream_SetInfo(stream, &info);
         }
     }

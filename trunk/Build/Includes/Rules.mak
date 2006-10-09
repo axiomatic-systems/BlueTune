@@ -21,7 +21,7 @@
 
 ### build .a from .o 
 %.a:
-	$(BLT_ARCHIVE_O) $@ $(filter %.o %.a %.lib,$^)
+	$(BLT_ARCHIVE_A) $@ $(filter %.o %.a %.lib,$^)
 
 ### make an executable
 BLT_MAKE_EXECUTABLE_COMMAND_C = $(BLT_LINK_C) $(BLT_OPTIMIZE_C) $(BLT_DEBUG_C) $(BLT_PROFILE_C) $(filter %.o %.a %.lib,$^) $(BLT_LIBRARIES_C) -o $@

@@ -10,25 +10,25 @@
 ##########################################################################
 #    tools
 ##########################################################################
-BTK_CROSS_PREFIX=arm-xscale-linux-
+BLT_CROSS_PREFIX=arm-linux-
 
-BLT_COMPILE_C    = $(BKT_CROSS_PREFIX)gcc
-BLT_FLAGS_C      = -ansi -pedantic
+BLT_COMPILE_C    = $(BLT_CROSS_PREFIX)gcc
+BLT_FLAGS_C      = 
 BLT_DEFINES_C    = -D_REENTRANT -D_BSD_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE -DBLT_TARGET=$(BLT_TARGET)
-BLT_WARNINGS_C   = -Werror -Wall -W -Wundef -Wmissing-prototypes -Wmissing-declarations -Wno-long-long
-BLT_AUTODEP_C    = $(BKT_CROSS_PREFIX) gcc -MM
-BLT_LINK_C       = $(BKT_CROSS_PREFIX) gcc
+BLT_WARNINGS_C   = -Wall -W -Wundef -Wmissing-prototypes -Wmissing-declarations -Wno-long-long
+BLT_AUTODEP_C    = $(BLT_CROSS_PREFIX)gcc -MM
+BLT_LINK_C       = $(BLT_CROSS_PREFIX)gcc
 
-BLT_COMPILE_CPP  =$(BKT_CROSS_PREFIX)  g++
+BLT_COMPILE_CPP  =$(BLT_CROSS_PREFIX)g++
 BLT_FLAGS_CPP    = -ansi -pedantic
 BLT_DEFINES_CPP  = -D_REENTRANT -D_BSD_SOURCE -D_POSIX_SOURCE -DBLT_TARGET=$(BLT_TARGET)
 BLT_WARNINGS_CPP = -Werror -Wall -W -Wundef -Wmissing-prototypes -Wno-long-long
-BLT_AUTODEP_CPP  = $(BKT_CROSS_PREFIX) gcc -MM
-BLT_LINK_CPP     = $(BKT_CROSS_PREFIX) g++
+BLT_AUTODEP_CPP  = $(BLT_CROSS_PREFIX)gcc -MM
+BLT_LINK_CPP     = $(BLT_CROSS_PREFIX)g++
 BLT_LIBRARIES_CPP = -lpthread
 
-BLT_ARCHIVE_O      = $(BKT_CROSS_PREFIX) ld -r -o
-BLT_ARCHIVE_A      = $(BKT_CROSS_PREFIX) ar rs
+BLT_ARCHIVE_O      = $(BLT_CROSS_PREFIX)ld -r -o
+BLT_ARCHIVE_A      = $(BLT_CROSS_PREFIX)ar rs
 
 BLT_COPY_IF_NEW  = cp -u
 BLT_MAKE_FLAGS   = --no-print-directory 

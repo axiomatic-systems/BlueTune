@@ -133,6 +133,7 @@ BLT_BaseModule_GetInfo(BLT_Module* _self, BLT_ModuleInfo* info)
 BLT_DIRECT_METHOD
 BLT_BaseModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
+    BLT_COMPILER_UNUSED(_self);
     BLT_COMPILER_UNUSED(core);
 #if defined(BLT_DEBUG)
     {

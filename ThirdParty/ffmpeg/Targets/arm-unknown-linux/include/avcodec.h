@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+#include <limits.h>
 #include "common.h"
 #include "rational.h"
 #include <sys/types.h> /* size_t */
@@ -174,6 +175,7 @@ enum CodecType {
     CODEC_TYPE_AUDIO,
     CODEC_TYPE_DATA,
 };
+
 
 /**
  * Pixel format. Notes: 

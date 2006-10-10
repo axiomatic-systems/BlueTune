@@ -52,22 +52,35 @@ def GetLibraries(modules):
             libs.append(module)
     return libs
 
+def GetLibraryDirs(modules):
+    lib_dirs = []
+    for module in modules:
+        if Modules.has_key(module):
+            MergeListUnique(lib_dirs, Modules[module].GetLibraryDirs())
+    return lib_dirs
+
 Modules = {}
 class Module:
     def __init__(self, name, 
                  included_modules = [], 
-                 linked_modules   = []):
+                 linked_modules   = [],
+                 lib_dirs         = []):
         self.name             = name
         self.included_modules = included_modules
         self.linked_modules   = linked_modules
+        self.lib_dirs         = [GetDirPath(dir) for dir in lib_dirs]
         self.product          = []
         Modules[name]         = self        
         
     def GetLibraries(self):
         return self.product+GetLibraries(self.linked_modules)
         
+    def GetLibraryDirs(self):
+        return self.lib_dirs+GetLibraryDirs(self.linked_modules)
+
     def GetIncludeDirs(self):
         return GetIncludeDirs(self.included_modules, self.name)
+
     
 class BuildModule(Module):
     def __init__(self, name, 
@@ -82,6 +95,7 @@ class BuildModule(Module):
                  environment           = None,
                  excluded_files        = [],
                  extra_cpp_defines     = {},
+                 extra_lib_dirs        = [],
                  type                  = 'StaticLibrary') :
 
         # store this new object in the module dictionary
@@ -89,7 +103,8 @@ class BuildModule(Module):
         Module.__init__(self, 
                         name, 
                         Split(included_modules)+Split(included_only_modules)+Split(build_source_dirs), 
-                        Split(linked_modules)+Split(included_modules))
+                        Split(linked_modules)+Split(included_modules),
+                        extra_lib_dirs)
         self.build_include_dirs = build_include_dirs
         self.type               = type
         
@@ -131,8 +146,9 @@ class BuildModule(Module):
             self.product = self.env.Library(target=name, source=sources)
         elif type == 'Executable':
             # libraries    
-            libs = GetLibraries(Split(linked_modules))
-            self.product = self.env.Program(target=name, source=sources, LIBS=libs, CPPPATH=cpp_path)
+            libs = GetLibraries(linked_modules)
+            lib_dirs = GetLibraryDirs(linked_modules)
+            self.product = self.env.Program(target=name, source=sources, LIBS=libs, LIBPATH=lib_dirs, CPPPATH=cpp_path)
             
         self.env.Alias(name, self.product)
 
@@ -215,8 +231,11 @@ BuildModule(name                  = 'Neptune',
 
 ############################# Fluo
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
-    BuildModule(name              = 'FloDecoderEngine',
-                source_root       = 'ThirdParty/mpg123/mpglib')
+    BuildModule(name        = 'FloDecoderEngine',
+                source_root = 'ThirdParty/mpg123/mpglib')
+elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_FFMPEG'):
+    BuildModule(name = 'FloDecoderEngine',
+                source_root = 'ThirdParty/foo/bar/')
 else:
     raise 'FLO_DECODER_ENGINE not set'
 
@@ -226,23 +245,29 @@ BuildModule(name              = 'Fluo',
             extra_cpp_defines = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']})
 
 ############################# Core
-BuildModule(name               = 'BltCore',
-            build_source_dirs  = ['Core'],
-            build_include_dirs = ['Source/Config'],
-            linked_modules     = ['Atomix', 'Neptune'])
+BuildModule(name                  = 'BltCore',
+            build_source_dirs     = ['Core'],
+            included_only_modules = ['Source/Config'],
+            linked_modules        = ['Atomix', 'Neptune'])
 
 ############################# Decoder
 BuildModule(name               = 'BltDecoder',
             build_source_dirs  = ['Decoder'],
-            build_include_dirs = ['Source/Config'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
+
+############################# BltPluginsSupport
+BuildModule(name               = 'BltPluginsSupport',
+            build_source_files = {'Plugins/Common':'BltReplayGain.c'},
             linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
                  
 ############################# Plugins
 PluginsSettings = {
     'FileInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',         'src_dir':'Inputs/File'              },
     'CddaInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',         'src_dir':'Inputs/CDDA'              },
+    'AlsaInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',         'src_dir':'Inputs/Alsa'              },
     'FileOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',        'src_dir':'Outputs/File'             },
     'OssOutput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',         'src_dir':'Outputs/OSS'              },
+    'AlsaOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',        'src_dir':'Outputs/Alsa'             },
     'DebugOutput'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',       'src_dir':'Outputs/Debug'            },
     'NullOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',        'src_dir':'Outputs/Null'             },
     'MpegAudioDecoder' : {'flags':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
@@ -259,30 +284,41 @@ PluginsSettings = {
     'PacketStreamer'   : {'flags':'BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER',    'src_dir':'General/PacketStreamer'   }
 }
 PluginsExtras = {
-    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include']},
-    'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include']},
-    'MpegAudioDecoder': {'dep_mods':['Fluo']}   
+    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
+                         'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
+                         'dep_mods':['FLAC']},
+    'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
+                         'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib'],
+                         'dep_mods':['vorbisfile','vorbis','ogg']},
+    'MpegAudioDecoder': {'dep_mods':['Fluo']},
+    'AlsaOutput':       {'dep_mods':['asound']},   
+    'AlsaInput':        {'dep_mods':['asound']},
 }
+if 'CddaInput' in env['BLT_PLUGINS']:
+    PluginsExtras['CddaInput'] = {'src_dirs':['Plugins/Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
 
 for plugin in env['BLT_PLUGINS']:
     extra_includes = []
     extra_dep_mods = []
+    extra_lib_dirs = []
+    extra_src_dirs = []
     if PluginsExtras.has_key(plugin):
         if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes = PluginsExtras[plugin]['inc_dirs']
         if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods = PluginsExtras[plugin]['dep_mods']
-
+        if PluginsExtras[plugin].has_key('lib_dirs'): extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
+        if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
     BuildModule(name               = 'Blt'+plugin,
-                build_source_dirs  = ['Plugins/'+PluginsSettings[plugin]['src_dir']],
+                build_source_dirs  = ['Plugins/'+PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
                 build_include_dirs = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                 linked_modules     = extra_dep_mods,
-                included_modules   = ['Atomix', 'Neptune', 'BltCore'])
+                included_modules   = ['Atomix', 'Neptune', 'BltCore', 'BltPluginsSupport'],
+                extra_lib_dirs     = extra_lib_dirs)
 
 plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])
 plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '\\"'+env['BLT_DEFAULT_OUTPUT']+'\\"'
 BuildModule(name               = 'BltPlugins',
-            build_source_dirs  = ['Plugins/Common'],
-            build_include_dirs = ['Source/Config'],
-            linked_modules     = ['Blt'+p for p in env['BLT_PLUGINS']],
+            build_source_files = {'Plugins/Common':'BltBuiltins.c'},
+            linked_modules     = ['Atomix', 'BltCore', 'BltPluginsSupport']+['Blt'+p for p in env['BLT_PLUGINS']],
             extra_cpp_defines  = plugins_cpp_defines)
 
 ############################# BtPlay

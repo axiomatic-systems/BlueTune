@@ -11,7 +11,6 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
-#include "Fluo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
 #include "BltSilenceRemover.h"

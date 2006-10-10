@@ -14,7 +14,7 @@
 #include "BltConfig.h"
 #include "BltTypes.h"
 #include "BltErrors.h"
-#include "BltId3Parser.h"
+#include "BltApeParser.h"
 
 /*----------------------------------------------------------------------
 |   constants
@@ -141,7 +141,7 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
     while (item_count && tag_size) {
         BLT_Size  value_length = ATX_BytesToInt32Le(tag);
         BLT_Flags item_flags = ATX_BytesToInt32Le(tag+4);
-        BLT_Size  key_length = ATX_StringLength(tag+8)+1;
+        BLT_Size  key_length = ATX_StringLength((char*)tag+8)+1;
         BLT_Size  item_size = key_length + value_length + 8;
 
         /* check the key and item length */
@@ -168,7 +168,7 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
             ATX_PropertyValue property_value;
 
             /* make the item name */
-            ATX_CopyString(property_name+9, &tag[8]);
+            ATX_CopyString((char*)property_name+9, (const char*)&tag[8]);
 
             /* copy the item value, so we can null-terminate it */
             if (value_length > BLT_APE_MAX_ITEM_SIZE) {

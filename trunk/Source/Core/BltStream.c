@@ -324,7 +324,7 @@ Stream_TopologyChanged(Stream*                     self,
     BLT_EventListener_OnEvent(self->event_listener,
                               (ATX_Object*)self, 
                               BLT_EVENT_TYPE_STREAM_TOPOLOGY,
-                              (const BLT_Event*)&event);
+                              (const BLT_Event*)(void*)&event);
 }
 
 /*----------------------------------------------------------------------
@@ -793,7 +793,7 @@ Stream_ResetInput(BLT_Stream* _self)
         BLT_EventListener_OnEvent(self->event_listener, 
                                   (ATX_Object*)self, 
                                   BLT_EVENT_TYPE_STREAM_INFO,
-                                  (const BLT_Event*)&event);
+                                  (const BLT_Event*)(void*)&event);
     }   
 
     return BLT_SUCCESS;
@@ -1804,7 +1804,7 @@ Stream_SetInfo(BLT_Stream* _self, const BLT_StreamInfo* info)
         BLT_EventListener_OnEvent(self->event_listener, 
                                   (ATX_Object*)self, 
                                   BLT_EVENT_TYPE_STREAM_INFO,
-                                  (const BLT_Event*)&event);
+                                  (const BLT_Event*)(void*)&event);
     }   
         
     return BLT_SUCCESS;

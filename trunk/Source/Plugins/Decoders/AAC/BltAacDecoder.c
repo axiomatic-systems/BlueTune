@@ -1,6 +1,6 @@
 /*****************************************************************
 |
-|   AAC Decoder Module
+|   BlueTune - AAC Decoder Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
@@ -11,7 +11,7 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
-#include "Fluo.h"
+#include "Melo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
 #include "BltAacDecoder.h"
@@ -21,8 +21,7 @@
 #include "BltPacketProducer.h"
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
-
-#include "faad.h"
+#include "BltReplayGain.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -30,404 +29,210 @@
 ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.aac")
 
 /*----------------------------------------------------------------------
-|   constants
+|    constants
 +---------------------------------------------------------------------*/
-#define BLT_BITRATE_AVERAGING_SHORT_SCALE     7
-#define BLT_BITRATE_AVERAGING_SHORT_WINDOW    32
-#define BLT_BITRATE_AVERAGING_LONG_SCALE      7
-#define BLT_BITRATE_AVERAGING_LONG_WINDOW     4096
-#define BLT_BITRATE_AVERAGING_PRECISION       4000
-
-#define BLT_AAC_DECODER_INPUT_BUFFER_SIZE     8192
-
-/*----------------------------------------------------------------------
-|   forward declarations
-+---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
-static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
-static const BLT_MediaNodeInterface AacDecoder_BLT_MediaNodeInterface;
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderInputPort)
-
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderOutputPort)
+#define BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC 0x67
+#define BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO  0x40
 
 /*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_BaseModule  base;
-    BLT_MediaTypeId aac_type_id;
+    BLT_MediaType base;
+    unsigned int  object_type_id;
+    unsigned int  decoder_info_length;
+    /* variable size array follows */
+    unsigned char decoder_info[1]; /* could be more than 1 byte */
+} BLT_Mpeg4AudioMediaType;
+
+typedef struct {
+    /* base class */
+    ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_UInt32 mp4es_type_id;
 } AacDecoderModule;
 
 typedef struct {
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
+
+    /* members */
     BLT_Boolean eos;
-    ATX_List*   packets;
-    struct {
-        unsigned char* data;
-        unsigned long  size;
-    } buffer;
-} AacDecoderInputPort;
+} AacDecoderInput;
 
 typedef struct {
-    BLT_Boolean      eos;
+    /* interfaces */
+    ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_PacketProducer);
+
+    /* members */
+    ATX_List*        packets;
     BLT_PcmMediaType media_type;
-    ATX_Int64        sample_count;
     BLT_TimeStamp    time_stamp;
-} AacDecoderOutputPort;
+    ATX_Int64        sample_count;
+} AacDecoderOutput;
 
 typedef struct {
-    BLT_BaseMediaNode    base;
-    BLT_Module           module;
-    AacDecoderInputPort  input;
-    AacDecoderOutputPort output;
-    faacDecHandle        handle;
-    BLT_Boolean          initialized;
-    struct {
-        BLT_Cardinal nominal_bitrate;
-        BLT_Cardinal average_bitrate;
-        ATX_Int64    average_bitrate_accumulator;
-        BLT_Cardinal instant_bitrate;
-        ATX_Int64    instant_bitrate_accumulator;
-    }                    stream_info;
+    /* base class */
+    ATX_EXTENDS(BLT_BaseMediaNode);
+
+    /* members */
+    AacDecoderInput   input;
+    AacDecoderOutput  output;
+    BLT_UInt32        mp4es_type_id;
+    MLO_Decoder*      melo;
+    MLO_SampleBuffer* sample_buffer;
 } AacDecoder;
 
 /*----------------------------------------------------------------------
-|    AacDecoderInputPort_Flush
+|   forward declarations
 +---------------------------------------------------------------------*/
-static BLT_Result
-AacDecoderInputPort_Flush(AacDecoder* decoder)
-{
-    ATX_ListItem* item;
-    while ((item = ATX_List_GetFirstItem(decoder->input.packets))) {
-        BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
-        if (packet) BLT_MediaPacket_Release(packet);
-        ATX_List_RemoveItem(decoder->input.packets, item);
-    }
-
-    return BLT_SUCCESS;
-}
+ATX_DECLARE_INTERFACE_MAP(AacDecoderModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(AacDecoder, BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(AacDecoder, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|    AacDecoderInputPort_PutPacket
+|   AacDecoderInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
-                              BLT_MediaPacket*            packet)
+AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
+                          BLT_MediaPacket*    packet)
 {
-    AacDecoder* decoder = (AacDecoder*)instance;
-    ATX_Result  result;
+    AacDecoder*             self = ATX_SELF_M(input, AacDecoder, BLT_PacketConsumer);
+    const MLO_SampleFormat* sample_format; 
+    ATX_Result              result;
 
     /* check to see if this is the end of a stream */
     if (BLT_MediaPacket_GetFlags(packet) & 
         BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
-        decoder->input.eos = BLT_TRUE;
+        self->input.eos = BLT_TRUE;
     }
 
-    /* add the packet to the input list */
-    result = ATX_List_AddData(decoder->input.packets, packet);
-    if (ATX_SUCCEEDED(result)) {
-        BLT_MediaPacket_AddReference(packet);
-    }
-
-    return result;
-}
-
-/*----------------------------------------------------------------------
-|    AacDecoderInputPort_BytesUsed
-+---------------------------------------------------------------------*/
-static void
-AacDecoderInputPort_BytesUsed(AacDecoder* decoder, unsigned int size)
-{
-    if (size) {
-        ATX_MoveMemory(decoder->input.buffer.data,
-                        decoder->input.buffer.data + size,
-                        decoder->input.buffer.size - size);
-        decoder->input.buffer.size -= size;
-    }
-}
-
-/*----------------------------------------------------------------------
-|    AacDecoderInputPort_RefillBuffer
-+---------------------------------------------------------------------*/
-static BLT_Result
-AacDecoderInputPort_RefillBuffer(AacDecoder* decoder)
-{
-    /* try to fill the input buffer */
-    while (decoder->input.buffer.size < BLT_AAC_DECODER_INPUT_BUFFER_SIZE) {
-        ATX_ListItem* item;
-        if (item = ATX_List_GetFirstItem(decoder->input.packets)) {
-            BLT_MediaPacket* packet = (BLT_MediaPacket*)ATX_ListItem_GetData(item);
-            BLT_Size space = BLT_AAC_DECODER_INPUT_BUFFER_SIZE - 
-                             decoder->input.buffer.size;
-            BLT_Size payload_size = BLT_MediaPacket_GetPayloadSize(packet);
-            void* payload_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-            if (payload_size <= space) {
-                /* the entire packet fits in the buffer */
-                ATX_CopyMemory(decoder->input.buffer.data +
-                               decoder->input.buffer.size,
-                               payload_buffer, 
-                               payload_size);
-                decoder->input.buffer.size += payload_size;
-                ATX_List_RemoveItem(decoder->input.packets, item);
-                BLT_MediaPacket_Release(packet);
-            } else {
-                /* only a portion of the packet will fit */
-                ATX_CopyMemory(decoder->input.buffer.data +
-                               decoder->input.buffer.size,
-                               payload_buffer,
-                               space);
-                decoder->input.buffer.size += space;
-                BLT_MediaPacket_SetPayloadOffset(
-                    packet, 
-                    BLT_MediaPacket_GetPayloadOffset(packet) +
-                    space);
-            }
-        } else {
-            /* not enough data */
-            return BLT_ERROR_PORT_HAS_NO_DATA;
+    /* check to see if we need to create a decoder for this */
+    if (self->melo == NULL) {
+        MLO_DecoderConfig              decoder_config;
+        const BLT_MediaType*           media_type;
+        const BLT_Mpeg4AudioMediaType* mp4_media_type;
+        BLT_MediaPacket_GetMediaType(packet, &media_type);
+        if (media_type == NULL || media_type->id != self->mp4es_type_id) {
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
+        mp4_media_type = (const BLT_Mpeg4AudioMediaType*)media_type;
+        if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, mp4_media_type->decoder_info_length, &decoder_config))) {
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        }
+        if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        result = MLO_Decoder_Create(&decoder_config, &self->melo);
+        if (MLO_FAILED(result)) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    /* decode the packet as a frame */
+    result = MLO_Decoder_DecodeFrame(self->melo, 
+                                     BLT_MediaPacket_GetPayloadBuffer(packet),
+                                     BLT_MediaPacket_GetPayloadSize(packet),
+                                     self->sample_buffer);
+    if (MLO_FAILED(result)) return BLT_ERROR_PORT_HAS_NO_DATA;
+
+    /* check that the sample buffer matches our current media type */
+    sample_format = MLO_SampleBuffer_GetFormat(self->sample_buffer);
+    if (self->output.media_type.channel_count == 0) {
+        /* first time, setup our media type */
+        self->output.media_type.channel_count   = sample_format->channel_count;
+        self->output.media_type.sample_rate     = sample_format->sample_rate;
+        self->output.media_type.bits_per_sample = 16;
+        self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    } else {
+        /* we've already setup a media type, check that this is the same */
+        if (self->output.media_type.sample_rate   != sample_format->sample_rate || 
+            self->output.media_type.channel_count != sample_format->channel_count) {
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        }
+    }
+
+    /* create a PCM packet for the output */
+    {
+        BLT_Size         out_packet_size = MLO_SampleBuffer_GetSize(self->sample_buffer);
+        BLT_MediaPacket* out_packet;
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                            out_packet_size,
+                                            (BLT_MediaType*)&self->output.media_type,
+                                            &out_packet);
+        if (BLT_FAILED(result)) return result;
+        BLT_MediaPacket_SetPayloadSize(out_packet, out_packet_size);
+        ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(out_packet), 
+                       MLO_SampleBuffer_GetSamples(self->sample_buffer), 
+                       out_packet_size);
+        ATX_List_AddData(self->output.packets, out_packet);
     }
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AacDecoderInputPort,
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AacDecoderInput)
+    ATX_GET_INTERFACE_ACCEPT(AacDecoderInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(AacDecoderInput, BLT_PacketConsumer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_PacketConsumer interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(AacDecoderInput, BLT_PacketConsumer)
+    AacDecoderInput_PutPacket
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AacDecoderInput, 
                                          "input",
                                          PACKET,
                                          IN)
-static const BLT_MediaPortInterface
-AacDecoderInputPort_BLT_MediaPortInterface = {
-    AacDecoderInputPort_GetInterface,
-    AacDecoderInputPort_GetName,
-    AacDecoderInputPort_GetProtocol,
-    AacDecoderInputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(AacDecoderInput, BLT_MediaPort)
+    AacDecoderInput_GetName,
+    AacDecoderInput_GetProtocol,
+    AacDecoderInput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    BLT_PacketConsumer interface
-+---------------------------------------------------------------------*/
-static const BLT_PacketConsumerInterface
-AacDecoderInputPort_BLT_PacketConsumerInterface = {
-    AacDecoderInputPort_GetInterface,
-    AacDecoderInputPort_PutPacket
-};
-
-/*----------------------------------------------------------------------
-|   standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderInputPort)
-ATX_INTERFACE_MAP_ADD(AacDecoderInputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(AacDecoderInputPort, BLT_PacketConsumer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderInputPort)
-
-/*----------------------------------------------------------------------
-|    AacDecoder_UpdateInfo
+|   AacDecoderOutput_Flush
 +---------------------------------------------------------------------*/
 static BLT_Result
-AacDecoder_UpdateInfo(AacDecoder*       decoder,     
-                      faacDecFrameInfo* frame_info)
+AacDecoderOutput_Flush(AacDecoder* self)
 {
-    /* check if the media format has changed */
-    if (frame_info->samplerate != decoder->output.media_type.sample_rate   ||
-        frame_info->channels   != decoder->output.media_type.channel_count) {
-
-        /* set the output type extensions */
-        decoder->output.media_type.channel_count   = (BLT_UInt16)frame_info->channels;
-        decoder->output.media_type.sample_rate     = frame_info->samplerate;
-        decoder->output.media_type.bits_per_sample = 16;
-        decoder->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
-                
-        {
-            BLT_StreamInfo info;
-            info.data_type       = "AAC";
-            info.sample_rate     = frame_info->samplerate;
-            info.channel_count   = (BLT_UInt16)frame_info->channels;
-
-            if (!ATX_OBJECT_IS_NULL(&decoder->base.context)) {
-                info.mask = 
-                    BLT_STREAM_INFO_MASK_DATA_TYPE    |
-                    BLT_STREAM_INFO_MASK_SAMPLE_RATE  |
-                    BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
-                BLT_Stream_SetInfo(&decoder->base.context, &info);
-            }
-        }
+    ATX_ListItem* item;
+    while ((item = ATX_List_GetFirstItem(self->output.packets))) {
+        BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
+        if (packet) BLT_MediaPacket_Release(packet);
+        ATX_List_RemoveItem(self->output.packets, item);
     }
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    AacDecoder_UpdateBitrateAverage
-+---------------------------------------------------------------------*/
-static BLT_Cardinal
-AacDecoder_UpdateBitrateAverage(BLT_Cardinal previous_bitrate,
-                                BLT_Cardinal current_bitrate,
-                                ATX_Int64*   accumulator,
-                                BLT_Cardinal window,
-                                BLT_Cardinal scale)
-{
-    BLT_Cardinal new_bitrate;
-    long         diff_bitrate;
-
-    if (previous_bitrate == 0) {
-        ATX_Int64_Set_Int32(*accumulator, current_bitrate << scale);
-        return current_bitrate;
-    }
-
-    ATX_Int64_Mul_Int32(*accumulator, window-1);
-    ATX_Int64_Add_Int32(*accumulator, current_bitrate << scale);
-    ATX_Int64_Div_Int32(*accumulator, window);
-    
-    new_bitrate = ATX_Int64_Get_Int32(*accumulator);
-    new_bitrate = (new_bitrate + (1<<(scale-1))) >> scale;
-    new_bitrate = new_bitrate /
-        BLT_BITRATE_AVERAGING_PRECISION *
-        BLT_BITRATE_AVERAGING_PRECISION;
-
-    /* only update if the difference is more than 1/32th of the previous one */
-    diff_bitrate = new_bitrate - previous_bitrate;
-    if (diff_bitrate < 0) diff_bitrate = -diff_bitrate;
-    if (diff_bitrate > (long)(previous_bitrate>>5)) {
-        return new_bitrate;
-    } else {
-        return previous_bitrate;
-    }
-}
-
-/*----------------------------------------------------------------------
-|    AacDecoder_DecodeFrame
-+---------------------------------------------------------------------*/
-static BLT_Result
-AacDecoder_DecodeFrame(AacDecoder*       decoder,
-                       BLT_MediaPacket** packet)
-{
-    faacDecFrameInfo frame_info;
-    void*            sample_buffer;
-    BLT_Size         sample_buffer_size;
-    BLT_Result       result;
-
-    /* decoder a frame */
-    sample_buffer = faacDecDecode(decoder->handle,
-                                  &frame_info,
-                                  decoder->input.buffer.data,
-                                  decoder->input.buffer.size);
-    AacDecoderInputPort_BytesUsed(decoder, frame_info.bytesconsumed);
-
-    /* update the stream info */
-    result = AacDecoder_UpdateInfo(decoder, &frame_info);
-    if (BLT_FAILED(result)) return result;
-
-    /* update the bitrate */
-    //result = AacDecoder_UpdateDurationAndBitrate(decoder, &frame_info);
-    //if (BLT_FAILED(result)) return result;
-    
-    /* some frames may be emtpy (initial delay) */
-    if (frame_info.samples == 0) {
-        *packet = NULL;
-        return BLT_ERROR_PORT_HAS_NO_DATA;
-    }
-
-    /* get a packet from the core */
-    sample_buffer_size = frame_info.samples*2;
-    result = BLT_Core_CreateMediaPacket(&decoder->base.core,
-                                        sample_buffer_size,
-                                        (BLT_MediaType*)&decoder->output.media_type,
-                                        packet);
-    if (BLT_FAILED(result)) return result;
-
-    /* copy the samples */
-    ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(*packet),
-                   sample_buffer, sample_buffer_size);
-
-    /* set packet flags */
-    {
-        ATX_Int64 zero;
-        ATX_Int64_Zero(zero);
-        if (ATX_Int64_Equal(zero, decoder->output.sample_count)) {
-            BLT_MediaPacket_SetFlags(*packet, 
-                                     BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
-        }
-    }
-
-    /* update the sample count and timestamp */
-    if (frame_info.channels            != 0 && 
-        frame_info.samplerate          != 0) {
-        /* compute time stamp */
-        BLT_TimeStamp_FromSamples(&decoder->output.time_stamp, 
-                                  decoder->output.sample_count,
-                                  frame_info.samplerate);
-        BLT_MediaPacket_SetTimeStamp(*packet, decoder->output.time_stamp);
-
-        /* update sample count */
-        ATX_Int64_Add_Int32(decoder->output.sample_count, 
-                            frame_info.samples/frame_info.channels);
-    } 
-
-    /* set the packet payload size */
-    BLT_MediaPacket_SetPayloadSize(*packet, sample_buffer_size);
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    AacDecoderOutputPort_GetPacket
+|   AacDecoderOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
-                               BLT_MediaPacket**           packet)
+AacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
+                           BLT_MediaPacket**   packet)
 {
-    AacDecoder* decoder = (AacDecoder*)instance;
-    BLT_Result  result;
+    AacDecoder*   self = ATX_SELF_M(output, AacDecoder, BLT_PacketProducer);
+    ATX_ListItem* packet_item;
 
     /* default return */
     *packet = NULL;
 
-    /* check for EOS */
-    if (decoder->output.eos) {
-        return BLT_ERROR_EOS;
-    }
-
-    /* refill the input buffer */
-    result = AacDecoderInputPort_RefillBuffer(decoder);
-    if (BLT_FAILED(result)) return result;
-
-    /* init if we have not yet done so */
-    if (!decoder->initialized) {
-        unsigned long samplerate;
-        unsigned char channels;
-        unsigned long used;
-        used = faacDecInit(decoder->handle, 
-                           decoder->input.buffer.data,
-                           decoder->input.buffer.size,
-                           &samplerate,
-                           &channels);
-        AacDecoderInputPort_BytesUsed(decoder, used);
-        decoder->initialized = BLT_TRUE;
-        result = AacDecoderInputPort_RefillBuffer(decoder);
-        if (BLT_FAILED(result)) return result;
-    }
-    
-    /* try to decode a frame */
-    result = AacDecoder_DecodeFrame(decoder, packet);
-    if (BLT_SUCCEEDED(result)) return result;
-
-    /* if we've reached the end of stream, generate an empty packet with */
-    /* a flag to indicate that situation                                 */
-    if (decoder->input.eos) {
-        result = BLT_Core_CreateMediaPacket(&decoder->base.core,
-                                            0,
-                                            (BLT_MediaType*)&decoder->output.media_type,
-                                            packet);
-        if (BLT_FAILED(result)) return result;
-        BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
-        BLT_MediaPacket_SetTimeStamp(*packet, decoder->output.time_stamp);
-        decoder->output.eos = BLT_TRUE;
+    /* check if we have a packet available */
+    packet_item = ATX_List_GetFirstItem(self->output.packets);
+    if (packet_item) {
+        *packet = (BLT_MediaPacket*)ATX_ListItem_GetData(packet_item);
+        ATX_List_RemoveItem(self->output.packets, packet_item);
         return BLT_SUCCESS;
     }
     
@@ -435,65 +240,54 @@ AacDecoderOutputPort_GetPacket(BLT_PacketProducerInstance* instance,
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaPort interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AacDecoderOutputPort,
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AacDecoderOutput)
+    ATX_GET_INTERFACE_ACCEPT(AacDecoderOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(AacDecoderOutput, BLT_PacketProducer)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_MediaPort interface
++---------------------------------------------------------------------*/
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AacDecoderOutput, 
                                          "output",
                                          PACKET,
                                          OUT)
-static const BLT_MediaPortInterface
-AacDecoderOutputPort_BLT_MediaPortInterface = {
-    AacDecoderOutputPort_GetInterface,
-    AacDecoderOutputPort_GetName,
-    AacDecoderOutputPort_GetProtocol,
-    AacDecoderOutputPort_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(AacDecoderOutput, BLT_MediaPort)
+    AacDecoderOutput_GetName,
+    AacDecoderOutput_GetProtocol,
+    AacDecoderOutput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    BLT_PacketProducer interface
+|   BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-static const BLT_PacketProducerInterface
-AacDecoderOutputPort_BLT_PacketProducerInterface = {
-    AacDecoderOutputPort_GetInterface,
-    AacDecoderOutputPort_GetPacket
-};
+ATX_BEGIN_INTERFACE_MAP(AacDecoderOutput, BLT_PacketProducer)
+    AacDecoderOutput_GetPacket
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|   standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderOutputPort)
-ATX_INTERFACE_MAP_ADD(AacDecoderOutputPort, BLT_MediaPort)
-ATX_INTERFACE_MAP_ADD(AacDecoderOutputPort, BLT_PacketProducer)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderOutputPort)
-
-/*----------------------------------------------------------------------
-|    AacDecoder_SetupPorts
+|   AacDecoder_SetupPorts
 +---------------------------------------------------------------------*/
 static BLT_Result
-AacDecoder_SetupPorts(AacDecoder* decoder)
+AacDecoder_SetupPorts(AacDecoder* self, BLT_MediaTypeId mp4es_type_id)
 {
     ATX_Result result;
 
     /* init the input port */
-    decoder->input.eos = BLT_FALSE;
-    decoder->input.buffer.data = 
-        ATX_AllocateMemory(BLT_AAC_DECODER_INPUT_BUFFER_SIZE);
-    decoder->input.buffer.size = 0;
+    self->mp4es_type_id = mp4es_type_id;
+    self->input.eos = BLT_FALSE;
 
     /* create a list of input packets */
-    result = ATX_List_Create(&decoder->input.packets);
+    result = ATX_List_Create(&self->output.packets);
     if (ATX_FAILED(result)) return result;
     
     /* setup the output port */
-    decoder->output.eos = BLT_FALSE;
-    BLT_PcmMediaType_Init(&decoder->output.media_type);
-    decoder->output.media_type.sample_rate     = 0;
-    decoder->output.media_type.channel_count   = 0;
-    decoder->output.media_type.bits_per_sample = 0;
-    decoder->output.media_type.sample_format   = 0;
-    ATX_Int64_Set_Int32(decoder->output.sample_count, 0);
-    BLT_TimeStamp_Set(decoder->output.time_stamp, 0, 0);
+    BLT_PcmMediaType_Init(&self->output.media_type);
+    ATX_Int64_Set_Int32(self->output.sample_count, 0);
+    BLT_TimeStamp_Set(self->output.time_stamp, 0, 0);
 
     return BLT_SUCCESS;
 }
@@ -506,10 +300,11 @@ AacDecoder_Create(BLT_Module*              module,
                   BLT_Core*                core, 
                   BLT_ModuleParametersType parameters_type,
                   BLT_CString              parameters, 
-                  ATX_Object*              object)
+                  BLT_MediaNode**          object)
 {
-    AacDecoder* decoder;
-    BLT_Result  result;
+    AacDecoder*       self;
+    AacDecoderModule* aac_decoder_module = (AacDecoderModule*)module;
+    BLT_Result        result;
 
     ATX_LOG_FINE("AacDecoder::Create");
 
@@ -520,40 +315,34 @@ AacDecoder_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    decoder = ATX_AllocateZeroMemory(sizeof(AacDecoder));
-    if (decoder == NULL) {
-        ATX_CLEAR_OBJECT(object);
+    self = ATX_AllocateZeroMemory(sizeof(AacDecoder));
+    if (self == NULL) {
+        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&decoder->base, module, core);
-
-    /* create the aac decoder */
-    decoder->handle = faacDecOpen();
-    decoder->initialized = BLT_FALSE;
-
-    /* initialize the decoder */
-    {
-        faacDecConfigurationPtr config;
-        config = faacDecGetCurrentConfiguration(decoder->handle);
-        config->defObjectType = LC;
-        config->outputFormat  = FAAD_FMT_16BIT;
-        config->downMatrix    = 0;
-        faacDecSetConfiguration(decoder->handle, config);
-    }
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* setup the input and output ports */
-    result = AacDecoder_SetupPorts(decoder);
+    result = AacDecoder_SetupPorts(self, aac_decoder_module->mp4es_type_id);
     if (BLT_FAILED(result)) {
-        ATX_FreeMemory(decoder);
-        ATX_CLEAR_OBJECT(object);
+        ATX_FreeMemory(self);
+        *object = NULL;
         return result;
     }
 
-    /* construct reference */
-    ATX_INSTANCE(object)  = (ATX_Instance*)decoder;
-    ATX_INTERFACE(object) = (ATX_Interface*)&AacDecoder_BLT_MediaNodeInterface;
+    /* create a sample buffer */
+    MLO_SampleBuffer_Create(0, &(self->sample_buffer));
+
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, AacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, AacDecoder, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  AacDecoderInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  AacDecoderInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, AacDecoderOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, AacDecoderOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
@@ -562,31 +351,25 @@ AacDecoder_Create(BLT_Module*              module,
 |    AacDecoder_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-AacDecoder_Destroy(AacDecoder* decoder)
+AacDecoder_Destroy(AacDecoder* self)
 { 
-    ATX_ListItem* item;
-
     ATX_LOG_FINE("AacDecoder::Destroy");
 
     /* release any packet we may hold */
-    item = ATX_List_GetFirstItem(decoder->input.packets);
-    while (item) {
-        BLT_MediaPacket* packet = ATX_ListItem_GetData(item);
-        if (packet) {
-            BLT_MediaPacket_Release(packet);
-        }
-        item = ATX_ListItem_GetNext(item);
-    }
-    ATX_List_Destroy(decoder->input.packets);
+    AacDecoderOutput_Flush(self);
+    ATX_List_Destroy(self->output.packets);
     
-    /* destroy the AAC decoder */
-    faacDecClose(decoder->handle);
+    /* destroy the Melo decoder */
+    if (self->melo) MLO_Decoder_Destroy(self->melo);
     
     /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&decoder->base);
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
+
+    /* destroy the sample buffer */
+    MLO_SampleBuffer_Destroy(self->sample_buffer);
 
     /* free the object memory */
-    ATX_FreeMemory(decoder);
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }
@@ -595,22 +378,20 @@ AacDecoder_Destroy(AacDecoder* decoder)
 |   AacDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
-                         BLT_CString            name,
-                         BLT_MediaPort*         port)
+AacDecoder_GetPortByName(BLT_MediaNode*  _self,
+                               BLT_CString     name,
+                               BLT_MediaPort** port)
 {
-    AacDecoder* decoder = (AacDecoder*)instance;
+    AacDecoder* self = ATX_SELF_EX(AacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &AacDecoderInputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
     } else if (ATX_StringsEqual(name, "output")) {
-        ATX_INSTANCE(port)  = (BLT_MediaPortInstance*)decoder;
-        ATX_INTERFACE(port) = &AacDecoderOutputPort_BLT_MediaPortInterface; 
+        *port = &ATX_BASE(&self->output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
-        ATX_CLEAR_OBJECT(port);
+        *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
 }
@@ -619,40 +400,47 @@ AacDecoder_GetPortByName(BLT_MediaNodeInstance* instance,
 |    AacDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoder_Seek(BLT_MediaNodeInstance* instance,
-                BLT_SeekMode*          mode,
-                BLT_SeekPoint*         point)
+AacDecoder_Seek(BLT_MediaNode* _self,
+                BLT_SeekMode*  mode,
+                BLT_SeekPoint* point)
 {
-    AacDecoder* decoder = (AacDecoder*)instance;
-
-    /* flush pending input packets */
-    AacDecoderInputPort_Flush(decoder);
+    AacDecoder* self = ATX_SELF_EX(AacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     /* clear the eos flag */
-    decoder->input.eos  = BLT_FALSE;
-    decoder->output.eos = BLT_FALSE;
+    self->input.eos  = BLT_FALSE;
 
-    /* flush and reset the decoder */
+    /* remove any packets in the output list */
+    AacDecoderOutput_Flush(self);
+
+    /* reset the decoder */
+    if (self->melo) MLO_Decoder_Reset(self->melo);
 
     /* estimate the seek point in time_stamp mode */
-    if (ATX_OBJECT_IS_NULL(&decoder->base.context)) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(&decoder->base.context, *mode, point);
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
     if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
         return BLT_FAILURE;
     }
 
-    /* update the output sample count */
-    decoder->output.sample_count = point->sample;
+    /* update the decoder's sample position */
+    self->output.sample_count = point->sample;
+    self->output.time_stamp = point->time_stamp;
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    BLT_MediaNode interface
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-static const BLT_MediaNodeInterface
-AacDecoder_BLT_MediaNodeInterface = {
-    AacDecoder_GetInterface,
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
+    ATX_GET_INTERFACE_ACCEPT_EX(AacDecoder, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(AacDecoder, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   BLT_MediaNode interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP_EX(AacDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     AacDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
@@ -662,52 +450,38 @@ AacDecoder_BLT_MediaNodeInterface = {
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
     AacDecoder_Seek
-};
+ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AacDecoder, 
-                                             base.reference_count)
-
-/*----------------------------------------------------------------------
-|   standard GetInterface implementation
-+---------------------------------------------------------------------*/
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
-ATX_INTERFACE_MAP_ADD(AacDecoder, BLT_MediaNode)
-ATX_INTERFACE_MAP_ADD(AacDecoder, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoder)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AacDecoder, 
+                                         BLT_BaseMediaNode, 
+                                         reference_count)
 
 /*----------------------------------------------------------------------
 |   AacDecoderModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
+AacDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    AacDecoderModule* module = (AacDecoderModule*)instance;
-    BLT_Registry      registry;
-    BLT_Result        result;
+    AacDecoderModule* self = ATX_SELF_EX(AacDecoderModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*           registry;
+    BLT_Result              result;
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
 
-    /* register the .aac file extensions */
-    result = BLT_Registry_RegisterExtension(&registry, 
-                                            ".aac",
-                                            "audio/x-aac");
-    if (BLT_FAILED(result)) return result;
-
-    /* register the "audio/x-aac" type */
+    /* register the type id for "audio/vnd.bluetune.mp4-es" */
     result = BLT_Registry_RegisterName(
-        &registry,
+        registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        "audio/x-aac",
-        &module->aac_type_id);
+        "audio/vnd.bluetune.mp4-es",
+        &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("AacDecoderModule::Attach (audio/x-aac type = %d)", 
-                   module->aac_type_id);
+    ATX_LOG_FINE_1("AacDecoderModule::Attach (audio/vnd.bluetune.mp4-es = %d)", self->mp4es_type_id);
 
     return BLT_SUCCESS;
 }
@@ -716,13 +490,13 @@ AacDecoderModule_Attach(BLT_ModuleInstance* instance, BLT_Core* core)
 |   AacDecoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AacDecoderModule_Probe(BLT_ModuleInstance*      instance, 
+AacDecoderModule_Probe(BLT_Module*              _self, 
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
                        BLT_Cardinal*            match)
 {
-    AacDecoderModule* module = (AacDecoderModule*)instance;
+    AacDecoderModule* self = ATX_SELF_EX(AacDecoderModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
     
     switch (parameters_type) {
@@ -743,10 +517,25 @@ AacDecoderModule_Probe(BLT_ModuleInstance*      instance,
                 return BLT_FAILURE;
             }
 
-            /* the input type should be audio/x-aac */
+            /* the input type should be audio/vnd.bluetune.mp4es */
             if (constructor->spec.input.media_type->id != 
-                module->aac_type_id) {
+                self->mp4es_type_id) {
                 return BLT_FAILURE;
+            } else {
+                /* check the object type id */
+                BLT_Mpeg4AudioMediaType* media_type = (BLT_Mpeg4AudioMediaType*)constructor->spec.input.media_type;
+                if (media_type->object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC &&
+                    media_type->object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
+                    return BLT_FAILURE;
+                }
+                if (media_type->object_type_id == BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
+                    /* check that this is AAC LC */
+                    MLO_DecoderConfig decoder_config;
+                    if (MLO_FAILED(MLO_DecoderConfig_Parse(media_type->decoder_info, media_type->decoder_info_length, &decoder_config))) {
+                        return BLT_FAILURE;
+                    }
+                    if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_FAILURE;
+                }
             }
 
             /* the output type should be unspecified, or audio/pcm */
@@ -785,21 +574,27 @@ AacDecoderModule_Probe(BLT_ModuleInstance*      instance,
 }
 
 /*----------------------------------------------------------------------
-|   template instantiations
+|   GetInterface implementation
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AacDecoder)
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AacDecoder, "AAC Decoder", 0)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(AacDecoderModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(AacDecoderModule, BLT_BaseModule, ATX_Referenceable)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|   node factory
++---------------------------------------------------------------------*/
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AacDecoderModule, AacDecoder)
 
 /*----------------------------------------------------------------------
 |   BLT_Module interface
 +---------------------------------------------------------------------*/
-static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface = {
-    AacDecoderModule_GetInterface,
+ATX_BEGIN_INTERFACE_MAP_EX(AacDecoderModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
     AacDecoderModule_Attach,
     AacDecoderModule_CreateInstance,
     AacDecoderModule_Probe
-};
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
@@ -807,23 +602,20 @@ static const BLT_ModuleInterface AacDecoderModule_BLT_ModuleInterface = {
 #define AacDecoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_SIMPLE_REFERENCEABLE_INTERFACE(AacDecoderModule, 
-                                             base.reference_count)
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AacDecoderModule, 
+                                         BLT_BaseModule,
+                                         reference_count)
 
 /*----------------------------------------------------------------------
-|   standard GetInterface implementation
+|   node constructor
 +---------------------------------------------------------------------*/
-ATX_DECLARE_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
-ATX_BEGIN_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule) 
-ATX_INTERFACE_MAP_ADD(AacDecoderModule, BLT_Module)
-ATX_INTERFACE_MAP_ADD(AacDecoderModule, ATX_Referenceable)
-ATX_END_SIMPLE_GET_INTERFACE_IMPLEMENTATION(AacDecoderModule)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AacDecoderModule, "AAC Audio Decoder", 0)
 
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_AacDecoderModule_GetModuleObject(BLT_Module* object)
+BLT_AacDecoderModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 

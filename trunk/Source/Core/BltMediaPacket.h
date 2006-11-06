@@ -61,6 +61,10 @@ typedef struct BLT_MediaPacket BLT_MediaPacket;
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_MediaPacket_AddReference(BLT_MediaPacket* packet);
 BLT_Result BLT_MediaPacket_Release(BLT_MediaPacket* packet);
 BLT_Any    BLT_MediaPacket_GetPayloadBuffer(BLT_MediaPacket* packet);
@@ -88,5 +92,9 @@ BLT_Result BLT_MediaPacket_ClearFlags(BLT_MediaPacket* packet,
                                       BLT_Flags        flags);
 BLT_Result BLT_MediaPacket_ResetFlags(BLT_MediaPacket* packet);
 BLT_Flags  BLT_MediaPacket_GetFlags(BLT_MediaPacket* packet);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_MEDIA_PACKET_H_ */

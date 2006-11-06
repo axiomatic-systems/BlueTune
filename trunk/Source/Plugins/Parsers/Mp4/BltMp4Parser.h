@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|   AAC Decoder Module
+|   Mp4Parser Module
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 
-#ifndef _BLT_AAC_DECODER_H_
-#define _BLT_AAC_DECODER_H_
+#ifndef _BLT_MP4_PARSER_H_
+#define _BLT_MP4_PARSER_H_
 
 /*----------------------------------------------------------------------
 |   includes
@@ -19,6 +19,14 @@
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
-BLT_Result BLT_AacDecoderModule_GetModuleObject(BLT_Module** module);
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-#endif /* _BLT_AAC_DECODER_H_ */
+BLT_Result BLT_Mp4ParserModule_GetModuleObject(BLT_Module** module);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* _BLT_MP4_PARSER_H_ */

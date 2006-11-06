@@ -70,7 +70,11 @@ BLT_MediaPacket_Create(BLT_Size             size,
     BLT_TimeStamp_Set((*packet)->time_stamp, 0, 0);
 
     /* set the media type */
-    if (type) BLT_MediaType_Clone(type, &(*packet)->type);
+    if (type) {
+        BLT_MediaType_Clone(type, &(*packet)->type);
+    } else {
+        BLT_MediaType_Clone(&BLT_MediaType_None, &(*packet)->type);;
+    }
 
     return BLT_SUCCESS;
 }

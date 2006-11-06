@@ -122,6 +122,10 @@ ATX_INTERFACE(object)->Probe(object, core, type, query, match)
 /*----------------------------------------------------------------------
 |   base methods
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result
 BLT_BaseModule_Construct(BLT_BaseModule* self, 
                          BLT_CString     name, 
@@ -147,6 +151,10 @@ BLT_BaseModule_GetInfo(BLT_Module* self, BLT_ModuleInfo* info);
 
 BLT_DIRECT_METHOD
 BLT_BaseModule_Attach(BLT_Module* self, BLT_Core* core);
+
+#if defined (__cplusplus)
+}
+#endif
 
 /*----------------------------------------------------------------------
 |   template macros

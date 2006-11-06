@@ -20,13 +20,16 @@ def MergeItemUnique(item_list, item):
     if not item in item_list: item_list.append(item)
             
 def GlobSources(drct, patterns, excluded_files=[]):
-    root = GetBuildPath('#'+drct)
+    root = GetBuildPath(GetDirPath(drct))
     files = []
     for pattern in Split(patterns):
         files += glob(root+'/'+pattern)
     return [drct+'/'+os.path.basename(x) for x in  files if os.path.basename(x) not in excluded_files]
 
 def GetDirPath(drct):
+    for key in SourceDirLookup.keys():
+        if drct.startswith(key):
+            return SourceDirLookup[key]+drct[len(key):]
     return '#/'+drct
     
 def DeclareBuildDir(drct):
@@ -159,6 +162,8 @@ class BuildModule(Module):
 #######################################################
 Import("env")
 
+SourceDirLookup = {}
+
 env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
 env['BLT_EXTRA_LIBS'] = ''
@@ -201,7 +206,8 @@ if os.path.exists(target_config_file):
 #######################################################
 
 ############################# Atomix
-ATX_SOURCE_ROOT = 'ThirdParty/Atomix/Source'           
+ATX_SOURCE_ROOT = 'Atomix/Source'         
+SourceDirLookup[ATX_SOURCE_ROOT] = '#/../Atomix/Source'  
 if env['build_config'] == 'Debug':
     ATX_EXTRA_CPP_DEFINES = {'ATX_DEBUG':None}
 else:
@@ -216,7 +222,8 @@ BuildModule(name                  = 'Atomix',
             extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
 
 ############################ Neptune
-NPT_SOURCE_ROOT = 'ThirdParty/Neptune/Source'
+NPT_SOURCE_ROOT = 'Neptune/Source'
+SourceDirLookup[NPT_SOURCE_ROOT] = '#/../Neptune/Source'  
 if env['build_config'] == 'Debug':
     NPT_EXTRA_CPP_DEFINES = {'NPT_DEBUG':None}
 else:
@@ -228,6 +235,32 @@ BuildModule(name                  = 'Neptune',
             linked_modules        = env['NPT_EXTRA_LIBS'],
             source_root           = NPT_SOURCE_ROOT,
             extra_cpp_defines     = NPT_EXTRA_CPP_DEFINES)
+
+############################ Bento4
+AP4_SOURCE_ROOT = 'Bento4/Source/C++'
+SourceDirLookup[AP4_SOURCE_ROOT] = '#/../Bento4/Source/C++'  
+if env['build_config'] == 'Debug':
+    AP4_EXTRA_CPP_DEFINES = {'AP4_DEBUG':None}
+else:
+    AP4_EXTRA_CPP_DEFINES = {}
+BuildModule(name                  = 'Bento4',
+            build_source_dirs     = ['Core', 'MetaData', 'Crypto'],
+            build_source_files    = env['AP4_SYSTEM_SOURCES'],
+            included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto']],
+            source_root           = AP4_SOURCE_ROOT,
+            extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
+
+############################ Melo
+MLO_SOURCE_ROOT = 'Melo/Source'
+SourceDirLookup[MLO_SOURCE_ROOT] = '#/../Melo/Source'  
+if env['build_config'] == 'Debug':
+    MLO_EXTRA_CPP_DEFINES = {'MLO_DEBUG':None}
+else:
+    MLO_EXTRA_CPP_DEFINES = {}
+BuildModule(name                  = 'Melo',
+            build_source_dirs     = ['.'],
+            source_root           = MLO_SOURCE_ROOT,
+            extra_cpp_defines     = MLO_EXTRA_CPP_DEFINES)
 
 ############################# Fluo
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
@@ -273,9 +306,11 @@ PluginsSettings = {
     'MpegAudioDecoder' : {'flags':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
     'FlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
+    'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':'Decoders/AAC'             },
     'WaveParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
     'AiffParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
     'TagParser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },
+    'Mp4Parser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_MP4_PARSER',         'src_dir':'Parsers/Mp4'              },
     'WaveFormatter'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER',     'src_dir':'Formatters/Wave'          },
     'GainControlFilter': {'flags':'BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER','src_dir':'Filters/GainControl'      },
     'PcmAdapter'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER',        'src_dir':'Adapters/PCM'             },
@@ -284,13 +319,17 @@ PluginsSettings = {
     'PacketStreamer'   : {'flags':'BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER',    'src_dir':'General/PacketStreamer'   }
 }
 PluginsExtras = {
+    'Mp4Parser':        {'dep_mods':['Bento4']},   
+    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include']},
+    'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include']},
+    'MpegAudioDecoder': {'dep_mods':['Fluo']},   
+    'AacDecoder':       {'dep_mods':['Melo']},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
                          'dep_mods':['FLAC']},
     'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib'],
                          'dep_mods':['vorbisfile','vorbis','ogg']},
-    'MpegAudioDecoder': {'dep_mods':['Fluo']},
     'AlsaOutput':       {'dep_mods':['asound']},   
     'AlsaInput':        {'dep_mods':['asound']},
 }
@@ -303,8 +342,8 @@ for plugin in env['BLT_PLUGINS']:
     extra_lib_dirs = []
     extra_src_dirs = []
     if PluginsExtras.has_key(plugin):
-        if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes = PluginsExtras[plugin]['inc_dirs']
-        if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods = PluginsExtras[plugin]['dep_mods']
+        if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes += PluginsExtras[plugin]['inc_dirs']
+        if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods += PluginsExtras[plugin]['dep_mods']
         if PluginsExtras[plugin].has_key('lib_dirs'): extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
         if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
     BuildModule(name               = 'Blt'+plugin,

@@ -111,7 +111,7 @@ GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
     /*BLT_Debug("GainControlFilterInput_PutPacket\n");*/
 
     /* get the media type */
-    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(void*)&media_type);
     if (BLT_FAILED(result)) return result;
 
     /* check the media type */

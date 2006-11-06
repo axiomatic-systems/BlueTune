@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common\;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Adapters\PcmAdapter;..\..\..\..\Source\Plugins\Composite\FilterHost;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\..\Neptune\Source\Neptune;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Core"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=&quot;&quot;wave:0&quot;&quot;;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;_BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;FLAC__NO_DLL"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common\;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Composite\FilterHost;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\..\Neptune\Source\Neptune;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Core;&quot;..\..\..\..\..\Bento4\Source\C++\Config&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;;..\..\..\..\..\Melo\Source"
+				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=&quot;&quot;wave:0&quot;&quot;;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -111,8 +111,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common\;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Adapters\PcmAdapter;..\..\..\..\Source\Plugins\Composite\FilterHost;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\..\Neptune\Source\Neptune;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Core"
-				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=&quot;&quot;wave:0&quot;&quot;;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;FLAC__NO_DLL"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common\;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Composite\FilterHost;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\..\Neptune\Source\Neptune;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Core;&quot;..\..\..\..\..\Bento4\Source\C++\Config&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;;..\..\..\..\..\Melo\Source"
+				PreprocessorDefinitions="BLT_TARGET=x86-microsoft-win32;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=&quot;&quot;wave:0&quot;&quot;;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -165,7 +165,6 @@
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -246,7 +245,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltHttpNetworkStream.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Plugins\Parsers\Tags\BltId3Parser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Plugins\Parsers\Mp4\BltMp4Parser.cpp"
 				>
 			</File>
 			<File
@@ -270,7 +277,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Plugins\Adapters\PcmAdapter\BltPcmAdapter.c"
+				RelativePath="..\..\..\..\Source\Plugins\Adapters\PCM\BltPcmAdapter.c"
 				>
 			</File>
 			<File
@@ -371,7 +378,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltHttpNetworkStream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Plugins\Parsers\Tags\BltId3Parser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Plugins\Parsers\Mp4\BltMp4Parser.h"
 				>
 			</File>
 			<File
@@ -395,7 +410,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Source\Plugins\Adapters\PcmAdapter\BltPcmAdapter.h"
+				RelativePath="..\..\..\..\Source\Plugins\Adapters\PCM\BltPcmAdapter.h"
 				>
 			</File>
 			<File

@@ -19,6 +19,7 @@
 #include "BltModule.h"
 #include "BltByteStreamProvider.h"
 #include "BltTcpNetworkStream.h"
+#include "BltHttpNetworkStream.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -96,8 +97,7 @@ NetworkInput_Create(BLT_Module*              module,
                     BLT_MediaNode**          object)
 {
     NetworkInput*             input;
-    BLT_MediaNodeConstructor* constructor = 
-        (BLT_MediaNodeConstructor*)parameters;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
 
     ATX_LOG_FINE("NetworkInput::Create");
@@ -123,6 +123,9 @@ NetworkInput_Create(BLT_Module*              module,
     if (ATX_StringsEqualN(constructor->name, "tcp://", 6)) {
         /* create a TCP byte stream */
         result = BLT_TcpNetworkStream_Create(constructor->name+6, &input->stream);
+    } else if (ATX_StringsEqualN(constructor->name, "http://", 7)) {
+        /* create an HTTP byte stream */
+        result = BLT_HttpNetworkStream_Create(constructor->name, &input->stream);
     } else {
         result = BLT_ERROR_INVALID_PARAMETERS;
     }
@@ -347,7 +350,8 @@ NetworkInputModule_Probe(BLT_Module*              self,
             }
 
             /* check the name */
-            if (ATX_StringsEqualN(constructor->name, "tcp://", 6)) {
+            if (ATX_StringsEqualN(constructor->name, "tcp://", 6) ||
+                ATX_StringsEqualN(constructor->name, "http://", 7)) {
                 /* this is an exact match for us */
                 *match = BLT_MODULE_PROBE_MATCH_EXACT;
             } else if (constructor->spec.input.protocol ==

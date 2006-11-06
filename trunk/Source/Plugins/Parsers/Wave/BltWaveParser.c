@@ -266,7 +266,6 @@ WaveParserInput_SetStream(BLT_InputStreamUser* _self,
     BLT_Size       header_size;
     BLT_StreamInfo stream_info;
     BLT_Result     result;
-    BLT_COMPILER_UNUSED(media_type);
 
     /* check media type */
     if (media_type == NULL || media_type->id != self->input.media_type.id) {

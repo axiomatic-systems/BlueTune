@@ -57,8 +57,16 @@ extern const BLT_MediaType BLT_MediaType_Unknown;
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id);
 BLT_Result BLT_MediaType_Free(BLT_MediaType* type);
 BLT_Result BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_MEDIA_H_ */

@@ -1,14 +1,14 @@
 /*****************************************************************
 |
-|   AAC Decoder Module
+|   BlueTune - HTTP Network Stream
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
- ****************************************************************/
+****************************************************************/
 
-#ifndef _BLT_AAC_DECODER_H_
-#define _BLT_AAC_DECODER_H_
+#ifndef _BLT_HTTP_NETWORK_STREAM_H_
+#define _BLT_HTTP_NETWORK_STREAM_H_
 
 /*----------------------------------------------------------------------
 |   includes
@@ -17,8 +17,17 @@
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
-|   module
+|   functions
 +---------------------------------------------------------------------*/
-BLT_Result BLT_AacDecoderModule_GetModuleObject(BLT_Module** module);
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-#endif /* _BLT_AAC_DECODER_H_ */
+BLT_Result 
+BLT_HttpNetworkStream_Create(const char* url, ATX_InputStream** stream);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* _BLT_HTTP_NETWORK_STREAM_H_ */

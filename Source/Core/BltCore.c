@@ -221,7 +221,7 @@ Core_CreateCompatibleNode(BLT_Core*                 _self,
     Core*         core = ATX_SELF(Core, BLT_Core);
     ATX_ListItem* item       = ATX_List_GetFirstItem(core->modules);
     int           best_match = -1;
-    BLT_Module*   best_module;
+    BLT_Module*   best_module = NULL;
             
     /* find a module that responds to the probe */
     while (item) {

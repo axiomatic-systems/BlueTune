@@ -3,9 +3,11 @@ LoadTool('gcc-generic', env)
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
 env['ATX_EXTRA_LIBS']='m'
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
+env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_MPG123'
 env['BLT_PLUGINS'] = ['FileInput', 
                       'MpegAudioDecoder', 
+                      'AacDecoder',
                       'StreamPacketizer', 
                       'NullOutput',
                       'FileOutput',
@@ -14,6 +16,7 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'DebugOutput',
                       'WaveParser',
                       'AiffParser',
+                      'Mp4Parser',
                       'WaveFormatter',
                       'SilenceRemover',
                       'GainControlFilter',

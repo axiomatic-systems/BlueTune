@@ -250,7 +250,7 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*          core,
     *out = NULL;
 
     /* get the media type */
-    result = BLT_MediaPacket_GetMediaType(in, (const BLT_MediaType**)&in_type);
+    result = BLT_MediaPacket_GetMediaType(in, (const BLT_MediaType**)(void*)&in_type);
     if (BLT_FAILED(result)) return result;
 
     /* check the media type */

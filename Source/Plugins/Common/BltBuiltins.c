@@ -85,6 +85,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltTagParser.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_MP4_PARSER)
+#include "BltMp4Parser.h"
+#endif
+
 /* formatters */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
 #include "BltWaveFormatter.h"
@@ -249,6 +253,15 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_TAG_PARSER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_TagParserModule");
     result = BLT_TagParserModule_GetModuleObject(&module);
+    if (BLT_FAILED(result)) return result;
+    result = BLT_Core_RegisterModule(core, module);
+    if (BLT_FAILED(result)) return result;
+#endif
+
+    /* mp4 parser */
+#if defined(BLT_CONFIG_MODULES_ENABLE_MP4_PARSER)
+    ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_Mp4ParserModule");
+    result = BLT_Mp4ParserModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
     result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;

@@ -121,6 +121,10 @@ ATX_INTERFACE(object)->Seek(object, mode, point)
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_BaseMediaNode_Construct(BLT_BaseMediaNode* self,
                                        BLT_Module*        module,
                                        BLT_Core*          core);
@@ -137,6 +141,10 @@ BLT_Result BLT_BaseMediaNode_Resume(BLT_MediaNode* self);
 BLT_Result BLT_BaseMediaNode_Seek(BLT_MediaNode* self, 
                                   BLT_SeekMode*  mode,
                                   BLT_SeekPoint* point);
+
+#if defined(__cplusplus)
+}
+#endif
 
 /*----------------------------------------------------------------------
 |   template macros

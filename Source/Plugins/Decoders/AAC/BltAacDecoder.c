@@ -115,6 +115,7 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         MLO_DecoderConfig              decoder_config;
         const BLT_MediaType*           media_type;
         const BLT_Mpeg4AudioMediaType* mp4_media_type;
+
         BLT_MediaPacket_GetMediaType(packet, &media_type);
         if (media_type == NULL || media_type->id != self->mp4es_type_id) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
@@ -126,6 +127,18 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_ERROR_INVALID_MEDIA_FORMAT;
         result = MLO_Decoder_Create(&decoder_config, &self->melo);
         if (MLO_FAILED(result)) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+
+        /* update the stream info */
+        if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+            BLT_StreamInfo stream_info;
+            stream_info.data_type     = "MPEG-4 AAC";
+            stream_info.sample_rate   = MLO_DecoderConfig_GetSampleRate(&decoder_config);
+            stream_info.channel_count = MLO_DecoderConfig_GetChannelCount(&decoder_config);
+            stream_info.mask = BLT_STREAM_INFO_MASK_DATA_TYPE    |
+                               BLT_STREAM_INFO_MASK_SAMPLE_RATE  |
+                               BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
+            BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
+        }
     }
 
     /* decode the packet as a frame */

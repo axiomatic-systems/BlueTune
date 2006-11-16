@@ -798,9 +798,16 @@ Registry_GetMediaTypeIdForExtension(BLT_Registry*    self,
     if (BLT_FAILED(result)) return result;
 
     /* get the key for the file extension */
-    result = Registry_GetKey(self, namespace_key, 
-                             extension, &extension_key);
-    if (BLT_FAILED(result)) return result;
+    {
+        ATX_String extension_lc = ATX_String_Create(extension);
+        ATX_String_MakeLowercase(&extension_lc);
+        result = Registry_GetKey(self, 
+                                 namespace_key, 
+                                 ATX_CSTR(extension_lc), 
+                                 &extension_key);
+        ATX_String_Destruct(&extension_lc);
+        if (BLT_FAILED(result)) return result;
+    }
 
     /* get the media type id */
     result = Registry_GetKeyValue(self, extension_key,

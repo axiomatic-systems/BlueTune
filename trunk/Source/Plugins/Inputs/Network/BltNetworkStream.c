@@ -40,7 +40,7 @@ ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
 |   BLT_NetworkStream_Create
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_NetworkStream_Create(BLT_Size          size,
+BLT_NetworkStream_Create(BLT_Size          buffer_size,
                          ATX_InputStream*  source, 
                          ATX_InputStream** stream)
 {
@@ -55,12 +55,12 @@ BLT_NetworkStream_Create(BLT_Size          size,
 
     /* construct the object */
     self->reference_count = 1;
-    result = ATX_RingBuffer_Create(size, &self->buffer);
+    result = ATX_RingBuffer_Create(buffer_size, &self->buffer);
     if (ATX_FAILED(result)) {
         *stream = NULL;
         return ATX_ERROR_OUT_OF_MEMORY;
     }
-    self->buffer_size = size;
+    self->buffer_size = buffer_size;
     self->source = source;
     ATX_REFERENCE_OBJECT(source);
 

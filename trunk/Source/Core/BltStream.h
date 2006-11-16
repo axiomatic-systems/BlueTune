@@ -26,6 +26,7 @@
 |   error codes
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_STREAM_NO_COMPATIBLE_NODE (BLT_ERROR_BASE_STREAM - 0)
+#define BLT_ERROR_STREAM_INPUT_NOT_FOUND    (BLT_ERROR_BASE_STREAM - 1)
 
 /*----------------------------------------------------------------------
 |   constants

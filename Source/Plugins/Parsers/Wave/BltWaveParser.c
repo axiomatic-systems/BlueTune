@@ -177,6 +177,7 @@ WaveParser_ParseHeader(WaveParser*      self,
                     BLT_PcmMediaType_Init(&media_type);
                     BLT_MediaType_Free(self->output.media_type);
                     media_type.channel_count   = ATX_BytesToInt16Le(buffer+2);
+                    media_type.channel_mask    = 0;
                     media_type.sample_rate     = ATX_BytesToInt32Le(buffer+4);
                     media_type.bits_per_sample = (BLT_UInt8)(8*((ATX_BytesToInt16Le(buffer+14)+7)/8));
                     if (format_tag == BLT_WAVE_FORMAT_IEEE_FLOAT) {

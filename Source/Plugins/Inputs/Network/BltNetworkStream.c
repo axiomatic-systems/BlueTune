@@ -7,6 +7,14 @@
 |
 ****************************************************************/
 
+/**
+ * This module implements a buffered stream cache that allows some
+ * amount of seeking backward and forward in a slow-to-seek source
+ * stream such as a network stream.
+ * The cache will try to limit the forward-filling of the buffer to 
+ * a small amount to keep as much backward-seek buffer as possible.
+ */
+
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
@@ -26,9 +34,24 @@ typedef struct {
     ATX_InputStream* source;
     ATX_RingBuffer*  buffer;
     ATX_Size         buffer_size;
+    ATX_Size         back_store;
     ATX_Offset       position;
     ATX_Boolean      eos;
 } BLT_NetworkStream;
+
+/*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+/**
+ * Threshold below which a seek forward is implemented by reading from
+ * the source instead of seeking in the source.
+ */
+#define BLT_NETWORK_STREAM_SEEK_AS_READ_THRESHOLD 
+
+/**
+ * Try to keep this amount of data in the back store 
+ */
+#define BLT_NETWORK_STREAM_MIN_BACK_STORE 4096
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -58,7 +81,7 @@ BLT_NetworkStream_Create(BLT_Size          buffer_size,
     result = ATX_RingBuffer_Create(buffer_size, &self->buffer);
     if (ATX_FAILED(result)) {
         *stream = NULL;
-        return ATX_ERROR_OUT_OF_MEMORY;
+        return result;
     }
     self->buffer_size = buffer_size;
     self->source = source;
@@ -86,50 +109,74 @@ BLT_NetworkStream_Destroy(BLT_NetworkStream* self)
 }
 
 /*----------------------------------------------------------------------
-|   BLT_NetworkStream_Destroy
+|   BLT_NetworkStream_ClampBackStore
++---------------------------------------------------------------------*/
+static void
+BLT_NetworkStream_ClampBackStore(BLT_NetworkStream* self)
+{
+    /** clamp the back store to ensure it is not bigger than the max
+     * possible value */
+    ATX_Size max_back = ATX_RingBuffer_GetSpace(self->buffer);
+    if (self->back_store > max_back) self->back_store = max_back;
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_Read
 +---------------------------------------------------------------------*/
 static ATX_Result
 BLT_NetworkStream_Read(ATX_InputStream* _self, 
-                       ATX_Any          buffer,
+                       ATX_Byte*        buffer,
                        ATX_Size         bytes_to_read,
                        ATX_Size*        bytes_read)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
     ATX_Size           buffered = ATX_RingBuffer_GetAvailable(self->buffer);
-    ATX_Size           total_read = 0;
+    ATX_Size           chunk;
+    ATX_Size           bytes_read_storage = 0;
 
     /* default */
-    if (bytes_read)  *bytes_read = 0;
+    if (bytes_read) {
+        *bytes_read = 0;
+    } else {
+        bytes_read = &bytes_read_storage;
+    }
 
     /* shortcut */
     if (bytes_to_read == 0) return ATX_SUCCESS;
 
     /* use all we can from the buffer */
-    if (buffered > bytes_to_read) buffered = bytes_to_read;
-    if (buffered) {
-        ATX_RingBuffer_Read(self->buffer, buffer, buffered);
-        total_read += buffered;
-        bytes_to_read -= buffered;
-        if (bytes_read) *bytes_read += buffered;
-        self->position += buffered;
-        buffer = (ATX_Any)((unsigned char*)buffer+buffered);
+    chunk = buffered > bytes_to_read ? bytes_to_read : buffered;
+    if (chunk) {
+        ATX_RingBuffer_Read(self->buffer, buffer, chunk);
+        bytes_to_read -= chunk;
+        *bytes_read += chunk;
+        self->position += chunk;
+        buffer += chunk;
+        self->back_store += chunk;
+        BLT_NetworkStream_ClampBackStore(self);
     }
 
     /* read what we can from the source */
     while (bytes_to_read && !self->eos) {
         ATX_Size       read_from_source = 0;
-        ATX_Size       can_read = ATX_RingBuffer_GetContiguousSpace(self->buffer);
+        ATX_Size       can_write = ATX_RingBuffer_GetSpace(self->buffer);
+        ATX_Size       should_read = ATX_RingBuffer_GetContiguousSpace(self->buffer);
         unsigned char* in = ATX_RingBuffer_GetIn(self->buffer);
         ATX_Result     result;
+
+        /* compute how much to read from the source */
+        if (should_read > BLT_NETWORK_STREAM_MIN_BACK_STORE &&
+            should_read - BLT_NETWORK_STREAM_MIN_BACK_STORE >= bytes_to_read) {
+            /* leave some data in the back store */
+            should_read -= BLT_NETWORK_STREAM_MIN_BACK_STORE;
+        }
 
         /* read from the source */
         result = ATX_InputStream_Read(self->source, 
                                       in, 
-                                      can_read, 
+                                      should_read, 
                                       &read_from_source);
         if (ATX_SUCCEEDED(result)) {
-            ATX_Size chunk;
-
             /* adjust the ring buffer */
             ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
 
@@ -138,24 +185,32 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
             ATX_RingBuffer_Read(self->buffer, buffer, chunk);
 
             /* adjust counters and pointers */
-            total_read += chunk;
+            *bytes_read += chunk;
             bytes_to_read -= chunk;
-            if (bytes_read) *bytes_read += chunk;
             self->position += chunk;
-            buffer = (ATX_Any)((unsigned char*)buffer+chunk);
+            buffer += chunk;
+
+            /* compute how much back-store we have now */
+            if (can_write-read_from_source < self->back_store) {
+                /* we have reduced (written over) the back store */
+                self->back_store = can_write-read_from_source;
+            }
+            self->back_store += chunk;
+            BLT_NetworkStream_ClampBackStore(self);
+
         } else if (result == ATX_ERROR_EOS) {
             /* we can't continue further */
             self->eos = ATX_TRUE;
             break;
         } else {
-            return (total_read == 0) ? result : ATX_SUCCESS;
+            return (*bytes_read == 0) ? result : ATX_SUCCESS;
         }
 
         /* don't loop if this was a short read */
-        if (read_from_source != can_read) break;
+        if (read_from_source != should_read) break;
     }
 
-    if (self->eos && total_read == 0) {
+    if (self->eos && *bytes_read == 0) {
         return ATX_ERROR_EOS;
     } else {
         return ATX_SUCCESS;
@@ -169,15 +224,22 @@ static ATX_Result
 BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
-    ATX_Size           buffered = ATX_RingBuffer_GetAvailable(self->buffer);
     int                move = position-self->position;
     ATX_Result         result;
 
+    /* shortcut */
+    if (move == 0) return ATX_SUCCESS;
+
     /* see if we can seek entirely within our buffer */
-    if (move >= 0 && move <= (int)buffered) {
+    if ((move < 0 && -move <= (int)self->back_store) ||
+        (move > 0 && move < (int)ATX_RingBuffer_GetAvailable(self->buffer))) {
         ATX_RingBuffer_MoveOut(self->buffer, move);
         self->position = position;
         self->eos = ATX_FALSE;
+
+        /* adjust the back-store counter */
+        self->back_store += move;
+
         return ATX_SUCCESS;
     }
 
@@ -185,8 +247,9 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     result = ATX_InputStream_Seek(self->source, position);
     if (ATX_FAILED(result)) return result;
     ATX_RingBuffer_Reset(self->buffer);
+    self->back_store = 0;
     self->position = position;
-    
+
     self->eos = ATX_FALSE;
     return ATX_SUCCESS;
 }

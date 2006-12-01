@@ -302,34 +302,38 @@ Win32Output_Open(Win32Output* self)
     format.Format.wBitsPerSample = self->media_type.bits_per_sample;
     format.Format.cbSize = 22;
     format.Samples.wValidBitsPerSample = self->media_type.bits_per_sample;
-    switch (self->media_type.channel_count) {
-        case 1:
-            format.dwChannelMask = KSAUDIO_SPEAKER_MONO;
-            break;
+    if (self->media_type.channel_mask && self->media_type.channel_count > 2) {
+        format.dwChannelMask = self->media_type.channel_mask;
+    } else {
+        switch (self->media_type.channel_count) {
+            case 1:
+                format.dwChannelMask = KSAUDIO_SPEAKER_MONO;
+                break;
 
-        case 2:
-            format.dwChannelMask = KSAUDIO_SPEAKER_STEREO;
-            break;
+            case 2:
+                format.dwChannelMask = KSAUDIO_SPEAKER_STEREO;
+                break;
 
-        case 3:
-            format.dwChannelMask = KSAUDIO_SPEAKER_STEREO |
-                                   SPEAKER_FRONT_CENTER;
-            break;
+            case 3:
+                format.dwChannelMask = KSAUDIO_SPEAKER_STEREO |
+                                       SPEAKER_FRONT_CENTER;
+                break;
 
-        case 4:
-            format.dwChannelMask = KSAUDIO_SPEAKER_QUAD;
-            break;
+            case 4:
+                format.dwChannelMask = KSAUDIO_SPEAKER_QUAD;
+                break;
 
-        case 5:
-            format.dwChannelMask = KSAUDIO_SPEAKER_5POINT1;
-            break;
+            case 6:
+                format.dwChannelMask = KSAUDIO_SPEAKER_5POINT1;
+                break;
 
-        case 7:
-            format.dwChannelMask = KSAUDIO_SPEAKER_7POINT1;
-            break;
+            case 8:
+                format.dwChannelMask = KSAUDIO_SPEAKER_7POINT1;
+                break;
 
-        default:
-            format.dwChannelMask = SPEAKER_ALL;
+            default:
+                format.dwChannelMask = SPEAKER_ALL;
+        }
     }
     format.SubFormat = BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM; 
 #else

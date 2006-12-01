@@ -1639,7 +1639,7 @@ Stream_PumpPacket(BLT_Stream* _self)
     Stream*          self = ATX_SELF(Stream, BLT_Stream);
     StreamNode*      node;
     BLT_MediaPacket* packet;
-    BLT_Result       result;
+    BLT_Result       result = BLT_FAILURE;
 
     /* check that we have an input and an output */
     if (self->input.node  == NULL ||
@@ -1693,7 +1693,7 @@ Stream_PumpPacket(BLT_Stream* _self)
         node = node->prev;
     }
 
-    return BLT_FAILURE;
+    return result;
 }
 
 /*----------------------------------------------------------------------

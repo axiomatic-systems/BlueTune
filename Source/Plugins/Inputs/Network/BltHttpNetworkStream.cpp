@@ -57,7 +57,7 @@ struct HttpInputStream {
     HttpInputStream(const char* url);
     ~HttpInputStream();
     ATX_Object* GetInterface(const ATX_InterfaceId* id);
-    BLT_Result SendRequest();
+    BLT_Result SendRequest(NPT_Position position = 0);
 
     // members
     ATX_Cardinal             m_ReferenceCount;
@@ -65,6 +65,8 @@ struct HttpInputStream {
     NPT_HttpUrl              m_Url;
     NPT_HttpResponse*        m_Response;
     NPT_InputStreamReference m_InputStream;
+    NPT_Size                 m_ContentLength;
+    bool                     m_Eos;
 };
 
 /*----------------------------------------------------------------------
@@ -148,7 +150,9 @@ HttpInputStream::GetInterface_ATX_Referenceable(ATX_Referenceable*     _self,
 HttpInputStream::HttpInputStream(const char* url) :
     m_ReferenceCount(1),
     m_Url(url),
-    m_Response(NULL)
+    m_Response(NULL),
+    m_ContentLength(0),
+    m_Eos(false)
 {
     /* setup interfaces */
     ATX_SET_INTERFACE(this, HttpInputStream, ATX_InputStream);
@@ -194,11 +198,13 @@ HttpInputStream::Release(ATX_Referenceable* _self)
 +---------------------------------------------------------------------*/
 ATX_Result
 HttpInputStream::Read(ATX_InputStream* _self,
-                             ATX_Any          buffer,
-                             ATX_Size         bytes_to_read,
-                             ATX_Size*        bytes_read)
+                      ATX_Any          buffer,
+                      ATX_Size         bytes_to_read,
+                      ATX_Size*        bytes_read)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
+    if (self->m_Eos) return ATX_ERROR_EOS;
+    if (self->m_InputStream.IsNull()) return ATX_ERROR_INVALID_STATE;
     return MapResult(self->m_InputStream->Read(buffer, bytes_to_read, bytes_read));
 }
 
@@ -207,10 +213,12 @@ HttpInputStream::Read(ATX_InputStream* _self,
 +---------------------------------------------------------------------*/
 ATX_Result
 HttpInputStream::Seek(ATX_InputStream* _self, 
-                             ATX_Position     where)
+                      ATX_Position     where)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
-    return MapResult(self->m_InputStream->Seek(where));
+    NPT_Result result = self->SendRequest(where);
+    if (NPT_SUCCEEDED(result)) self->m_Eos = false;
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -221,6 +229,12 @@ HttpInputStream::Tell(ATX_InputStream* _self,
                       ATX_Position*    position)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
+    if (self->m_Eos) {
+        if (self->m_Response) {
+            *position = self->m_Response->GetEntity()->GetContentLength();
+        }
+    }
+    if (self->m_InputStream.IsNull()) return ATX_ERROR_INVALID_STATE;
     NPT_Position _position;
     ATX_Result result = MapResult(self->m_InputStream->Tell(_position));
     if (position) *position = _position;
@@ -235,12 +249,8 @@ HttpInputStream::GetSize(ATX_InputStream* _self,
                          ATX_Size*        size)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
-    if (self->m_Response) {
-        if (size) *size = self->m_Response->GetEntity()->GetContentLength();
-        return ATX_SUCCESS;
-    } else {
-        return ATX_ERROR_INVALID_STATE;
-    }
+    *size = self->m_ContentLength;
+    return ATX_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -251,6 +261,8 @@ HttpInputStream::GetAvailable(ATX_InputStream* _self,
                               ATX_Size*        available)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
+    *available = 0;
+    if (self->m_InputStream.IsNull()) return ATX_ERROR_INVALID_STATE;
     NPT_Size _available;
     ATX_Result result = MapResult(self->m_InputStream->GetAvailable(_available));
     if (available) *available = _available;
@@ -261,20 +273,45 @@ HttpInputStream::GetAvailable(ATX_InputStream* _self,
 |   HttpInputStream::SendRequest
 +---------------------------------------------------------------------*/
 BLT_Result
-HttpInputStream::SendRequest()
+HttpInputStream::SendRequest(NPT_Position position)
 {
     // send the request
-    NPT_Result        result = BLT_FAILURE;
-    NPT_HttpRequest   request(m_Url, NPT_HTTP_METHOD_GET);
+    NPT_Result      result = BLT_FAILURE;
+    NPT_HttpRequest request(m_Url, NPT_HTTP_METHOD_GET);
 
     // delete any previous response we may have
     delete m_Response;
+    m_Response = NULL;
+    m_InputStream = NULL;
 
+    // handle a non-zero start position
+    if (position) {
+        if (m_ContentLength == position) {
+            // special case: seek to end of stream
+            m_Eos = true;
+            return BLT_SUCCESS;
+        }
+        NPT_String range = "bytes="+NPT_String::FromInteger(position);
+        range += "-";
+        request.GetHeaders().SetHeader(NPT_HTTP_HEADER_RANGE, range);
+    }
+
+    // send the request
     result = m_HttpClient.SendRequest(request, m_Response);
     if (NPT_FAILED(result)) return result;
 
     switch (m_Response->GetStatusCode()) {
         case 200:
+            // if this is a Range request, expect a 206 instead
+            if (position) return BLT_ERROR_PROTOCOL_FAILURE;
+            m_Response->GetEntity()->GetInputStream(m_InputStream);
+            m_ContentLength = m_Response->GetEntity()->GetContentLength();
+            result = BLT_SUCCESS;
+            break;
+
+        case 206:
+            // if this is not a Range request, expect a 200 instead
+            if (position == 0) return BLT_ERROR_PROTOCOL_FAILURE;
             m_Response->GetEntity()->GetInputStream(m_InputStream);
             result = BLT_SUCCESS;
             break;

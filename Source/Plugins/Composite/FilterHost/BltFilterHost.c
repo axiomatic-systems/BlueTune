@@ -353,8 +353,8 @@ FilterHostModule_Probe(BLT_Module*              self,
                 }
 
                 /* check that the in and out formats are supported */
-                if (BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
-                                       constructor->spec.output.media_type)) {
+                if (!BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
+                                        constructor->spec.output.media_type)) {
                     return BLT_FAILURE;
                 }
             } else {
@@ -382,8 +382,8 @@ FilterHostModule_Probe(BLT_Module*              self,
                 }
 
                 /* check that the in and out formats are supported */
-                if (BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
-                                       constructor->spec.output.media_type)) {
+                if (!BLT_Pcm_CanConvert(constructor->spec.input.media_type, 
+                                        constructor->spec.output.media_type)) {
                     return BLT_FAILURE;
                 }
             }

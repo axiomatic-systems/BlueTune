@@ -298,7 +298,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     // update the stream
     BLT_StreamInfo stream_info;
-    stream_info.duration = self->input.mp4_track->GetDurationMs();
+    stream_info.duration        = self->input.mp4_track->GetDurationMs();
     stream_info.channel_count   = audio_desc->GetChannelCount();
     stream_info.sample_rate     = audio_desc->GetSampleRate();
     stream_info.data_type = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
@@ -434,7 +434,10 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
     } else {
         AP4_Sample sample;
         AP4_Result result = self->input.mp4_track->ReadSample(self->output.sample, sample, *self->output.sample_buffer);
-        if (AP4_FAILED(result)) return BLT_ERROR_PORT_HAS_NO_DATA;
+        if (AP4_FAILED(result)) {
+            ATX_LOG_WARNING_1("Mp4ParserOutput::GetPacket - ReadSample failed (%d)", result);
+            return BLT_ERROR_PORT_HAS_NO_DATA;
+        }
 
         AP4_Size packet_size = self->output.sample_buffer->GetDataSize();
         result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,

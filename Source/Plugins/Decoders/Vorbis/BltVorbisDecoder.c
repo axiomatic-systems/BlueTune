@@ -224,6 +224,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
     if (info == NULL) return BLT_ERROR_INVALID_MEDIA_FORMAT;
     self->output.media_type.sample_rate     = info->rate;
     self->output.media_type.channel_count   = info->channels;
+    self->output.media_type.channel_mask    = 0;
     self->output.media_type.bits_per_sample = 16;
     self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
 
@@ -650,8 +651,8 @@ VorbisDecoder_Seek(BLT_MediaNode* _self,
     ov_result = ov_time_seek(&self->input.vorbis_file, time);
     if (ov_result != 0) return BLT_FAILURE;
 
-    /* set the mode so that the nodes down the chaine know the seek has */
-    /* already been done on the stream                                  */
+    /* set the mode so that the nodes down the chain know the seek has */
+    /* already been done on the stream                                 */
     *mode = BLT_SEEK_MODE_IGNORE;
 
     return BLT_SUCCESS;

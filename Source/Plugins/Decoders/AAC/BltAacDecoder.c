@@ -146,7 +146,9 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                                      BLT_MediaPacket_GetPayloadBuffer(packet),
                                      BLT_MediaPacket_GetPayloadSize(packet),
                                      self->sample_buffer);
-    if (MLO_FAILED(result)) return BLT_ERROR_PORT_HAS_NO_DATA;
+    if (MLO_FAILED(result)) {
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
 
     /* check that the sample buffer matches our current media type */
     sample_format = MLO_SampleBuffer_GetFormat(self->sample_buffer);
@@ -156,6 +158,7 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->output.media_type.sample_rate     = sample_format->sample_rate;
         self->output.media_type.bits_per_sample = 16;
         self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+        self->output.media_type.channel_mask    = 0;
     } else {
         /* we've already setup a media type, check that this is the same */
         if (self->output.media_type.sample_rate   != sample_format->sample_rate || 

@@ -42,22 +42,31 @@
 #define BLT_ERROR_INVALID_INTERFACE     ATX_ERROR_INVALID_INTERFACE
 #define BLT_ERROR_NO_MEDIUM             ATX_ERROR_NO_MEDIUM
 
+/* Error base */
+#ifndef BLT_ERROR_BASE               
+#define BLT_ERROR_BASE                (-40000)
+#endif
+
+/* Generic errors */
+#define BLT_ERROR_BASE_GENERIC        (BLT_ERROR_BASE-0)
+#define BLT_ERROR_PROTOCOL_FAILURE    (BLT_ERROR_BASE_GENERIC-0)
+
 /* Media errors */
-#define BLT_ERROR_BASE_MEDIA          (-5000)
+#define BLT_ERROR_BASE_MEDIA          (BLT_ERROR_BASE-100)
 
 /* Media Node Errors */
-#define BLT_ERROR_BASE_MEDIA_NODE     (-5100)
+#define BLT_ERROR_BASE_MEDIA_NODE     (BLT_ERROR_BASE-200)
 
 /* Media Port errors */
-#define BLT_ERROR_BASE_MEDIA_PORT     (-5200)
+#define BLT_ERROR_BASE_MEDIA_PORT     (BLT_ERROR_BASE-300)
 
 /* Stream Errors */
-#define BLT_ERROR_BASE_STREAM         (-5300)
+#define BLT_ERROR_BASE_STREAM         (BLT_ERROR_BASE-400)
 
 /* Registry errors */
-#define BLT_ERROR_BASE_REGISTRY       (-5400)
+#define BLT_ERROR_BASE_REGISTRY       (BLT_ERROR_BASE-500)
 
 /* Module errors */
-#define BLT_ERROR_BASE_MODULE         (-5500)
+#define BLT_ERROR_BASE_MODULE         (BLT_ERROR_BASE-600)
 
 #endif /* _BLT_ERRORS_H_ */

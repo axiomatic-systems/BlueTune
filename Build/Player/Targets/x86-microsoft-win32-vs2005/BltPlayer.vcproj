@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Neptune"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_DEBUG;ATX_CONFIG_ENABLE_LOGGING"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -106,7 +106,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Config;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\..\Atomix\Source\Atomix;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Atomix\Source\Config;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\Config;..\..\..\..\..\Neptune\Source\Neptune"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;ATX_CONFIG_ENABLE_LOGGING"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"

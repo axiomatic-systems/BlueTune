@@ -8,6 +8,7 @@ env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_MPG123'
 env['BLT_PLUGINS'] = ['FileInput', 
                       'MpegAudioDecoder', 
                       'AacDecoder',
+                      'WmaDecoder',
                       'StreamPacketizer', 
                       'NullOutput',
                       'FileOutput',
@@ -25,4 +26,7 @@ env['BLT_PLUGINS'] = ['FileInput',
 env['BLT_PLUGINS_CDDA_TYPE'] = 'Linux'
 env['BLT_DEFAULT_OUTPUT']    = 'oss:0'
 
-                                    
+### relaxed warnings for WMA9
+env['WMA_ENV'] = env.Copy() 
+LoadTool('gcc-generic', env['WMA_ENV'], gcc_relaxed_warnings=True)  
+         

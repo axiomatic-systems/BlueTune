@@ -102,6 +102,7 @@ CddaInput_Create(BLT_Module*              module,
     BLT_PcmMediaType_Init(&input->media_type);
 	input->media_type.sample_rate     = 44100;
     input->media_type.channel_count   = 2;
+    input->media_type.channel_mask    = 0;
     input->media_type.bits_per_sample = 16;
     input->media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
 

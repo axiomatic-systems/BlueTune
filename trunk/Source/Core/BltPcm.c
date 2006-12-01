@@ -35,6 +35,7 @@ BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type)
     media_type->base.extension_size = sizeof(BLT_PcmMediaType)-sizeof(BLT_MediaType);
     media_type->bits_per_sample = 0;
     media_type->channel_count   = 0;
+    media_type->channel_mask    = 0;
     media_type->sample_format   = 0;
     media_type->sample_rate     = 0;
 }
@@ -178,7 +179,7 @@ BLT_Pcm_WriteFloatLE(void* buffer, BLT_Int32 sample, unsigned int width)
 /*----------------------------------------------------------------------
 |   BLT_Pcm_CanConvert
 +---------------------------------------------------------------------*/
-BLT_Result
+BLT_Boolean
 BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
 {
     const BLT_PcmMediaType* from_pcm = (const BLT_PcmMediaType*)from;
@@ -187,14 +188,14 @@ BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
     /* check that both types are PCM */
     if (from->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM ||
         to->id   != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_FAILURE;
+        return BLT_FALSE;
     }
 
     /* check that the input format is valid */
     if (from_pcm->bits_per_sample == 0 ||
         from_pcm->channel_count == 0   ||
         from_pcm->sample_rate == 0) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_FALSE;
     }
 
     /* check that we support the format */
@@ -202,42 +203,42 @@ BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
         from_pcm->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE &&
         from_pcm->sample_format != BLT_PCM_SAMPLE_FORMAT_FLOAT_BE      &&
         from_pcm->sample_format != BLT_PCM_SAMPLE_FORMAT_FLOAT_LE) {
-        return BLT_FAILURE;
+        return BLT_FALSE;
     }
 
     /* we only support floats in 32bit width */
     if (from_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_LE ||
         from_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_BE) {
-        if (from_pcm->bits_per_sample != 32) return BLT_FAILURE;
+        if (from_pcm->bits_per_sample != 32) return BLT_FALSE;
     }
     if (to_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_LE ||
         to_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_BE) {
-        if (to_pcm->bits_per_sample != 32) return BLT_FAILURE;
+        if (to_pcm->bits_per_sample != 32) return BLT_FALSE;
     }
 
     /* we do not support channel conversions yet */
     if (to_pcm->channel_count   != 0 && 
         from_pcm->channel_count != to_pcm->channel_count) {
-        return BLT_FAILURE;
+        return BLT_FALSE;
     }
 
     /* we do not support sample rate conversions yet */
     if (to_pcm->sample_rate   != 0 && 
         from_pcm->sample_rate != to_pcm->sample_rate) {
-        return BLT_FAILURE;
+        return BLT_FALSE;
     }
 
-    return BLT_SUCCESS;
+    return BLT_TRUE;
 }
 
 /*----------------------------------------------------------------------
 |   BLT_Pcm_ConvertMediaPacket
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Pcm_ConvertMediaPacket(BLT_Core*          core,
-                           BLT_MediaPacket*   in, 
-                           BLT_PcmMediaType*  out_type_spec, 
-                           BLT_MediaPacket**  out)
+BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
+                           BLT_MediaPacket*  in, 
+                           BLT_PcmMediaType* out_type_spec, 
+                           BLT_MediaPacket** out)
 {
     const BLT_PcmMediaType* in_type;
     BLT_PcmMediaType        out_type;

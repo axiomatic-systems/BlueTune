@@ -34,6 +34,7 @@ typedef struct {
     BLT_UInt16    channel_count;
     BLT_UInt8     bits_per_sample;
     BLT_UInt8     sample_format;
+    BLT_UInt32    channel_mask;
 } BLT_PcmMediaType;
 
 /*----------------------------------------------------------------------
@@ -51,7 +52,7 @@ do {                                            \
 |   constants
 +---------------------------------------------------------------------*/
 
-/* PCM sample format IDs */
+/* PCM sample format IDs   */
 /* _NE means Native Endian */
 /* _LE means Little Endian */
 /* _BE means Big Endian    */
@@ -75,6 +76,49 @@ do {                                            \
 #define BLT_PCM_SAMPLE_FORMAT_FLOAT_NE         BLT_PCM_SAMPLE_FORMAT_FLOAT_LE
 #endif
 
+/* channel mask bits */
+#define BLT_PCM_SPEAKER_FRONT_LEFT 	          (1    )
+#define BLT_PCM_SPEAKER_FRONT_RIGHT 	      (1<< 1)
+#define BLT_PCM_SPEAKER_FRONT_CENTER 	      (1<< 2)
+#define BLT_PCM_SPEAKER_LOW_FREQUENCY 	      (1<< 3)
+#define BLT_PCM_SPEAKER_BACK_LEFT 	          (1<< 4)
+#define BLT_PCM_SPEAKER_BACK_RIGHT 	          (1<< 5)
+#define BLT_PCM_SPEAKER_FRONT_LEFT_OF_CENTER  (1<< 6)
+#define BLT_PCM_SPEAKER_FRONT_RIGHT_OF_CENTER (1<< 7)
+#define BLT_PCM_SPEAKER_BACK_CENTER 	      (1<< 8)
+#define BLT_PCM_SPEAKER_SIDE_LEFT 	          (1<< 9)
+#define BLT_PCM_SPEAKER_SIDE_RIGHT 	          (1<<10)
+#define BLT_PCM_SPEAKER_TOP_CENTER 	          (1<<11)
+#define BLT_PCM_SPEAKER_TOP_FRONT_LEFT 	      (1<<12)
+#define BLT_PCM_SPEAKER_TOP_FRONT_CENTER 	  (1<<13)
+#define BLT_PCM_SPEAKER_TOP_FRONT_RIGHT 	  (1<<14)
+#define BLT_PCM_SPEAKER_TOP_BACK_LEFT 	      (1<<15)
+#define BLT_PCM_SPEAKER_TOP_BACK_CENTER 	  (1<<16)
+#define BLT_PCM_SPEAKER_TOP_BACK_RIGHT 	      (1<<17)
+
+/* predefined channel masks */
+#define BLT_CHANNEL_MASK_MONO            (BLT_PCM_SPEAKER_FRONT_CENTER)
+#define BLT_CHANNEL_MASK_STEREO          (BLT_PCM_SPEAKER_FRONT_LEFT | BLT_PCM_SPEAKER_FRONT_RIGHT)
+#define BLT_CHANNEL_MASK_QUAD            (BLT_PCM_SPEAKER_FRONT_LEFT | BLT_PCM_SPEAKER_FRONT_RIGHT | \
+                                          BLT_PCM_SPEAKER_BACK_LEFT  | BLT_PCM_SPEAKER_BACK_RIGHT)
+#define BLT_CHANNEL_MASK_SURROUND        (BLT_PCM_SPEAKER_FRONT_LEFT   | BLT_PCM_SPEAKER_FRONT_RIGHT | \
+                                          BLT_PCM_SPEAKER_FRONT_CENTER | BLT_PCM_SPEAKER_BACK_CENTER)
+#define BLT_CHANNEL_MASK_5POINT1         (BLT_PCM_SPEAKER_FRONT_LEFT   | BLT_PCM_SPEAKER_FRONT_RIGHT   | \
+                                          BLT_PCM_SPEAKER_FRONT_CENTER | BLT_PCM_SPEAKER_LOW_FREQUENCY | \
+                                          BLT_PCM_SPEAKER_BACK_LEFT    | BLT_PCM_SPEAKER_BACK_RIGHT)
+#define BLT_CHANNEL_MASK_7POINT1         (BLT_PCM_SPEAKER_FRONT_LEFT           | BLT_PCM_SPEAKER_FRONT_RIGHT   | \
+                                          BLT_PCM_SPEAKER_FRONT_CENTER         | BLT_PCM_SPEAKER_LOW_FREQUENCY | \
+                                          BLT_PCM_SPEAKER_BACK_LEFT            | BLT_PCM_SPEAKER_BACK_RIGHT    | \
+                                          BLT_PCM_SPEAKER_FRONT_LEFT_OF_CENTER | BLT_PCM_SPEAKER_FRONT_RIGHT_OF_CENTER)
+#define BLT_CHANNEL_MASK_5POINT1_SURROUND (BLT_PCM_SPEAKER_FRONT_LEFT   | BLT_PCM_SPEAKER_FRONT_RIGHT   | \
+                                           BLT_PCM_SPEAKER_FRONT_CENTER | BLT_PCM_SPEAKER_LOW_FREQUENCY | \
+                                           BLT_PCM_SPEAKER_SIDE_LEFT    | BLT_PCM_SPEAKER_SIDE_RIGHT)
+#define BLT_CHANNEL_MASK_7POINT1_SURROUND (BLT_PCM_SPEAKER_FRONT_LEFT   | BLT_PCM_SPEAKER_FRONT_RIGHT   | \
+                                           BLT_PCM_SPEAKER_FRONT_CENTER | BLT_PCM_SPEAKER_LOW_FREQUENCY | \
+                                           BLT_PCM_SPEAKER_BACK_LEFT    | BLT_PCM_SPEAKER_BACK_RIGHT    | \
+                                           BLT_PCM_SPEAKER_SIDE_LEFT    | BLT_PCM_SPEAKER_SIDE_RIGHT)
+
+
 /*----------------------------------------------------------------------
 |   globals
 +---------------------------------------------------------------------*/
@@ -86,7 +130,7 @@ extern const BLT_MediaType BLT_GenericPcmMediaType;
 extern void
 BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type);
 
-extern BLT_Result
+extern BLT_Boolean
 BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to);
 
 extern BLT_Result

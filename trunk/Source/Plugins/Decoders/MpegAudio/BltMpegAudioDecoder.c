@@ -184,7 +184,7 @@ MpegAudioDecoder_UpdateInfo(MpegAudioDecoder* self,
     /* check if the media format has changed */
     if (frame_info->sample_rate   != self->output.media_type.sample_rate   ||
         frame_info->channel_count != self->output.media_type.channel_count ||
-        frame_info->level         != self->mpeg_info.level             ||
+        frame_info->level         != self->mpeg_info.level                 ||
         frame_info->layer         != self->mpeg_info.layer) {
 
         if (self->output.media_type.sample_rate   != 0 ||

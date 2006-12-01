@@ -203,6 +203,7 @@ AiffParser_OnCommChunk(AiffParser*      self,
 
     /* update the format */
     self->output.media_type.channel_count   = num_channels;
+    self->output.media_type.channel_mask    = 0;
     self->output.media_type.bits_per_sample = (BLT_UInt8)sample_size;
     self->output.media_type.sample_rate     = sample_rate;
 

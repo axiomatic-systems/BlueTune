@@ -257,10 +257,47 @@ if env['build_config'] == 'Debug':
     MLO_EXTRA_CPP_DEFINES = {'MLO_DEBUG':None}
 else:
     MLO_EXTRA_CPP_DEFINES = {}
-BuildModule(name                  = 'Melo',
-            build_source_dirs     = ['.'],
-            source_root           = MLO_SOURCE_ROOT,
-            extra_cpp_defines     = MLO_EXTRA_CPP_DEFINES)
+BuildModule(name              = 'Melo',
+            build_source_dirs = ['.'],
+            source_root       = MLO_SOURCE_ROOT,
+            extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
+
+############################ WMA9
+WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
+SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
+WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
+                         'ENABLE_LPC':None,
+                         'ENABLE_ALL_ENCOPT':None,
+                         'DISABLE_OPT':None,
+                         'BITSTREAM_CORRUPTION_ASSERTS':None,
+                         'BUILD_WMASTD':None,
+                         'BUILD_WMAPRO':None,
+                         'BUILD_WMALSL':None,
+                         'BUILD_WMAPRO_PLLM':None,
+                         'WMAAPI_NO_DRM':None,
+                         'WMAAPI_NO_DRM_STREAM':None}  
+if env['build_config'] == 'Release':
+    WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
+BuildModule(name               = 'WMA9',
+            build_source_dirs  = ['audio/wmaudio/v9/asfparse_s',
+                                  'audio/wmaudio/v9/common',
+                                  'audio/wmaudio/v9/include',
+                                  'audio/wmaudio/v9/decoder',
+                                  'audio/wmaudio/v9/fmthlpr',
+                                  'audio/wmaudio/v9/win32/decoder'],
+            build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
+                                  ['mf/common/include',
+                                   'audio/common/include',
+                                   'audio/wmaudio/v9/common/include',
+                                   'audio/wmaudio/v9/asfparse_s',
+                                   'audio/wmaudio/v9/common',
+                                   'audio/wmaudio/v9/decoder',
+                                   'audio/wmaudio/v9/fmthlpr',
+                                   'audio/wmaudio/v9/include',
+                                   'audio/wmaudio/v9/win32']],
+            source_root        = WMA_SOURCE_ROOT,
+            environment        = env['WMA_ENV'],
+            extra_cpp_defines  = WMA_EXTRA_CPP_DEFINES)
 
 ############################# Fluo
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
@@ -307,6 +344,7 @@ PluginsSettings = {
     'FlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
     'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':'Decoders/AAC'             },
+    'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',        'src_dir':'Decoders/WMA'             },
     'WaveParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
     'AiffParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
     'TagParser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },
@@ -324,6 +362,7 @@ PluginsExtras = {
     'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include']},
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
     'AacDecoder':       {'dep_mods':['Melo']},   
+    'WmaDecoder':       {'dep_mods':['WMA9'], 'env':env['WMA_ENV']},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
                          'dep_mods':['FLAC']},
@@ -341,16 +380,19 @@ for plugin in env['BLT_PLUGINS']:
     extra_dep_mods = []
     extra_lib_dirs = []
     extra_src_dirs = []
+    extra_env      = None
     if PluginsExtras.has_key(plugin):
         if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes += PluginsExtras[plugin]['inc_dirs']
         if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods += PluginsExtras[plugin]['dep_mods']
         if PluginsExtras[plugin].has_key('lib_dirs'): extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
         if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
+        if PluginsExtras[plugin].has_key('env'):      extra_env      = PluginsExtras[plugin]['env']
     BuildModule(name               = 'Blt'+plugin,
                 build_source_dirs  = ['Plugins/'+PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
                 build_include_dirs = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                 linked_modules     = extra_dep_mods,
                 included_modules   = ['Atomix', 'Neptune', 'BltCore', 'BltPluginsSupport'],
+                environment        = extra_env,
                 extra_lib_dirs     = extra_lib_dirs)
 
 plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])

@@ -111,6 +111,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltAacDecoder.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_WMA_DECODER)
+#include "BltWmaDecoder.h"
+#endif
+
 /* outputs */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT)
 #include "BltWin32Output.h"
@@ -334,6 +338,15 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_AAC_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_AacDecoderModule");
     result = BLT_AacDecoderModule_GetModuleObject(&module);
+    if (BLT_FAILED(result)) return result;
+    result = BLT_Core_RegisterModule(core, module);
+    if (BLT_FAILED(result)) return result;
+#endif
+
+    /* wma decoder */
+#if defined(BLT_CONFIG_MODULES_ENABLE_WMA_DECODER)
+    ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_WmaDecoderModule");
+    result = BLT_WmaDecoderModule_GetModuleObject(&module);
     if (BLT_FAILED(result)) return result;
     result = BLT_Core_RegisterModule(core, module);
     if (BLT_FAILED(result)) return result;

@@ -19,13 +19,15 @@
 /*----------------------------------------------------------------------
 |    CHECK
 +---------------------------------------------------------------------*/
-#define CHECK(x)                                     \
- do {                                                \
-    if (!(x)) {                                      \
-        fprintf(stderr, "FAILED line %d", __LINE__); \
-        abort();                                     \
-    }                                                \
-} while (0)
+static void CHECK(int x)                             
+{               
+    static unsigned long counter = 0;
+    ++counter;
+    if (!(x)) {                                      
+        fprintf(stderr, "FAILED line %d", __LINE__); 
+        abort();                                     
+    }                                                
+}
 
 /*----------------------------------------------------------------------
 |    Test

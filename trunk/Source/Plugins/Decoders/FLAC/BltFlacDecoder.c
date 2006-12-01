@@ -437,6 +437,7 @@ FlacDecoder_WriteCallback(const FLAC__SeekableStreamDecoder* decoder,
     /* set the packet media type */
     self->output.media_type.sample_rate     = frame->header.sample_rate;
     self->output.media_type.channel_count   = frame->header.channels;
+    self->output.media_type.channel_mask    = 0;
     self->output.media_type.bits_per_sample = frame->header.bits_per_sample;
     self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
 
@@ -684,10 +685,6 @@ FlacDecoder_SetupPorts(FlacDecoder* self, BLT_MediaTypeId flac_type_id)
     self->output.eos                    = BLT_FALSE;
     self->output.packet_count           = 0;
     BLT_PcmMediaType_Init(&self->output.media_type);
-    self->output.media_type.sample_rate     = 0;
-    self->output.media_type.channel_count   = 0;
-    self->output.media_type.bits_per_sample = 0;
-    self->output.media_type.sample_format   = 0;
 
     /* create a list of output packets */
     result = ATX_List_Create(&self->output.packets);

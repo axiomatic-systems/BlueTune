@@ -10,7 +10,7 @@
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
-#include "AP4.h"
+#include "Ap4.h"
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltMp4Parser.h"
@@ -50,6 +50,7 @@ typedef struct {
 class Mp4StreamAdapter : public AP4_ByteStream {
 public:
     Mp4StreamAdapter(ATX_InputStream* stream);
+    virtual ~Mp4StreamAdapter();
 
     // AP4_ByteStream methods
     virtual AP4_Result Read(void*     buffer, 
@@ -68,7 +69,6 @@ public:
 
 private:
     // methods
-    ~Mp4StreamAdapter();
     AP4_Result MapResult(ATX_Result result);
 
     // members
@@ -261,6 +261,13 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     self->input.mp4_file = new AP4_File(*stream_adapter);
     stream_adapter->Release();
 
+    /* declare variables here to avoid GCC warnings */
+    AP4_SampleDescription*      sample_desc;
+    AP4_MpegSampleDescription*  mpeg_desc;
+    AP4_AudioSampleDescription* audio_desc;
+    const AP4_DataBuffer*       decoder_info;
+    BLT_StreamInfo              stream_info;
+
     /* find the audio track */
     AP4_Movie* movie = self->input.mp4_file->GetMovie();
     if (movie == NULL) {
@@ -274,34 +281,33 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     }
 
     // check that the track is of the right type
-    AP4_SampleDescription* sdesc = self->input.mp4_track->GetSampleDescription(0);
-    if (sdesc == NULL) {
+    sample_desc = self->input.mp4_track->GetSampleDescription(0);
+    if (sample_desc == NULL) {
         ATX_LOG_FINE("Mp4ParserInput::SetStream - no sample description");
         goto fail;
     }
-    if (sdesc->GetType() != AP4_SampleDescription::TYPE_MPEG) {
+    if (sample_desc->GetType() != AP4_SampleDescription::TYPE_MPEG) {
         ATX_LOG_FINE("Mp4ParserInput::SetStream - not an MPEG audio track");
         goto fail;
     }
-    AP4_MpegSampleDescription* mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sdesc);
-    AP4_AudioSampleDescription* audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sdesc);
+    mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
+    audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
     if (mpeg_desc == NULL || audio_desc == NULL) {
         ATX_LOG_FINE("Mp4ParserInput::SetStream - cannot find audio description or mpeg description");
         goto fail;
     }
 
-    const AP4_DataBuffer* decoder_info = mpeg_desc->GetDecoderInfo();
+    decoder_info = mpeg_desc->GetDecoderInfo();
     if (decoder_info == NULL) {
         ATX_LOG_FINE("Mp4ParserInput::SetStream - no decoder info");
         goto fail;
     }
 
     // update the stream
-    BLT_StreamInfo stream_info;
     stream_info.duration        = self->input.mp4_track->GetDurationMs();
     stream_info.channel_count   = audio_desc->GetChannelCount();
     stream_info.sample_rate     = audio_desc->GetSampleRate();
-    stream_info.data_type = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
+    stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
     stream_info.average_bitrate = mpeg_desc->GetAvgBitrate();
     stream_info.nominal_bitrate = mpeg_desc->GetAvgBitrate();
     stream_info.mask = BLT_STREAM_INFO_MASK_DURATION        |

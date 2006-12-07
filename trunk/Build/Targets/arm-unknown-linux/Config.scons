@@ -1,11 +1,15 @@
-LoadTool('gcc-generic', env)
+LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux')
 
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
 env['ATX_EXTRA_LIBS']='m'
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
+env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_FFMPEG'
+env['MLO_CPP_DEFINES'] = {'MLO_CONFIG_FIXED':None}
 env['BLT_PLUGINS'] = ['FileInput', 
                       'MpegAudioDecoder', 
+                      'FlacDecoder',
+                      'AacDecoder',
                       'StreamPacketizer', 
                       'NullOutput',
                       'FileOutput',
@@ -14,12 +18,14 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'DebugOutput',
                       'WaveParser',
                       'AiffParser',
+                      'Mp4Parser',
                       'WaveFormatter',
                       'SilenceRemover',
                       'GainControlFilter',
                       'PcmAdapter',
-                      'OssOutput']
+                      'OssOutput',
+                      'VorbisDecoder']
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
-env['BLT_DEFAULT_OUTPUT']    = 'oss:0'
-
+env['BLT_DEFAULT_OUTPUT']           = 'oss:0'
+env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
                                     

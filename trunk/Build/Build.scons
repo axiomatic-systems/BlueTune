@@ -32,7 +32,7 @@ def GetDirPath(drct):
             return SourceDirLookup[key]+drct[len(key):]
     return '#/'+drct
     
-def DeclareBuildDir(drct):
+def DeclareBuildDir(env, drct):
     env.BuildDir(drct, GetDirPath(drct), duplicate=0)
     
 def GetIncludeDirs(modules, exclude=None):
@@ -122,14 +122,14 @@ class BuildModule(Module):
         # and compute the list of source files to build
         sources = []
         for drct in Split(build_source_dirs):
-            DeclareBuildDir(drct)
+            DeclareBuildDir(self.env, drct)
             sources += GlobSources(drct, build_source_pattern, excluded_files)
             
         # add cherry-picked files
         for drct in build_source_files.keys():
             pattern = build_source_files[drct]
             drct_path = source_root+'/'+drct
-            DeclareBuildDir(drct_path)
+            DeclareBuildDir(self.env, drct_path)
             sources += GlobSources(drct_path, pattern)
 
         # calculate our build include path
@@ -145,15 +145,17 @@ class BuildModule(Module):
         if type == 'SharedLibrary':
             libs = GetLibraries(Split(linked_modules))
             self.product = self.env.SharedLibrary(target=name, LIBS=libs, source=sources)
+            self.env.Alias(name, self.product)
         elif type == 'StaticLibrary':
             self.product = self.env.Library(target=name, source=sources)
+            self.env.Alias(name, self.product)
         elif type == 'Executable':
             # libraries    
             libs = GetLibraries(linked_modules)
             lib_dirs = GetLibraryDirs(linked_modules)
             self.product = self.env.Program(target=name, source=sources, LIBS=libs, LIBPATH=lib_dirs, CPPPATH=cpp_path)
-            
-        self.env.Alias(name, self.product)
+            self.env.Alias(name+'-app', self.product)    
+        
 
     
         
@@ -253,19 +255,45 @@ BuildModule(name                  = 'Bento4',
 ############################ Melo
 MLO_SOURCE_ROOT = 'Melo/Source'
 SourceDirLookup[MLO_SOURCE_ROOT] = '#/../Melo/Source'  
-if env['build_config'] == 'Debug':
-    MLO_EXTRA_CPP_DEFINES = {'MLO_DEBUG':None}
+if env.has_key('MLO_CPP_DEFINES'):
+    MLO_EXTRA_CPP_DEFINES = env['MLO_CPP_DEFINES'] 
 else:
     MLO_EXTRA_CPP_DEFINES = {}
+
+if env['build_config'] == 'Debug':
+    MLO_EXTRA_CPP_DEFINES['MLO_DEBUG'] = None
+
 BuildModule(name              = 'Melo',
             build_source_dirs = ['.'],
             source_root       = MLO_SOURCE_ROOT,
             extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
 
+############################# Fluo
+if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
+    BuildModule(name        = 'FloDecoderEngine',
+                source_root = 'ThirdParty/mpg123/mpglib')
+    fluo_decoder_deps = ['FloDecoderEngine']
+    fluo_decoder_lib_dirs = []
+    fluo_decoder_inc_dirs = []
+elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_FFMPEG'):
+    fluo_decoder_deps = ['avcodec']
+    fluo_decoder_lib_dirs = ['ThirdParty/ffmpeg/Targets/'+env['target']+'/lib']
+    fluo_decoder_inc_dirs = ['ThirdParty/ffmpeg/Targets/'+env['target']+'/include']
+else:
+    raise 'FLO_DECODER_ENGINE not set'
+
+BuildModule(name               = 'Fluo',
+            build_source_dirs  = ['Fluo'],
+            build_include_dirs = fluo_decoder_inc_dirs,
+            linked_modules     = ['Atomix'] + fluo_decoder_deps,
+            extra_cpp_defines  = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']},
+            extra_lib_dirs     = fluo_decoder_lib_dirs)
+
 ############################ WMA9
-WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
-SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
-WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
+if os.environ.has_key('WMSDK_HOME'):
+    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
+    SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
+    WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
                          'ENABLE_LPC':None,
                          'ENABLE_ALL_ENCOPT':None,
                          'DISABLE_OPT':None,
@@ -276,9 +304,10 @@ WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None,
                          'BUILD_WMAPRO_PLLM':None,
                          'WMAAPI_NO_DRM':None,
                          'WMAAPI_NO_DRM_STREAM':None}  
-if env['build_config'] == 'Release':
-    WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
-BuildModule(name               = 'WMA9',
+    if env['build_config'] == 'Release':
+        WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
+    wma_env = env.has_key('WMA_ENV') and env['WMA_ENV'] or None
+    BuildModule(name               = 'WMA9',
             build_source_dirs  = ['audio/wmaudio/v9/asfparse_s',
                                   'audio/wmaudio/v9/common',
                                   'audio/wmaudio/v9/include',
@@ -296,23 +325,8 @@ BuildModule(name               = 'WMA9',
                                    'audio/wmaudio/v9/include',
                                    'audio/wmaudio/v9/win32']],
             source_root        = WMA_SOURCE_ROOT,
-            environment        = env['WMA_ENV'],
+            environment        = wma_env,
             extra_cpp_defines  = WMA_EXTRA_CPP_DEFINES)
-
-############################# Fluo
-if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
-    BuildModule(name        = 'FloDecoderEngine',
-                source_root = 'ThirdParty/mpg123/mpglib')
-elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_FFMPEG'):
-    BuildModule(name = 'FloDecoderEngine',
-                source_root = 'ThirdParty/foo/bar/')
-else:
-    raise 'FLO_DECODER_ENGINE not set'
-
-BuildModule(name              = 'Fluo',
-            build_source_dirs = ['Fluo'],
-            linked_modules    = ['Atomix', 'FloDecoderEngine'],
-            extra_cpp_defines = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']})
 
 ############################# Core
 BuildModule(name                  = 'BltCore',
@@ -362,7 +376,7 @@ PluginsExtras = {
     'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include']},
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
     'AacDecoder':       {'dep_mods':['Melo']},   
-    'WmaDecoder':       {'dep_mods':['WMA9'], 'env':env['WMA_ENV']},   
+    'WmaDecoder':       {'dep_mods':['WMA9'], 'env':env.has_key('WMA_ENV') and env['WMA_ENV'] or env},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
                          'dep_mods':['FLAC']},
@@ -375,28 +389,38 @@ PluginsExtras = {
 if 'CddaInput' in env['BLT_PLUGINS']:
     PluginsExtras['CddaInput'] = {'src_dirs':['Plugins/Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
 
+if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
+    print "******************", env['BLT_PLUGINS_VORBIS_LIBRARY']
+    if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
+        PluginsExtras['VorbisDecoder']['dep_mods'] = ['vorbisidec']
+        PluginsExtras['VorbisDecoder']['flags'] = {'BLT_CONFIG_VORBIS_USE_TREMOR':None}
+
 for plugin in env['BLT_PLUGINS']:
     extra_includes = []
     extra_dep_mods = []
     extra_lib_dirs = []
     extra_src_dirs = []
+    extra_flags    = {}
     extra_env      = None
     if PluginsExtras.has_key(plugin):
         if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes += PluginsExtras[plugin]['inc_dirs']
         if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods += PluginsExtras[plugin]['dep_mods']
         if PluginsExtras[plugin].has_key('lib_dirs'): extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
         if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
+        if PluginsExtras[plugin].has_key('flags'):    extra_flags    = PluginsExtras[plugin]['flags']
         if PluginsExtras[plugin].has_key('env'):      extra_env      = PluginsExtras[plugin]['env']
     BuildModule(name               = 'Blt'+plugin,
                 build_source_dirs  = ['Plugins/'+PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
                 build_include_dirs = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                 linked_modules     = extra_dep_mods,
                 included_modules   = ['Atomix', 'Neptune', 'BltCore', 'BltPluginsSupport'],
-                environment        = extra_env,
-                extra_lib_dirs     = extra_lib_dirs)
+                extra_lib_dirs     = extra_lib_dirs,
+                extra_cpp_defines  = extra_flags,
+                environment        = extra_env)
 
 plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])
 plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '\\"'+env['BLT_DEFAULT_OUTPUT']+'\\"'
+
 BuildModule(name               = 'BltPlugins',
             build_source_files = {'Plugins/Common':'BltBuiltins.c'},
             linked_modules     = ['Atomix', 'BltCore', 'BltPluginsSupport']+['Blt'+p for p in env['BLT_PLUGINS']],

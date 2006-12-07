@@ -35,7 +35,9 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32")
 /*----------------------------------------------------------------------
 |   options
 +---------------------------------------------------------------------*/
+#if !defined(_WIN32_WCE)
 #define BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE 
+#endif
 
 #if defined(BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
 #include <mmreg.h>

@@ -358,12 +358,12 @@ Registry_FindKeyByName(Registry*   registry,
         if (*look == '/' || *look == '\0') {
             /* find the first part of the key in the subkeys */
             if (look != name) {
-                Key* subkey = Key_FindSubKey(key, name, look-name);
+                Key* subkey = Key_FindSubKey(key, name, (BLT_Size)(look-name));
                 if (subkey == NULL) {
                     /* not found */
                     if (create) {
                         /* create the key */
-                        subkey = Key_AddSubKey(key, name, look-name);
+                        subkey = Key_AddSubKey(key, name, (BLT_Size)(look-name));
                     } else {
                         /* we're done */
                         return NULL;

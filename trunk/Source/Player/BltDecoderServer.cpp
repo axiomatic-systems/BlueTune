@@ -259,13 +259,13 @@ BLT_DecoderServer::UpdateStatus()
         unsigned long ratio = status.position.range/m_PositionUpdateRange;
         unsigned long offset;
         if (ratio == 0) {
- 	    offset = 0;
-	} else {
-	    offset = status.position.offset/ratio;
-	}
-	if (offset != m_DecoderStatus.position.offset) {
-	    m_DecoderStatus.position.offset = offset;
-	    NotifyPosition();
+ 	        offset = 0;
+	    } else {
+	        offset = status.position.offset/ratio;
+	    }
+	    if (offset != m_DecoderStatus.position.offset) {
+	        m_DecoderStatus.position.offset = offset;
+	        NotifyPosition();
         }
     }
 

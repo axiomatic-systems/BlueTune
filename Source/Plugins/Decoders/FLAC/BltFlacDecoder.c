@@ -24,7 +24,7 @@
 #include "BltReplayGain.h"
 
 #include "FLAC/stream_decoder.h"
-#include "FLAC/seekable_stream_decoder.h"
+/*#include "FLAC/seekable_stream_decoder.h"*/
 
 /*----------------------------------------------------------------------
 |   logging
@@ -52,7 +52,7 @@ typedef struct {
     ATX_InputStream*                stream;
     BLT_Size                        size;
     BLT_MediaTypeId                 media_type_id;
-    FLAC__SeekableStreamDecoder*    decoder;
+    FLAC__StreamDecoder*            decoder;
     FLAC__StreamMetadata_StreamInfo stream_info;
 } FlacDecoderInput;
 
@@ -176,9 +176,9 @@ FlacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                             BLT_MediaPacket**   packet)
 {
     FlacDecoder* self = ATX_SELF_M(output, FlacDecoder, BLT_PacketProducer);
-    FLAC__SeekableStreamDecoderState flac_state;
-    FLAC__bool                       flac_result;
-    BLT_Result                       result;
+    FLAC__StreamDecoderState flac_state;
+    FLAC__bool               flac_result;
+    BLT_Result               result;
 
     /* check for EOS */
     if (self->output.eos) {
@@ -208,11 +208,11 @@ FlacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         }
 
         /* no more data available, decode some more */
-        flac_state = FLAC__seekable_stream_decoder_get_state(self->input.decoder);
-        if (flac_state == FLAC__SEEKABLE_STREAM_DECODER_OK) {
+        flac_state = FLAC__stream_decoder_get_state(self->input.decoder);
+        if (flac_state == FLAC__STREAM_DECODER_OK) {
             flac_result = 
-                FLAC__seekable_stream_decoder_process_single(self->input.decoder);
-            flac_state = FLAC__seekable_stream_decoder_get_state(self->input.decoder);
+                FLAC__stream_decoder_process_single(self->input.decoder);
+            flac_state = FLAC__stream_decoder_get_state(self->input.decoder);
         } else {
             break;
         }
@@ -264,7 +264,7 @@ ATX_END_INTERFACE_MAP
 /*----------------------------------------------------------------------
 |   FlacDecoder_ReadCallback
 +---------------------------------------------------------------------*/
-static FLAC__SeekableStreamDecoderReadStatus 
+static FLAC__StreamDecoderReadStatus 
 FlacDecoder_ReadCallback(const FLAC__SeekableStreamDecoder* flac, 
                          FLAC__byte                         buffer[], 
                          unsigned*                          bytes, 
@@ -725,15 +725,15 @@ FlacDecoder_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* create FLAC self */
-    self->input.decoder = FLAC__seekable_stream_decoder_new();
+    self->input.decoder = FLAC__stream_decoder_new();
 
     /* setup the flac decoder */
-    FLAC__seekable_stream_decoder_set_client_data(self->input.decoder, self);
-    FLAC__seekable_stream_decoder_set_read_callback(self->input.decoder,
-                                                    FlacDecoder_ReadCallback);
-    FLAC__seekable_stream_decoder_set_seek_callback(self->input.decoder,
-                                                    FlacDecoder_SeekCallback);
-    FLAC__seekable_stream_decoder_set_tell_callback(self->input.decoder,
+    FLAC__stream_decoder_set_client_data(self->input.decoder, self);
+    FLAC__stream_decoder_set_read_callback(self->input.decoder,
+                                           FlacDecoder_ReadCallback);
+    FLAC__stream_decoder_set_seek_callback(self->input.decoder,
+                                           FlacDecoder_SeekCallback);
+    FLAC__stream_decoder_set_tell_callback(self->input.decoder,
                                                     FlacDecoder_TellCallback);
     FLAC__seekable_stream_decoder_set_length_callback(self->input.decoder,
                                                       FlacDecoder_LengthCallback);

@@ -148,10 +148,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 |    constants
 +---------------------------------------------------------------------*/
 #if !defined(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME)
-static BLT_CString BLT_BUILTINS_DEFAULT_OUTPUT_NAME="null";
+#define BLT_BUILTINS_DEFAULT_OUTPUT_NAME "null"
 #endif
 #if !defined(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_TYPE)
-static BLT_CString BLT_BUILTINS_DEFAULT_OUTPUT_TYPE="audio/pcm";
+#define BLT_BUILTINS_DEFAULT_OUTPUT_TYPE "audio/pcm"
 #endif
 
 /*----------------------------------------------------------------------

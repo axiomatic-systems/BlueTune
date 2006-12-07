@@ -251,7 +251,7 @@ StreamNode_Destroy(StreamNode* self)
     return BLT_SUCCESS;
 }
 
-#if defined(BLT_DEBUG)
+#if defined(ATX_CONFIG_ENABLE_LOGGING)
 /*----------------------------------------------------------------------
 |    Stream_GetProtocolName
 +---------------------------------------------------------------------*/
@@ -303,7 +303,7 @@ Stream_GetTypeName(Stream* self, const BLT_MediaType* type)
       }
     }
 }
-#endif /* defined(BLT_DEBUG) */
+#endif /* defined(ATX_CONFIG_ENABLE_LOGGING) */
 
 /*----------------------------------------------------------------------
 |    Stream_TopologyChanged

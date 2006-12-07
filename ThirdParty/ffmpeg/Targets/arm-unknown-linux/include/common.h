@@ -216,7 +216,7 @@ static inline float floorf(float f) {
 
 #    include "bswap.h"
 
-// Use rip-relative addressing if compiling PIC code on x86-64.
+/* Use rip-relative addressing if compiling PIC code on x86-64. */
 #    if defined(__MINGW32__) || defined(__CYGWIN__) || \
         defined(__OS2__) || (defined (__OpenBSD__) && !defined(__ELF__))
 #        if defined(ARCH_X86_64) && defined(PIC)
@@ -256,7 +256,7 @@ inline void dprintf(const char* fmt,...) {}
 
 #    define av_abort()      do { av_log(NULL, AV_LOG_ERROR, "Abort at %s:%d\n", __FILE__, __LINE__); abort(); } while (0)
 
-//rounded divison & shift
+/*rounded divison & shift*/
 #define RSHIFT(a,b) ((a) > 0 ? ((a) + ((1<<(b))>>1))>>(b) : ((a) + ((1<<(b))>>1)-1)>>(b))
 /* assume b>0 */
 #define ROUNDED_DIV(a,b) (((a)>0 ? (a) + ((b)>>1) : (a) - ((b)>>1))/(b))
@@ -286,7 +286,7 @@ extern const uint32_t inverse[256];
  
 /* define it to include statistics code (useful only for optimizing
    codec efficiency */
-//#define STATS
+/*#define STATS*/
 
 #ifdef STATS
 

@@ -22,8 +22,13 @@
 #include "BltStream.h"
 #include "BltReplayGain.h"
 
+#if defined(BLT_CONFIG_VORBIS_USE_TREMOR)
+#include "ivorbisfile.h"
+#include "ivorbiscodec.h"
+#else
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
+#endif
 
 /*----------------------------------------------------------------------
 |   logging
@@ -429,10 +434,17 @@ VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 
     /* decode some audio samples */
     do {
+#if defined(BLT_CONFIG_VORBIS_USE_TREMOR)
+        bytes_read = ov_read(&self->input.vorbis_file,
+                             buffer,
+                             BLT_VORBIS_DECODER_PACKET_SIZE,
+                             &current_section);
+#else
         bytes_read = ov_read(&self->input.vorbis_file,
                              buffer,
                              BLT_VORBIS_DECODER_PACKET_SIZE,
                              0, 2, 1, &current_section);
+#endif
     } while (bytes_read == OV_HOLE);
     if (bytes_read == 0) {
         self->input.eos = BLT_TRUE;

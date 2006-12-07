@@ -96,7 +96,7 @@ ScanPacket(BLT_MediaPacket* packet,
     *zero_tail = 0;
 
     /* get the media type */
-    BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(void*)&media_type);
+    BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;

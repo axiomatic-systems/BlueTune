@@ -594,7 +594,7 @@ AlsaOutput_PutPacket(BLT_PacketConsumer* _self,
     if (size == 0) return BLT_SUCCESS;
 
     /* get the media type */
-    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
     if (BLT_FAILED(result)) return result;
 
     /* check the media type */

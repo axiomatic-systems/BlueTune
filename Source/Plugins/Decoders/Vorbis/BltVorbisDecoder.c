@@ -641,7 +641,6 @@ VorbisDecoder_Seek(BLT_MediaNode* _self,
                    BLT_SeekPoint* point)
 {
     VorbisDecoder* self = ATX_SELF_EX(VorbisDecoder, BLT_BaseMediaNode, BLT_MediaNode);
-    double         time;
     int            ov_result;
 
     /* estimate the seek point in time_stamp mode */
@@ -656,12 +655,21 @@ VorbisDecoder_Seek(BLT_MediaNode* _self,
     self->output.sample_count = point->sample;
 
     /* seek to the target time */
-    time = 
-        (double)point->time_stamp.seconds +
-        (double)point->time_stamp.nanoseconds/1000000000.0f;
-    ATX_LOG_FINER_1("VorbisDecoder::Seek - sample = %f", time);
-    ov_result = ov_time_seek(&self->input.vorbis_file, time);
-    if (ov_result != 0) return BLT_FAILURE;
+    {
+#if defined(BLT_CONFIG_VORBIS_USE_TREMOR)
+        ogg_int64_t time = 
+            (ogg_int64_t)point->time_stamp.seconds*1000 +
+            (ogg_int64_t)point->time_stamp.nanoseconds/1000000;
+        ATX_LOG_FINER_1("VorbisDecoder::Seek - sample = %ld", (long)time);
+#else
+        double time = 
+            (double)point->time_stamp.seconds +
+            (double)point->time_stamp.nanoseconds/1000000000.0f;
+        ATX_LOG_FINER_1("VorbisDecoder::Seek - sample = %f", time);
+#endif
+        ov_result = ov_time_seek(&self->input.vorbis_file, time);
+        if (ov_result != 0) return BLT_FAILURE;
+    }
 
     /* set the mode so that the nodes down the chain know the seek has */
     /* already been done on the stream                                 */

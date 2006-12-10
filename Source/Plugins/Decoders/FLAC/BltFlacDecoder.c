@@ -209,10 +209,8 @@ FlacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 
         /* no more data available, decode some more */
         flac_state = FLAC__stream_decoder_get_state(self->input.decoder);
-        if (flac_state == FLAC__STREAM_DECODER_OK) {
-            flac_result = 
-                FLAC__stream_decoder_process_single(self->input.decoder);
-            flac_state = FLAC__stream_decoder_get_state(self->input.decoder);
+        if (flac_state != FLAC__STREAM_DECODER_END_OF_STREAM) {
+            flac_result = FLAC__stream_decoder_process_single(self->input.decoder);
         } else {
             break;
         }
@@ -265,10 +263,10 @@ ATX_END_INTERFACE_MAP
 |   FlacDecoder_ReadCallback
 +---------------------------------------------------------------------*/
 static FLAC__StreamDecoderReadStatus 
-FlacDecoder_ReadCallback(const FLAC__SeekableStreamDecoder* flac, 
-                         FLAC__byte                         buffer[], 
-                         unsigned*                          bytes, 
-                         void*                              client_data)
+FlacDecoder_ReadCallback(const FLAC__StreamDecoder* flac, 
+                         FLAC__byte                 buffer[], 
+                         unsigned*                  bytes, 
+                         void*                      client_data)
 {
     FlacDecoder*  self = (FlacDecoder*)client_data;
     BLT_Size      bytes_read;
@@ -289,21 +287,22 @@ FlacDecoder_ReadCallback(const FLAC__SeekableStreamDecoder* flac,
         if (result == BLT_ERROR_EOS) {
             *bytes = 0;
             self->input.eos = BLT_TRUE;
+            return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
         }
-        return FLAC__SEEKABLE_STREAM_DECODER_READ_STATUS_ERROR;
+        return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
     }
 
     *bytes = bytes_read;
-    return FLAC__SEEKABLE_STREAM_DECODER_READ_STATUS_OK;
+    return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 }
 
 /*----------------------------------------------------------------------
 |   FlacDecoder_SeekCallback
 +---------------------------------------------------------------------*/
-static FLAC__SeekableStreamDecoderSeekStatus 
-FlacDecoder_SeekCallback(const FLAC__SeekableStreamDecoder *decoder, 
-                         FLAC__uint64                       offset, 
-                         void*                              client_data)
+static FLAC__StreamDecoderSeekStatus 
+FlacDecoder_SeekCallback(const FLAC__StreamDecoder *decoder, 
+                         FLAC__uint64               offset, 
+                         void*                      client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
     BLT_Result   result;
@@ -319,19 +318,19 @@ FlacDecoder_SeekCallback(const FLAC__SeekableStreamDecoder *decoder,
     ATX_LOG_FINER_1("FlacDecoder::SeekCallback - offset = %ld", offset);
     result = ATX_InputStream_Seek(self->input.stream, (ATX_Offset)offset);
     if (BLT_FAILED(result)) {
-        return FLAC__SEEKABLE_STREAM_DECODER_SEEK_STATUS_ERROR;
+        return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
     }
 
-    return FLAC__SEEKABLE_STREAM_DECODER_SEEK_STATUS_OK;
+    return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
 }
 
 /*----------------------------------------------------------------------
 |   FlacDecoder_TellCallback
 +---------------------------------------------------------------------*/
-static FLAC__SeekableStreamDecoderTellStatus 
-FlacDecoder_TellCallback(const FLAC__SeekableStreamDecoder* flac, 
-                         FLAC__uint64*                      offset, 
-                         void*                              client_data)
+static FLAC__StreamDecoderTellStatus 
+FlacDecoder_TellCallback(const FLAC__StreamDecoder* flac, 
+                         FLAC__uint64*              offset, 
+                         void*                      client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
     ATX_Position stream_offset;
@@ -344,22 +343,22 @@ FlacDecoder_TellCallback(const FLAC__SeekableStreamDecoder* flac,
     result = ATX_InputStream_Tell(self->input.stream, &stream_offset);
     if (BLT_FAILED(result)) {
         *offset = 0;
-        return FLAC__SEEKABLE_STREAM_DECODER_TELL_STATUS_ERROR;
+        return FLAC__STREAM_DECODER_TELL_STATUS_ERROR;
     }
 
     /*BLT_Debug("FlacDecoder::TellCallback - offset = %ld\n", *offset);*/
     *offset = stream_offset;
 
-    return FLAC__SEEKABLE_STREAM_DECODER_TELL_STATUS_OK;
+    return FLAC__STREAM_DECODER_TELL_STATUS_OK;
 }
 
 /*----------------------------------------------------------------------
 |   FlacDecoder_LengthCallback
 +---------------------------------------------------------------------*/
-static FLAC__SeekableStreamDecoderLengthStatus 
-FlacDecoder_LengthCallback(const FLAC__SeekableStreamDecoder* decoder, 
-                           FLAC__uint64*                      stream_length, 
-                           void*                              client_data)
+static FLAC__StreamDecoderLengthStatus 
+FlacDecoder_LengthCallback(const FLAC__StreamDecoder* decoder, 
+                           FLAC__uint64*              stream_length, 
+                           void*                      client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
     BLT_Size     size;
@@ -378,15 +377,15 @@ FlacDecoder_LengthCallback(const FLAC__SeekableStreamDecoder* decoder,
 
     /*BLT_Debug("FlacDecoder::LengthCallback - length = %ld\n", *stream_length);*/
 
-    return FLAC__SEEKABLE_STREAM_DECODER_LENGTH_STATUS_OK;
+    return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
 }
 
 /*----------------------------------------------------------------------
 |   FlacDecoder_EofCallback
 +---------------------------------------------------------------------*/
 static FLAC__bool 
-FlacDecoder_EofCallback(const FLAC__SeekableStreamDecoder* decoder, 
-                        void*                              client_data)
+FlacDecoder_EofCallback(const FLAC__StreamDecoder* decoder, 
+                        void*                      client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
     
@@ -401,10 +400,10 @@ FlacDecoder_EofCallback(const FLAC__SeekableStreamDecoder* decoder,
 |   FlacDecoder_WriteCallback
 +---------------------------------------------------------------------*/
 static FLAC__StreamDecoderWriteStatus 
-FlacDecoder_WriteCallback(const FLAC__SeekableStreamDecoder* decoder, 
-                          const FLAC__Frame*                 frame, 
-                          const FLAC__int32* const           buffer[], 
-                          void*                              client_data)
+FlacDecoder_WriteCallback(const FLAC__StreamDecoder* decoder, 
+                          const FLAC__Frame*         frame, 
+                          const FLAC__int32* const   buffer[], 
+                          void*                      client_data)
 {
     FlacDecoder*     self = (FlacDecoder*)client_data;
     BLT_MediaPacket* packet;
@@ -628,9 +627,9 @@ FlacDecoder_HandleVorbisComment(
 |   FlacDecoder_MetaDataCallback
 +---------------------------------------------------------------------*/
 static void 
-FlacDecoder_MetaDataCallback(const FLAC__SeekableStreamDecoder* decoder, 
-                             const FLAC__StreamMetadata*        metadata, 
-                             void*                              client_data)
+FlacDecoder_MetaDataCallback(const FLAC__StreamDecoder*  decoder, 
+                             const FLAC__StreamMetadata* metadata, 
+                             void*                       client_data)
 {
     FlacDecoder* self = (FlacDecoder*)client_data;
     
@@ -656,9 +655,9 @@ FlacDecoder_MetaDataCallback(const FLAC__SeekableStreamDecoder* decoder,
 |   FlacDecoder_ErrorCallback
 +---------------------------------------------------------------------*/
 static void 
-FlacDecoder_ErrorCallback(const FLAC__SeekableStreamDecoder* decoder, 
-                          FLAC__StreamDecoderErrorStatus     status, 
-                          void*                              client_data)
+FlacDecoder_ErrorCallback(const FLAC__StreamDecoder*     decoder, 
+                          FLAC__StreamDecoderErrorStatus status, 
+                          void*                          client_data)
 {
     /* IGNORE */
     BLT_COMPILER_UNUSED(decoder);
@@ -703,8 +702,9 @@ FlacDecoder_Create(BLT_Module*              module,
                    BLT_CString              parameters, 
                    BLT_MediaNode**          object)
 {
-    FlacDecoder* self;
-    BLT_Result   result;
+    FlacDecoder*                  self;
+    BLT_Result                    result;
+    FLAC__StreamDecoderInitStatus init_status;;
 
     ATX_LOG_FINE("FlacDecoder::Create");
 
@@ -715,9 +715,9 @@ FlacDecoder_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
+    *object = NULL;
     self = ATX_AllocateZeroMemory(sizeof(FlacDecoder));
     if (self == NULL) {
-        *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
 
@@ -728,31 +728,26 @@ FlacDecoder_Create(BLT_Module*              module,
     self->input.decoder = FLAC__stream_decoder_new();
 
     /* setup the flac decoder */
-    FLAC__stream_decoder_set_client_data(self->input.decoder, self);
-    FLAC__stream_decoder_set_read_callback(self->input.decoder,
-                                           FlacDecoder_ReadCallback);
-    FLAC__stream_decoder_set_seek_callback(self->input.decoder,
-                                           FlacDecoder_SeekCallback);
-    FLAC__stream_decoder_set_tell_callback(self->input.decoder,
-                                                    FlacDecoder_TellCallback);
-    FLAC__seekable_stream_decoder_set_length_callback(self->input.decoder,
-                                                      FlacDecoder_LengthCallback);
-    FLAC__seekable_stream_decoder_set_eof_callback(self->input.decoder,
-                                                   FlacDecoder_EofCallback);
-    FLAC__seekable_stream_decoder_set_write_callback(self->input.decoder,
-                                                     FlacDecoder_WriteCallback);
-    FLAC__seekable_stream_decoder_set_metadata_callback(self->input.decoder,
-                                                        FlacDecoder_MetaDataCallback);
-    FLAC__seekable_stream_decoder_set_error_callback(self->input.decoder,
-                                                     FlacDecoder_ErrorCallback);
-    FLAC__seekable_stream_decoder_set_metadata_respond(self->input.decoder,
-        FLAC__METADATA_TYPE_VORBIS_COMMENT);
-    if (FLAC__seekable_stream_decoder_init(self->input.decoder) !=
-        FLAC__SEEKABLE_STREAM_DECODER_OK) {
-        FLAC__seekable_stream_decoder_delete(self->input.decoder);
+    init_status = FLAC__stream_decoder_init_stream(
+        self->input.decoder,
+        FlacDecoder_ReadCallback,
+        FlacDecoder_SeekCallback,
+        FlacDecoder_TellCallback,
+        FlacDecoder_LengthCallback,
+        FlacDecoder_EofCallback,
+        FlacDecoder_WriteCallback,
+        FlacDecoder_MetaDataCallback,
+        FlacDecoder_ErrorCallback,
+        self);
+    if (init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+        ATX_LOG_WARNING_1("FlacDecoder_Create - FLAC__stream_decoder_init_stream failed (%d)", (int)init_status);
+
+        FLAC__stream_decoder_delete(self->input.decoder);
         ATX_FreeMemory((void*)self);
-        return BLT_ERROR_INTERNAL;
+        return BLT_FAILURE;
     }
+    FLAC__stream_decoder_set_metadata_respond(self->input.decoder,
+        FLAC__METADATA_TYPE_VORBIS_COMMENT);
 
     /* setup the input and output ports */
     result = FlacDecoder_SetupPorts(self, 
@@ -801,7 +796,7 @@ FlacDecoder_Destroy(FlacDecoder* self)
     
     /* destroy the FLAC decoder */
     if (self->input.decoder) {
-        FLAC__seekable_stream_decoder_delete(self->input.decoder);
+        FLAC__stream_decoder_delete(self->input.decoder);
     }
     
     /* destruct the inherited object */
@@ -879,7 +874,7 @@ FlacDecoder_Seek(BLT_MediaNode* _self,
 
     /* seek to the target sample */
     ATX_LOG_FINE_1("FlacDecoder::Seek - sample = %ld", (long)point->sample);
-    FLAC__seekable_stream_decoder_seek_absolute(self->input.decoder, point->sample);
+    FLAC__stream_decoder_seek_absolute(self->input.decoder, point->sample);
 
     /* set the mode so that the nodes down the chaine know the seek has */
     /* already been done on the stream                                  */

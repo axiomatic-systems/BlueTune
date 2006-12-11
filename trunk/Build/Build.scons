@@ -128,7 +128,10 @@ class BuildModule(Module):
         # add cherry-picked files
         for drct in build_source_files.keys():
             pattern = build_source_files[drct]
-            drct_path = source_root+'/'+drct
+            if drct.startswith('/'):
+                drct_path = drct[1:]
+            else:
+                drct_path = source_root+'/'+drct
             DeclareBuildDir(self.env, drct_path)
             sources += GlobSources(drct_path, pattern)
 
@@ -289,7 +292,18 @@ BuildModule(name               = 'Fluo',
             extra_cpp_defines  = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']},
             extra_lib_dirs     = fluo_decoder_lib_dirs)
 
-############################ WMA9
+############################# Core
+BuildModule(name                  = 'BltCore',
+            build_source_dirs     = ['Core'],
+            included_only_modules = ['Source/Config'],
+            linked_modules        = ['Atomix', 'Neptune'])
+
+############################# Decoder
+BuildModule(name               = 'BltDecoder',
+            build_source_dirs  = ['Decoder'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
+
+############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
     WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
     SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
@@ -307,7 +321,8 @@ if os.environ.has_key('WMSDK_HOME'):
     if env['build_config'] == 'Release':
         WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
     wma_env = env.has_key('WMA_ENV') and env['WMA_ENV'] or None
-    BuildModule(name               = 'WMA9',
+    BuildModule(name           = 'BltWmaDecoder',
+            build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
             build_source_dirs  = ['audio/wmaudio/v9/asfparse_s',
                                   'audio/wmaudio/v9/common',
                                   'audio/wmaudio/v9/include',
@@ -324,21 +339,21 @@ if os.environ.has_key('WMSDK_HOME'):
                                    'audio/wmaudio/v9/fmthlpr',
                                    'audio/wmaudio/v9/include',
                                    'audio/wmaudio/v9/win32']],
-            source_root        = WMA_SOURCE_ROOT,
-            environment        = wma_env,
-            extra_cpp_defines  = WMA_EXTRA_CPP_DEFINES)
-
-############################# Core
-BuildModule(name                  = 'BltCore',
-            build_source_dirs     = ['Core'],
-            included_only_modules = ['Source/Config'],
-            linked_modules        = ['Atomix', 'Neptune'])
-
-############################# Decoder
-BuildModule(name               = 'BltDecoder',
-            build_source_dirs  = ['Decoder'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
-
+            included_only_modules = 'Source/Plugins/Decoders/WMA',
+            linked_modules        = ['Atomix', 'BltCore'],
+            source_root           = WMA_SOURCE_ROOT,
+            environment           = wma_env,
+            extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
+elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
+    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
+    Module(name             = 'BltWmaDecoder',
+           included_modules = 'Source/Plugins/Decoders/WMA',
+           linked_modules   = 'BltWmaDecoderPlugin',
+           lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
+else:
+    if 'WmaDecoder' in env['BLT_PLUGINS']:
+        raise 'ERROR: the WmaDecoder plugin requires WMSDK_HOME or BLT_EXTRAS_HOME'
+           
 ############################# BltPluginsSupport
 BuildModule(name               = 'BltPluginsSupport',
             build_source_files = {'Plugins/Common':'BltReplayGain.c'},
@@ -358,7 +373,7 @@ PluginsSettings = {
     'FlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
     'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':'Decoders/AAC'             },
-    'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',        'src_dir':'Decoders/WMA'             },
+    'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                             },
     'WaveParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
     'AiffParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
     'TagParser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },
@@ -373,10 +388,8 @@ PluginsSettings = {
 PluginsExtras = {
     'Mp4Parser':        {'dep_mods':['Bento4']},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include']},
-    'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include']},
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
     'AacDecoder':       {'dep_mods':['Melo']},   
-    'WmaDecoder':       {'dep_mods':['WMA9'], 'env':env.has_key('WMA_ENV') and env['WMA_ENV'] or env},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
                          'dep_mods':['FLAC']},
@@ -395,7 +408,10 @@ if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIB
         PluginsExtras['VorbisDecoder']['dep_mods'] = ['vorbisidec']
         PluginsExtras['VorbisDecoder']['flags'] = {'BLT_CONFIG_VORBIS_USE_TREMOR':None}
 
+if env.has_key('extra_plugins'): env['BLT_PLUGINS'] += Split(env['extra_plugins'])
+
 for plugin in env['BLT_PLUGINS']:
+    if not PluginsSettings[plugin].has_key('src_dir'): continue # skip binary only plugins
     extra_includes = []
     extra_dep_mods = []
     extra_lib_dirs = []

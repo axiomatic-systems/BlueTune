@@ -87,6 +87,9 @@ BLT_Result BLT_MediaPacket_SetMediaType(BLT_MediaPacket*     packet,
 BLT_Result BLT_MediaPacket_SetTimeStamp(BLT_MediaPacket* packet,
                                         BLT_TimeStamp    time_stamp);
 BLT_TimeStamp BLT_MediaPacket_GetTimeStamp(BLT_MediaPacket* packet);
+BLT_Time      BLT_MediaPacket_GetDuration(BLT_MediaPacket* packet);
+BLT_Result    BLT_MediaPacket_SetDuration(BLT_MediaPacket* packet,
+                                          BLT_Time         duration);
 BLT_Result BLT_MediaPacket_SetFlags(BLT_MediaPacket* packet, BLT_Flags flags);
 BLT_Result BLT_MediaPacket_ClearFlags(BLT_MediaPacket* packet, 
                                       BLT_Flags        flags);

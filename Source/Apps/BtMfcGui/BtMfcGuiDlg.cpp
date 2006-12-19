@@ -5,6 +5,7 @@
 #include "BtMfcGui.h"
 #include "BtMfcGuiDlg.h"
 #include "BlueTune.h"
+#include "NptWin32MessageQueue.h"
 #include ".\btmfcguidlg.h"
 
 #ifdef _DEBUG
@@ -45,7 +46,11 @@ END_MESSAGE_MAP()
 class MfcPlayer : public BLT_Player
 {
 public:
-    MfcPlayer(CBtMfcGuiDlg* dialog) : m_Dialog(dialog), m_Scrolling(false) {}
+    MfcPlayer(CBtMfcGuiDlg* dialog) : 
+        BLT_Player(new NPT_Win32WindowMessageQueue()),
+        m_Dialog(dialog), 
+        m_Scrolling(false) {}
+    ~MfcPlayer() { delete m_Queue;}
 
     // message handlers
     void OnStreamPositionNotification(BLT_StreamPosition& position);
@@ -200,7 +205,7 @@ void CBtMfcGuiDlg::OnBnClickedOpenButton()
 							OFN_FILEMUSTEXIST    | 
 							OFN_HIDEREADONLY     |
 							OFN_EXPLORER,
-							TEXT("MPEG Audio Files {*.mpg;*.mp1;*.mp2;*.mp3}|*.mpg;*.mp1;*.mp2;*.mp3|All Files {*.*}|*.*||"));
+							TEXT("Audio Files|*.mpg;*.mp1;*.mp2;*.mp3;*.flac;*.ogg;*.wav;*.aif;*.aiff;*.mp4;*.m4a;*.wma|All Files|*.*||"));
 
 
 	INT_PTR ret;

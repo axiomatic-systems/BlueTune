@@ -95,8 +95,8 @@ typedef BLT_TimeStamp BLT_Time;
 /*----------------------------------------------------------------------
 |   functions
 +---------------------------------------------------------------------*/
-void BLT_TimeStamp_FromSamples(BLT_TimeStamp* time_stamp, 
-                               ATX_Int64      sample_count,
-                               ATX_Int32      sample_rate);
+BLT_TimeStamp
+BLT_TimeStamp_FromSamples(ATX_Int64 sample_count,
+                          ATX_Int32 sample_rate);
 
 #endif /* _BLT_TIME_H_ */

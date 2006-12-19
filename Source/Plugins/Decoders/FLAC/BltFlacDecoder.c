@@ -65,8 +65,6 @@ typedef struct {
     BLT_PcmMediaType media_type;
     ATX_List*        packets;
     BLT_Cardinal     packet_count;
-    ATX_Int64        sample_count;
-    BLT_TimeStamp    time_stamp;
     BLT_Boolean      eos;
 } FlacDecoderOutput;
 
@@ -114,8 +112,6 @@ FlacDecoderInput_SetStream(BLT_InputStreamUser*     _self,
     self->input.eos = BLT_FALSE;
     self->output.eos = BLT_FALSE;
     self->output.packet_count = 0;
-    ATX_Int64_Set_Int32(self->output.sample_count, 0);
-    BLT_TimeStamp_Set(self->output.time_stamp, 0, 0);
 
     /* get stream size */
     ATX_InputStream_GetSize(stream, &self->input.size);
@@ -177,7 +173,7 @@ FlacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 {
     FlacDecoder* self = ATX_SELF_M(output, FlacDecoder, BLT_PacketProducer);
     FLAC__StreamDecoderState flac_state;
-    FLAC__bool               flac_result;
+    FLAC__bool               flac_result = 0;
     BLT_Result               result;
 
     /* check for EOS */
@@ -225,7 +221,9 @@ FlacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     if (BLT_FAILED(result)) return result;
     BLT_MediaPacket_SetFlags(*packet, 
                              BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
-    BLT_MediaPacket_SetTimeStamp(*packet, self->output.time_stamp);
+
+    /* flush the decoder, just in case... */
+    FLAC__stream_decoder_flush(self->input.decoder);
 
     return BLT_SUCCESS;
 }
@@ -316,7 +314,7 @@ FlacDecoder_SeekCallback(const FLAC__StreamDecoder *decoder,
 
     /* seek */
     ATX_LOG_FINER_1("FlacDecoder::SeekCallback - offset = %ld", offset);
-    result = ATX_InputStream_Seek(self->input.stream, (ATX_Offset)offset);
+    result = ATX_InputStream_Seek(self->input.stream, (ATX_Position)offset);
     if (BLT_FAILED(result)) {
         return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
     }
@@ -495,18 +493,6 @@ FlacDecoder_WriteCallback(const FLAC__StreamDecoder* decoder,
     /* update the size of the packet */
     BLT_MediaPacket_SetPayloadSize(packet, packet_size);
     
-    /* set the packet time stamp */
-    if (frame->header.sample_rate) {
-        BLT_TimeStamp_FromSamples(&self->output.time_stamp, 
-                                  self->output.sample_count,
-                                  frame->header.sample_rate);
-        BLT_MediaPacket_SetTimeStamp(packet, self->output.time_stamp);
-    }
-
-    /* update the sample count */
-    ATX_Int64_Add_Int32(self->output.sample_count,  
-                        frame->header.blocksize);
-
     /* add the packet to our output queue */
     ATX_List_AddData(self->output.packets, packet);
 
@@ -858,6 +844,7 @@ FlacDecoder_Seek(BLT_MediaNode* _self,
                  BLT_SeekPoint* point)
 {
     FlacDecoder* self = ATX_SELF_EX(FlacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    FLAC__bool   result;
 
     /* flush pending packets */
     FlacDecoderOutput_Flush(self);
@@ -869,18 +856,16 @@ FlacDecoder_Seek(BLT_MediaNode* _self,
         return BLT_FAILURE;
     }
 
-    /* update the output sample count */
-    self->output.sample_count = point->sample;
-
     /* seek to the target sample */
     ATX_LOG_FINE_1("FlacDecoder::Seek - sample = %ld", (long)point->sample);
-    FLAC__stream_decoder_seek_absolute(self->input.decoder, point->sample);
+    FLAC__stream_decoder_flush(self->input.decoder);
+    result = FLAC__stream_decoder_seek_absolute(self->input.decoder, point->sample);
 
-    /* set the mode so that the nodes down the chaine know the seek has */
-    /* already been done on the stream                                  */
+    /* set the mode so that the nodes down the chain know the seek has */
+    /* already been done on the stream                                 */
     *mode = BLT_SEEK_MODE_IGNORE;
 
-    return BLT_SUCCESS;
+    return result == result?BLT_SUCCESS:BLT_FAILURE;
 }
 
 /*----------------------------------------------------------------------

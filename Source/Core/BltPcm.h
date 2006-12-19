@@ -139,5 +139,4 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
                            BLT_PcmMediaType* out_type, 
                            BLT_MediaPacket** out_packet);
 
-
 #endif /* _BLT_PCM_H_ */

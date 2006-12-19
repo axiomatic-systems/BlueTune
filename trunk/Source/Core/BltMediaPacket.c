@@ -33,6 +33,7 @@ struct BLT_MediaPacket {
     BLT_Any        payload;
     BLT_Flags      flags;
     BLT_TimeStamp  time_stamp;
+    BLT_Time       duration;
 };
 
 /*----------------------------------------------------------------------
@@ -44,7 +45,7 @@ BLT_MediaPacket_Create(BLT_Size             size,
                        BLT_MediaPacket**    packet)
 {
     /* allocate memory for the packet object */
-    *packet = (BLT_MediaPacket*)ATX_AllocateMemory(sizeof(BLT_MediaPacket));
+    *packet = (BLT_MediaPacket*)ATX_AllocateZeroMemory(sizeof(BLT_MediaPacket));
     if (*packet == NULL) {
         return BLT_ERROR_OUT_OF_MEMORY;
     }
@@ -61,13 +62,9 @@ BLT_MediaPacket_Create(BLT_Size             size,
         (*packet)->payload = NULL;
     }
 
-    /* initialize the fields */
+    /* initialize the non-zero fields */
     (*packet)->reference_count = 1;
     (*packet)->allocated_size  = size;
-    (*packet)->payload_size    = 0;
-    (*packet)->payload_offset  = 0;
-    (*packet)->flags           = 0;
-    BLT_TimeStamp_Set((*packet)->time_stamp, 0, 0);
 
     /* set the media type */
     if (type) {
@@ -314,6 +311,25 @@ BLT_TimeStamp
 BLT_MediaPacket_GetTimeStamp(BLT_MediaPacket* packet)
 {
     return packet->time_stamp;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_MediaPacket_SetDuration
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_MediaPacket_SetDuration(BLT_MediaPacket* packet, BLT_Time duration)
+{
+    packet->duration = duration;
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_MediaPacket_GetDuration
++---------------------------------------------------------------------*/
+BLT_Time
+BLT_MediaPacket_GetDuration(BLT_MediaPacket* packet)
+{
+    return packet->duration;
 }
 
 /*----------------------------------------------------------------------

@@ -61,7 +61,7 @@ public:
                              AP4_Size*   bytes_written);
     virtual AP4_Result Seek(AP4_Position position);
     virtual AP4_Result Tell(AP4_Position& position);
-    virtual AP4_Result GetSize(AP4_Size& size);
+    virtual AP4_Result GetSize(AP4_LargeSize& size);
 
     // AP4_Referenceable methods
     virtual void AddReference();
@@ -194,7 +194,7 @@ Mp4StreamAdapter::Write(const void*, AP4_Size, AP4_Size*)
 AP4_Result
 Mp4StreamAdapter::Seek(AP4_Position position)
 {
-    return MapResult(ATX_InputStream_Seek(m_Stream, position));
+    return MapResult(ATX_InputStream_Seek(m_Stream, (ATX_Position)position));
 }
 
 /*----------------------------------------------------------------------
@@ -203,16 +203,22 @@ Mp4StreamAdapter::Seek(AP4_Position position)
 AP4_Result
 Mp4StreamAdapter::Tell(AP4_Position& position)
 {
-    return MapResult(ATX_InputStream_Tell(m_Stream, &position));
+    ATX_Position atx_position;
+    ATX_Result result = MapResult(ATX_InputStream_Tell(m_Stream, &atx_position));
+    position = atx_position;
+    return result;
 }
 
 /*----------------------------------------------------------------------
 |   Mp4StreamAdapter::GetSize
 +---------------------------------------------------------------------*/
 AP4_Result
-Mp4StreamAdapter::GetSize(AP4_Size& size)
+Mp4StreamAdapter::GetSize(AP4_LargeSize& size)
 {
-    return MapResult(ATX_InputStream_GetSize(m_Stream, &size));
+    AP4_Size atx_size;
+    ATX_Result result = MapResult(ATX_InputStream_GetSize(m_Stream, &atx_size));
+    size = atx_size;
+    return result;
 }
 
 /*----------------------------------------------------------------------

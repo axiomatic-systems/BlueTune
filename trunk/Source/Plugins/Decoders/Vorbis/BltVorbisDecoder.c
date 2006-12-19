@@ -473,8 +473,7 @@ VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         BLT_UInt32 sample_count;
 
             /* compute time stamp */
-        BLT_TimeStamp time_stamp;
-        BLT_TimeStamp_FromSamples(&time_stamp, 
+        BLT_TimeStamp time_stamp = BLT_TimeStamp_FromSamples( 
                                   self->output.sample_count,
                                   self->output.media_type.sample_rate);
         BLT_MediaPacket_SetTimeStamp(*packet, time_stamp);

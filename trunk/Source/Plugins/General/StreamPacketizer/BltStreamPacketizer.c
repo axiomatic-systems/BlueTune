@@ -232,19 +232,22 @@ StreamPacketizerOutput_GetPacket(BLT_PacketProducer* _self,
         if (pcm_type->channel_count   != 0 && 
             pcm_type->bits_per_sample != 0 &&
             pcm_type->sample_rate     != 0) {
-            BLT_UInt32 sample_count;
-
-            /* compute time stamp */
+            BLT_UInt32    sample_count;
             BLT_TimeStamp time_stamp;
-            BLT_TimeStamp_FromSamples(&time_stamp, 
-                                      self->output.sample_count,
-                                      pcm_type->sample_rate);
+    
+            /* compute time stamp */
+            time_stamp = BLT_TimeStamp_FromSamples(self->output.sample_count,
+                                                   pcm_type->sample_rate);
             BLT_MediaPacket_SetTimeStamp(*packet, time_stamp);
 
             /* update sample count */
             sample_count = bytes_read/(pcm_type->channel_count*
                                        pcm_type->bits_per_sample/8);
             ATX_Int64_Add_Int32(self->output.sample_count, sample_count);
+
+            /* set the packet duration */
+            BLT_MediaPacket_SetDuration(*packet, BLT_TimeStamp_FromSamples(sample_count, 
+                                                                           pcm_type->sample_rate));
         }
     } 
 

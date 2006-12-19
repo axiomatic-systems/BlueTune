@@ -109,6 +109,29 @@ typedef struct {
 #define BLT_WIN32_OUTPUT_QUEUE_WAIT_WATCHDOG    50
 
 /*----------------------------------------------------------------------
+|    Win32Output_DestroyListItem
++---------------------------------------------------------------------*/
+static void 
+Win32Output_DestroyListItem(ATX_ListDataDestructor* self, ATX_Any data, ATX_UInt32 type)
+{
+    QueueBuffer* queue_buffer = (QueueBuffer*)data;
+    if (queue_buffer->media_packet) {
+        BLT_MediaPacket_Release(queue_buffer->media_packet);
+    }
+    ATX_FreeMemory(queue_buffer);
+}
+
+/*----------------------------------------------------------------------
+|    Win32OutputListItemDestructor
++---------------------------------------------------------------------*/
+static void Win32Output_DestroyListItem(ATX_ListDataDestructor* self, ATX_Any data, ATX_UInt32 type);
+ATX_ListDataDestructor 
+Win32OutputListItemDestructor = {
+    NULL,
+    Win32Output_DestroyListItem
+};
+
+/*----------------------------------------------------------------------
 |    Win32Output_FreeQueueItem
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -593,8 +616,8 @@ Win32Output_Create(BLT_Module*              module,
     self->media_type.bits_per_sample = 0;
     self->pending_queue.buffered     = 0;
     self->pending_queue.max_buffered = 0;
-    ATX_List_Create(&self->free_queue.packets);
-    ATX_List_Create(&self->pending_queue.packets);
+    ATX_List_CreateEx(&Win32OutputListItemDestructor, &self->free_queue.packets);
+    ATX_List_CreateEx(&Win32OutputListItemDestructor, &self->pending_queue.packets);
 
     /* setup the expected media type */
     BLT_PcmMediaType_Init(&self->expected_media_type);
@@ -619,6 +642,10 @@ Win32Output_Destroy(Win32Output* self)
 {
     /* close the handle */
     Win32Output_Close(self);
+
+    /* free resources */
+    ATX_List_Destroy(self->free_queue.packets);
+    ATX_List_Destroy(self->pending_queue.packets);
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));

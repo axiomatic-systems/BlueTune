@@ -30,6 +30,7 @@
 #include "BltEvent.h"
 #include "BltEventListener.h"
 #include "BltOutputNode.h"
+#include "BltPcm.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -92,7 +93,8 @@ typedef struct {
         StreamNode*     node;
         BLT_OutputNode* output_node;
         BLT_TimeStamp   last_time_stamp;
-    }                 output;
+        BLT_TimeStamp   next_time_stamp;
+    }                  output;
     ATX_Properties*    properties;
     BLT_StreamInfo     info;
     BLT_EventListener* event_listener;
@@ -713,6 +715,7 @@ Stream_ResetInfo(Stream* self)
 
     /* reset the time stamp */
     BLT_TimeStamp_Set(self->output.last_time_stamp, 0, 0);
+    BLT_TimeStamp_Set(self->output.next_time_stamp, 0, 0);
 
     return BLT_SUCCESS;
 } 
@@ -855,6 +858,8 @@ Stream_SetInput(BLT_Stream* _self,
     /* normalize type */
     if (type && type[0] == '\0') type = NULL;
 
+    ATX_LOG_INFO_1("Stream::SetInput = name=%s", name);
+
     /* ask the core to create the corresponding input node */
     constructor.spec.input.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;
     constructor.spec.output.protocol = BLT_MEDIA_PORT_PROTOCOL_ANY;
@@ -939,6 +944,7 @@ Stream_ResetOutput(BLT_Stream* _self)
 
     /* reset the time stamp */
     BLT_TimeStamp_Set(self->output.last_time_stamp, 0, 0);
+    BLT_TimeStamp_Set(self->output.next_time_stamp, 0, 0);
 
     return BLT_SUCCESS;
 } 
@@ -1454,8 +1460,36 @@ done:
         if (to_node == self->output.node) {
             /* if the packet has been delivered to the output, keep */
             /* its timestamp                                        */
-            self->output.last_time_stamp = 
-                BLT_MediaPacket_GetTimeStamp(packet);
+            BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
+            BLT_Time      duration = BLT_MediaPacket_GetDuration(packet);
+            if (ts.seconds == 0 && ts.nanoseconds == 0) {
+                /* this packet has a zero timestamp, which means that   */
+                /* the timing information was probably not set my any   */
+                /* of the media nodes, so we compute the real timestamp */
+                /* from the previous one plus the packet duration       */
+                self->output.last_time_stamp = self->output.next_time_stamp;
+            } else {
+                self->output.last_time_stamp = ts;
+            }
+
+            /* if the duration of the packet is 0, assume it was not set  */
+            /* by any of the media nodes, so try to compute it if we know */
+            /* it is PCM                                                  */
+            if (duration.seconds == 0 && duration.nanoseconds == 0) {
+                const BLT_MediaType* media_type = NULL;
+                BLT_MediaPacket_GetMediaType(packet, &media_type);
+                if (media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+                    const BLT_PcmMediaType* pcm_type = (const BLT_PcmMediaType*)media_type;
+                    if (pcm_type->channel_count && pcm_type->bits_per_sample) {
+                        unsigned int sample_count = BLT_MediaPacket_GetPayloadSize(packet)/
+                                                    (pcm_type->channel_count*pcm_type->bits_per_sample/8);
+                        duration = BLT_TimeStamp_FromSamples(sample_count, pcm_type->sample_rate);
+                    }
+                }
+            }
+            BLT_TimeStamp_Add(self->output.next_time_stamp,
+                              self->output.last_time_stamp,
+                              duration);
         }
         if (from_node->output.connected == BLT_FALSE) {
             /* we're now connected */

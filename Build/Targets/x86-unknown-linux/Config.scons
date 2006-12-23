@@ -23,7 +23,6 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'FlacDecoder',
                       'VorbisDecoder',
                       'AacDecoder',
-                      'WmaDecoder',
                       'CddaInput',
                       'AlsaOutput',
                       'AlsaInput']

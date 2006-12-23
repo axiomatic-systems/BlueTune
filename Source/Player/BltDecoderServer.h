@@ -28,6 +28,7 @@ class BLT_DecoderServer_MessageHandler
 {
 public:
     // methods
+    virtual      ~BLT_DecoderServer_MessageHandler() {}
     virtual void OnSetInputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
     virtual void OnSetOutputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
     virtual void OnPlayCommand()  {}

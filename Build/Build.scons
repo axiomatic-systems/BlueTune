@@ -156,8 +156,8 @@ class BuildModule(Module):
             # libraries    
             libs = GetLibraries(linked_modules)
             lib_dirs = GetLibraryDirs(linked_modules)
-            self.product = self.env.Program(target=name, source=sources, LIBS=libs, LIBPATH=lib_dirs, CPPPATH=cpp_path)
-            self.env.Alias(name+'-app', self.product)    
+            self.product = self.env.Program(target=name.lower(), source=sources, LIBS=libs, LIBPATH=lib_dirs, CPPPATH=cpp_path)
+            self.env.Alias(name, self.product)    
         
 
     
@@ -184,6 +184,9 @@ if os.path.exists(target_config_file):
     # Load the target-specific config file    
     execfile(target_config_file)
 
+### extra plugins
+if env.has_key('extra_plugins'): 
+    env['BLT_PLUGINS'] += Split(env['extra_plugins'])
 #######################################################
 # modules
 #
@@ -303,6 +306,11 @@ BuildModule(name               = 'BltDecoder',
             build_source_dirs  = ['Decoder'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
 
+############################# Player
+BuildModule(name               = 'BltPlayer',
+            build_source_dirs  = ['Player'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder'])
+
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
     WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
@@ -350,9 +358,9 @@ elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
            included_modules = 'Source/Plugins/Decoders/WMA',
            linked_modules   = 'BltWmaDecoderPlugin',
            lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
-else:
-    if 'WmaDecoder' in env['BLT_PLUGINS']:
-        raise 'ERROR: the WmaDecoder plugin requires WMSDK_HOME or BLT_EXTRAS_HOME'
+#else:
+#    if 'WmaDecoder' in env['BLT_PLUGINS']:
+#        raise 'ERROR: the WmaDecoder plugin requires WMSDK_HOME or BLT_WMA_PLUGIN_HOME'
            
 ############################# BltPluginsSupport
 BuildModule(name               = 'BltPluginsSupport',
@@ -408,8 +416,6 @@ if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIB
         PluginsExtras['VorbisDecoder']['dep_mods'] = ['vorbisidec']
         PluginsExtras['VorbisDecoder']['flags'] = {'BLT_CONFIG_VORBIS_USE_TREMOR':None}
 
-if env.has_key('extra_plugins'): env['BLT_PLUGINS'] += Split(env['extra_plugins'])
-
 for plugin in env['BLT_PLUGINS']:
     if not PluginsSettings[plugin].has_key('src_dir'): continue # skip binary only plugins
     extra_includes = []
@@ -448,3 +454,19 @@ BuildModule(name               = 'BtPlay',
             build_source_dirs  = ['Apps/BtPlay'],
             build_include_dirs = ['Source/BlueTune', 'Source/Config'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlugins'])
+
+############################# BtGtk
+#gtk_env = env.Copy()
+#gtk_env.ParseConfig('pkg-config --cflags gtk+-2.0')
+BuildModule(name               = 'BtGtk',
+            type               = 'Executable',
+            build_source_dirs  = ['Apps/BtGtk'],
+            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins', 
+                                  '/usr/include/gtk-2.0',
+                                  '/usr/lib/gtk-2.0/include',
+                                  '/usr/include/atk-1.0',
+                                  '/usr/include/cairo',
+                                  '/usr/include/pango-1.0',
+                                  '/usr/include/glib-2.0',
+                                  '/usr/lib/glib-2.0/include'])

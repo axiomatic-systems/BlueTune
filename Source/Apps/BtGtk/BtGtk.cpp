@@ -293,11 +293,11 @@ handle_input_callback(gpointer          data,
 +---------------------------------------------------------------------*/
 static GtkItemFactoryEntry
 MenuItems[] = {
-    {"/_File",        NULL,         NULL,      0, "<Branch>" },
+    {"/_File",        NULL,         NULL,      0, "<Branch>", NULL },
     {"/File/_Open",   "<control>O", GtkItemFactoryCallback(menu_open), 
-     0, NULL},
+     0, NULL, NULL},
     {"/File/_Exit",   "<control>E", GtkItemFactoryCallback(menu_exit), 
-     0, NULL}
+     0, NULL, NULL}
 };
 
 /*----------------------------------------------------------------------
@@ -543,19 +543,19 @@ BtPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
     char text[128];
 
     if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-        sprintf(text, "%ld", info.nominal_bitrate);
+        sprintf(text, "%d", info.nominal_bitrate);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 0, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-        sprintf(text, "%ld", info.average_bitrate);
+        sprintf(text, "%d", info.average_bitrate);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 1, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-        sprintf(text, "%ld", info.instant_bitrate);
+        sprintf(text, "%d", info.instant_bitrate);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 2, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-        sprintf(text, "%ld", info.sample_rate);
+        sprintf(text, "%d", info.sample_rate);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 3, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
@@ -563,11 +563,11 @@ BtPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 4, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-        sprintf(text, "%ld", info.duration);
+        sprintf(text, "%d", info.duration);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 5, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        sprintf(text, "%ld", info.size);
+        sprintf(text, "%d", info.size);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 6, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {

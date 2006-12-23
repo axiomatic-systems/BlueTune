@@ -513,9 +513,9 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* self,
         frame_info.sample_rate               != 0 &&
         sample_buffer.format.bits_per_sample != 0) {
         /* compute time stamp */
-        BLT_TimeStamp_FromSamples(&self->output.time_stamp, 
-                                  self->output.sample_count,
-                                  frame_info.sample_rate);
+        self->output.time_stamp = 
+            BLT_TimeStamp_FromSamples(self->output.sample_count,
+                                      frame_info.sample_rate);
         BLT_MediaPacket_SetTimeStamp(*packet, self->output.time_stamp);
     } 
 

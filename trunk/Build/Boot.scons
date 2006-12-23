@@ -27,7 +27,8 @@ options = Options()
 options.AddOptions(
     EnumOption('target', 'Build Target', DefaultTarget(), allowed_values=PLATFORM_TO_TARGET_MAP.values()+CROSS_PLATFORMS),
     BoolOption('enable_profiling', 'Enable Profiling', False),
-    ListOption('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release'])
+    ListOption('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release']),
+    ListOption('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
 )
 
 env = Environment(options=options).Copy()

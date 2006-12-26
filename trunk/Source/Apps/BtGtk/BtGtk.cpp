@@ -73,13 +73,13 @@ handle_delete_event(GtkWidget* widget,
     BLT_COMPILER_UNUSED(event);
     BLT_COMPILER_UNUSED(data);
 
-    return(TRUE);
+    return TRUE;
 }
 
 /*----------------------------------------------------------------------
 |       handle_destroy_event
 +---------------------------------------------------------------------*/
-static void 
+static gint
 handle_destroy_event(GtkWidget* widget, 
                      gpointer   data)
 {
@@ -87,6 +87,8 @@ handle_destroy_event(GtkWidget* widget,
     BLT_COMPILER_UNUSED(data);
 
     gtk_main_quit();
+
+    return TRUE;
 }
 
 /*----------------------------------------------------------------------
@@ -132,7 +134,7 @@ handle_file_cancel_callback(GtkWidget* widget,
 /*----------------------------------------------------------------------
 |       handle_track_slider_button_pressed
 +---------------------------------------------------------------------*/
-static void 
+static gint 
 handle_track_slider_button_pressed(GtkWidget*      widget,
                                    GdkEventButton* event,
                                    gpointer        data)
@@ -144,12 +146,14 @@ handle_track_slider_button_pressed(GtkWidget*      widget,
 
     // we have started dragging the slider
     player->m_TrackSliderIsActive = true;
+
+    return FALSE;
 }
 
 /*----------------------------------------------------------------------
 |       handle_track_slider_button_released
 +---------------------------------------------------------------------*/
-static void 
+static gint
 handle_track_slider_button_released(GtkWidget*      widget,
                                     GdkEventButton* event,
                                     gpointer        data)
@@ -165,6 +169,8 @@ handle_track_slider_button_released(GtkWidget*      widget,
     // seek to desired position
     int offset = (int)player->m_TrackAdjustment->value;
     player->SeekToPosition(offset, BT_PLAYER_TRACK_SLIDER_RANGE);
+
+    return FALSE;
 }
 
 /*----------------------------------------------------------------------
@@ -349,9 +355,9 @@ BtPlayer::BtPlayer(NPT_SelectableMessageQueue* queue) :
     GtkWidget* button_box2 = gtk_hbox_new(FALSE, 2);
 
     // create the buttons
-    m_PlayButton     = gtk_button_new_with_label("Play");
-    m_PauseButton    = gtk_button_new_with_label("Pause");
-    m_StopButton     = gtk_button_new_with_label("Stop");
+    m_PlayButton  = gtk_button_new_with_label("Play");
+    m_PauseButton = gtk_button_new_with_label("Pause");
+    m_StopButton  = gtk_button_new_with_label("Stop");
 
     // set event handlers for the buttons
     gtk_signal_connect(GTK_OBJECT(m_PlayButton), "clicked",
@@ -376,6 +382,7 @@ BtPlayer::BtPlayer(NPT_SelectableMessageQueue* queue) :
 		       "button_press_event",
 		       GTK_SIGNAL_FUNC(handle_track_slider_button_pressed),
 		       this);
+
     gtk_widget_set_usize(m_TrackSlider, 
 			 BT_PLAYER_TRACK_SLIDER_WIDTH,
 			 BT_PLAYER_TRACK_SLIDER_HEIGHT);

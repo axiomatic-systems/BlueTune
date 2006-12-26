@@ -455,18 +455,45 @@ BuildModule(name               = 'BtPlay',
             build_include_dirs = ['Source/BlueTune', 'Source/Config'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlugins'])
 
+############################# BtCommand
+BuildModule(name               = 'BtCommand',
+            type               = 'Executable',
+            build_source_dirs  = ['Apps/BtCommand'],
+            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
+
 ############################# BtGtk
 #gtk_env = env.Copy()
 #gtk_env.ParseConfig('pkg-config --cflags gtk+-2.0')
 BuildModule(name               = 'BtGtk',
             type               = 'Executable',
             build_source_dirs  = ['Apps/BtGtk'],
-            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins', 
+            build_include_dirs = ['Source/BlueTune', 'Source/Config',
                                   '/usr/include/gtk-2.0',
                                   '/usr/lib/gtk-2.0/include',
                                   '/usr/include/atk-1.0',
                                   '/usr/include/cairo',
                                   '/usr/include/pango-1.0',
                                   '/usr/include/glib-2.0',
-                                  '/usr/lib/glib-2.0/include'])
+                                  '/usr/lib/glib-2.0/include'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins',
+                                  'gtk-x11-2.0', 
+                                  'gdk-x11-2.0', 
+                                  'atk-1.0', 
+                                  'gdk_pixbuf-2.0', 
+                                  'pangocairo-1.0',
+                                  'fontconfig',
+                                  'Xext',
+                                  'Xrender',
+                                  'Xinerama',
+                                  'Xi',
+                                  'Xrandr',
+                                  'Xcursor',
+                                  'Xfixes',
+                                  'pango-1.0',
+                                  'cairo', 
+                                  'X11',    
+                                  'gobject-2.0',
+                                  'gmodule-2.0', 
+                                  'dl', 
+                                  'glib-2.0'])

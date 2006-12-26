@@ -25,7 +25,8 @@ class BLT_DecoderClient_MessageHandler
 {
 public:
     // methods
-    virtual      ~BLT_DecoderClient_MessageHandler() {}
+    virtual ~BLT_DecoderClient_MessageHandler() {}
+
     virtual void OnAckNotification(BLT_DecoderServer_Message::CommandId /*id*/) {}
     virtual void OnNackNotification(BLT_DecoderServer_Message::CommandId /*id*/,
                                     BLT_Result                     /*result*/) {}

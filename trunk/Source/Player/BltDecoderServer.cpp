@@ -36,20 +36,21 @@ BLT_DecoderServer_Message::MessageType = "BLT_DecoderServer Message";
 |    forward references
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD 
-BLT_DecoderServer_OnEvent(BLT_EventListener* self,
-                          ATX_Object*        source,
-                          BLT_EventType      type,
-                          const BLT_Event*   event);
+BLT_DecoderServer_EventListenerWrapper_OnEvent(
+    BLT_EventListener* self,
+    ATX_Object*        source,
+    BLT_EventType      type,
+    const BLT_Event*   event);
 
 /*----------------------------------------------------------------------
 |    BLT_EventListener interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_DecoderServer)
-    ATX_GET_INTERFACE_ACCEPT(BLT_DecoderServer, BLT_EventListener)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_DecoderServer_EventListenerWrapper)
+    ATX_GET_INTERFACE_ACCEPT(BLT_DecoderServer_EventListenerWrapper, BLT_EventListener)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
-ATX_BEGIN_INTERFACE_MAP(BLT_DecoderServer, BLT_EventListener)
-    BLT_DecoderServer_OnEvent
+ATX_BEGIN_INTERFACE_MAP(BLT_DecoderServer_EventListenerWrapper, BLT_EventListener)
+    BLT_DecoderServer_EventListenerWrapper_OnEvent
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -76,7 +77,10 @@ BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
     m_DecoderStatus.position.offset = 0;
 
     // setup our listener interface
-    ATX_SET_INTERFACE(this, BLT_DecoderServer, BLT_EventListener);
+    m_EventListenerWrapper.outer = this;
+    ATX_SET_INTERFACE(&m_EventListenerWrapper, 
+                      BLT_DecoderServer_EventListenerWrapper, 
+                      BLT_EventListener);
 
     // start the thread
     Start();
@@ -112,7 +116,9 @@ BLT_DecoderServer::Run()
     if (BLT_FAILED(result)) return;
         
     // register as the event handler
-    BLT_Decoder_SetEventListener(m_Decoder, &ATX_BASE(this, BLT_EventListener));
+    BLT_Decoder_SetEventListener(m_Decoder, 
+                                 &ATX_BASE(&m_EventListenerWrapper, 
+                                           BLT_EventListener));
 
     // register builtins 
     result = BLT_Decoder_RegisterBuiltins(m_Decoder);
@@ -544,14 +550,15 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_OnEvent
+|   BLT_DecoderServer_EventListenerWrapper_OnEvent
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD 
-BLT_DecoderServer_OnEvent(BLT_EventListener* _self,
-                          ATX_Object*        source,
-                          BLT_EventType      type,
-                          const BLT_Event*   event)
+BLT_DecoderServer_EventListenerWrapper_OnEvent(
+    BLT_EventListener* _self,
+    ATX_Object*        source,
+    BLT_EventType      type,
+    const BLT_Event*   event)
 {
-    BLT_DecoderServer* server = ATX_SELF(BLT_DecoderServer, BLT_EventListener);
-    server->OnEvent(source, type, event);
+    BLT_DecoderServer_EventListenerWrapper* self = ATX_SELF(BLT_DecoderServer_EventListenerWrapper, BLT_EventListener);
+    self->outer->OnEvent(source, type, event);
 }

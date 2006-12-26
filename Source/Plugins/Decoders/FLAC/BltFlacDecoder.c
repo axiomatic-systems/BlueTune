@@ -89,8 +89,8 @@ ATX_DECLARE_INTERFACE_MAP(FlacDecoder, ATX_Referenceable)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 FlacDecoderInput_SetStream(BLT_InputStreamUser*     _self, 
-                               ATX_InputStream*     stream,
-                               const BLT_MediaType* media_type)
+                           ATX_InputStream*     stream,
+                           const BLT_MediaType* media_type)
 {
     FlacDecoder* self = ATX_SELF_M(input, FlacDecoder, BLT_InputStreamUser);;
 
@@ -425,7 +425,7 @@ FlacDecoder_WriteCallback(const FLAC__StreamDecoder* decoder,
     if (frame->header.bits_per_sample != 16 &&
         frame->header.bits_per_sample != 24 &&
         frame->header.bits_per_sample != 32) {
-            return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+        return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
     /* compute packet size */

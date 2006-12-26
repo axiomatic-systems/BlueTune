@@ -28,7 +28,8 @@ class BLT_DecoderServer_MessageHandler
 {
 public:
     // methods
-    virtual      ~BLT_DecoderServer_MessageHandler() {}
+    virtual ~BLT_DecoderServer_MessageHandler() {}
+
     virtual void OnSetInputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
     virtual void OnSetOutputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
     virtual void OnPlayCommand()  {}
@@ -278,6 +279,18 @@ public:
 };
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer_EventListenerWrapper
++---------------------------------------------------------------------*/
+class BLT_DecoderServer;
+typedef struct {
+    // ATX-style interfaces
+    ATX_IMPLEMENTS(BLT_EventListener);
+
+    // back pointer
+    BLT_DecoderServer* outer;
+} BLT_DecoderServer_EventListenerWrapper;
+ 
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer : public NPT_Thread,
@@ -328,9 +341,6 @@ class BLT_DecoderServer : public NPT_Thread,
                                BLT_EventType     type,
                                const BLT_Event*  event);
 
-    // ATX-style interfaces
-    ATX_IMPLEMENTS(BLT_EventListener);
-
  private:
     // methods
     BLT_Result SendReply(BLT_DecoderServer_Message::CommandId id, 
@@ -348,6 +358,8 @@ class BLT_DecoderServer : public NPT_Thread,
     BLT_Size             m_PositionUpdateRange;
     BLT_DecoderStatus    m_DecoderStatus;
     State                m_State;
+
+    BLT_DecoderServer_EventListenerWrapper m_EventListenerWrapper;
 };
 
 #endif /* _BLT_DECODER_SERVER_H_ */

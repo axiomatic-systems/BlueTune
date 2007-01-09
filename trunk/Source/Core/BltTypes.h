@@ -19,6 +19,7 @@
 /*----------------------------------------------------------------------
 |   import some Atomix types
 +---------------------------------------------------------------------*/
+typedef ATX_UInt64       BLT_UInt64;
 typedef ATX_UInt32       BLT_UInt32;
 typedef ATX_Int32        BLT_Int32;
 typedef ATX_UInt16       BLT_UInt16;

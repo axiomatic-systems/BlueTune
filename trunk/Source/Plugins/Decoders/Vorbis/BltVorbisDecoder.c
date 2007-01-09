@@ -307,7 +307,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
             ATX_String_Assign(&value, ATX_CSTR(string)+sep+1);
 
             ATX_LOG_FINE_3("  COMMENT %d : %s = %s", i, ATX_CSTR(key), ATX_CSTR(value));
-            ATX_String_ToUppercase(&key);
+            ATX_String_MakeUppercase(&key);
             if (ATX_String_Equals(&key, BLT_VORBIS_COMMENT_REPLAY_GAIN_TRACK_GAIN, ATX_FALSE)) {
                 ATX_String_ToFloat(&value, &track_gain, ATX_TRUE);
                 track_gain_mode = BLT_REPLAY_GAIN_SET_MODE_UPDATE;
@@ -573,11 +573,6 @@ VorbisDecoder_Destroy(VorbisDecoder* self)
 {
     ATX_LOG_FINE("VorbisDecoder::Destroy");
 
-    /* free the vorbis decoder */
-    if (self->input.stream) {
-        ov_clear(&self->input.vorbis_file);
-    }
-
     /* release the input stream */
     ATX_RELEASE_OBJECT(self->input.stream);
 
@@ -600,11 +595,16 @@ VorbisDecoder_Deactivate(BLT_MediaNode* _self)
 
     ATX_LOG_FINER("VorbisDecoder::Deactivate");
 
+    /* free the vorbis decoder */
+    if (self->input.stream) {
+        ov_clear(&self->input.vorbis_file);
+
+        /* release the input stream */
+        ATX_RELEASE_OBJECT(self->input.stream);
+    }
+
     /* call the base class method */
     BLT_BaseMediaNode_Deactivate(_self);
-
-    /* release the input stream */
-    ATX_RELEASE_OBJECT(self->input.stream);
 
     return BLT_SUCCESS;
 }

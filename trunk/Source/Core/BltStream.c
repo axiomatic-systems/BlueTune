@@ -1863,11 +1863,10 @@ Stream_GetInfo(BLT_Stream* _self, BLT_StreamInfo* info)
 BLT_METHOD
 Stream_GetStatus(BLT_Stream* _self, BLT_StreamStatus* status)
 {
-    Stream*    self = ATX_SELF(Stream, BLT_Stream);
-    BLT_Result result;
+    Stream* self = ATX_SELF(Stream, BLT_Stream);
 
     /* set the stream status */
-    status->time_stamp = self->output.last_time_stamp;
+    status->time_stamp = self->output.next_time_stamp;
     if (self->info.duration) {
         /* estimate the position from the time stamp and duration */
         ATX_Int64 offset;
@@ -1884,21 +1883,11 @@ Stream_GetStatus(BLT_Stream* _self, BLT_StreamStatus* status)
     }
     
     /* compute the output node status */
-    if (self->output.output_node == NULL) {
-        /* the output does not implement the BLT_OutputNode interface */
-        /* so we return the time stamp of the last packet that was    */
-        /* delivered to the output                                    */
-        status->output_status.time_stamp = self->output.last_time_stamp;
-        BLT_TimeStamp_Set(status->output_status.delay, 0, 0);
-    } else {
+    BLT_TimeStamp_Set(status->output_status.delay, 0, 0);
+    if (self->output.output_node) {
         /* get the output status from the output node */
-        status->output_status.time_stamp = self->output.last_time_stamp;
-        result = BLT_OutputNode_GetStatus(self->output.output_node, 
-                                          &status->output_status);
-        if (BLT_FAILED(result)) {
-            status->output_status.time_stamp = self->output.last_time_stamp;
-            BLT_TimeStamp_Set(status->output_status.delay, 0, 0);
-        }
+        BLT_OutputNode_GetStatus(self->output.output_node, 
+                                 &status->output_status);
     }
 
     return BLT_SUCCESS;
@@ -2095,6 +2084,9 @@ Stream_Seek(Stream*        self,
     StreamNode* node = self->nodes.tail;
     BLT_Result  result;
 
+    /* check parameters */
+    if (mode == NULL || point == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+
     /* go through all the nodes in reverse order */
     while (node) {
         /* tell the node to seek */
@@ -2105,10 +2097,12 @@ Stream_Seek(Stream*        self,
         node = node->prev;
     }
 
-    /* keep a copy of the time stamp as our last time stamt */
-    if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
-        self->output.last_time_stamp = point->time_stamp;
+    /* keep a copy of the time stamp as our last time stamp */
+    if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP)) {
+        Stream_EstimateSeekPoint(&ATX_BASE(self, BLT_Stream), *mode, point);
     }
+    self->output.last_time_stamp = point->time_stamp;
+    self->output.next_time_stamp = point->time_stamp;
 
     return BLT_SUCCESS;
 }

@@ -30,6 +30,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BtMfcGui", "BtMfcGui\BtMfcG
 		{EF79D129-5B03-4A18-9F1B-E081C3AC553E} = {EF79D129-5B03-4A18-9F1B-E081C3AC553E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BltWmaPluginStub", "BltWmaPluginStub\BltWmaPluginStub.vcproj", "{04359B37-3B2E-494D-9696-8EB5D0DBC14C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -68,6 +70,10 @@ Global
 		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Debug|Win32.Build.0 = Debug|Win32
 		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Release|Win32.ActiveCfg = Release|Win32
 		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Release|Win32.Build.0 = Release|Win32
+		{04359B37-3B2E-494D-9696-8EB5D0DBC14C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{04359B37-3B2E-494D-9696-8EB5D0DBC14C}.Debug|Win32.Build.0 = Debug|Win32
+		{04359B37-3B2E-494D-9696-8EB5D0DBC14C}.Release|Win32.ActiveCfg = Release|Win32
+		{04359B37-3B2E-494D-9696-8EB5D0DBC14C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

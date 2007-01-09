@@ -225,11 +225,19 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
+				RelativePath="..\..\..\..\Source\Apps\BtMfcGui\res\BtMfcGui.ico"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Apps\BtMfcGui\BtMfcGui.rc"
 				>
 			</File>
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="\Develop\Workspace\BlueTune\Source\Apps\BtMfcGui\BtMfcGui.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

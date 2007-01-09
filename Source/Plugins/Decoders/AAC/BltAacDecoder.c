@@ -70,8 +70,6 @@ typedef struct {
     /* members */
     ATX_List*        packets;
     BLT_PcmMediaType media_type;
-    BLT_TimeStamp    time_stamp;
-    ATX_Int64        sample_count;
 } AacDecoderOutput;
 
 typedef struct {
@@ -180,13 +178,18 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(out_packet), 
                        MLO_SampleBuffer_GetSamples(self->sample_buffer), 
                        out_packet_size);
+
+        /* copy the timestamp */
+        BLT_MediaPacket_SetTimeStamp(out_packet, BLT_MediaPacket_GetTimeStamp(packet));
+
+        /* add to the output packet list */
         ATX_List_AddData(self->output.packets, out_packet);
     }
 
     return BLT_SUCCESS;
 }
 
-/*----------------------------------------------------------------------
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AacDecoderInput)
@@ -302,8 +305,6 @@ AacDecoder_SetupPorts(AacDecoder* self, BLT_MediaTypeId mp4es_type_id)
     
     /* setup the output port */
     BLT_PcmMediaType_Init(&self->output.media_type);
-    ATX_Int64_Set_Int32(self->output.sample_count, 0);
-    BLT_TimeStamp_Set(self->output.time_stamp, 0, 0);
 
     return BLT_SUCCESS;
 }
@@ -422,6 +423,9 @@ AacDecoder_Seek(BLT_MediaNode* _self,
 {
     AacDecoder* self = ATX_SELF_EX(AacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
+    BLT_COMPILER_UNUSED(mode);
+    BLT_COMPILER_UNUSED(point);
+    
     /* clear the eos flag */
     self->input.eos  = BLT_FALSE;
 
@@ -430,17 +434,6 @@ AacDecoder_Seek(BLT_MediaNode* _self,
 
     /* reset the decoder */
     if (self->melo) MLO_Decoder_Reset(self->melo);
-
-    /* estimate the seek point in time_stamp mode */
-    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
-    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
-    if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
-        return BLT_FAILURE;
-    }
-
-    /* update the decoder's sample position */
-    self->output.sample_count = point->sample;
-    self->output.time_stamp = point->time_stamp;
 
     return BLT_SUCCESS;
 }

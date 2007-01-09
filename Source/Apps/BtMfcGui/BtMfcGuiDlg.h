@@ -22,6 +22,11 @@ public:
 
 
 // Implementation
+public:
+    // methods
+    void ClearInfo();
+    void UpdateInfo(const char* name, const char* value);
+
 protected:
     MfcPlayer* m_Player;
 
@@ -39,10 +44,12 @@ public:
     afx_msg void OnBnClickedPlayButton();
     afx_msg void OnBnClickedPauseButton();
     afx_msg void OnBnClickedStopButton();
+    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+    afx_msg void OnBnClickedSetInputButton();
+
 protected:
     CSliderCtrl m_Slider;
-public:
-    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+    CListCtrl   m_StreamInfoList;
 
 friend class MfcPlayer;
 };

@@ -88,20 +88,21 @@ typedef struct {
     BLT_PcmMediaType  expected_media_type;
     BLT_PcmMediaType  media_type;
     BLT_Boolean       paused;
+    BLT_UInt64        nb_samples_written;
     struct {
         ATX_List* packets;
     }                 free_queue;
     struct {
-        ATX_List*    packets;
-        BLT_Size     buffered;
-        BLT_Size     max_buffered;
+        ATX_List* packets;
+        BLT_Size  buffered;
+        BLT_Size  max_buffered;
     }                 pending_queue;
 } Win32Output;
 
 /*----------------------------------------------------------------------
 |    constants
 +---------------------------------------------------------------------*/
-#define BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION     3    /* seconds */
+#define BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION     1    /* seconds */
 #define BLT_WIN32_OUTPUT_MAX_OPEN_RETRIES       10
 #define BLT_WIN32_OUTPUT_OPEN_RETRY_SLEEP       30   /* milliseconds */
 #define BLT_WIN32_OUTPUT_QUEUE_WAIT_SLEEP       100  /* milliseconds */ 
@@ -315,6 +316,9 @@ Win32Output_Open(Win32Output* self)
         return BLT_SUCCESS;
     }
 
+    /* reset some fields */
+    self->nb_samples_written = 0;
+
     /* fill in format structure */
 #if defined(BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
     format.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
@@ -432,6 +436,9 @@ Win32Output_Close(Win32Output* self)
         }
     }
 
+    /* reset counters */
+    self->nb_samples_written = 0;
+
     /* clear the device handle */
     self->device_handle = NULL;
 
@@ -542,6 +549,9 @@ Win32Output_PutPacket(BLT_PacketConsumer* _self,
         goto failed;
     }
 
+    /* keep a count of the number of samples written */
+    self->nb_samples_written += BLT_MediaPacket_GetPayloadSize(packet)/(media_type->channel_count*(media_type->bits_per_sample/8));
+
     /* queue the packet */
     ATX_List_AddItem(self->pending_queue.packets, queue_item);
     self->pending_queue.buffered += queue_buffer->wave_header.dwBufferLength;
@@ -551,11 +561,11 @@ Win32Output_PutPacket(BLT_PacketConsumer* _self,
 
     return BLT_SUCCESS;
 
-    failed:
-        if (queue_item) {
-            Win32Output_FreeQueueItem(self, queue_item);
-        }
-        return result;
+failed:
+    if (queue_item) {
+        Win32Output_FreeQueueItem(self, queue_item);
+    }
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -616,6 +626,7 @@ Win32Output_Create(BLT_Module*              module,
     self->media_type.bits_per_sample = 0;
     self->pending_queue.buffered     = 0;
     self->pending_queue.max_buffered = 0;
+    self->nb_samples_written         = 0;
     ATX_List_CreateEx(&Win32OutputListItemDestructor, &self->free_queue.packets);
     ATX_List_CreateEx(&Win32OutputListItemDestructor, &self->pending_queue.packets);
 
@@ -690,6 +701,9 @@ Win32Output_Seek(BLT_MediaNode* _self,
     /* reset the device */
     waveOutReset(self->device_handle);
 
+    /* reset counters */
+    self->nb_samples_written = 0;
+
     return BLT_SUCCESS;
 }
 
@@ -697,14 +711,28 @@ Win32Output_Seek(BLT_MediaNode* _self,
 |    Win32Output_GetStatus
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32Output_GetStatus(BLT_OutputNode*       self,
+Win32Output_GetStatus(BLT_OutputNode*       _self,
                       BLT_OutputNodeStatus* status)
 {
-    /*Win32Output* self = (Win32Output*)instance;*/
-    BLT_COMPILER_UNUSED(self);
+    Win32Output* self = ATX_SELF(Win32Output, BLT_OutputNode);
+    MMRESULT     result;
+    MMTIME       position;
 
+    /* default value */
     status->delay.seconds = 0;
     status->delay.nanoseconds = 0;
+
+    /* get the output position from the device */
+    position.wType = TIME_SAMPLES;
+    result = waveOutGetPosition(self->device_handle,  
+                                &position, sizeof(position)); 
+    if (result == MMSYSERR_NOERROR && self->media_type.sample_rate) {
+        BLT_UInt64 delay;
+        delay  = ((BLT_UInt64)(self->nb_samples_written - position.u.sample) *
+                  1000000000) /self->media_type.sample_rate;
+        status->delay.seconds     = (BLT_UInt32)(delay/1000000000);
+        status->delay.nanoseconds = (BLT_UInt32)(delay - ((BLT_UInt64)status->delay.seconds * 1000000000));
+    } 
 
     return BLT_SUCCESS;
 }

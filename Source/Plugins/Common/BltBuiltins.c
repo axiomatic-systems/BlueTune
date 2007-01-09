@@ -167,252 +167,280 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_INPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_FileInputModule");
     result = BLT_FileInputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* network input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_NetworkInputModule");
     result = BLT_NetworkInputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* cdda input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_CddaInputModule");
     result = BLT_CddaInputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* alsa input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_AlsaInputModule");
     result = BLT_AlsaInputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* stream packetizer */
 #if defined(BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_StreamPacketizerModule");
     result = BLT_StreamPacketizerModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* packet streamer */
 #if defined(BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_PacketStreamerModule");
     result = BLT_PacketStreamerModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* cross fader */
 #if defined(BLT_CONFIG_MODULES_ENABLE_CROSS_FADER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_CrossFaderModule");
     result = BLT_CrossFaderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* silence remover */
 #if defined(BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_SilenceRemoverModule");
     result = BLT_SilenceRemoverModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* wave parser */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_WaveParserModule");
     result = BLT_WaveParserModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* aiff parser */
 #if defined(BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_AiffParserModule");
     result = BLT_AiffParserModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* tag parser */
 #if defined(BLT_CONFIG_MODULES_ENABLE_TAG_PARSER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_TagParserModule");
     result = BLT_TagParserModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* mp4 parser */
 #if defined(BLT_CONFIG_MODULES_ENABLE_MP4_PARSER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_Mp4ParserModule");
     result = BLT_Mp4ParserModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* wave formatter */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_WaveFormatterModule");
     result = BLT_WaveFormatterModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* gain control filter */
 #if defined(BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_GainControlFilterModule");
     result = BLT_GainControlFilterModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* filter host */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILTER_HOST)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_FilterHostModule");
     result = BLT_FilterHostModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* pcm adapter */
 #if defined(BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_PcmAdapterModule");
     result = BLT_PcmAdapterModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* mpeg audio decoder */
 #if defined(BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_MpegAudioDecoderModule");
     result = BLT_MpegAudioDecoderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* vorbis decoder */
 #if defined(BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_VorbisDecoderModule");
     result = BLT_VorbisDecoderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* flac decoder */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_FlacDecoderModule");
     result = BLT_FlacDecoderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* aac decoder */
 #if defined(BLT_CONFIG_MODULES_ENABLE_AAC_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_AacDecoderModule");
     result = BLT_AacDecoderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* wma decoder */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMA_DECODER)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_WmaDecoderModule");
     result = BLT_WmaDecoderModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* win32 output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_Win32OutputModule");
     result = BLT_Win32OutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* oss output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_OssOutputModule");
     result = BLT_OssOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* alsa output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_AlsaOutputModule");
     result = BLT_AlsaOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* neutrino output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_NEUTRINO_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_NeutrinoOutputModule");
     result = BLT_NeutrinoOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* debug output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_DebugOutputModule");
     result = BLT_DebugOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* file output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_FileOutputModule");
     result = BLT_FileOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     /* null output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_NullOutputModule");
     result = BLT_NullOutputModule_GetModuleObject(&module);
-    if (BLT_FAILED(result)) return result;
-    result = BLT_Core_RegisterModule(core, module);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
 #endif
 
     return BLT_SUCCESS;

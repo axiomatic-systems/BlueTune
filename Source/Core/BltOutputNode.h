@@ -26,8 +26,7 @@
 |   types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_TimeStamp time_stamp;
-    BLT_Time      delay;
+    BLT_Time delay;
 } BLT_OutputNodeStatus;
 
 /*----------------------------------------------------------------------

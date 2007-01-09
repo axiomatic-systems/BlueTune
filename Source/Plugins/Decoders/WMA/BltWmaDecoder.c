@@ -525,23 +525,23 @@ WmaDecoder_Seek(BLT_MediaNode* _self,
                 BLT_SeekPoint* point)
 {
     WmaDecoder* self = ATX_SELF_EX(WmaDecoder, BLT_BaseMediaNode, BLT_MediaNode);
-    double      time;
+    tWMA_U32 ts_ms;
+    tWMA_U32 ts_ms_actual = 0;
 
     /* estimate the seek point in time_stamp mode */
     if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
     BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
-    if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) ||
-        !(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
+    if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP)) {
         return BLT_FAILURE;
     }
 
     /* seek to the target time */
-    time = 
-        (double)point->time_stamp.seconds +
-        (double)point->time_stamp.nanoseconds/1000000000.0f;
-    ATX_LOG_FINER_1("WmaDecoder::Seek - sample = %f", time);
-    /*ov_result = ov_time_seek(&self->input.vorbis_file, time);*/
-    /*if (ov_result != 0) return BLT_FAILURE;*/
+    ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
+    ATX_LOG_FINER_1("WmaDecoder::Seek - seek to %d", ts_ms);
+
+    WMAFileSeek(self->wma_handle, ts_ms, &ts_ms_actual);
+
+    ATX_LOG_FINER_1("WmaDecoder::Seek - actual timestamp = %d", ts_ms_actual);
 
     /* set the mode so that the nodes down the chain know the seek has */
     /* already been done on the stream                                 */

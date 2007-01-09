@@ -460,6 +460,25 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         BLT_MediaPacket_SetPayloadSize(*packet, packet_size);
         void* buffer = BLT_MediaPacket_GetPayloadBuffer(*packet);
         ATX_CopyMemory(buffer, self->output.sample_buffer->GetData(), packet_size);
+
+        // set the timestamp
+        AP4_UI32 media_timescale = self->input.mp4_track->GetMediaTimeScale();
+        if (media_timescale) {
+            AP4_UI64 ts = ((AP4_UI64)sample.GetCts())*1000000;
+            ts /= media_timescale;
+            BLT_TimeStamp bt_ts = {
+                (BLT_Int32)(ts / 1000000),
+                (BLT_Int32)((ts % 1000000)*1000)
+            };
+            BLT_MediaPacket_SetTimeStamp(*packet, bt_ts);
+        }
+
+        // set packet flags
+        if (self->output.sample == 0) {
+            BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+        }
+
+        // move on to the next sample
         self->output.sample++;
 
         return BLT_SUCCESS;
@@ -555,10 +574,33 @@ Mp4Parser_GetPortByName(BLT_MediaNode*  _self,
 |   Mp4Parser_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Mp4Parser_Seek(BLT_MediaNode* /*_self*/,
-               BLT_SeekMode*  /*mode*/,
-               BLT_SeekPoint* /*point*/)
+Mp4Parser_Seek(BLT_MediaNode* _self,
+               BLT_SeekMode*  mode,
+               BLT_SeekPoint* point)
 {
+    Mp4Parser* self = ATX_SELF_EX(Mp4Parser, BLT_BaseMediaNode, BLT_MediaNode);
+
+    /* estimate the seek point */
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+    if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP)) {
+        return BLT_FAILURE;
+    }
+
+    /* seek to the estimated offset */
+    AP4_Ordinal   sample_index = 0;
+    AP4_TimeStamp ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
+    AP4_Result result = self->input.mp4_track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+    if (AP4_FAILED(result)) {
+        ATX_LOG_WARNING_1("Mp4Parser::Seek - GetSampleIndexForTimeStampMs failed (%d)", result);
+        return BLT_FAILURE;
+    }
+    self->output.sample = sample_index;
+
+    /* set the mode so that the nodes down the chaine know the seek has */
+    /* already been done on the stream                                  */
+    *mode = BLT_SEEK_MODE_IGNORE;
+
     return BLT_SUCCESS;
 }
 

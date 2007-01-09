@@ -116,13 +116,19 @@ BLT_Decoder_UpdateStatus(BLT_Decoder* decoder)
 
     result = BLT_Stream_GetStatus(decoder->stream, &status);
     if (BLT_SUCCEEDED(result)) {
-        decoder->status.time_stamp = status.output_status.time_stamp;
+        decoder->status.time_stamp = status.time_stamp;
         decoder->status.position   = status.position;
-        /*BLT_Debug("+++++++++++++ %d.%09d : %d/%d\n",
-                  decoder->status.time_stamp.seconds,
-                  decoder->status.time_stamp.nanoseconds,
-                  decoder->status.position.offset,
-                  decoder->status.position.range);*/
+
+        /* adjust the timestamp */
+        if (BLT_TimeStamp_IsLaterOrEqual(decoder->status.time_stamp, 
+                                         status.output_status.delay)) {
+            BLT_TimeStamp_Sub(decoder->status.time_stamp, 
+                              decoder->status.time_stamp,
+                              status.output_status.delay);
+        } else {
+            decoder->status.time_stamp.seconds     = 0;
+            decoder->status.time_stamp.nanoseconds = 0;
+        }
     }
 
     return BLT_SUCCESS;

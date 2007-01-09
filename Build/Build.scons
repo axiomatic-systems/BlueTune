@@ -167,12 +167,15 @@ class BuildModule(Module):
 #######################################################
 Import("env")
 
+env.Default('BtPlay', 'BtCommand')
+
 SourceDirLookup = {}
 
 env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
 env['BLT_EXTRA_LIBS'] = ''
 
+### global settings
 if env['build_config'] == 'Debug':
 	env['BLT_GLOBAL_CPP_DEFINES'] = {'BLT_DEBUG':None, 'ATX_CONFIG_ENABLE_LOGGING':None}
 else:
@@ -186,7 +189,8 @@ if os.path.exists(target_config_file):
 
 ### extra plugins
 if env.has_key('extra_plugins'): 
-    env['BLT_PLUGINS'] += Split(env['extra_plugins'])
+    env['BLT_PLUGINS'] += Split(env['extra_plugins'])
+    
 #######################################################
 # modules
 #

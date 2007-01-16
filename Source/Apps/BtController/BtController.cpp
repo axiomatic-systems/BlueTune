@@ -1,14 +1,11 @@
 /*****************************************************************
 |
-|   BlueTune - Console Player
+|   BlueTune - Controller/Player
 |
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
-/** @file 
- * Main code for BtCommand
- */
 
 /*----------------------------------------------------------------------
 |    includes
@@ -20,20 +17,17 @@
 #include "NptUtils.h"
 #include "Neptune.h"
 #include "BlueTune.h"
+#include "BtStreamController.h"
 
 /*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
-class BtCommand : public NPT_Thread,
-                  public BLT_Player
+class BtController : public BLT_Player
 {
 public:
     // methods
-    BtCommand();
-    virtual ~BtCommand();
-
-    // NPT_Thread methods
-    void Run();
+    BtController();
+    virtual ~BtController();
 
     // BLT_DecoderClient_MessageHandler methods
     void OnAckNotification(BLT_DecoderServer_Message::CommandId id);
@@ -45,31 +39,45 @@ public:
 
     // command methods
     void DoSeekToTimeStamp(const char* time);
+
+private:
+    // members
+    BtStreamController* m_ConsoleController;
 };
 
 /*----------------------------------------------------------------------
-|    BtCommand::BtCommand
+|    BtController::BtController
 +---------------------------------------------------------------------*/
-BtCommand::BtCommand()
+BtController::BtController()
 {
-    // start our thread
-    ATX_Debug(">>> BtCommand: starting input thread\n");
-    Start();
+    // create the command stream
+    NPT_File standard_in(NPT_FILE_STANDARD_INPUT);
+    NPT_Result result = standard_in.Open(NPT_FILE_OPEN_MODE_READ |
+                                         NPT_FILE_OPEN_MODE_UNBUFFERED);
+    if (NPT_FAILED(result)) return;
+
+    // get the command stream
+    NPT_InputStreamReference input_stream;
+    standard_in.GetInputStream(input_stream);
+
+    // create the controller
+    m_ConsoleController = new BtStreamController(input_stream, *this);
+    m_ConsoleController->Start();
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::~BtCommand
+|    BtController::~BtController
 +---------------------------------------------------------------------*/
-BtCommand::~BtCommand()
+BtController::~BtController()
 {
-    ATX_Debug(">>> BtCommand::~BtCommand\n");
+    delete m_ConsoleController;
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::DoSeekToTimeStamp
+|    BtController::DoSeekToTimeStamp
 +---------------------------------------------------------------------*/
 void
-BtCommand::DoSeekToTimeStamp(const char* time)
+BtController::DoSeekToTimeStamp(const char* time)
 {
     BLT_UInt8 h;
     BLT_UInt8 m;
@@ -115,76 +123,19 @@ BtCommand::DoSeekToTimeStamp(const char* time)
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::Run
+|    BtController::OnAckNotification
 +---------------------------------------------------------------------*/
 void
-BtCommand::Run()
-{
-    char       buffer[1024];
-    bool       done = false;
-    BLT_Result result;
-
-    ATX_Debug(">>> BtCommand: running\n");
-
-    // create the command stream
-    NPT_File standard_in(NPT_FILE_STANDARD_INPUT);
-    result = standard_in.Open(NPT_FILE_OPEN_MODE_READ |
-                              NPT_FILE_OPEN_MODE_UNBUFFERED);
-    if (NPT_FAILED(result)) return;
-
-    // get the command stream
-    NPT_InputStreamReference input_stream;
-    standard_in.GetInputStream(input_stream);
-    NPT_BufferedInputStream input(input_stream, 0);
-
-    do {
-        NPT_Size bytes_read;
-        result = input.ReadLine(buffer, 
-                                sizeof(buffer), 
-                                &bytes_read);
-        if (NPT_SUCCEEDED(result)) {
-            if (NPT_StringsEqualN(buffer, "set-input ", 10)) {
-                SetInput(&buffer[10]);
-            } else if (NPT_StringsEqualN(buffer, "add-node ", 9)) {
-                AddNode(&buffer[9]);
-            } else if (NPT_StringsEqual(buffer, "play")) {
-                Play();
-            } else if (NPT_StringsEqual(buffer, "stop")) {
-                Stop();
-            } else if (NPT_StringsEqual(buffer, "pause")) {
-                Pause();
-            } else if (NPT_StringsEqualN(buffer, "seek-to-timestamp", 17)) {
-                DoSeekToTimeStamp(buffer+17);
-            } else if (NPT_StringsEqualN(buffer, "exit", 4)) {
-                done = BLT_TRUE;
-            } else {
-                ATX_Debug("ERROR: invalid command\n");
-            }
-        } else {
-            ATX_Debug("end: %d\n", result);
-        }
-    } while (BLT_SUCCEEDED(result) && !done);
-
-    // terminate so that we can exit our message pump loop
-    Terminate();
-
-    ATX_Debug(">>> BtCommand: done\n");
-}
-
-/*----------------------------------------------------------------------
-|    BtCommand::OnAckNotification
-+---------------------------------------------------------------------*/
-void
-BtCommand::OnAckNotification(BLT_DecoderServer_Message::CommandId id)
+BtController::OnAckNotification(BLT_DecoderServer_Message::CommandId id)
 {
     ATX_Debug("BLT_Player::OnAckNotification (id=%d)\n", id);
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::OnAckNotification
+|    BtController::OnAckNotification
 +---------------------------------------------------------------------*/
 void
-BtCommand::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
+BtController::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
                              BLT_Result                           result)
 {
     ATX_Debug("BLT_Player::OnNackNotification (id=%d, result=%d)\n", 
@@ -192,10 +143,10 @@ BtCommand::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::OnDecoderStateNotification
+|    BtController::OnDecoderStateNotification
 +---------------------------------------------------------------------*/
 void
-BtCommand::OnDecoderStateNotification(BLT_DecoderServer::State state)
+BtController::OnDecoderStateNotification(BLT_DecoderServer::State state)
 {
     ATX_ConsoleOutput("BLT_Player::OnDecoderStateNotification state=");
 
@@ -223,24 +174,25 @@ BtCommand::OnDecoderStateNotification(BLT_DecoderServer::State state)
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::OnStreamTimeCodeNotification
+|    BtController::OnStreamTimeCodeNotification
 +---------------------------------------------------------------------*/
 void 
-BtCommand::OnStreamTimeCodeNotification(BLT_TimeCode time_code)
+BtController::OnStreamTimeCodeNotification(BLT_TimeCode time_code)
 {
     char time[32];
-    sprintf(time, "%02d:%02d:%02d",
-            time_code.h,
-            time_code.m,
-            time_code.s);
-    ATX_ConsoleOutputF("BtCommand::OnStreamTimeCodeNotification - %s\n", time);
+    ATX_FormatStringN(time, 32,
+                      "%02d:%02d:%02d",
+                      time_code.h,
+                      time_code.m,
+                      time_code.s);
+    ATX_ConsoleOutputF("BtController::OnStreamTimeCodeNotification - %s\n", time);
 }
 
 /*----------------------------------------------------------------------
-|    BtCommand::OnStreamInfoNotification
+|    BtController::OnStreamInfoNotification
 +---------------------------------------------------------------------*/
 void 
-BtCommand::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
+BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {       
     if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
         ATX_ConsoleOutputF("Nominal Bitrate = %ld\n", info.nominal_bitrate);
@@ -271,15 +223,16 @@ BtCommand::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 int
 main(int /*argc*/, char** /*argv*/)
 {
-    // create the player
-    BtCommand* player = new BtCommand();
+    // create the controller
+    BtController* controller = new BtController();
 
     // pump notification messages
-    while (player->PumpMessage() == NPT_SUCCESS) {/* */}
-    ATX_Debug("BtCommand::main Received Terminate Message\n");
+    while (controller->PumpMessage() == NPT_SUCCESS) {/* */}
 
-    // delete the player
-    delete player;
+    ATX_Debug("BtController::main Received Terminate Message\n");
+
+    // delete the controller
+    delete controller;
 
     return 0;
 }

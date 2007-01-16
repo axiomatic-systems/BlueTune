@@ -1,0 +1,5 @@
+BlueTune Kit
+------------
+
+The BlueTune Kit contains all the software packages necessary to build the BlueTune framework, plugins, and sample applications.
+Each one of those software packages is contained in a directory at the top level of the BlueTune Kit distribution.

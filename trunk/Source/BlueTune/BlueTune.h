@@ -2,12 +2,21 @@
 |
 |      BlueTune - Top Level Header
 |
-|      (c) 2002-2006 Gilles Boccon-Gibod
+|      (c) 2002-2007 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
- * Master Header file included by BlueTune clients
+ * Master Top Level Header file included by BlueTune clients
+ */
+
+/**
+ @mainpage BlueTune SDK
+
+ @section intro Introduction
+
+ @section getting_started Getting Started
+
  */
 
 #ifndef _BLUETUNE_H_

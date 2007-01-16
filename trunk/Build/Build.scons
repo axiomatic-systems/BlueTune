@@ -167,7 +167,7 @@ class BuildModule(Module):
 #######################################################
 Import("env")
 
-env.Default('BtPlay', 'BtCommand')
+env.Default('BtPlay', 'BtController')
 
 SourceDirLookup = {}
 
@@ -459,10 +459,10 @@ BuildModule(name               = 'BtPlay',
             build_include_dirs = ['Source/BlueTune', 'Source/Config'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlugins'])
 
-############################# BtCommand
-BuildModule(name               = 'BtCommand',
+############################# BtController
+BuildModule(name               = 'BtController',
             type               = 'Executable',
-            build_source_dirs  = ['Apps/BtCommand'],
+            build_source_dirs  = ['Apps/BtController'],
             build_include_dirs = ['Source/BlueTune', 'Source/Config'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
 

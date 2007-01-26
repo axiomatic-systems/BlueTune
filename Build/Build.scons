@@ -110,12 +110,10 @@ class BuildModule(Module):
                         extra_lib_dirs)
         self.build_include_dirs = build_include_dirs
         self.type               = type
-        
-        if environment is None:
-            self.env = env.Copy()
-        else:
-            self.env = environment.Copy()
-        self.env.Append(CPPDEFINES = extra_cpp_defines)
+
+        # setup the environment        
+        self.env = environment and environment.Copy() or env.Copy()
+        if extra_cpp_defines: self.env.Append(CPPDEFINES = extra_cpp_defines.items())
         
         # for each source drct to build, create a BuildDir
         # to say where we want the object files to be built,
@@ -142,12 +140,11 @@ class BuildModule(Module):
         if len(sources) == 0:
             raise 'Module '+name+' has no sources'
         
-        # the product is a library
-        self.env.AppendUnique(CPPDEFINES=self.env['BLT_GLOBAL_CPP_DEFINES'])
+        # create the module's product
         self.env.AppendUnique(CPPPATH=cpp_path)
+        self.env.AppendUnique(LIBS=GetLibraries(Split(linked_modules)))
         if type == 'SharedLibrary':
-            libs = GetLibraries(Split(linked_modules))
-            self.product = self.env.SharedLibrary(target=name, LIBS=libs, source=sources)
+            self.product = self.env.SharedLibrary(target=name, source=sources)
             self.env.Alias(name, self.product)
         elif type == 'StaticLibrary':
             self.product = self.env.Library(target=name, source=sources)
@@ -155,13 +152,12 @@ class BuildModule(Module):
         elif type == 'Executable':
             # libraries    
             libs = GetLibraries(linked_modules)
-            lib_dirs = GetLibraryDirs(linked_modules)
-            self.product = self.env.Program(target=name.lower(), source=sources, LIBS=libs, LIBPATH=lib_dirs, CPPPATH=cpp_path)
+            lib_path = GetLibraryDirs(linked_modules)
+            self.env.AppendUnique(LIBS=libs, LIBPATH=lib_path)
+            self.product = self.env.Program(target=name.lower(), source=sources)
             self.env.Alias(name, self.product)    
         
 
-    
-        
 #######################################################
 # Main Build
 #######################################################
@@ -175,11 +171,10 @@ env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
 env['BLT_EXTRA_LIBS'] = ''
 
-### global settings
 if env['build_config'] == 'Debug':
-	env['BLT_GLOBAL_CPP_DEFINES'] = {'BLT_DEBUG':None, 'ATX_CONFIG_ENABLE_LOGGING':None}
+	env.Append(CPPDEFINES = ['BLT_DEBUG', 'ATX_CONFIG_ENABLE_LOGGING'])
 else:
-	env['BLT_GLOBAL_CPP_DEFINES'] = {'NDEBUG':None}
+	env.Append(CPPDEFINES = ['NDEBUG'])
 
 ### try to read in any target specific configuration
 target_config_file = env.GetBuildPath('#/Build/Targets/'+env['target']+'/Config.scons')
@@ -187,10 +182,12 @@ if os.path.exists(target_config_file):
     # Load the target-specific config file    
     execfile(target_config_file)
 
+### default build targets
+env.Default('btplay', 'btcontroller')
+
 ### extra plugins
 if env.has_key('extra_plugins'): 
-    env['BLT_PLUGINS'] += Split(env['extra_plugins'])
-    
+    env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
 #######################################################
 # modules
 #
@@ -264,6 +261,7 @@ BuildModule(name                  = 'Bento4',
 
 ############################ Melo
 MLO_SOURCE_ROOT = 'Melo/Source'
+
 SourceDirLookup[MLO_SOURCE_ROOT] = '#/../Melo/Source'  
 if env.has_key('MLO_CPP_DEFINES'):
     MLO_EXTRA_CPP_DEFINES = env['MLO_CPP_DEFINES'] 
@@ -317,7 +315,7 @@ BuildModule(name               = 'BltPlayer',
 
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
-    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
+    env.AppendUnique(BLT_PLUGINS='WmaDecoder')    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
     SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
     WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
                          'ENABLE_LPC':None,
@@ -357,14 +355,11 @@ if os.environ.has_key('WMSDK_HOME'):
             environment           = wma_env,
             extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
 elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
-    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
+    env.AppendUnique(BLT_PLUGINS='WmaDecoder')    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
     Module(name             = 'BltWmaDecoder',
            included_modules = 'Source/Plugins/Decoders/WMA',
            linked_modules   = 'BltWmaDecoderPlugin',
            lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
-#else:
-#    if 'WmaDecoder' in env['BLT_PLUGINS']:
-#        raise 'ERROR: the WmaDecoder plugin requires WMSDK_HOME or BLT_WMA_PLUGIN_HOME'
            
 ############################# BltPluginsSupport
 BuildModule(name               = 'BltPluginsSupport',
@@ -467,37 +462,11 @@ BuildModule(name               = 'BtController',
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
 
 ############################# BtGtk
-#gtk_env = env.Copy()
-#gtk_env.ParseConfig('pkg-config --cflags gtk+-2.0')
+gtk_env = env.Copy()
+gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
 BuildModule(name               = 'BtGtk',
             type               = 'Executable',
             build_source_dirs  = ['Apps/BtGtk'],
-            build_include_dirs = ['Source/BlueTune', 'Source/Config',
-                                  '/usr/include/gtk-2.0',
-                                  '/usr/lib/gtk-2.0/include',
-                                  '/usr/include/atk-1.0',
-                                  '/usr/include/cairo',
-                                  '/usr/include/pango-1.0',
-                                  '/usr/include/glib-2.0',
-                                  '/usr/lib/glib-2.0/include'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins',
-                                  'gtk-x11-2.0', 
-                                  'gdk-x11-2.0', 
-                                  'atk-1.0', 
-                                  'gdk_pixbuf-2.0', 
-                                  'pangocairo-1.0',
-                                  'fontconfig',
-                                  'Xext',
-                                  'Xrender',
-                                  'Xinerama',
-                                  'Xi',
-                                  'Xrandr',
-                                  'Xcursor',
-                                  'Xfixes',
-                                  'pango-1.0',
-                                  'cairo', 
-                                  'X11',    
-                                  'gobject-2.0',
-                                  'gmodule-2.0', 
-                                  'dl', 
-                                  'glib-2.0'])
+            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
+            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
+            environment        = gtk_env)

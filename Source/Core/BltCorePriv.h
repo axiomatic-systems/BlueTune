@@ -6,9 +6,6 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
-/** @file
- * BlueTune Core Private API Header file
- */
 
 #ifndef _BLT_CORE_PRIV_H_
 #define _BLT_CORE_PRIV_H_
@@ -16,14 +13,12 @@
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
-#include "Atomix.h"
 #include "BltCore.h"
-#include "BltMediaNode.h"
 
 /*----------------------------------------------------------------------
-|   types
+|   functions
 +---------------------------------------------------------------------*/
-typedef struct Core Core;
+BLT_Result BLT_Core_Create(BLT_Core** core);
 
 /*----------------------------------------------------------------------
 |   prototypes

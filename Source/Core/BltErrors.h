@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Result and Error codes
+ * Results and Error codes
  */
 
 #ifndef _BLT_ERRORS_H_

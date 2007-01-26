@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune OutputNode Interface Header file
+ * BLT_OutputNode interface
  */
 
 #ifndef _BLT_OUTPUT_NODE_H_

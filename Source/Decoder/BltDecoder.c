@@ -14,6 +14,7 @@
 #include "BltCore.h"
 #include "BltStream.h"
 #include "BltBuiltins.h"
+#include "BltCorePriv.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -46,7 +47,7 @@ BLT_Decoder_Create(BLT_Decoder** decoder)
     }
 
     /* get the core object */
-    result = BLT_Init(&(*decoder)->core);
+    result = BLT_Core_Create(&(*decoder)->core);
     if (BLT_FAILED(result)) goto failed;
 
     /* create a stream */
@@ -71,8 +72,6 @@ BLT_Decoder_Destroy(BLT_Decoder* decoder)
     
     ATX_RELEASE_OBJECT(decoder->stream);
     BLT_Core_Destroy(decoder->core);
-    BLT_Terminate();
-    ATX_FreeMemory(decoder);
 
     return BLT_SUCCESS;
 }
@@ -135,12 +134,12 @@ BLT_Decoder_UpdateStatus(BLT_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_Decoder_GetSettings
+|    BLT_Decoder_GetProperties
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Decoder_GetSettings(BLT_Decoder* decoder, ATX_Properties** settings) 
+BLT_Decoder_GetProperties(BLT_Decoder* decoder, ATX_Properties** properties) 
 {
-    return BLT_Core_GetSettings(decoder->core, settings);
+    return BLT_Core_GetProperties(decoder->core, properties);
 }
 
 /*----------------------------------------------------------------------
@@ -267,7 +266,7 @@ BLT_Decoder_Pause(BLT_Decoder* decoder)
 |    BLT_Decoder_SeekToTime
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_Cardinal time)
+BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time)
 {
     return BLT_Stream_SeekToTime(decoder->stream, time);
 }

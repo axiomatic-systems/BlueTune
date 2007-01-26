@@ -6,6 +6,9 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
+/** @file
+ * ReplayGain API
+ */
 
 #ifndef _BLT_REPLAY_GAIN_H_
 #define _BLT_REPLAY_GAIN_H_

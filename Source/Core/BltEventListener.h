@@ -6,6 +6,9 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
+/** @file
+ * BLT_EventListener interface
+ */
 
 #ifndef _BLT_EVENT_LISTENER_H_
 #define _BLT_EVENT_LISTENER_H_

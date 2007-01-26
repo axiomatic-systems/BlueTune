@@ -17,7 +17,7 @@
 #include "BltDefs.h"
 #include "BltTypes.h"
 #include "BltErrors.h"
-#include "BltCorePriv.h"
+#include "BltCore.h"
 
 /*----------------------------------------------------------------------
 |   Stream_Create

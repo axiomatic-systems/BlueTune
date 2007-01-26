@@ -16,7 +16,6 @@
 #include "BltErrors.h"
 #include "BltModule.h"
 #include "BltCore.h"
-#include "BltCorePriv.h"
 #include "BltStreamPriv.h"
 #include "BltMediaNode.h"
 #include "BltRegistryPriv.h"

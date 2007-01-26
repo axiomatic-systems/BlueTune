@@ -6,6 +6,9 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
+/** @file
+ * Common Types
+ */
 
 #ifndef _BLT_TYPES_H_
 #define _BLT_TYPES_H_

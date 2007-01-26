@@ -20,11 +20,11 @@
 #include "BltErrors.h"
 #include "BltModule.h"
 #include "BltCore.h"
-#include "BltCorePriv.h"
 #include "BltStreamPriv.h"
 #include "BltMediaNode.h"
 #include "BltRegistryPriv.h"
 #include "BltMediaPacketPriv.h"
+#include "BltCorePriv.h"
 
 /*----------------------------------------------------------------------
 |    logging
@@ -34,16 +34,16 @@ ATX_SET_LOCAL_LOGGER("bluetune.core")
 /*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
-struct Core {
+typedef struct {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_Core);
     ATX_IMPLEMENTS(ATX_Destroyable);
 
     /* members */
     BLT_Registry*   registry;
-    ATX_Properties* settings;
+    ATX_Properties* properties;
     ATX_List*       modules;
-};
+} Core;
 
 /*----------------------------------------------------------------------
 |    forward declarations
@@ -77,8 +77,8 @@ Core_Create(BLT_Core** object)
         return result;
     }
 
-    /* create the settings */
-    ATX_Properties_Create(&core->settings);
+    /* create the properties */
+    ATX_Properties_Create(&core->properties);
 
     /* create the module list */
     result = ATX_List_Create(&core->modules);
@@ -118,8 +118,8 @@ Core_Destroy(ATX_Destroyable* _self)
     /* delete the module list */
     ATX_List_Destroy(core->modules);
 
-    /* destroy the settings */
-    ATX_DESTROY_OBJECT(core->settings);
+    /* destroy the properties */
+    ATX_DESTROY_OBJECT(core->properties);
 
     /* destroy the registry */
     BLT_Registry_Destroy(core->registry);
@@ -200,13 +200,13 @@ Core_GetRegistry(BLT_Core* _self, BLT_Registry** registry)
 }
 
 /*----------------------------------------------------------------------
-|    Core_GetSettings
+|    Core_GetProperties
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_GetSettings(BLT_Core* _self, ATX_Properties** settings)
+Core_GetProperties(BLT_Core* _self, ATX_Properties** properties)
 {
     Core* self = ATX_SELF(Core, BLT_Core);
-    *settings = self->settings;
+    *properties = self->properties;
     return BLT_SUCCESS;
 }
 
@@ -297,7 +297,7 @@ ATX_BEGIN_INTERFACE_MAP(Core, BLT_Core)
     Core_UnRegisterModule,
     Core_EnumerateModules,
     Core_GetRegistry,
-    Core_GetSettings,
+    Core_GetProperties,
     Core_CreateCompatibleNode,
     Core_CreateMediaPacket
 ATX_END_INTERFACE_MAP
@@ -308,20 +308,11 @@ ATX_END_INTERFACE_MAP
 ATX_IMPLEMENT_DESTROYABLE_INTERFACE(Core)
 
 /*----------------------------------------------------------------------
-|    BLT_Init
+|    BLT_Core_Create
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Init(BLT_Core** core)
+BLT_Core_Create(BLT_Core** core)
 {
     return Core_Create(core);
-}
-
-/*----------------------------------------------------------------------
-|    BLT_Terminate
-+---------------------------------------------------------------------*/
-BLT_Result
-BLT_Terminate(void)
-{
-    return BLT_SUCCESS;
 }
 

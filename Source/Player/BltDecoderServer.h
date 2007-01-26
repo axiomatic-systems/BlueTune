@@ -40,6 +40,9 @@ public:
     virtual void OnSeekToPositionCommand(BLT_Size /*offset*/, BLT_Size /*range*/) {}
     virtual void OnRegisterModuleCommand(const BLT_Module* /*module*/) {}
     virtual void OnAddNodeCommand(BLT_CString /*name*/) {}
+    virtual void OnSetPropertyCommand(BLT_CString              /* name  */, 
+                                      ATX_PropertyType         /* type  */,
+                                      const ATX_PropertyValue* /* value */) {}
 };
 
 /*----------------------------------------------------------------------
@@ -59,7 +62,8 @@ public:
         COMMAND_ID_SEEK_TO_TIME,
         COMMAND_ID_SEEK_TO_POSITION,
         COMMAND_ID_REGISTER_MODULE,
-        COMMAND_ID_ADD_NODE
+        COMMAND_ID_ADD_NODE,
+        COMMAND_ID_SET_PROPERTY
     } CommandId;
 
     // functions
@@ -279,6 +283,29 @@ public:
 };
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer_SetPropertyMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderServer_SetPropertyMessage : public BLT_DecoderServer_Message
+{
+public:
+    // methods
+    BLT_DecoderServer_SetPropertyMessage(BLT_CString              name, 
+                                         ATX_PropertyType         type,
+                                         const ATX_PropertyValue* value);
+    ~BLT_DecoderServer_SetPropertyMessage();
+    NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
+        handler->OnSetPropertyCommand(m_Name, m_Type, &m_Value);
+        return NPT_SUCCESS;
+    }
+
+ private:
+    // members
+    BLT_StringObject  m_Name;
+    ATX_PropertyType  m_Type;
+    ATX_PropertyValue m_Value;
+};
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer_EventListenerWrapper
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer;
@@ -320,6 +347,9 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual BLT_Result SeekToPosition(BLT_Size offset, BLT_Size range);
     virtual BLT_Result RegisterModule(BLT_Module* module);
     virtual BLT_Result AddNode(BLT_CString name);
+    virtual BLT_Result SetPropertyCommand(BLT_CString              name, 
+                                          ATX_PropertyType         type,
+                                          const ATX_PropertyValue* value);
 
     // NPT_Runnable methods
     void Run();
@@ -335,6 +365,9 @@ class BLT_DecoderServer : public NPT_Thread,
     void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range);
     void OnRegisterModuleCommand(BLT_Module* module);
     void OnAddNodeCommand(BLT_CString name);
+    void OnSetPropertyCommand(BLT_CString              name, 
+                              ATX_PropertyType         type,
+                              const ATX_PropertyValue* value);
 
     // BLT_EventListener methods
     virtual BLT_Result OnEvent(const ATX_Object* source,

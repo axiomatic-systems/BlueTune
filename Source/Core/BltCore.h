@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Core API Header file
+ * BLT_Core interface
  */
 
 #ifndef _BLT_CORE_H_
@@ -58,7 +58,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Core)
                                    BLT_Mask       categories,
                                    ATX_Iterator** iterator);
     BLT_Result (*GetRegistry)(BLT_Core* self, BLT_Registry** registry);
-    BLT_Result (*GetSettings)(BLT_Core* stream, ATX_Properties** settings);
+    BLT_Result (*GetProperties)(BLT_Core* self, ATX_Properties** properties);
     BLT_Result (*CreateCompatibleMediaNode)(BLT_Core*                 self,
                                             BLT_MediaNodeConstructor* constructor,
                                             BLT_MediaNode**           node);
@@ -86,8 +86,8 @@ ATX_INTERFACE(object)->EnumerateModules(object, categories, iterator)
 #define BLT_Core_GetRegistry(object, registry) \
 ATX_INTERFACE(object)->GetRegistry(object, registry)
 
-#define BLT_Core_GetSettings(object, settings) \
-ATX_INTERFACE(object)->GetSettings(object, settings)
+#define BLT_Core_GetProperties(object, settings) \
+ATX_INTERFACE(object)->GetProperties(object, settings)
 
 #define BLT_Core_CreateCompatibleMediaNode(object, constructor, node) \
 ATX_INTERFACE(object)->CreateCompatibleMediaNode(object, constructor, node)
@@ -96,11 +96,5 @@ ATX_INTERFACE(object)->CreateCompatibleMediaNode(object, constructor, node)
 ATX_INTERFACE(object)->CreateMediaPacket(object, size, type, packet)
 
 #define BLT_Core_Destroy(object) ATX_DESTROY_OBJECT(object)
-
-/*----------------------------------------------------------------------
-|   prototypes
-+---------------------------------------------------------------------*/
-BLT_Result BLT_Init(BLT_Core** core);
-BLT_Result BLT_Terminate(void);
 
 #endif /* _BLT_CORE_H_ */

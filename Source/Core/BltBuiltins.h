@@ -6,9 +6,6 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
-/** @file
- * BlueTune Builtins API Header file
- */
 
 #ifndef _BLT_BUILTINS_H_
 #define _BLT_BUILTINS_H_

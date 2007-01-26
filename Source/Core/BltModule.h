@@ -7,11 +7,20 @@
 |
  ****************************************************************/
 /** @file 
- * Header file for the BLT_Module interface 
+ * BLT_Module interface 
  */
 
 #ifndef _BLT_MODULE_H_
 #define _BLT_MODULE_H_
+
+/**
+ * @defgroup BLT_Module
+ * Interface implemented by objects that create other objects.
+ *  
+ * A Module object is responsible for creating object instance of a certain 
+ * class. Module objects implement the BLT_Module interface, and clients that
+ * want to create instances of that module will call the CreateObject method.
+ */
 
 /*----------------------------------------------------------------------
 |   includes
@@ -65,25 +74,35 @@ typedef struct {
 /*----------------------------------------------------------------------
 |   BLT_Module interface
 +---------------------------------------------------------------------*/
-/**
- * @brief Interface implemented by objects that create other objects
- *  
- * A Module object is responsible for creating object instance of a certain 
- * class. Module objects implement the BLT_Module interface, and clients that
- * want to create instances of that module will call the CreateObject method.
- */
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_Module)
+    /**
+     * Get the module's info.
+     * @param self Pointer to the BLT_Module object on which the method 
+     * is called 
+     * @param info Pointer to a BLT_ModuleInfo structure in which the
+     * module's info will be returned.
+     */
     BLT_Result (*GetInfo)(BLT_Module* self, BLT_ModuleInfo* info);
+
+    /**
+     * Attach the module to a BLT_Core object. The BLT_Core object reprents
+     * the context in which the module is running. This allows the module, 
+     * amongst other things, to access the core's registry.
+     * @param self Pointer to the BLT_Module object on which the method 
+     * is called 
+     * @param core Pointer the BLT_Core object to which this module is being
+     * attached.
+     */
     BLT_Result (*Attach)(BLT_Module* self, BLT_Core* core);
 
-    /** create an instance of the module that implements a given interface
-     * @param instance Instance pointer of the object on which the method 
+    /** 
+     * Create an instance of the module that implements a given interface
+     * @param self Pointer to the BLT_Module object on which the method 
      * is called 
      * @param parameters Generic parameters used for constructing the object
      * @param interface_id Interface ID that the object needs to implement
      * @param object address of an object reference where the created object
-     * will be returned if the call succeeds
-     * @blt_method_result
+     * will be returned if the call succeeds.
      */
     BLT_Result (*CreateInstance)(BLT_Module*              self,
                                  BLT_Core*                core,
@@ -92,6 +111,20 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Module)
                                  const ATX_InterfaceId*   interface_id,
                                  ATX_Object**             object);
 
+    /**
+     * Probe the module to know if it is able to create an oject instance
+     * that can handle a certain task.
+     * @param self Pointer to the BLT_Module object on which the method 
+     * is called 
+     * @param core Pointer to the BLT_Core object that represents the
+     * core context for the call.
+     * @param parameters_type Type identifier that indicates which specific
+     * structure the parameters point to.
+     * @param parameters Pointer to a parameters structure. The type of the
+     * structure pointed to is indicated by the parameters_type parameter.
+     * The type of parameters passed to this method indicates what type of
+     * query is being made and what the query parameters are.
+     */
     BLT_Result (*Probe)(BLT_Module*              self,
                         BLT_Core*                core,
                         BLT_ModuleParametersType parameters_type,
@@ -110,10 +143,10 @@ ATX_INTERFACE(object)->Attach(object, core)
 
 #define BLT_Module_CreateInstance(object, core, parameters_type, parameters, interface_id, new_object) \
 ATX_INTERFACE(object)->CreateInstance(object,               \
-                                      core,                               \
-                                      parameters_type,                    \
-                                      parameters,                         \
-                                      interface_id,                       \
+                                      core,                 \
+                                      parameters_type,      \
+                                      parameters,           \
+                                      interface_id,         \
                                       new_object)
 
 #define BLT_Module_Probe(object, core, type, query, match) \
@@ -185,6 +218,8 @@ _module_class##_Create(BLT_Module** object)                         \
     *object = &ATX_BASE_EX(module, BLT_BaseModule, BLT_Module);     \
     return BLT_SUCCESS;                                             \
 }
+
+/** @} */
 
 #endif /* _BLT_MODULE_H_ */
 

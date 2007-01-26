@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * Header file for common preprocessor definitions
+ * Common preprocessor definitions
  */
 
 #ifndef _BLT_DEFS_H_

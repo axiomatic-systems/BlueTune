@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune PCM Interface Header file
+ * PCM API
  */
 
 #ifndef _BLT_PCM_H_

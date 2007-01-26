@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune PacketConsumer Interface Header file
+ * BLT_PacketConsumer interface
  */
 
 #ifndef _BLT_PACKET_CONSUMER_H_

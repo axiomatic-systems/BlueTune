@@ -72,7 +72,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -156,7 +156,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -240,7 +240,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -324,7 +324,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -407,7 +407,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -492,7 +492,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -577,7 +577,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -662,7 +662,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				AdditionalDependencies="iphlpapi.lib"
+				AdditionalDependencies="iphlpapi.lib ws2.lib"
 				OutputFile="$(OutDir)/BtPlay.exe"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"

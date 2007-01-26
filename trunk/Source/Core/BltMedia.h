@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Media Interface Header file
+ * BLT_MediaType API
  */
 
 #ifndef _BLT_MEDIA_H_

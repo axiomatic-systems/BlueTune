@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune MediaNode Interface Header file
+ * BLT_MediaNode interface
  */
 
 #ifndef _BLT_MEDIA_NODE_H_

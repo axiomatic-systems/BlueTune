@@ -218,6 +218,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\..\Source\Plugins\Common\BltReplayGain.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\Source\Core\BltStream.c"
 					>
 				</File>
@@ -364,10 +368,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Plugins\Common\BltReplayGain.c"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Plugins\General\SilenceRemover\BltSilenceRemover.c"
 					>
 				</File>
@@ -450,10 +450,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Plugins\Outputs\Debug\BltDebugOutput.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Decoder\BltDecoder.h"
 					>
 				</File>
@@ -482,10 +478,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Core\BltInput.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Core\BltMedia.h"
 					>
 				</File>
@@ -507,6 +499,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Core\BltModule.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Core\BltOutputNode.h"
 					>
 				</File>
 				<File
@@ -534,6 +530,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\..\Source\Plugins\Common\BltReplayGain.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\Source\Core\BltStream.h"
 					>
 				</File>
@@ -542,19 +542,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Plugins\Parsers\Tags\BltTagParser.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Core\BltTime.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Core\BltTypes.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\..\Source\Plugins\Outputs\Win32\BltWin32Output.h"
 					>
 				</File>
 				<File
@@ -575,6 +567,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Parsers\Tags\BltApeParser.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Outputs\Debug\BltDebugOutput.h"
 					>
 				</File>
 				<File
@@ -626,10 +622,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Core\BltOutputNode.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Plugins\General\PacketStreamer\BltPacketStreamer.h"
 					>
 				</File>
@@ -638,15 +630,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\Source\Plugins\Common\BltReplayGain.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\Source\Plugins\General\SilenceRemover\BltSilenceRemover.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\General\StreamPacketizer\BltStreamPacketizer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Parsers\Tags\BltTagParser.h"
 					>
 				</File>
 				<File
@@ -663,6 +655,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Parsers\Wave\BltWaveParser.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Outputs\Win32\BltWin32Output.h"
 					>
 				</File>
 			</Filter>

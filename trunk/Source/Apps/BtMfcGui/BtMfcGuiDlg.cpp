@@ -90,8 +90,9 @@ void
 MfcPlayer::OnStreamTimeCodeNotification(BLT_TimeCode timecode)
 {
     char timecode_string[16];
-    sprintf(timecode_string, "%02d:%02d:%02d", 
-            timecode.h, timecode.m, timecode.s);
+    NPT_FormatString(timecode_string, sizeof(timecode_string),
+                     "%02d:%02d:%02d", 
+                     timecode.h, timecode.m, timecode.s);
     m_Dialog->SetDlgItemText(IDC_PLAYER_TIMECODE_LABEL, timecode_string);
 }
 
@@ -118,31 +119,31 @@ MfcPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {
     char value[16];
     if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-        sprintf(value, "%d", info.nominal_bitrate);
+        NPT_FormatString(value, sizeof(value), "%d", info.nominal_bitrate);
         m_Dialog->UpdateInfo("Nominal Bitrate", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-        sprintf(value, "%d", info.instant_bitrate);
+        NPT_FormatString(value, sizeof(value), "%d", info.instant_bitrate);
         m_Dialog->UpdateInfo("Instant Bitrate", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-        sprintf(value, "%d", info.average_bitrate);
+        NPT_FormatString(value, sizeof(value), "%d", info.average_bitrate);
         m_Dialog->UpdateInfo("Average Bitrate", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
-        sprintf(value, "%d", info.channel_count);
+        NPT_FormatString(value, sizeof(value), "%d", info.channel_count);
         m_Dialog->UpdateInfo("Channels", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-        sprintf(value, "%d", info.sample_rate);
+        NPT_FormatString(value, sizeof(value), "%d", info.sample_rate);
         m_Dialog->UpdateInfo("Sample Rate", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-        sprintf(value, "%d", info.duration);
+        NPT_FormatString(value, sizeof(value), "%d", info.duration);
         m_Dialog->UpdateInfo("Duration", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        sprintf(value, "%d", info.size);
+        NPT_FormatString(value, sizeof(value), "%d", info.size);
         m_Dialog->UpdateInfo("Size", value);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {

@@ -6,9 +6,6 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
-/** @file
- * BlueTune MediaPacket Interface Header file
- */
 
 #ifndef _BLT_MEDIA_PACKET_PRIV_H_
 #define _BLT_MEDIA_PACKET_PRIV_H_

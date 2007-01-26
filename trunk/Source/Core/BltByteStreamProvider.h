@@ -6,6 +6,9 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
+/** @file
+ * BLT_StreamProvider interface
+ */
 
 #ifndef _BLT_BYTE_STREAM_PROVIDER_H_
 #define _BLT_BYTE_STREAM_PROVIDER_H_

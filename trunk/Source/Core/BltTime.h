@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Time Interface Header file
+ * Time API
  */
 
 #ifndef _BLT_TIME_H_

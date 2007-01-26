@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune MediaPort Interface Header file
+ * BLT_MediaPort interface.
  */
 
 #ifndef _BLT_MEDIA_PORT_H_

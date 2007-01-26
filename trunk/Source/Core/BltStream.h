@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Stream Interface Header file
+ * BLT_Stream interface
  */
 
 #ifndef _BLT_STREAM_H_
@@ -167,7 +167,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
     BLT_Result (*EstimateSeekPoint)(BLT_Stream*    self,
                                     BLT_SeekMode   mode,
                                     BLT_SeekPoint* point);
-    BLT_Result (*SeekToTime)(BLT_Stream* self, BLT_Cardinal time);
+    BLT_Result (*SeekToTime)(BLT_Stream* self, BLT_UInt32 time);
     BLT_Result (*SeekToPosition)(BLT_Stream* self,
                                  BLT_Size    offset,
                                  BLT_Size    range);

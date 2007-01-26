@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune Registry API Header file
+ * BLT_Registry interface
  */
 
 #ifndef _BLT_REGISTRY_H_

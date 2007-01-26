@@ -6,6 +6,9 @@
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
+/** @file
+ * Events
+ */
 
 #ifndef _BLT_EVENT_H_
 #define _BLT_EVENT_H_

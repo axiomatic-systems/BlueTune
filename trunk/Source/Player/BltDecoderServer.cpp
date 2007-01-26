@@ -526,6 +526,37 @@ BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer::SetPropertyCommand
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderServer::SetPropertyCommand(BLT_CString              name, 
+                                      ATX_PropertyType         type,
+                                      const ATX_PropertyValue* value)
+{
+    return PostMessage(
+        new BLT_DecoderServer_SetPropertyMessage(name, type, value));
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer::OnSetPropertyCommand
++---------------------------------------------------------------------*/
+void 
+BLT_DecoderServer::OnSetPropertyCommand(BLT_CString              name, 
+                                        ATX_PropertyType         type,
+                                        const ATX_PropertyValue* value)
+{
+    BLT_Result result;
+    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", name);
+
+    ATX_Properties* properties = NULL;
+    result = BLT_Decoder_GetProperties(m_Decoder, &properties);
+    if (ATX_SUCCEEDED(result)) {
+        result = ATX_Properties_SetProperty(properties, name, type, value);
+    }
+    SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY, result);
+}
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnEvent
 +---------------------------------------------------------------------*/
 BLT_Result
@@ -561,4 +592,53 @@ BLT_DecoderServer_EventListenerWrapper_OnEvent(
 {
     BLT_DecoderServer_EventListenerWrapper* self = ATX_SELF(BLT_DecoderServer_EventListenerWrapper, BLT_EventListener);
     self->outer->OnEvent(source, type, event);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer_SetPropertyMessage::BLT_DecoderServer_SetPropertyMessage
++---------------------------------------------------------------------*/
+BLT_DecoderServer_SetPropertyMessage::BLT_DecoderServer_SetPropertyMessage(
+    BLT_CString              name, 
+    ATX_PropertyType         type, 
+    const ATX_PropertyValue* value) :
+    BLT_DecoderServer_Message(COMMAND_ID_SET_PROPERTY),
+    m_Name(name),
+    m_Type(type)
+{
+    switch (type) {
+        case ATX_PROPERTY_TYPE_STRING:
+            m_Value.string = ATX_DuplicateString(value->string);
+            break;
+
+        case ATX_PROPERTY_TYPE_RAW_DATA:
+            m_Value.raw_data.data = ATX_AllocateMemory(value->raw_data.size);
+            m_Value.raw_data.size = value->raw_data.size;
+            ATX_CopyMemory(m_Value.raw_data.data, 
+                           value->raw_data.data, 
+                           value->raw_data.size);
+            break;
+
+        default:
+            m_Value = *value;
+            break;
+    }
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer_SetPropertyMessage::~BLT_DecoderServer_SetPropertyMessage
++---------------------------------------------------------------------*/
+BLT_DecoderServer_SetPropertyMessage::~BLT_DecoderServer_SetPropertyMessage() 
+{
+    switch (m_Type) {
+        case ATX_PROPERTY_TYPE_STRING:
+            if (m_Value.string) ATX_FreeMemory((void*)m_Value.string);
+            break;
+
+        case ATX_PROPERTY_TYPE_RAW_DATA:
+            if (m_Value.raw_data.data) ATX_FreeMemory(m_Value.raw_data.data);
+            break;
+
+        default:
+            break;
+    }
 }

@@ -7,7 +7,7 @@
 |
  ****************************************************************/
 /** @file
- * BlueTune PacketProducer Interface Header file
+ * BLT_PacketProducer interface
  */
 
 #ifndef _BLT_PACKET_PRODUCER_H_

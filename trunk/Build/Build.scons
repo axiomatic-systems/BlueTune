@@ -167,7 +167,7 @@ class BuildModule(Module):
 #######################################################
 Import("env")
 
-env.Default('BtPlay', 'BtController')
+env.Default('btplay', 'btcontroller')
 
 SourceDirLookup = {}
 

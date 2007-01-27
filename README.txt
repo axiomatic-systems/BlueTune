@@ -56,3 +56,17 @@ because not all Linux systems have GTK. To build that sample application, you
 need to build it explicitely, by passing its name on the 'scons' command line:
 >>> scons -u BtGtk
 
+1.2.1 WMA Support
+If you have licensed the non-GPL version of BlueTune and the WMA Plugin option,
+you will have received a BlueTuneExtras distribution with a WmaPlugin directory
+containing the WMA plugin object code. If you do not have this optional plugin, 
+the WMA decoder plugin will not be available.
+
+1.2.1.1 Windows Build
+On Windows, all you need to do is to ensure that you have placed the BlueTuneExtras
+directory in the BlueTuneKit directory, at the same level as Atomix, Neptune and
+BlueTune.
+
+1.2.1.2 Scons Build
+You need to set the environment variable BLT_WMA_PLUGIN_HOME to the absolute path 
+of the BlueTuneExtras/WmaPlugin directory.

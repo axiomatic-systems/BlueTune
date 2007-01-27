@@ -61,9 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;"
+				AdditionalLibraryDirectories=""
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="MSVCRT.lib;LIBCMT.lib;LIBCMTD.lib"
 				GenerateDebugInformation="true"
@@ -139,9 +138,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libFLAC_static.lib vorbis_static.lib ogg_static.lib vorbisfile_static.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib&quot;;&quot;..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib&quot;"
+				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"

@@ -163,9 +163,8 @@ class BuildModule(Module):
 #######################################################
 Import("env")
 
-env.Default('btplay', 'btcontroller')
-
 SourceDirLookup = {}
+OptionalModules = []
 
 env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
@@ -182,12 +181,11 @@ if os.path.exists(target_config_file):
     # Load the target-specific config file    
     execfile(target_config_file)
 
-### default build targets
-env.Default('btplay', 'btcontroller')
-
 ### extra plugins
 if env.has_key('extra_plugins'): 
-    env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
+    env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
+
+
 #######################################################
 # modules
 #
@@ -315,7 +313,8 @@ BuildModule(name               = 'BltPlayer',
 
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
-    env.AppendUnique(BLT_PLUGINS='WmaDecoder')    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
+    env.AppendUnique(BLT_PLUGINS='WmaDecoder')
+    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
     SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
     WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
                          'ENABLE_LPC':None,
@@ -355,7 +354,8 @@ if os.environ.has_key('WMSDK_HOME'):
             environment           = wma_env,
             extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
 elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
-    env.AppendUnique(BLT_PLUGINS='WmaDecoder')    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
+    env.AppendUnique(BLT_PLUGINS='WmaDecoder')
+    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
     Module(name             = 'BltWmaDecoder',
            included_modules = 'Source/Plugins/Decoders/WMA',
            linked_modules   = 'BltWmaDecoderPlugin',
@@ -463,10 +463,19 @@ BuildModule(name               = 'BtController',
 
 ############################# BtGtk
 gtk_env = env.Copy()
-gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
-BuildModule(name               = 'BtGtk',
-            type               = 'Executable',
-            build_source_dirs  = ['Apps/BtGtk'],
-            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
-            environment        = gtk_env)
+try:
+    gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+    BuildModule(name               = 'BtGtk',
+                type               = 'Executable',
+                build_source_dirs  = ['Apps/BtGtk'],
+                build_include_dirs = ['Source/BlueTune', 'Source/Config'],
+                linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
+                environment        = gtk_env)
+    OptionalModules.append('BtGtk')
+except:
+    pass
+
+################################################
+# Default Build Modues
+################################################
+env.Default(['BtPlay', 'BtController'] + OptionalModules)

@@ -14,12 +14,17 @@
 #define _BLT_MODULE_H_
 
 /**
- * @defgroup BLT_Module
+ * @defgroup plugin_modules Plugin Modules
+ */
+
+/**
+ * @defgroup BLT_Module_interface BLT_Module Interface
  * Interface implemented by objects that create other objects.
  *  
  * A Module object is responsible for creating object instance of a certain 
  * class. Module objects implement the BLT_Module interface, and clients that
  * want to create instances of that module will call the CreateObject method.
+ * @{
  */
 
 /*----------------------------------------------------------------------
@@ -32,18 +37,35 @@
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
+/**
+ * Type identifiers for the parameters argument of the Probe method of
+ * the BLT_Module interface.
+ */
 typedef enum {
+    /**
+     * The parameters pointer points to a BLT_MediaNodeConstructor.
+     */
     BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR
 } BLT_ModuleParametersType;
 
+/**
+ * Module identifier.
+ */
 typedef unsigned char BLT_ModuleId[16];
 
+/**
+ * Information about a module.
+ */
 typedef struct {
     BLT_CString  name;
     BLT_ModuleId id;
     BLT_Flags    flags;
 } BLT_ModuleInfo;
 
+/**
+ * Base implementation of the BLT_Module interface that other 
+ * implementation of that interface can inherit from.
+ */
 typedef struct {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_Module);

@@ -46,14 +46,14 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
+/*----------------------------------------------------------------------
+|   MfcPlayer
++---------------------------------------------------------------------*/
 class MfcPlayer : public BLT_Player
 {
 public:
-    MfcPlayer(CBtMfcGuiDlg* dialog) : 
-        BLT_Player(new NPT_Win32WindowMessageQueue()),
-        m_Dialog(dialog), 
-        m_Scrolling(false) {}
-    ~MfcPlayer() { delete m_Queue;}
+    MfcPlayer(CBtMfcGuiDlg* dialog);
+    ~MfcPlayer();
 
     // message handlers
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State state);
@@ -63,8 +63,34 @@ public:
 
     // members
     CBtMfcGuiDlg* m_Dialog;
-    bool          m_Scrolling;
+    bool          m_Scrolling; // true is we are dragging the seek thumb
 };
+
+/*----------------------------------------------------------------------
+|   MfcPlayer::MfcPlayer
++---------------------------------------------------------------------*/
+MfcPlayer::MfcPlayer(CBtMfcGuiDlg* dialog) : 
+        // We use an instance of NPT_Win32WindowMessageQueue
+        // so that player messages will be dispatched just 
+        // like other windows messages, when the main loop
+        // calls DispatchMessage()
+        BLT_Player(new NPT_Win32WindowMessageQueue()),
+        m_Dialog(dialog), 
+        m_Scrolling(false)
+{
+}
+
+/*----------------------------------------------------------------------
+|   MfcPlayer::~MfcPlayer
++---------------------------------------------------------------------*/
+MfcPlayer::~MfcPlayer()
+{
+    // ensure that we won't be receiving any more messages on the queue
+    Shutdown();
+
+    // cleanup;
+    delete m_Queue;
+}
 
 /*----------------------------------------------------------------------
 |   MfcPlayer::OnDecoderStateNotification

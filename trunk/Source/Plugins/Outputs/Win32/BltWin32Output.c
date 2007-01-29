@@ -875,7 +875,7 @@ Win32OutputModule_Probe(BLT_Module*              self,
                 return BLT_FAILURE;
             }
 
-            /* the name should be 'wave:<name>' */
+            /* the name should be 'wave:<n>' */
             if (constructor->name == NULL ||
                 !ATX_StringsEqualN(constructor->name, "wave:", 5)) {
                 return BLT_FAILURE;

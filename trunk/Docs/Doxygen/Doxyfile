@@ -77,9 +77,10 @@ INPUT                  = ../../Source/BlueTune \
                          ../../Source/Decoder \
                          ../../Source/Player \
                          ../../../Atomix/Source/Core \
-                         ../../../Neptune/Source/Core
+                         ../../../Neptune/Source/Core \
+                         ../../Source/Plugins/
 FILE_PATTERNS          = *.h
-RECURSIVE              = NO
+RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = *_.h
@@ -111,7 +112,7 @@ IGNORE_PREFIX          = BLT_
 # configuration options related to the HTML output
 #---------------------------------------------------------------------------
 GENERATE_HTML          = YES
-HTML_OUTPUT            = html
+HTML_OUTPUT            = BlueTune-HTML
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = 
 HTML_FOOTER            = Footer.html
@@ -130,7 +131,7 @@ TREEVIEW_WIDTH         = 250
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 LATEX_OUTPUT           = latex
 LATEX_CMD_NAME         = latex
 MAKEINDEX_CMD_NAME     = makeindex

@@ -13,6 +13,47 @@
 #ifndef _BLT_MEDIA_NODE_H_
 #define _BLT_MEDIA_NODE_H_
 
+/**
+ * @defgroup plugin_input_modules Input Plugin Modules
+ * Plugin modules that can be used as input. Input modules
+ * are always positioned first in a chain.
+ * Input modules product byte streams or media packets.
+ *
+ * @defgroup plugin_output_modules Output Plugin Modules
+ * Plugin modules that can be used as output. Output modules
+ * are always positioned last in a chain. Output modules consume
+ * byte streams or media packets, and produce nothing.
+ *
+ * @defgroup plugin_parser_modules Parser Plugin Modules
+ * Plugin modules that parse media formats. Typically, these modules
+ * consume a byte stream at their input and product either media packets
+ * or another byte stream.
+ *
+ * @defgroup plugin_formatter_modules Formatter Plugin Modules
+ * Plugin modules that format media formats. Typically, these modules
+ * consume a byte stream or media packets, and produce a formatted 
+ * byte stream.
+ *
+ * @defgroup plugin_decoder_modules Decoder Plugin Modules
+ * Plugin modules that implement some type of decoder that decodes
+ * one format of media buffers and produces another format.
+ *
+ * @defgroup plugin_adapter_modules Adapter Plugin Modules
+ * Plugin modules that adapt one media type to another similar media
+ * type with slightly different characteristics.
+ *
+ * @defgroup plugin_filter_modules Filter Plugin Modules
+ * Plugin modules that produce the same type of data as what they
+ * consume, and perform some type of filter transformation on the
+ * media data.
+ *
+ * @defgroup plugin_filter_modules General Plugin Modules
+ * Plugin modules that act on all types of media types, and usually
+ * just change their input type into a different output type, but 
+ * without changing the media data.
+ *
+ */
+
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/

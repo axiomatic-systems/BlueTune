@@ -93,7 +93,7 @@ BLT_DecoderServer::~BLT_DecoderServer()
 {
     ATX_LOG_FINE("BLT_DecoderServer::~BLT_DecoderServer");
 
-    // send a message to the thread to make it terminate
+    // send a message to our thread to make it terminate
     PostMessage(new NPT_TerminateMessage);
     
     // wait for the thread to terminate
@@ -319,6 +319,10 @@ BLT_DecoderServer::OnSetInputCommand(BLT_CString name, BLT_CString type)
     ATX_LOG_FINE_2("BLT_DecoderServer::OnSetInputCommand (%s / %s)",
                    BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     result = BLT_Decoder_SetInput(m_Decoder, name, type);
+
+    // update the state we were in the STATE_EOS state
+    if (m_State == STATE_EOS) SetState(STATE_STOPPED);
+    
     UpdateStatus();
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_INPUT, result);
 }
@@ -451,7 +455,11 @@ BLT_DecoderServer::OnSeekToTimeCommand(BLT_Cardinal time)
     result = BLT_Decoder_SeekToTime(m_Decoder, time);
     if (BLT_SUCCEEDED(result)) {
         UpdateStatus();
+
+        // update the state we were in the STATE_EOS state
+        if (m_State == STATE_EOS) SetState(STATE_STOPPED);
     }
+
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_TIME, result);
 }
 
@@ -477,7 +485,11 @@ BLT_DecoderServer::OnSeekToPositionCommand(BLT_Size offset, BLT_Size range)
     result = BLT_Decoder_SeekToPosition(m_Decoder, offset, range);
     if (BLT_SUCCEEDED(result)) {
         UpdateStatus();
+
+        // update the state we were in the STATE_EOS state
+        if (m_State == STATE_EOS) SetState(STATE_STOPPED);
     }
+
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_POSITION, result);
 }
 

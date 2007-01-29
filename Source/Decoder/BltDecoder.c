@@ -71,7 +71,9 @@ BLT_Decoder_Destroy(BLT_Decoder* decoder)
     ATX_LOG_FINE("BLT_Decoder::Destroy");
     
     ATX_RELEASE_OBJECT(decoder->stream);
-    BLT_Core_Destroy(decoder->core);
+    if (decoder->core) BLT_Core_Destroy(decoder->core);
+
+    ATX_FreeMemory(decoder);
 
     return BLT_SUCCESS;
 }

@@ -36,6 +36,12 @@
 +---------------------------------------------------------------------*/
 /**
  * BLT_Decoder object.
+ * This is the synchronous client API.
+ * A decoder creates a core engine, and manages a chain of media nodes
+ * including the input and output nodes. It acts as a media data 'pump'
+ * getting data from the input, processing it through all the media nodes
+ * in the chain, until it reaches the output. The decoder also encapsulates
+ * the core functions, such as the registration of plugin modules, etc...
  */
 typedef struct BLT_Decoder BLT_Decoder;
 
@@ -124,6 +130,9 @@ BLT_Result BLT_Decoder_GetStatus(BLT_Decoder*       decoder,
 /**
  * Get the ATX_Properties object representing the properties of a
  * BLT_Decoder object's stream.
+ * @param properties Pointer to a pointer where a pointer to an 
+ * APX_Properties object will be returned. The caller can then call
+ * methods of the ATX_Properties object to query stream properties.
  */
 BLT_Result BLT_Decoder_GetStreamProperties(BLT_Decoder*     decoder,
                                            ATX_Properties** properties);
@@ -162,8 +171,8 @@ BLT_Result BLT_Decoder_Pause(BLT_Decoder* decoder);
 BLT_Result BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time);
 
 /** Seek to a specific position.
- * @param Offset offset between 0 and range
- * @param Range maximum value of offset. The range is an arbitrary
+ * @param offset Offset between 0 and range
+ * @param range Maximum value of offset. The range is an arbitrary
  * scale. For example, if offset=1 and range=2, this means that
  * the decoder should seek to exacly the middle point of the input.
  * Or if offset=25 and range=100, this means that the decoder should

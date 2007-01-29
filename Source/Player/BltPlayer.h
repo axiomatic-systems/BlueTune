@@ -28,6 +28,14 @@
 /*----------------------------------------------------------------------
 |   BLT_Player
 +---------------------------------------------------------------------*/
+/**
+ * The BLT_Player class is the asynchronous client API.
+ * A BLT_Player player creates internally a thread in which a decoder 
+ * (BLT_Decoder) runs in a decoding loop. The decoding loop receives
+ * commands that are sent to it when calling some of the methods of this
+ * class. Those commands perform basic player controls, such as the ability
+ * to select the input, the output, to play, stop, pause, seek, etc...
+ */
 class BLT_Player : public BLT_DecoderClient
 {
  public:
@@ -36,6 +44,12 @@ class BLT_Player : public BLT_DecoderClient
      * @param queue pointer to a message queue that should receive messages
      * from the decoder thread. If this parameter is NULL, a message queue
      * will be created automatically.
+     * WARNING: it is important that this queue not be destroyed before this
+     * player object is destroyed, because it may receive notification 
+     * messages. If you need to destroy the queue in the destructor of a 
+     * subclass of this class, call the Shutdown() method before destroying
+     * the message queue to ensure that no more notification messages will 
+     * be posted to the queue.
      */
     BLT_Player(NPT_MessageQueue* queue = NULL);
 
@@ -51,12 +65,6 @@ class BLT_Player : public BLT_DecoderClient
      * of whether a message is available or not.
      */
     virtual BLT_Result PumpMessage(bool blocking = true);
-
-    /**
-     * Tell the decoder thread to stop decoding, and exit. This object
-     * can no longer be used after this method returns.
-     */
-    virtual BLT_Result Terminate();
 
     /**
      * Set the input of the decoder.
@@ -112,8 +120,8 @@ class BLT_Player : public BLT_DecoderClient
 
     /**
      * Instruct the decoder to seek to a specific position.
-     * @param Offset offset between 0 and range
-     * @param Range maximum value of offset. The range is an arbitrary
+     * @param offset Offset between 0 and range
+     * @param range Maximum value of offset. The range is an arbitrary
      * scale. For example, if offset=1 and range=2, this means that
      * the decoder should seek to exacly the middle point of the input.
      * Or if offset=25 and range=100, this means that the decoder should
@@ -123,7 +131,7 @@ class BLT_Player : public BLT_DecoderClient
 
     /**
      * Register a module with the decoder.
-     * @name module Pointer to a module object.
+     * @param module Pointer to a module object.
      */
     virtual BLT_Result RegisterModule(BLT_Module* module);
 
@@ -134,8 +142,29 @@ class BLT_Player : public BLT_DecoderClient
      */
     virtual BLT_Result AddNode(BLT_CString name);
 
+    /**
+     * Shutdown the player. 
+     * Use this method before deleting the player if you need to ensure that
+     * no more asynchronous event callbacks will be made. 
+     * When this method returns, no other method can be called appart from
+     * the destructor.
+     */
+    virtual BLT_Result Shutdown();
+
+    /**
+     * Send this player a NPT_TerminateMessage message that will cause any caller
+     * waiting for a message on the incoming message queue to be
+     * unblocked.
+     * CAUTION: this is an advanced function. Only call this is you know 
+     * exactly what you are doing (it is not often needed).
+     */
+    virtual BLT_Result Interrupt();
+
 private:
-    // members
+    /**
+     * Instance of a decoding thread that implements the BLT_DecoderServer interface.
+     * All player commands are delegated to this instance.
+     */
     BLT_DecoderServer* m_Server;
 };
 

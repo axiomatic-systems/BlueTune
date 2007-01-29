@@ -66,7 +66,7 @@ BtStreamController::Run()
         }
     } while (BLT_SUCCEEDED(result) && !done);
 
-    // terminate so that we can exit our message pump loop
-    m_Player.Terminate();
+    // interrupt ourselves so that we can exit our message pump loop
+    m_Player.Interrupt();
 }
 

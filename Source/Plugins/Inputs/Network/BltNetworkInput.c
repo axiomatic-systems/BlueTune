@@ -246,11 +246,15 @@ NetworkInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     {
         BLT_StreamInfo info;
         BLT_Result     result;
+        ATX_Size       size;
 
-        result = ATX_InputStream_GetSize(self->stream, &info.size);
+        result = ATX_InputStream_GetSize(self->stream, &size);
         if (BLT_SUCCEEDED(result)) {
+            info.size = size;
             info.mask = BLT_STREAM_INFO_MASK_SIZE;
             BLT_Stream_SetInfo(stream, &info);
+        } else {
+            info.size = 0;
         }
     }
     

@@ -246,10 +246,13 @@ BuildModule(name                  = 'Neptune',
 ############################ Bento4
 AP4_SOURCE_ROOT = 'Bento4/Source/C++'
 SourceDirLookup[AP4_SOURCE_ROOT] = '#/../Bento4/Source/C++'  
-if env['build_config'] == 'Debug':
-    AP4_EXTRA_CPP_DEFINES = {'AP4_DEBUG':None}
+if env.has_key('AP4_CPP_DEFINES'):
+    AP4_EXTRA_CPP_DEFINES = env['AP4_CPP_DEFINES']
 else:
     AP4_EXTRA_CPP_DEFINES = {}
+if env['build_config'] == 'Debug':
+    AP4_EXTRA_CPP_DEFINES['AP4_DEBUG'] = None
+
 BuildModule(name                  = 'Bento4',
             build_source_dirs     = ['Core', 'MetaData', 'Crypto'],
             build_source_files    = env['AP4_SYSTEM_SOURCES'],
@@ -366,6 +369,7 @@ PluginsSettings = {
     'FileInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',         'src_dir':'Inputs/File'              },
     'CddaInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',         'src_dir':'Inputs/CDDA'              },
     'AlsaInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',         'src_dir':'Inputs/Alsa'              },
+    'NetworkInput'     : {'flags':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',      'src_dir':'Inputs/Network'           },
     'FileOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',        'src_dir':'Outputs/File'             },
     'OssOutput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',         'src_dir':'Outputs/OSS'              },
     'AlsaOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',        'src_dir':'Outputs/Alsa'             },

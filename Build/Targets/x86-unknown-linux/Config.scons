@@ -6,6 +6,7 @@ env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_MPG123'
 env['BLT_PLUGINS'] = ['FileInput', 
+                      'NetworkInput',
                       'MpegAudioDecoder', 
                       'StreamPacketizer', 
                       'NullOutput',

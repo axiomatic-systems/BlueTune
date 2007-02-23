@@ -3,10 +3,13 @@ LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux')
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
 env['ATX_EXTRA_LIBS']='m'
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
+env['NPT_EXTRA_LIBS']='pthread'
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
+env['AP4_CPP_DEFINES']={'AP4_PLATFORM_BYTE_ORDER':'AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN'}
 env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_FFMPEG'
 env['MLO_CPP_DEFINES'] = {'MLO_CONFIG_FIXED':None}
 env['BLT_PLUGINS'] = ['FileInput', 
+                      'NetworkInput',
                       'MpegAudioDecoder', 
                       'FlacDecoder',
                       'AacDecoder',

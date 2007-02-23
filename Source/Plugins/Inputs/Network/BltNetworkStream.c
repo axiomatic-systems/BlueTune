@@ -125,7 +125,7 @@ BLT_NetworkStream_ClampBackStore(BLT_NetworkStream* self)
 +---------------------------------------------------------------------*/
 static ATX_Result
 BLT_NetworkStream_Read(ATX_InputStream* _self, 
-                       ATX_Byte*        buffer,
+                       void*            buffer,
                        ATX_Size         bytes_to_read,
                        ATX_Size*        bytes_read)
 {
@@ -151,7 +151,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
         bytes_to_read -= chunk;
         *bytes_read += chunk;
         self->position += chunk;
-        buffer += chunk;
+        buffer = (void*)((char*)buffer+chunk);
         self->back_store += chunk;
         BLT_NetworkStream_ClampBackStore(self);
     }
@@ -188,7 +188,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
             *bytes_read += chunk;
             bytes_to_read -= chunk;
             self->position += chunk;
-            buffer += chunk;
+            buffer = (void*)((char*)buffer+chunk);
 
             /* compute how much back-store we have now */
             if (can_write-read_from_source < self->back_store) {

@@ -82,7 +82,7 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
     // delete any previous response we may have
     delete self->m_Response;
     self->m_Response = NULL;
-    self->m_InputStream = NULL;
+    *self->m_InputStream = NULL;
 
     // handle a non-zero start position
     if (position) {

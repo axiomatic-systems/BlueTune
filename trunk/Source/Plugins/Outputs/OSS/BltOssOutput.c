@@ -247,13 +247,15 @@ OssOutput_Configure(OssOutput* self)
 
         /* format */
         switch (self->media_type.bits_per_sample) {
-        	case 8: param  = AFMT_U8;     break;
+        	case  8: param = AFMT_U8;     break;
         	case 16: param = AFMT_S16_NE; break;
         	default: return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
 
         io_result = ioctl(self->device_handle, SNDCTL_DSP_SETFMT, &param);
         if (io_result != 0) {
+            ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_SETFMT(%d) failed (%d)",
+                              param, io_result);
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
 
@@ -261,6 +263,8 @@ OssOutput_Configure(OssOutput* self)
         param = self->media_type.sample_rate;
         io_result = ioctl(self->device_handle, SNDCTL_DSP_SPEED, &param);
         if (io_result != 0) {
+            ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_SPEED(%d) failed (%d)", 
+                              param, io_result);
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
 
@@ -268,6 +272,8 @@ OssOutput_Configure(OssOutput* self)
         param = self->media_type.channel_count == 2 ? 1 : 0;
         io_result = ioctl(self->device_handle, SNDCTL_DSP_STEREO, &param);
         if (io_result != 0) {
+            ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_STEREO(%d) failed (%d)", 
+                              param, io_result);
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
         
@@ -350,7 +356,11 @@ OssOutput_Write(OssOutput* self, void* buffer, BLT_Size size)
 
     /* ensure that the device is configured */
     result = OssOutput_Configure(self);
-    if (BLT_FAILED(result)) return result;
+    if (BLT_FAILED(result)) {
+        /* reset the media type */
+        BLT_PcmMediaType_Init(&self->media_type);
+        return result;
+    }
 
 #if defined(SNDCTL_DSP_SETTRIGGER)
     if (self->device_flags & BLT_OSS_OUTPUT_FLAG_CAN_TRIGGER) {
@@ -530,7 +540,8 @@ OssOutput_Create(BLT_Module*              module,
 
     /* setup the expected media type */
     BLT_PcmMediaType_Init(&self->expected_media_type);
-    self->expected_media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    self->expected_media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    self->expected_media_type.bits_per_sample = 16;
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, OssOutput, BLT_BaseMediaNode, BLT_MediaNode);

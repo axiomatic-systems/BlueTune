@@ -314,40 +314,35 @@ BuildModule(name               = 'BltPlayer',
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
     env.AppendUnique(BLT_PLUGINS='WmaDecoder')
-    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA9DEC'
-    SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA9DEC'
+    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
+    SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA10Dec'
     WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
-                         'ENABLE_LPC':None,
-                         'ENABLE_ALL_ENCOPT':None,
-                         'DISABLE_OPT':None,
-                         'BITSTREAM_CORRUPTION_ASSERTS':None,
-                         'BUILD_WMASTD':None,
-                         'BUILD_WMAPRO':None,
-                         'BUILD_WMALSL':None,
-                         'BUILD_WMAPRO_PLLM':None,
-                         'WMAAPI_NO_DRM':None,
-                         'WMAAPI_NO_DRM_STREAM':None}  
+                             'ENABLE_LPC':None,
+                             'ENABLE_ALL_ENCOPT':None,
+                             'DISABLE_OPT':None,
+                             'BITSTREAM_CORRUPTION_ASSERTS':None,
+                             'WMA_DECPK_BUILD':None,
+                             'WMAAPI_NO_DRM':None,
+                             'WMAAPI_NO_DRM_STREAM':None,
+                             'DISABLE_UES':None}  
     if env['build_config'] == 'Release':
         WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
     wma_env = env.has_key('WMA_ENV') and env['WMA_ENV'] or None
     BuildModule(name           = 'BltWmaDecoder',
             build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
-            build_source_dirs  = ['audio/wmaudio/v9/asfparse_s',
-                                  'audio/wmaudio/v9/common',
-                                  'audio/wmaudio/v9/include',
-                                  'audio/wmaudio/v9/decoder',
-                                  'audio/wmaudio/v9/fmthlpr',
-                                  'audio/wmaudio/v9/win32/decoder'],
+            build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
+                                  'audio/wmaudio/v10/common',
+                                  'audio/wmaudio/v10/decoder',
+                                  'audio/wmaudio/v10/fmthlpr',
+                                  'audio/wmaudio/v10/include',
+                                  'audio/wmaudio/v10/win32/decoder',
+                                  'audio/common/primitive',
+                                  'audio/common/pcmfmt',
+                                  'audio/common/chanmtx'],
             build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
-                                  ['mf/common/include',
-                                   'audio/common/include',
-                                   'audio/wmaudio/v9/common/include',
-                                   'audio/wmaudio/v9/asfparse_s',
-                                   'audio/wmaudio/v9/common',
-                                   'audio/wmaudio/v9/decoder',
-                                   'audio/wmaudio/v9/fmthlpr',
-                                   'audio/wmaudio/v9/include',
-                                   'audio/wmaudio/v9/win32']],
+                                  ['common/include',
+                                  'common/logging',
+                                   'audio/common/include']],
             included_only_modules = 'Source/Plugins/Decoders/WMA',
             linked_modules        = ['Atomix', 'BltCore'],
             source_root           = WMA_SOURCE_ROOT,

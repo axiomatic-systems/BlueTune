@@ -26,6 +26,9 @@ const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 65536;
 /*----------------------------------------------------------------------
 |   HttpInputStream
 +---------------------------------------------------------------------*/
+// it is important to keep this structure a POD (no methods)
+// because the strict compilers will not like use using
+// the offsetof() macro necessary when using ATX_SELF()
 struct HttpInputStream {
     // interfaces
     ATX_IMPLEMENTS(ATX_InputStream);
@@ -33,8 +36,12 @@ struct HttpInputStream {
 
     // class methods
     static ATX_Result  MapResult(NPT_Result result);
+    static HttpInputStream* Create(const char* url);
+    static void Destroy(HttpInputStream* self);
+    static BLT_Result SendRequest(HttpInputStream* self, NPT_Position position);
 
     // ATX_Polymorphic methods
+    static ATX_Object* GetInterface(HttpInputStream* self, const ATX_InterfaceId* id);
     static ATX_Object* GetInterface_ATX_InputStream(ATX_InputStream* self, const ATX_InterfaceId* id);
     static ATX_Object* GetInterface_ATX_Referenceable(ATX_Referenceable* self, const ATX_InterfaceId* id);
 
@@ -50,14 +57,8 @@ struct HttpInputStream {
     static ATX_Result  Release(ATX_Referenceable* self);
 
     // class members
-    static ATX_InputStreamInterface   ATX_InputStreamInterface;
-    static ATX_ReferenceableInterface ATX_ReferenceableInterface;
-
-    // methods
-    HttpInputStream(const char* url);
-    ~HttpInputStream();
-    ATX_Object* GetInterface(const ATX_InterfaceId* id);
-    BLT_Result SendRequest(NPT_Position position = 0);
+    static ATX_InputStreamInterface   InputStreamInterface;
+    static ATX_ReferenceableInterface ReferenceableInterface;
 
     // members
     ATX_Cardinal             m_ReferenceCount;
@@ -70,10 +71,10 @@ struct HttpInputStream {
 };
 
 /*----------------------------------------------------------------------
-|   HttpInputStream::ATX_InputStreamInterface
+|   HttpInputStream::InputStreamInterface
 +---------------------------------------------------------------------*/
 ATX_InputStreamInterface 
-HttpInputStream::ATX_InputStreamInterface = {
+HttpInputStream::InputStreamInterface = {
     HttpInputStream::GetInterface_ATX_InputStream,
     HttpInputStream::Read,
     HttpInputStream::Seek,
@@ -83,28 +84,28 @@ HttpInputStream::ATX_InputStreamInterface = {
 };
 
 /*----------------------------------------------------------------------
-|   HttpInputStream::ATX_ReferenceableInterface
+|   HttpInputStream::ReferenceableInterface
 +---------------------------------------------------------------------*/
 ATX_ReferenceableInterface 
-HttpInputStream::ATX_ReferenceableInterface = {
+HttpInputStream::ReferenceableInterface = {
     HttpInputStream::GetInterface_ATX_Referenceable,
     HttpInputStream::AddReference,
     HttpInputStream::Release,
 };
 
-#define HttpInputStream_ATX_InputStreamInterface HttpInputStream::ATX_InputStreamInterface
-#define HttpInputStream_ATX_ReferenceableInterface HttpInputStream::ATX_ReferenceableInterface
+#define HttpInputStream_ATX_InputStreamInterface HttpInputStream::InputStreamInterface
+#define HttpInputStream_ATX_ReferenceableInterface HttpInputStream::ReferenceableInterface
 
 /*----------------------------------------------------------------------
 |   HttpInputStream::GetInterface
 +---------------------------------------------------------------------*/
 ATX_Object* 
-HttpInputStream::GetInterface(const ATX_InterfaceId* id)
+HttpInputStream::GetInterface(HttpInputStream* self, const ATX_InterfaceId* id)
 {
     if (ATX_INTERFACE_IDS_EQUAL(id, &ATX_INTERFACE_ID(ATX_InputStream))) {
-        return (ATX_Object*)(void*)&ATX_InputStream_Base; 
+        return (ATX_Object*)(void*)&self->ATX_InputStream_Base; 
     } else if (ATX_INTERFACE_IDS_EQUAL(id, &ATX_INTERFACE_ID(ATX_Referenceable))) {
-        return (ATX_Object*)(void*)&ATX_Referenceable_Base; 
+        return (ATX_Object*)(void*)&self->ATX_Referenceable_Base; 
     } else {
         return NULL;
     }
@@ -130,7 +131,7 @@ HttpInputStream::GetInterface_ATX_InputStream(ATX_InputStream*       _self,
                                               const ATX_InterfaceId* id)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
-    return self->GetInterface(id);
+    return HttpInputStream::GetInterface(self, id);
 }
 
 /*----------------------------------------------------------------------
@@ -141,30 +142,38 @@ HttpInputStream::GetInterface_ATX_Referenceable(ATX_Referenceable*     _self,
                                                 const ATX_InterfaceId* id)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_Referenceable);
-    return self->GetInterface(id);
+    return HttpInputStream::GetInterface(self, id);
 }
 
 /*----------------------------------------------------------------------
-|   HttpInputStream::HttpInputStream
+|   HttpInputStream::Create
 +---------------------------------------------------------------------*/
-HttpInputStream::HttpInputStream(const char* url) :
-    m_ReferenceCount(1),
-    m_Url(url),
-    m_Response(NULL),
-    m_ContentLength(0),
-    m_Eos(false)
+HttpInputStream*
+HttpInputStream::Create(const char* url)
 {
-    /* setup interfaces */
-    ATX_SET_INTERFACE(this, HttpInputStream, ATX_InputStream);
-    ATX_SET_INTERFACE(this, HttpInputStream, ATX_Referenceable);
+    // create and initialize
+    HttpInputStream* stream = new HttpInputStream;
+    stream->m_ReferenceCount = 1;
+    stream->m_Url = url;
+    stream->m_Response = NULL;
+    stream->m_ContentLength = 0;
+    stream->m_Eos = false;
+
+    // setup interfaces
+    ATX_SET_INTERFACE(stream, HttpInputStream, ATX_InputStream);
+    ATX_SET_INTERFACE(stream, HttpInputStream, ATX_Referenceable);
+
+    return stream;
 }
 
 /*----------------------------------------------------------------------
-|   HttpInputStream::~HttpInputStream
+|   HttpInputStream::Destroy
 +---------------------------------------------------------------------*/
-HttpInputStream::~HttpInputStream()
+void
+HttpInputStream::Destroy(HttpInputStream* self)
 {
-    delete m_Response;
+    delete self->m_Response;
+    delete self;
 }
 
 /*----------------------------------------------------------------------
@@ -187,7 +196,7 @@ HttpInputStream::Release(ATX_Referenceable* _self)
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_Referenceable);
     if (self == NULL) return ATX_SUCCESS;
     if (--self->m_ReferenceCount == 0) {
-        delete self;
+        HttpInputStream::Destroy(self);
     }
 
     return ATX_SUCCESS;
@@ -216,7 +225,7 @@ HttpInputStream::Seek(ATX_InputStream* _self,
                       ATX_Position     where)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
-    NPT_Result result = self->SendRequest(where);
+    NPT_Result result = SendRequest(self, where);
     if (NPT_SUCCEEDED(result)) self->m_Eos = false;
     return result;
 }
@@ -273,22 +282,22 @@ HttpInputStream::GetAvailable(ATX_InputStream* _self,
 |   HttpInputStream::SendRequest
 +---------------------------------------------------------------------*/
 BLT_Result
-HttpInputStream::SendRequest(NPT_Position position)
+HttpInputStream::SendRequest(HttpInputStream* self, NPT_Position position)
 {
     // send the request
     NPT_Result      result = BLT_FAILURE;
-    NPT_HttpRequest request(m_Url, NPT_HTTP_METHOD_GET);
+    NPT_HttpRequest request(self->m_Url, NPT_HTTP_METHOD_GET);
 
     // delete any previous response we may have
-    delete m_Response;
-    m_Response = NULL;
-    m_InputStream = NULL;
+    delete self->m_Response;
+    self->m_Response = NULL;
+    self->m_InputStream = NULL;
 
     // handle a non-zero start position
     if (position) {
-        if (m_ContentLength == position) {
+        if (self->m_ContentLength == position) {
             // special case: seek to end of stream
-            m_Eos = true;
+            self->m_Eos = true;
             return BLT_SUCCESS;
         }
         NPT_String range = "bytes="+NPT_String::FromInteger(position);
@@ -297,22 +306,22 @@ HttpInputStream::SendRequest(NPT_Position position)
     }
 
     // send the request
-    result = m_HttpClient.SendRequest(request, m_Response);
+    result = self->m_HttpClient.SendRequest(request, self->m_Response);
     if (NPT_FAILED(result)) return result;
 
-    switch (m_Response->GetStatusCode()) {
+    switch (self->m_Response->GetStatusCode()) {
         case 200:
             // if this is a Range request, expect a 206 instead
             if (position) return BLT_ERROR_PROTOCOL_FAILURE;
-            m_Response->GetEntity()->GetInputStream(m_InputStream);
-            m_ContentLength = m_Response->GetEntity()->GetContentLength();
+            self->m_Response->GetEntity()->GetInputStream(self->m_InputStream);
+            self->m_ContentLength = self->m_Response->GetEntity()->GetContentLength();
             result = BLT_SUCCESS;
             break;
 
         case 206:
             // if this is not a Range request, expect a 200 instead
             if (position == 0) return BLT_ERROR_PROTOCOL_FAILURE;
-            m_Response->GetEntity()->GetInputStream(m_InputStream);
+            self->m_Response->GetEntity()->GetInputStream(self->m_InputStream);
             result = BLT_SUCCESS;
             break;
 
@@ -339,11 +348,11 @@ BLT_HttpNetworkStream_Create(const char* url, ATX_InputStream** stream)
     *stream = NULL;
 
     // create a stream object
-    HttpInputStream* http_stream = new HttpInputStream(url);
+    HttpInputStream* http_stream = HttpInputStream::Create(url);
     if (!http_stream->m_Url.IsValid()) return BLT_ERROR_INVALID_PARAMETERS;
 
     // send the request
-    result = http_stream->SendRequest();
+    result = HttpInputStream::SendRequest(http_stream, 0);
     if (NPT_FAILED(result)) return result;
 
     ATX_InputStream* adapted_input_stream = &ATX_BASE(http_stream, ATX_InputStream);

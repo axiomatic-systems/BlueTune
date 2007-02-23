@@ -22,7 +22,7 @@
 #include "BltStream.h"
 
 #include "wmaudio.h"
-#include "wmaprodecS_api.h"
+#include "pcmfmt.h"
 
 /*----------------------------------------------------------------------
 |   logging

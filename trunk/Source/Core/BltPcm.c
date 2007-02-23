@@ -50,7 +50,7 @@ BLT_Pcm_ReadSignedIntBE(const void* buffer, unsigned int width)
 {
     unsigned char* x = (unsigned char*)buffer;
     BLT_Int32 sample = 0;
-    unsigned char* y = ((unsigned char*)&sample)+width;
+    unsigned char* y = ((unsigned char*)&sample)+sizeof(sample);
     while (width--) {
         *--y = *x++;
     }
@@ -65,7 +65,7 @@ BLT_Pcm_ReadSignedIntLE(const void* buffer, unsigned int width)
 {
     unsigned char* x = ((unsigned char*)buffer)+width;
     BLT_Int32 sample = 0;
-    unsigned char* y = ((unsigned char*)&sample)+width;
+    unsigned char* y = ((unsigned char*)&sample)+sizeof(sample);
     while (width--) {
         *--y = *--x;
     }
@@ -79,7 +79,7 @@ static void
 BLT_Pcm_WriteSignedIntBE(void* buffer, BLT_Int32 sample, unsigned int width)
 {
     unsigned char* x = (unsigned char*)buffer;
-    unsigned char* y = ((unsigned char*)&sample)+width;
+    unsigned char* y = ((unsigned char*)&sample)+sizeof(sample);
     while (width--) {
         *x++ = *--y;
     }
@@ -92,7 +92,7 @@ static void
 BLT_Pcm_WriteSignedIntLE(void* buffer, BLT_Int32 sample, unsigned int width)
 {
     unsigned char* x = ((unsigned char*)buffer)+width;
-    unsigned char* y = ((unsigned char*)&sample)+width;
+    unsigned char* y = ((unsigned char*)&sample)+sizeof(sample);
     while (width--) {
         *--x = *--y;
     }
@@ -206,7 +206,7 @@ BLT_Pcm_CanConvert(const BLT_MediaType* from, const BLT_MediaType* to)
         return BLT_FALSE;
     }
 
-    /* we only support floats in 32bit width */
+    /* we only support floats in 32-bit width */
     if (from_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_LE ||
         from_pcm->sample_format == BLT_PCM_SAMPLE_FORMAT_FLOAT_BE) {
         if (from_pcm->bits_per_sample != 32) return BLT_FALSE;
@@ -243,6 +243,7 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
     const BLT_PcmMediaType* in_type;
     BLT_PcmMediaType        out_type;
     unsigned int            sample_count;
+    unsigned int            packet_size;
     BLT_Int32               (*in_function)(const void* buffer, unsigned int width);
     void                    (*out_function)(void* buffer, BLT_Int32 sample, unsigned int width);
     BLT_Result              result;
@@ -318,27 +319,19 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
+    /* allocate the output packet */
     sample_count = BLT_MediaPacket_GetPayloadSize(in)/(in_type->bits_per_sample/8);
-    if (in_type->bits_per_sample > out_type.bits_per_sample) {
-        /* we need a larger buffer for the output */
-        BLT_Size packet_size = sample_count*(out_type.bits_per_sample/8);
-        result = BLT_Core_CreateMediaPacket(core,
-                                            packet_size,
-                                            (const BLT_MediaType*)&out_type,
-                                            out);
-        if (BLT_FAILED(result)) return result;
-    } else {
-        /* use the same packet for output (don't copy the media types now) */
-        BLT_MediaPacket_AddReference(in);
-        *out = in;
-    }
+    packet_size = sample_count*(out_type.bits_per_sample/8);
+    result = BLT_Core_CreateMediaPacket(core,
+                                        packet_size,
+                                        (const BLT_MediaType*)&out_type,
+                                        out);
+    if (BLT_FAILED(result)) return result;
 
-    /* do nothing if the formats are the same */
-    if (in_type->sample_format == out_type.sample_format) {
-        return BLT_SUCCESS;
-    }
+    /* set the payload size */
+    BLT_MediaPacket_SetPayloadSize(*out, packet_size);
 
-    /* convert samples */
+    /* convert the samples */
     {
         const char*  in_buffer = (const char*)BLT_MediaPacket_GetPayloadBuffer(in);
         unsigned int in_width  = in_type->bits_per_sample/8;
@@ -350,11 +343,6 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
             in_buffer += in_width;
             out_buffer += out_width;
         }
-    }
-
-    /* adjust sample format if we have reused the same packet */
-    if (*out == in) {
-        BLT_MediaPacket_SetMediaType(in, (const BLT_MediaType*)&out_type);
     }
 
     return BLT_SUCCESS;

@@ -491,7 +491,7 @@ Win32Output_PutPacket(BLT_PacketConsumer* _self,
         if (media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-        if (media_type->bits_per_sample != 8 &&
+        if (media_type->bits_per_sample !=  8 &&
             media_type->bits_per_sample != 16 &&
             media_type->bits_per_sample != 24 &&
             media_type->bits_per_sample != 32) {

@@ -71,12 +71,18 @@ PcmAdapterInput_PutPacket(BLT_PacketConsumer* _self,
                           BLT_MediaPacket*    packet)
 {
     PcmAdapter* self = ATX_SELF_M(input, PcmAdapter, BLT_PacketConsumer);
-    
+    BLT_Result  result;
+
     /* transform the packet data */
-    return BLT_Pcm_ConvertMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
-                                      packet, 
-                                      &self->output.pcm_type, 
-                                      &self->output.packet);
+    result =  BLT_Pcm_ConvertMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                         packet, 
+                                         &self->output.pcm_type, 
+                                         &self->output.packet);
+    if (BLT_FAILED(result)) {
+        ATX_LOG_WARNING_1("PcmAdapterInput::PutPacket - failed to convert PCM (%d)", result);
+    }
+
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -358,7 +364,7 @@ PcmAdapterModule_Probe(BLT_Module*              self,
                     return BLT_FAILURE;
                 }
             } else {
-                /* if a name is a specified, it needs to match exactly */
+                /* if a name is specified, it needs to match exactly */
                 if (!ATX_StringsEqual(constructor->name, "PcmAdapter")) {
                     return BLT_FAILURE;
                 } else {

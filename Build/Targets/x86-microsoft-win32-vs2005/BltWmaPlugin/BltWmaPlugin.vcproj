@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\BlueTune\Source\Core;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\common\include;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\include;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\asfparse_s;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\decoder"
+				AdditionalIncludeDirectories="..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\BlueTune\Source\Core;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\common\include;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\include;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\asfparse_s;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\decoder"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_DEBUG;ATX_CONFIG_ENABLE_LOGGING"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -104,7 +104,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\BlueTune\Source\Core;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\common\include;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\include;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\asfparse_s;..\..\..\..\..\WMSDK\WMPK\WMA9DEC\audio\wmaudio\v9\decoder"
+				AdditionalIncludeDirectories="..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\BlueTune\Source\Core;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\common\include;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\include;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\asfparse_s;..\..\..\..\..\WMSDK\WMPK\WMA10Dec\audio\wmaudio\v10\decoder"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;ATX_CONFIG_ENABLE_LOGGING"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

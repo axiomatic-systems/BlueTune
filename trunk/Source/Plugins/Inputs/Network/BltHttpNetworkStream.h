@@ -15,6 +15,8 @@
 +---------------------------------------------------------------------*/
 #include "BltTypes.h"
 #include "BltModule.h"
+#include "BltMedia.h"
+#include "BltNetworkInputSource.h"
 
 /*----------------------------------------------------------------------
 |   functions
@@ -24,7 +26,11 @@ extern "C" {
 #endif
 
 BLT_Result 
-BLT_HttpNetworkStream_Create(const char* url, ATX_InputStream** stream);
+BLT_HttpNetworkStream_Create(const char*              url, 
+                             BLT_Core*                core,
+                             ATX_InputStream**        stream,
+                             BLT_NetworkInputSource** source,
+                             BLT_MediaType**          media_type);
 
 #if defined(__cplusplus)
 }

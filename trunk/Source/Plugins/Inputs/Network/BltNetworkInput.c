@@ -20,6 +20,7 @@
 #include "BltByteStreamProvider.h"
 #include "BltTcpNetworkStream.h"
 #include "BltHttpNetworkStream.h"
+#include "BltNetworkInputSource.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -41,9 +42,10 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_InputStreamProvider);
 
     /* members */
-    ATX_InputStream* stream;
-    ATX_Flags        flags;
-    BLT_MediaType*   media_type;
+    BLT_NetworkInputSource* source;
+    ATX_InputStream*        stream;
+    ATX_Flags               flags;
+    BLT_MediaType*          media_type;
 } NetworkInput;
 
 /*----------------------------------------------------------------------
@@ -125,7 +127,7 @@ NetworkInput_Create(BLT_Module*              module,
         result = BLT_TcpNetworkStream_Create(constructor->name+6, &input->stream);
     } else if (ATX_StringsEqualN(constructor->name, "http://", 7)) {
         /* create an HTTP byte stream */
-        result = BLT_HttpNetworkStream_Create(constructor->name, &input->stream);
+        result = BLT_HttpNetworkStream_Create(constructor->name, core, &input->stream, &input->source, &input->media_type);
     } else {
         result = BLT_ERROR_INVALID_PARAMETERS;
     }
@@ -137,14 +139,16 @@ NetworkInput_Create(BLT_Module*              module,
     }
 
     /* figure out the media type */
-    if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
-        /* unknown type, try to figure it out from the network extension */
-        BLT_MediaType_Clone(&BLT_MediaType_Unknown, &input->media_type);
-        NetworkInput_DecideMediaType(input, constructor->name);
-    } else {
-        /* use the media type from the output spec */
-        BLT_MediaType_Clone(constructor->spec.output.media_type, 
-                            &input->media_type);
+    if (input->media_type == NULL) {
+        if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
+            /* unknown type, try to figure it out from the network extension */
+            BLT_MediaType_Clone(&BLT_MediaType_Unknown, &input->media_type);
+            NetworkInput_DecideMediaType(input, constructor->name);
+        } else {
+            /* use the media type from the output spec */
+            BLT_MediaType_Clone(constructor->spec.output.media_type, 
+                                &input->media_type);
+        }
     }
 
     /* construct reference */
@@ -261,6 +265,27 @@ NetworkInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     /* keep the stream as our context */
     ATX_BASE(self, BLT_BaseMediaNode).context = stream;
 
+    /* notify the source */
+    if (self->source) {
+        return BLT_NetworkInputSource_Attach(self->source, stream);
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    NetworkInput_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+NetworkInput_Deactivate(BLT_MediaNode* _self)
+{
+    NetworkInput* self = ATX_SELF_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode);
+
+    /* notify the source */
+    if (self->source) {
+        return BLT_NetworkInputSource_Detach(self->source);
+    }
+
     return BLT_SUCCESS;
 }
 
@@ -281,7 +306,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(NetworkInput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     NetworkInput_GetPortByName,
     NetworkInput_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    NetworkInput_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,

@@ -16,6 +16,7 @@
 #include "BltModule.h"
 #include "BltHttpNetworkStream.h"
 #include "BltNetworkStream.h"
+#include "BltNetworkInputSource.h"
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
@@ -32,6 +33,7 @@ const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 65536;
 typedef struct {
     // interfaces
     ATX_IMPLEMENTS(ATX_InputStream);
+    ATX_IMPLEMENTS(BLT_NetworkInputSource);
     ATX_IMPLEMENTS(ATX_Referenceable);
 
     // members
@@ -42,18 +44,71 @@ typedef struct {
     NPT_InputStreamReference* m_InputStream;
     NPT_Size                  m_ContentLength;
     bool                      m_Eos;
+    bool                      m_IsIcy;
+    unsigned int              m_IcyMetaInterval;
+    unsigned int              m_IcyMetaCounter;
+    BLT_Stream*               m_Context;
 } HttpInputStream;
 
 /*----------------------------------------------------------------------
 |   HttpInputStream_MapResult
 +---------------------------------------------------------------------*/
-ATX_Result
+static BLT_Result
 HttpInputStream_MapResult(NPT_Result result)
 {
     switch (result) {
         case NPT_ERROR_EOS: return ATX_ERROR_EOS;
         default: return result;
     }
+}
+
+/*----------------------------------------------------------------------
+|   HttpInputStream_GetMediaType
++---------------------------------------------------------------------*/
+static BLT_Result
+HttpInputStream_GetMediaType(HttpInputStream*  self,
+                             BLT_Core*         core, 
+                             BLT_MediaType**   media_type)
+{
+    BLT_Registry* registry;
+    BLT_UInt32    type_id;
+    BLT_Result    result;
+
+    /* check that we have what we need */
+    if (self->m_Response == NULL || self->m_Response->GetEntity() == NULL) {
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+
+    /* get the registry */
+    result = BLT_Core_GetRegistry(core, &registry);
+    if (BLT_FAILED(result)) return result;
+
+    /* query the registry */
+    result = BLT_Registry_GetIdForName(registry, 
+                                       BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS, 
+                                       self->m_Response->GetEntity()->GetContentType(), 
+                                       &type_id);
+    if (BLT_FAILED(result)) {
+        // try to guess based on the name extension
+        if (self->m_Url) {
+            int dot = self->m_Url->GetPath().ReverseFind('.');
+            if (dot >= 0) {
+                // query the registry
+                const char* extension = self->m_Url->GetPath().GetChars()+dot;
+                result = BLT_Registry_GetMediaTypeIdForExtension(registry, 
+                                                                 extension, 
+                                                                 &type_id);
+                if (BLT_FAILED(result)) return BLT_FAILURE;
+            }
+        }
+        return result;
+    }
+
+    /* create the media type */
+    BLT_MediaType_Clone(&BLT_MediaType_Unknown, media_type);
+    (*media_type)->id = type_id;
+
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -96,6 +151,9 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
         request.GetHeaders().SetHeader(NPT_HTTP_HEADER_RANGE, range);
     }
 
+    // add the ICY header that says we can deal with ICY metadata
+    request.GetHeaders().SetHeader("icy-metadata", "1");
+
     // send the request
     result = self->m_HttpClient->SendRequest(request, self->m_Response);
     if (NPT_FAILED(result)) return result;
@@ -124,7 +182,73 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
             result = BLT_FAILURE;
     }
 
+    // see if this is an ICY response
+    self->m_IcyMetaCounter = 0;
+    if (self->m_Response->GetProtocol() == "ICY") {
+        self->m_IsIcy = true;
+    } else {
+        self->m_IsIcy = false;
+    }
+    NPT_HttpHeader* icy_metaint = self->m_Response->GetHeaders().GetHeader("icy-metaint");
+    if (icy_metaint) {
+        unsigned long interval = 0;
+        ATX_ParseIntegerU(icy_metaint->GetValue(), &interval, ATX_TRUE);
+        self->m_IcyMetaInterval = interval;
+        self->m_IsIcy = true;
+    }
+
     return result;
+}
+
+/*----------------------------------------------------------------------
+|   HttpInputStream_Attach
++---------------------------------------------------------------------*/
+BLT_METHOD
+HttpInputStream_Attach(BLT_NetworkInputSource* _self,
+                       BLT_Stream*             stream)
+{
+    HttpInputStream* self = ATX_SELF(HttpInputStream, BLT_NetworkInputSource);
+    self->m_Context = stream;
+
+    // read the http headers
+    ATX_Properties* properties;
+    if (stream && BLT_SUCCEEDED(BLT_Stream_GetProperties(stream, &properties))) {
+        for (NPT_List<NPT_HttpHeader*>::Iterator i = self->m_Response->GetHeaders().GetHeaders().GetFirstItem();
+             i;
+             ++i) {
+            NPT_HttpHeader* header = *i;
+            ATX_PropertyValue value;
+            if (header->GetName().StartsWith("icy-", true)) {
+                NPT_String name = "ICY/";
+                name += header->GetName().GetChars()+4;
+                value.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, name, ATX_PROPERTY_TYPE_STRING, &value);
+            }
+
+            if (header->GetName().Compare("icy-name", true) == 0) {
+                value.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, "Tags/RadioName", ATX_PROPERTY_TYPE_STRING, &value);
+            } else if (header->GetName().Compare("icy-genre", true) == 0) {
+                value.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, "Tags/Genre", ATX_PROPERTY_TYPE_STRING, &value);
+            }
+        }
+    }
+
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   HttpInputStream_Detach
++---------------------------------------------------------------------*/
+BLT_METHOD
+HttpInputStream_Detach(BLT_NetworkInputSource* _self)
+{
+    HttpInputStream* self = ATX_SELF(HttpInputStream, BLT_NetworkInputSource);
+    self->m_Context = NULL;
+
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -139,7 +263,58 @@ HttpInputStream_Read(ATX_InputStream* _self,
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
     if (self->m_Eos) return ATX_ERROR_EOS;
     if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
-    return HttpInputStream_MapResult((*(self->m_InputStream))->Read(buffer, bytes_to_read, bytes_read));
+
+    // see if we need to truncate the read because of ICY metadata
+    if (self->m_IsIcy && self->m_IcyMetaInterval) {
+        unsigned int can_read = self->m_IcyMetaInterval-self->m_IcyMetaCounter;
+        if (can_read < bytes_to_read) bytes_to_read = can_read;
+    }
+
+    // read and count
+    NPT_Size local_bytes_read;
+    NPT_Result result = (*(self->m_InputStream))->Read(buffer, bytes_to_read, &local_bytes_read);
+    if (NPT_SUCCEEDED(result)) {
+        if (bytes_read) *bytes_read = local_bytes_read;
+        self->m_IcyMetaCounter += local_bytes_read;
+    }
+
+    // see if we should read ICY metadata now 
+    if (self->m_IsIcy && self->m_IcyMetaInterval && 
+        self->m_IcyMetaCounter == self->m_IcyMetaInterval) {
+        unsigned char meta_size = 0;
+        result = (*(self->m_InputStream))->Read(&meta_size, 1);
+        if (NPT_SUCCEEDED(result) && meta_size != 0) {
+            char* meta_value = new char[meta_size*16+1];
+            meta_value[meta_size*16] = '\0'; // terminate
+            result = (*(self->m_InputStream))->ReadFully(meta_value, meta_size*16);
+            if (NPT_SUCCEEDED(result)) {
+                // extract the title
+                NPT_String title(meta_value);
+                int quote_1 = title.Find("StringTitle='");
+                if (quote_1) {
+                    quote_1 += 13;
+                    int quote_2 = title.Find("';", quote_1);
+                    if (quote_2) {
+                        title.SetLength(quote_2);
+
+                        // notify of the title
+                        ATX_Properties* properties;
+                        if (self->m_Context && BLT_SUCCEEDED(BLT_Stream_GetProperties(self->m_Context, &properties))) {
+                            ATX_PropertyValue pvalue;
+                            pvalue.string = title.GetChars()+quote_1+1;
+                            ATX_Properties_SetProperty(properties, "Tags/Title", ATX_PROPERTY_TYPE_STRING, &pvalue);
+                        }
+                    }
+                }
+            }
+            delete[] meta_value;
+       }
+
+       // reset the counter
+       self->m_IcyMetaCounter = 0;
+    }
+
+    return HttpInputStream_MapResult(result);
 }
 
 /*----------------------------------------------------------------------
@@ -150,6 +325,11 @@ HttpInputStream_Seek(ATX_InputStream* _self,
                      ATX_Position     where)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
+
+    // check if we can seek
+    if (self->m_IsIcy) return BLT_ERROR_NOT_IMPLEMENTED;
+
+    // seek by emitting a new request with a range
     NPT_Result result = HttpInputStream_SendRequest(self, where);
     if (NPT_SUCCEEDED(result)) self->m_Eos = false;
     return result;
@@ -209,6 +389,7 @@ HttpInputStream_GetAvailable(ATX_InputStream* _self,
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(HttpInputStream)
     ATX_GET_INTERFACE_ACCEPT(HttpInputStream, ATX_Referenceable)
     ATX_GET_INTERFACE_ACCEPT(HttpInputStream, ATX_InputStream)
+    ATX_GET_INTERFACE_ACCEPT(HttpInputStream, BLT_NetworkInputSource)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -223,6 +404,14 @@ ATX_BEGIN_INTERFACE_MAP(HttpInputStream, ATX_InputStream)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
+|    BLT_NetworkInputSource interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(HttpInputStream, BLT_NetworkInputSource)
+    HttpInputStream_Attach,
+    HttpInputStream_Detach
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(HttpInputStream, m_ReferenceCount)
@@ -234,17 +423,22 @@ HttpInputStream*
 HttpInputStream_Create(const char* url)
 {
     // create and initialize
-    HttpInputStream* stream  = new HttpInputStream;
-    stream->m_ReferenceCount = 1;
-    stream->m_HttpClient     = new NPT_HttpClient;
-    stream->m_Url            = new NPT_HttpUrl(url);
-    stream->m_Response       = NULL;
-    stream->m_InputStream    = new NPT_InputStreamReference;
-    stream->m_ContentLength  = 0;
-    stream->m_Eos            = false;
+    HttpInputStream* stream   = new HttpInputStream;
+    stream->m_ReferenceCount  = 1;
+    stream->m_HttpClient      = new NPT_HttpClient;
+    stream->m_Url             = new NPT_HttpUrl(url);
+    stream->m_Response        = NULL;
+    stream->m_InputStream     = new NPT_InputStreamReference;
+    stream->m_ContentLength   = 0;
+    stream->m_Eos             = false;
+    stream->m_IsIcy           = false;
+    stream->m_IcyMetaInterval = 0;
+    stream->m_IcyMetaCounter  = 0;
+    stream->m_Context         = NULL;
 
     // setup interfaces
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_InputStream);
+    ATX_SET_INTERFACE(stream, HttpInputStream, BLT_NetworkInputSource);
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_Referenceable);
 
     return stream;
@@ -254,21 +448,32 @@ HttpInputStream_Create(const char* url)
 |   BLT_HttpNetworkStream_Create
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_HttpNetworkStream_Create(const char* url, ATX_InputStream** stream)
+BLT_HttpNetworkStream_Create(const char*              url, 
+                             BLT_Core*                core,
+                             ATX_InputStream**        stream,
+                             BLT_NetworkInputSource** source,
+                             BLT_MediaType**          media_type)
 {
     BLT_Result result = BLT_FAILURE;
 
     // default return value
     *stream = NULL;
+    *source = NULL;
+    *media_type = NULL;
 
     // create a stream object
     HttpInputStream* http_stream = HttpInputStream_Create(url);
     if (!http_stream->m_Url->IsValid()) return BLT_ERROR_INVALID_PARAMETERS;
+    *source = &ATX_BASE(http_stream, BLT_NetworkInputSource);
 
     // send the request
     result = HttpInputStream_SendRequest(http_stream, 0);
     if (NPT_FAILED(result)) return result;
 
+    // see if we can determine the media type
+    HttpInputStream_GetMediaType(http_stream, core, media_type);
+
+    // create a stream adapter
     ATX_InputStream* adapted_input_stream = &ATX_BASE(http_stream, ATX_InputStream);
     BLT_NetworkStream_Create(BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE, adapted_input_stream, stream);
 

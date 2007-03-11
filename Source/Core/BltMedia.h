@@ -42,28 +42,29 @@ typedef struct {
 #define BLT_MEDIA_TYPE_ID_AUDIO_PCM        2
 
 /*----------------------------------------------------------------------
-|   shared data
-+---------------------------------------------------------------------*/
-extern const BLT_MediaType BLT_MediaType_None;
-extern const BLT_MediaType BLT_MediaType_Unknown;
-
-/*----------------------------------------------------------------------
 |   error codes
 +---------------------------------------------------------------------*/
 #define BLT_ERROR_INVALID_MEDIA_FORMAT           (BLT_ERROR_BASE_MEDIA - 0)
 #define BLT_ERROR_UNSUPPORTED_CODEC              (BLT_ERROR_BASE_MEDIA - 1)
 #define BLT_ERROR_UNSUPPORTED_FORMAT             (BLT_ERROR_BASE_MEDIA - 2)
 
-/*----------------------------------------------------------------------
-|   prototypes
-+---------------------------------------------------------------------*/
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+/*----------------------------------------------------------------------
+|   shared data
++---------------------------------------------------------------------*/
+extern const BLT_MediaType BLT_MediaType_None;
+extern const BLT_MediaType BLT_MediaType_Unknown;
+
+/*----------------------------------------------------------------------
+|   prototypes
++---------------------------------------------------------------------*/
 BLT_Result BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id);
 BLT_Result BLT_MediaType_Free(BLT_MediaType* type);
 BLT_Result BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to);
+
 
 #if defined(__cplusplus)
 }

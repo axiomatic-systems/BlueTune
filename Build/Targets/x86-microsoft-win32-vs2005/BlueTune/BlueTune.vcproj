@@ -352,6 +352,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltNetworkInputSource.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltNetworkStream.c"
 					>
 				</File>
@@ -611,6 +615,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltNetworkInput.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Inputs\Network\BltNetworkInputSource.h"
 					>
 				</File>
 				<File

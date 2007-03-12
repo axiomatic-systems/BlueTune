@@ -83,10 +83,16 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
 
-    /* query the registry */
+    // query the registry
+    const char* content_type = self->m_Response->GetEntity()->GetContentType();
+    if (content_type[0] == '\0' && self->m_IsIcy) {
+        // if the content type is not specified, and this is an ICY stream,
+        // assume MP3
+        content_type = "audio/mpeg";
+    }
     result = BLT_Registry_GetIdForName(registry, 
                                        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS, 
-                                       self->m_Response->GetEntity()->GetContentType(), 
+                                       content_type, 
                                        &type_id);
     if (BLT_FAILED(result)) {
         // try to guess based on the name extension
@@ -101,6 +107,7 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
                 if (BLT_FAILED(result)) return BLT_FAILURE;
             }
         }
+
         return result;
     }
 

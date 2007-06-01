@@ -444,8 +444,14 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
     if (self->input.mp4_track == NULL) {
         return BLT_ERROR_PORT_HAS_NO_DATA;
     } else {
+        // check for end-of-stream
+        if (self->output.sample >= self->input.mp4_track->GetSampleCount()) {
+            return BLT_ERROR_EOS;
+        }
+
+        // read one sample
         AP4_Sample sample;
-        AP4_Result result = self->input.mp4_track->ReadSample(self->output.sample, sample, *self->output.sample_buffer);
+        AP4_Result result = self->input.mp4_track->ReadSample(self->output.sample++, sample, *self->output.sample_buffer);
         if (AP4_FAILED(result)) {
             ATX_LOG_WARNING_1("Mp4ParserOutput::GetPacket - ReadSample failed (%d)", result);
             return BLT_ERROR_PORT_HAS_NO_DATA;
@@ -477,9 +483,6 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         if (self->output.sample == 0) {
             BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
         }
-
-        // move on to the next sample
-        self->output.sample++;
 
         return BLT_SUCCESS;
     }

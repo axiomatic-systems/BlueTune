@@ -43,9 +43,9 @@ extern "C" {
 
 BOOL MPGLIB_Init(PMPSTR mp);
 void MPGLIB_Reset(PMPSTR mp);
-int MPGLIB_DecodeFrame(PMPSTR         mp, 
-                       unsigned char* frame, 
-                       void*          samples);
+int MPGLIB_DecodeFrame(PMPSTR               mp, 
+                       const unsigned char* frame, 
+                       void*                samples);
 void MPGLIB_Exit(PMPSTR mp);
 
 #ifdef __cplusplus

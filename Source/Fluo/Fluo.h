@@ -19,6 +19,6 @@
 #include "FloTypes.h"
 #include "FloErrors.h"
 #include "FloDecoder.h"
-#include "FloBitStream.h"
+#include "FloByteStream.h"
 
 #endif /* _FLUO_H_ */

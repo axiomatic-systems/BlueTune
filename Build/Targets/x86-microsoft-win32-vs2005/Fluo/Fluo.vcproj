@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Fluo;..\..\..\..\ThirdParty\mpg123\mpglib;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;FLO_DECODER_ENGINE=FLO_DECODER_ENGINE_MPG123"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -104,7 +104,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\..\Source\Fluo;..\..\..\..\ThirdParty\mpg123\mpglib;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;FLO_DECODER_ENGINE=FLO_DECODER_ENGINE_MPG123"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -153,7 +153,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloByteStream.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloDecoder.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloEngine.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloFilter.c"
 				>
 			</File>
 			<File
@@ -162,6 +174,22 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloHuffman.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerI.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerII.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerIII.c"
 				>
 			</File>
 			<File
@@ -183,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloByteStream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloConfig.h"
 				>
 			</File>
@@ -191,7 +223,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloEngine.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloErrors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloFilter.h"
 				>
 			</File>
 			<File
@@ -200,6 +240,26 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloHeaders.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloHuffman.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerII.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloLayerIII.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloMath.h"
 				>
 			</File>
 			<File
@@ -212,6 +272,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\Source\Fluo\FloTypes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Fluo\FloUtils.h"
 				>
 			</File>
 			<File
@@ -228,90 +292,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-		</Filter>
-		<Filter
-			Name="mpglib"
-			>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\common.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\dct64_i386.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\decode_i386.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\huffman.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\interface2.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\l2tables.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer1.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer2.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\layer3.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpg123.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\mpglib_config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ThirdParty\mpg123\mpglib\tabinit.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

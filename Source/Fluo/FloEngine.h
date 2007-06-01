@@ -1,43 +1,36 @@
 /*****************************************************************
 |
-|   Fluo - Headers (VBR and other Headers)
+|   Fluo - Frame Decoding Engine
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-20076 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
-/** @file
- * Fluo - Headers
- */
 
-#ifndef _FLO_HEADERS_H_
-#define _FLO_HEADERS_H_
+#ifndef _FLO_ENGINE_H_
+#define _FLO_ENGINE_H_
 
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
 #include "FloTypes.h"
-#include "FloSyntax.h"
 #include "FloFrame.h"
-#include "FloByteStream.h"
 #include "FloDecoder.h"
 
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
-typedef unsigned long FLO_VbrTableEntry;
-
-typedef struct {
-    FLO_VbrTableEntry* entries;
-    FLO_Cardinal       entry_count;
-} FLO_VbrToc;
+typedef struct FLO_Engine FLO_Engine;
 
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
-extern FLO_Result FLO_Headers_Parse(FLO_FrameInfo*     frame_info,
-                                    FLO_ByteStream*    bits,
-                                    FLO_DecoderStatus* decoder_status,
-                                    FLO_VbrToc*        vbr_toc);
+FLO_Result FLO_Engine_Create(FLO_Engine** engine);
+FLO_Result FLO_Engine_Destroy(FLO_Engine* engine);
+FLO_Result FLO_Engine_Reset(FLO_Engine* engine);
+FLO_Result FLO_Engine_DecodeFrame(FLO_Engine*          engine, 
+                                  const FLO_FrameInfo* frame_info,
+                                  const unsigned char* frame_data,
+                                  FLO_SampleBuffer*    sample_buffer);
 
-#endif /* _FLO_HEADERS_H_ */
+#endif /* _FLO_ENGINE_H_ */

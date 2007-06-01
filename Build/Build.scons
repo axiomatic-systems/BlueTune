@@ -470,18 +470,19 @@ BuildModule(name               = 'BtController',
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
 
 ############################# BtGtk
-gtk_env = env.Copy()
-try:
-    gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
-    BuildModule(name               = 'BtGtk',
-                type               = 'Executable',
-                build_source_dirs  = ['Apps/BtGtk'],
-                build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-                linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
-                environment        = gtk_env)
-    OptionalModules.append('BtGtk')
-except:
-    pass
+if env['target'] == 'x86-unknown-linux':
+    gtk_env = env.Copy()
+    try:    
+        gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+        BuildModule(name               = 'BtGtk',
+                    type               = 'Executable',
+                    build_source_dirs  = ['Apps/BtGtk'],
+                    build_include_dirs = ['Source/BlueTune', 'Source/Config'],
+                    linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
+                    environment        = gtk_env)
+        OptionalModules.append('BtGtk')
+    except:
+        pass
 
 ################################################
 # Default Build Modues

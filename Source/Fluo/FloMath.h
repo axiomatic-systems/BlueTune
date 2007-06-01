@@ -39,24 +39,17 @@ typedef long FLO_Float;
 #define FLO_FC8_BITS 23
 #define FLO_FC9_BITS 5
 #else /* FLO_CONFIG_INTEGER_32 */
-#if defined(__GNUC__) && defined(__arm__)
-#define FLO_FIX_MUL(x,y,bits)                                               \
-({                                                                          \
-    long result;                                                            \
-    asm("smull r8, r9, %1, %2\n\t"                                          \
-        "mov r9, r9, asl %3\n\t"                                            \
-        "orr %0, r9, r8, lsr %4"                                            \
-        : "=r" (result)                                                     \
-        : "r" (x), "r" (y), "i" (32-bits), "i" (bits)                       \
-        : "r8", "r9");                                                      \
-    result;                                                                 \
-})
-#elif defined(FLO_CONFIG_INTEGER_INLINE)
-#define FLO_FIX_MUL(result, x, y, bits) \
-__asm {\
-    smull r7,r8,(x),(y);\
-    mov r8,r8,asl (32-bits);\
-    orr result, r8, r7, lsr bits;\
+#if 0 /*defined(__GNUC__) && defined(__arm__)*/
+static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
+{                                                                          
+    long result;                                                            
+    asm("smull r8, r9, %1, %2\n\t"                                          
+        "mov r9, r9, asl %3\n\t"                                            
+        "orr %0, r9, r8, lsr %4"                                            
+        : "=r" (result)                                                     
+        : "r" (x), "r" (y), "i" (32-bits), "i" (bits)                       
+        : "r8", "r9"); /* r8 and r9 are clobbered */                                                      
+    return result;                                                                 
 }
 #else
 #define FLO_FIX_MUL(x, y, bits) ((FLO_Float)(((long long)(x)*(long long)(y))>>(bits)))

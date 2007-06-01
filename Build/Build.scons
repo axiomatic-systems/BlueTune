@@ -296,11 +296,15 @@ elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_BUILTIN'):
     fluo_decoder_lib_dirs = []
     fluo_decoder_inc_dirs = []
     
+fluo_extra_cpp_defines = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']}
+if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
+    fluo_extra_cpp_defines['FLO_CONFIG_INTEGER_DECODE'] = True
+    
 BuildModule(name               = 'Fluo',
             build_source_dirs  = ['Fluo'],
             build_include_dirs = fluo_decoder_inc_dirs,
             linked_modules     = ['Atomix'] + fluo_decoder_deps,
-            extra_cpp_defines  = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']},
+            extra_cpp_defines  = fluo_extra_cpp_defines,
             extra_lib_dirs     = fluo_decoder_lib_dirs)
 
 ############################# Core

@@ -31,15 +31,21 @@
     (result) != FLO_ERROR_NOT_ENOUGH_DATA &&     \
     (result) != FLO_ERROR_SAMPLES_SKIPPED &&     \
     (result) != FLO_ERROR_NO_MORE_SAMPLES &&     \
-    (result) != FLO_ERROR_CORRUPTED_BITSTREAM && \
+    (result) != FLO_ERROR_INVALID_BITSTREAM &&   \
     (result) != FLO_ERROR_FRAME_SKIPPED          \
 )
 
-/* Decoder errors */
-#define FLO_ERROR_BASE_DECODER        (-10000)
+#define FLO_CHECK(x)                            \
+{                                               \
+    FLO_Result _result = (x);                   \
+    if (FLO_FAILED(_result)) return _result;    \
+}
 
-/* BitStream errors */
-#define FLO_ERROR_BASE_BITSTREAM      (-10100)
+/* generic errors */
+#define FLO_ERROR_BASE_GENERAL           (-10000)
+
+/* Decoder errors */
+#define FLO_ERROR_BASE_DECODER           (-10100)
 
 /*----------------------------------------------------------------------
 |    import some Atomix error codes

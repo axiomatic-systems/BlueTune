@@ -78,6 +78,8 @@ typedef struct {
 #define FLO_REPLAY_GAIN_HAS_TRACK_VALUE 1
 #define FLO_REPLAY_GAIN_HAS_ALBUM_VALUE 2
 
+#define FLO_FRAME_BUFFER_SIZE    2048
+
 /*----------------------------------------------------------------------
 |   error codes
 +---------------------------------------------------------------------*/
@@ -85,6 +87,8 @@ typedef struct {
 #define FLO_ERROR_FRAME_SKIPPED         (FLO_ERROR_BASE_DECODER - 1)
 #define FLO_ERROR_SAMPLES_SKIPPED       (FLO_ERROR_BASE_DECODER - 2)
 #define FLO_ERROR_NO_MORE_SAMPLES       (FLO_ERROR_BASE_DECODER - 3)
+#define FLO_ERROR_NOT_ENOUGH_DATA       (FLO_ERROR_BASE_DECODER - 4)
+#define FLO_ERROR_INVALID_BITSTREAM     (FLO_ERROR_BASE_DECODER - 5)
 
 /*----------------------------------------------------------------------
 |   prototypes

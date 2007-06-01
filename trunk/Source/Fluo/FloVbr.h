@@ -21,7 +21,7 @@
 #include "FloTypes.h"
 #include "FloSyntax.h"
 #include "FloFrame.h"
-#include "FloBitStream.h"
+#include "FloByteStream.h"
 #include "FloDecoder.h"
 
 /*----------------------------------------------------------------------
@@ -38,7 +38,7 @@ typedef struct {
 |       prototypes
 +---------------------------------------------------------------------*/
 extern FLO_Result FLO_Vbr_Parse(FLO_FrameInfo*     frame_info,
-                                FLO_BitStream*     bits,
+                                FLO_ByteStream*    bits,
                                 FLO_DecoderStatus* decoder_status,
                                 FLO_VbrToc*        vbr_toc);
 

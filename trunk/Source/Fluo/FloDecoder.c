@@ -13,36 +13,16 @@
 #include "Atomix.h"
 #include "FloConfig.h"
 #include "FloTypes.h"
-#include "FloBitStream.h"
+#include "FloByteStream.h"
 #include "FloDecoder.h"
 #include "FloFrame.h"
 #include "FloHeaders.h"
-
-/*----------------------------------------------------------------------
-|   external decoder engine
-+---------------------------------------------------------------------*/
-#define FLO_DECODER_ENGINE_MPG123 1
-#define FLO_DECODER_ENGINE_FFMPEG 2
-
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-#include "mpg123.h"
-#include "mpglib.h"
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-#include <stdio.h>
-#include "avcodec.h"
-#else
-#error FLO_DECODER_ENGINE not defined
-#endif
+#include "FloEngine.h"
+#include "FloUtils.h"
 
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define FLO_INPUT_BUFFER_SIZE   2048
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-/*#define FLO_MPG123_OUTPUT_SAMPLE_COUNT 1152*/
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-#define FLO_FFMPEG_OUTPUT_SAMPLE_COUNT 1152
-#endif
 #define FLO_LAYER3_DECODER_DELAY 528
 #define FLO_LAYER2_DECODER_DELAY 240
 
@@ -63,18 +43,13 @@ typedef enum {
 
 struct FLO_Decoder {
     FLO_DecoderState  state;
-    FLO_BitStream     bits;
+    FLO_ByteStream    bits;
     FLO_FrameInfo     frame_info;
+    unsigned char     frame_buffer[FLO_FRAME_BUFFER_SIZE];
     FLO_VbrToc        vbr_toc;
     FLO_DecoderStatus status;
-    unsigned char     input_buffer[FLO_INPUT_BUFFER_SIZE];
     FLO_Cardinal      samples_to_skip;
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    MPSTR /*struct mpstr*/             mpg123_decoder;
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    AVCodec*          ffmpeg_decoder_module;
-    AVCodecContext*   ffmpeg_decoder_context;
-#endif
+    FLO_Engine*       engine;
 };
 
 /*----------------------------------------------------------------------
@@ -95,27 +70,26 @@ FLO_UpdateBufferSize(FLO_SampleBuffer* buffer)
 FLO_Result 
 FLO_Decoder_Create(FLO_Decoder** decoder)
 {
+    FLO_Result result;
+
     *decoder = ATX_AllocateZeroMemory(sizeof(FLO_Decoder));
     if (*decoder == NULL) {
         return FLO_ERROR_OUT_OF_MEMORY;
+    }
+
+    /* create the engine */
+    result = FLO_Engine_Create(&(*decoder)->engine);
+    if (FLO_FAILED(result)) {
+        FLO_FreeMemory(*decoder);
+        *decoder = NULL;
+        return result;
     }
 
     /* initialize the state */
     (*decoder)->state = FLO_DECODER_STATE_NEEDS_FRAME;
 
     /* initialize the bitstream */
-    FLO_BitStream_Create(&(*decoder)->bits);
-
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    /* initialize the mpg123 library */
-    MPGLIB_Init(&(*decoder)->mpg123_decoder);
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    /* initialize the ffmpeg decoder */
-    (*decoder)->ffmpeg_decoder_context = avcodec_alloc_context();
-    (*decoder)->ffmpeg_decoder_module = &mp3_decoder;
-    avcodec_open((*decoder)->ffmpeg_decoder_context, 
-                 (*decoder)->ffmpeg_decoder_module);
-#endif
+    FLO_ByteStream_Construct(&(*decoder)->bits);
 
     /* set some default values */
     (*decoder)->status.stream_info.decoder_delay = 0;
@@ -130,13 +104,8 @@ FLO_Decoder_Create(FLO_Decoder** decoder)
 FLO_Result 
 FLO_Decoder_Destroy(FLO_Decoder* decoder)
 {
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    MPGLIB_Exit(&decoder->mpg123_decoder);
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    avcodec_close(decoder->ffmpeg_decoder_context);
-    free((void*)decoder->ffmpeg_decoder_context);
-#endif
-    FLO_BitStream_Destroy(&decoder->bits);
+    FLO_Engine_Destroy(decoder->engine);
+    FLO_ByteStream_Destruct(&decoder->bits);
     ATX_FreeMemory(decoder);
 
     return FLO_SUCCESS;
@@ -165,18 +134,18 @@ FLO_Decoder_Feed(FLO_Decoder*   decoder,
 
     /* set flags */
     if (flags & FLO_DECODER_BUFFER_IS_END_OF_STREAM) {
-        decoder->bits.flags |= FLO_BITSTREAM_FLAG_EOS;
+        decoder->bits.flags |= FLO_BYTE_STREAM_FLAG_EOS;
     }
 
     /* possible shortcut */
     if (*size == 0) return FLO_SUCCESS;
 
     /* see how much data we can write */
-    free_space = FLO_BitStream_GetBytesFree(&decoder->bits);
+    free_space = FLO_ByteStream_GetBytesFree(&decoder->bits);
     if (*size > free_space) *size = free_space;
 
     /* write the data */
-    return FLO_BitStream_WriteBytes(&decoder->bits, buffer, *size); 
+    return FLO_ByteStream_WriteBytes(&decoder->bits, buffer, *size); 
 }
 
 /*----------------------------------------------------------------------
@@ -186,7 +155,7 @@ FLO_Result
 FLO_Decoder_Flush(FLO_Decoder* decoder)
 {
     /* reset the bitstream */
-    FLO_BitStream_Reset(&decoder->bits);
+    FLO_ByteStream_Reset(&decoder->bits);
 
     return FLO_SUCCESS;
 }
@@ -199,94 +168,6 @@ FLO_Decoder_SetSample(FLO_Decoder* decoder, FLO_Int64 sample)
 {
     decoder->status.sample_count = sample;
     return FLO_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|   FLO_Decoder_CallExternalEngine
-+---------------------------------------------------------------------*/
-static FLO_Result
-FLO_Decoder_CallExternalEngine(FLO_Decoder* decoder, FLO_SampleBuffer* buffer)
-{
-    int result;
-
-    /* read the frame in a buffer */
-    FLO_BitStream_ReadBytes(&decoder->bits, 
-                            decoder->input_buffer, 
-                            decoder->frame_info.size);
-
-    /* decode the frame */
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    result = MPGLIB_DecodeFrame(&decoder->mpg123_decoder,
-                                decoder->input_buffer,
-                                buffer->samples);
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    {   
-        int ffmpeg_frame_size;
-        avcodec_decode_audio(decoder->ffmpeg_decoder_context,
-                             buffer->samples,
-                             &ffmpeg_frame_size,
-                             decoder->input_buffer,
-                             decoder->frame_info.size);
-        if (ffmpeg_frame_size == 0) {
-            avcodec_decode_audio(decoder->ffmpeg_decoder_context,
-                                 buffer->samples,
-                                 &ffmpeg_frame_size,
-                                 NULL, 0);
-            if (ffmpeg_frame_size == 0) {
-                result = FLO_FAILURE;
-            } else {
-                result = FLO_SUCCESS;
-            }
-        } else {
-            result = FLO_SUCCESS;
-        }
-    }
-#endif
-
-    /* set the buffer info */
-    buffer->size = 
-        decoder->frame_info.channel_count *
-        decoder->frame_info.sample_count * 2;
-    buffer->sample_count           = decoder->frame_info.sample_count;
-    buffer->format.type            = FLO_SAMPLE_TYPE_INTERLACED_SIGNED;
-    buffer->format.sample_rate     = decoder->frame_info.sample_rate;
-    buffer->format.channel_count   = decoder->frame_info.channel_count;
-    buffer->format.bits_per_sample = 16;
-
-    /* return the result */
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    if (result != MP3_OK) {
-        /*printf("----------------- result = %d\n", result);*/
-    }
-    if (result == MP3_OK) {
-        return FLO_SUCCESS;
-    } else if (result == MP3_NEED_MORE) {
-        return FLO_ERROR_NOT_ENOUGH_DATA;
-    } else if (result == MP3_INVALID_BITS) {
-        return FLO_ERROR_CORRUPTED_BITSTREAM;
-    } else {
-        return FLO_FAILURE;
-    }
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    return result;
-#endif
-}
-
-/*----------------------------------------------------------------------
-|   FLO_Decoder_ResetExternalEngine
-+---------------------------------------------------------------------*/
-static void
-FLO_Decoder_ResetExternalEngine(FLO_Decoder* decoder)
-{
-#if (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_MPG123)
-    MPGLIB_Reset(&decoder->mpg123_decoder);
-#elif (FLO_DECODER_ENGINE == FLO_DECODER_ENGINE_FFMPEG)
-    avcodec_close(decoder->ffmpeg_decoder_context);
-    free((void*)decoder->ffmpeg_decoder_context);
-    decoder->ffmpeg_decoder_context = avcodec_alloc_context();
-    avcodec_open(decoder->ffmpeg_decoder_context, 
-                 decoder->ffmpeg_decoder_module);    
-#endif
 }
 
 /*----------------------------------------------------------------------
@@ -304,7 +185,7 @@ FLO_Decoder_FindFrame(FLO_Decoder* decoder, FLO_FrameInfo* frame_info)
     }
 
     /* find a valid frame header */
-    result = FLO_BitStream_FindFrame(&decoder->bits, &decoder->frame_info);
+    result = FLO_ByteStream_FindFrame(&decoder->bits, &decoder->frame_info);
     if (result == ATX_SUCCESS) {
         /*ATX_Debug("FIND-FRAME: [%d] - br=%d ch=%d lev=%d lay=%d mode=%d sr=%d\n",
             decoder->state,
@@ -316,10 +197,10 @@ FLO_Decoder_FindFrame(FLO_Decoder* decoder, FLO_FrameInfo* frame_info)
             decoder->frame_info.sample_rate);*/
     }
 
-    if (result == FLO_ERROR_CORRUPTED_BITSTREAM &&
+    if (result == FLO_ERROR_INVALID_BITSTREAM &&
         decoder->state == FLO_DECODER_STATE_NEEDS_FRAME) {
         /* we lost sync, go into resync mode */
-        FLO_Decoder_ResetExternalEngine(decoder);
+        FLO_Engine_Reset(decoder->engine);
         decoder->state = FLO_DECODER_STATE_NEEDS_FRAME_RESYNC;
     }
     if (FLO_FAILED(result)) return result;
@@ -334,7 +215,7 @@ FLO_Decoder_FindFrame(FLO_Decoder* decoder, FLO_FrameInfo* frame_info)
         /* ignore this frame, and move to next state */
 
         /* skip the frame */
-        FLO_BitStream_SkipBytes(&decoder->bits, decoder->frame_info.size);
+        FLO_ByteStream_SkipBytes(&decoder->bits, decoder->frame_info.size);
 
         decoder->state = FLO_DECODER_STATE_NEEDS_FRAME;
         decoder->status.frame_count++;
@@ -393,13 +274,13 @@ FLO_Decoder_SkipFrame(FLO_Decoder* decoder)
     }
     
     /* check that we have enough data to skip */
-    available = FLO_BitStream_GetBytesAvailable(&decoder->bits);
+    available = FLO_ByteStream_GetBytesAvailable(&decoder->bits);
     if (available < decoder->frame_info.size) {
         return FLO_ERROR_NOT_ENOUGH_DATA;
     }
 
     /* skip the frame */
-    FLO_BitStream_SkipBytes(&decoder->bits, decoder->frame_info.size);
+    FLO_ByteStream_SkipBytes(&decoder->bits, decoder->frame_info.size);
 
     /* we need a new frame */
     decoder->state = FLO_DECODER_STATE_NEEDS_FRAME;
@@ -444,8 +325,16 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
         if (FLO_FAILED(result)) return result;
     }
 
+    /* read the frame in a buffer */
+    FLO_ByteStream_ReadBytes(&decoder->bits, 
+                             decoder->frame_buffer, 
+                             decoder->frame_info.size);
+
     /* decode the frame */
-    result = FLO_Decoder_CallExternalEngine(decoder, buffer);
+    result = FLO_Engine_DecodeFrame(decoder->engine, 
+                                    &decoder->frame_info,
+                                    decoder->frame_buffer,
+                                    buffer);
 
     /* skip samples caused by encoder and decoder delays */
     if (decoder->samples_to_skip != 0) {
@@ -499,8 +388,8 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
 FLO_Result 
 FLO_Decoder_Reset(FLO_Decoder* decoder)
 {
-    /* reset the external engine */
-    FLO_Decoder_ResetExternalEngine(decoder);
+    /* reset the engine */
+    FLO_Engine_Reset(decoder->engine);
 
     /* reset some of the decoder state */
     decoder->status.frame_count = 0;

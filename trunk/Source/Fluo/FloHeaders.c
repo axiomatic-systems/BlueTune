@@ -14,7 +14,7 @@
 #include "FloConfig.h"
 #include "FloHeaders.h"
 #include "FloDecoder.h"
-#include "FloBitStream.h"
+#include "FloByteStream.h"
 
 /*----------------------------------------------------------------------
 |   constants
@@ -92,13 +92,13 @@ FLO_Vbr_ComputeDurationAndBitrate(FLO_FrameInfo*     frame_info,
 +---------------------------------------------------------------------*/
 static FLO_Result 
 FLO_Vbr_ParseFhg(FLO_FrameInfo*     frame_info,
-                 FLO_BitStream*     bits,
+                 FLO_ByteStream*    bits,
                  FLO_DecoderStatus* decoder_status,
                  FLO_VbrToc*        vbr_toc)
 {
     unsigned char  buffer[FLO_FHG_VBR_HEADER_SIZE];
     unsigned char* current = buffer;
-    FLO_BitStream scan;
+    FLO_ByteStream scan;
 
     /* check the frame size */
     if (frame_info->size < FLO_FHG_VBR_HEADER_OFFSET+FLO_FHG_VBR_HEADER_SIZE) {
@@ -106,9 +106,9 @@ FLO_Vbr_ParseFhg(FLO_FrameInfo*     frame_info,
     }
 
     /* attach to the bitstream and read the header */
-    FLO_BitStream_Attach(bits, &scan);
-    FLO_BitStream_SkipBytes(&scan, FLO_FHG_VBR_HEADER_OFFSET);
-    FLO_BitStream_ReadBytes(&scan, buffer, sizeof(buffer));
+    FLO_ByteStream_Attach(bits, &scan);
+    FLO_ByteStream_SkipBytes(&scan, FLO_FHG_VBR_HEADER_OFFSET);
+    FLO_ByteStream_ReadBytes(&scan, buffer, sizeof(buffer));
 
     /* check header cookie */
     if (current[0] != 'V' ||
@@ -157,7 +157,7 @@ FLO_Vbr_ParseFhg(FLO_FrameInfo*     frame_info,
 +---------------------------------------------------------------------*/
 static FLO_Result 
 FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
-                            FLO_BitStream*     bits,
+                            FLO_ByteStream*    bits,
                             FLO_DecoderStatus* decoder_status,
                             FLO_VbrToc*        vbr_toc)
 {
@@ -167,7 +167,7 @@ FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
     unsigned char* current = buffer;
     FLO_Size       header_offset;
     FLO_Flags      header_flags;
-    FLO_BitStream  scan;
+    FLO_ByteStream scan;
 
     /* compute header offset */
     if (frame_info->level == FLO_SYNTAX_MPEG_ID_MPEG_1) {
@@ -192,9 +192,9 @@ FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
     }
 
     /* attach to the bitstream and read the header */
-    FLO_BitStream_Attach(bits, &scan);
-    FLO_BitStream_SkipBytes(&scan, header_offset);
-    FLO_BitStream_ReadBytes(&scan, buffer, sizeof(buffer));
+    FLO_ByteStream_Attach(bits, &scan);
+    FLO_ByteStream_SkipBytes(&scan, header_offset);
+    FLO_ByteStream_ReadBytes(&scan, buffer, sizeof(buffer));
 
     /* check header cookie (Xing|Lame|Info) */
     if ((current[0] != 'X' ||
@@ -248,7 +248,7 @@ FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
         goto done;
     }
     if (header_flags & FLO_XING_VBR_HEADER_HAS_TOC) {
-        FLO_BitStream_ReadBytes(&scan, toc, FLO_XING_VBR_TOC_SIZE);
+        FLO_ByteStream_ReadBytes(&scan, toc, FLO_XING_VBR_TOC_SIZE);
     }
 
     /* vbr scale */
@@ -256,7 +256,7 @@ FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
         goto done;
     }
     if (header_flags & FLO_XING_VBR_HEADER_HAS_VBR_SCALE) {
-        FLO_BitStream_ReadBytes(&scan, buffer, 4);
+        FLO_ByteStream_ReadBytes(&scan, buffer, 4);
         decoder_status->vbr_quality = ATX_BytesToInt32Be(buffer);
     } else {
         decoder_status->vbr_quality = 0;
@@ -268,7 +268,7 @@ FLO_Headers_ParseXingOrLame(FLO_FrameInfo*     frame_info,
                            FLO_LAME_TAG_SIZE) {
         goto done;
     }
-    FLO_BitStream_ReadBytes(&scan, lame_tag, sizeof(lame_tag));
+    FLO_ByteStream_ReadBytes(&scan, lame_tag, sizeof(lame_tag));
     if (lame_tag[0] == 'L' &&
         lame_tag[1] == 'A' &&
         lame_tag[2] == 'M' &&
@@ -355,7 +355,7 @@ done:
 +---------------------------------------------------------------------*/
 FLO_Result 
 FLO_Headers_Parse(FLO_FrameInfo*     frame_info,
-                  FLO_BitStream*     bits,
+                  FLO_ByteStream*    bits,
                   FLO_DecoderStatus* decoder_status,
                   FLO_VbrToc*        vbr_toc)
 {

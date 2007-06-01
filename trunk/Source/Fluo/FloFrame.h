@@ -51,10 +51,15 @@ typedef struct {
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
-extern void       FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, 
-                                          FLO_FrameInfo*   info);
-extern void       FLO_FrameHeader_Unpack(unsigned long    packed,
-                                         FLO_FrameHeader* header);
-extern FLO_Result FLO_FrameHeader_Check(FLO_FrameHeader* header);
+extern void       
+FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, FLO_FrameInfo* info);
+extern void       
+FLO_FrameHeader_Unpack(FLO_UInt32 packed, FLO_FrameHeader* header);
+
+extern void
+FLO_FrameHeader_FromBytes(const FLO_Byte* bytes, FLO_FrameHeader* header);
+
+extern FLO_Result 
+FLO_FrameHeader_Check(FLO_FrameHeader* header);
 
 #endif /* _FLO_FRAME_H_ */

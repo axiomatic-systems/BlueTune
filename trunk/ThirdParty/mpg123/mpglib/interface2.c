@@ -44,7 +44,7 @@ void MPGLIB_Exit(PMPSTR mp)
     (void)mp;
 }
 
-int MPGLIB_DecodeFrame(PMPSTR mp, unsigned char* in, void* out)
+int MPGLIB_DecodeFrame(PMPSTR mp, const unsigned char* in, void* out)
 {
     int done;
     

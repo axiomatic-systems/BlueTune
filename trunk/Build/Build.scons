@@ -278,6 +278,9 @@ BuildModule(name              = 'Melo',
             extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
 
 ############################# Fluo
+if not env.has_key('FLO_DECODER_ENGINE'):  
+    env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
+    
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
     BuildModule(name        = 'FloDecoderEngine',
                 source_root = 'ThirdParty/mpg123/mpglib')
@@ -288,9 +291,11 @@ elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_FFMPEG'):
     fluo_decoder_deps = ['avcodec']
     fluo_decoder_lib_dirs = ['ThirdParty/ffmpeg/Targets/'+env['target']+'/lib']
     fluo_decoder_inc_dirs = ['ThirdParty/ffmpeg/Targets/'+env['target']+'/include']
-else:
-    raise 'FLO_DECODER_ENGINE not set'
-
+elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_BUILTIN'):
+    fluo_decoder_deps     = []
+    fluo_decoder_lib_dirs = []
+    fluo_decoder_inc_dirs = []
+    
 BuildModule(name               = 'Fluo',
             build_source_dirs  = ['Fluo'],
             build_include_dirs = fluo_decoder_inc_dirs,

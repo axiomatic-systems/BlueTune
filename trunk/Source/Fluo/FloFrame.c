@@ -96,7 +96,7 @@ FLO_FrameHeader_GetInfo(FLO_FrameHeader* header, FLO_FrameInfo* info)
 |   FLO_FrameHeader_Unpack
 +---------------------------------------------------------------------*/
 void
-FLO_FrameHeader_Unpack(unsigned long packed, FLO_FrameHeader* header)
+FLO_FrameHeader_Unpack(FLO_UInt32 packed, FLO_FrameHeader* header)
 {
     header->emphasis            = (unsigned char)(packed & 0x3); packed >>= 2;
     header->original            = (unsigned char)(packed & 0x1); packed >>= 1;
@@ -114,6 +114,20 @@ FLO_FrameHeader_Unpack(unsigned long packed, FLO_FrameHeader* header)
         /* this is FHG's MPEG 2.5 extension */
         header->id += 2;
     }
+}
+
+/*----------------------------------------------------------------------
+|   FLO_FrameHeader_FromBytes
++---------------------------------------------------------------------*/
+void
+FLO_FrameHeader_FromBytes(const FLO_Byte* bytes, FLO_FrameHeader* header)
+{
+    FLO_UInt32 packed = 
+        (((FLO_UInt32)(bytes[0]))<<24 ) |
+        (((FLO_UInt32)(bytes[1]))<<16 ) |
+        (((FLO_UInt32)(bytes[2]))<< 8 ) |
+        (((FLO_UInt32)(bytes[3]))     );
+    FLO_FrameHeader_Unpack(packed, header);
 }
 
 /*----------------------------------------------------------------------

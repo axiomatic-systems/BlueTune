@@ -65,6 +65,13 @@ typedef enum {
 #define FLO_SYNTAX_MPEG_LAYER_II                           2
 #define FLO_SYNTAX_MPEG_LAYER_I                            3
 
+#define FLO_SYNTAX_MPEG_LAYER_I_ALLOCATION_INVALID         15
+#define FLO_SYNTAX_MPEG_LAYER_I_II_SCALEFACTOR_INVALID     63
+
+#define FLO_SYNTAX_MPEG_FRAME_HAS_CRC                      0
+#define FLO_SYNTAX_MPEG_FRAME_HAS_NO_CRC                   1
+#define FLO_SYNTAX_MPEG_CRC_SIZE                           16
+
 #define FLO_SYNTAX_MPEG_SAMPLING_FREQUENCY_44100_22050     0
 #define FLO_SYNTAX_MPEG_SAMPLING_FREQUENCY_48000_24000     1
 #define FLO_SYNTAX_MPEG_SAMPLING_FREQUENCY_32000_16000     2

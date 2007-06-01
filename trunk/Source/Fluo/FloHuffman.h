@@ -14,7 +14,7 @@
 |       includes
 +-------------------------------------------------------------------------*/
 #include "FloConfig.h"
-#include "FLoBitStream.h"
+#include "FloBitStream.h"
 #include "FloTables.h"
 
 /*-------------------------------------------------------------------------

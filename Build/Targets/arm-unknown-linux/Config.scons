@@ -1,5 +1,8 @@
 LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux')
+env['BLT_RELAXED_ENV'] = env.Copy()
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_relaxed_warnings=True)
 
+env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
 env['ATX_EXTRA_LIBS']='m'
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
@@ -10,8 +13,8 @@ env['MLO_CPP_DEFINES'] = {'MLO_CONFIG_FIXED':None}
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
-                      'MpegAudioDecoder', 
-                      'FlacDecoder',
+                      #'MpegAudioDecoder', 
+                      #'FlacDecoder',
                       'AacDecoder',
                       'StreamPacketizer', 
                       'NullOutput',

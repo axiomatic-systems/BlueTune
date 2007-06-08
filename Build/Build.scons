@@ -277,6 +277,11 @@ BuildModule(name              = 'Melo',
             source_root       = MLO_SOURCE_ROOT,
             extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
 
+############################ Tremor
+BuildModule(name		= 'Tremor',
+	        source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
+            environment = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
+	
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
@@ -322,6 +327,7 @@ BuildModule(name               = 'BltDecoder',
 BuildModule(name               = 'BltPlayer',
             build_source_dirs  = ['Player'],
             linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder'])
+
 
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
@@ -420,7 +426,7 @@ if 'CddaInput' in env['BLT_PLUGINS']:
 if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
     print "******************", env['BLT_PLUGINS_VORBIS_LIBRARY']
     if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
-        PluginsExtras['VorbisDecoder']['dep_mods'] = ['vorbisidec']
+        PluginsExtras['VorbisDecoder']['dep_mods'] = ['Tremor']
         PluginsExtras['VorbisDecoder']['flags'] = {'BLT_CONFIG_VORBIS_USE_TREMOR':None}
 
 for plugin in env['BLT_PLUGINS']:

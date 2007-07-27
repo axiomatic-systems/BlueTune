@@ -88,7 +88,7 @@ BLT_Decoder_RegisterBuiltins(BLT_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_Decoder_RegisterBuiltins
+|    BLT_Decoder_RegisterModule
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_Decoder_RegisterModule(BLT_Decoder* decoder, BLT_Module* module)

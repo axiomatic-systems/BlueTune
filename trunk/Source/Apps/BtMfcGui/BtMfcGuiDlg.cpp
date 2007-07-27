@@ -60,6 +60,7 @@ public:
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode);
     virtual void OnStreamPositionNotification(BLT_StreamPosition& position);
     virtual void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
+    virtual void OnStreamPropertyNotification(const ATX_Property& property);
 
     // members
     CBtMfcGuiDlg* m_Dialog;
@@ -174,6 +175,25 @@ MfcPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
         m_Dialog->UpdateInfo("Data Type", info.data_type);
+    }
+}
+
+/*----------------------------------------------------------------------
+|   MfcPlayer::OnStreamPropertyNotification
++---------------------------------------------------------------------*/
+void
+MfcPlayer::OnStreamPropertyNotification(const ATX_Property& property)
+{
+    char value[16];
+    switch (property.type) {
+        case ATX_PROPERTY_TYPE_INTEGER:
+            NPT_FormatString(value, sizeof(value), "%d", property.value.integer);
+            m_Dialog->UpdateInfo(property.name, value);
+            break;
+
+        case ATX_PROPERTY_TYPE_STRING:
+            m_Dialog->UpdateInfo(property.name, property.value.string);
+            break;
     }
 }
 

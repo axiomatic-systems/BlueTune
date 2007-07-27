@@ -577,10 +577,10 @@ ATX_BEGIN_INTERFACE_MAP_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode)
 |    GainControlFilter_OnPropertyChanged
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD
-GainControlFilter_OnPropertyChanged(ATX_PropertyListener* _self,
-                                    ATX_CString                   name,
-                                    ATX_PropertyType              type,
-                                    const ATX_PropertyValue*      value)
+GainControlFilter_OnPropertyChanged(ATX_PropertyListener*    _self,
+                                    ATX_CString              name,
+                                    ATX_PropertyType         type,
+                                    const ATX_PropertyValue* value)
 {
     GainControlFilter* self = ATX_SELF(GainControlFilter, ATX_PropertyListener);
 

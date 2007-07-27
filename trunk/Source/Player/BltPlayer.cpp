@@ -179,6 +179,17 @@ BLT_Player::SeekToPosition(BLT_Size offset, BLT_Size range)
 |    BLT_Player::RegisterModule
 +---------------------------------------------------------------------*/
 BLT_Result
+BLT_Player::Ping(const void* cookie)
+{
+    ATX_LOG_FINE_1("BLT_Player::Ping, cookie=%lx", NPT_POINTER_TO_LONG(cookie));
+    if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
+    return m_Server->Ping(cookie);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player::RegisterModule
++---------------------------------------------------------------------*/
+BLT_Result
 BLT_Player::RegisterModule(BLT_Module* module)
 {
     ATX_LOG_FINE("BLT_Player::RegisterModule");
@@ -195,4 +206,15 @@ BLT_Player::AddNode(BLT_CString name)
     ATX_LOG_FINE_1("BLT_Player::AddNode - name=%s", BLT_SAFE_STRING(name));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->AddNode(name);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player::AddNode
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Player::SetProperty(const ATX_Property& property)
+{
+    ATX_LOG_FINE_1("BLT_Player::SetProperty - name=%s", BLT_SAFE_STRING(property.name));
+    if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
+    return m_Server->SetProperty(property);
 }

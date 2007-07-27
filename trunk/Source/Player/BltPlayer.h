@@ -76,7 +76,7 @@ class BLT_Player : public BLT_DecoderClient
     /**
      * Set the output of the decoder.
      * @param name Name of the output
-     * @param type Mime-type of the output, if known
+     * @param type Mime-type of the output, if known.
      */
     virtual BLT_Result SetOutput(BLT_CString name, BLT_CString type = NULL);
 
@@ -130,7 +130,23 @@ class BLT_Player : public BLT_DecoderClient
     virtual BLT_Result SeekToPosition(BLT_Size offset, BLT_Size range);
 
     /**
+     * Ping the decoder.
+     * When the decoding thread processes the ping message, it
+     * sends back a pong reply, which will invoke the OnPongNotification
+     * notification method when received.
+     * @param cookie Arbitrary pointer value that will be passed back
+     * along with the pong notification message. This is typically used
+     * by the caller to keep any state information associated with this
+     * call.
+     */
+    virtual BLT_Result Ping(const void* cookie);
+
+    /**
      * Register a module with the decoder.
+     * NOTE: the module's methods will be called in the context of
+     * the decoding thread. The caller of this method should not
+     * make any call to the module's methods after this method 
+     * call returns.
      * @param module Pointer to a module object.
      */
     virtual BLT_Result RegisterModule(BLT_Module* module);
@@ -141,6 +157,16 @@ class BLT_Player : public BLT_DecoderClient
      * @param name Name of the node to add.
      */
     virtual BLT_Result AddNode(BLT_CString name);
+
+    /**
+     * Set a property.
+     * Properties are typically used to control various aspects of certain
+     * module instances such as media nodes instantiated in the decoding
+     * stream.
+     * @param property Property object specifying the name and value of the
+     * property to set.
+     */
+    virtual BLT_Result SetProperty(const ATX_Property& property);
 
     /**
      * Shutdown the player. 

@@ -14,6 +14,7 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Neptune.h"
+#include "Atomix.h"
 #include "BltDecoder.h"
 #include "BltTime.h"
 #include "BltDecoderServer.h"
@@ -36,6 +37,7 @@ public:
     virtual void OnStreamPositionNotification(BLT_StreamPosition& /*position*/) {}
     virtual void OnStreamInfoNotification(BLT_Mask        /*update_mask*/, 
                                           BLT_StreamInfo& /*info*/) {}
+    virtual void OnStreamPropertyNotification(const ATX_Property& /* property */) {}
 };
 
 /*----------------------------------------------------------------------
@@ -207,6 +209,26 @@ private:
     // members
     BLT_Mask       m_UpdateMask;
     BLT_StreamInfo m_StreamInfo;
+};
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderClient_StreamPropertyNotificationMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderClient_StreamPropertyNotificationMessage :
+    public BLT_DecoderClient_Message
+{
+public:
+    // methods
+    BLT_DecoderClient_StreamPropertyNotificationMessage(const ATX_Property& property) :
+      m_PropertyWarpper(property) {}
+    NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
+        handler->OnStreamPropertyNotification(m_PropertyWarpper.m_Property);
+        return NPT_SUCCESS;
+    }
+
+private:
+    // members
+    BLT_DecoderServer_PropertyWrapper m_PropertyWarpper;
 };
 
 /*----------------------------------------------------------------------

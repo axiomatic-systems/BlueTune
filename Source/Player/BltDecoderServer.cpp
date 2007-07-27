@@ -42,6 +42,13 @@ BLT_DecoderServer_EventListenerWrapper_OnEvent(
     BLT_EventType      type,
     const BLT_Event*   event);
 
+BLT_VOID_METHOD 
+BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged(
+    ATX_PropertyListener*    self,
+    ATX_CString              name,
+    ATX_PropertyType         type,
+    const ATX_PropertyValue* value);
+
 /*----------------------------------------------------------------------
 |    BLT_EventListener interface
 +---------------------------------------------------------------------*/
@@ -51,6 +58,17 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 ATX_BEGIN_INTERFACE_MAP(BLT_DecoderServer_EventListenerWrapper, BLT_EventListener)
     BLT_DecoderServer_EventListenerWrapper_OnEvent
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    ATX_PropertyListener interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_DecoderServer_PropertyListenerWrapper)
+    ATX_GET_INTERFACE_ACCEPT(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyListener)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+ATX_BEGIN_INTERFACE_MAP(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyListener)
+    BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -76,11 +94,17 @@ BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
     m_DecoderStatus.position.range  = m_PositionUpdateRange;
     m_DecoderStatus.position.offset = 0;
 
-    // setup our listener interface
+    // setup our event listener interface
     m_EventListenerWrapper.outer = this;
     ATX_SET_INTERFACE(&m_EventListenerWrapper, 
                       BLT_DecoderServer_EventListenerWrapper, 
                       BLT_EventListener);
+
+    // setup our property listener interface
+    m_PropertyListenerWrapper.outer = this;
+    ATX_SET_INTERFACE(&m_PropertyListenerWrapper, 
+                      BLT_DecoderServer_PropertyListenerWrapper, 
+                      ATX_PropertyListener);
 
     // start the thread
     Start();
@@ -119,6 +143,13 @@ BLT_DecoderServer::Run()
     BLT_Decoder_SetEventListener(m_Decoder, 
                                  &ATX_BASE(&m_EventListenerWrapper, 
                                            BLT_EventListener));
+
+    // listen to stream property changes
+    {
+        ATX_Properties* properties;
+        BLT_Decoder_GetStreamProperties(m_Decoder, &properties);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&m_PropertyListenerWrapper, ATX_PropertyListener), NULL);
+    }
 
     // register builtins 
     result = BLT_Decoder_RegisterBuiltins(m_Decoder);
@@ -538,32 +569,28 @@ BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer::SetPropertyCommand
+|   BLT_DecoderServer::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderServer::SetPropertyCommand(BLT_CString              name, 
-                                      ATX_PropertyType         type,
-                                      const ATX_PropertyValue* value)
+BLT_DecoderServer::SetProperty(const ATX_Property& property)
 {
     return PostMessage(
-        new BLT_DecoderServer_SetPropertyMessage(name, type, value));
+        new BLT_DecoderServer_SetPropertyMessage(property));
 }
 
 /*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnSetPropertyCommand
 +---------------------------------------------------------------------*/
 void 
-BLT_DecoderServer::OnSetPropertyCommand(BLT_CString              name, 
-                                        ATX_PropertyType         type,
-                                        const ATX_PropertyValue* value)
+BLT_DecoderServer::OnSetPropertyCommand(const ATX_Property& property)
 {
     BLT_Result result;
-    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", name);
+    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", property.name);
 
     ATX_Properties* properties = NULL;
     result = BLT_Decoder_GetProperties(m_Decoder, &properties);
     if (ATX_SUCCEEDED(result)) {
-        result = ATX_Properties_SetProperty(properties, name, type, value);
+        result = ATX_Properties_SetProperty(properties, property.name, property.type, &property.value);
     }
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY, result);
 }
@@ -571,7 +598,7 @@ BLT_DecoderServer::OnSetPropertyCommand(BLT_CString              name,
 /*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnEvent
 +---------------------------------------------------------------------*/
-BLT_Result
+void
 BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
                            BLT_EventType     type,
                            const BLT_Event*  event)
@@ -579,7 +606,7 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
     switch (type) {
       case BLT_EVENT_TYPE_STREAM_INFO: {
           BLT_StreamInfoEvent* e = (BLT_StreamInfoEvent*)event;
-          return m_Client->PostMessage(
+          m_Client->PostMessage(
               new BLT_DecoderClient_StreamInfoNotificationMessage(
                   e->update_mask,
                   e->info));
@@ -588,8 +615,6 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
       default:
         break;
     }
-
-    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -607,50 +632,105 @@ BLT_DecoderServer_EventListenerWrapper_OnEvent(
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_SetPropertyMessage::BLT_DecoderServer_SetPropertyMessage
+|    BLTP_DecoderServer::OnStreamPropertyChanged
 +---------------------------------------------------------------------*/
-BLT_DecoderServer_SetPropertyMessage::BLT_DecoderServer_SetPropertyMessage(
-    BLT_CString              name, 
-    ATX_PropertyType         type, 
-    const ATX_PropertyValue* value) :
-    BLT_DecoderServer_Message(COMMAND_ID_SET_PROPERTY),
-    m_Name(name),
-    m_Type(type)
+void
+BLT_DecoderServer::OnStreamPropertyChanged(ATX_CString              name, 
+                                           ATX_PropertyType         type, 
+                                           const ATX_PropertyValue* value)
 {
-    switch (type) {
+    ATX_Property property;
+    property.name = name;
+    property.type = type;
+    if (value) {
+        property.value = *value;
+    } else {
+        property.value.any = NULL;
+    }
+    m_Client->PostMessage(new BLT_DecoderClient_StreamPropertyNotificationMessage(property));
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged
++---------------------------------------------------------------------*/
+BLT_VOID_METHOD
+BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged(
+    ATX_PropertyListener*    _self,
+    ATX_CString              name,
+    ATX_PropertyType         type,
+    const ATX_PropertyValue* value)    
+{
+    BLT_DecoderServer_PropertyListenerWrapper* self = ATX_SELF(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyListener);
+    self->outer->OnStreamPropertyChanged(name, type, value);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer_PropertyWrapper::BLT_DecoderServer_PropertyWrapper
++---------------------------------------------------------------------*/
+BLT_DecoderServer_PropertyWrapper::BLT_DecoderServer_PropertyWrapper(const ATX_Property& property)
+{
+    m_Property.type = property.type;
+
+    if (property.name) {
+         char* copy = new char[ATX_StringLength(property.name)+1];
+         m_Property.name = copy;
+        ATX_CopyString(copy, property.name);
+    } else {
+        m_Property.name = NULL;
+    }
+
+    switch (property.type) {
+        case ATX_PROPERTY_TYPE_NONE:
+        case ATX_PROPERTY_TYPE_BOOLEAN:
+        case ATX_PROPERTY_TYPE_FLOAT:
+        case ATX_PROPERTY_TYPE_INTEGER:
+            m_Property.value = property.value;
+            break;
+
         case ATX_PROPERTY_TYPE_STRING:
-            m_Value.string = ATX_DuplicateString(value->string);
+            if (property.value.string) {
+                char* copy = new char[ATX_StringLength(property.value.string)+1];
+                ATX_CopyString(copy, property.value.string);
+                m_Property.value.string = copy;
+            } else {
+                m_Property.value.string = NULL;
+            }
             break;
 
         case ATX_PROPERTY_TYPE_RAW_DATA:
-            m_Value.raw_data.data = ATX_AllocateMemory(value->raw_data.size);
-            m_Value.raw_data.size = value->raw_data.size;
-            ATX_CopyMemory(m_Value.raw_data.data, 
-                           value->raw_data.data, 
-                           value->raw_data.size);
-            break;
-
-        default:
-            m_Value = *value;
+            if (property.value.raw_data.data &&
+                property.value.raw_data.size) {
+                m_Property.value.raw_data.size = property.value.raw_data.size;
+                m_Property.value.raw_data.data = new unsigned char[property.value.raw_data.size];
+                ATX_CopyMemory(m_Property.value.raw_data.data, property.value.raw_data.data, property.value.raw_data.size);
+            } else {
+                m_Property.value.raw_data.size = 0;
+                m_Property.value.raw_data.data = NULL;
+            }
             break;
     }
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_SetPropertyMessage::~BLT_DecoderServer_SetPropertyMessage
+|   BLT_DecoderServer_PropertyWrapper::~BLT_DecoderServer_PropertyWrapper
 +---------------------------------------------------------------------*/
-BLT_DecoderServer_SetPropertyMessage::~BLT_DecoderServer_SetPropertyMessage() 
+    BLT_DecoderServer_PropertyWrapper::~BLT_DecoderServer_PropertyWrapper()
 {
-    switch (m_Type) {
+    delete[] m_Property.name;
+
+    switch (m_Property.type) {
         case ATX_PROPERTY_TYPE_STRING:
-            if (m_Value.string) ATX_FreeMemory((void*)m_Value.string);
+            delete[] m_Property.value.string;
             break;
 
         case ATX_PROPERTY_TYPE_RAW_DATA:
-            if (m_Value.raw_data.data) ATX_FreeMemory(m_Value.raw_data.data);
+            delete[] m_Property.value.raw_data.data;
             break;
 
-        default:
+        case ATX_PROPERTY_TYPE_NONE:
+        case ATX_PROPERTY_TYPE_BOOLEAN:
+        case ATX_PROPERTY_TYPE_FLOAT:
+        case ATX_PROPERTY_TYPE_INTEGER:
             break;
     }
 }

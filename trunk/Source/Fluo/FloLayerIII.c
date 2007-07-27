@@ -1169,11 +1169,21 @@ FLO_LayerIII_DecodeFrame(const unsigned char* frame_data,
     /* switch to the main data bits */
     main_data_start = frame_data+side_info_size;
     main_data_size  = frame_payload_size - side_info_size;
+    
+    /* check if we have enough in the buffer */
     if (main_data_buffer->available < frame->side_info.main_data_begin) {
-        /* not enough main data */
+        /* not enough main data: we can't decode, but we still need to buffer */
+        /* the main data from this frame.                                     */
+        if (main_data_size) {
+            FLO_CopyMemory(main_data_buffer->data,
+                           main_data_start, 
+                           main_data_size);
+        }
+        main_data_buffer->available = main_data_size;
         result = FLO_ERROR_INVALID_BITSTREAM;
         goto err;
     }
+
     if (frame->side_info.main_data_begin) {
         /* align the start of this frame's main data at the start of the buffer */
         FLO_MoveMemory(main_data_buffer->data, 

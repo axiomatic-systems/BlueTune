@@ -124,6 +124,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltOssOutput.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT)
+#include "BltMacOSXOutput.h"
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT)
 #include "BltAlsaOutput.h"
 #endif
@@ -403,6 +407,16 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     }
 #endif
 
+    /* alsa output */
+#if defined(BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT)
+    ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_MacOSXOutputModule");
+    result = BLT_MacOSXOutputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
+#endif
+
     /* neutrino output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_NEUTRINO_OUTPUT)
     ATX_LOG_INFO("BLT_Builtins_RegisterModules - registering BLT_NeutrinoOutputModule");
@@ -449,17 +463,19 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 /*----------------------------------------------------------------------
 |    BLT_Builtins_GetDefaultOutput
 +---------------------------------------------------------------------*/
+#define BLT_STRINGIFY_1(x) #x
+#define BLT_STRINGIFY(x) BLT_STRINGIFY_1(x)
 BLT_Result
 BLT_Builtins_GetDefaultOutput(BLT_CString* name, BLT_CString* type)
 {
 #if defined(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME)
-    if (name) *name = BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME;
+    if (name) *name = BLT_STRINGIFY(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME);
 #else
     if (name) *name = BLT_BUILTINS_DEFAULT_OUTPUT_NAME;
 #endif
 
 #if defined(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_TYPE)
-    if (type) *type = BLT_CONFIG_MODULES_DEFAULT_OUTPUT_TYPE;
+    if (type) *type = BLT_STRINGIFY(BLT_CONFIG_MODULES_DEFAULT_OUTPUT_TYPE);
 #else
     if (type) *type = BLT_BUILTINS_DEFAULT_OUTPUT_TYPE;
 #endif

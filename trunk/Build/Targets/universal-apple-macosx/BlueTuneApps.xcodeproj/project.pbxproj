@@ -1,0 +1,517 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CA5046050C5AF49A0060E6FE /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5046040C5AF4930060E6FE /* libNeptune.a */; };
+		CA5046060C5AF49E0060E6FE /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */; };
+		CA5046120C5AF4E50060E6FE /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5046110C5AF4DF0060E6FE /* libAtomix.a */; };
+		CA5046130C5AF4EE0060E6FE /* BtController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5045D30C5AF31D0060E6FE /* BtController.cpp */; };
+		CA5046140C5AF4F30060E6FE /* BtStreamController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5045D40C5AF31D0060E6FE /* BtStreamController.cpp */; };
+		CA5046420C5AF67D0060E6FE /* BtPlay.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5045E60C5AF31D0060E6FE /* BtPlay.c */; };
+		CA5046430C5AF6870060E6FE /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */; };
+		CA5046440C5AF68A0060E6FE /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5046040C5AF4930060E6FE /* libNeptune.a */; };
+		CA5046450C5AF68C0060E6FE /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5046110C5AF4DF0060E6FE /* libAtomix.a */; };
+		CA5046480C5AF6960060E6FE /* BtPlayForceCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5045E70C5AF31D0060E6FE /* BtPlayForceCpp.cpp */; };
+		CA50486C0C5BFD910060E6FE /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50486B0C5BFD910060E6FE /* CoreServices.framework */; };
+		CA50486D0C5BFD910060E6FE /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50486B0C5BFD910060E6FE /* CoreServices.framework */; };
+		CA50487A0C5BFDAE0060E6FE /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5048790C5BFDAE0060E6FE /* AudioUnit.framework */; };
+		CA50487B0C5BFDAE0060E6FE /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5048790C5BFDAE0060E6FE /* AudioUnit.framework */; };
+		CA50487F0C5BFDCF0060E6FE /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50487E0C5BFDCF0060E6FE /* AudioToolbox.framework */; };
+		CA5048800C5BFDCF0060E6FE /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50487E0C5BFDCF0060E6FE /* AudioToolbox.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CA5045CA0C5AF2EB0060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBlueTune.a */;
+			remoteInfo = BlueTune;
+		};
+		CA5045CF0C5AF2F50060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* BlueTune */;
+			remoteInfo = BlueTune;
+		};
+		CA5046030C5AF4930060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F912B69F0B8EB1C700C1E90D /* libNeptune.a */;
+			remoteInfo = Neptune;
+		};
+		CA5046100C5AF4DF0060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libAtomix.a */;
+			remoteInfo = Atomix;
+		};
+		CA5046380C5AF6620060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D /* Neptune */;
+			remoteInfo = Neptune;
+		};
+		CA50463A0C5AF6620060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* Atomix */;
+			remoteInfo = Atomix;
+		};
+		CA50463C0C5AF6620060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* BlueTune */;
+			remoteInfo = BlueTune;
+		};
+		CA50463E0C5AF6740060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D /* Neptune */;
+			remoteInfo = Neptune;
+		};
+		CA5046400C5AF6740060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* Atomix */;
+			remoteInfo = Atomix;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CA5045C40C5AF2DB0060E6FE /* BtController */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = BtController; path = build/Debug/BtController; sourceTree = "<group>"; };
+		CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = BlueTune.xcodeproj; sourceTree = "<group>"; };
+		CA5045D30C5AF31D0060E6FE /* BtController.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BtController.cpp; sourceTree = "<group>"; };
+		CA5045D40C5AF31D0060E6FE /* BtStreamController.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BtStreamController.cpp; sourceTree = "<group>"; };
+		CA5045D50C5AF31D0060E6FE /* BtStreamController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BtStreamController.h; sourceTree = "<group>"; };
+		CA5045E60C5AF31D0060E6FE /* BtPlay.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BtPlay.c; sourceTree = "<group>"; };
+		CA5045E70C5AF31D0060E6FE /* BtPlayForceCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayForceCpp.cpp; sourceTree = "<group>"; };
+		CA5045EC0C5AF3420060E6FE /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
+		CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */ = {isa = PBXFileReference; explicitFileType = "wrapper.pb-project"; name = Neptune.xcodeproj; path = "../../../../Neptune/Build/Targets/universal-apple-macosx/Neptune.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Atomix.xcodeproj; path = "../../../../Atomix/Build/Targets/universal-apple-macosx/Atomix.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CA5046360C5AF6520060E6FE /* BtPlay */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = BtPlay; path = build/Debug/BtPlay; sourceTree = "<group>"; };
+		CA50486B0C5BFD910060E6FE /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		CA5048790C5BFDAE0060E6FE /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		CA50487E0C5BFDCF0060E6FE /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CA5045C20C5AF2DB0060E6FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5046060C5AF49E0060E6FE /* libBlueTune.a in Frameworks */,
+				CA5046050C5AF49A0060E6FE /* libNeptune.a in Frameworks */,
+				CA5046120C5AF4E50060E6FE /* libAtomix.a in Frameworks */,
+				CA50486D0C5BFD910060E6FE /* CoreServices.framework in Frameworks */,
+				CA50487B0C5BFDAE0060E6FE /* AudioUnit.framework in Frameworks */,
+				CA5048800C5BFDCF0060E6FE /* AudioToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA5046340C5AF6520060E6FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5046430C5AF6870060E6FE /* libBlueTune.a in Frameworks */,
+				CA5046440C5AF68A0060E6FE /* libNeptune.a in Frameworks */,
+				CA5046450C5AF68C0060E6FE /* libAtomix.a in Frameworks */,
+				CA50486C0C5BFD910060E6FE /* CoreServices.framework in Frameworks */,
+				CA50487A0C5BFDAE0060E6FE /* AudioUnit.framework in Frameworks */,
+				CA50487F0C5BFDCF0060E6FE /* AudioToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* BlueTuneApps */ = {
+			isa = PBXGroup;
+			children = (
+				CA50487E0C5BFDCF0060E6FE /* AudioToolbox.framework */,
+				CA5048790C5BFDAE0060E6FE /* AudioUnit.framework */,
+				CA50486B0C5BFD910060E6FE /* CoreServices.framework */,
+				CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */,
+				CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */,
+				CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = BlueTuneApps;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045D10C5AF31D0060E6FE /* Apps */,
+				CA5045EA0C5AF3420060E6FE /* Tests */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045C40C5AF2DB0060E6FE /* BtController */,
+				CA5046360C5AF6520060E6FE /* BtPlay */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+		CA5045C70C5AF2EB0060E6FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA5045D10C5AF31D0060E6FE /* Apps */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045D20C5AF31D0060E6FE /* BtController */,
+				CA5045E50C5AF31D0060E6FE /* BtPlay */,
+			);
+			name = Apps;
+			path = ../../../Source/Apps;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5045D20C5AF31D0060E6FE /* BtController */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045D30C5AF31D0060E6FE /* BtController.cpp */,
+				CA5045D40C5AF31D0060E6FE /* BtStreamController.cpp */,
+				CA5045D50C5AF31D0060E6FE /* BtStreamController.h */,
+			);
+			path = BtController;
+			sourceTree = "<group>";
+		};
+		CA5045E50C5AF31D0060E6FE /* BtPlay */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045E60C5AF31D0060E6FE /* BtPlay.c */,
+				CA5045E70C5AF31D0060E6FE /* BtPlayForceCpp.cpp */,
+			);
+			path = BtPlay;
+			sourceTree = "<group>";
+		};
+		CA5045EA0C5AF3420060E6FE /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045EB0C5AF3420060E6FE /* NetworkStream */,
+			);
+			name = Tests;
+			path = ../../../Source/Tests;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5045EB0C5AF3420060E6FE /* NetworkStream */ = {
+			isa = PBXGroup;
+			children = (
+				CA5045EC0C5AF3420060E6FE /* NetworkStreamTest.c */,
+			);
+			path = NetworkStream;
+			sourceTree = "<group>";
+		};
+		CA5046000C5AF4930060E6FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA5046040C5AF4930060E6FE /* libNeptune.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA50460D0C5AF4DF0060E6FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA5046110C5AF4DF0060E6FE /* libAtomix.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CA5045C30C5AF2DB0060E6FE /* BtController */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA5045CC0C5AF2EB0060E6FE /* Build configuration list for PBXNativeTarget "BtController" */;
+			buildPhases = (
+				CA5045C10C5AF2DB0060E6FE /* Sources */,
+				CA5045C20C5AF2DB0060E6FE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA50463F0C5AF6740060E6FE /* PBXTargetDependency */,
+				CA5046410C5AF6740060E6FE /* PBXTargetDependency */,
+				CA5045D00C5AF2F50060E6FE /* PBXTargetDependency */,
+			);
+			name = BtController;
+			productName = BtController;
+			productReference = CA5045C40C5AF2DB0060E6FE /* BtController */;
+			productType = "com.apple.product-type.tool";
+		};
+		CA5046350C5AF6520060E6FE /* BtPlay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA50464F0C5AF6A20060E6FE /* Build configuration list for PBXNativeTarget "BtPlay" */;
+			buildPhases = (
+				CA5046330C5AF6520060E6FE /* Sources */,
+				CA5046340C5AF6520060E6FE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA5046390C5AF6620060E6FE /* PBXTargetDependency */,
+				CA50463B0C5AF6620060E6FE /* PBXTargetDependency */,
+				CA50463D0C5AF6620060E6FE /* PBXTargetDependency */,
+			);
+			name = BtPlay;
+			productName = BtPlay;
+			productReference = CA5046360C5AF6520060E6FE /* BtPlay */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "BlueTuneApps" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTuneApps */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = CA50460D0C5AF4DF0060E6FE /* Products */;
+					ProjectRef = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+				},
+				{
+					ProductGroup = CA5045C70C5AF2EB0060E6FE /* Products */;
+					ProjectRef = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+				},
+				{
+					ProductGroup = CA5046000C5AF4930060E6FE /* Products */;
+					ProjectRef = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+				},
+			);
+			targets = (
+				CA5045C30C5AF2DB0060E6FE /* BtController */,
+				CA5046350C5AF6520060E6FE /* BtPlay */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libBlueTune.a;
+			remoteRef = CA5045CA0C5AF2EB0060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA5046040C5AF4930060E6FE /* libNeptune.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libNeptune.a;
+			remoteRef = CA5046030C5AF4930060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA5046110C5AF4DF0060E6FE /* libAtomix.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libAtomix.a;
+			remoteRef = CA5046100C5AF4DF0060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CA5045C10C5AF2DB0060E6FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5046130C5AF4EE0060E6FE /* BtController.cpp in Sources */,
+				CA5046140C5AF4F30060E6FE /* BtStreamController.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA5046330C5AF6520060E6FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5046420C5AF67D0060E6FE /* BtPlay.c in Sources */,
+				CA5046480C5AF6960060E6FE /* BtPlayForceCpp.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CA5045D00C5AF2F50060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BlueTune;
+			targetProxy = CA5045CF0C5AF2F50060E6FE /* PBXContainerItemProxy */;
+		};
+		CA5046390C5AF6620060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA5046380C5AF6620060E6FE /* PBXContainerItemProxy */;
+		};
+		CA50463B0C5AF6620060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA50463A0C5AF6620060E6FE /* PBXContainerItemProxy */;
+		};
+		CA50463D0C5AF6620060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BlueTune;
+			targetProxy = CA50463C0C5AF6620060E6FE /* PBXContainerItemProxy */;
+		};
+		CA50463F0C5AF6740060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA50463E0C5AF6740060E6FE /* PBXContainerItemProxy */;
+		};
+		CA5046410C5AF6740060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA5046400C5AF6740060E6FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923608733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../Source/** $(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
+			};
+			name = Debug;
+		};
+		1DEB923708733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../Source/** $(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
+			};
+			name = Release;
+		};
+		CA5045CD0C5AF2EB0060E6FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = "$(HOME)/bin";
+				PREBINDING = NO;
+				PRODUCT_NAME = BtController;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA5045CE0C5AF2EB0060E6FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = "$(HOME)/bin";
+				PREBINDING = NO;
+				PRODUCT_NAME = BtController;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA5046500C5AF6A20060E6FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = "$(HOME)/bin";
+				PREBINDING = NO;
+				PRODUCT_NAME = BtPlay;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA5046510C5AF6A20060E6FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = "$(HOME)/bin";
+				PREBINDING = NO;
+				PRODUCT_NAME = BtPlay;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "BlueTuneApps" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA5045CC0C5AF2EB0060E6FE /* Build configuration list for PBXNativeTarget "BtController" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5045CD0C5AF2EB0060E6FE /* Debug */,
+				CA5045CE0C5AF2EB0060E6FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA50464F0C5AF6A20060E6FE /* Build configuration list for PBXNativeTarget "BtPlay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5046500C5AF6A20060E6FE /* Debug */,
+				CA5046510C5AF6A20060E6FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

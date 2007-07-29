@@ -1,0 +1,1586 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; };
+		CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; };
+		CA5042CB0C5AE52B0060E6FE /* BltByteStreamProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */; };
+		CA5042CC0C5AE52B0060E6FE /* BltByteStreamUser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F40C5AE52B0060E6FE /* BltByteStreamUser.h */; };
+		CA5042CD0C5AE52B0060E6FE /* BltConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F50C5AE52B0060E6FE /* BltConfig.h */; };
+		CA5042CE0C5AE52B0060E6FE /* BltCore.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5041F60C5AE52B0060E6FE /* BltCore.c */; };
+		CA5042CF0C5AE52B0060E6FE /* BltCore.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F70C5AE52B0060E6FE /* BltCore.h */; };
+		CA5042D00C5AE52B0060E6FE /* BltCorePriv.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F80C5AE52B0060E6FE /* BltCorePriv.h */; };
+		CA5042D10C5AE52B0060E6FE /* BltDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F90C5AE52B0060E6FE /* BltDefs.h */; };
+		CA5042D20C5AE52B0060E6FE /* BltErrors.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FA0C5AE52B0060E6FE /* BltErrors.h */; };
+		CA5042D30C5AE52B0060E6FE /* BltEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FB0C5AE52B0060E6FE /* BltEvent.h */; };
+		CA5042D40C5AE52B0060E6FE /* BltEventListener.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FC0C5AE52B0060E6FE /* BltEventListener.h */; };
+		CA5042D50C5AE52B0060E6FE /* BltInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5041FD0C5AE52B0060E6FE /* BltInterfaces.c */; };
+		CA5042D60C5AE52B0060E6FE /* BltMedia.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5041FE0C5AE52B0060E6FE /* BltMedia.c */; };
+		CA5042D70C5AE52B0060E6FE /* BltMedia.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FF0C5AE52B0060E6FE /* BltMedia.h */; };
+		CA5042D80C5AE52B0060E6FE /* BltMediaNode.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042000C5AE52B0060E6FE /* BltMediaNode.c */; };
+		CA5042D90C5AE52B0060E6FE /* BltMediaNode.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042010C5AE52B0060E6FE /* BltMediaNode.h */; };
+		CA5042DA0C5AE52B0060E6FE /* BltMediaPacket.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042020C5AE52B0060E6FE /* BltMediaPacket.c */; };
+		CA5042DB0C5AE52B0060E6FE /* BltMediaPacket.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042030C5AE52B0060E6FE /* BltMediaPacket.h */; };
+		CA5042DC0C5AE52B0060E6FE /* BltMediaPacketPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042040C5AE52B0060E6FE /* BltMediaPacketPriv.h */; };
+		CA5042DD0C5AE52B0060E6FE /* BltMediaPort.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042050C5AE52B0060E6FE /* BltMediaPort.c */; };
+		CA5042DE0C5AE52B0060E6FE /* BltMediaPort.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042060C5AE52B0060E6FE /* BltMediaPort.h */; };
+		CA5042DF0C5AE52B0060E6FE /* BltModule.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042070C5AE52B0060E6FE /* BltModule.c */; };
+		CA5042E00C5AE52B0060E6FE /* BltModule.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042080C5AE52B0060E6FE /* BltModule.h */; };
+		CA5042E10C5AE52B0060E6FE /* BltOutputNode.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042090C5AE52B0060E6FE /* BltOutputNode.h */; };
+		CA5042E20C5AE52B0060E6FE /* BltPacketConsumer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420A0C5AE52B0060E6FE /* BltPacketConsumer.h */; };
+		CA5042E30C5AE52B0060E6FE /* BltPacketProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420B0C5AE52B0060E6FE /* BltPacketProducer.h */; };
+		CA5042E40C5AE52B0060E6FE /* BltPcm.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50420C0C5AE52B0060E6FE /* BltPcm.c */; };
+		CA5042E50C5AE52B0060E6FE /* BltPcm.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420D0C5AE52B0060E6FE /* BltPcm.h */; };
+		CA5042E60C5AE52B0060E6FE /* BltRegistry.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50420E0C5AE52B0060E6FE /* BltRegistry.c */; };
+		CA5042E70C5AE52B0060E6FE /* BltRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420F0C5AE52B0060E6FE /* BltRegistry.h */; };
+		CA5042E80C5AE52B0060E6FE /* BltRegistryPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042100C5AE52B0060E6FE /* BltRegistryPriv.h */; };
+		CA5042E90C5AE52B0060E6FE /* BltStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042110C5AE52B0060E6FE /* BltStream.c */; };
+		CA5042EA0C5AE52B0060E6FE /* BltStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042120C5AE52B0060E6FE /* BltStream.h */; };
+		CA5042EB0C5AE52B0060E6FE /* BltStreamPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042130C5AE52B0060E6FE /* BltStreamPriv.h */; };
+		CA5042EC0C5AE52B0060E6FE /* BltTime.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042140C5AE52B0060E6FE /* BltTime.c */; };
+		CA5042ED0C5AE52B0060E6FE /* BltTime.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042150C5AE52B0060E6FE /* BltTime.h */; };
+		CA5042EE0C5AE52B0060E6FE /* BltTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042160C5AE52B0060E6FE /* BltTypes.h */; };
+		CA5042EF0C5AE52B0060E6FE /* BltDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042180C5AE52B0060E6FE /* BltDecoder.c */; };
+		CA5042F00C5AE52B0060E6FE /* BltDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042190C5AE52B0060E6FE /* BltDecoder.h */; };
+		CA5042F10C5AE52B0060E6FE /* FloBitStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50421B0C5AE52B0060E6FE /* FloBitStream.c */; };
+		CA5042F20C5AE52B0060E6FE /* FloBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50421C0C5AE52B0060E6FE /* FloBitStream.h */; };
+		CA5042F30C5AE52B0060E6FE /* FloByteStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50421D0C5AE52B0060E6FE /* FloByteStream.c */; };
+		CA5042F40C5AE52B0060E6FE /* FloByteStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50421E0C5AE52B0060E6FE /* FloByteStream.h */; };
+		CA5042F50C5AE52B0060E6FE /* FloConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50421F0C5AE52B0060E6FE /* FloConfig.h */; };
+		CA5042F60C5AE52B0060E6FE /* FloDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042200C5AE52B0060E6FE /* FloDecoder.c */; };
+		CA5042F70C5AE52B0060E6FE /* FloDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042210C5AE52B0060E6FE /* FloDecoder.h */; };
+		CA5042F80C5AE52B0060E6FE /* FloEngine.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042220C5AE52B0060E6FE /* FloEngine.c */; };
+		CA5042F90C5AE52B0060E6FE /* FloEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042230C5AE52B0060E6FE /* FloEngine.h */; };
+		CA5042FA0C5AE52B0060E6FE /* FloErrors.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042240C5AE52B0060E6FE /* FloErrors.h */; };
+		CA5042FB0C5AE52B0060E6FE /* FloFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042250C5AE52B0060E6FE /* FloFilter.c */; };
+		CA5042FC0C5AE52B0060E6FE /* FloFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042260C5AE52B0060E6FE /* FloFilter.h */; };
+		CA5042FD0C5AE52B0060E6FE /* FloFrame.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042270C5AE52B0060E6FE /* FloFrame.c */; };
+		CA5042FE0C5AE52B0060E6FE /* FloFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042280C5AE52B0060E6FE /* FloFrame.h */; };
+		CA5042FF0C5AE52B0060E6FE /* FloHeaders.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042290C5AE52B0060E6FE /* FloHeaders.c */; };
+		CA5043000C5AE52B0060E6FE /* FloHeaders.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50422A0C5AE52B0060E6FE /* FloHeaders.h */; };
+		CA5043010C5AE52B0060E6FE /* FloHuffman.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50422B0C5AE52B0060E6FE /* FloHuffman.c */; };
+		CA5043020C5AE52B0060E6FE /* FloHuffman.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50422C0C5AE52B0060E6FE /* FloHuffman.h */; };
+		CA5043030C5AE52B0060E6FE /* FloLayerI.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50422D0C5AE52B0060E6FE /* FloLayerI.c */; };
+		CA5043040C5AE52B0060E6FE /* FloLayerI.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50422E0C5AE52B0060E6FE /* FloLayerI.h */; };
+		CA5043050C5AE52B0060E6FE /* FloLayerII.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50422F0C5AE52B0060E6FE /* FloLayerII.c */; };
+		CA5043060C5AE52B0060E6FE /* FloLayerII.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042300C5AE52B0060E6FE /* FloLayerII.h */; };
+		CA5043070C5AE52B0060E6FE /* FloLayerIII.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042310C5AE52B0060E6FE /* FloLayerIII.c */; };
+		CA5043080C5AE52B0060E6FE /* FloLayerIII.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042320C5AE52B0060E6FE /* FloLayerIII.h */; };
+		CA5043090C5AE52B0060E6FE /* FloMath.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042330C5AE52B0060E6FE /* FloMath.h */; };
+		CA50430A0C5AE52B0060E6FE /* FloSyntax.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042340C5AE52B0060E6FE /* FloSyntax.h */; };
+		CA50430B0C5AE52B0060E6FE /* FloTables.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042350C5AE52B0060E6FE /* FloTables.c */; };
+		CA50430C0C5AE52B0060E6FE /* FloTables.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042360C5AE52B0060E6FE /* FloTables.h */; };
+		CA50430D0C5AE52B0060E6FE /* FloTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042370C5AE52B0060E6FE /* FloTypes.h */; };
+		CA50430E0C5AE52B0060E6FE /* FloUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042380C5AE52B0060E6FE /* FloUtils.h */; };
+		CA50430F0C5AE52B0060E6FE /* FloVbr.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042390C5AE52B0060E6FE /* FloVbr.c */; };
+		CA5043100C5AE52B0060E6FE /* FloVbr.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50423A0C5AE52B0060E6FE /* FloVbr.h */; };
+		CA5043110C5AE52B0060E6FE /* Fluo.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50423B0C5AE52B0060E6FE /* Fluo.h */; };
+		CA5043120C5AE52B0060E6FE /* BltDecoderClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA50423D0C5AE52B0060E6FE /* BltDecoderClient.cpp */; };
+		CA5043130C5AE52B0060E6FE /* BltDecoderClient.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50423E0C5AE52B0060E6FE /* BltDecoderClient.h */; };
+		CA5043140C5AE52B0060E6FE /* BltDecoderServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA50423F0C5AE52B0060E6FE /* BltDecoderServer.cpp */; };
+		CA5043150C5AE52B0060E6FE /* BltDecoderServer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042400C5AE52B0060E6FE /* BltDecoderServer.h */; };
+		CA5043160C5AE52B0060E6FE /* BltPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5042410C5AE52B0060E6FE /* BltPlayer.cpp */; };
+		CA5043170C5AE52B0060E6FE /* BltPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042420C5AE52B0060E6FE /* BltPlayer.h */; };
+		CA5043180C5AE52B0060E6FE /* BltPcmAdapter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042460C5AE52B0060E6FE /* BltPcmAdapter.c */; };
+		CA5043190C5AE52B0060E6FE /* BltPcmAdapter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042470C5AE52B0060E6FE /* BltPcmAdapter.h */; };
+		CA50431A0C5AE52B0060E6FE /* BltBuiltins.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042490C5AE52B0060E6FE /* BltBuiltins.c */; };
+		CA50431B0C5AE52B0060E6FE /* BltReplayGain.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50424A0C5AE52B0060E6FE /* BltReplayGain.c */; };
+		CA50431C0C5AE52B0060E6FE /* BltReplayGain.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */; };
+		CA50431D0C5AE52B0060E6FE /* BltFilterHost.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50424E0C5AE52B0060E6FE /* BltFilterHost.c */; };
+		CA50431E0C5AE52B0060E6FE /* BltFilterHost.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424F0C5AE52B0060E6FE /* BltFilterHost.h */; };
+		CA5043200C5AE52B0060E6FE /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
+		CA5043230C5AE52B0060E6FE /* BltMpegAudioDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042580C5AE52B0060E6FE /* BltMpegAudioDecoder.c */; };
+		CA5043240C5AE52B0060E6FE /* BltMpegAudioDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042590C5AE52B0060E6FE /* BltMpegAudioDecoder.h */; };
+		CA5043290C5AE52B0060E6FE /* BltGainControlFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042620C5AE52B0060E6FE /* BltGainControlFilter.c */; };
+		CA50432A0C5AE52B0060E6FE /* BltGainControlFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042630C5AE52B0060E6FE /* BltGainControlFilter.h */; };
+		CA50432B0C5AE52B0060E6FE /* BltWaveFormatter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042660C5AE52B0060E6FE /* BltWaveFormatter.c */; };
+		CA50432C0C5AE52B0060E6FE /* BltWaveFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042670C5AE52B0060E6FE /* BltWaveFormatter.h */; };
+		CA50432F0C5AE52B0060E6FE /* BltPacketStreamer.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50426D0C5AE52B0060E6FE /* BltPacketStreamer.c */; };
+		CA5043300C5AE52B0060E6FE /* BltPacketStreamer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50426E0C5AE52B0060E6FE /* BltPacketStreamer.h */; };
+		CA5043310C5AE52B0060E6FE /* BltSilenceRemover.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042700C5AE52B0060E6FE /* BltSilenceRemover.c */; };
+		CA5043320C5AE52B0060E6FE /* BltSilenceRemover.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042710C5AE52B0060E6FE /* BltSilenceRemover.h */; };
+		CA5043330C5AE52B0060E6FE /* BltStreamPacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042730C5AE52B0060E6FE /* BltStreamPacketizer.c */; };
+		CA5043340C5AE52B0060E6FE /* BltStreamPacketizer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042740C5AE52B0060E6FE /* BltStreamPacketizer.h */; };
+		CA50433D0C5AE52B0060E6FE /* BltFileInput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042830C5AE52B0060E6FE /* BltFileInput.c */; };
+		CA50433E0C5AE52B0060E6FE /* BltFileInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042840C5AE52B0060E6FE /* BltFileInput.h */; };
+		CA50433F0C5AE52B0060E6FE /* BltHttpNetworkStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5042860C5AE52B0060E6FE /* BltHttpNetworkStream.cpp */; };
+		CA5043400C5AE52B0060E6FE /* BltHttpNetworkStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042870C5AE52B0060E6FE /* BltHttpNetworkStream.h */; };
+		CA5043410C5AE52B0060E6FE /* BltNetworkInput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042880C5AE52B0060E6FE /* BltNetworkInput.c */; };
+		CA5043420C5AE52B0060E6FE /* BltNetworkInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042890C5AE52B0060E6FE /* BltNetworkInput.h */; };
+		CA5043430C5AE52B0060E6FE /* BltNetworkInputSource.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50428A0C5AE52B0060E6FE /* BltNetworkInputSource.c */; };
+		CA5043440C5AE52B0060E6FE /* BltNetworkInputSource.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50428B0C5AE52B0060E6FE /* BltNetworkInputSource.h */; };
+		CA5043450C5AE52B0060E6FE /* BltNetworkStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50428C0C5AE52B0060E6FE /* BltNetworkStream.c */; };
+		CA5043460C5AE52B0060E6FE /* BltNetworkStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50428D0C5AE52B0060E6FE /* BltNetworkStream.h */; };
+		CA5043470C5AE52B0060E6FE /* BltTcpNetworkStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50428E0C5AE52B0060E6FE /* BltTcpNetworkStream.c */; };
+		CA5043480C5AE52B0060E6FE /* BltTcpNetworkStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50428F0C5AE52B0060E6FE /* BltTcpNetworkStream.h */; };
+		CA50434B0C5AE52B0060E6FE /* BltDebugOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042950C5AE52B0060E6FE /* BltDebugOutput.c */; };
+		CA50434C0C5AE52B0060E6FE /* BltDebugOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042960C5AE52B0060E6FE /* BltDebugOutput.h */; };
+		CA50434D0C5AE52B0060E6FE /* BltFileOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042990C5AE52B0060E6FE /* BltFileOutput.c */; };
+		CA50434E0C5AE52B0060E6FE /* BltFileOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50429A0C5AE52B0060E6FE /* BltFileOutput.h */; };
+		CA5043510C5AE52B0060E6FE /* BltNullOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50429F0C5AE52B0060E6FE /* BltNullOutput.c */; };
+		CA5043520C5AE52B0060E6FE /* BltNullOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042A00C5AE52B0060E6FE /* BltNullOutput.h */; };
+		CA5043570C5AE52B0060E6FE /* BltAiffParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042A90C5AE52B0060E6FE /* BltAiffParser.c */; };
+		CA5043580C5AE52B0060E6FE /* BltAiffParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042AA0C5AE52B0060E6FE /* BltAiffParser.h */; };
+		CA50435A0C5AE52B0060E6FE /* BltMp4Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042AD0C5AE52B0060E6FE /* BltMp4Parser.h */; };
+		CA50435B0C5AE52B0060E6FE /* BltApeParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042AF0C5AE52B0060E6FE /* BltApeParser.c */; };
+		CA50435C0C5AE52B0060E6FE /* BltApeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B00C5AE52B0060E6FE /* BltApeParser.h */; };
+		CA50435D0C5AE52B0060E6FE /* BltId3Parser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042B10C5AE52B0060E6FE /* BltId3Parser.c */; };
+		CA50435E0C5AE52B0060E6FE /* BltId3Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B20C5AE52B0060E6FE /* BltId3Parser.h */; };
+		CA50435F0C5AE52B0060E6FE /* BltTagParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042B30C5AE52B0060E6FE /* BltTagParser.c */; };
+		CA5043600C5AE52B0060E6FE /* BltTagParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B40C5AE52B0060E6FE /* BltTagParser.h */; };
+		CA5043610C5AE52B0060E6FE /* BltWaveParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042B60C5AE52B0060E6FE /* BltWaveParser.c */; };
+		CA5043620C5AE52B0060E6FE /* BltWaveParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B70C5AE52B0060E6FE /* BltWaveParser.h */; };
+		CA5046AA0C5BC54A0060E6FE /* BltMacOSXOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5046A80C5BC54A0060E6FE /* BltMacOSXOutput.c */; };
+		CA5046AB0C5BC54A0060E6FE /* BltMacOSXOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5046A90C5BC54A0060E6FE /* BltMacOSXOutput.h */; };
+		CA504AD40C5C53440060E6FE /* all.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049CF0C5C53440060E6FE /* all.h */; };
+		CA504AD50C5C53440060E6FE /* assert.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D00C5C53440060E6FE /* assert.h */; };
+		CA504AD60C5C53440060E6FE /* callback.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D10C5C53440060E6FE /* callback.h */; };
+		CA504AD70C5C53440060E6FE /* export.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D20C5C53440060E6FE /* export.h */; };
+		CA504AD80C5C53440060E6FE /* format.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D30C5C53440060E6FE /* format.h */; };
+		CA504AD90C5C53440060E6FE /* metadata.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D40C5C53440060E6FE /* metadata.h */; };
+		CA504ADA0C5C53440060E6FE /* ordinals.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D50C5C53440060E6FE /* ordinals.h */; };
+		CA504ADB0C5C53440060E6FE /* stream_decoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D60C5C53440060E6FE /* stream_decoder.h */; };
+		CA504ADC0C5C53440060E6FE /* stream_encoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5049D70C5C53440060E6FE /* stream_encoder.h */; };
+		CA504B400C5C53440060E6FE /* asm_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A5E0C5C53440060E6FE /* asm_arm.h */; };
+		CA504B410C5C53440060E6FE /* backends.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A5F0C5C53440060E6FE /* backends.h */; };
+		CA504B420C5C53440060E6FE /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A600C5C53440060E6FE /* bitwise.c */; };
+		CA504B430C5C53440060E6FE /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A610C5C53440060E6FE /* block.c */; };
+		CA504B440C5C53440060E6FE /* block.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A620C5C53440060E6FE /* block.h */; };
+		CA504B450C5C53440060E6FE /* codebook.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A630C5C53440060E6FE /* codebook.c */; };
+		CA504B460C5C53440060E6FE /* codebook.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A640C5C53440060E6FE /* codebook.h */; };
+		CA504B470C5C53440060E6FE /* codec_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A650C5C53440060E6FE /* codec_internal.h */; };
+		CA504B480C5C53440060E6FE /* config_types.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A660C5C53440060E6FE /* config_types.h */; };
+		CA504B490C5C53440060E6FE /* floor0.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A680C5C53440060E6FE /* floor0.c */; };
+		CA504B4A0C5C53440060E6FE /* floor1.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A690C5C53440060E6FE /* floor1.c */; };
+		CA504B4B0C5C53440060E6FE /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A6A0C5C53440060E6FE /* framing.c */; };
+		CA504B4C0C5C53440060E6FE /* info.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A6B0C5C53440060E6FE /* info.c */; };
+		CA504B4D0C5C53440060E6FE /* ivorbiscodec.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A6C0C5C53440060E6FE /* ivorbiscodec.h */; };
+		CA504B4E0C5C53440060E6FE /* ivorbisfile.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A6D0C5C53440060E6FE /* ivorbisfile.h */; };
+		CA504B4F0C5C53440060E6FE /* lsp_lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A6E0C5C53440060E6FE /* lsp_lookup.h */; };
+		CA504B500C5C53440060E6FE /* mapping0.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A6F0C5C53440060E6FE /* mapping0.c */; };
+		CA504B510C5C53440060E6FE /* mdct.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A700C5C53440060E6FE /* mdct.c */; };
+		CA504B520C5C53440060E6FE /* mdct.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A710C5C53440060E6FE /* mdct.h */; };
+		CA504B530C5C53440060E6FE /* mdct_lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A720C5C53440060E6FE /* mdct_lookup.h */; };
+		CA504B540C5C53440060E6FE /* misc.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A730C5C53440060E6FE /* misc.h */; };
+		CA504B550C5C53440060E6FE /* ogg.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A740C5C53440060E6FE /* ogg.h */; };
+		CA504B560C5C53440060E6FE /* os.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A750C5C53440060E6FE /* os.h */; };
+		CA504B570C5C53440060E6FE /* os_types.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A760C5C53440060E6FE /* os_types.h */; };
+		CA504B580C5C53440060E6FE /* registry.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A780C5C53440060E6FE /* registry.c */; };
+		CA504B590C5C53440060E6FE /* registry.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A790C5C53440060E6FE /* registry.h */; };
+		CA504B5A0C5C53440060E6FE /* res012.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A7A0C5C53440060E6FE /* res012.c */; };
+		CA504B5B0C5C53440060E6FE /* sharedbook.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A7B0C5C53440060E6FE /* sharedbook.c */; };
+		CA504B5C0C5C53440060E6FE /* synthesis.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A7C0C5C53440060E6FE /* synthesis.c */; };
+		CA504B5D0C5C53440060E6FE /* vorbisfile.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A7D0C5C53440060E6FE /* vorbisfile.c */; };
+		CA504B5E0C5C53440060E6FE /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A7E0C5C53440060E6FE /* window.c */; };
+		CA504B5F0C5C53440060E6FE /* window.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A7F0C5C53440060E6FE /* window.h */; };
+		CA504B600C5C53440060E6FE /* window_lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A800C5C53440060E6FE /* window_lookup.h */; };
+		CA504B8F0C5C54450060E6FE /* BltVorbisDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50425B0C5AE52B0060E6FE /* BltVorbisDecoder.c */; };
+		CA504B900C5C54460060E6FE /* BltVorbisDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50425C0C5AE52B0060E6FE /* BltVorbisDecoder.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F912B69F0B8EB1C700C1E90D /* libNeptune.a */;
+			remoteInfo = Neptune;
+		};
+		CA5043AD0C5AE6320060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libAtomix.a */;
+			remoteInfo = Atomix;
+		};
+		CA5043CC0C5AE93C0060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* Atomix */;
+			remoteInfo = Atomix;
+		};
+		CA5043CE0C5AE9470060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D /* Neptune */;
+			remoteInfo = Neptune;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
+		CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltBuiltins.h; sourceTree = "<group>"; };
+		CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamProvider.h; sourceTree = "<group>"; };
+		CA5041F40C5AE52B0060E6FE /* BltByteStreamUser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamUser.h; sourceTree = "<group>"; };
+		CA5041F50C5AE52B0060E6FE /* BltConfig.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltConfig.h; sourceTree = "<group>"; };
+		CA5041F60C5AE52B0060E6FE /* BltCore.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltCore.c; sourceTree = "<group>"; };
+		CA5041F70C5AE52B0060E6FE /* BltCore.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltCore.h; sourceTree = "<group>"; };
+		CA5041F80C5AE52B0060E6FE /* BltCorePriv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltCorePriv.h; sourceTree = "<group>"; };
+		CA5041F90C5AE52B0060E6FE /* BltDefs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltDefs.h; sourceTree = "<group>"; };
+		CA5041FA0C5AE52B0060E6FE /* BltErrors.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltErrors.h; sourceTree = "<group>"; };
+		CA5041FB0C5AE52B0060E6FE /* BltEvent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltEvent.h; sourceTree = "<group>"; };
+		CA5041FC0C5AE52B0060E6FE /* BltEventListener.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltEventListener.h; sourceTree = "<group>"; };
+		CA5041FD0C5AE52B0060E6FE /* BltInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltInterfaces.c; sourceTree = "<group>"; };
+		CA5041FE0C5AE52B0060E6FE /* BltMedia.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMedia.c; sourceTree = "<group>"; };
+		CA5041FF0C5AE52B0060E6FE /* BltMedia.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMedia.h; sourceTree = "<group>"; };
+		CA5042000C5AE52B0060E6FE /* BltMediaNode.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMediaNode.c; sourceTree = "<group>"; };
+		CA5042010C5AE52B0060E6FE /* BltMediaNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMediaNode.h; sourceTree = "<group>"; };
+		CA5042020C5AE52B0060E6FE /* BltMediaPacket.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMediaPacket.c; sourceTree = "<group>"; };
+		CA5042030C5AE52B0060E6FE /* BltMediaPacket.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMediaPacket.h; sourceTree = "<group>"; };
+		CA5042040C5AE52B0060E6FE /* BltMediaPacketPriv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMediaPacketPriv.h; sourceTree = "<group>"; };
+		CA5042050C5AE52B0060E6FE /* BltMediaPort.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMediaPort.c; sourceTree = "<group>"; };
+		CA5042060C5AE52B0060E6FE /* BltMediaPort.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMediaPort.h; sourceTree = "<group>"; };
+		CA5042070C5AE52B0060E6FE /* BltModule.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltModule.c; sourceTree = "<group>"; };
+		CA5042080C5AE52B0060E6FE /* BltModule.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltModule.h; sourceTree = "<group>"; };
+		CA5042090C5AE52B0060E6FE /* BltOutputNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltOutputNode.h; sourceTree = "<group>"; };
+		CA50420A0C5AE52B0060E6FE /* BltPacketConsumer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPacketConsumer.h; sourceTree = "<group>"; };
+		CA50420B0C5AE52B0060E6FE /* BltPacketProducer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPacketProducer.h; sourceTree = "<group>"; };
+		CA50420C0C5AE52B0060E6FE /* BltPcm.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltPcm.c; sourceTree = "<group>"; };
+		CA50420D0C5AE52B0060E6FE /* BltPcm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPcm.h; sourceTree = "<group>"; };
+		CA50420E0C5AE52B0060E6FE /* BltRegistry.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltRegistry.c; sourceTree = "<group>"; };
+		CA50420F0C5AE52B0060E6FE /* BltRegistry.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltRegistry.h; sourceTree = "<group>"; };
+		CA5042100C5AE52B0060E6FE /* BltRegistryPriv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltRegistryPriv.h; sourceTree = "<group>"; };
+		CA5042110C5AE52B0060E6FE /* BltStream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltStream.c; sourceTree = "<group>"; };
+		CA5042120C5AE52B0060E6FE /* BltStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltStream.h; sourceTree = "<group>"; };
+		CA5042130C5AE52B0060E6FE /* BltStreamPriv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltStreamPriv.h; sourceTree = "<group>"; };
+		CA5042140C5AE52B0060E6FE /* BltTime.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltTime.c; sourceTree = "<group>"; };
+		CA5042150C5AE52B0060E6FE /* BltTime.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltTime.h; sourceTree = "<group>"; };
+		CA5042160C5AE52B0060E6FE /* BltTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltTypes.h; sourceTree = "<group>"; };
+		CA5042180C5AE52B0060E6FE /* BltDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltDecoder.c; sourceTree = "<group>"; };
+		CA5042190C5AE52B0060E6FE /* BltDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltDecoder.h; sourceTree = "<group>"; };
+		CA50421B0C5AE52B0060E6FE /* FloBitStream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloBitStream.c; sourceTree = "<group>"; };
+		CA50421C0C5AE52B0060E6FE /* FloBitStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloBitStream.h; sourceTree = "<group>"; };
+		CA50421D0C5AE52B0060E6FE /* FloByteStream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloByteStream.c; sourceTree = "<group>"; };
+		CA50421E0C5AE52B0060E6FE /* FloByteStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloByteStream.h; sourceTree = "<group>"; };
+		CA50421F0C5AE52B0060E6FE /* FloConfig.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloConfig.h; sourceTree = "<group>"; };
+		CA5042200C5AE52B0060E6FE /* FloDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloDecoder.c; sourceTree = "<group>"; };
+		CA5042210C5AE52B0060E6FE /* FloDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloDecoder.h; sourceTree = "<group>"; };
+		CA5042220C5AE52B0060E6FE /* FloEngine.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloEngine.c; sourceTree = "<group>"; };
+		CA5042230C5AE52B0060E6FE /* FloEngine.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloEngine.h; sourceTree = "<group>"; };
+		CA5042240C5AE52B0060E6FE /* FloErrors.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloErrors.h; sourceTree = "<group>"; };
+		CA5042250C5AE52B0060E6FE /* FloFilter.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloFilter.c; sourceTree = "<group>"; };
+		CA5042260C5AE52B0060E6FE /* FloFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloFilter.h; sourceTree = "<group>"; };
+		CA5042270C5AE52B0060E6FE /* FloFrame.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloFrame.c; sourceTree = "<group>"; };
+		CA5042280C5AE52B0060E6FE /* FloFrame.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloFrame.h; sourceTree = "<group>"; };
+		CA5042290C5AE52B0060E6FE /* FloHeaders.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloHeaders.c; sourceTree = "<group>"; };
+		CA50422A0C5AE52B0060E6FE /* FloHeaders.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloHeaders.h; sourceTree = "<group>"; };
+		CA50422B0C5AE52B0060E6FE /* FloHuffman.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloHuffman.c; sourceTree = "<group>"; };
+		CA50422C0C5AE52B0060E6FE /* FloHuffman.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloHuffman.h; sourceTree = "<group>"; };
+		CA50422D0C5AE52B0060E6FE /* FloLayerI.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloLayerI.c; sourceTree = "<group>"; };
+		CA50422E0C5AE52B0060E6FE /* FloLayerI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloLayerI.h; sourceTree = "<group>"; };
+		CA50422F0C5AE52B0060E6FE /* FloLayerII.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloLayerII.c; sourceTree = "<group>"; };
+		CA5042300C5AE52B0060E6FE /* FloLayerII.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloLayerII.h; sourceTree = "<group>"; };
+		CA5042310C5AE52B0060E6FE /* FloLayerIII.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloLayerIII.c; sourceTree = "<group>"; };
+		CA5042320C5AE52B0060E6FE /* FloLayerIII.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloLayerIII.h; sourceTree = "<group>"; };
+		CA5042330C5AE52B0060E6FE /* FloMath.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloMath.h; sourceTree = "<group>"; };
+		CA5042340C5AE52B0060E6FE /* FloSyntax.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloSyntax.h; sourceTree = "<group>"; };
+		CA5042350C5AE52B0060E6FE /* FloTables.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloTables.c; sourceTree = "<group>"; };
+		CA5042360C5AE52B0060E6FE /* FloTables.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloTables.h; sourceTree = "<group>"; };
+		CA5042370C5AE52B0060E6FE /* FloTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloTypes.h; sourceTree = "<group>"; };
+		CA5042380C5AE52B0060E6FE /* FloUtils.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloUtils.h; sourceTree = "<group>"; };
+		CA5042390C5AE52B0060E6FE /* FloVbr.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FloVbr.c; sourceTree = "<group>"; };
+		CA50423A0C5AE52B0060E6FE /* FloVbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloVbr.h; sourceTree = "<group>"; };
+		CA50423B0C5AE52B0060E6FE /* Fluo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Fluo.h; sourceTree = "<group>"; };
+		CA50423D0C5AE52B0060E6FE /* BltDecoderClient.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BltDecoderClient.cpp; sourceTree = "<group>"; };
+		CA50423E0C5AE52B0060E6FE /* BltDecoderClient.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltDecoderClient.h; sourceTree = "<group>"; };
+		CA50423F0C5AE52B0060E6FE /* BltDecoderServer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BltDecoderServer.cpp; sourceTree = "<group>"; };
+		CA5042400C5AE52B0060E6FE /* BltDecoderServer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltDecoderServer.h; sourceTree = "<group>"; };
+		CA5042410C5AE52B0060E6FE /* BltPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BltPlayer.cpp; sourceTree = "<group>"; };
+		CA5042420C5AE52B0060E6FE /* BltPlayer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPlayer.h; sourceTree = "<group>"; };
+		CA5042460C5AE52B0060E6FE /* BltPcmAdapter.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltPcmAdapter.c; sourceTree = "<group>"; };
+		CA5042470C5AE52B0060E6FE /* BltPcmAdapter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPcmAdapter.h; sourceTree = "<group>"; };
+		CA5042490C5AE52B0060E6FE /* BltBuiltins.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltBuiltins.c; sourceTree = "<group>"; };
+		CA50424A0C5AE52B0060E6FE /* BltReplayGain.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltReplayGain.c; sourceTree = "<group>"; };
+		CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltReplayGain.h; sourceTree = "<group>"; };
+		CA50424E0C5AE52B0060E6FE /* BltFilterHost.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltFilterHost.c; sourceTree = "<group>"; };
+		CA50424F0C5AE52B0060E6FE /* BltFilterHost.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltFilterHost.h; sourceTree = "<group>"; };
+		CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
+		CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
+		CA5042550C5AE52B0060E6FE /* BltFlacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltFlacDecoder.c; sourceTree = "<group>"; };
+		CA5042560C5AE52B0060E6FE /* BltFlacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltFlacDecoder.h; sourceTree = "<group>"; };
+		CA5042580C5AE52B0060E6FE /* BltMpegAudioDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMpegAudioDecoder.c; sourceTree = "<group>"; };
+		CA5042590C5AE52B0060E6FE /* BltMpegAudioDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMpegAudioDecoder.h; sourceTree = "<group>"; };
+		CA50425B0C5AE52B0060E6FE /* BltVorbisDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltVorbisDecoder.c; sourceTree = "<group>"; };
+		CA50425C0C5AE52B0060E6FE /* BltVorbisDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltVorbisDecoder.h; sourceTree = "<group>"; };
+		CA50425E0C5AE52B0060E6FE /* BltWmaDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoder.c; sourceTree = "<group>"; };
+		CA50425F0C5AE52B0060E6FE /* BltWmaDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltWmaDecoder.h; sourceTree = "<group>"; };
+		CA5042620C5AE52B0060E6FE /* BltGainControlFilter.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltGainControlFilter.c; sourceTree = "<group>"; };
+		CA5042630C5AE52B0060E6FE /* BltGainControlFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltGainControlFilter.h; sourceTree = "<group>"; };
+		CA5042660C5AE52B0060E6FE /* BltWaveFormatter.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltWaveFormatter.c; sourceTree = "<group>"; };
+		CA5042670C5AE52B0060E6FE /* BltWaveFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltWaveFormatter.h; sourceTree = "<group>"; };
+		CA50426D0C5AE52B0060E6FE /* BltPacketStreamer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltPacketStreamer.c; sourceTree = "<group>"; };
+		CA50426E0C5AE52B0060E6FE /* BltPacketStreamer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltPacketStreamer.h; sourceTree = "<group>"; };
+		CA5042700C5AE52B0060E6FE /* BltSilenceRemover.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltSilenceRemover.c; sourceTree = "<group>"; };
+		CA5042710C5AE52B0060E6FE /* BltSilenceRemover.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltSilenceRemover.h; sourceTree = "<group>"; };
+		CA5042730C5AE52B0060E6FE /* BltStreamPacketizer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltStreamPacketizer.c; sourceTree = "<group>"; };
+		CA5042740C5AE52B0060E6FE /* BltStreamPacketizer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltStreamPacketizer.h; sourceTree = "<group>"; };
+		CA5042830C5AE52B0060E6FE /* BltFileInput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltFileInput.c; sourceTree = "<group>"; };
+		CA5042840C5AE52B0060E6FE /* BltFileInput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltFileInput.h; sourceTree = "<group>"; };
+		CA5042860C5AE52B0060E6FE /* BltHttpNetworkStream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BltHttpNetworkStream.cpp; sourceTree = "<group>"; };
+		CA5042870C5AE52B0060E6FE /* BltHttpNetworkStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltHttpNetworkStream.h; sourceTree = "<group>"; };
+		CA5042880C5AE52B0060E6FE /* BltNetworkInput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltNetworkInput.c; sourceTree = "<group>"; };
+		CA5042890C5AE52B0060E6FE /* BltNetworkInput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltNetworkInput.h; sourceTree = "<group>"; };
+		CA50428A0C5AE52B0060E6FE /* BltNetworkInputSource.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltNetworkInputSource.c; sourceTree = "<group>"; };
+		CA50428B0C5AE52B0060E6FE /* BltNetworkInputSource.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltNetworkInputSource.h; sourceTree = "<group>"; };
+		CA50428C0C5AE52B0060E6FE /* BltNetworkStream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltNetworkStream.c; sourceTree = "<group>"; };
+		CA50428D0C5AE52B0060E6FE /* BltNetworkStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltNetworkStream.h; sourceTree = "<group>"; };
+		CA50428E0C5AE52B0060E6FE /* BltTcpNetworkStream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltTcpNetworkStream.c; sourceTree = "<group>"; };
+		CA50428F0C5AE52B0060E6FE /* BltTcpNetworkStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltTcpNetworkStream.h; sourceTree = "<group>"; };
+		CA5042950C5AE52B0060E6FE /* BltDebugOutput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltDebugOutput.c; sourceTree = "<group>"; };
+		CA5042960C5AE52B0060E6FE /* BltDebugOutput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltDebugOutput.h; sourceTree = "<group>"; };
+		CA5042990C5AE52B0060E6FE /* BltFileOutput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltFileOutput.c; sourceTree = "<group>"; };
+		CA50429A0C5AE52B0060E6FE /* BltFileOutput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltFileOutput.h; sourceTree = "<group>"; };
+		CA50429F0C5AE52B0060E6FE /* BltNullOutput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltNullOutput.c; sourceTree = "<group>"; };
+		CA5042A00C5AE52B0060E6FE /* BltNullOutput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltNullOutput.h; sourceTree = "<group>"; };
+		CA5042A90C5AE52B0060E6FE /* BltAiffParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAiffParser.c; sourceTree = "<group>"; };
+		CA5042AA0C5AE52B0060E6FE /* BltAiffParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAiffParser.h; sourceTree = "<group>"; };
+		CA5042AC0C5AE52B0060E6FE /* BltMp4Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BltMp4Parser.cpp; sourceTree = "<group>"; };
+		CA5042AD0C5AE52B0060E6FE /* BltMp4Parser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMp4Parser.h; sourceTree = "<group>"; };
+		CA5042AF0C5AE52B0060E6FE /* BltApeParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltApeParser.c; sourceTree = "<group>"; };
+		CA5042B00C5AE52B0060E6FE /* BltApeParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltApeParser.h; sourceTree = "<group>"; };
+		CA5042B10C5AE52B0060E6FE /* BltId3Parser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltId3Parser.c; sourceTree = "<group>"; };
+		CA5042B20C5AE52B0060E6FE /* BltId3Parser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltId3Parser.h; sourceTree = "<group>"; };
+		CA5042B30C5AE52B0060E6FE /* BltTagParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltTagParser.c; sourceTree = "<group>"; };
+		CA5042B40C5AE52B0060E6FE /* BltTagParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltTagParser.h; sourceTree = "<group>"; };
+		CA5042B60C5AE52B0060E6FE /* BltWaveParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltWaveParser.c; sourceTree = "<group>"; };
+		CA5042B70C5AE52B0060E6FE /* BltWaveParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltWaveParser.h; sourceTree = "<group>"; };
+		CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Neptune.xcodeproj; path = "../../../../Neptune/Build/Targets/universal-apple-macosx/Neptune.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Atomix.xcodeproj; path = "../../../../Atomix/Build/Targets/universal-apple-macosx/Atomix.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CA5046A80C5BC54A0060E6FE /* BltMacOSXOutput.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltMacOSXOutput.c; sourceTree = "<group>"; };
+		CA5046A90C5BC54A0060E6FE /* BltMacOSXOutput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltMacOSXOutput.h; sourceTree = "<group>"; };
+		CA5049CF0C5C53440060E6FE /* all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = all.h; sourceTree = "<group>"; };
+		CA5049D00C5C53440060E6FE /* assert.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = assert.h; sourceTree = "<group>"; };
+		CA5049D10C5C53440060E6FE /* callback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
+		CA5049D20C5C53440060E6FE /* export.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = export.h; sourceTree = "<group>"; };
+		CA5049D30C5C53440060E6FE /* format.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = format.h; sourceTree = "<group>"; };
+		CA5049D40C5C53440060E6FE /* metadata.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = metadata.h; sourceTree = "<group>"; };
+		CA5049D50C5C53440060E6FE /* ordinals.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ordinals.h; sourceTree = "<group>"; };
+		CA5049D60C5C53440060E6FE /* stream_decoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stream_decoder.h; sourceTree = "<group>"; };
+		CA5049D70C5C53440060E6FE /* stream_encoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stream_encoder.h; sourceTree = "<group>"; };
+		CA5049DB0C5C53440060E6FE /* bitbuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = bitbuffer.c; sourceTree = "<group>"; };
+		CA5049DC0C5C53440060E6FE /* bitmath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = bitmath.c; sourceTree = "<group>"; };
+		CA5049DD0C5C53440060E6FE /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
+		CA5049DE0C5C53440060E6FE /* crc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
+		CA5049DF0C5C53440060E6FE /* fixed.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = fixed.c; sourceTree = "<group>"; };
+		CA5049E00C5C53440060E6FE /* float.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = float.c; sourceTree = "<group>"; };
+		CA5049E10C5C53440060E6FE /* format.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = format.c; sourceTree = "<group>"; };
+		CA5049E40C5C53440060E6FE /* all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = all.h; sourceTree = "<group>"; };
+		CA5049E50C5C53440060E6FE /* bitbuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = bitbuffer.h; sourceTree = "<group>"; };
+		CA5049E60C5C53440060E6FE /* bitmath.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = bitmath.h; sourceTree = "<group>"; };
+		CA5049E70C5C53440060E6FE /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
+		CA5049E80C5C53440060E6FE /* crc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
+		CA5049E90C5C53440060E6FE /* fixed.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = fixed.h; sourceTree = "<group>"; };
+		CA5049EA0C5C53440060E6FE /* float.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = float.h; sourceTree = "<group>"; };
+		CA5049EB0C5C53440060E6FE /* format.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = format.h; sourceTree = "<group>"; };
+		CA5049EC0C5C53440060E6FE /* lpc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lpc.h; sourceTree = "<group>"; };
+		CA5049ED0C5C53440060E6FE /* md5.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
+		CA5049EE0C5C53440060E6FE /* memory.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
+		CA5049EF0C5C53440060E6FE /* metadata.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = metadata.h; sourceTree = "<group>"; };
+		CA5049F40C5C53440060E6FE /* stream_encoder_framing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stream_encoder_framing.h; sourceTree = "<group>"; };
+		CA5049F50C5C53440060E6FE /* window.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
+		CA5049F70C5C53440060E6FE /* all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = all.h; sourceTree = "<group>"; };
+		CA5049F80C5C53440060E6FE /* stream_decoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stream_decoder.h; sourceTree = "<group>"; };
+		CA5049F90C5C53440060E6FE /* stream_encoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stream_encoder.h; sourceTree = "<group>"; };
+		CA5049FA0C5C53440060E6FE /* lpc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = lpc.c; sourceTree = "<group>"; };
+		CA5049FB0C5C53440060E6FE /* md5.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = md5.c; sourceTree = "<group>"; };
+		CA5049FC0C5C53440060E6FE /* memory.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = memory.c; sourceTree = "<group>"; };
+		CA5049FD0C5C53440060E6FE /* metadata_iterators.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = metadata_iterators.c; sourceTree = "<group>"; };
+		CA5049FE0C5C53440060E6FE /* metadata_object.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = metadata_object.c; sourceTree = "<group>"; };
+		CA5049FF0C5C53440060E6FE /* stream_decoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = stream_decoder.c; sourceTree = "<group>"; };
+		CA504A000C5C53440060E6FE /* window.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = window.c; sourceTree = "<group>"; };
+		CA504A5E0C5C53440060E6FE /* asm_arm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = asm_arm.h; sourceTree = "<group>"; };
+		CA504A5F0C5C53440060E6FE /* backends.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = backends.h; sourceTree = "<group>"; };
+		CA504A600C5C53440060E6FE /* bitwise.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = bitwise.c; sourceTree = "<group>"; };
+		CA504A610C5C53440060E6FE /* block.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = block.c; sourceTree = "<group>"; };
+		CA504A620C5C53440060E6FE /* block.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
+		CA504A630C5C53440060E6FE /* codebook.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = codebook.c; sourceTree = "<group>"; };
+		CA504A640C5C53440060E6FE /* codebook.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = codebook.h; sourceTree = "<group>"; };
+		CA504A650C5C53440060E6FE /* codec_internal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = codec_internal.h; sourceTree = "<group>"; };
+		CA504A660C5C53440060E6FE /* config_types.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = config_types.h; sourceTree = "<group>"; };
+		CA504A680C5C53440060E6FE /* floor0.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = floor0.c; sourceTree = "<group>"; };
+		CA504A690C5C53440060E6FE /* floor1.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = floor1.c; sourceTree = "<group>"; };
+		CA504A6A0C5C53440060E6FE /* framing.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = framing.c; sourceTree = "<group>"; };
+		CA504A6B0C5C53440060E6FE /* info.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = info.c; sourceTree = "<group>"; };
+		CA504A6C0C5C53440060E6FE /* ivorbiscodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ivorbiscodec.h; sourceTree = "<group>"; };
+		CA504A6D0C5C53440060E6FE /* ivorbisfile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ivorbisfile.h; sourceTree = "<group>"; };
+		CA504A6E0C5C53440060E6FE /* lsp_lookup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = lsp_lookup.h; sourceTree = "<group>"; };
+		CA504A6F0C5C53440060E6FE /* mapping0.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = mapping0.c; sourceTree = "<group>"; };
+		CA504A700C5C53440060E6FE /* mdct.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = mdct.c; sourceTree = "<group>"; };
+		CA504A710C5C53440060E6FE /* mdct.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = mdct.h; sourceTree = "<group>"; };
+		CA504A720C5C53440060E6FE /* mdct_lookup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = mdct_lookup.h; sourceTree = "<group>"; };
+		CA504A730C5C53440060E6FE /* misc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = misc.h; sourceTree = "<group>"; };
+		CA504A740C5C53440060E6FE /* ogg.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ogg.h; sourceTree = "<group>"; };
+		CA504A750C5C53440060E6FE /* os.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = os.h; sourceTree = "<group>"; };
+		CA504A760C5C53440060E6FE /* os_types.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = os_types.h; sourceTree = "<group>"; };
+		CA504A780C5C53440060E6FE /* registry.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = registry.c; sourceTree = "<group>"; };
+		CA504A790C5C53440060E6FE /* registry.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = registry.h; sourceTree = "<group>"; };
+		CA504A7A0C5C53440060E6FE /* res012.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = res012.c; sourceTree = "<group>"; };
+		CA504A7B0C5C53440060E6FE /* sharedbook.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sharedbook.c; sourceTree = "<group>"; };
+		CA504A7C0C5C53440060E6FE /* synthesis.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = synthesis.c; sourceTree = "<group>"; };
+		CA504A7D0C5C53440060E6FE /* vorbisfile.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = vorbisfile.c; sourceTree = "<group>"; };
+		CA504A7E0C5C53440060E6FE /* window.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = window.c; sourceTree = "<group>"; };
+		CA504A7F0C5C53440060E6FE /* window.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
+		CA504A800C5C53440060E6FE /* window_lookup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = window_lookup.h; sourceTree = "<group>"; };
+		D2AAC046055464E500DB518D /* libBlueTune.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBlueTune.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
+			isa = PBXGroup;
+			children = (
+				CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */,
+				CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */,
+				CA5041D50C5AE52B0060E6FE /* Source */,
+				CA5049B10C5C53440060E6FE /* ThirdParty */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = BlueTune;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC046055464E500DB518D /* libBlueTune.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+		CA5041D50C5AE52B0060E6FE /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				CA5041EF0C5AE52B0060E6FE /* BlueTune */,
+				CA5041F10C5AE52B0060E6FE /* Core */,
+				CA5042170C5AE52B0060E6FE /* Decoder */,
+				CA50421A0C5AE52B0060E6FE /* Fluo */,
+				CA50423C0C5AE52B0060E6FE /* Player */,
+				CA5042430C5AE52B0060E6FE /* Plugins */,
+			);
+			name = Source;
+			path = ../../../Source;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5041EF0C5AE52B0060E6FE /* BlueTune */ = {
+			isa = PBXGroup;
+			children = (
+				CA5041F00C5AE52B0060E6FE /* BlueTune.h */,
+			);
+			path = BlueTune;
+			sourceTree = "<group>";
+		};
+		CA5041F10C5AE52B0060E6FE /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */,
+				CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */,
+				CA5041F40C5AE52B0060E6FE /* BltByteStreamUser.h */,
+				CA5041F50C5AE52B0060E6FE /* BltConfig.h */,
+				CA5041F60C5AE52B0060E6FE /* BltCore.c */,
+				CA5041F70C5AE52B0060E6FE /* BltCore.h */,
+				CA5041F80C5AE52B0060E6FE /* BltCorePriv.h */,
+				CA5041F90C5AE52B0060E6FE /* BltDefs.h */,
+				CA5041FA0C5AE52B0060E6FE /* BltErrors.h */,
+				CA5041FB0C5AE52B0060E6FE /* BltEvent.h */,
+				CA5041FC0C5AE52B0060E6FE /* BltEventListener.h */,
+				CA5041FD0C5AE52B0060E6FE /* BltInterfaces.c */,
+				CA5041FE0C5AE52B0060E6FE /* BltMedia.c */,
+				CA5041FF0C5AE52B0060E6FE /* BltMedia.h */,
+				CA5042000C5AE52B0060E6FE /* BltMediaNode.c */,
+				CA5042010C5AE52B0060E6FE /* BltMediaNode.h */,
+				CA5042020C5AE52B0060E6FE /* BltMediaPacket.c */,
+				CA5042030C5AE52B0060E6FE /* BltMediaPacket.h */,
+				CA5042040C5AE52B0060E6FE /* BltMediaPacketPriv.h */,
+				CA5042050C5AE52B0060E6FE /* BltMediaPort.c */,
+				CA5042060C5AE52B0060E6FE /* BltMediaPort.h */,
+				CA5042070C5AE52B0060E6FE /* BltModule.c */,
+				CA5042080C5AE52B0060E6FE /* BltModule.h */,
+				CA5042090C5AE52B0060E6FE /* BltOutputNode.h */,
+				CA50420A0C5AE52B0060E6FE /* BltPacketConsumer.h */,
+				CA50420B0C5AE52B0060E6FE /* BltPacketProducer.h */,
+				CA50420C0C5AE52B0060E6FE /* BltPcm.c */,
+				CA50420D0C5AE52B0060E6FE /* BltPcm.h */,
+				CA50420E0C5AE52B0060E6FE /* BltRegistry.c */,
+				CA50420F0C5AE52B0060E6FE /* BltRegistry.h */,
+				CA5042100C5AE52B0060E6FE /* BltRegistryPriv.h */,
+				CA5042110C5AE52B0060E6FE /* BltStream.c */,
+				CA5042120C5AE52B0060E6FE /* BltStream.h */,
+				CA5042130C5AE52B0060E6FE /* BltStreamPriv.h */,
+				CA5042140C5AE52B0060E6FE /* BltTime.c */,
+				CA5042150C5AE52B0060E6FE /* BltTime.h */,
+				CA5042160C5AE52B0060E6FE /* BltTypes.h */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		CA5042170C5AE52B0060E6FE /* Decoder */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042180C5AE52B0060E6FE /* BltDecoder.c */,
+				CA5042190C5AE52B0060E6FE /* BltDecoder.h */,
+			);
+			path = Decoder;
+			sourceTree = "<group>";
+		};
+		CA50421A0C5AE52B0060E6FE /* Fluo */ = {
+			isa = PBXGroup;
+			children = (
+				CA50421B0C5AE52B0060E6FE /* FloBitStream.c */,
+				CA50421C0C5AE52B0060E6FE /* FloBitStream.h */,
+				CA50421D0C5AE52B0060E6FE /* FloByteStream.c */,
+				CA50421E0C5AE52B0060E6FE /* FloByteStream.h */,
+				CA50421F0C5AE52B0060E6FE /* FloConfig.h */,
+				CA5042200C5AE52B0060E6FE /* FloDecoder.c */,
+				CA5042210C5AE52B0060E6FE /* FloDecoder.h */,
+				CA5042220C5AE52B0060E6FE /* FloEngine.c */,
+				CA5042230C5AE52B0060E6FE /* FloEngine.h */,
+				CA5042240C5AE52B0060E6FE /* FloErrors.h */,
+				CA5042250C5AE52B0060E6FE /* FloFilter.c */,
+				CA5042260C5AE52B0060E6FE /* FloFilter.h */,
+				CA5042270C5AE52B0060E6FE /* FloFrame.c */,
+				CA5042280C5AE52B0060E6FE /* FloFrame.h */,
+				CA5042290C5AE52B0060E6FE /* FloHeaders.c */,
+				CA50422A0C5AE52B0060E6FE /* FloHeaders.h */,
+				CA50422B0C5AE52B0060E6FE /* FloHuffman.c */,
+				CA50422C0C5AE52B0060E6FE /* FloHuffman.h */,
+				CA50422D0C5AE52B0060E6FE /* FloLayerI.c */,
+				CA50422E0C5AE52B0060E6FE /* FloLayerI.h */,
+				CA50422F0C5AE52B0060E6FE /* FloLayerII.c */,
+				CA5042300C5AE52B0060E6FE /* FloLayerII.h */,
+				CA5042310C5AE52B0060E6FE /* FloLayerIII.c */,
+				CA5042320C5AE52B0060E6FE /* FloLayerIII.h */,
+				CA5042330C5AE52B0060E6FE /* FloMath.h */,
+				CA5042340C5AE52B0060E6FE /* FloSyntax.h */,
+				CA5042350C5AE52B0060E6FE /* FloTables.c */,
+				CA5042360C5AE52B0060E6FE /* FloTables.h */,
+				CA5042370C5AE52B0060E6FE /* FloTypes.h */,
+				CA5042380C5AE52B0060E6FE /* FloUtils.h */,
+				CA5042390C5AE52B0060E6FE /* FloVbr.c */,
+				CA50423A0C5AE52B0060E6FE /* FloVbr.h */,
+				CA50423B0C5AE52B0060E6FE /* Fluo.h */,
+			);
+			path = Fluo;
+			sourceTree = "<group>";
+		};
+		CA50423C0C5AE52B0060E6FE /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				CA50423D0C5AE52B0060E6FE /* BltDecoderClient.cpp */,
+				CA50423E0C5AE52B0060E6FE /* BltDecoderClient.h */,
+				CA50423F0C5AE52B0060E6FE /* BltDecoderServer.cpp */,
+				CA5042400C5AE52B0060E6FE /* BltDecoderServer.h */,
+				CA5042410C5AE52B0060E6FE /* BltPlayer.cpp */,
+				CA5042420C5AE52B0060E6FE /* BltPlayer.h */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		CA5042430C5AE52B0060E6FE /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042440C5AE52B0060E6FE /* Adapters */,
+				CA5042480C5AE52B0060E6FE /* Common */,
+				CA50424C0C5AE52B0060E6FE /* Composite */,
+				CA5042500C5AE52B0060E6FE /* Decoders */,
+				CA5042600C5AE52B0060E6FE /* Filters */,
+				CA5042640C5AE52B0060E6FE /* Formatters */,
+				CA5042680C5AE52B0060E6FE /* General */,
+				CA5042750C5AE52B0060E6FE /* Inputs */,
+				CA5042900C5AE52B0060E6FE /* Outputs */,
+				CA5042A70C5AE52B0060E6FE /* Parsers */,
+			);
+			path = Plugins;
+			sourceTree = "<group>";
+		};
+		CA5042440C5AE52B0060E6FE /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042450C5AE52B0060E6FE /* PCM */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
+		CA5042450C5AE52B0060E6FE /* PCM */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042460C5AE52B0060E6FE /* BltPcmAdapter.c */,
+				CA5042470C5AE52B0060E6FE /* BltPcmAdapter.h */,
+			);
+			path = PCM;
+			sourceTree = "<group>";
+		};
+		CA5042480C5AE52B0060E6FE /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042490C5AE52B0060E6FE /* BltBuiltins.c */,
+				CA50424A0C5AE52B0060E6FE /* BltReplayGain.c */,
+				CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		CA50424C0C5AE52B0060E6FE /* Composite */ = {
+			isa = PBXGroup;
+			children = (
+				CA50424D0C5AE52B0060E6FE /* FilterHost */,
+			);
+			path = Composite;
+			sourceTree = "<group>";
+		};
+		CA50424D0C5AE52B0060E6FE /* FilterHost */ = {
+			isa = PBXGroup;
+			children = (
+				CA50424E0C5AE52B0060E6FE /* BltFilterHost.c */,
+				CA50424F0C5AE52B0060E6FE /* BltFilterHost.h */,
+			);
+			path = FilterHost;
+			sourceTree = "<group>";
+		};
+		CA5042500C5AE52B0060E6FE /* Decoders */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042510C5AE52B0060E6FE /* AAC */,
+				CA5042540C5AE52B0060E6FE /* FLAC */,
+				CA5042570C5AE52B0060E6FE /* MpegAudio */,
+				CA50425A0C5AE52B0060E6FE /* Vorbis */,
+				CA50425D0C5AE52B0060E6FE /* WMA */,
+			);
+			path = Decoders;
+			sourceTree = "<group>";
+		};
+		CA5042510C5AE52B0060E6FE /* AAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */,
+				CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */,
+			);
+			path = AAC;
+			sourceTree = "<group>";
+		};
+		CA5042540C5AE52B0060E6FE /* FLAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042550C5AE52B0060E6FE /* BltFlacDecoder.c */,
+				CA5042560C5AE52B0060E6FE /* BltFlacDecoder.h */,
+			);
+			path = FLAC;
+			sourceTree = "<group>";
+		};
+		CA5042570C5AE52B0060E6FE /* MpegAudio */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042580C5AE52B0060E6FE /* BltMpegAudioDecoder.c */,
+				CA5042590C5AE52B0060E6FE /* BltMpegAudioDecoder.h */,
+			);
+			path = MpegAudio;
+			sourceTree = "<group>";
+		};
+		CA50425A0C5AE52B0060E6FE /* Vorbis */ = {
+			isa = PBXGroup;
+			children = (
+				CA50425B0C5AE52B0060E6FE /* BltVorbisDecoder.c */,
+				CA50425C0C5AE52B0060E6FE /* BltVorbisDecoder.h */,
+			);
+			path = Vorbis;
+			sourceTree = "<group>";
+		};
+		CA50425D0C5AE52B0060E6FE /* WMA */ = {
+			isa = PBXGroup;
+			children = (
+				CA50425E0C5AE52B0060E6FE /* BltWmaDecoder.c */,
+				CA50425F0C5AE52B0060E6FE /* BltWmaDecoder.h */,
+			);
+			path = WMA;
+			sourceTree = "<group>";
+		};
+		CA5042600C5AE52B0060E6FE /* Filters */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042610C5AE52B0060E6FE /* GainControl */,
+			);
+			path = Filters;
+			sourceTree = "<group>";
+		};
+		CA5042610C5AE52B0060E6FE /* GainControl */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042620C5AE52B0060E6FE /* BltGainControlFilter.c */,
+				CA5042630C5AE52B0060E6FE /* BltGainControlFilter.h */,
+			);
+			path = GainControl;
+			sourceTree = "<group>";
+		};
+		CA5042640C5AE52B0060E6FE /* Formatters */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042650C5AE52B0060E6FE /* Wave */,
+			);
+			path = Formatters;
+			sourceTree = "<group>";
+		};
+		CA5042650C5AE52B0060E6FE /* Wave */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042660C5AE52B0060E6FE /* BltWaveFormatter.c */,
+				CA5042670C5AE52B0060E6FE /* BltWaveFormatter.h */,
+			);
+			path = Wave;
+			sourceTree = "<group>";
+		};
+		CA5042680C5AE52B0060E6FE /* General */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042690C5AE52B0060E6FE /* CrossFader */,
+				CA50426C0C5AE52B0060E6FE /* PacketStreamer */,
+				CA50426F0C5AE52B0060E6FE /* SilenceRemover */,
+				CA5042720C5AE52B0060E6FE /* StreamPacketizer */,
+			);
+			path = General;
+			sourceTree = "<group>";
+		};
+		CA5042690C5AE52B0060E6FE /* CrossFader */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = CrossFader;
+			sourceTree = "<group>";
+		};
+		CA50426C0C5AE52B0060E6FE /* PacketStreamer */ = {
+			isa = PBXGroup;
+			children = (
+				CA50426D0C5AE52B0060E6FE /* BltPacketStreamer.c */,
+				CA50426E0C5AE52B0060E6FE /* BltPacketStreamer.h */,
+			);
+			path = PacketStreamer;
+			sourceTree = "<group>";
+		};
+		CA50426F0C5AE52B0060E6FE /* SilenceRemover */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042700C5AE52B0060E6FE /* BltSilenceRemover.c */,
+				CA5042710C5AE52B0060E6FE /* BltSilenceRemover.h */,
+			);
+			path = SilenceRemover;
+			sourceTree = "<group>";
+		};
+		CA5042720C5AE52B0060E6FE /* StreamPacketizer */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042730C5AE52B0060E6FE /* BltStreamPacketizer.c */,
+				CA5042740C5AE52B0060E6FE /* BltStreamPacketizer.h */,
+			);
+			path = StreamPacketizer;
+			sourceTree = "<group>";
+		};
+		CA5042750C5AE52B0060E6FE /* Inputs */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042820C5AE52B0060E6FE /* File */,
+				CA5042850C5AE52B0060E6FE /* Network */,
+			);
+			path = Inputs;
+			sourceTree = "<group>";
+		};
+		CA5042820C5AE52B0060E6FE /* File */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042830C5AE52B0060E6FE /* BltFileInput.c */,
+				CA5042840C5AE52B0060E6FE /* BltFileInput.h */,
+			);
+			path = File;
+			sourceTree = "<group>";
+		};
+		CA5042850C5AE52B0060E6FE /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042860C5AE52B0060E6FE /* BltHttpNetworkStream.cpp */,
+				CA5042870C5AE52B0060E6FE /* BltHttpNetworkStream.h */,
+				CA5042880C5AE52B0060E6FE /* BltNetworkInput.c */,
+				CA5042890C5AE52B0060E6FE /* BltNetworkInput.h */,
+				CA50428A0C5AE52B0060E6FE /* BltNetworkInputSource.c */,
+				CA50428B0C5AE52B0060E6FE /* BltNetworkInputSource.h */,
+				CA50428C0C5AE52B0060E6FE /* BltNetworkStream.c */,
+				CA50428D0C5AE52B0060E6FE /* BltNetworkStream.h */,
+				CA50428E0C5AE52B0060E6FE /* BltTcpNetworkStream.c */,
+				CA50428F0C5AE52B0060E6FE /* BltTcpNetworkStream.h */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		CA5042900C5AE52B0060E6FE /* Outputs */ = {
+			isa = PBXGroup;
+			children = (
+				CA5046A70C5BC54A0060E6FE /* MacOSX */,
+				CA5042940C5AE52B0060E6FE /* Debug */,
+				CA5042980C5AE52B0060E6FE /* File */,
+				CA50429E0C5AE52B0060E6FE /* Null */,
+			);
+			path = Outputs;
+			sourceTree = "<group>";
+		};
+		CA5042940C5AE52B0060E6FE /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042950C5AE52B0060E6FE /* BltDebugOutput.c */,
+				CA5042960C5AE52B0060E6FE /* BltDebugOutput.h */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		CA5042980C5AE52B0060E6FE /* File */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042990C5AE52B0060E6FE /* BltFileOutput.c */,
+				CA50429A0C5AE52B0060E6FE /* BltFileOutput.h */,
+			);
+			path = File;
+			sourceTree = "<group>";
+		};
+		CA50429E0C5AE52B0060E6FE /* Null */ = {
+			isa = PBXGroup;
+			children = (
+				CA50429F0C5AE52B0060E6FE /* BltNullOutput.c */,
+				CA5042A00C5AE52B0060E6FE /* BltNullOutput.h */,
+			);
+			path = Null;
+			sourceTree = "<group>";
+		};
+		CA5042A70C5AE52B0060E6FE /* Parsers */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042A80C5AE52B0060E6FE /* Aiff */,
+				CA5042AB0C5AE52B0060E6FE /* Mp4 */,
+				CA5042AE0C5AE52B0060E6FE /* Tags */,
+				CA5042B50C5AE52B0060E6FE /* Wave */,
+			);
+			path = Parsers;
+			sourceTree = "<group>";
+		};
+		CA5042A80C5AE52B0060E6FE /* Aiff */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042A90C5AE52B0060E6FE /* BltAiffParser.c */,
+				CA5042AA0C5AE52B0060E6FE /* BltAiffParser.h */,
+			);
+			path = Aiff;
+			sourceTree = "<group>";
+		};
+		CA5042AB0C5AE52B0060E6FE /* Mp4 */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042AC0C5AE52B0060E6FE /* BltMp4Parser.cpp */,
+				CA5042AD0C5AE52B0060E6FE /* BltMp4Parser.h */,
+			);
+			path = Mp4;
+			sourceTree = "<group>";
+		};
+		CA5042AE0C5AE52B0060E6FE /* Tags */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042AF0C5AE52B0060E6FE /* BltApeParser.c */,
+				CA5042B00C5AE52B0060E6FE /* BltApeParser.h */,
+				CA5042B10C5AE52B0060E6FE /* BltId3Parser.c */,
+				CA5042B20C5AE52B0060E6FE /* BltId3Parser.h */,
+				CA5042B30C5AE52B0060E6FE /* BltTagParser.c */,
+				CA5042B40C5AE52B0060E6FE /* BltTagParser.h */,
+			);
+			path = Tags;
+			sourceTree = "<group>";
+		};
+		CA5042B50C5AE52B0060E6FE /* Wave */ = {
+			isa = PBXGroup;
+			children = (
+				CA5042B60C5AE52B0060E6FE /* BltWaveParser.c */,
+				CA5042B70C5AE52B0060E6FE /* BltWaveParser.h */,
+			);
+			path = Wave;
+			sourceTree = "<group>";
+		};
+		CA5043650C5AE61E0060E6FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA50437F0C5AE61E0060E6FE /* libNeptune.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA5043A70C5AE6320060E6FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA5043AE0C5AE6320060E6FE /* libAtomix.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA5046A70C5BC54A0060E6FE /* MacOSX */ = {
+			isa = PBXGroup;
+			children = (
+				CA5046A80C5BC54A0060E6FE /* BltMacOSXOutput.c */,
+				CA5046A90C5BC54A0060E6FE /* BltMacOSXOutput.h */,
+			);
+			path = MacOSX;
+			sourceTree = "<group>";
+		};
+		CA5049B10C5C53440060E6FE /* ThirdParty */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CA0C5C53440060E6FE /* FLAC */,
+				CA504A580C5C53440060E6FE /* Vorbis */,
+			);
+			name = ThirdParty;
+			path = ../../../ThirdParty;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5049CA0C5C53440060E6FE /* FLAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CB0C5C53440060E6FE /* Distributions */,
+			);
+			path = FLAC;
+			sourceTree = "<group>";
+		};
+		CA5049CB0C5C53440060E6FE /* Distributions */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CC0C5C53440060E6FE /* flac-1.1.3 */,
+			);
+			path = Distributions;
+			sourceTree = "<group>";
+		};
+		CA5049CC0C5C53440060E6FE /* flac-1.1.3 */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CD0C5C53440060E6FE /* include */,
+				CA5049D90C5C53440060E6FE /* src */,
+			);
+			path = "flac-1.1.3";
+			sourceTree = "<group>";
+		};
+		CA5049CD0C5C53440060E6FE /* include */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CE0C5C53440060E6FE /* FLAC */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		CA5049CE0C5C53440060E6FE /* FLAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049CF0C5C53440060E6FE /* all.h */,
+				CA5049D00C5C53440060E6FE /* assert.h */,
+				CA5049D10C5C53440060E6FE /* callback.h */,
+				CA5049D20C5C53440060E6FE /* export.h */,
+				CA5049D30C5C53440060E6FE /* format.h */,
+				CA5049D40C5C53440060E6FE /* metadata.h */,
+				CA5049D50C5C53440060E6FE /* ordinals.h */,
+				CA5049D60C5C53440060E6FE /* stream_decoder.h */,
+				CA5049D70C5C53440060E6FE /* stream_encoder.h */,
+			);
+			path = FLAC;
+			sourceTree = "<group>";
+		};
+		CA5049D90C5C53440060E6FE /* src */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049DA0C5C53440060E6FE /* libFLAC */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		CA5049DA0C5C53440060E6FE /* libFLAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049DB0C5C53440060E6FE /* bitbuffer.c */,
+				CA5049DC0C5C53440060E6FE /* bitmath.c */,
+				CA5049DD0C5C53440060E6FE /* cpu.c */,
+				CA5049DE0C5C53440060E6FE /* crc.c */,
+				CA5049DF0C5C53440060E6FE /* fixed.c */,
+				CA5049E00C5C53440060E6FE /* float.c */,
+				CA5049E10C5C53440060E6FE /* format.c */,
+				CA5049E20C5C53440060E6FE /* include */,
+				CA5049FA0C5C53440060E6FE /* lpc.c */,
+				CA5049FB0C5C53440060E6FE /* md5.c */,
+				CA5049FC0C5C53440060E6FE /* memory.c */,
+				CA5049FD0C5C53440060E6FE /* metadata_iterators.c */,
+				CA5049FE0C5C53440060E6FE /* metadata_object.c */,
+				CA5049FF0C5C53440060E6FE /* stream_decoder.c */,
+				CA504A000C5C53440060E6FE /* window.c */,
+			);
+			path = libFLAC;
+			sourceTree = "<group>";
+		};
+		CA5049E20C5C53440060E6FE /* include */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049E30C5C53440060E6FE /* private */,
+				CA5049F60C5C53440060E6FE /* protected */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		CA5049E30C5C53440060E6FE /* private */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049E40C5C53440060E6FE /* all.h */,
+				CA5049E50C5C53440060E6FE /* bitbuffer.h */,
+				CA5049E60C5C53440060E6FE /* bitmath.h */,
+				CA5049E70C5C53440060E6FE /* cpu.h */,
+				CA5049E80C5C53440060E6FE /* crc.h */,
+				CA5049E90C5C53440060E6FE /* fixed.h */,
+				CA5049EA0C5C53440060E6FE /* float.h */,
+				CA5049EB0C5C53440060E6FE /* format.h */,
+				CA5049EC0C5C53440060E6FE /* lpc.h */,
+				CA5049ED0C5C53440060E6FE /* md5.h */,
+				CA5049EE0C5C53440060E6FE /* memory.h */,
+				CA5049EF0C5C53440060E6FE /* metadata.h */,
+				CA5049F40C5C53440060E6FE /* stream_encoder_framing.h */,
+				CA5049F50C5C53440060E6FE /* window.h */,
+			);
+			path = private;
+			sourceTree = "<group>";
+		};
+		CA5049F60C5C53440060E6FE /* protected */ = {
+			isa = PBXGroup;
+			children = (
+				CA5049F70C5C53440060E6FE /* all.h */,
+				CA5049F80C5C53440060E6FE /* stream_decoder.h */,
+				CA5049F90C5C53440060E6FE /* stream_encoder.h */,
+			);
+			path = protected;
+			sourceTree = "<group>";
+		};
+		CA504A580C5C53440060E6FE /* Vorbis */ = {
+			isa = PBXGroup;
+			children = (
+				CA504A590C5C53440060E6FE /* Distributions */,
+			);
+			path = Vorbis;
+			sourceTree = "<group>";
+		};
+		CA504A590C5C53440060E6FE /* Distributions */ = {
+			isa = PBXGroup;
+			children = (
+				CA504A5D0C5C53440060E6FE /* Tremor */,
+			);
+			path = Distributions;
+			sourceTree = "<group>";
+		};
+		CA504A5D0C5C53440060E6FE /* Tremor */ = {
+			isa = PBXGroup;
+			children = (
+				CA504A5E0C5C53440060E6FE /* asm_arm.h */,
+				CA504A5F0C5C53440060E6FE /* backends.h */,
+				CA504A600C5C53440060E6FE /* bitwise.c */,
+				CA504A610C5C53440060E6FE /* block.c */,
+				CA504A620C5C53440060E6FE /* block.h */,
+				CA504A630C5C53440060E6FE /* codebook.c */,
+				CA504A640C5C53440060E6FE /* codebook.h */,
+				CA504A650C5C53440060E6FE /* codec_internal.h */,
+				CA504A660C5C53440060E6FE /* config_types.h */,
+				CA504A680C5C53440060E6FE /* floor0.c */,
+				CA504A690C5C53440060E6FE /* floor1.c */,
+				CA504A6A0C5C53440060E6FE /* framing.c */,
+				CA504A6B0C5C53440060E6FE /* info.c */,
+				CA504A6C0C5C53440060E6FE /* ivorbiscodec.h */,
+				CA504A6D0C5C53440060E6FE /* ivorbisfile.h */,
+				CA504A6E0C5C53440060E6FE /* lsp_lookup.h */,
+				CA504A6F0C5C53440060E6FE /* mapping0.c */,
+				CA504A700C5C53440060E6FE /* mdct.c */,
+				CA504A710C5C53440060E6FE /* mdct.h */,
+				CA504A720C5C53440060E6FE /* mdct_lookup.h */,
+				CA504A730C5C53440060E6FE /* misc.h */,
+				CA504A740C5C53440060E6FE /* ogg.h */,
+				CA504A750C5C53440060E6FE /* os.h */,
+				CA504A760C5C53440060E6FE /* os_types.h */,
+				CA504A780C5C53440060E6FE /* registry.c */,
+				CA504A790C5C53440060E6FE /* registry.h */,
+				CA504A7A0C5C53440060E6FE /* res012.c */,
+				CA504A7B0C5C53440060E6FE /* sharedbook.c */,
+				CA504A7C0C5C53440060E6FE /* synthesis.c */,
+				CA504A7D0C5C53440060E6FE /* vorbisfile.c */,
+				CA504A7E0C5C53440060E6FE /* window.c */,
+				CA504A7F0C5C53440060E6FE /* window.h */,
+				CA504A800C5C53440060E6FE /* window_lookup.h */,
+			);
+			path = Tremor;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */,
+				CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */,
+				CA5042CB0C5AE52B0060E6FE /* BltByteStreamProvider.h in Headers */,
+				CA5042CC0C5AE52B0060E6FE /* BltByteStreamUser.h in Headers */,
+				CA5042CD0C5AE52B0060E6FE /* BltConfig.h in Headers */,
+				CA5042CF0C5AE52B0060E6FE /* BltCore.h in Headers */,
+				CA5042D00C5AE52B0060E6FE /* BltCorePriv.h in Headers */,
+				CA5042D10C5AE52B0060E6FE /* BltDefs.h in Headers */,
+				CA5042D20C5AE52B0060E6FE /* BltErrors.h in Headers */,
+				CA5042D30C5AE52B0060E6FE /* BltEvent.h in Headers */,
+				CA5042D40C5AE52B0060E6FE /* BltEventListener.h in Headers */,
+				CA5042D70C5AE52B0060E6FE /* BltMedia.h in Headers */,
+				CA5042D90C5AE52B0060E6FE /* BltMediaNode.h in Headers */,
+				CA5042DB0C5AE52B0060E6FE /* BltMediaPacket.h in Headers */,
+				CA5042DC0C5AE52B0060E6FE /* BltMediaPacketPriv.h in Headers */,
+				CA5042DE0C5AE52B0060E6FE /* BltMediaPort.h in Headers */,
+				CA5042E00C5AE52B0060E6FE /* BltModule.h in Headers */,
+				CA5042E10C5AE52B0060E6FE /* BltOutputNode.h in Headers */,
+				CA5042E20C5AE52B0060E6FE /* BltPacketConsumer.h in Headers */,
+				CA5042E30C5AE52B0060E6FE /* BltPacketProducer.h in Headers */,
+				CA5042E50C5AE52B0060E6FE /* BltPcm.h in Headers */,
+				CA5042E70C5AE52B0060E6FE /* BltRegistry.h in Headers */,
+				CA5042E80C5AE52B0060E6FE /* BltRegistryPriv.h in Headers */,
+				CA5042EA0C5AE52B0060E6FE /* BltStream.h in Headers */,
+				CA5042EB0C5AE52B0060E6FE /* BltStreamPriv.h in Headers */,
+				CA5042ED0C5AE52B0060E6FE /* BltTime.h in Headers */,
+				CA5042EE0C5AE52B0060E6FE /* BltTypes.h in Headers */,
+				CA5042F00C5AE52B0060E6FE /* BltDecoder.h in Headers */,
+				CA5042F20C5AE52B0060E6FE /* FloBitStream.h in Headers */,
+				CA5042F40C5AE52B0060E6FE /* FloByteStream.h in Headers */,
+				CA5042F50C5AE52B0060E6FE /* FloConfig.h in Headers */,
+				CA5042F70C5AE52B0060E6FE /* FloDecoder.h in Headers */,
+				CA5042F90C5AE52B0060E6FE /* FloEngine.h in Headers */,
+				CA5042FA0C5AE52B0060E6FE /* FloErrors.h in Headers */,
+				CA5042FC0C5AE52B0060E6FE /* FloFilter.h in Headers */,
+				CA5042FE0C5AE52B0060E6FE /* FloFrame.h in Headers */,
+				CA5043000C5AE52B0060E6FE /* FloHeaders.h in Headers */,
+				CA5043020C5AE52B0060E6FE /* FloHuffman.h in Headers */,
+				CA5043040C5AE52B0060E6FE /* FloLayerI.h in Headers */,
+				CA5043060C5AE52B0060E6FE /* FloLayerII.h in Headers */,
+				CA5043080C5AE52B0060E6FE /* FloLayerIII.h in Headers */,
+				CA5043090C5AE52B0060E6FE /* FloMath.h in Headers */,
+				CA50430A0C5AE52B0060E6FE /* FloSyntax.h in Headers */,
+				CA50430C0C5AE52B0060E6FE /* FloTables.h in Headers */,
+				CA50430D0C5AE52B0060E6FE /* FloTypes.h in Headers */,
+				CA50430E0C5AE52B0060E6FE /* FloUtils.h in Headers */,
+				CA5043100C5AE52B0060E6FE /* FloVbr.h in Headers */,
+				CA5043110C5AE52B0060E6FE /* Fluo.h in Headers */,
+				CA5043130C5AE52B0060E6FE /* BltDecoderClient.h in Headers */,
+				CA5043150C5AE52B0060E6FE /* BltDecoderServer.h in Headers */,
+				CA5043170C5AE52B0060E6FE /* BltPlayer.h in Headers */,
+				CA5043190C5AE52B0060E6FE /* BltPcmAdapter.h in Headers */,
+				CA50431C0C5AE52B0060E6FE /* BltReplayGain.h in Headers */,
+				CA50431E0C5AE52B0060E6FE /* BltFilterHost.h in Headers */,
+				CA5043200C5AE52B0060E6FE /* BltAacDecoder.h in Headers */,
+				CA5043240C5AE52B0060E6FE /* BltMpegAudioDecoder.h in Headers */,
+				CA50432A0C5AE52B0060E6FE /* BltGainControlFilter.h in Headers */,
+				CA50432C0C5AE52B0060E6FE /* BltWaveFormatter.h in Headers */,
+				CA5043300C5AE52B0060E6FE /* BltPacketStreamer.h in Headers */,
+				CA5043320C5AE52B0060E6FE /* BltSilenceRemover.h in Headers */,
+				CA5043340C5AE52B0060E6FE /* BltStreamPacketizer.h in Headers */,
+				CA50433E0C5AE52B0060E6FE /* BltFileInput.h in Headers */,
+				CA5043400C5AE52B0060E6FE /* BltHttpNetworkStream.h in Headers */,
+				CA5043420C5AE52B0060E6FE /* BltNetworkInput.h in Headers */,
+				CA5043440C5AE52B0060E6FE /* BltNetworkInputSource.h in Headers */,
+				CA5043460C5AE52B0060E6FE /* BltNetworkStream.h in Headers */,
+				CA5043480C5AE52B0060E6FE /* BltTcpNetworkStream.h in Headers */,
+				CA50434C0C5AE52B0060E6FE /* BltDebugOutput.h in Headers */,
+				CA50434E0C5AE52B0060E6FE /* BltFileOutput.h in Headers */,
+				CA5043520C5AE52B0060E6FE /* BltNullOutput.h in Headers */,
+				CA5043580C5AE52B0060E6FE /* BltAiffParser.h in Headers */,
+				CA50435A0C5AE52B0060E6FE /* BltMp4Parser.h in Headers */,
+				CA50435C0C5AE52B0060E6FE /* BltApeParser.h in Headers */,
+				CA50435E0C5AE52B0060E6FE /* BltId3Parser.h in Headers */,
+				CA5043600C5AE52B0060E6FE /* BltTagParser.h in Headers */,
+				CA5043620C5AE52B0060E6FE /* BltWaveParser.h in Headers */,
+				CA5046AB0C5BC54A0060E6FE /* BltMacOSXOutput.h in Headers */,
+				CA504AD40C5C53440060E6FE /* all.h in Headers */,
+				CA504AD50C5C53440060E6FE /* assert.h in Headers */,
+				CA504AD60C5C53440060E6FE /* callback.h in Headers */,
+				CA504AD70C5C53440060E6FE /* export.h in Headers */,
+				CA504AD80C5C53440060E6FE /* format.h in Headers */,
+				CA504AD90C5C53440060E6FE /* metadata.h in Headers */,
+				CA504ADA0C5C53440060E6FE /* ordinals.h in Headers */,
+				CA504ADB0C5C53440060E6FE /* stream_decoder.h in Headers */,
+				CA504ADC0C5C53440060E6FE /* stream_encoder.h in Headers */,
+				CA504B400C5C53440060E6FE /* asm_arm.h in Headers */,
+				CA504B410C5C53440060E6FE /* backends.h in Headers */,
+				CA504B440C5C53440060E6FE /* block.h in Headers */,
+				CA504B460C5C53440060E6FE /* codebook.h in Headers */,
+				CA504B470C5C53440060E6FE /* codec_internal.h in Headers */,
+				CA504B480C5C53440060E6FE /* config_types.h in Headers */,
+				CA504B4D0C5C53440060E6FE /* ivorbiscodec.h in Headers */,
+				CA504B4E0C5C53440060E6FE /* ivorbisfile.h in Headers */,
+				CA504B4F0C5C53440060E6FE /* lsp_lookup.h in Headers */,
+				CA504B520C5C53440060E6FE /* mdct.h in Headers */,
+				CA504B530C5C53440060E6FE /* mdct_lookup.h in Headers */,
+				CA504B540C5C53440060E6FE /* misc.h in Headers */,
+				CA504B550C5C53440060E6FE /* ogg.h in Headers */,
+				CA504B560C5C53440060E6FE /* os.h in Headers */,
+				CA504B570C5C53440060E6FE /* os_types.h in Headers */,
+				CA504B590C5C53440060E6FE /* registry.h in Headers */,
+				CA504B5F0C5C53440060E6FE /* window.h in Headers */,
+				CA504B600C5C53440060E6FE /* window_lookup.h in Headers */,
+				CA504B900C5C54460060E6FE /* BltVorbisDecoder.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* BlueTune */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */,
+				CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */,
+			);
+			name = BlueTune;
+			productName = BlueTune;
+			productReference = D2AAC046055464E500DB518D /* libBlueTune.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTune */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = CA5043A70C5AE6320060E6FE /* Products */;
+					ProjectRef = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+				},
+				{
+					ProductGroup = CA5043650C5AE61E0060E6FE /* Products */;
+					ProjectRef = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+				},
+			);
+			targets = (
+				D2AAC045055464E500DB518D /* BlueTune */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		CA50437F0C5AE61E0060E6FE /* libNeptune.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libNeptune.a;
+			remoteRef = CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA5043AE0C5AE6320060E6FE /* libAtomix.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libAtomix.a;
+			remoteRef = CA5043AD0C5AE6320060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA5042CE0C5AE52B0060E6FE /* BltCore.c in Sources */,
+				CA5042D50C5AE52B0060E6FE /* BltInterfaces.c in Sources */,
+				CA5042D60C5AE52B0060E6FE /* BltMedia.c in Sources */,
+				CA5042D80C5AE52B0060E6FE /* BltMediaNode.c in Sources */,
+				CA5042DA0C5AE52B0060E6FE /* BltMediaPacket.c in Sources */,
+				CA5042DD0C5AE52B0060E6FE /* BltMediaPort.c in Sources */,
+				CA5042DF0C5AE52B0060E6FE /* BltModule.c in Sources */,
+				CA5042E40C5AE52B0060E6FE /* BltPcm.c in Sources */,
+				CA5042E60C5AE52B0060E6FE /* BltRegistry.c in Sources */,
+				CA5042E90C5AE52B0060E6FE /* BltStream.c in Sources */,
+				CA5042EC0C5AE52B0060E6FE /* BltTime.c in Sources */,
+				CA5042EF0C5AE52B0060E6FE /* BltDecoder.c in Sources */,
+				CA5042F10C5AE52B0060E6FE /* FloBitStream.c in Sources */,
+				CA5042F30C5AE52B0060E6FE /* FloByteStream.c in Sources */,
+				CA5042F60C5AE52B0060E6FE /* FloDecoder.c in Sources */,
+				CA5042F80C5AE52B0060E6FE /* FloEngine.c in Sources */,
+				CA5042FB0C5AE52B0060E6FE /* FloFilter.c in Sources */,
+				CA5042FD0C5AE52B0060E6FE /* FloFrame.c in Sources */,
+				CA5042FF0C5AE52B0060E6FE /* FloHeaders.c in Sources */,
+				CA5043010C5AE52B0060E6FE /* FloHuffman.c in Sources */,
+				CA5043030C5AE52B0060E6FE /* FloLayerI.c in Sources */,
+				CA5043050C5AE52B0060E6FE /* FloLayerII.c in Sources */,
+				CA5043070C5AE52B0060E6FE /* FloLayerIII.c in Sources */,
+				CA50430B0C5AE52B0060E6FE /* FloTables.c in Sources */,
+				CA50430F0C5AE52B0060E6FE /* FloVbr.c in Sources */,
+				CA5043120C5AE52B0060E6FE /* BltDecoderClient.cpp in Sources */,
+				CA5043140C5AE52B0060E6FE /* BltDecoderServer.cpp in Sources */,
+				CA5043160C5AE52B0060E6FE /* BltPlayer.cpp in Sources */,
+				CA5043180C5AE52B0060E6FE /* BltPcmAdapter.c in Sources */,
+				CA50431A0C5AE52B0060E6FE /* BltBuiltins.c in Sources */,
+				CA50431B0C5AE52B0060E6FE /* BltReplayGain.c in Sources */,
+				CA50431D0C5AE52B0060E6FE /* BltFilterHost.c in Sources */,
+				CA5043230C5AE52B0060E6FE /* BltMpegAudioDecoder.c in Sources */,
+				CA5043290C5AE52B0060E6FE /* BltGainControlFilter.c in Sources */,
+				CA50432B0C5AE52B0060E6FE /* BltWaveFormatter.c in Sources */,
+				CA50432F0C5AE52B0060E6FE /* BltPacketStreamer.c in Sources */,
+				CA5043310C5AE52B0060E6FE /* BltSilenceRemover.c in Sources */,
+				CA5043330C5AE52B0060E6FE /* BltStreamPacketizer.c in Sources */,
+				CA50433D0C5AE52B0060E6FE /* BltFileInput.c in Sources */,
+				CA50433F0C5AE52B0060E6FE /* BltHttpNetworkStream.cpp in Sources */,
+				CA5043410C5AE52B0060E6FE /* BltNetworkInput.c in Sources */,
+				CA5043430C5AE52B0060E6FE /* BltNetworkInputSource.c in Sources */,
+				CA5043450C5AE52B0060E6FE /* BltNetworkStream.c in Sources */,
+				CA5043470C5AE52B0060E6FE /* BltTcpNetworkStream.c in Sources */,
+				CA50434B0C5AE52B0060E6FE /* BltDebugOutput.c in Sources */,
+				CA50434D0C5AE52B0060E6FE /* BltFileOutput.c in Sources */,
+				CA5043510C5AE52B0060E6FE /* BltNullOutput.c in Sources */,
+				CA5043570C5AE52B0060E6FE /* BltAiffParser.c in Sources */,
+				CA50435B0C5AE52B0060E6FE /* BltApeParser.c in Sources */,
+				CA50435D0C5AE52B0060E6FE /* BltId3Parser.c in Sources */,
+				CA50435F0C5AE52B0060E6FE /* BltTagParser.c in Sources */,
+				CA5043610C5AE52B0060E6FE /* BltWaveParser.c in Sources */,
+				CA5046AA0C5BC54A0060E6FE /* BltMacOSXOutput.c in Sources */,
+				CA504B420C5C53440060E6FE /* bitwise.c in Sources */,
+				CA504B430C5C53440060E6FE /* block.c in Sources */,
+				CA504B450C5C53440060E6FE /* codebook.c in Sources */,
+				CA504B490C5C53440060E6FE /* floor0.c in Sources */,
+				CA504B4A0C5C53440060E6FE /* floor1.c in Sources */,
+				CA504B4B0C5C53440060E6FE /* framing.c in Sources */,
+				CA504B4C0C5C53440060E6FE /* info.c in Sources */,
+				CA504B500C5C53440060E6FE /* mapping0.c in Sources */,
+				CA504B510C5C53440060E6FE /* mdct.c in Sources */,
+				CA504B580C5C53440060E6FE /* registry.c in Sources */,
+				CA504B5A0C5C53440060E6FE /* res012.c in Sources */,
+				CA504B5B0C5C53440060E6FE /* sharedbook.c in Sources */,
+				CA504B5C0C5C53440060E6FE /* synthesis.c in Sources */,
+				CA504B5D0C5C53440060E6FE /* vorbisfile.c in Sources */,
+				CA504B5E0C5C53440060E6FE /* window.c in Sources */,
+				CA504B8F0C5C54450060E6FE /* BltVorbisDecoder.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA5043CC0C5AE93C0060E6FE /* PBXContainerItemProxy */;
+		};
+		CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA5043CE0C5AE9470060E6FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB91EC08733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_5)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_6)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_7)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_8)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_9)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-microsoft-win32/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-qnx-neutrino/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_5 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_6 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_7 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-microsoft-win32/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_8 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-qnx-neutrino/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_9 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-unknown-linux/lib\"";
+				PRODUCT_NAME = BlueTune;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		1DEB91ED08733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_4)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_5)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_6)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_7)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_8)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_9)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-microsoft-win32/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-qnx-neutrino/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_5 = "\"$(SRCROOT)/../../../ThirdParty/FLAC/Targets/x86-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_6 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/arm-unknown-linux/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_7 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-microsoft-win32/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_8 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-qnx-neutrino/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_9 = "\"$(SRCROOT)/../../../ThirdParty/Vorbis/Targets/x86-unknown-linux/lib\"";
+				PRODUCT_NAME = BlueTune;
+			};
+			name = Release;
+		};
+		1DEB91F008733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
+					BLT_CONFIG_VORBIS_USE_TREMOR,
+					"BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=macosx:0",
+					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
+					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
+					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
+					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
+					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
+					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
+					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../Atomix/Source/Core $(SRCROOT)/../../../../Neptune/Source/Core $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor";
+			};
+			name = Debug;
+		};
+		1DEB91F108733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
+					BLT_CONFIG_VORBIS_USE_TREMOR,
+					"BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=macosx:0",
+					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
+					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
+					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
+					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
+					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
+					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
+					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../Atomix/Source/Core $(SRCROOT)/../../../../Neptune/Source/Core $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91EC08733DB70010E9CD /* Debug */,
+				1DEB91ED08733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91F008733DB70010E9CD /* Debug */,
+				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

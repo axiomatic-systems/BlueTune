@@ -37,7 +37,6 @@ typedef struct {
 
     /* interfaces */
     ATX_IMPLEMENTS(BLT_PacketConsumer);
-    ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
 
     /* members */
@@ -51,7 +50,6 @@ ATX_DECLARE_INTERFACE_MAP(NullOutputModule, BLT_Module)
 
 ATX_DECLARE_INTERFACE_MAP(NullOutput, BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(NullOutput, ATX_Referenceable)
-ATX_DECLARE_INTERFACE_MAP(NullOutput, BLT_OutputNode)
 ATX_DECLARE_INTERFACE_MAP(NullOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(NullOutput, BLT_PacketConsumer)
 
@@ -132,7 +130,6 @@ NullOutput_Create(BLT_Module*              module,
     ATX_SET_INTERFACE_EX(self, NullOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, NullOutput, BLT_BaseMediaNode, ATX_Referenceable);
     ATX_SET_INTERFACE(self, NullOutput, BLT_PacketConsumer);
-    ATX_SET_INTERFACE(self, NullOutput, BLT_OutputNode);
     ATX_SET_INTERFACE(self, NullOutput, BLT_MediaPort);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -182,7 +179,6 @@ NullOutput_GetPortByName(BLT_MediaNode*  _self,
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(NullOutput)
     ATX_GET_INTERFACE_ACCEPT_EX(NullOutput, BLT_BaseMediaNode, BLT_MediaNode)
     ATX_GET_INTERFACE_ACCEPT_EX(NullOutput, BLT_BaseMediaNode, ATX_Referenceable)
-    ATX_GET_INTERFACE_ACCEPT(NullOutput, BLT_OutputNode)
     ATX_GET_INTERFACE_ACCEPT(NullOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT(NullOutput, BLT_PacketConsumer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION

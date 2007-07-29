@@ -67,7 +67,7 @@ static ogg_int32_t _float32_unpack(long val,int *point){
 /* given a list of word lengths, generate a list of codewords.  Works
    for length ordered or unordered, always assigns the lowest valued
    codewords first.  Extended to handle unused entries (length 0) */
-ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
+static ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
   long i,j,count=0;
   ogg_uint32_t marker[33];
   ogg_uint32_t *r=(ogg_uint32_t *)_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
@@ -178,7 +178,7 @@ long _book_maptype1_quantvals(const static_codebook *b){
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
 
-ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
+static ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 			      int *maxpoint){
   long j,k,count=0;
   if(b->maptype==1 || b->maptype==2){

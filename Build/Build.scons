@@ -44,14 +44,14 @@ def GetIncludeDirs(modules, exclude=None):
             MergeItemUnique(dirs, GetDirPath(module))
     return dirs
     
-def GetLibraries(modules):
+def GetLibraries(modules, modules_only=False):
     libs = []
     for module in Split(modules):
         if module in libs: continue
         if Modules.has_key(module):
             dep_libs = Modules[module].GetLibraries()
             libs = [lib for lib in libs if not lib in dep_libs]+dep_libs
-        else:
+        elif not modules_only:
             libs.append(module)
     return libs
 
@@ -489,6 +489,9 @@ if env['target'] == 'x86-unknown-linux':
         OptionalModules.append('BtGtk')
     except:
         pass
+
+############################# SDK
+
 
 ################################################
 # Default Build Modues

@@ -263,7 +263,7 @@ ATX_END_INTERFACE_MAP
 static FLAC__StreamDecoderReadStatus 
 FlacDecoder_ReadCallback(const FLAC__StreamDecoder* flac, 
                          FLAC__byte                 buffer[], 
-                         unsigned*                  bytes, 
+                         size_t*                    bytes, 
                          void*                      client_data)
 {
     FlacDecoder*  self = (FlacDecoder*)client_data;

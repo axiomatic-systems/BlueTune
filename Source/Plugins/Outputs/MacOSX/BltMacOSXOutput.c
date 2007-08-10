@@ -12,6 +12,7 @@
 +---------------------------------------------------------------------*/
 #include <AudioUnit/AudioUnit.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "Atomix.h"
 #include "BltConfig.h"
@@ -147,10 +148,19 @@ MacOSXOutput_RenderCallback(void*						inRefCon,
    
 end:
     /* fill whatever is left with silence */    
-    ATX_LOG_FINEST_1("MacOSXOutput::RenderCallback - filling with %d bytes of silence", requested);
-    ATX_SetMemory(out, 0, requested);
+    if (requested) {
+        ATX_LOG_FINEST_1("MacOSXOutput::RenderCallback - filling with %d bytes of silence", requested);
+        ATX_SetMemory(out, 0, requested);
+    }
     
     pthread_mutex_unlock(&self->lock);
+    
+    {
+        Float64 secs;
+        UInt32 size = sizeof(secs);
+        AudioUnitGetProperty(self->audio_unit, kAudioUnitProperty_Latency, kAudioUnitScope_Input, 0, &secs, &size);
+        printf("%lf\n", secs);
+    }
     
     return 0;
 }

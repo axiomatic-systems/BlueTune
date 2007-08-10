@@ -30,69 +30,83 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBlueTune.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
 		CA5045CF0C5AF2F50060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* BlueTune */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
 		CA5046030C5AF4930060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F912B69F0B8EB1C700C1E90D /* libNeptune.a */;
+			remoteGlobalIDString = F912B69F0B8EB1C700C1E90D;
 			remoteInfo = Neptune;
 		};
 		CA5046100C5AF4DF0060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libAtomix.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = Atomix;
 		};
 		CA5046380C5AF6620060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D /* Neptune */;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
 			remoteInfo = Neptune;
 		};
 		CA50463A0C5AF6620060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* Atomix */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Atomix;
 		};
 		CA50463C0C5AF6620060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* BlueTune */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
 		CA50463E0C5AF6740060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D /* Neptune */;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
 			remoteInfo = Neptune;
 		};
 		CA5046400C5AF6740060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* Atomix */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Atomix;
+		};
+		CA504E710C5EA3B50060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA504E6F0C5EA3960060E6FE;
+			remoteInfo = Tremor;
+		};
+		CA504ECD0C5EABDB0060E6FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA504EB70C5EABCC0060E6FE;
+			remoteInfo = FLAC;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		CA5045C40C5AF2DB0060E6FE /* BtController */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = BtController; path = build/Debug/BtController; sourceTree = "<group>"; };
+		CA5045C40C5AF2DB0060E6FE /* BtController */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BtController; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = BlueTune.xcodeproj; sourceTree = "<group>"; };
 		CA5045D30C5AF31D0060E6FE /* BtController.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BtController.cpp; sourceTree = "<group>"; };
 		CA5045D40C5AF31D0060E6FE /* BtStreamController.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BtStreamController.cpp; sourceTree = "<group>"; };
@@ -102,7 +116,7 @@
 		CA5045EC0C5AF3420060E6FE /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */ = {isa = PBXFileReference; explicitFileType = "wrapper.pb-project"; name = Neptune.xcodeproj; path = "../../../../Neptune/Build/Targets/universal-apple-macosx/Neptune.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Atomix.xcodeproj; path = "../../../../Atomix/Build/Targets/universal-apple-macosx/Atomix.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		CA5046360C5AF6520060E6FE /* BtPlay */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = BtPlay; path = build/Debug/BtPlay; sourceTree = "<group>"; };
+		CA5046360C5AF6520060E6FE /* BtPlay */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BtPlay; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA50486B0C5BFD910060E6FE /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		CA5048790C5BFDAE0060E6FE /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		CA50487E0C5BFDCF0060E6FE /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
@@ -183,6 +197,8 @@
 			isa = PBXGroup;
 			children = (
 				CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */,
+				CA504E720C5EA3B50060E6FE /* libTremor.a */,
+				CA504ECE0C5EABDB0060E6FE /* libFLAC.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -340,6 +356,20 @@
 			fileType = archive.ar;
 			path = libAtomix.a;
 			remoteRef = CA5046100C5AF4DF0060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA504E720C5EA3B50060E6FE /* libTremor.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTremor.a;
+			remoteRef = CA504E710C5EA3B50060E6FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA504ECE0C5EABDB0060E6FE /* libFLAC.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFLAC.a;
+			remoteRef = CA504ECD0C5EABDB0060E6FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

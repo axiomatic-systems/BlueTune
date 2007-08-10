@@ -724,7 +724,7 @@ BLT_DecoderServer_PropertyWrapper::BLT_DecoderServer_PropertyWrapper(const ATX_P
             break;
 
         case ATX_PROPERTY_TYPE_RAW_DATA:
-            delete[] m_Property.value.raw_data.data;
+            delete[] static_cast<unsigned char*>(m_Property.value.raw_data.data);
             break;
 
         case ATX_PROPERTY_TYPE_NONE:

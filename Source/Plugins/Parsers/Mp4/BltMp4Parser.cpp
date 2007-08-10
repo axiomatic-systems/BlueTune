@@ -53,12 +53,12 @@ public:
     virtual ~Mp4StreamAdapter();
 
     // AP4_ByteStream methods
-    virtual AP4_Result Read(void*     buffer, 
-                            AP4_Size  bytes_to_read, 
-                            AP4_Size* bytes_read);
-    virtual AP4_Result Write(const void* buffer, 
-                             AP4_Size    bytes_to_write, 
-                             AP4_Size*   bytes_written);
+    virtual AP4_Result ReadPartial(void*     buffer, 
+                                   AP4_Size  bytes_to_read, 
+                                   AP4_Size& bytes_read);
+    virtual AP4_Result WritePartial(const void* buffer, 
+                                    AP4_Size    bytes_to_write, 
+                                    AP4_Size&   bytes_written);
     virtual AP4_Result Seek(AP4_Position position);
     virtual AP4_Result Tell(AP4_Position& position);
     virtual AP4_Result GetSize(AP4_LargeSize& size);
@@ -169,13 +169,12 @@ Mp4StreamAdapter::Release()
 }
 
 /*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Read
+|   Mp4StreamAdapter::ReadPartial
 +---------------------------------------------------------------------*/
 AP4_Result
-Mp4StreamAdapter::Read(void* buffer, AP4_Size bytes_to_read, AP4_Size* bytes_read)
+Mp4StreamAdapter::ReadPartial(void* buffer, AP4_Size bytes_to_read, AP4_Size& bytes_read)
 {
-    ATX_Result result = ATX_InputStream_ReadFully(m_Stream, buffer, bytes_to_read);
-    if (ATX_SUCCEEDED(result) && bytes_read) *bytes_read = bytes_to_read;
+    ATX_Result result = ATX_InputStream_Read(m_Stream, buffer, bytes_to_read, &bytes_read);
     return MapResult(result);
 }
 
@@ -183,7 +182,7 @@ Mp4StreamAdapter::Read(void* buffer, AP4_Size bytes_to_read, AP4_Size* bytes_rea
 |   Mp4StreamAdapter::Write
 +---------------------------------------------------------------------*/
 AP4_Result
-Mp4StreamAdapter::Write(const void*, AP4_Size, AP4_Size*)
+Mp4StreamAdapter::WritePartial(const void*, AP4_Size, AP4_Size&)
 {
     return AP4_FAILURE;
 }

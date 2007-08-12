@@ -32,6 +32,10 @@ public:
     void Run();
 
 protected:
+    // methods
+    void DoSeekToTimeStamp(const char* time);
+    void DoSetProperty(const char* property);
+    
     // members
     NPT_InputStreamReference m_InputStream;
     BLT_Player&              m_Player;

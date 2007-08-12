@@ -50,6 +50,7 @@
 /* Generic errors */
 #define BLT_ERROR_BASE_GENERIC        (BLT_ERROR_BASE-0)
 #define BLT_ERROR_PROTOCOL_FAILURE    (BLT_ERROR_BASE_GENERIC-0)
+#define BLT_ERROR_NOT_SUPPORTED       (BLT_ERROR_BASE_GENERIC-1)
 
 /* Media errors */
 #define BLT_ERROR_BASE_MEDIA          (BLT_ERROR_BASE-100)

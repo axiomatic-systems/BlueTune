@@ -160,13 +160,16 @@ class BLT_Player : public BLT_DecoderClient
 
     /**
      * Set a property.
-     * Properties are typically used to control various aspects of certain
-     * module instances such as media nodes instantiated in the decoding
-     * stream.
+     * @param scope Scope enum specifying what type of property is being set.
+     * @param target Name of the target to which this property applies. For
+     * Core (BLT_PROPERTY_SCOPE_CORE) and Stream (BLT_PROPERTY_SCOPE_STREAM)
+     * scopes this parameter must be NULL.
      * @param property Property object specifying the name and value of the
      * property to set.
      */
-    virtual BLT_Result SetProperty(const ATX_Property& property);
+    virtual BLT_Result SetProperty(BLT_PropertyScope   scope,
+                                   const char*         target,
+                                   const ATX_Property& property);
 
     /**
      * Shutdown the player. 

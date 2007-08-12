@@ -209,12 +209,14 @@ BLT_Player::AddNode(BLT_CString name)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_Player::AddNode
+|    BLT_Player::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_Player::SetProperty(const ATX_Property& property)
+BLT_Player::SetProperty(BLT_PropertyScope   scope,
+                        const char*         target,
+                        const ATX_Property& property)
 {
     ATX_LOG_FINE_1("BLT_Player::SetProperty - name=%s", BLT_SAFE_STRING(property.name));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
-    return m_Server->SetProperty(property);
+    return m_Server->SetProperty(scope, target, property);
 }

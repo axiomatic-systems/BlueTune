@@ -154,14 +154,7 @@ end:
     }
     
     pthread_mutex_unlock(&self->lock);
-    
-    {
-        Float64 secs;
-        UInt32 size = sizeof(secs);
-        AudioUnitGetProperty(self->audio_unit, kAudioUnitProperty_Latency, kAudioUnitScope_Input, 0, &secs, &size);
-        printf("%lf\n", secs);
-    }
-    
+        
     return 0;
 }
 
@@ -194,7 +187,6 @@ MacOSXOutput_QueuePacket(MacOSXOutput* self, BLT_MediaPacket* packet)
     /* wait for some space in the queue */
     while (ATX_List_GetItemCount(self->packet_queue) >= BLT_MACOSX_OUTPUT_PACKET_QUEUE_SIZE) {
         pthread_mutex_unlock(&self->lock);
-        printf("****** wait ****\n");
         usleep(BLT_MACOSX_OUTPUT_SLEEP_INTERVAL);
         pthread_mutex_lock(&self->lock);
         
@@ -517,13 +509,18 @@ MacOSXOutput_Seek(BLT_MediaNode* _self,
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
-    /* reset the device */
     pthread_mutex_lock(&self->lock);
+
+    /* flush the queue */
+    ATX_List_Clear(self->packet_queue);
+    
+    /* reset the device */
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
-    pthread_mutex_unlock(&self->lock);
     if (result != noErr) {
         ATX_LOG_WARNING_1("MacOSXOutput::Stop - AudioUnitReset failed (%d)", result);
     }
+
+    pthread_mutex_unlock(&self->lock);
 
     return BLT_SUCCESS;
 }
@@ -574,18 +571,23 @@ MacOSXOutput_Stop(BLT_MediaNode* _self)
     MacOSXOutput*   self = ATX_SELF_EX(MacOSXOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ComponentResult result;
     
-    /* stop the and reset audio unit */
     pthread_mutex_lock(&self->lock);
+
+    /* flush the queue */
+    ATX_List_Clear(self->packet_queue);
+
+    /* stop the and reset audio unit */
     result = AudioOutputUnitStop(self->audio_unit);
     if (result != noErr) {
         ATX_LOG_WARNING_1("MacOSXOutput::Stop - AudioUnitOutputStop failed (%d)", result);
     }
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
-    pthread_mutex_unlock(&self->lock);
     if (result != noErr) {
         ATX_LOG_WARNING_1("MacOSXOutput::Stop - AudioUnitReset failed (%d)", result);
     }
     
+    pthread_mutex_unlock(&self->lock);
+
     return BLT_SUCCESS;
 }
 

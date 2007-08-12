@@ -37,7 +37,9 @@ public:
     virtual void OnStreamPositionNotification(BLT_StreamPosition& /*position*/) {}
     virtual void OnStreamInfoNotification(BLT_Mask        /*update_mask*/, 
                                           BLT_StreamInfo& /*info*/) {}
-    virtual void OnStreamPropertyNotification(const ATX_Property& /* property */) {}
+    virtual void OnPropertyNotification(BLT_PropertyScope   /* scope    */,
+                                        const char*         /* source   */,
+                                        const ATX_Property& /* property */) {}
 };
 
 /*----------------------------------------------------------------------
@@ -212,22 +214,30 @@ private:
 };
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderClient_StreamPropertyNotificationMessage
+|   BLT_DecoderClient_PropertyNotificationMessage
 +---------------------------------------------------------------------*/
-class BLT_DecoderClient_StreamPropertyNotificationMessage :
+class BLT_DecoderClient_PropertyNotificationMessage :
     public BLT_DecoderClient_Message
 {
 public:
     // methods
-    BLT_DecoderClient_StreamPropertyNotificationMessage(const ATX_Property& property) :
+    BLT_DecoderClient_PropertyNotificationMessage(BLT_PropertyScope   scope,
+                                                  const char*         source,
+                                                  const ATX_Property& property) :
+      m_Scope(scope),
+      m_Source(source),
       m_PropertyWarpper(property) {}
     NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
-        handler->OnStreamPropertyNotification(m_PropertyWarpper.m_Property);
+        handler->OnPropertyNotification(m_Scope,
+                                        m_Source,
+                                        m_PropertyWarpper.m_Property);
         return NPT_SUCCESS;
     }
 
 private:
     // members
+    BLT_PropertyScope                 m_Scope;
+    NPT_String                        m_Source;
     BLT_DecoderServer_PropertyWrapper m_PropertyWarpper;
 };
 

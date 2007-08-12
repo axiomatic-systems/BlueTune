@@ -26,6 +26,106 @@ BtStreamController::BtStreamController(NPT_InputStreamReference& input,
 }
 
 /*----------------------------------------------------------------------
+|    BtStreamController::DoSeekToTimeStamp
+|
+|    Parse a timecode of the form: {hh:}{mm:}{ss}{.ff}
+|
++---------------------------------------------------------------------*/
+void
+BtStreamController::DoSeekToTimeStamp(const char* time)
+{
+    BLT_UInt8    val[4] = {0,0,0,0};
+    ATX_Size     length = ATX_StringLength(time);
+    unsigned int val_c = 0;
+    bool         has_dot = false;
+    
+    if (length != 11 && length != 8 && length != 5 && length != 2) return;
+    
+    do {
+        if ( time[0] >= '0' && time[0] <= '9' && 
+             time[1] >= '0' && time[0] <= '9' &&
+            (time[2] == ':' || time[2] == '.' || time[2] == '\0')) {
+            if (time[2] == '.') {
+                if (length != 5) return; // dots only on the last part
+                has_dot = true;
+            } else {
+                if (val_c == 3) return; // too many parts
+            }
+            val[val_c++] = (time[0]-'0')*10 + (time[1]-'0');
+            length -= (time[2]=='\0')?2:3;
+            time += 3;
+        } else {
+            return;
+        }
+    } while (length >= 2);
+    
+    BLT_UInt8 h,m,s,f;
+    if (has_dot) --val_c;    
+    h = val[(val_c+1)%4];
+    m = val[(val_c+2)%4];
+    s = val[(val_c+3)%4];
+    f = val[(val_c  )%4];
+
+    m_Player.SeekToTimeStamp(h,m,s,f);
+}
+
+/*----------------------------------------------------------------------
+|   BtStreamController::DoSetProperty
+|
+|   The command syntax is:
+|   <scope>,<name>=<type>:<value>
+|   where scope can be:
+|       core
+|    or
+|       stream
+|   an type can be:
+|     s --> value is a string 
+|     i --> value is an integer
+|
++---------------------------------------------------------------------*/
+void
+BtStreamController::DoSetProperty(const char* property_spec)
+{
+    NPT_String        spec(property_spec);
+    BLT_PropertyScope property_scope;
+    
+    int sc = spec.Find(',');
+    if (sc < 1) return;
+    NPT_String scope(property_spec, sc);
+    if (scope == "core") {
+        property_scope = BLT_PROPERTY_SCOPE_CORE;
+    } else if (scope == "stream") {
+        property_scope = BLT_PROPERTY_SCOPE_STREAM;
+    } else {
+        return;
+    }
+    
+    int eq = spec.Find('=', sc);
+    if (eq < 1) return;
+    NPT_String property_name(property_spec+sc+1, eq-sc-1);
+    
+    char property_type = property_spec[eq+1];
+    if (property_type == '\0') return;
+    if (property_spec[eq+2] != ':') return;
+    
+    ATX_Property property;
+    property.name = property_name.GetChars();
+    if (property_type == 's') {
+        property.type = ATX_PROPERTY_TYPE_STRING;
+        property.value.string = property_spec+eq+3;
+    } else if (property_type == 'i') {
+        NPT_Int32 value;
+        if (NPT_FAILED(NPT_ParseInteger32(property_spec+eq+3, value))) {
+            return;
+        }
+        property.type = ATX_PROPERTY_TYPE_INTEGER;
+        property.value.integer = value;
+    }
+    
+    m_Player.SetProperty(property_scope, NULL, property);
+}
+
+/*----------------------------------------------------------------------
 |    BtStreamController::Run
 +---------------------------------------------------------------------*/
 void
@@ -54,8 +154,10 @@ BtStreamController::Run()
                 m_Player.Stop();
             } else if (NPT_StringsEqual(buffer, "pause")) {
                 m_Player.Pause();
-            } else if (NPT_StringsEqualN(buffer, "seek-to-timestamp", 17)) {
-                //m_Player.DoSeekToTimeStamp(buffer+17);
+            } else if (NPT_StringsEqualN(buffer, "seek ", 5)) {
+                DoSeekToTimeStamp(buffer+5);
+            } else if (NPT_StringsEqualN(buffer, "set-property ", 13)) {
+                DoSetProperty(buffer+13);
             } else if (NPT_StringsEqualN(buffer, "exit", 4)) {
                 done = BLT_TRUE;
             } else {

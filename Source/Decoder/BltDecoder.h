@@ -54,6 +54,16 @@ typedef struct {
     BLT_TimeStamp      time_stamp;  /**< Timestamp         */
 } BLT_DecoderStatus;
 
+/**
+ * Property scopes represent the scope of a property. The scope indicates
+ * to what part of the system the property applies.
+ */
+typedef enum {
+    BLT_PROPERTY_SCOPE_CORE,
+    BLT_PROPERTY_SCOPE_STREAM,
+    BLT_PROPERTY_SCOPE_MODULE
+} BLT_PropertyScope;
+
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/

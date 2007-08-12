@@ -95,14 +95,24 @@ BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
     m_DecoderStatus.position.offset = 0;
 
     // setup our event listener interface
-    m_EventListenerWrapper.outer = this;
-    ATX_SET_INTERFACE(&m_EventListenerWrapper, 
+    m_EventListener.outer = this;
+    ATX_SET_INTERFACE(&m_EventListener, 
                       BLT_DecoderServer_EventListenerWrapper, 
                       BLT_EventListener);
 
-    // setup our property listener interface
-    m_PropertyListenerWrapper.outer = this;
-    ATX_SET_INTERFACE(&m_PropertyListenerWrapper, 
+    // setup our core property listener interface
+    m_CorePropertyListener.scope = BLT_PROPERTY_SCOPE_CORE;
+    m_CorePropertyListener.source = NULL;
+    m_CorePropertyListener.outer = this;
+    ATX_SET_INTERFACE(&m_CorePropertyListener, 
+                      BLT_DecoderServer_PropertyListenerWrapper, 
+                      ATX_PropertyListener);
+
+    // setup our stream property listener interface
+    m_StreamPropertyListener.scope = BLT_PROPERTY_SCOPE_STREAM;
+    m_StreamPropertyListener.source = NULL;
+    m_StreamPropertyListener.outer = this;
+    ATX_SET_INTERFACE(&m_StreamPropertyListener, 
                       BLT_DecoderServer_PropertyListenerWrapper, 
                       ATX_PropertyListener);
 
@@ -141,14 +151,21 @@ BLT_DecoderServer::Run()
         
     // register as the event handler
     BLT_Decoder_SetEventListener(m_Decoder, 
-                                 &ATX_BASE(&m_EventListenerWrapper, 
+                                 &ATX_BASE(&m_EventListener, 
                                            BLT_EventListener));
+
+    // listen to core property changes
+    {
+        ATX_Properties* properties;
+        BLT_Decoder_GetProperties(m_Decoder, &properties);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&m_CorePropertyListener, ATX_PropertyListener), NULL);
+    }
 
     // listen to stream property changes
     {
         ATX_Properties* properties;
         BLT_Decoder_GetStreamProperties(m_Decoder, &properties);
-        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&m_PropertyListenerWrapper, ATX_PropertyListener), NULL);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&m_StreamPropertyListener, ATX_PropertyListener), NULL);
     }
 
     // register builtins 
@@ -572,24 +589,40 @@ BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 |   BLT_DecoderServer::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderServer::SetProperty(const ATX_Property& property)
+BLT_DecoderServer::SetProperty(BLT_PropertyScope   scope,
+                               const char*         target,
+                               const ATX_Property& property)
 {
     return PostMessage(
-        new BLT_DecoderServer_SetPropertyMessage(property));
+        new BLT_DecoderServer_SetPropertyCommandMessage(scope, target, property));
 }
 
 /*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnSetPropertyCommand
 +---------------------------------------------------------------------*/
 void 
-BLT_DecoderServer::OnSetPropertyCommand(const ATX_Property& property)
+BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope   scope,
+                                        const NPT_String&   target,
+                                        const ATX_Property& property)
 {
     BLT_Result result;
     ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", property.name);
 
     ATX_Properties* properties = NULL;
-    result = BLT_Decoder_GetProperties(m_Decoder, &properties);
-    if (ATX_SUCCEEDED(result)) {
+    switch (scope) {
+        case BLT_PROPERTY_SCOPE_CORE:
+            result = BLT_Decoder_GetProperties(m_Decoder, &properties);
+            break;
+            
+        case BLT_PROPERTY_SCOPE_STREAM:
+            result = BLT_Decoder_GetStreamProperties(m_Decoder, &properties);
+            break;
+            
+        default:
+            // not handled yet
+            result = BLT_ERROR_NOT_SUPPORTED;
+    }
+    if (ATX_SUCCEEDED(result) && properties != NULL) {
         result = ATX_Properties_SetProperty(properties, property.name, property.type, &property.value);
     }
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY, result);
@@ -632,12 +665,14 @@ BLT_DecoderServer_EventListenerWrapper_OnEvent(
 }
 
 /*----------------------------------------------------------------------
-|    BLTP_DecoderServer::OnStreamPropertyChanged
+|    BLTP_DecoderServer::OnPropertyChanged
 +---------------------------------------------------------------------*/
 void
-BLT_DecoderServer::OnStreamPropertyChanged(ATX_CString              name, 
-                                           ATX_PropertyType         type, 
-                                           const ATX_PropertyValue* value)
+BLT_DecoderServer::OnPropertyChanged(BLT_PropertyScope        scope,
+                                     const char*              source,
+                                     const char*              name, 
+                                     ATX_PropertyType         type, 
+                                     const ATX_PropertyValue* value)
 {
     ATX_Property property;
     property.name = name;
@@ -647,7 +682,9 @@ BLT_DecoderServer::OnStreamPropertyChanged(ATX_CString              name,
     } else {
         property.value.any = NULL;
     }
-    m_Client->PostMessage(new BLT_DecoderClient_StreamPropertyNotificationMessage(property));
+    m_Client->PostMessage(new BLT_DecoderClient_PropertyNotificationMessage(scope,
+                                                                            source,
+                                                                            property));
 }
 
 /*----------------------------------------------------------------------
@@ -661,7 +698,7 @@ BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged(
     const ATX_PropertyValue* value)    
 {
     BLT_DecoderServer_PropertyListenerWrapper* self = ATX_SELF(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyListener);
-    self->outer->OnStreamPropertyChanged(name, type, value);
+    self->outer->OnPropertyChanged(self->scope, self->source, name, type, value);
 }
 
 /*----------------------------------------------------------------------

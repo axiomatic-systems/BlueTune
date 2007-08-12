@@ -36,7 +36,10 @@ public:
     void OnDecoderStateNotification(BLT_DecoderServer::State state);
     void OnStreamTimeCodeNotification(BLT_TimeCode time_code);
     void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
-
+    void OnPropertyNotification(BLT_PropertyScope   scope,
+                                const char*         source,
+                                const ATX_Property& property);
+    
     // command methods
     void DoSeekToTimeStamp(const char* time);
 
@@ -71,55 +74,6 @@ BtController::BtController()
 BtController::~BtController()
 {
     delete m_ConsoleController;
-}
-
-/*----------------------------------------------------------------------
-|    BtController::DoSeekToTimeStamp
-+---------------------------------------------------------------------*/
-void
-BtController::DoSeekToTimeStamp(const char* time)
-{
-    BLT_UInt8 h;
-    BLT_UInt8 m;
-    BLT_UInt8 s;
-    BLT_UInt8 f;
-    BLT_Size  length = ATX_StringLength(time);
-
-    if (length != 12 && length != 9) return;
-
-    if (time[1] >= '0' && time[1] <= '9' && 
-        time[2] >= '0' && time[2] <= '9' &&
-        time[3] == ':') {
-        h = (time[1]-'0')*10 + (time[2]-'0');
-    } else {
-        return;
-    }
-    if (time[4] >= '0' && time[4] <= '9' && 
-        time[5] >= '0' && time[5] <= '9' &&
-        time[6] == ':') {
-        m = (time[4]-'0')*10 + (time[5]-'0');
-    } else {
-        return;
-    }
-    if (time[7] >= '0' && time[7] <= '9' && 
-        time[8] >= '0' && time[8] <= '9') {
-        s = (time[7]-'0')*10 + (time[8]-'0');
-    } else {
-        return;
-    }
-    if (length == 12) {
-        if (time[10] >= '0' && time[10] <= '9' && 
-            time[11] >= '0' && time[11] <= '9' &&
-            time[ 9] == ':') {
-            f = (time[10]-'0')*10 + (time[11]-'0');
-        } else {
-            return;
-        }
-    } else {
-        f = 0;
-    }
-
-    SeekToTimeStamp(h, m, s, f);
 }
 
 /*----------------------------------------------------------------------
@@ -214,6 +168,57 @@ BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& inf
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
         ATX_ConsoleOutputF("Data Type = %s\n", info.data_type);
+    }
+}
+
+/*----------------------------------------------------------------------
+|    BtController::OnPropertyNotification
++---------------------------------------------------------------------*/
+void 
+BtController::OnPropertyNotification(BLT_PropertyScope   scope,
+                                     const char*         source,
+                                     const ATX_Property& property)
+{
+    const char* scope_name;
+    switch (scope) {
+        case BLT_PROPERTY_SCOPE_CORE: scope_name = "core"; break;
+        case BLT_PROPERTY_SCOPE_STREAM: scope_name = "stream"; break;
+        default: scope_name = "unknown";
+    }
+    
+    // when the name is NULL, it means that all the properties in that scope for
+    // that source have been deleted 
+    if (property.name == NULL || property.name[0] == '\0') {
+        ATX_ConsoleOutputF("All properties in '%s' scope deleted\n", scope_name);
+        return;
+    }
+    
+    ATX_ConsoleOutputF("Property %s (%s) ", property.name, scope_name);
+    
+    switch (property.type) {
+        case ATX_PROPERTY_TYPE_NONE:
+            ATX_ConsoleOutputF("deleted\n");
+            break;
+            
+        case ATX_PROPERTY_TYPE_INTEGER:
+            ATX_ConsoleOutputF("= [I] %d\n", property.value.integer);
+            break;
+            
+        case ATX_PROPERTY_TYPE_FLOAT:
+            ATX_ConsoleOutputF("= [F] %f\n", property.value.fp);
+            break;
+            
+        case ATX_PROPERTY_TYPE_STRING:
+            ATX_ConsoleOutputF("= [S] %s\n", property.value.string);
+            break;
+            
+        case ATX_PROPERTY_TYPE_BOOLEAN:
+            ATX_ConsoleOutputF("= [B] %s\n", property.value.boolean == ATX_TRUE?"true":"false");
+            break;
+            
+        case ATX_PROPERTY_TYPE_RAW_DATA:
+            ATX_ConsoleOutputF("= [R] %d bytes of data\n", property.value.raw_data.size);
+            break;
     }
 }
 

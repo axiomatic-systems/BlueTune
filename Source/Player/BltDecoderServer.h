@@ -22,7 +22,7 @@
 const BLT_Size BLT_DECODER_SERVER_DEFAULT_POSITION_UPDATE_RANGE = 400;
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_MessageHandler
+|   BLT_DecoderServer_PropertyWrapper
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_PropertyWrapper {
 public:
@@ -41,17 +41,19 @@ public:
     // methods
     virtual ~BLT_DecoderServer_MessageHandler() {}
 
-    virtual void OnSetInputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
-    virtual void OnSetOutputCommand(BLT_CString /*name*/, BLT_CString /*type*/) {}
-    virtual void OnPlayCommand()  {}
-    virtual void OnStopCommand()  {}
-    virtual void OnPauseCommand() {}
-    virtual void OnPingCommand(const void* /*cookie*/) {}
-    virtual void OnSeekToTimeCommand(BLT_Cardinal /*time*/) {}
-    virtual void OnSeekToPositionCommand(BLT_Size /*offset*/, BLT_Size /*range*/) {}
-    virtual void OnRegisterModuleCommand(const BLT_Module* /*module*/) {}
-    virtual void OnAddNodeCommand(BLT_CString /*name*/) {}
-    virtual void OnSetPropertyCommand(ATX_Property& /*property*/) {}
+    virtual void OnSetInputCommand(BLT_CString name, BLT_CString type) = 0;
+    virtual void OnSetOutputCommand(BLT_CString name, BLT_CString type) = 0;
+    virtual void OnPlayCommand() = 0;
+    virtual void OnStopCommand() = 0;
+    virtual void OnPauseCommand() = 0;
+    virtual void OnPingCommand(const void* cookie) = 0;
+    virtual void OnSeekToTimeCommand(BLT_Cardinal time) = 0;
+    virtual void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range) = 0;
+    virtual void OnRegisterModuleCommand(BLT_Module* module) = 0;
+    virtual void OnAddNodeCommand(BLT_CString name) = 0;
+    virtual void OnSetPropertyCommand(BLT_PropertyScope   scope,
+                                      const NPT_String&   target,
+                                      const ATX_Property& property) = 0;
 };
 
 /*----------------------------------------------------------------------
@@ -292,22 +294,28 @@ public:
 };
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_SetPropertyMessage
+|   BLT_DecoderServer_SetPropertyCommandMessage
 +---------------------------------------------------------------------*/
-class BLT_DecoderServer_SetPropertyMessage : public BLT_DecoderServer_Message
+class BLT_DecoderServer_SetPropertyCommandMessage : public BLT_DecoderServer_Message
 {
 public:
     // methods
-    BLT_DecoderServer_SetPropertyMessage(const ATX_Property& property) :
+    BLT_DecoderServer_SetPropertyCommandMessage(BLT_PropertyScope   scope,
+                                                const char*         target,
+                                                const ATX_Property& property) :
       BLT_DecoderServer_Message(COMMAND_ID_SET_PROPERTY),
+      m_Scope(scope),
+      m_Target(target),
       m_PropertyWrapper(property) {}
     NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
-        handler->OnSetPropertyCommand(m_PropertyWrapper.m_Property);
+        handler->OnSetPropertyCommand(m_Scope, m_Target, m_PropertyWrapper.m_Property);
         return NPT_SUCCESS;
     }
 
  private:
     // members
+    BLT_PropertyScope                 m_Scope;
+    NPT_String                        m_Target;
     BLT_DecoderServer_PropertyWrapper m_PropertyWrapper;
 };
 
@@ -330,7 +338,9 @@ typedef struct {
     // ATX-style interfaces
     ATX_IMPLEMENTS(ATX_PropertyListener);
 
-    // back pointer
+    // back pointer and scoping
+    BLT_PropertyScope  scope;
+    const char*        source;
     BLT_DecoderServer* outer;
 } BLT_DecoderServer_PropertyListenerWrapper;
 
@@ -364,7 +374,9 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual BLT_Result SeekToPosition(BLT_Size offset, BLT_Size range);
     virtual BLT_Result RegisterModule(BLT_Module* module);
     virtual BLT_Result AddNode(BLT_CString name);
-    virtual BLT_Result SetProperty(const ATX_Property& property);
+    virtual BLT_Result SetProperty(BLT_PropertyScope   scope,
+                                   const char*         target,
+                                   const ATX_Property& property);
 
     // NPT_Runnable methods
     void Run();
@@ -380,7 +392,9 @@ class BLT_DecoderServer : public NPT_Thread,
     void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range);
     void OnRegisterModuleCommand(BLT_Module* module);
     void OnAddNodeCommand(BLT_CString name);
-    void OnSetPropertyCommand(const ATX_Property& property);
+    void OnSetPropertyCommand(BLT_PropertyScope   scope,
+                              const NPT_String&   target,
+                              const ATX_Property& property);
 
     // BLT_EventListener methods
     virtual void OnEvent(const ATX_Object* source,
@@ -388,9 +402,11 @@ class BLT_DecoderServer : public NPT_Thread,
                          const BLT_Event*  event);
 
     // ATX_PropertyListener methods
-    virtual void OnStreamPropertyChanged(ATX_CString              name,
-                                         ATX_PropertyType         type,
-                                         const ATX_PropertyValue* value);
+    virtual void OnPropertyChanged(BLT_PropertyScope        scope,
+                                   const char*              source,
+                                   const char*              name,
+                                   ATX_PropertyType         type,
+                                   const ATX_PropertyValue* value);
 
  private:
     // methods
@@ -410,8 +426,9 @@ class BLT_DecoderServer : public NPT_Thread,
     BLT_DecoderStatus    m_DecoderStatus;
     State                m_State;
 
-    BLT_DecoderServer_EventListenerWrapper    m_EventListenerWrapper;
-    BLT_DecoderServer_PropertyListenerWrapper m_PropertyListenerWrapper;
+    BLT_DecoderServer_EventListenerWrapper    m_EventListener;
+    BLT_DecoderServer_PropertyListenerWrapper m_CorePropertyListener;
+    BLT_DecoderServer_PropertyListenerWrapper m_StreamPropertyListener;
 };
 
 #endif /* _BLT_DECODER_SERVER_H_ */

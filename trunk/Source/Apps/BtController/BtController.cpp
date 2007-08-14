@@ -176,7 +176,7 @@ BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& inf
 +---------------------------------------------------------------------*/
 void 
 BtController::OnPropertyNotification(BLT_PropertyScope   scope,
-                                     const char*         source,
+                                     const char*       /*source*/,
                                      const ATX_Property& property)
 {
     const char* scope_name;

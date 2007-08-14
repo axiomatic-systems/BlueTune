@@ -113,7 +113,8 @@ class BuildModule(Module):
 
         # setup the environment        
         self.env = environment and environment.Copy() or env.Copy()
-        if extra_cpp_defines: self.env.Append(CPPDEFINES = extra_cpp_defines.items())
+        if extra_cpp_defines:
+            self.env.Append(CPPDEFINES=[(x[1] and x or x[0]) for x in extra_cpp_defines.items()])
         
         # for each source drct to build, create a BuildDir
         # to say where we want the object files to be built,
@@ -454,7 +455,7 @@ for plugin in env['BLT_PLUGINS']:
                 environment        = extra_env)
 
 plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])
-plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '\\"'+env['BLT_DEFAULT_OUTPUT']+'\\"'
+plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '"'+env['BLT_DEFAULT_OUTPUT']+'"'
 
 BuildModule(name               = 'BltPlugins',
             build_source_files = {'Plugins/Common':'BltBuiltins.c'},

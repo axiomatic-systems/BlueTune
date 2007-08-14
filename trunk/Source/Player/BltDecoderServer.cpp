@@ -602,7 +602,7 @@ BLT_DecoderServer::SetProperty(BLT_PropertyScope   scope,
 +---------------------------------------------------------------------*/
 void 
 BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope   scope,
-                                        const NPT_String&   target,
+                                        const NPT_String&   /*target*/,
                                         const ATX_Property& property)
 {
     BLT_Result result;

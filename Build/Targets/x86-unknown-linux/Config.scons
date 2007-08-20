@@ -1,4 +1,6 @@
 LoadTool('gcc-generic', env)
+env['BLT_RELAXED_ENV'] = env.Copy()
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_relaxed_warnings=True)
 
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
 env['ATX_EXTRA_LIBS']='m'
@@ -27,9 +29,9 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'AlsaOutput',
                       'AlsaInput']
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
+env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
 env['BLT_DEFAULT_OUTPUT']           = 'alsa:default'
 
-### relaxed warnings for WMA9
-env['WMA_ENV'] = env.Copy() 
-LoadTool('gcc-generic', env['WMA_ENV'], gcc_relaxed_warnings=True)  
+### relaxed warnings for WMA
+env['WMA_ENV'] = env['BLT_RELAXED_ENV'].Copy() 
                                              

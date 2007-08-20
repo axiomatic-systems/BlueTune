@@ -1,182 +1,27 @@
 import sys
 import os
-import imp
-from glob import glob
 
-#######################################################
-# reusable functions and data structures
-#######################################################
-def LoadTool(name, env, **kw):
-    config_path = GetBuildPath('#/Build/Tools/SCons')
-    file, path, desc = imp.find_module(name, [config_path])
-    module = imp.load_module(name, file, path, desc)
-    module.generate(env, **kw)
-
-def MergeListUnique(item_list, items):
-    for item in items: 
-        if not item in item_list: item_list.append(item)
-
-def MergeItemUnique(item_list, item):
-    if not item in item_list: item_list.append(item)
-            
-def GlobSources(drct, patterns, excluded_files=[]):
-    root = GetBuildPath(GetDirPath(drct))
-    files = []
-    for pattern in Split(patterns):
-        files += glob(root+'/'+pattern)
-    return [drct+'/'+os.path.basename(x) for x in  files if os.path.basename(x) not in excluded_files]
-
-def GetDirPath(drct):
-    for key in SourceDirLookup.keys():
-        if drct.startswith(key):
-            return SourceDirLookup[key]+drct[len(key):]
-    return '#/'+drct
-    
-def DeclareBuildDir(env, drct):
-    env.BuildDir(drct, GetDirPath(drct), duplicate=0)
-    
-def GetIncludeDirs(modules, exclude=None):
-    dirs = []
-    for module in Split(modules):
-        if Modules.has_key(module) and not module == exclude:
-            MergeListUnique(dirs, Modules[module].GetIncludeDirs())
-        else:
-            MergeItemUnique(dirs, GetDirPath(module))
-    return dirs
-    
-def GetLibraries(modules, modules_only=False):
-    libs = []
-    for module in Split(modules):
-        if module in libs: continue
-        if Modules.has_key(module):
-            dep_libs = Modules[module].GetLibraries()
-            libs = [lib for lib in libs if not lib in dep_libs]+dep_libs
-        elif not modules_only:
-            libs.append(module)
-    return libs
-
-def GetLibraryDirs(modules):
-    lib_dirs = []
-    for module in modules:
-        if Modules.has_key(module):
-            MergeListUnique(lib_dirs, Modules[module].GetLibraryDirs())
-    return lib_dirs
-
-Modules = {}
-class Module:
-    def __init__(self, name, 
-                 included_modules = [], 
-                 linked_modules   = [],
-                 lib_dirs         = []):
-        self.name             = name
-        self.included_modules = included_modules
-        self.linked_modules   = linked_modules
-        self.lib_dirs         = [GetDirPath(dir) for dir in lib_dirs]
-        self.product          = []
-        Modules[name]         = self        
-        
-    def GetLibraries(self):
-        return self.product+GetLibraries(self.linked_modules)
-        
-    def GetLibraryDirs(self):
-        return self.lib_dirs+GetLibraryDirs(self.linked_modules)
-
-    def GetIncludeDirs(self):
-        return GetIncludeDirs(self.included_modules, self.name)
-
-    
-class BuildModule(Module):
-    def __init__(self, name, 
-                 build_source_dirs     = ['.'], 
-                 build_source_files    = {},
-                 source_root           = 'Source',
-                 build_source_pattern  = ['*.c', '*.cpp'], 
-                 build_include_dirs    = [], 
-                 included_modules      = [], 
-                 included_only_modules = [],
-                 linked_modules        = [],
-                 environment           = None,
-                 excluded_files        = [],
-                 extra_cpp_defines     = {},
-                 extra_lib_dirs        = [],
-                 type                  = 'StaticLibrary') :
-
-        # store this new object in the module dictionary
-        build_source_dirs = [source_root+'/'+drct for drct in build_source_dirs]
-        Module.__init__(self, 
-                        name, 
-                        Split(included_modules)+Split(included_only_modules)+Split(build_source_dirs), 
-                        Split(linked_modules)+Split(included_modules),
-                        extra_lib_dirs)
-        self.build_include_dirs = build_include_dirs
-        self.type               = type
-
-        # setup the environment        
-        self.env = environment and environment.Copy() or env.Copy()
-        if extra_cpp_defines:
-            self.env.Append(CPPDEFINES=[(x[1] and x or x[0]) for x in extra_cpp_defines.items()])
-        
-        # for each source drct to build, create a BuildDir
-        # to say where we want the object files to be built,
-        # and compute the list of source files to build
-        sources = []
-        for drct in Split(build_source_dirs):
-            DeclareBuildDir(self.env, drct)
-            sources += GlobSources(drct, build_source_pattern, excluded_files)
-            
-        # add cherry-picked files
-        for drct in build_source_files.keys():
-            pattern = build_source_files[drct]
-            if drct.startswith('/'):
-                drct_path = drct[1:]
-            else:
-                drct_path = source_root+'/'+drct
-            DeclareBuildDir(self.env, drct_path)
-            sources += GlobSources(drct_path, pattern)
-
-        # calculate our build include path
-        cpp_path = GetIncludeDirs(Split(self.build_include_dirs) + Split(build_source_dirs) + self.included_modules + self.linked_modules)
-
-        # check that the source list is not empty
-        if len(sources) == 0:
-            raise 'Module '+name+' has no sources'
-        
-        # create the module's product
-        self.env.AppendUnique(CPPPATH=cpp_path)
-        self.env.AppendUnique(LIBS=GetLibraries(Split(linked_modules)))
-        if type == 'SharedLibrary':
-            self.product = self.env.SharedLibrary(target=name, source=sources)
-            self.env.Alias(name, self.product)
-        elif type == 'StaticLibrary':
-            self.product = self.env.Library(target=name, source=sources)
-            self.env.Alias(name, self.product)
-        elif type == 'Executable':
-            # libraries    
-            libs = GetLibraries(linked_modules)
-            lib_path = GetLibraryDirs(linked_modules)
-            self.env.AppendUnique(LIBS=libs, LIBPATH=lib_path)
-            self.product = self.env.Program(target=name.lower(), source=sources)
-            self.env.Alias(name, self.product)    
-        
-
+from BuildUtils import *
+
 #######################################################
 # Main Build
 #######################################################
 Import("env")
-
-SourceDirLookup = {}
-OptionalModules = []
-
-env['NPT_EXTRA_LIBS'] = ''
+SetDefaultEnv(env)
+env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
 env['BLT_EXTRA_LIBS'] = ''
 
+### enable logging in all builds
+env.Append(CPPDEFINES = ['ATX_CONFIG_ENABLE_LOGGING', 'NPT_CONFIG_ENABLE_LOGGING'])
+
+### build config specifics
 if env['build_config'] == 'Debug':
-	env.Append(CPPDEFINES = ['BLT_DEBUG', 'ATX_CONFIG_ENABLE_LOGGING'])
+	env.Append(CPPDEFINES = ['BLT_DEBUG'])
 else:
 	env.Append(CPPDEFINES = ['NDEBUG'])
 
-### try to read in any target specific configuration
+### target specifics
 target_config_file = env.GetBuildPath('#/Build/Targets/'+env['target']+'/Config.scons')
 if os.path.exists(target_config_file):
     # Load the target-specific config file    
@@ -185,103 +30,59 @@ if os.path.exists(target_config_file):
 ### extra plugins
 if env.has_key('extra_plugins'): 
     env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
-
-
-#######################################################
-# modules
-#
-# Usage:
-#
-# The LibraryModule() function declares a code module
-# The included_modules parameter is a list of all the modules and/or directories
-# that will be added to the include path when building this module AND to
-# the include path of any other module that depends on this one.
-# The linked_modules parameter is a list of all the modules and/or directories
-# that are necessary to build this module. These modules will be added to
-# the include path of this module, but not to that of the modules that depend
-# on this module. The modules that depend no this module, however, will 
-# automatically link with the linked_modules. 
-# Note that the included_modules list is automatically added to the 
-# linked_modules list, so that you do not need to list in linked_modules
-# the modules that are already listed in included_modules.
-# If a module needs to export an include path to its dependents that
-# is not a module that the dependent can link with (ex: an include dir),
-# list it in the included_only_modules.
-# To summarize: included_modules should list all the modules that users
-# of the public interface should depend on; linked_modules should list
-# all the modules not listed in included_modules that are used by the
-# module's implementation only.
-#######################################################
+### optional modules
+OptionalModules = []
 
 ############################# Atomix
-ATX_SOURCE_ROOT = 'Atomix/Source'         
-SourceDirLookup[ATX_SOURCE_ROOT] = '#/../Atomix/Source'  
-if env['build_config'] == 'Debug':
-    ATX_EXTRA_CPP_DEFINES = {'ATX_DEBUG':None}
-else:
-    ATX_EXTRA_CPP_DEFINES = {}
-    
-BuildModule(name                  = 'Atomix',
-            build_source_dirs     = ['Core'],
-            build_source_files    = env['ATX_SYSTEM_SOURCES'],
-            included_only_modules = [ATX_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Atomix']],
-            linked_modules        = env['ATX_EXTRA_LIBS'],
-            source_root           = ATX_SOURCE_ROOT,
-            extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
+ATX_SOURCE_ROOT = 'Atomix/Source'
+ATX_EXTRA_CPP_DEFINES = env['build_config'] == 'Debug' and ['ATX_DEBUG'] or []
+MapSourceDir(ATX_SOURCE_ROOT, '#/../Atomix/Source')CompiledModule(name                  = 'Atomix',
+               module_type           = 'StaticLibrary',
+               source_root           = ATX_SOURCE_ROOT,
+               build_source_dirs     = ['Core'],
+               build_source_files    = env['ATX_SYSTEM_SOURCES'],
+               included_only_modules = [ATX_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Atomix']],
+               linked_modules        = env['ATX_EXTRA_LIBS'],
+               extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
 
 ############################ Neptune
 NPT_SOURCE_ROOT = 'Neptune/Source'
-SourceDirLookup[NPT_SOURCE_ROOT] = '#/../Neptune/Source'  
-if env['build_config'] == 'Debug':
-    NPT_EXTRA_CPP_DEFINES = {'NPT_DEBUG':None}
-else:
-    NPT_EXTRA_CPP_DEFINES = {}
-BuildModule(name                  = 'Neptune',
-            build_source_dirs     = ['Core'],
-            build_source_files    = env['NPT_SYSTEM_SOURCES'],
-            included_only_modules = [NPT_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Neptune']],
-            linked_modules        = env['NPT_EXTRA_LIBS'],
-            source_root           = NPT_SOURCE_ROOT,
-            extra_cpp_defines     = NPT_EXTRA_CPP_DEFINES)
+NPT_EXTRA_CPP_DEFINES = env['build_config'] == 'Debug' and ['NPT_DEBUG'] or []
+MapSourceDir(NPT_SOURCE_ROOT, '#/../Neptune/Source')
+CompiledModule(name                  = 'Neptune',
+               module_type           = 'StaticLibrary',
+               source_root           = NPT_SOURCE_ROOT,
+               build_source_dirs     = ['Core'],
+               build_source_files    = env['NPT_SYSTEM_SOURCES'],
+               included_only_modules = [NPT_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Neptune']],
+               linked_modules        = env['NPT_EXTRA_LIBS'],
+               extra_cpp_defines     = NPT_EXTRA_CPP_DEFINES)
 
 ############################ Bento4
 AP4_SOURCE_ROOT = 'Bento4/Source/C++'
-SourceDirLookup[AP4_SOURCE_ROOT] = '#/../Bento4/Source/C++'  
-if env.has_key('AP4_CPP_DEFINES'):
-    AP4_EXTRA_CPP_DEFINES = env['AP4_CPP_DEFINES']
-else:
-    AP4_EXTRA_CPP_DEFINES = {}
+AP4_EXTRA_CPP_DEFINES = env.has_key('AP4_CPP_DEFINES') and env['AP4_CPP_DEFINES'] or []
 if env['build_config'] == 'Debug':
-    AP4_EXTRA_CPP_DEFINES['AP4_DEBUG'] = None
+    AP4_EXTRA_CPP_DEFINES.append(['AP4_DEBUG'])
 
-BuildModule(name                  = 'Bento4',
-            build_source_dirs     = ['Core', 'MetaData', 'Crypto'],
-            build_source_files    = env['AP4_SYSTEM_SOURCES'],
-            included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto']],
-            source_root           = AP4_SOURCE_ROOT,
-            extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
+MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
+CompiledModule(name                  = 'Bento4',
+               module_type           = 'StaticLibrary',
+               source_root           = AP4_SOURCE_ROOT,
+               build_source_dirs     = ['Core', 'MetaData', 'Crypto'],
+               build_source_files    = env['AP4_SYSTEM_SOURCES'],
+               included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto']],
+               extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
 
 ############################ Melo
 MLO_SOURCE_ROOT = 'Melo/Source'
-
-SourceDirLookup[MLO_SOURCE_ROOT] = '#/../Melo/Source'  
-if env.has_key('MLO_CPP_DEFINES'):
-    MLO_EXTRA_CPP_DEFINES = env['MLO_CPP_DEFINES'] 
-else:
-    MLO_EXTRA_CPP_DEFINES = {}
-
+MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
 if env['build_config'] == 'Debug':
-    MLO_EXTRA_CPP_DEFINES['MLO_DEBUG'] = None
+    MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
 
-BuildModule(name              = 'Melo',
-            build_source_dirs = ['.'],
-            source_root       = MLO_SOURCE_ROOT,
-            extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
-
-############################ Tremor
-BuildModule(name		= 'Tremor',
-	        source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
-            environment = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
+MapSourceDir(MLO_SOURCE_ROOT, '#/../Melo/Source')
+CompiledModule(name              = 'Melo',
+               source_root       = MLO_SOURCE_ROOT,
+               extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
 	
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  
@@ -306,48 +107,63 @@ fluo_extra_cpp_defines = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']}
 if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
     fluo_extra_cpp_defines['FLO_CONFIG_INTEGER_DECODE'] = True
     
-BuildModule(name               = 'Fluo',
-            build_source_dirs  = ['Fluo'],
-            build_include_dirs = fluo_decoder_inc_dirs,
-            linked_modules     = ['Atomix'] + fluo_decoder_deps,
-            extra_cpp_defines  = fluo_extra_cpp_defines,
-            extra_lib_dirs     = fluo_decoder_lib_dirs)
+CompiledModule(name               = 'Fluo',
+               source_root        = 'Source/Fluo',
+               build_include_dirs = fluo_decoder_inc_dirs,
+               linked_modules     = ['Atomix'] + fluo_decoder_deps,
+               extra_cpp_defines  = fluo_extra_cpp_defines,
+               extra_lib_dirs     = fluo_decoder_lib_dirs)
+
+############################ Tremor
+if 'VorbisDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
+    CompiledModule(name		   = 'Tremor',
+                   source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
+                   environment = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
+
+############################ FLAC
+if 'FlacDecoder' in env['BLT_PLUGINS']:
+    FLAC_SOURCE_ROOT='ThirdParty/FLAC/Distributions/flac-1.2.0'
+    CompiledModule(name		          = 'FLAC',
+                   source_root        = FLAC_SOURCE_ROOT,
+                   build_source_dirs  = ['src/libFLAC'],
+                   build_include_dirs = [FLAC_SOURCE_ROOT+'/include', FLAC_SOURCE_ROOT+'/src/libFLAC/include'],
+                   environment        = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
 
 ############################# Core
-BuildModule(name                  = 'BltCore',
-            build_source_dirs     = ['Core'],
-            included_only_modules = ['Source/Config'],
-            linked_modules        = ['Atomix', 'Neptune'])
+CompiledModule(name                  = 'BltCore',
+               source_root           = 'Source/Core',
+               included_only_modules = ['Source/Config', 'Source/BlueTune'],
+               included_modules      = ['Atomix', 'Neptune'])
 
 ############################# Decoder
-BuildModule(name               = 'BltDecoder',
-            build_source_dirs  = ['Decoder'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
+CompiledModule(name             = 'BltDecoder',
+               source_root      = 'Source/Decoder',
+               included_modules = ['Atomix', 'Neptune', 'BltCore'])
 
 ############################# Player
-BuildModule(name               = 'BltPlayer',
-            build_source_dirs  = ['Player'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder'])
-
+CompiledModule(name             = 'BltPlayer',
+               source_root      = 'Source/Player',
+               included_modules = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder'])
 
 ############################ WmaDecoder Plugin
 if os.environ.has_key('WMSDK_HOME'):
     env.AppendUnique(BLT_PLUGINS='WmaDecoder')
     WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
-    SourceDirLookup[WMA_SOURCE_ROOT] = '#/../WMSDK/WMPK/WMA10Dec'
-    WMA_EXTRA_CPP_DEFINES = {'BUILD_INT_FLOAT':None, 
-                             'ENABLE_LPC':None,
-                             'ENABLE_ALL_ENCOPT':None,
-                             'DISABLE_OPT':None,
-                             'BITSTREAM_CORRUPTION_ASSERTS':None,
-                             'WMA_DECPK_BUILD':None,
-                             'WMAAPI_NO_DRM':None,
-                             'WMAAPI_NO_DRM_STREAM':None,
-                             'DISABLE_UES':None}  
+    WMA_EXTRA_CPP_DEFINES = ['BUILD_INT_FLOAT', 
+                             'ENABLE_LPC',
+                             'ENABLE_ALL_ENCOPT',
+                             'DISABLE_OPT',
+                             'BITSTREAM_CORRUPTION_ASSERTS',
+                             'WMA_DECPK_BUILD',
+                             'WMAAPI_NO_DRM',
+                             'WMAAPI_NO_DRM_STREAM',
+                             'DISABLE_UES']  
     if env['build_config'] == 'Release':
         WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
     wma_env = env.has_key('WMA_ENV') and env['WMA_ENV'] or None
-    BuildModule(name           = 'BltWmaDecoder',
+    MapSourceDir(WMA_SOURCE_ROOT, '#/../WMSDK/WMPK/WMA10Dec')
+    CompiledModule(name        = 'BltWmaDecoder',
+            source_root        = WMA_SOURCE_ROOT,
             build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
             build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
                                   'audio/wmaudio/v10/common',
@@ -364,7 +180,6 @@ if os.environ.has_key('WMSDK_HOME'):
                                    'audio/common/include']],
             included_only_modules = 'Source/Plugins/Decoders/WMA',
             linked_modules        = ['Atomix', 'BltCore'],
-            source_root           = WMA_SOURCE_ROOT,
             environment           = wma_env,
             extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
 elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
@@ -376,10 +191,11 @@ elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
            lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
            
 ############################# BltPluginsSupport
-BuildModule(name               = 'BltPluginsSupport',
-            build_source_files = {'Plugins/Common':'BltReplayGain.c'},
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore'])
-                 
+CompiledModule(name               = 'BltPluginsSupport',
+               build_source_dirs  = [],
+               build_source_files = {'/Source/Plugins/Common':'BltReplayGain.c'},
+               linked_modules     = ['BltCore'])
+       
 ############################# Plugins
 PluginsSettings = {
     'FileInput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',         'src_dir':'Inputs/File'              },
@@ -409,11 +225,9 @@ PluginsSettings = {
 }
 PluginsExtras = {
     'Mp4Parser':        {'dep_mods':['Bento4']},   
-    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include']},
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
     'AacDecoder':       {'dep_mods':['Melo']},   
-    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/include'],
-                         'lib_dirs':['ThirdParty/FLAC/Targets/'+env['target']+'/lib'],
+    'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Distributions/flac-1.2.0/include'],
                          'dep_mods':['FLAC']},
     'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
                          'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib'],
@@ -422,14 +236,13 @@ PluginsExtras = {
     'AlsaInput':        {'dep_mods':['asound']},
 }
 if 'CddaInput' in env['BLT_PLUGINS']:
-    PluginsExtras['CddaInput'] = {'src_dirs':['Plugins/Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
+    PluginsExtras['CddaInput'] = {'src_dirs':['Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
 
 if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
-    print "******************", env['BLT_PLUGINS_VORBIS_LIBRARY']
     if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
         PluginsExtras['VorbisDecoder']['dep_mods'] = ['Tremor']
-        PluginsExtras['VorbisDecoder']['flags'] = {'BLT_CONFIG_VORBIS_USE_TREMOR':None}
-
+        PluginsExtras['VorbisDecoder']['flags'] = ['BLT_CONFIG_VORBIS_USE_TREMOR']
+    
 for plugin in env['BLT_PLUGINS']:
     if not PluginsSettings[plugin].has_key('src_dir'): continue # skip binary only plugins
     extra_includes = []
@@ -445,56 +258,60 @@ for plugin in env['BLT_PLUGINS']:
         if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
         if PluginsExtras[plugin].has_key('flags'):    extra_flags    = PluginsExtras[plugin]['flags']
         if PluginsExtras[plugin].has_key('env'):      extra_env      = PluginsExtras[plugin]['env']
-    BuildModule(name               = 'Blt'+plugin,
-                build_source_dirs  = ['Plugins/'+PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
-                build_include_dirs = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
-                linked_modules     = extra_dep_mods,
-                included_modules   = ['Atomix', 'Neptune', 'BltCore', 'BltPluginsSupport'],
-                extra_lib_dirs     = extra_lib_dirs,
-                extra_cpp_defines  = extra_flags,
-                environment        = extra_env)
+    CompiledModule(name               = 'Blt'+plugin,
+                   source_root        = 'Source/Plugins',
+                   build_source_dirs  = [PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
+                   build_include_dirs = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
+                   linked_modules     = extra_dep_mods,
+                   included_modules   = ['BltCore', 'BltPluginsSupport', 'Neptune'],
+                   extra_lib_dirs     = extra_lib_dirs,
+                   extra_cpp_defines  = extra_flags,
+                   environment        = extra_env)
 
 plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])
 plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '"'+env['BLT_DEFAULT_OUTPUT']+'"'
 
-BuildModule(name               = 'BltPlugins',
-            build_source_files = {'Plugins/Common':'BltBuiltins.c'},
-            linked_modules     = ['Atomix', 'BltCore', 'BltPluginsSupport']+['Blt'+p for p in env['BLT_PLUGINS']],
-            extra_cpp_defines  = plugins_cpp_defines)
+CompiledModule(name               = 'BltPlugins',
+               build_source_dirs  = [],
+               build_source_files = {'/Source/Plugins/Common':'BltBuiltins.c'},
+               linked_modules     = ['Atomix', 'BltCore', 'BltPluginsSupport']+['Blt'+p for p in env['BLT_PLUGINS']],
+               extra_cpp_defines  = plugins_cpp_defines)
+
+############################# Sync API
+LinkedModule(name             = 'BlueTune-Sync',
+             included_modules = ['BltCore', 'BltDecoder', 'BltPlugins'])
+
+############################# SDK
+LinkedModule(name             = 'BlueTune',
+             included_modules = ['BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
 
 ############################# BtPlay
-BuildModule(name               = 'BtPlay',
-            type               = 'Executable',
-            build_source_dirs  = ['Apps/BtPlay'],
-            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlugins'])
+CompiledModule(name               = 'BtPlay',
+               module_type        = 'Executable',
+               source_root        = 'Source/Apps/BtPlay',
+               included_modules   = ['BlueTune-Sync'])
 
 ############################# BtController
-BuildModule(name               = 'BtController',
-            type               = 'Executable',
-            build_source_dirs  = ['Apps/BtController'],
-            build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-            linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
+CompiledModule(name             = 'BtController',
+               module_type      = 'Executable',
+               source_root      = 'Source/Apps/BtController',
+               included_modules = ['BlueTune'])
 
 ############################# BtGtk
 if env['target'] == 'x86-unknown-linux':
-    gtk_env = env.Copy()
     try:    
-        gtk_env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+        gtk_env = env.Copy()
+        gtk_env.ParseConfig('pkg-config --silence-errors --cflags --libs gtk+-2.0')
         BuildModule(name               = 'BtGtk',
                     type               = 'Executable',
-                    build_source_dirs  = ['Apps/BtGtk'],
-                    build_include_dirs = ['Source/BlueTune', 'Source/Config'],
-                    linked_modules     = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'],
+                    build_source_dirs  = ['Source/Apps/BtGtk'],
+                    linked_modules     = ['BlueTune'],
                     environment        = gtk_env)
         OptionalModules.append('BtGtk')
     except:
-        pass
-
-############################# SDK
-
-
+        pass
 ################################################
 # Default Build Modues
 ################################################
 env.Default(['BtPlay', 'BtController'] + OptionalModules)
+

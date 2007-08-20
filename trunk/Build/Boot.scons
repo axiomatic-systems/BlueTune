@@ -31,7 +31,7 @@ options.AddOptions(
     ListOption('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
 )
 
-env = Environment(options=options).Copy()
+env = Environment(options=options)
 Help(options.GenerateHelpText(env))
 
 ### call the actual build script for each build config

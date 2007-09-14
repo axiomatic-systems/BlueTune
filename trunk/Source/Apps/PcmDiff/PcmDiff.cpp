@@ -20,9 +20,11 @@
 /*----------------------------------------------------------------------
 |    globals
 +---------------------------------------------------------------------*/
-struct {
+static struct {
     const char*  filename_1;
     const char*  filename_2;
+    unsigned int skip1;
+    unsigned int skip2;
     unsigned int frame_size;
     unsigned int channel_count;
     unsigned int threshold;
@@ -39,6 +41,8 @@ PrintUsageAndExit()
            "  --frame-size=<n>: audio frame size (in samples) [def=1152]\n"
            "  --channels=<n>:   number of channels [def=2]\n"
            "  --threshold=<n>:  threshold for detecting a difference [def=1]\n"
+           "  --skip1=<n>:      skip <n> bytes from file 1\n"
+           "  --skip2=<n>:      skip <n> bytes from file 2\n"
         );
     exit(1);
 }
@@ -60,6 +64,10 @@ ParseCommandLine(char** args)
     while((arg = *args++)) {
         if (!strncmp(arg, "--frame-size=", 13)) {
             Options.frame_size = strtoul(arg+13, NULL, 10);
+        } else if (!strncmp(arg, "--skip1=", 8)) {
+            Options.skip1 = strtoul(arg+8, NULL, 10);
+        } else if (!strncmp(arg, "--skip2=", 8)) {
+            Options.skip2 = strtoul(arg+8, NULL, 10);
         } else if (!strncmp(arg, "--channels=", 11)) {
             Options.channel_count = strtoul(arg+11, NULL, 10);
         } else if (!strncmp(arg, "--threshold=", 12)) {
@@ -92,23 +100,29 @@ main(int argc, char** argv)
     ParseCommandLine(argv+1);
 
     // open first file
-    NPT_FileByteStream* in1 = 
-        new NPT_FileByteStream(Options.filename_1,
-                               NPT_FILE_BYTE_STREAM_MODE_READ);
-    result = in1->GetOpenResult();
+    NPT_File* file1 = new NPT_File(Options.filename_1);
+    result = file1->Open(NPT_FILE_OPEN_MODE_READ);
     if (NPT_FAILED(result)) {
         fprintf(stderr, "cannot open file %s [error %d]\n",
                 Options.filename_1, result);
     }
-
-    // open first file
-    NPT_FileByteStream* in2 = 
-        new NPT_FileByteStream(Options.filename_2,
-                               NPT_FILE_BYTE_STREAM_MODE_READ);
-    result = in2->GetOpenResult();
+    NPT_InputStreamReference in1;
+    file1->GetInputStream(in1);
+    if (Options.skip1) {
+        in1->Seek(Options.skip1);
+    }
+    
+    // open second file
+    NPT_File* file2 = new NPT_File(Options.filename_2);
+    result = file2->Open(NPT_FILE_OPEN_MODE_READ);
     if (NPT_FAILED(result)) {
         fprintf(stderr, "cannot open file %s [error %d]\n",
                 Options.filename_2, result);
+    }
+    NPT_InputStreamReference in2;
+    file2->GetInputStream(in2);
+    if (Options.skip2) {
+        in2->Seek(Options.skip2);
     }
 
     NPT_Size chunk_size = Options.frame_size*Options.channel_count;

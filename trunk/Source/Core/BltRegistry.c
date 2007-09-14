@@ -68,9 +68,11 @@ typedef struct {
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(Registry, BLT_Registry)
 ATX_DECLARE_INTERFACE_MAP(Registry, ATX_Destroyable)
-static BLT_Result Registry_RegisterNameAndId(Registry* registry, 
+static BLT_Result Registry_RegisterNameAndId(Registry*   registry, 
                                              BLT_CString category, 
-                                             BLT_CString name, BLT_UInt32 id);
+                                             BLT_CString name, 
+                                             BLT_UInt32  id,
+                                             BLT_Boolean register_reverse_mapping);
 BLT_METHOD Registry_CreateKey(BLT_Registry*     self,
                               BLT_RegistryKey*  parent,
                               BLT_CString       name,
@@ -270,13 +272,13 @@ Registry_Initialize(Registry* registry)
     /* register the default types and formats */
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "none", 0);
+                               "none", 0, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "unknown", 1);
+                               "unknown", 1, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "audio/pcm", 2);
+                               "audio/pcm", 2, BLT_TRUE);
 
     /* create the file extensions namespace key */
     result = Registry_CreateKey(&ATX_BASE(registry, BLT_Registry), 
@@ -539,7 +541,8 @@ static BLT_Result
 Registry_RegisterNameAndId(Registry*   registry, 
                            BLT_CString category, 
                            BLT_CString name,
-                           BLT_UInt32  id)
+                           BLT_UInt32  id,
+                           BLT_Boolean register_reverse_mapping)
 {
     BLT_RegistryKey* namespace_key;
     BLT_RegistryKey* category_key;
@@ -568,6 +571,9 @@ Registry_RegisterNameAndId(Registry*   registry,
                                   (BLT_RegistryValue*)&id);
     if (BLT_FAILED(result)) return result;
 
+    /* stop now if we dont' want to create a reverse mapping */
+    if (!register_reverse_mapping) return BLT_SUCCESS;
+    
     /* create the key for the reverse mapping */
     result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
                              BLT_REGISTRY_KEY_ROOT,
@@ -611,14 +617,42 @@ Registry_RegisterName(BLT_Registry* _self,
     result = Registry_GetIdForName(_self, category, name, id);
     if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
 
-    /* the name is no register, register it now */
+    /* the name is not registered, register it now */
     if (id) {
         *id = self->id_base;
     }
     return Registry_RegisterNameAndId(self, 
                                       category, 
                                       name, 
-                                      self->id_base++);
+                                      self->id_base++,
+                                      BLT_TRUE);
+}
+
+/*----------------------------------------------------------------------
+|    Registry_RegisterNameForId
++---------------------------------------------------------------------*/
+BLT_METHOD
+Registry_RegisterNameForId(BLT_Registry* _self, 
+                           BLT_CString   category,
+                           BLT_CString   name,
+                           BLT_UInt32    id)
+{
+    Registry*  self = ATX_SELF(Registry, BLT_Registry);
+    BLT_UInt32 existing_id;
+    BLT_Result result;
+
+    /* check if the name has already been registered */
+    result = Registry_GetIdForName(_self, category, name, &existing_id);
+    if (BLT_SUCCEEDED(result)) {
+        return existing_id == id ? BLT_SUCCESS : BLT_ERROR_INVALID_PARAMETERS;
+    }
+    
+    /* register the name, but without a reverse mapping */
+    return Registry_RegisterNameAndId(self, 
+                                      category, 
+                                      name, 
+                                      id, 
+                                      BLT_FALSE);
 }
 
 /*----------------------------------------------------------------------
@@ -843,6 +877,7 @@ ATX_BEGIN_INTERFACE_MAP(Registry, BLT_Registry)
     Registry_SetKeyValue,
     Registry_GetKeyValue,
     Registry_RegisterName,
+    Registry_RegisterNameForId,
     Registry_GetNameForId,
     Registry_GetIdForName,
     Registry_RegisterExtension,

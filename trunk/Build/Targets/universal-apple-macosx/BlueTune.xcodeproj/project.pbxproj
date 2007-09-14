@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487870C99E13800638991 /* BltAdtsParser.h */; };
+		CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0487880C99E13800638991 /* BltAdtsParser.c */; };
+		CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */; };
+		CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA6B38720C965CE9000D7A0A /* libHelixAAC.a */; };
 		CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; };
 		CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; };
 		CA5042CB0C5AE52B0060E6FE /* BltByteStreamProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */; };
@@ -93,7 +97,6 @@
 		CA50431C0C5AE52B0060E6FE /* BltReplayGain.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */; };
 		CA50431D0C5AE52B0060E6FE /* BltFilterHost.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50424E0C5AE52B0060E6FE /* BltFilterHost.c */; };
 		CA50431E0C5AE52B0060E6FE /* BltFilterHost.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424F0C5AE52B0060E6FE /* BltFilterHost.h */; };
-		CA5043200C5AE52B0060E6FE /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA5043230C5AE52B0060E6FE /* BltMpegAudioDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042580C5AE52B0060E6FE /* BltMpegAudioDecoder.c */; };
 		CA5043240C5AE52B0060E6FE /* BltMpegAudioDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042590C5AE52B0060E6FE /* BltMpegAudioDecoder.h */; };
 		CA5043290C5AE52B0060E6FE /* BltGainControlFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042620C5AE52B0060E6FE /* BltGainControlFilter.c */; };
@@ -140,7 +143,6 @@
 		CA504B8F0C5C54450060E6FE /* BltVorbisDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50425B0C5AE52B0060E6FE /* BltVorbisDecoder.c */; };
 		CA504B900C5C54460060E6FE /* BltVorbisDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50425C0C5AE52B0060E6FE /* BltVorbisDecoder.h */; };
 		CA504E2D0C5E8E030060E6FE /* BltMp4Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5042AC0C5AE52B0060E6FE /* BltMp4Parser.cpp */; };
-		CA504E2F0C5E8E090060E6FE /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA504E730C5EA3D70060E6FE /* mapping0.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A6F0C5C53440060E6FE /* mapping0.c */; };
 		CA504E740C5EA3D80060E6FE /* mdct_lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = CA504A720C5C53440060E6FE /* mdct_lookup.h */; };
 		CA504E750C5EA3D90060E6FE /* info.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504A6B0C5C53440060E6FE /* info.c */; };
@@ -226,9 +228,60 @@
 		CA504F840C5EC7310060E6FE /* flac_window.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504F830C5EC7310060E6FE /* flac_window.c */; };
 		CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504E1B0C5E8D5A0060E6FE /* libMelo.a */; };
 		CA504FDF0C5ED62C0060E6FE /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504D7B0C5E8C870060E6FE /* libBento4.a */; };
+		CA64346E0C97197C00F67CD5 /* aacdec.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434350C97197C00F67CD5 /* aacdec.c */; };
+		CA64346F0C97197C00F67CD5 /* aactabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434360C97197C00F67CD5 /* aactabs.c */; };
+		CA6434700C97197C00F67CD5 /* aaccommon.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434380C97197C00F67CD5 /* aaccommon.h */; };
+		CA6434710C97197C00F67CD5 /* aacdec.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434390C97197C00F67CD5 /* aacdec.h */; };
+		CA6434720C97197C00F67CD5 /* statname.h in Headers */ = {isa = PBXBuildFile; fileRef = CA64343A0C97197C00F67CD5 /* statname.h */; };
+		CA6434800C97197C00F67CD5 /* assembly.h in Headers */ = {isa = PBXBuildFile; fileRef = CA64344F0C97197C00F67CD5 /* assembly.h */; };
+		CA6434810C97197C00F67CD5 /* bitstream.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434500C97197C00F67CD5 /* bitstream.c */; };
+		CA6434820C97197C00F67CD5 /* bitstream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434510C97197C00F67CD5 /* bitstream.h */; };
+		CA6434830C97197C00F67CD5 /* buffers.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434520C97197C00F67CD5 /* buffers.c */; };
+		CA6434840C97197C00F67CD5 /* coder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434530C97197C00F67CD5 /* coder.h */; };
+		CA6434850C97197C00F67CD5 /* dct4.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434540C97197C00F67CD5 /* dct4.c */; };
+		CA6434860C97197C00F67CD5 /* decelmnt.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434550C97197C00F67CD5 /* decelmnt.c */; };
+		CA6434870C97197C00F67CD5 /* dequant.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434560C97197C00F67CD5 /* dequant.c */; };
+		CA6434880C97197C00F67CD5 /* fft.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434570C97197C00F67CD5 /* fft.c */; };
+		CA6434890C97197C00F67CD5 /* filefmt.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434580C97197C00F67CD5 /* filefmt.c */; };
+		CA64348A0C97197C00F67CD5 /* huffman.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434590C97197C00F67CD5 /* huffman.c */; };
+		CA64348B0C97197C00F67CD5 /* hufftabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64345A0C97197C00F67CD5 /* hufftabs.c */; };
+		CA64348C0C97197C00F67CD5 /* imdct.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64345B0C97197C00F67CD5 /* imdct.c */; };
+		CA64348D0C97197C00F67CD5 /* noiseless.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64345C0C97197C00F67CD5 /* noiseless.c */; };
+		CA64348E0C97197C00F67CD5 /* pns.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64345D0C97197C00F67CD5 /* pns.c */; };
+		CA64348F0C97197C00F67CD5 /* sbr.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64345E0C97197C00F67CD5 /* sbr.c */; };
+		CA6434900C97197C00F67CD5 /* sbr.h in Headers */ = {isa = PBXBuildFile; fileRef = CA64345F0C97197C00F67CD5 /* sbr.h */; };
+		CA6434910C97197C00F67CD5 /* sbrfft.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434600C97197C00F67CD5 /* sbrfft.c */; };
+		CA6434920C97197C00F67CD5 /* sbrfreq.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434610C97197C00F67CD5 /* sbrfreq.c */; };
+		CA6434930C97197C00F67CD5 /* sbrhfadj.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434620C97197C00F67CD5 /* sbrhfadj.c */; };
+		CA6434950C97197C00F67CD5 /* sbrhuff.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434640C97197C00F67CD5 /* sbrhuff.c */; };
+		CA6434960C97197C00F67CD5 /* sbrimdct.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434650C97197C00F67CD5 /* sbrimdct.c */; };
+		CA6434970C97197C00F67CD5 /* sbrmath.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434660C97197C00F67CD5 /* sbrmath.c */; };
+		CA6434990C97197C00F67CD5 /* sbrside.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434680C97197C00F67CD5 /* sbrside.c */; };
+		CA64349A0C97197C00F67CD5 /* sbrtabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434690C97197C00F67CD5 /* sbrtabs.c */; };
+		CA64349B0C97197C00F67CD5 /* stproc.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64346A0C97197C00F67CD5 /* stproc.c */; };
+		CA64349C0C97197C00F67CD5 /* tns.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64346B0C97197C00F67CD5 /* tns.c */; };
+		CA64349D0C97197C00F67CD5 /* trigtabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA64346C0C97197C00F67CD5 /* trigtabs.c */; };
+		CA6434B60C971C2200F67CD5 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */; };
+		CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */; };
+		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
+		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CA18AD280C9326CF00A5FE6D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Bento4;
+		};
+		CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Melo;
+		};
 		CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -285,9 +338,19 @@
 			remoteGlobalIDString = CA504EB60C5EABCC0060E6FE;
 			remoteInfo = FLAC;
 		};
+		CA6435560C974C5200F67CD5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA6B38710C965CE9000D7A0A;
+			remoteInfo = HelixAAC;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CA0487870C99E13800638991 /* BltAdtsParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAdtsParser.h; sourceTree = "<group>"; };
+		CA0487880C99E13800638991 /* BltAdtsParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAdtsParser.c; sourceTree = "<group>"; };
+		CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltCommonMediaTypes.h; sourceTree = "<group>"; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
 		CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltBuiltins.h; sourceTree = "<group>"; };
 		CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamProvider.h; sourceTree = "<group>"; };
@@ -512,6 +575,44 @@
 		CA504F030C5EBB120060E6FE /* metadata_object.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = metadata_object.c; sourceTree = "<group>"; };
 		CA504F040C5EBB120060E6FE /* stream_decoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = stream_decoder.c; sourceTree = "<group>"; };
 		CA504F830C5EC7310060E6FE /* flac_window.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = flac_window.c; sourceTree = "<group>"; };
+		CA6434350C97197C00F67CD5 /* aacdec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aacdec.c; sourceTree = "<group>"; };
+		CA6434360C97197C00F67CD5 /* aactabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aactabs.c; sourceTree = "<group>"; };
+		CA6434380C97197C00F67CD5 /* aaccommon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = aaccommon.h; sourceTree = "<group>"; };
+		CA6434390C97197C00F67CD5 /* aacdec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = aacdec.h; sourceTree = "<group>"; };
+		CA64343A0C97197C00F67CD5 /* statname.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = statname.h; sourceTree = "<group>"; };
+		CA64344F0C97197C00F67CD5 /* assembly.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = assembly.h; sourceTree = "<group>"; };
+		CA6434500C97197C00F67CD5 /* bitstream.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = bitstream.c; sourceTree = "<group>"; };
+		CA6434510C97197C00F67CD5 /* bitstream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = bitstream.h; sourceTree = "<group>"; };
+		CA6434520C97197C00F67CD5 /* buffers.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = buffers.c; sourceTree = "<group>"; };
+		CA6434530C97197C00F67CD5 /* coder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coder.h; sourceTree = "<group>"; };
+		CA6434540C97197C00F67CD5 /* dct4.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = dct4.c; sourceTree = "<group>"; };
+		CA6434550C97197C00F67CD5 /* decelmnt.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = decelmnt.c; sourceTree = "<group>"; };
+		CA6434560C97197C00F67CD5 /* dequant.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = dequant.c; sourceTree = "<group>"; };
+		CA6434570C97197C00F67CD5 /* fft.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = fft.c; sourceTree = "<group>"; };
+		CA6434580C97197C00F67CD5 /* filefmt.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = filefmt.c; sourceTree = "<group>"; };
+		CA6434590C97197C00F67CD5 /* huffman.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = huffman.c; sourceTree = "<group>"; };
+		CA64345A0C97197C00F67CD5 /* hufftabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = hufftabs.c; sourceTree = "<group>"; };
+		CA64345B0C97197C00F67CD5 /* imdct.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = imdct.c; sourceTree = "<group>"; };
+		CA64345C0C97197C00F67CD5 /* noiseless.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = noiseless.c; sourceTree = "<group>"; };
+		CA64345D0C97197C00F67CD5 /* pns.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pns.c; sourceTree = "<group>"; };
+		CA64345E0C97197C00F67CD5 /* sbr.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbr.c; sourceTree = "<group>"; };
+		CA64345F0C97197C00F67CD5 /* sbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = sbr.h; sourceTree = "<group>"; };
+		CA6434600C97197C00F67CD5 /* sbrfft.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrfft.c; sourceTree = "<group>"; };
+		CA6434610C97197C00F67CD5 /* sbrfreq.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrfreq.c; sourceTree = "<group>"; };
+		CA6434620C97197C00F67CD5 /* sbrhfadj.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrhfadj.c; sourceTree = "<group>"; };
+		CA6434630C97197C00F67CD5 /* sbrhfgen.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrhfgen.c; sourceTree = "<group>"; };
+		CA6434640C97197C00F67CD5 /* sbrhuff.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrhuff.c; sourceTree = "<group>"; };
+		CA6434650C97197C00F67CD5 /* sbrimdct.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrimdct.c; sourceTree = "<group>"; };
+		CA6434660C97197C00F67CD5 /* sbrmath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrmath.c; sourceTree = "<group>"; };
+		CA6434670C97197C00F67CD5 /* sbrqmf.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrqmf.c; sourceTree = "<group>"; };
+		CA6434680C97197C00F67CD5 /* sbrside.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrside.c; sourceTree = "<group>"; };
+		CA6434690C97197C00F67CD5 /* sbrtabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sbrtabs.c; sourceTree = "<group>"; };
+		CA64346A0C97197C00F67CD5 /* stproc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = stproc.c; sourceTree = "<group>"; };
+		CA64346B0C97197C00F67CD5 /* tns.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = tns.c; sourceTree = "<group>"; };
+		CA64346C0C97197C00F67CD5 /* trigtabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = trigtabs.c; sourceTree = "<group>"; };
+		CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
+		CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
+		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2AAC046055464E500DB518D /* libBlueTune.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBlueTune.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -530,6 +631,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA6B38700C965CE9000D7A0A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D289987405E68DCB004EDB86 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -538,6 +646,7 @@
 				CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */,
 				CA504E950C5EA3FF0060E6FE /* libTremor.a in Frameworks */,
 				CA504F540C5EBF710060E6FE /* libFLAC.a in Frameworks */,
+				CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,6 +674,7 @@
 				D2AAC046055464E500DB518D /* libBlueTune.a */,
 				CA504E6F0C5EA3960060E6FE /* libTremor.a */,
 				CA504EB70C5EABCC0060E6FE /* libFLAC.a */,
+				CA6B38720C965CE9000D7A0A /* libHelixAAC.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -574,6 +684,15 @@
 			children = (
 			);
 			name = Documentation;
+			sourceTree = "<group>";
+		};
+		CA0487860C99E13800638991 /* Adts */ = {
+			isa = PBXGroup;
+			children = (
+				CA0487870C99E13800638991 /* BltAdtsParser.h */,
+				CA0487880C99E13800638991 /* BltAdtsParser.c */,
+			);
+			path = Adts;
 			sourceTree = "<group>";
 		};
 		CA5041D50C5AE52B0060E6FE /* Source */ = {
@@ -741,6 +860,7 @@
 		CA5042480C5AE52B0060E6FE /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */,
 				CA5042490C5AE52B0060E6FE /* BltBuiltins.c */,
 				CA50424A0C5AE52B0060E6FE /* BltReplayGain.c */,
 				CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */,
@@ -768,6 +888,7 @@
 		CA5042500C5AE52B0060E6FE /* Decoders */ = {
 			isa = PBXGroup;
 			children = (
+				CA6434AC0C971B5500F67CD5 /* HelixAAC */,
 				CA5042510C5AE52B0060E6FE /* AAC */,
 				CA5042540C5AE52B0060E6FE /* FLAC */,
 				CA5042570C5AE52B0060E6FE /* MpegAudio */,
@@ -977,6 +1098,7 @@
 		CA5042A70C5AE52B0060E6FE /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				CA0487860C99E13800638991 /* Adts */,
 				CA5042A80C5AE52B0060E6FE /* Aiff */,
 				CA5042AB0C5AE52B0060E6FE /* Mp4 */,
 				CA5042AE0C5AE52B0060E6FE /* Tags */,
@@ -1053,6 +1175,7 @@
 		CA5049B10C5C53440060E6FE /* ThirdParty */ = {
 			isa = PBXGroup;
 			children = (
+				CA6434330C97197C00F67CD5 /* HelixAAC */,
 				CA5049CA0C5C53440060E6FE /* FLAC */,
 				CA504A580C5C53440060E6FE /* Vorbis */,
 			);
@@ -1258,6 +1381,121 @@
 			path = protected;
 			sourceTree = "<group>";
 		};
+		CA6434330C97197C00F67CD5 /* HelixAAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA6434340C97197C00F67CD5 /* Source */,
+			);
+			path = HelixAAC;
+			sourceTree = "<group>";
+		};
+		CA6434340C97197C00F67CD5 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				CA6434350C97197C00F67CD5 /* aacdec.c */,
+				CA6434360C97197C00F67CD5 /* aactabs.c */,
+				CA6434370C97197C00F67CD5 /* pub */,
+				CA64343C0C97197C00F67CD5 /* real */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		CA6434370C97197C00F67CD5 /* pub */ = {
+			isa = PBXGroup;
+			children = (
+				CA6434380C97197C00F67CD5 /* aaccommon.h */,
+				CA6434390C97197C00F67CD5 /* aacdec.h */,
+				CA64343A0C97197C00F67CD5 /* statname.h */,
+			);
+			path = pub;
+			sourceTree = "<group>";
+		};
+		CA64343C0C97197C00F67CD5 /* real */ = {
+			isa = PBXGroup;
+			children = (
+				CA64343D0C97197C00F67CD5 /* asm */,
+				CA64344F0C97197C00F67CD5 /* assembly.h */,
+				CA6434500C97197C00F67CD5 /* bitstream.c */,
+				CA6434510C97197C00F67CD5 /* bitstream.h */,
+				CA6434520C97197C00F67CD5 /* buffers.c */,
+				CA6434530C97197C00F67CD5 /* coder.h */,
+				CA6434540C97197C00F67CD5 /* dct4.c */,
+				CA6434550C97197C00F67CD5 /* decelmnt.c */,
+				CA6434560C97197C00F67CD5 /* dequant.c */,
+				CA6434570C97197C00F67CD5 /* fft.c */,
+				CA6434580C97197C00F67CD5 /* filefmt.c */,
+				CA6434590C97197C00F67CD5 /* huffman.c */,
+				CA64345A0C97197C00F67CD5 /* hufftabs.c */,
+				CA64345B0C97197C00F67CD5 /* imdct.c */,
+				CA64345C0C97197C00F67CD5 /* noiseless.c */,
+				CA64345D0C97197C00F67CD5 /* pns.c */,
+				CA64345E0C97197C00F67CD5 /* sbr.c */,
+				CA64345F0C97197C00F67CD5 /* sbr.h */,
+				CA6434600C97197C00F67CD5 /* sbrfft.c */,
+				CA6434610C97197C00F67CD5 /* sbrfreq.c */,
+				CA6434620C97197C00F67CD5 /* sbrhfadj.c */,
+				CA6434630C97197C00F67CD5 /* sbrhfgen.c */,
+				CA6434640C97197C00F67CD5 /* sbrhuff.c */,
+				CA6434650C97197C00F67CD5 /* sbrimdct.c */,
+				CA6434660C97197C00F67CD5 /* sbrmath.c */,
+				CA6434670C97197C00F67CD5 /* sbrqmf.c */,
+				CA6434680C97197C00F67CD5 /* sbrside.c */,
+				CA6434690C97197C00F67CD5 /* sbrtabs.c */,
+				CA64346A0C97197C00F67CD5 /* stproc.c */,
+				CA64346B0C97197C00F67CD5 /* tns.c */,
+				CA64346C0C97197C00F67CD5 /* trigtabs.c */,
+			);
+			path = real;
+			sourceTree = "<group>";
+		};
+		CA64343D0C97197C00F67CD5 /* asm */ = {
+			isa = PBXGroup;
+			children = (
+				CA64343E0C97197C00F67CD5 /* armads */,
+				CA6434420C97197C00F67CD5 /* armgcc */,
+				CA6434460C97197C00F67CD5 /* armgcc_nosyms */,
+				CA64344A0C97197C00F67CD5 /* armwince */,
+			);
+			path = asm;
+			sourceTree = "<group>";
+		};
+		CA64343E0C97197C00F67CD5 /* armads */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = armads;
+			sourceTree = "<group>";
+		};
+		CA6434420C97197C00F67CD5 /* armgcc */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = armgcc;
+			sourceTree = "<group>";
+		};
+		CA6434460C97197C00F67CD5 /* armgcc_nosyms */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = armgcc_nosyms;
+			sourceTree = "<group>";
+		};
+		CA64344A0C97197C00F67CD5 /* armwince */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = armwince;
+			sourceTree = "<group>";
+		};
+		CA6434AC0C971B5500F67CD5 /* HelixAAC */ = {
+			isa = PBXGroup;
+			children = (
+				CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */,
+				CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */,
+			);
+			path = HelixAAC;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1324,6 +1562,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA6B386E0C965CE9000D7A0A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA6434700C97197C00F67CD5 /* aaccommon.h in Headers */,
+				CA6434710C97197C00F67CD5 /* aacdec.h in Headers */,
+				CA6434720C97197C00F67CD5 /* statname.h in Headers */,
+				CA6434800C97197C00F67CD5 /* assembly.h in Headers */,
+				CA6434820C97197C00F67CD5 /* bitstream.h in Headers */,
+				CA6434840C97197C00F67CD5 /* coder.h in Headers */,
+				CA6434900C97197C00F67CD5 /* sbr.h in Headers */,
+				CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2AAC043055464E500DB518D /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1382,7 +1635,6 @@
 				CA5043190C5AE52B0060E6FE /* BltPcmAdapter.h in Headers */,
 				CA50431C0C5AE52B0060E6FE /* BltReplayGain.h in Headers */,
 				CA50431E0C5AE52B0060E6FE /* BltFilterHost.h in Headers */,
-				CA5043200C5AE52B0060E6FE /* BltAacDecoder.h in Headers */,
 				CA5043240C5AE52B0060E6FE /* BltMpegAudioDecoder.h in Headers */,
 				CA50432A0C5AE52B0060E6FE /* BltGainControlFilter.h in Headers */,
 				CA50432C0C5AE52B0060E6FE /* BltWaveFormatter.h in Headers */,
@@ -1407,6 +1659,8 @@
 				CA5046AB0C5BC54A0060E6FE /* BltMacOSXOutput.h in Headers */,
 				CA504B900C5C54460060E6FE /* BltVorbisDecoder.h in Headers */,
 				CA504F5A0C5EC0A70060E6FE /* BltFlacDecoder.h in Headers */,
+				CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */,
+				CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1447,6 +1701,23 @@
 			productReference = CA504EB70C5EABCC0060E6FE /* libFLAC.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		CA6B38710C965CE9000D7A0A /* HelixAAC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA6B38760C965D00000D7A0A /* Build configuration list for PBXNativeTarget "HelixAAC" */;
+			buildPhases = (
+				CA6B386E0C965CE9000D7A0A /* Headers */,
+				CA6B386F0C965CE9000D7A0A /* Sources */,
+				CA6B38700C965CE9000D7A0A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HelixAAC;
+			productName = HelixAAC;
+			productReference = CA6B38720C965CE9000D7A0A /* libHelixAAC.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		D2AAC045055464E500DB518D /* BlueTune */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */;
@@ -1462,6 +1733,9 @@
 				CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */,
 				CA504F8D0C5EC79A0060E6FE /* PBXTargetDependency */,
 				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
+				CA6435570C974C5200F67CD5 /* PBXTargetDependency */,
+				CA18AD290C9326CF00A5FE6D /* PBXTargetDependency */,
+				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
 			);
 			name = BlueTune;
 			productName = BlueTune;
@@ -1499,6 +1773,7 @@
 				D2AAC045055464E500DB518D /* BlueTune */,
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
+				CA6B38710C965CE9000D7A0A /* HelixAAC */,
 			);
 		};
 /* End PBXProject section */
@@ -1579,6 +1854,42 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA6B386F0C965CE9000D7A0A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA64346E0C97197C00F67CD5 /* aacdec.c in Sources */,
+				CA64346F0C97197C00F67CD5 /* aactabs.c in Sources */,
+				CA6434810C97197C00F67CD5 /* bitstream.c in Sources */,
+				CA6434830C97197C00F67CD5 /* buffers.c in Sources */,
+				CA6434850C97197C00F67CD5 /* dct4.c in Sources */,
+				CA6434860C97197C00F67CD5 /* decelmnt.c in Sources */,
+				CA6434870C97197C00F67CD5 /* dequant.c in Sources */,
+				CA6434880C97197C00F67CD5 /* fft.c in Sources */,
+				CA6434890C97197C00F67CD5 /* filefmt.c in Sources */,
+				CA64348A0C97197C00F67CD5 /* huffman.c in Sources */,
+				CA64348B0C97197C00F67CD5 /* hufftabs.c in Sources */,
+				CA64348C0C97197C00F67CD5 /* imdct.c in Sources */,
+				CA64348D0C97197C00F67CD5 /* noiseless.c in Sources */,
+				CA64348E0C97197C00F67CD5 /* pns.c in Sources */,
+				CA64348F0C97197C00F67CD5 /* sbr.c in Sources */,
+				CA6434910C97197C00F67CD5 /* sbrfft.c in Sources */,
+				CA6434920C97197C00F67CD5 /* sbrfreq.c in Sources */,
+				CA6434930C97197C00F67CD5 /* sbrhfadj.c in Sources */,
+				CA6434950C97197C00F67CD5 /* sbrhuff.c in Sources */,
+				CA6434960C97197C00F67CD5 /* sbrimdct.c in Sources */,
+				CA6434970C97197C00F67CD5 /* sbrmath.c in Sources */,
+				CA6434990C97197C00F67CD5 /* sbrside.c in Sources */,
+				CA64349A0C97197C00F67CD5 /* sbrtabs.c in Sources */,
+				CA64349B0C97197C00F67CD5 /* stproc.c in Sources */,
+				CA64349C0C97197C00F67CD5 /* tns.c in Sources */,
+				CA64349D0C97197C00F67CD5 /* trigtabs.c in Sources */,
+				CA6434B60C971C2200F67CD5 /* BltAacDecoder.c in Sources */,
+				CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */,
+				CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2AAC044055464E500DB518D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1638,14 +1949,24 @@
 				CA5046AA0C5BC54A0060E6FE /* BltMacOSXOutput.c in Sources */,
 				CA504B8F0C5C54450060E6FE /* BltVorbisDecoder.c in Sources */,
 				CA504E2D0C5E8E030060E6FE /* BltMp4Parser.cpp in Sources */,
-				CA504E2F0C5E8E090060E6FE /* BltAacDecoder.c in Sources */,
 				CA504F5B0C5EC0A80060E6FE /* BltFlacDecoder.c in Sources */,
+				CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CA18AD290C9326CF00A5FE6D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4;
+			targetProxy = CA18AD280C9326CF00A5FE6D /* PBXContainerItemProxy */;
+		};
+		CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Melo;
+			targetProxy = CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */;
+		};
 		CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Atomix;
@@ -1665,6 +1986,11 @@
 			isa = PBXTargetDependency;
 			target = CA504EB60C5EABCC0060E6FE /* FLAC */;
 			targetProxy = CA504F8E0C5EC79A0060E6FE /* PBXContainerItemProxy */;
+		};
+		CA6435570C974C5200F67CD5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA6B38710C965CE9000D7A0A /* HelixAAC */;
+			targetProxy = CA6435560C974C5200F67CD5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1691,6 +2017,7 @@
 					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
@@ -1709,7 +2036,7 @@
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/Core $(BENTO4_HOME)/Source/C++/MetaData $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -1737,6 +2064,7 @@
 					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
@@ -1755,7 +2083,7 @@
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/Core $(BENTO4_HOME)/Source/C++/MetaData $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 			};
 			name = Release;
 		};
@@ -1877,6 +2205,54 @@
 			};
 			name = Release;
 		};
+		CA6B38770C965D00000D7A0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_DEFAULT_STDLIB,
+					AAC_ENABLE_SBR,
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(ATOMIX_HOME)/Source/Core",
+					"$(NEPTUNE_HOME)/Source/Core",
+					"$(SRCROOT)/../../../**",
+				);
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = HelixAAC;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA6B38780C965D00000D7A0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_DEFAULT_STDLIB,
+					AAC_ENABLE_SBR,
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(ATOMIX_HOME)/Source/Core",
+					"$(NEPTUNE_HOME)/Source/Core",
+					"$(SRCROOT)/../../../**",
+				);
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = HelixAAC;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1912,6 +2288,15 @@
 			buildConfigurations = (
 				CA504EC90C5EABDB0060E6FE /* Debug */,
 				CA504ECA0C5EABDB0060E6FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA6B38760C965D00000D7A0A /* Build configuration list for PBXNativeTarget "HelixAAC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA6B38770C965D00000D7A0A /* Debug */,
+				CA6B38780C965D00000D7A0A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

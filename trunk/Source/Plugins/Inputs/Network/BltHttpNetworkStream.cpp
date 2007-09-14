@@ -20,6 +20,11 @@
 #include "BltStream.h"
 
 /*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.network.http")
+
+/*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
 const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 65536;
@@ -85,6 +90,8 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
 
     // query the registry
     const char* content_type = self->m_Response->GetEntity()->GetContentType();
+    ATX_LOG_INFO_1("HttpInputStream::GetMediaType - Content-Type = %s", 
+                   content_type?content_type:"unknown");
     if (content_type[0] == '\0' && self->m_IsIcy) {
         // if the content type is not specified, and this is an ICY stream,
         // assume MP3

@@ -22,6 +22,7 @@
 #include "BltPacketConsumer.h"
 #include "BltStream.h"
 #include "BltReplayGain.h"
+#include "BltCommonMediaTypes.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -37,14 +38,6 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.aac")
 /*----------------------------------------------------------------------
 |    types
 +---------------------------------------------------------------------*/
-typedef struct {
-    BLT_MediaType base;
-    unsigned int  object_type_id;
-    unsigned int  decoder_info_length;
-    /* variable size array follows */
-    unsigned char decoder_info[1]; /* could be more than 1 byte */
-} BLT_Mpeg4AudioMediaType;
-
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseModule);

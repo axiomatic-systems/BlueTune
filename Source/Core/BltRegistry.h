@@ -95,6 +95,10 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Registry)
                                BLT_CString           category,
                                BLT_CString           name,
                                BLT_UInt32*           id);
+    BLT_Result (*RegisterNameForId)(BLT_Registry* self, 
+                                    BLT_CString   category,
+                                    BLT_CString   name,
+                                    BLT_UInt32    id);
     BLT_Result (*GetNameForId)(BLT_Registry*         self, 
                                BLT_CString           category,
                                BLT_UInt32            id,
@@ -133,6 +137,10 @@ parent, name, value_type, value)
 
 #define BLT_Registry_RegisterName(object, category, name, id) \
 ATX_INTERFACE(object)->RegisterName(object, category, \
+name, id)
+
+#define BLT_Registry_RegisterNameForId(object, category, name, id) \
+ATX_INTERFACE(object)->RegisterNameForId(object, category, \
 name, id)
 
 #define BLT_Registry_GetNameForId(object, category, name, id) \

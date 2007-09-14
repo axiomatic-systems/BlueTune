@@ -608,7 +608,7 @@ WaveParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->wav_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("Wave Parser Module::Attach (audio/wav type = %d", self->wav_type_id);
+    ATX_LOG_FINE_1("Wave Parser Module::Attach (audio/wav type = %d)", self->wav_type_id);
 
     return BLT_SUCCESS;
 }

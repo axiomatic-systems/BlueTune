@@ -892,6 +892,29 @@ MpegAudioDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->mpeg_audio_type_id);
     if (BLT_FAILED(result)) return result;
     
+    /* register mime type aliases */
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/mp3", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/x-mp3", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/mpg", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/x-mpg", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/x-mpeg", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/mpeg3", self->mpeg_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/x-mpeg3", self->mpeg_audio_type_id);
+
     ATX_LOG_FINE_1("MpegAudioDecoderModule::Attach (audio/mpeg type = %d)", self->mpeg_audio_type_id);
 
     return BLT_SUCCESS;

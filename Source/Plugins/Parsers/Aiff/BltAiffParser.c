@@ -37,7 +37,6 @@ typedef struct {
 
     /* members */
     BLT_UInt32 aiff_type_id;
-    BLT_UInt32 x_aiff_type_id;
 } AiffParserModule;
 
 typedef struct {
@@ -744,14 +743,14 @@ AiffParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->aiff_type_id);
     if (BLT_FAILED(result)) return result;
     
-    result = BLT_Registry_RegisterName(
+    result = BLT_Registry_RegisterNameForId(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/x-aiff",
-        &self->x_aiff_type_id);
+        self->aiff_type_id);
     if (BLT_FAILED(result)) return result;
 
-    ATX_LOG_FINE_1("AiffParserModule::Attach (audio/aiff type = %d",
+    ATX_LOG_FINE_1("AiffParserModule::Attach (audio/aiff type = %d)",
                    self->aiff_type_id);
 
     return BLT_SUCCESS;
@@ -790,8 +789,7 @@ AiffParserModule_Probe(BLT_Module*              _self,
             }
 
             /* we need the input media type to be 'audio/aiff' or 'audio/x-aiff' */
-            if (constructor->spec.input.media_type->id != self->aiff_type_id &&
-                constructor->spec.input.media_type->id != self->x_aiff_type_id) {
+            if (constructor->spec.input.media_type->id != self->aiff_type_id) {
                 return BLT_FAILURE;
             }
 

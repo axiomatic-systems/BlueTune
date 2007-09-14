@@ -21,6 +21,7 @@
 #include "BltPacketProducer.h"
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
+#include "BltCommonMediaTypes.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -38,14 +39,6 @@ struct Mp4ParserModule {
     BLT_UInt32 mp4_type_id;
     BLT_UInt32 mp4es_type_id;
 };
-
-typedef struct {
-    BLT_MediaType base;
-    unsigned int  object_type_id;
-    unsigned int  decoder_info_length;
-    /* variable size array follows */
-    unsigned char decoder_info[1]; /* could be more than 1 byte */
-} BLT_Mpeg4AudioMediaType;
 
 class Mp4StreamAdapter : public AP4_ByteStream {
 public:
@@ -99,6 +92,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
+    BLT_UInt32               media_type_id;
     BLT_Mpeg4AudioMediaType* media_type;
     BLT_Ordinal              sample;
     AP4_DataBuffer*          sample_buffer;
@@ -114,8 +108,6 @@ typedef struct {
     /* members */
     Mp4ParserInput  input;
     Mp4ParserOutput output;
-    BLT_UInt32      mp4_type_id;
-    BLT_UInt32      mp4es_type_id;
 } Mp4Parser;
 
 /*----------------------------------------------------------------------
@@ -325,8 +317,8 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     // setup the output media type
     self->output.media_type = (BLT_Mpeg4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mpeg4AudioMediaType)+decoder_info->GetDataSize());
-    BLT_MediaType_Init(&self->output.media_type->base, self->mp4es_type_id);
-    self->output.media_type->base.extension_size = sizeof(BLT_Mpeg4AudioMediaType)-sizeof(BLT_MediaType);
+    BLT_MediaType_Init(&self->output.media_type->base, self->output.media_type_id);
+    self->output.media_type->base.extension_size = sizeof(BLT_Mpeg4AudioMediaType)+decoder_info->GetDataSize()-sizeof(BLT_MediaType);
     self->output.media_type->object_type_id      = mpeg_desc->GetObjectTypeId();
     self->output.media_type->decoder_info_length =  decoder_info->GetDataSize();
     ATX_CopyMemory(&self->output.media_type->decoder_info[0], decoder_info->GetData(), decoder_info->GetDataSize());
@@ -651,8 +643,7 @@ Mp4Parser_Construct(Mp4Parser* self, BLT_Module* module, BLT_Core* core)
 
     /* setup media types */
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
-    self->mp4_type_id   = mp4_parser_module->mp4_type_id;
-    self->mp4es_type_id = mp4_parser_module->mp4es_type_id;
+    self->output.media_type_id = mp4_parser_module->mp4es_type_id;
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, Mp4Parser, BLT_BaseMediaNode, BLT_MediaNode);
@@ -719,6 +710,12 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                             "audio/mp4");
     if (BLT_FAILED(result)) return result;
 
+    /* register the ".3gp" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".3gp",
+                                            "audio/mp4");
+    if (BLT_FAILED(result)) return result;
+
     /* get the type id for "audio/mp4" */
     result = BLT_Registry_GetIdForName(
         registry,
@@ -726,7 +723,7 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/mp4",
         &self->mp4_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/mp4 type = %d", self->mp4_type_id);
+    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/mp4 type = %d)", self->mp4_type_id);
     
     /* register the type id for "audio/vnd.bluetune.mp4-es" */
     result = BLT_Registry_RegisterName(
@@ -735,7 +732,7 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/vnd.bluetune.mp4-es",
         &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/vnd.bluetune.mp4-es type = %d", self->mp4es_type_id);
+    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/vnd.bluetune.mp4-es type = %d)", self->mp4es_type_id);
 
     return BLT_SUCCESS;
 }

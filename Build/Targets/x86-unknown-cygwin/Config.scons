@@ -1,7 +1,7 @@
 LoadTool('gcc-generic', env)
 
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
-env['ATX_EXTRA_LIBS']='m'
+env['ATX_EXTRA_LIBS']=['m']
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['BLT_PLUGINS'] = ['FileInput', 

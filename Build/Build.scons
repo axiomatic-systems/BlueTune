@@ -7,7 +7,6 @@ from BuildUtils import *
 # Main Build
 #######################################################
 Import("env")
-SetDefaultEnv(env)
 env['NPT_EXTRA_LIBS'] = ''
 env['ATX_EXTRA_LIBS'] = ''
 env['BLT_EXTRA_LIBS'] = ''
@@ -30,8 +29,12 @@ if os.path.exists(target_config_file):
 ### extra plugins
 if env.has_key('extra_plugins'): 
     env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
+
 ### optional modules
 OptionalModules = []
+
+### default build env
+SetDefaultEnv(env)
 
 ############################# Atomix
 ATX_SOURCE_ROOT = 'Atomix/Source'
@@ -62,7 +65,7 @@ CompiledModule(name                  = 'Neptune',
 AP4_SOURCE_ROOT = 'Bento4/Source/C++'
 AP4_EXTRA_CPP_DEFINES = env.has_key('AP4_CPP_DEFINES') and env['AP4_CPP_DEFINES'] or []
 if env['build_config'] == 'Debug':
-    AP4_EXTRA_CPP_DEFINES.append(['AP4_DEBUG'])
+    AP4_EXTRA_CPP_DEFINES.append('AP4_DEBUG')
 
 MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
 CompiledModule(name                  = 'Bento4',
@@ -78,6 +81,8 @@ MLO_SOURCE_ROOT = 'Melo/Source'
 MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
 if env['build_config'] == 'Debug':
     MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
+if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
+    MLO_EXTRA_CPP_DEFINES += ['MLO_CONFIG_FIXED']
 
 MapSourceDir(MLO_SOURCE_ROOT, '#/../Melo/Source')
 CompiledModule(name              = 'Melo',
@@ -103,9 +108,9 @@ elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_BUILTIN'):
     fluo_decoder_lib_dirs = []
     fluo_decoder_inc_dirs = []
     
-fluo_extra_cpp_defines = {'FLO_DECODER_ENGINE':env['FLO_DECODER_ENGINE']}
+fluo_extra_cpp_defines = [('FLO_DECODER_ENGINE',env['FLO_DECODER_ENGINE'])]
 if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
-    fluo_extra_cpp_defines['FLO_CONFIG_INTEGER_DECODE'] = True
+    fluo_extra_cpp_defines += ['FLO_CONFIG_INTEGER_DECODE']
     
 CompiledModule(name               = 'Fluo',
                source_root        = 'Source/Fluo',
@@ -159,7 +164,7 @@ if os.environ.has_key('WMSDK_HOME'):
                              'WMAAPI_NO_DRM_STREAM',
                              'DISABLE_UES']  
     if env['build_config'] == 'Release':
-        WMA_EXTRA_CPP_DEFINES['NDEBUG'] = None
+        WMA_EXTRA_CPP_DEFINES.append('NDEBUG')
     wma_env = env.has_key('WMA_ENV') and env['WMA_ENV'] or None
     MapSourceDir(WMA_SOURCE_ROOT, '#/../WMSDK/WMPK/WMA10Dec')
     CompiledModule(name        = 'BltWmaDecoder',
@@ -268,8 +273,8 @@ for plugin in env['BLT_PLUGINS']:
                    extra_cpp_defines  = extra_flags,
                    environment        = extra_env)
 
-plugins_cpp_defines = dict([[PluginsSettings[p]['flags'], None] for p in env['BLT_PLUGINS']])
-plugins_cpp_defines['BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME'] = '"'+env['BLT_DEFAULT_OUTPUT']+'"'
+plugins_cpp_defines = [PluginsSettings[p]['flags'] for p in env['BLT_PLUGINS']]
+plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME', '"'+env['BLT_DEFAULT_OUTPUT']+'"')]
 
 CompiledModule(name               = 'BltPlugins',
                build_source_dirs  = [],

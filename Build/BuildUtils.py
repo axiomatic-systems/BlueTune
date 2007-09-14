@@ -9,6 +9,7 @@ DefaultEnv = Environment()
 SourceDirMap = {}
 
 def SetDefaultEnv(env):
+    global DefaultEnv
     DefaultEnv = env
 
 def MapSourceDir(key, val):

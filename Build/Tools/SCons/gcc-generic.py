@@ -16,7 +16,7 @@ def generate(env, gcc_cross_prefix=None, gcc_extra_options='', gcc_relaxed_warni
     if env['build_config'] == 'Debug':
         c_compiler_flags = '-g'    
     else:
-        c_compiler_flags = '-O3'
+        c_compiler_flags = '-O3 -fomit-frame-pointer'
     
     if env['enable_profiling']:
         c_compiler_profile_flags = '-pg'

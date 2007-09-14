@@ -8,12 +8,12 @@ env['ATX_EXTRA_LIBS']='m'
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
 env['NPT_EXTRA_LIBS']='pthread'
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
-env['AP4_CPP_DEFINES']={'AP4_PLATFORM_BYTE_ORDER':'AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN'}
-env['MLO_CPP_DEFINES'] = {'MLO_CONFIG_FIXED':None}
+env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN')]
+env['MLO_CPP_DEFINES'] = ['MLO_CONFIG_FIXED']
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
-                      #'MpegAudioDecoder', 
+                      'MpegAudioDecoder', 
                       #'FlacDecoder',
                       'AacDecoder',
                       'StreamPacketizer', 

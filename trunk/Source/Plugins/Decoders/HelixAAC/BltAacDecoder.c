@@ -417,7 +417,7 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         if (decoder_config.object_type == BLT_AAC_OBJECT_TYPE_AAC_LC) {
             aac_frame_info.profile = AAC_PROFILE_LC;
         }
-        self->sample_buffer_size = BLT_AAC_FRAME_SIZE*2*aac_frame_info.nChans*2; // the last *2 is for SBR support
+        self->sample_buffer_size = BLT_AAC_FRAME_SIZE*2*aac_frame_info.nChans*2; /* the last *2 is for SBR support */
         AACSetRawBlockParams(self->helix_decoder, 0, &aac_frame_info);        
     }
 
@@ -469,9 +469,12 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                                    BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
                 BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
             }
+
+            /* update the packet media type */
+            BLT_MediaPacket_SetMediaType(out_packet, (BLT_MediaType*)&self->output.media_type);
         } else {
             /* we've already setup a media type, check that this is the same */
-            if (self->output.media_type.sample_rate   != aac_frame_info.sampRateOut || 
+            if (self->output.media_type.sample_rate   != (unsigned int)aac_frame_info.sampRateOut || 
                 self->output.media_type.channel_count != aac_frame_info.nChans) {
                 BLT_MediaPacket_Release(out_packet);
                 return BLT_ERROR_INVALID_MEDIA_FORMAT;
@@ -646,9 +649,6 @@ AacDecoder_Create(BLT_Module*              module,
         return result;
     }
 
-    /* create a sample buffer */
-    //MLO_SampleBuffer_Create(0, &(self->sample_buffer));
-
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, AacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, AacDecoder, BLT_BaseMediaNode, ATX_Referenceable);
@@ -678,9 +678,6 @@ AacDecoder_Destroy(AacDecoder* self)
     
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
-
-    /* destroy the sample buffer */
-    //MLO_SampleBuffer_Destroy(self->sample_buffer);
 
     /* free the object memory */
     ATX_FreeMemory(self);

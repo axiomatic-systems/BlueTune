@@ -363,7 +363,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
                                               hw_params, 
                                               &rate, NULL);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'rate' failed (%d)", ior);
+            ATX_LOG_WARNING_2("AlsaOutput::Configure - set 'rate' (%d) failed (%d)", rate, ior);
             return BLT_FAILURE;
         }
 
@@ -371,7 +371,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         ior = snd_pcm_hw_params_set_channels(self->device_handle, hw_params,
                                              format->channel_count);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'channels' failed (%d)", ior);
+            ATX_LOG_WARNING_2("AlsaOutput::Configure - set 'channels' (%d) failed (%d)", format->channel_count, ior);
             return BLT_FAILURE;
         }
 

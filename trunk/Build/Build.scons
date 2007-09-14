@@ -7,9 +7,9 @@ from BuildUtils import *
 # Main Build
 #######################################################
 Import("env")
-env['NPT_EXTRA_LIBS'] = ''
-env['ATX_EXTRA_LIBS'] = ''
-env['BLT_EXTRA_LIBS'] = ''
+env['NPT_EXTRA_LIBS'] = []
+env['ATX_EXTRA_LIBS'] = []
+env['BLT_EXTRA_LIBS'] = []
 
 ### enable logging in all builds
 env.Append(CPPDEFINES = ['ATX_CONFIG_ENABLE_LOGGING', 'NPT_CONFIG_ENABLE_LOGGING'])
@@ -48,6 +48,14 @@ MapSourceDir(ATX_SOURCE_ROOT, '#/../Atomix/Source')CompiledModule(name         
                linked_modules        = env['ATX_EXTRA_LIBS'],
                extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
 
+############################ Zlib
+ZLIB_SOURCE_ROOT = 'Neptune/ThirdParty/zlib-1.2.3'
+MapSourceDir(ZLIB_SOURCE_ROOT, '#/../Neptune/ThirdParty/zlib-1.2.3')
+CompiledModule(name                  = 'Zlib',
+               module_type           = 'StaticLibrary',
+               source_root           = ZLIB_SOURCE_ROOT,
+               build_source_dirs     = ['.'])
+
 ############################ Neptune
 NPT_SOURCE_ROOT = 'Neptune/Source'
 NPT_EXTRA_CPP_DEFINES = env['build_config'] == 'Debug' and ['NPT_DEBUG'] or []
@@ -58,7 +66,7 @@ CompiledModule(name                  = 'Neptune',
                build_source_dirs     = ['Core'],
                build_source_files    = env['NPT_SYSTEM_SOURCES'],
                included_only_modules = [NPT_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Neptune']],
-               linked_modules        = env['NPT_EXTRA_LIBS'],
+               linked_modules        = env['NPT_EXTRA_LIBS']+['Zlib'],
                extra_cpp_defines     = NPT_EXTRA_CPP_DEFINES)
 
 ############################ Bento4
@@ -76,19 +84,36 @@ CompiledModule(name                  = 'Bento4',
                included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto']],
                extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
 
-############################ Melo
-MLO_SOURCE_ROOT = 'Melo/Source'
-MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
-if env['build_config'] == 'Debug':
-    MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
-if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
-    MLO_EXTRA_CPP_DEFINES += ['MLO_CONFIG_FIXED']
+############################ select AAC library
+if 'AacDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
+    env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
-MapSourceDir(MLO_SOURCE_ROOT, '#/../Melo/Source')
-CompiledModule(name              = 'Melo',
-               source_root       = MLO_SOURCE_ROOT,
-               extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
+############################ Melo
+if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
+    MLO_SOURCE_ROOT = 'Melo/Source'
+    MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
+    BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/AAC'
+    BLT_AAC_DECODER_PLUGIN_DEPS = ['Melo']
+    if env['build_config'] == 'Debug':
+        MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
+    if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
+        MLO_EXTRA_CPP_DEFINES += ['MLO_CONFIG_FIXED']
+
+    MapSourceDir(MLO_SOURCE_ROOT, '#/../Melo/Source')
+    CompiledModule(name              = 'Melo',
+                   source_root       = MLO_SOURCE_ROOT,
+                   extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
 	
+############################ HelixAAC
+if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
+    BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/HelixAAC'
+    BLT_AAC_DECODER_PLUGIN_DEPS = ['HelixAAC']
+    CompiledModule(name		         = 'HelixAAC',
+                   source_root       = 'ThirdParty/HelixAAC/Source',
+                   build_source_dirs = ['.', 'pub', 'real'],
+                   extra_cpp_defines = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
+                   environment       = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
+
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
@@ -215,12 +240,13 @@ PluginsSettings = {
     'MpegAudioDecoder' : {'flags':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
     'FlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
-    'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':'Decoders/AAC'             },
+    'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
     'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                             },
     'WaveParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
     'AiffParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
     'TagParser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },
     'Mp4Parser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_MP4_PARSER',         'src_dir':'Parsers/Mp4'              },
+    'AdtsParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER',        'src_dir':'Parsers/Adts'             },
     'WaveFormatter'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER',     'src_dir':'Formatters/Wave'          },
     'GainControlFilter': {'flags':'BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER','src_dir':'Filters/GainControl'      },
     'PcmAdapter'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER',        'src_dir':'Adapters/PCM'             },
@@ -231,7 +257,7 @@ PluginsSettings = {
 PluginsExtras = {
     'Mp4Parser':        {'dep_mods':['Bento4']},   
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
-    'AacDecoder':       {'dep_mods':['Melo']},   
+    'AacDecoder':       {'dep_mods':BLT_AAC_DECODER_PLUGIN_DEPS},   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Distributions/flac-1.2.0/include'],
                          'dep_mods':['FLAC']},
     'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
@@ -247,6 +273,10 @@ if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIB
     if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
         PluginsExtras['VorbisDecoder']['dep_mods'] = ['Tremor']
         PluginsExtras['VorbisDecoder']['flags'] = ['BLT_CONFIG_VORBIS_USE_TREMOR']
+
+if 'AacDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_AAC_LIBRARY'):
+    if env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
+        PluginsExtras['AacDecoder']['dep_mods'] = ['HelixAAC']
     
 for plugin in env['BLT_PLUGINS']:
     if not PluginsSettings[plugin].has_key('src_dir'): continue # skip binary only plugins

@@ -1,6 +1,8 @@
-LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux')
+GCC_ARM_OPTIONS='-mcpu=arm9e -mtune=arm9e'
+#GCC_ARM_OPTIONS=''
+LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
 env['BLT_RELAXED_ENV'] = env.Copy()
-LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_relaxed_warnings=True)
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_extra_options=GCC_ARM_OPTIONS, gcc_relaxed_warnings=True)
 
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
@@ -9,12 +11,10 @@ env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/
 env['NPT_EXTRA_LIBS']=['pthread']
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN')]
-env['MLO_CPP_DEFINES'] = ['MLO_CONFIG_FIXED']
-env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
                       'MpegAudioDecoder', 
-                      #'FlacDecoder',
+                      'FlacDecoder',
                       'AacDecoder',
                       'StreamPacketizer', 
                       'NullOutput',
@@ -32,6 +32,7 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'OssOutput',
                       'VorbisDecoder']
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
-env['BLT_DEFAULT_OUTPUT']           = 'oss:0'
+env['BLT_DEFAULT_OUTPUT']           = 'alsa:default'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
+env['BLT_PLUGINS_AAC_LIBRARY']      = 'Helix'
                                     

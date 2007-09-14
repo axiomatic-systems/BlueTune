@@ -39,12 +39,12 @@ typedef long FLO_Float;
 #define FLO_FC8_BITS 23
 #define FLO_FC9_BITS 5
 #else /* FLO_CONFIG_INTEGER_32 */
-#if 0 /*defined(__GNUC__) && defined(__arm__)*/
+#if defined(__GNUC__) && defined(__arm__)
 static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
 {                                                                          
     long result;                                                            
     asm("smull r8, r9, %1, %2\n\t"                                          
-        "mov r9, r9, asl %3\n\t"                                            
+        "mov r9, r9, lsl %3\n\t"                                            
         "orr %0, r9, r8, lsr %4"                                            
         : "=r" (result)                                                     
         : "r" (x), "r" (y), "i" (32-bits), "i" (bits)                       

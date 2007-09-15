@@ -25,14 +25,17 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'WaveParser',
                       'AiffParser',
                       'Mp4Parser',
+                      'AdtsParser',
                       'WaveFormatter',
                       'SilenceRemover',
                       'GainControlFilter',
                       'PcmAdapter',
                       'OssOutput',
+                      'AlsaOutput',
                       'VorbisDecoder']
-env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
-env['BLT_DEFAULT_OUTPUT']           = 'alsa:default'
-env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
-env['BLT_PLUGINS_AAC_LIBRARY']      = 'Helix'
-                                    
+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']  = 'Linux'
+env['BLT_DEFAULT_OUTPUT']            = 'alsa:default'
+#env['BLT_DEFAULT_OUTPUT']            = 'oss:0'
+env['BLT_PLUGINS_VORBIS_LIBRARY']    = 'Tremor'
+env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
+env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']                                   

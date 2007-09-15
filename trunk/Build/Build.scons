@@ -108,11 +108,16 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Mel
 if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
     BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/HelixAAC'
     BLT_AAC_DECODER_PLUGIN_DEPS = ['HelixAAC']
-    CompiledModule(name		         = 'HelixAAC',
-                   source_root       = 'ThirdParty/HelixAAC/Source',
-                   build_source_dirs = ['.', 'pub', 'real'],
-                   extra_cpp_defines = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
-                   environment       = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
+    if env.has_key('BLT_PLUGINS_HELIX_AAC_ASM_DIR'):
+        BLT_HELIX_AAC_ASM_DIRS = env['BLT_PLUGINS_HELIX_AAC_ASM_DIR']
+    else:
+        BLT_HELIX_AAC_ASM_DIRS = []
+    CompiledModule(name		            = 'HelixAAC',
+                   source_root          = 'ThirdParty/HelixAAC/Source',
+                   build_source_dirs    = ['.', 'pub', 'real']+BLT_HELIX_AAC_ASM_DIRS,
+                   build_source_pattern = ['*.c', '*.s'],
+                   extra_cpp_defines    = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
+                   environment          = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
 
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  

@@ -383,7 +383,7 @@ AdtsParserOutput_GetPacket(BLT_PacketProducer* _self,
                            BLT_MediaPacket**   packet)
 {
     AdtsParser* self = ATX_SELF_M(output, AdtsParser, BLT_PacketProducer);
-    BLT_Result  result;
+    BLT_Result  result = BLT_SUCCESS;
     
     /* default value */
     *packet = NULL;

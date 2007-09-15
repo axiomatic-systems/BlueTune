@@ -25,6 +25,7 @@ def generate(env, gcc_cross_prefix=None, gcc_extra_options='', gcc_relaxed_warni
                 
     if gcc_cross_prefix:
         env['ENV']['PATH'] += os.environ['PATH']
+        env['AS']     = gcc_cross_prefix+'-as'
         env['AR']     = gcc_cross_prefix+'-ar'
         env['RANLIB'] = gcc_cross_prefix+'-ranlib'
         env['CC']     = gcc_cross_prefix+'-gcc ' + gcc_extra_options

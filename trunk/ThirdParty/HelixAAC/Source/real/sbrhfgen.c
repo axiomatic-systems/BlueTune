@@ -243,7 +243,7 @@ extern "C"
 #endif
 void CVKernel2(int *XBuf, int *accBuf);
 #else
-static void CVKernel2(int *XBuf, int *accBuf)
+static CVKernel2(int *XBuf, int *accBuf)
 {
 	U64 p02re, p02im;
 	int n, x0re, x0im, x1re, x1im, x2re, x2im;

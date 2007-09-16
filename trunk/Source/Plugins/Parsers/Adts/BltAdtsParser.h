@@ -2,7 +2,7 @@
 |
 |   AdtsParser Module
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2007 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -14,10 +14,11 @@
  * @ingroup plugin_modules
  * @ingroup plugin_parser_modules
  * @defgroup adts_parser_module ADTS Parser Module 
- * Plugin module that creates media nodes that parse WAV (RIFF variant)
- * encoded streams with PCM audio.
- * These media nodes expect a byte stream with WAV encoded data and produce
- * a byte stream with PCM audio data.
+ * Plugin module that creates media nodes that parse AAC ADTS 
+ * encoded streams.
+ * These media nodes expect a byte stream with ADTS encoded data and produce
+ * packets with AAC frames. This module registers the mime types:
+ * audio/aac and audio/aacp
  * @{ 
  */
 

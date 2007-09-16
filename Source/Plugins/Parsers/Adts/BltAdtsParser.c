@@ -647,8 +647,15 @@ AdtsParser_Seek(BLT_MediaNode* _self,
     self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
     self->buffer_fullness = 0;
     self->input.eos = BLT_FALSE;
-    
-    return BLT_SUCCESS;
+	
+    /* seek into the input stream (ignore return value) */
+    ATX_InputStream_Seek(self->input.stream, point->offset);
+
+    /* set the mode so that the nodes down the chain know the seek has */
+    /* already been done on the stream                                 */
+    *mode = BLT_SEEK_MODE_IGNORE;
+
+	return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------

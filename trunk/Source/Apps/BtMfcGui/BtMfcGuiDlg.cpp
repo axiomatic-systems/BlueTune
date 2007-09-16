@@ -60,7 +60,9 @@ public:
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode);
     virtual void OnStreamPositionNotification(BLT_StreamPosition& position);
     virtual void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
-    virtual void OnStreamPropertyNotification(const ATX_Property& property);
+    virtual void OnPropertyNotification(BLT_PropertyScope   scope,
+                                        const char*         source,
+                                        const ATX_Property& property);
 
     // members
     CBtMfcGuiDlg* m_Dialog;
@@ -182,7 +184,9 @@ MfcPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 |   MfcPlayer::OnStreamPropertyNotification
 +---------------------------------------------------------------------*/
 void
-MfcPlayer::OnStreamPropertyNotification(const ATX_Property& property)
+MfcPlayer:: OnPropertyNotification(BLT_PropertyScope   scope,
+                                   const char*         source,
+                                   const ATX_Property& property)
 {
     char value[16];
     switch (property.type) {

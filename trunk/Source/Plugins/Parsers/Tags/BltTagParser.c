@@ -424,8 +424,8 @@ TagParser_Seek(BLT_MediaNode* _self,
     /* seek into the input stream (ignore return value) */
     ATX_InputStream_Seek(self->input.stream, point->offset);
 
-    /* set the mode so that the nodes down the chaine know the seek has */
-    /* already been done on the stream                                  */
+    /* set the mode so that the nodes down the chain know the seek has */
+    /* already been done on the stream                                 */
     *mode = BLT_SEEK_MODE_IGNORE;
 
     return BLT_SUCCESS;

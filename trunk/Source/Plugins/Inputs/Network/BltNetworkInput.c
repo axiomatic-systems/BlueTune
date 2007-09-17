@@ -127,7 +127,11 @@ NetworkInput_Create(BLT_Module*              module,
         result = BLT_TcpNetworkStream_Create(constructor->name+6, &input->stream);
     } else if (ATX_StringsEqualN(constructor->name, "http://", 7)) {
         /* create an HTTP byte stream */
-        result = BLT_HttpNetworkStream_Create(constructor->name, core, &input->stream, &input->source, &input->media_type);
+        result = BLT_HttpNetworkStream_Create(constructor->name, 
+                                              core, 
+                                              &input->stream,
+                                              &input->source, 
+                                              &input->media_type);
     } else {
         result = BLT_ERROR_INVALID_PARAMETERS;
     }
@@ -169,9 +173,12 @@ NetworkInput_Destroy(NetworkInput* self)
 {
     ATX_LOG_FINE("NetworkInput::Destroy");
 
-    /* release the byte stream */
+    /* release the input stream */
     ATX_RELEASE_OBJECT(self->stream);
     
+    /* release the input source */
+    ATX_RELEASE_OBJECT(self->source);
+
     /* free the media type extensions */
     BLT_MediaType_Free(self->media_type);
 

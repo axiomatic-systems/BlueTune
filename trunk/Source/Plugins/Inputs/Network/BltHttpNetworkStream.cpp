@@ -477,7 +477,10 @@ BLT_HttpNetworkStream_Create(const char*              url,
 
     // create a stream object
     HttpInputStream* http_stream = HttpInputStream_Create(url);
-    if (!http_stream->m_Url->IsValid()) return BLT_ERROR_INVALID_PARAMETERS;
+    if (!http_stream->m_Url->IsValid()) {
+        HttpInputStream_Destroy(http_stream);
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
     *source = &ATX_BASE(http_stream, BLT_NetworkInputSource);
 
     // send the request

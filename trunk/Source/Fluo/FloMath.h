@@ -39,7 +39,7 @@ typedef long FLO_Float;
 #define FLO_FC8_BITS 23
 #define FLO_FC9_BITS 5
 #else /* FLO_CONFIG_INTEGER_32 */
-#if defined(__GNUC__) && defined(__arm__)
+#if defined(__GNUC__) && defined(__arm__) && !defined(BLT_DEBUG)
 static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
 {                                                                          
     long result;                                                            
@@ -48,7 +48,7 @@ static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
         "orr %0, r9, r8, lsr %4"                                            
         : "=r" (result)                                                     
         : "r" (x), "r" (y), "i" (32-bits), "i" (bits)                       
-        : "r8", "r9"); /* r8 and r9 are clobbered */                                                      
+        : "r8", "r9"); /* r8 and r9 are clobbered */         
     return result;                                                                 
 }
 #else

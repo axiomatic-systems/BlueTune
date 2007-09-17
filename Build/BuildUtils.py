@@ -172,8 +172,10 @@ class CompiledModule(Module):
             self.library = self.env.StaticLibrary(target=name, source=self.objects+dep_objects)
             self.product = self.library
         elif module_type == 'Executable':
-            libs = GetLibraries(self.linked_modules)
-            lib_path = GetLibraryDirs(self.linked_modules)
+            libs = self.env.has_key('LIBS') and self.env['LIBS'] or []
+            libs += GetLibraries(self.linked_modules)
+            lib_path = self.env.has_key('LIBPATH') and self.env['LIBPATH'] or []
+            lib_path += GetLibraryDirs(self.linked_modules)
             self.product = self.env.Program(target=name.lower(), source=self.objects, LIBS=libs, LIBPATH=lib_path)
             
         self.env.Alias(name, self.product)

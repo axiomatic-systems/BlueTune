@@ -342,11 +342,11 @@ if env['target'] == 'x86-unknown-linux':
     try:    
         gtk_env = env.Copy()
         gtk_env.ParseConfig('pkg-config --silence-errors --cflags --libs gtk+-2.0')
-        BuildModule(name               = 'BtGtk',
-                    type               = 'Executable',
-                    build_source_dirs  = ['Source/Apps/BtGtk'],
-                    linked_modules     = ['BlueTune'],
-                    environment        = gtk_env)
+        CompiledModule(name             = 'BtGtk',
+                       module_type      = 'Executable',
+                       source_root      = 'Source/Apps/BtGtk',
+                       included_modules = ['BlueTune'],
+                       environment      = gtk_env)
         OptionalModules.append('BtGtk')
     except:
         pass

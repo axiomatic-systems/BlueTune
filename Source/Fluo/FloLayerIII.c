@@ -1174,12 +1174,21 @@ FLO_LayerIII_DecodeFrame(const unsigned char* frame_data,
     if (main_data_buffer->available < frame->side_info.main_data_begin) {
         /* not enough main data: we can't decode, but we still need to buffer */
         /* the main data from this frame.                                     */
+		unsigned int can_fit = sizeof(main_data_buffer->data)-main_data_buffer->available;
+		if (can_fit < main_data_size) {
+			/* we can't fit this frame's entire main data, shift to make some room */
+			unsigned int shrink = main_data_size-can_fit;
+			FLO_MoveMemory(main_data_buffer->data, 
+				           main_data_buffer->data+shrink,
+				           main_data_size);
+			main_data_buffer->available -= shrink;
+		}
         if (main_data_size) {
-            FLO_CopyMemory(main_data_buffer->data,
+            FLO_CopyMemory(main_data_buffer->data+main_data_buffer->available,
                            main_data_start, 
                            main_data_size);
         }
-        main_data_buffer->available = main_data_size;
+        main_data_buffer->available += main_data_size;
         result = FLO_ERROR_INVALID_BITSTREAM;
         goto err;
     }

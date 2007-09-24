@@ -104,7 +104,6 @@ FLO_LayerIII_ReadSideInfo_Mpeg1(FLO_BitStream* bits, FLO_Frame_III* frame)
 
     FLO_SideInfo* info = &frame->side_info;
 
-    info->main_data_size  = 0;
     info->main_data_begin = FLO_BitStream_ReadBits(bits, 9);
     switch (frame->header.mode) {
       case FLO_MPEG_MODE_SINGLE_CHANNEL:
@@ -133,7 +132,6 @@ FLO_LayerIII_ReadSideInfo_Mpeg1(FLO_BitStream* bits, FLO_Frame_III* frame)
             FLO_Granule *gp = &(info->granules[granule][channel]);
 
             gp->part_2_3_length   = FLO_BitStream_ReadBits(bits, 12);
-            info->main_data_size += gp->part_2_3_length;
             gp->big_values        = FLO_BitStream_ReadBits(bits, 9);
             if (gp->big_values > 
                 FLO_MPEG_LAYER_III_MPEG_2_PCM_SAMPLES_PER_FRAME/2) {
@@ -197,7 +195,6 @@ FLO_LayerIII_ReadSideInfo_Mpeg2(FLO_BitStream* bits, FLO_Frame_III* frame)
 
     FLO_SideInfo *info = &frame->side_info;
 
-    info->main_data_size  = 0;
     info->main_data_begin = FLO_BitStream_ReadBits(bits, 8);
     switch (frame->header.mode) {
       case FLO_MPEG_MODE_SINGLE_CHANNEL:
@@ -219,7 +216,6 @@ FLO_LayerIII_ReadSideInfo_Mpeg2(FLO_BitStream* bits, FLO_Frame_III* frame)
         FLO_Granule* gp = &(info->granules[0][channel]);
 
         gp->part_2_3_length                 = FLO_BitStream_ReadBits(bits, 12);
-        info->main_data_size               += gp->part_2_3_length;
         gp->big_values                      = FLO_BitStream_ReadBits(bits, 9);
         if (gp->big_values > FLO_MPEG_LAYER_III_MPEG_2_PCM_SAMPLES_PER_FRAME/2) {
             return FLO_ERROR_INVALID_BITSTREAM;
@@ -1146,6 +1142,11 @@ FLO_LayerIII_DecodeFrame(const unsigned char* frame_data,
     FLO_Size             frame_payload_size = frame_info->size-4;
     FLO_Result           result = FLO_SUCCESS;
 
+    /* if the frame has a CRC, update the frame size */
+    if (frame->header.protection_bit == 0) {
+        frame_payload_size -= 2;
+    }
+    
     /* the frame has two parts: the side info and the main data */
     side_info_size = FLO_LayerIII_GetSideInfoSize(&frame->header);
 
@@ -1206,7 +1207,7 @@ FLO_LayerIII_DecodeFrame(const unsigned char* frame_data,
                        main_data_size);
     }
     main_data_buffer->available = frame->side_info.main_data_begin+main_data_size;
-    FLO_BitStream_SetData(&bits, main_data_buffer->data, frame->side_info.main_data_size);
+    FLO_BitStream_SetData(&bits, main_data_buffer->data, main_data_buffer->available);
 
     /* decode the main data */
     FLO_CHECK(FLO_LayerIII_ReadAndProcessMainData(&bits, 

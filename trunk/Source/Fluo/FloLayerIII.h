@@ -73,7 +73,6 @@ typedef struct {
 
 typedef struct {
     unsigned int   main_data_begin;
-    unsigned int   main_data_size;
     unsigned int   private_bits;
     unsigned int   scalefactor_selection[2][FLO_MPEG_LAYER_III_NB_SCFSI_BANDS];
     FLO_Granule    granules[FLO_MPEG_LAYER_III_NB_GRANULES][2];
@@ -86,7 +85,6 @@ typedef struct {
 
 typedef struct {
     FLO_FrameHeader  header;
-    int              size;
     FLO_SideInfo     side_info;
     int              nb_granules;
     int              ms_stereo;

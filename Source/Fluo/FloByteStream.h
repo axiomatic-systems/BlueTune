@@ -35,7 +35,6 @@
 +---------------------------------------------------------------------*/
 typedef struct {
     unsigned char* buffer;
-    unsigned int   size;
     unsigned int   in;
     unsigned int   out;
     unsigned int   flags;

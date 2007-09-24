@@ -268,6 +268,11 @@ FLO_Engine_DecodeFrame(FLO_Engine*          self,
     FLO_FrameHeader_FromBytes(frame_data, &self->frame.header);
     frame_data += 4;
 
+    /* skip the CRC, if any */
+    if (self->frame.header.protection_bit == 0) {
+        frame_data += 2;
+    }
+    
     /* setup the filters and audio buffer parameters */
     sample_buffer->sample_count           = frame_info->sample_count;
     sample_buffer->format.type            = FLO_SAMPLE_TYPE_INTERLACED_SIGNED;

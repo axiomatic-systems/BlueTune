@@ -341,8 +341,10 @@ HttpInputStream_Seek(ATX_InputStream* _self,
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
 
     // check if we can seek
-    if (self->m_IsIcy) return BLT_ERROR_NOT_IMPLEMENTED;
-
+    if (self->m_IsIcy || self->m_ContentLength == 0) {
+        return BLT_ERROR_NOT_SUPPORTED;
+    }
+    
     // seek by emitting a new request with a range
     NPT_Result result = HttpInputStream_SendRequest(self, where);
     if (NPT_SUCCEEDED(result)) self->m_Eos = false;

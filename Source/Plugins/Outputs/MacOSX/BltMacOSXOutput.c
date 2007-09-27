@@ -111,6 +111,20 @@ MacOSXOutput_RenderCallback(void*						inRefCon,
     /* sanity check on the parameters */
     if (ioData == NULL || ioData->mNumberBuffers == 0) return 0;
     
+    /* in case we have a strange request with more than one buffer, just return silence */
+    if (ioData->mNumberBuffers != 1) {
+        unsigned int i;
+        ATX_LOG_FINEST_1("MacOSXOutput::RenderCallback - strange request with %d buffers", 
+                         ioData->mNumberBuffers);
+        for (i=0; i<ioData->mNumberBuffers; i++) {
+            ATX_SetMemory(ioData->mBuffers[i].mData, 0, ioData->mBuffers[i].mDataByteSize);
+        }
+        return 0;
+    }
+    
+    ATX_LOG_FINEST_2("MacOSXOutput::RenderCallback - request for %d bytes, %d frames", 
+                     requested, inNumberFrames);
+    
     /* lock the packet queue */
     pthread_mutex_lock(&self->lock);
     
@@ -652,6 +666,33 @@ MacOSXOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
         result = AudioUnitInitialize(self->audio_unit);
         if (result != noErr) {
             ATX_LOG_WARNING_1("MacOSXOutput::Activate - AudioUnitInitialize failed (%d)", result);
+            return BLT_FAILURE;
+        }
+    }
+
+    /* set some default audio format */
+    {
+        AudioStreamBasicDescription audio_desc;
+        ATX_SetMemory(&audio_desc, 0, sizeof(audio_desc));
+        
+        /* setup the audio description */
+        audio_desc.mFormatID         = kAudioFormatLinearPCM;
+        audio_desc.mFormatFlags      = kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+        audio_desc.mFramesPerPacket  = 1;
+        audio_desc.mSampleRate       = 44100;
+        audio_desc.mChannelsPerFrame = 2;
+        audio_desc.mBitsPerChannel   = 16;
+        audio_desc.mBytesPerFrame    = (audio_desc.mBitsPerChannel * audio_desc.mChannelsPerFrame) / 8;
+        audio_desc.mBytesPerPacket   = audio_desc.mBytesPerFrame * audio_desc.mFramesPerPacket;
+        audio_desc.mReserved         = 0;
+        result = AudioUnitSetProperty(self->audio_unit,
+                                      kAudioUnitProperty_StreamFormat,
+                                      kAudioUnitScope_Input,
+                                      0,
+                                      &audio_desc,
+                                      sizeof(audio_desc));
+        if (result != noErr) {
+            ATX_LOG_WARNING_1("MacOSXOutput::Activate - AudioUnitSetProperty failed (%d)", result);
             return BLT_FAILURE;
         }
     }

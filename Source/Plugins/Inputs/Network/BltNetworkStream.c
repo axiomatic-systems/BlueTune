@@ -228,8 +228,18 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     ATX_Result         result;
 
     /* shortcut */
-    if (move == 0) return ATX_SUCCESS;
-
+    if (move == 0) {
+        if (position == 0) {
+            /* force a call to the source, because some callers will  */
+            /* use this to determine if the source is seekable or not */
+            ATX_Position current = 0;
+            result = ATX_InputStream_Tell(self->source, &current);
+            if (ATX_FAILED(result)) return result;
+            return ATX_InputStream_Seek(self->source, current);
+        }
+        return ATX_SUCCESS;
+    }
+    
     /* see if we can seek entirely within our buffer */
     if ((move < 0 && -move <= (int)self->back_store) ||
         (move > 0 && move < (int)ATX_RingBuffer_GetAvailable(self->buffer))) {

@@ -125,12 +125,19 @@ VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
 
     /* compute where to seek */
     if (whence == SEEK_CUR) {
-        ATX_Position current;
-        ATX_InputStream_Tell(self->input.stream, &current);
-        if (current+offset <= self->input.size) {
-            where = current+(long)offset;
+        /* special case for offset == 0, vorbis uses that to test */
+        /* wether the input can seek or not.                      */
+        if (offset == 0 && self->input.size == 0) {
+            /* most likely an unseekable network stream */
+            return -1;
         } else {
-            where = self->input.size;
+            ATX_Position current;
+            ATX_InputStream_Tell(self->input.stream, &current);
+            if (current+offset <= self->input.size) {
+                where = current+(long)offset;
+            } else {
+                where = self->input.size;
+            }
         }
     } else if (whence == SEEK_END) {
         if (offset <= self->input.size) {
@@ -271,14 +278,13 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
         stream_info.instant_bitrate = 0;
 
         /* duration */
+        stream_info.duration = 0;
         if (info->rate) {
-            stream_info.duration = 
-                (long)(1000.0f*
-                       (float)ov_pcm_total(&self->input.vorbis_file,-1)/
-                       (float)info->rate);
-            stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
-        } else {
-            stream_info.duration = 0;
+            ogg_int64_t ogg_duration = ov_pcm_total(&self->input.vorbis_file,-1);
+            if (ogg_duration > 0) {
+                stream_info.duration = (long)(1000.0f*(float)ogg_duration/(float)info->rate);
+                stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+            }
         }   
 
         BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);

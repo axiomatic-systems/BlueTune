@@ -251,7 +251,7 @@ BLT_MediaPacket_SetPayloadOffset(BLT_MediaPacket* packet, BLT_Offset offset)
     }
 
     /* recompute the size */
-    packet->payload_size += packet->payload_offset - offset;
+    packet->payload_size -= offset - packet->payload_offset;
 
     /* store the offset */
     packet->payload_offset = offset;

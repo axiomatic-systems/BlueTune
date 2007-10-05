@@ -26,6 +26,7 @@ typedef struct {
     BLT_CString  output_name;
     BLT_CString  output_type;
     unsigned int duration;
+    unsigned int verbosity;
 } BLTP_Options;
 
 typedef struct  {
@@ -33,6 +34,18 @@ typedef struct  {
     ATX_IMPLEMENTS(BLT_EventListener);
     ATX_IMPLEMENTS(ATX_PropertyListener);
 } BLTP;
+
+/*----------------------------------------------------------------------
+|    globals
++---------------------------------------------------------------------*/
+BLTP_Options Options;
+
+/*----------------------------------------------------------------------
+|    flags
++---------------------------------------------------------------------*/
+#define BLTP_VERBOSITY_STREAM_TOPOLOGY      1
+#define BLTP_VERBOSITY_STREAM_INFO          2
+#define BLTP_VERBOSITY_MISC                 4
 
 /*----------------------------------------------------------------------
 |    macros
@@ -61,7 +74,10 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --help\n" 
         "  --output=<name>\n"
         "  --output-type=<type>\n"
-        "  --duration=<n> (seconds)\n");
+        "  --duration=<n> (seconds)\n"
+        "  --verbose=<name> : print messages related to <name>, where name is\n"
+        "                     'stream-topology', 'stream-info', or 'all'\n"
+        "                     (multiple --verbose= options can be specified)\n");
     exit(exit_code);
 }
 
@@ -69,27 +85,36 @@ BLTP_PrintUsageAndExit(int exit_code)
 |    BLTP_ParseCommandLine
 +---------------------------------------------------------------------*/
 static char**
-BLTP_ParseCommandLine(char** args, BLTP_Options* options)
+BLTP_ParseCommandLine(char** args)
 {
     char* arg;
 
     /* setup default values for options */
-    options->output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
-    options->output_type = NULL;
-    options->duration    = 0;
+    Options.output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
+    Options.output_type = NULL;
+    Options.duration    = 0;
+    Options.verbosity   = 0;
     
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
             ATX_StringsEqual(arg, "--help")) {
             BLTP_PrintUsageAndExit(0);
         } else if (ATX_StringsEqualN(arg, "--output=", 9)) {
-            options->output_name = arg+9;
+            Options.output_name = arg+9;
         } else if (ATX_StringsEqualN(arg, "--output-type=", 14)) {
-            options->output_type = arg+14;
+            Options.output_type = arg+14;
         } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
             long duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
-            options->duration = duration;
+            Options.duration = duration;
+        } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {
+            if (ATX_StringsEqual(arg+10, "stream-topology")) {
+                Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;
+            } else if (ATX_StringsEqual(arg+10, "stream-info")) {
+                Options.verbosity |= BLTP_VERBOSITY_STREAM_INFO;
+            } else if (ATX_StringsEqual(arg+10, "all")) {
+                Options.verbosity = 0xFFFFFFFF;
+            }
         } else {
             return args;
         }
@@ -110,6 +135,8 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
 {
     BLT_COMPILER_UNUSED(self);
 
+    if (!(Options.verbosity & BLTP_VERBOSITY_STREAM_INFO)) return;
+    
     if (name == NULL) {
         ATX_ConsoleOutput("BLTP::OnStreamPropertyChanged - All Properties Cleared\n");
     } else {
@@ -218,8 +245,8 @@ BLTP_OnEvent(BLT_EventListener* self,
              const BLT_Event*   event)
 {
     BLT_COMPILER_UNUSED(self);
-    ATX_ConsoleOutputF("BLTP::OnEvent - type = %d\n", (int)type);
-    if (type == BLT_EVENT_TYPE_STREAM_INFO) {
+    if (type == BLT_EVENT_TYPE_STREAM_INFO && 
+        Options.verbosity & BLTP_VERBOSITY_STREAM_INFO) {
         const BLT_StreamInfoEvent* e = (BLT_StreamInfoEvent*)event;
         ATX_ConsoleOutputF("BLTP::OnEvent - info update=%x\n", e->update_mask);
 
@@ -256,7 +283,8 @@ BLTP_OnEvent(BLT_EventListener* self,
             ATX_ConsoleOutputF("  data_type       = %s\n", 
                                e->info.data_type ? e->info.data_type : "");
         }
-    } else if (type == BLT_EVENT_TYPE_STREAM_TOPOLOGY) {
+    } else if (type == BLT_EVENT_TYPE_STREAM_TOPOLOGY &&
+               Options.verbosity & BLTP_VERBOSITY_STREAM_TOPOLOGY) {
         const BLT_StreamTopologyEvent* e = (BLT_StreamTopologyEvent*)event;
         switch (e->type) {
           case BLT_STREAM_TOPOLOGY_NODE_ADDED:
@@ -320,7 +348,6 @@ BLTP_CheckElapsedTime(BLT_Decoder* decoder, unsigned int duration)
 int
 main(int argc, char** argv)
 {
-    BLTP_Options options;
     BLT_Decoder* decoder;
     BLT_CString  input_name;
     BLT_CString  input_type = NULL;
@@ -332,7 +359,7 @@ main(int argc, char** argv)
 
     /* parse command line */
     if (argc < 2) BLTP_PrintUsageAndExit(0);
-    argv = BLTP_ParseCommandLine(argv+1, &options);
+    argv = BLTP_ParseCommandLine(argv+1);
 
     /* create a decoder */
     result = BLT_Decoder_Create(&decoder);
@@ -358,8 +385,8 @@ main(int argc, char** argv)
 
     /* set the output */
     result = BLT_Decoder_SetOutput(decoder,
-                                   options.output_name, 
-                                   options.output_type);
+                                   Options.output_name, 
+                                   Options.output_type);
     if (BLT_FAILED(result)) {
         fprintf(stderr, "SetOutput failed (%d)\n", result);
         exit(1);
@@ -392,9 +419,11 @@ main(int argc, char** argv)
             result = BLT_Decoder_PumpPacket(decoder);
             
             /* if a duration is specified, check if we have exceeded it */
-            if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, options.duration);
+            if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, Options.duration);
         } while (BLT_SUCCEEDED(result));
-        ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
+        if (Options.verbosity & BLTP_VERBOSITY_MISC) {
+            ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
+        }
 
         /* reset input type */
         input_type = NULL;

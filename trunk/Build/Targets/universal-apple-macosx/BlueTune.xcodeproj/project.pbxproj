@@ -265,6 +265,10 @@
 		CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */; };
 		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
+		CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */; };
+		CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; };
+		CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; };
+		CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -613,6 +617,10 @@
 		CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
 		CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
 		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAlacDecoder.c; sourceTree = "<group>"; };
+		CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAlacDecoder.h; sourceTree = "<group>"; };
+		CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltBitStream.h; sourceTree = "<group>"; };
+		CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltBitStream.c; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libBlueTune.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBlueTune.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -757,6 +765,8 @@
 				CA5042140C5AE52B0060E6FE /* BltTime.c */,
 				CA5042150C5AE52B0060E6FE /* BltTime.h */,
 				CA5042160C5AE52B0060E6FE /* BltTypes.h */,
+				CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */,
+				CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -888,6 +898,7 @@
 		CA5042500C5AE52B0060E6FE /* Decoders */ = {
 			isa = PBXGroup;
 			children = (
+				CAFBDAE80CAD717F00E6B62F /* ALAC */,
 				CA6434AC0C971B5500F67CD5 /* HelixAAC */,
 				CA5042510C5AE52B0060E6FE /* AAC */,
 				CA5042540C5AE52B0060E6FE /* FLAC */,
@@ -1496,6 +1507,15 @@
 			path = HelixAAC;
 			sourceTree = "<group>";
 		};
+		CAFBDAE80CAD717F00E6B62F /* ALAC */ = {
+			isa = PBXGroup;
+			children = (
+				CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */,
+				CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */,
+			);
+			path = ALAC;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1661,6 +1681,8 @@
 				CA504F5A0C5EC0A70060E6FE /* BltFlacDecoder.h in Headers */,
 				CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */,
 				CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */,
+				CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */,
+				CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1951,6 +1973,8 @@
 				CA504E2D0C5E8E030060E6FE /* BltMp4Parser.cpp in Sources */,
 				CA504F5B0C5EC0A80060E6FE /* BltFlacDecoder.c in Sources */,
 				CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */,
+				CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */,
+				CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2022,6 +2046,7 @@
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
@@ -2069,6 +2094,7 @@
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,

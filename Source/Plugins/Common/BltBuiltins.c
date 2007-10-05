@@ -111,6 +111,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltFlacDecoder.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER)
+#include "BltAlacDecoder.h"
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_AAC_DECODER)
 #include "BltAacDecoder.h"
 #endif
@@ -365,6 +369,16 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER)
     ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_FlacDecoderModule");
     result = BLT_FlacDecoderModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
+#endif
+
+    /* alac decoder */
+#if defined(BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER)
+    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_AlacDecoderModule");
+    result = BLT_AlacDecoderModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) {
         result = BLT_Core_RegisterModule(core, module);
         if (BLT_FAILED(result)) return result;

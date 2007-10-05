@@ -32,8 +32,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.macosx")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_MACOSX_OUTPUT_PACKET_QUEUE_SIZE    32     /* packets */
-#define BLT_MACOSX_OUTPUT_SLEEP_INTERVAL       100000 /* ms -> 0.1 secs */
+#define BLT_MACOSX_OUTPUT_DEFAULT_PACKET_QUEUE_SIZE    32     /* packets */
+#define BLT_MACOSX_OUTPUT_SLEEP_INTERVAL       100000 /* us -> 0.1 secs */
 #define BLT_MACOSX_OUTPUT_MAX_QUEUE_WAIT_COUNT (5000000/BLT_MACOSX_OUTPUT_SLEEP_INTERVAL) /* 5 secs */
 
 /*----------------------------------------------------------------------
@@ -57,6 +57,7 @@ typedef struct {
     AudioUnit         audio_unit;
     pthread_mutex_t   lock;
     ATX_List*         packet_queue;
+    BLT_Cardinal      max_packets_in_queue;
     BLT_PcmMediaType  expected_media_type;
     BLT_PcmMediaType  media_type;
     BLT_Boolean       paused;
@@ -82,7 +83,25 @@ BLT_METHOD MacOSXOutput_Stop(BLT_MediaNode* self);
 static BLT_Result
 MacOSXOutput_Drain(MacOSXOutput* self)
 {
-    BLT_COMPILER_UNUSED(self);
+    unsigned int watchdog = 20000000/BLT_MACOSX_OUTPUT_SLEEP_INTERVAL;
+    
+    /* lock the queue */
+    pthread_mutex_lock(&self->lock);
+    
+    /* wait until there are no more packets in the queue */
+    while (ATX_List_GetItemCount(self->packet_queue)) {
+        pthread_mutex_unlock(&self->lock);
+        usleep(BLT_MACOSX_OUTPUT_SLEEP_INTERVAL);
+        pthread_mutex_lock(&self->lock);
+        
+        if (--watchdog == 0) {
+            ATX_LOG_WARNING("MaxOSXOutput::Drain - *** the watchdog bit us ***");
+            break;
+        }
+    }
+
+    /* unlock the queue */
+    pthread_mutex_unlock(&self->lock);
     
     return BLT_SUCCESS;
 }
@@ -199,7 +218,7 @@ MacOSXOutput_QueuePacket(MacOSXOutput* self, BLT_MediaPacket* packet)
     pthread_mutex_lock(&self->lock);
     
     /* wait for some space in the queue */
-    while (ATX_List_GetItemCount(self->packet_queue) >= BLT_MACOSX_OUTPUT_PACKET_QUEUE_SIZE) {
+    while (ATX_List_GetItemCount(self->packet_queue) >= self->max_packets_in_queue) {
         pthread_mutex_unlock(&self->lock);
         usleep(BLT_MACOSX_OUTPUT_SLEEP_INTERVAL);
         pthread_mutex_lock(&self->lock);
@@ -434,6 +453,7 @@ MacOSXOutput_Create(BLT_Module*              module,
     {
         ATX_ListDataDestructor destructor = { NULL, MacOSXOutput_QueueItemDestructor };
         ATX_List_CreateEx(&destructor, &self->packet_queue);
+        self->max_packets_in_queue = BLT_MACOSX_OUTPUT_DEFAULT_PACKET_QUEUE_SIZE;
     }
     
     /* setup the expected media type */

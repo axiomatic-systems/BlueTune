@@ -374,25 +374,6 @@ WaveFormatter_Destroy(WaveFormatter* self)
 {
     ATX_LOG_FINE("WaveFormatter::Destroy");
 
-    /* update the header if needed */
-    if (self->output.stream) {
-        ATX_Position where = 0;
-        ATX_OutputStream_Tell(self->output.stream, &where);
-        self->input.size = where;
-        if (self->input.size >= BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE) {
-            self->input.size -= BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE;
-        }
-
-        /* update the header */
-        WaveFormatter_UpdateWavHeader(self);
-
-        /* set the stream back to its original position */
-        ATX_OutputStream_Seek(self->output.stream, where);
-    }
-
-    /* release the stream */
-    ATX_RELEASE_OBJECT(self->output.stream);
-
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
@@ -412,11 +393,27 @@ WaveFormatter_Deactivate(BLT_MediaNode* _self)
 
     ATX_LOG_FINER("WaveFormatter::Deactivate");
 
-    /* call the base class method */
-    BLT_BaseMediaNode_Deactivate(_self);
+    /* update the header if needed */
+    if (self->output.stream) {
+        ATX_Position where = 0;
+        ATX_OutputStream_Tell(self->output.stream, &where);
+        self->input.size = where;
+        if (self->input.size >= BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE) {
+            self->input.size -= BLT_WAVE_FORMATTER_RIFF_HEADER_SIZE;
+        }
+
+        /* update the header */
+        WaveFormatter_UpdateWavHeader(self);
+
+        /* set the stream back to its original position */
+        ATX_OutputStream_Seek(self->output.stream, where);
+    }
 
     /* release the output stream */
     ATX_RELEASE_OBJECT(self->output.stream);
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
 
     return BLT_SUCCESS;
 }

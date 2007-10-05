@@ -858,7 +858,7 @@ Stream_SetInput(BLT_Stream* _self,
     /* normalize type */
     if (type && type[0] == '\0') type = NULL;
 
-    ATX_LOG_INFO_1("Stream::SetInput = name=%s", name);
+    ATX_LOG_FINE_1("Stream::SetInput = name=%s", name);
 
     /* ask the core to create the corresponding input node */
     constructor.spec.input.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;

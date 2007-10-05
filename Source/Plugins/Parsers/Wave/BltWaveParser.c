@@ -88,6 +88,12 @@ typedef struct {
 #define BLT_WAVE_FORMAT_EXTENSIBLE         0xFFFE
 #define BLT_WAVE_FORMAT_DEVELOPMENT        0xFFFF
 
+
+static const unsigned char BLT_WAVE_KS_DATA_FORMAT_SUBTYPE_PCM[16]  =
+{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
+static const unsigned char BLT_WAVE_KS_DATA_FORMAT_SUBTYPE_IEEE_FLOAT[16]  =
+{0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71};
+
 /*----------------------------------------------------------------------
 |   forward declarations
 +---------------------------------------------------------------------*/
@@ -170,8 +176,7 @@ WaveParser_ParseHeader(WaveParser*      self,
             format_tag = ATX_BytesToInt16Le(buffer);
             switch (format_tag) {
               case BLT_WAVE_FORMAT_PCM:
-              case BLT_WAVE_FORMAT_IEEE_FLOAT:
-                {
+              case BLT_WAVE_FORMAT_IEEE_FLOAT: {
                     /* read the media type */
                     BLT_PcmMediaType media_type;
                     BLT_PcmMediaType_Init(&media_type);
@@ -202,9 +207,63 @@ WaveParser_ParseHeader(WaveParser*      self,
                         media_type.channel_count *
                         media_type.sample_rate   *
                         media_type.bits_per_sample/8;
-                }
-                break;
+                    
+                    break;
+              }
 
+              case BLT_WAVE_FORMAT_EXTENSIBLE: {
+                    /* read the media type */
+                    unsigned char extra[24];
+                    BLT_PcmMediaType media_type;
+
+                    if (chunk_size < BLT_WAVE_HEADER_FMT_LOOKUP_SIZE+sizeof(extra)) {
+                        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+                    }
+                    result = ATX_InputStream_ReadFully(stream, extra, sizeof(extra));
+                    if (BLT_FAILED(result)) {
+                        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+                    }
+                    /* check the cbSize field */
+                    if (ATX_BytesToInt16Le(extra) != 22) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+                    
+                    BLT_PcmMediaType_Init(&media_type);
+                    BLT_MediaType_Free(self->output.media_type);
+                    media_type.channel_count   = ATX_BytesToInt16Le(buffer+2);
+                    media_type.sample_rate     = ATX_BytesToInt32Le(buffer+4);
+                    media_type.bits_per_sample = (BLT_UInt8)(8*((ATX_BytesToInt16Le(buffer+14)+7)/8));
+                    media_type.channel_mask = ATX_BytesToInt32Le(&extra[4]);;
+                    
+                    /* look for a known subformat */
+                    if (ATX_MemoryEqual(&extra[8], BLT_WAVE_KS_DATA_FORMAT_SUBTYPE_PCM, 16)) {
+                        media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
+                    } else if (ATX_MemoryEqual(&extra[8], BLT_WAVE_KS_DATA_FORMAT_SUBTYPE_IEEE_FLOAT, 16)) {
+                        media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_FLOAT_LE;
+                    } else {
+                        return BLT_ERROR_UNSUPPORTED_CODEC;
+                    }
+                    
+                    BLT_MediaType_Clone((const BLT_MediaType*)&media_type, &self->output.media_type);
+
+                    /* compute the block size */
+                    self->output.block_size = media_type.channel_count*media_type.bits_per_sample/8;
+
+                    /* update the stream info */
+                    stream_info->sample_rate   = media_type.sample_rate;
+                    stream_info->channel_count = media_type.channel_count;
+                    stream_info->data_type     = "PCM";
+                    stream_info->mask |=
+                        BLT_STREAM_INFO_MASK_SAMPLE_RATE   |
+                        BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
+                        BLT_STREAM_INFO_MASK_DATA_TYPE;
+                    bytes_per_second = 
+                        media_type.channel_count *
+                        media_type.sample_rate   *
+                        media_type.bits_per_sample/8;
+                    
+                    break;                
+              }
+              
+              
               default:
                 return BLT_ERROR_UNSUPPORTED_CODEC;
             }

@@ -776,15 +776,15 @@ AacDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
 
-    /* register the type id for "audio/vnd.bluetune.mp4-es" */
+    /* register the type id */
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        "audio/vnd.bluetune.mp4-es",
+        BLT_MP4_ES_MIME_TYPE,
         &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("AacDecoderModule::Attach (audio/vnd.bluetune.mp4-es = %d)", self->mp4es_type_id);
+    ATX_LOG_FINE_1("AacDecoderModule::Attach (" BLT_MP4_ES_MIME_TYPE " = %d)", self->mp4es_type_id);
 
     return BLT_SUCCESS;
 }
@@ -820,7 +820,7 @@ AacDecoderModule_Probe(BLT_Module*              _self,
                 return BLT_FAILURE;
             }
 
-            /* the input type should be audio/vnd.bluetune.mp4es */
+            /* the input type should be BLT_MP4_ES_MIME_TYPE */
             if (constructor->spec.input.media_type->id != 
                 self->mp4es_type_id) {
                 return BLT_FAILURE;

@@ -721,15 +721,15 @@ AdtsParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                    BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                    "audio/aacp", self->adts_type_id);
 
-    /* register the type id for "audio/vnd.bluetune.mp4-es" */
+    /* register the type id for BLT_MP4_ES_MIME_TYPE */
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        "audio/vnd.bluetune.mp4-es",
+        BLT_MP4_ES_MIME_TYPE,
         &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("ADTS Parser Module::Attach (audio/vnd.bluetune.mp4-es type = %d)", self->mp4es_type_id);
+    ATX_LOG_FINE_1("ADTS Parser Module::Attach (" BLT_MP4_ES_MIME_TYPE " type = %d)", self->mp4es_type_id);
     ATX_LOG_FINE_1("ADTS Parser Module::Attach (audio/aac type = %d)", self->adts_type_id);
 
     return BLT_SUCCESS;

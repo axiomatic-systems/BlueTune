@@ -244,6 +244,7 @@ PluginsSettings = {
     'NullOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',        'src_dir':'Outputs/Null'             },
     'MpegAudioDecoder' : {'flags':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
     'FlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
+    'AlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',       'src_dir':'Decoders/ALAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
     'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
     'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                             },

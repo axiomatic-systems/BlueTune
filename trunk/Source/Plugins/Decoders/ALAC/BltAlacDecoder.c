@@ -113,7 +113,7 @@ AlacDecoder_Configure(AlacDecoder*         self,
 {
     if (decoder_info_length < 28) return BLT_ERROR_INVALID_PARAMETERS;
     
-    decoder_info += 4; // skip first 4 bytes (could be version/flags)
+    decoder_info += 4; /* skip first 4 bytes (could be version/flags) */
     
     self->config.samples_per_frame = ATX_BytesToInt32Be(decoder_info);
     if (self->config.samples_per_frame > BLT_ALAC_MAX_SAMPLES_PER_FRAME) {
@@ -121,7 +121,7 @@ AlacDecoder_Configure(AlacDecoder*         self,
     }
     decoder_info += 4;
     
-    decoder_info += 1; // skip unknown byte
+    decoder_info += 1; /* skip unknown byte */
     
     self->config.bits_per_sample = *decoder_info;
     decoder_info += 1;
@@ -138,7 +138,7 @@ AlacDecoder_Configure(AlacDecoder*         self,
     self->config.channel_count = *decoder_info;
     decoder_info += 1;
     
-    decoder_info += 2; // skip 2 unknown bytes
+    decoder_info += 2; /* skip 2 unknown bytes */
     
     self->config.max_frame_size = ATX_BytesToInt32Be(decoder_info);
     decoder_info += 4;

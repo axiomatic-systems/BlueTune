@@ -320,7 +320,7 @@ AlacDecoder_DecompressRiceCode(AlacDecoder* self,
         if ((history < 128) && (i+1 < sample_count)) {
             int run_length;
 
-            /* count leading 1s up to 9 bits long */
+            /* count leading 1s up to 8 bits */
             x = 0;
             while (x <= 8 && BLT_BitStream_ReadBit(bits)) {
                 ++x;
@@ -395,8 +395,7 @@ AlacDecoder_ApplyPredictor(const ATX_Int32* in,
         /* delta encoding (the coefs seem to be ignored in this case) */
         ATX_Int32 previous_value = 0;
         for (i = 0; i < sample_count; i++) {
-            ATX_Int32 sample = previous_value+in[i];
-            out[i] = BLT_ALAC_EXTEND_SIGN_32(sample, sample_size);
+            out[i] = previous_value+in[i];
             previous_value = in[i];
         }
         return;
@@ -405,9 +404,7 @@ AlacDecoder_ApplyPredictor(const ATX_Int32* in,
     /* compute the initial values */
     out[0] = in[0];
     for (i = 1; i <= predictor_coef_count; i++) {
-        ATX_Int32 sample = out[i-1]+in[i];
-        /*out[i] = BLT_ALAC_EXTEND_SIGN_32(sample, sample_size);*/
-        out[i] = sample;
+        out[i] = out[i-1]+in[i];
     }
 
     /* apply the filter to the rest of the samples */
@@ -428,7 +425,6 @@ AlacDecoder_ApplyPredictor(const ATX_Int32* in,
         sample += out[0] + error;
 
         /* emmit the sample */
-        /*out[predictor_coef_count+1] = BLT_ALAC_EXTEND_SIGN_32(sample, sample_size);*/
         out[predictor_coef_count+1] = sample;
 
         /* adapt the filter coefficients */

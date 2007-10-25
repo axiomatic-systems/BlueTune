@@ -378,7 +378,6 @@ static void
 AlacDecoder_ApplyPredictor(const ATX_Int32* in,
                            ATX_Int32*       out,
                            unsigned int     sample_count,
-                           unsigned int     sample_size,
                            ATX_Int16*       predictor_coef_table,
                            unsigned int     predictor_coef_count,
                            unsigned int     predictor_quantization)
@@ -592,7 +591,6 @@ AlacDecoder_DecodeFrame(AlacDecoder* self, BLT_MediaPacket* out)
                 AlacDecoder_ApplyPredictor(self->buffers.prediction_errors[c],
                                            self->buffers.samples[c],
                                            sample_count,
-                                           sample_size,
                                            predictor_coef_table[c],
                                            predictor_coef_count[c],
                                            prediction_quantitization[c]);

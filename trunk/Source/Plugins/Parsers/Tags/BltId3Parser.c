@@ -17,6 +17,11 @@
 #include "BltId3Parser.h"
 
 /*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.tags.id3")
+
+/*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_ID3V1_TAG_SIZE                    128
@@ -148,22 +153,36 @@ BLT_Id3Parser_ParseV1(ATX_InputStream* stream,
 {
     char              id3_tag[BLT_ID3V1_TAG_SIZE];
     char              buffer[BLT_ID3V1_TAG_MAX_STRING_LENGTH+1];
-    BLT_Size          bytes_read;
+    ATX_Properties*   stream_properties;
     ATX_PropertyValue property_value;
     BLT_Result        result;
 
     /* check that the size if enough to hold and BLT_ID3 tag */
-    if (stream_size < BLT_ID3V1_TAG_SIZE) {
-        return BLT_FAILURE;
-    }
+    if (stream_size < BLT_ID3V1_TAG_SIZE) return BLT_FAILURE;
 
+    /* default value */
+    *tag_size = 0;
+    
+    /* don't seek if the stream says it seeks slowly */
+    stream_properties = ATX_CAST(stream, ATX_Properties);
+    if (stream_properties) {
+        result = ATX_Properties_GetProperty(stream_properties, 
+                                            ATX_INPUT_STREAM_PROPERTY_SEEK_SPEED,
+                                            &property_value);
+        if (ATX_SUCCEEDED(result) && 
+            property_value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER &&
+            property_value.data.integer <= ATX_INPUT_STREAM_SEEK_SPEED_SLOW) {
+            ATX_LOG_FINER("BLT_Id3Parser::ParseV1 - not seeking for ID3 footer, source is slow");
+            return BLT_FAILURE;
+        }
+    }
+    
     /* seek to start of tag */
     result = ATX_InputStream_Seek(stream, stream_size-BLT_ID3V1_TAG_SIZE);
     if (BLT_FAILED(result)) return result;
 
     /* read the tag into a buffer */
-    result = ATX_InputStream_Read(stream, id3_tag, BLT_ID3V1_TAG_SIZE, 
-                                 &bytes_read);
+    result = ATX_InputStream_ReadFully(stream, id3_tag, BLT_ID3V1_TAG_SIZE);
     if (BLT_FAILED(result)) return result;
 
     /* check that it is a tag */
@@ -181,58 +200,58 @@ BLT_Id3Parser_ParseV1(ATX_InputStream* stream,
                     &id3_tag[BLT_ID3V1_TAG_TITLE_OFFSET], 
                     BLT_ID3V1_TAG_TITLE_SIZE);
     BLT_Id3Parser_TrimString(buffer, BLT_ID3V1_TAG_TITLE_SIZE);
-    property_value.string = buffer;
+    property_value.data.string = buffer;
+    property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
     ATX_Properties_SetProperty(properties,
                                "Tags/Title",
-                               ATX_PROPERTY_TYPE_STRING,
                                &property_value);
 
     ATX_CopyStringN(buffer, 
                     &id3_tag[BLT_ID3V1_TAG_ARTIST_OFFSET], 
                     BLT_ID3V1_TAG_ARTIST_SIZE);
     BLT_Id3Parser_TrimString(buffer, BLT_ID3V1_TAG_ARTIST_SIZE);
-    property_value.string = buffer;
+    property_value.data.string = buffer;
+    property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
     ATX_Properties_SetProperty(properties,
                                "Tags/Artist",
-                               ATX_PROPERTY_TYPE_STRING,
                                &property_value);
 
     ATX_CopyStringN(buffer, 
                     &id3_tag[BLT_ID3V1_TAG_ALBUM_OFFSET], 
                     BLT_ID3V1_TAG_ALBUM_SIZE);
     BLT_Id3Parser_TrimString(buffer, BLT_ID3V1_TAG_ALBUM_SIZE);
-    property_value.string = buffer;
+    property_value.data.string = buffer;
+    property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
     ATX_Properties_SetProperty(properties,
                                "Tags/Album",
-                               ATX_PROPERTY_TYPE_STRING,
                                &property_value);
 
     ATX_CopyStringN(buffer, 
                     &id3_tag[BLT_ID3V1_TAG_YEAR_OFFSET], 
                     BLT_ID3V1_TAG_YEAR_SIZE);
     BLT_Id3Parser_TrimString(buffer, BLT_ID3V1_TAG_YEAR_SIZE);
-    property_value.string = buffer;
+    property_value.data.string = buffer;
+    property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
     ATX_Properties_SetProperty(properties,
                                "Tags/Year",
-                               ATX_PROPERTY_TYPE_STRING,
                                &property_value);
 
     ATX_CopyStringN(buffer, 
                   &id3_tag[BLT_ID3V1_TAG_COMMENT_OFFSET], 
                   BLT_ID3V1_TAG_COMMENT_SIZE);
     BLT_Id3Parser_TrimString(buffer, BLT_ID3V1_TAG_COMMENT_SIZE);
-    property_value.string = buffer;
+    property_value.data.string = buffer;
+    property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
     ATX_Properties_SetProperty(properties,
                                "Tags/Comment",
-                               ATX_PROPERTY_TYPE_STRING,
                                &property_value);
 
     if ((unsigned char)id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET] < 
         ATX_ARRAY_SIZE(BLT_Id3GenreTable)) {
-        property_value.string = BLT_Id3GenreTable[(int)id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET]];
+        property_value.data.string = BLT_Id3GenreTable[(int)id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET]];
+        property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
         ATX_Properties_SetProperty(properties,
                                    "Tags/Genre",
-                                   ATX_PROPERTY_TYPE_STRING,
                                    &property_value);
     }
 
@@ -240,10 +259,10 @@ BLT_Id3Parser_ParseV1(ATX_InputStream* stream,
     /* the comment tag                                              */
     if (id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET-2] == 0 &&
         id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET-1]) {
-        property_value.integer = id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET-1];
+        property_value.data.integer = id3_tag[BLT_ID3V1_TAG_GENRE_OFFSET-1];
+        property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
         ATX_Properties_SetProperty(properties,
                                    "Tags/Index",
-                                   ATX_PROPERTY_TYPE_INTEGER,
                                    &property_value);
     }
 
@@ -260,7 +279,6 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
                       ATX_Properties*  properties)
 {
     char       header[BLT_ID3V2_TAG_HEADER_SIZE];
-    BLT_Size   bytes_read;
     BLT_Result result;
     
     BLT_COMPILER_UNUSED(properties);
@@ -271,9 +289,7 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
     }
 
     /* read the tag header into a buffer */
-    result = ATX_InputStream_Read(stream, header, 
-                                  BLT_ID3V2_TAG_HEADER_SIZE, 
-                                  &bytes_read);
+    result = ATX_InputStream_ReadFully(stream, header, BLT_ID3V2_TAG_HEADER_SIZE);
     if (BLT_FAILED(result)) return result;
 
     /* if there is an ID3v2 header, look at its size */

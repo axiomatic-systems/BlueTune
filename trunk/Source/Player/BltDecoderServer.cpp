@@ -46,7 +46,6 @@ BLT_VOID_METHOD
 BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged(
     ATX_PropertyListener*    self,
     ATX_CString              name,
-    ATX_PropertyType         type,
     const ATX_PropertyValue* value);
 
 /*----------------------------------------------------------------------
@@ -589,24 +588,26 @@ BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 |   BLT_DecoderServer::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderServer::SetProperty(BLT_PropertyScope   scope,
-                               const char*         target,
-                               const ATX_Property& property)
+BLT_DecoderServer::SetProperty(BLT_PropertyScope        scope,
+                               const char*              target,
+                               const char*              name,
+                               const ATX_PropertyValue* value)
 {
     return PostMessage(
-        new BLT_DecoderServer_SetPropertyCommandMessage(scope, target, property));
+        new BLT_DecoderServer_SetPropertyCommandMessage(scope, target, name, value));
 }
 
 /*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnSetPropertyCommand
 +---------------------------------------------------------------------*/
 void 
-BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope   scope,
-                                        const NPT_String&   /*target*/,
-                                        const ATX_Property& property)
+BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope        scope,
+                                        const NPT_String&        /*target*/,
+                                        const NPT_String&        name,
+                                        const ATX_PropertyValue* value)
 {
     BLT_Result result;
-    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", property.name);
+    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", name.GetChars());
 
     ATX_Properties* properties = NULL;
     switch (scope) {
@@ -623,7 +624,7 @@ BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope   scope,
             result = BLT_ERROR_NOT_SUPPORTED;
     }
     if (ATX_SUCCEEDED(result) && properties != NULL) {
-        result = ATX_Properties_SetProperty(properties, property.name, property.type, &property.value);
+        result = ATX_Properties_SetProperty(properties, name.GetChars(), value);
     }
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY, result);
 }
@@ -671,20 +672,12 @@ void
 BLT_DecoderServer::OnPropertyChanged(BLT_PropertyScope        scope,
                                      const char*              source,
                                      const char*              name, 
-                                     ATX_PropertyType         type, 
                                      const ATX_PropertyValue* value)
 {
-    ATX_Property property;
-    property.name = name;
-    property.type = type;
-    if (value) {
-        property.value = *value;
-    } else {
-        property.value.any = NULL;
-    }
     m_Client->PostMessage(new BLT_DecoderClient_PropertyNotificationMessage(scope,
                                                                             source,
-                                                                            property));
+                                                                            name,
+                                                                            value));
 }
 
 /*----------------------------------------------------------------------
@@ -694,80 +687,75 @@ BLT_VOID_METHOD
 BLT_DecoderServer_PropertyListenerWrapper_OnPropertyChanged(
     ATX_PropertyListener*    _self,
     ATX_CString              name,
-    ATX_PropertyType         type,
     const ATX_PropertyValue* value)    
 {
     BLT_DecoderServer_PropertyListenerWrapper* self = ATX_SELF(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyListener);
-    self->outer->OnPropertyChanged(self->scope, self->source, name, type, value);
+    self->outer->OnPropertyChanged(self->scope, self->source, name, value);
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_PropertyWrapper::BLT_DecoderServer_PropertyWrapper
+|   BLT_DecoderServer_PropertyValueWrapper::BLT_DecoderServer_PropertyValueWrapper
 +---------------------------------------------------------------------*/
-BLT_DecoderServer_PropertyWrapper::BLT_DecoderServer_PropertyWrapper(const ATX_Property& property)
+BLT_DecoderServer_PropertyValueWrapper::BLT_DecoderServer_PropertyValueWrapper(
+    const ATX_PropertyValue* value)
 {
-    m_Property.type = property.type;
-
-    if (property.name) {
-         char* copy = new char[ATX_StringLength(property.name)+1];
-         m_Property.name = copy;
-        ATX_CopyString(copy, property.name);
-    } else {
-        m_Property.name = NULL;
+    if (value == NULL) {
+        m_Value = NULL;
+        return;
     }
-
-    switch (property.type) {
-        case ATX_PROPERTY_TYPE_NONE:
-        case ATX_PROPERTY_TYPE_BOOLEAN:
-        case ATX_PROPERTY_TYPE_FLOAT:
-        case ATX_PROPERTY_TYPE_INTEGER:
-            m_Property.value = property.value;
+    
+    m_Value = new ATX_PropertyValue();
+    m_Value->type = value->type;
+    switch (value->type) {
+        case ATX_PROPERTY_VALUE_TYPE_BOOLEAN:
+        case ATX_PROPERTY_VALUE_TYPE_FLOAT:
+        case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+            m_Value->data = value->data;
             break;
 
-        case ATX_PROPERTY_TYPE_STRING:
-            if (property.value.string) {
-                char* copy = new char[ATX_StringLength(property.value.string)+1];
-                ATX_CopyString(copy, property.value.string);
-                m_Property.value.string = copy;
+        case ATX_PROPERTY_VALUE_TYPE_STRING:
+            if (value->data.string) {
+                char* copy = new char[ATX_StringLength(value->data.string)+1];
+                ATX_CopyString(copy, value->data.string);
+                m_Value->data.string = copy;
             } else {
-                m_Property.value.string = NULL;
+                m_Value->data.string = NULL;
             }
             break;
 
-        case ATX_PROPERTY_TYPE_RAW_DATA:
-            if (property.value.raw_data.data &&
-                property.value.raw_data.size) {
-                m_Property.value.raw_data.size = property.value.raw_data.size;
-                m_Property.value.raw_data.data = new unsigned char[property.value.raw_data.size];
-                ATX_CopyMemory(m_Property.value.raw_data.data, property.value.raw_data.data, property.value.raw_data.size);
+        case ATX_PROPERTY_VALUE_TYPE_RAW_DATA:
+            if (value->data.raw_data.data &&
+                value->data.raw_data.size) {
+                m_Value->data.raw_data.size = value->data.raw_data.size;
+                m_Value->data.raw_data.data = new unsigned char[value->data.raw_data.size];
+                ATX_CopyMemory(m_Value->data.raw_data.data, value->data.raw_data.data, value->data.raw_data.size);
             } else {
-                m_Property.value.raw_data.size = 0;
-                m_Property.value.raw_data.data = NULL;
+                m_Value->data.raw_data.size = 0;
+                m_Value->data.raw_data.data = NULL;
             }
             break;
     }
 }
 
 /*----------------------------------------------------------------------
-|   BLT_DecoderServer_PropertyWrapper::~BLT_DecoderServer_PropertyWrapper
+|   BLT_DecoderServer_PropertyValueWrapper::~BLT_DecoderServer_PropertyValueWrapper
 +---------------------------------------------------------------------*/
-    BLT_DecoderServer_PropertyWrapper::~BLT_DecoderServer_PropertyWrapper()
+BLT_DecoderServer_PropertyValueWrapper::~BLT_DecoderServer_PropertyValueWrapper()
 {
-    delete[] m_Property.name;
-
-    switch (m_Property.type) {
-        case ATX_PROPERTY_TYPE_STRING:
-            delete[] m_Property.value.string;
+    if (m_Value == NULL) return;
+    
+    switch (m_Value->type) {
+        case ATX_PROPERTY_VALUE_TYPE_STRING:
+            delete[] m_Value->data.string;
             break;
 
-        case ATX_PROPERTY_TYPE_RAW_DATA:
-            delete[] static_cast<unsigned char*>(m_Property.value.raw_data.data);
+        case ATX_PROPERTY_VALUE_TYPE_RAW_DATA:
+            delete[] static_cast<unsigned char*>(m_Value->data.raw_data.data);
             break;
 
-        case ATX_PROPERTY_TYPE_NONE:
-        case ATX_PROPERTY_TYPE_BOOLEAN:
-        case ATX_PROPERTY_TYPE_FLOAT:
-        case ATX_PROPERTY_TYPE_INTEGER:
+        case ATX_PROPERTY_VALUE_TYPE_BOOLEAN:
+        case ATX_PROPERTY_VALUE_TYPE_FLOAT:
+        case ATX_PROPERTY_VALUE_TYPE_INTEGER:
             break;
     }
 }

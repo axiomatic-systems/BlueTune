@@ -72,11 +72,14 @@ Test(int buffer_size, int source_size)
             ATX_Offset position = ATX_System_GetRandomInteger()%(10+source_size);
             ATX_Size   new_position;
             ATX_Result result = ATX_InputStream_Seek(stream, position);
-            ATX_InputStream_Tell(stream, &new_position);
             if (ATX_SUCCEEDED(result)) {
+                ATX_InputStream_Tell(stream, &new_position);
                 CHECK(new_position == position);
                 expect_eos = ATX_FALSE;
             } else {
+                result = ATX_InputStream_Seek(stream, offset);
+                CHECK(result == ATX_SUCCESS);
+                ATX_InputStream_Tell(stream, &new_position);
                 CHECK(new_position == offset);
             }
             offset = new_position;
@@ -127,6 +130,11 @@ main(int argc, char** argv)
     ATX_System_SetRandomSeed(0);
     for (i=2; i<1000; i++) {
         for (j=1; j<3000; j++) {
+            Test(i,j);
+        }
+    }
+    for (i=2; i<100000; i+=77) {
+        for (j=1; j<3000000; j+=777) {
             Test(i,j);
         }
     }

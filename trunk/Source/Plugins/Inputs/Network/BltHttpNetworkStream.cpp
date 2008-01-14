@@ -39,6 +39,7 @@ typedef struct {
     // interfaces
     ATX_IMPLEMENTS(ATX_InputStream);
     ATX_IMPLEMENTS(BLT_NetworkInputSource);
+    ATX_IMPLEMENTS(ATX_Properties);
     ATX_IMPLEMENTS(ATX_Referenceable);
 
     // members
@@ -50,6 +51,7 @@ typedef struct {
     NPT_Size                  m_ContentLength;
     bool                      m_Eos;
     bool                      m_IsIcy;
+    bool                      m_CanSeek;
     unsigned int              m_IcyMetaInterval;
     unsigned int              m_IcyMetaCounter;
     BLT_Stream*               m_Context;
@@ -65,6 +67,29 @@ HttpInputStream_MapResult(NPT_Result result)
         case NPT_ERROR_EOS: return ATX_ERROR_EOS;
         default: return result;
     }
+}
+
+/*----------------------------------------------------------------------
+|   HttpInputStream_GetProperty
++---------------------------------------------------------------------*/
+ATX_METHOD
+HttpInputStream_GetProperty(ATX_Properties*    _self, 
+                            const char*        name,
+                            ATX_PropertyValue* value)
+{
+    HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_Properties);
+    
+    if (name != NULL && ATX_StringsEqual(name, ATX_INPUT_STREAM_PROPERTY_SEEK_SPEED)) {
+        value->type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+        if (self->m_CanSeek) {
+            value->data.integer = ATX_INPUT_STREAM_SEEK_SPEED_SLOW;
+        } else {
+            value->data.integer = ATX_INPUT_STREAM_SEEK_SPEED_NO_SEEK;
+        }
+        return ATX_SUCCESS;
+    }
+    
+    return ATX_ERROR_NO_SUCH_PROPERTY;
 }
 
 /*----------------------------------------------------------------------
@@ -90,7 +115,7 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
 
     // query the registry
     const char* content_type = self->m_Response->GetEntity()->GetContentType();
-    ATX_LOG_INFO_1("HttpInputStream::GetMediaType - Content-Type = %s", 
+    ATX_LOG_FINE_1("HttpInputStream::GetMediaType - Content-Type = %s", 
                    content_type?content_type:"unknown");
     if (content_type[0] == '\0' && self->m_IsIcy) {
         // if the content type is not specified, and this is an ICY stream,
@@ -163,6 +188,7 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
         NPT_String range = "bytes="+NPT_String::FromInteger(position);
         range += "-";
         request.GetHeaders().SetHeader(NPT_HTTP_HEADER_RANGE, range);
+        ATX_LOG_FINE_1("HttpInputStream_SendRequest - seek, %s", range.GetChars());
     }
 
     // add the ICY header that says we can deal with ICY metadata
@@ -175,7 +201,9 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
     switch (self->m_Response->GetStatusCode()) {
         case 200:
             // if this is a Range request, expect a 206 instead
-            if (position) return BLT_ERROR_PROTOCOL_FAILURE;
+            if (position) result = BLT_ERROR_PROTOCOL_FAILURE;
+            
+            // get the body stream and size
             self->m_Response->GetEntity()->GetInputStream(*self->m_InputStream);
             self->m_ContentLength = self->m_Response->GetEntity()->GetContentLength();
             result = BLT_SUCCESS;
@@ -183,7 +211,9 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
 
         case 206:
             // if this is not a Range request, expect a 200 instead
-            if (position == 0) return BLT_ERROR_PROTOCOL_FAILURE;
+            if (position == 0) result = BLT_ERROR_PROTOCOL_FAILURE;
+            
+            // get the body stream
             self->m_Response->GetEntity()->GetInputStream(*self->m_InputStream);
             result = BLT_SUCCESS;
             break;
@@ -196,19 +226,31 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
             result = BLT_FAILURE;
     }
 
+    // see if we can seek 
+    self->m_CanSeek = false;
+    const NPT_String* accept_range = self->m_Response->GetHeaders().GetHeaderValue("Accept-Ranges");
+    if (accept_range) {
+        if (*accept_range == "bytes") {
+            ATX_LOG_FINE("HttpInputStream::SendRequest - stream is seekable");
+            self->m_CanSeek = true;
+        }
+    }
+    
     // see if this is an ICY response
     self->m_IcyMetaCounter = 0;
     if (self->m_Response->GetProtocol() == "ICY") {
-        self->m_IsIcy = true;
+        self->m_IsIcy   = true;
     } else {
         self->m_IsIcy = false;
     }
-    NPT_HttpHeader* icy_metaint = self->m_Response->GetHeaders().GetHeader("icy-metaint");
+    const NPT_String* icy_metaint = self->m_Response->GetHeaders().GetHeaderValue("icy-metaint");
     if (icy_metaint) {
         unsigned long interval = 0;
-        ATX_ParseIntegerU(icy_metaint->GetValue(), &interval, ATX_TRUE);
+        icy_metaint->ToInteger(interval, ATX_TRUE);
         self->m_IcyMetaInterval = interval;
         self->m_IsIcy = true;
+    } else {
+        self->m_IcyMetaInterval = 0;
     }
 
     return result;
@@ -232,19 +274,20 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
              ++i) {
             NPT_HttpHeader* header = *i;
             ATX_PropertyValue value;
+            value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
             if (header->GetName().StartsWith("icy-", true)) {
                 NPT_String name = "ICY/";
                 name += header->GetName().GetChars()+4;
-                value.string = header->GetValue();
-                ATX_Properties_SetProperty(properties, name, ATX_PROPERTY_TYPE_STRING, &value);
+                value.data.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, name, &value);
             }
 
             if (header->GetName().Compare("icy-name", true) == 0) {
-                value.string = header->GetValue();
-                ATX_Properties_SetProperty(properties, "Tags/RadioName", ATX_PROPERTY_TYPE_STRING, &value);
+                value.data.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, "Tags/RadioName", &value);
             } else if (header->GetName().Compare("icy-genre", true) == 0) {
-                value.string = header->GetValue();
-                ATX_Properties_SetProperty(properties, "Tags/Genre", ATX_PROPERTY_TYPE_STRING, &value);
+                value.data.string = header->GetValue();
+                ATX_Properties_SetProperty(properties, "Tags/Genre", &value);
             }
         }
     }
@@ -315,8 +358,9 @@ HttpInputStream_Read(ATX_InputStream* _self,
                         ATX_Properties* properties;
                         if (self->m_Context && BLT_SUCCEEDED(BLT_Stream_GetProperties(self->m_Context, &properties))) {
                             ATX_PropertyValue pvalue;
-                            pvalue.string = title.GetChars()+quote_1+1;
-                            ATX_Properties_SetProperty(properties, "Tags/Title", ATX_PROPERTY_TYPE_STRING, &pvalue);
+                            pvalue.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                            pvalue.data.string = title.GetChars()+quote_1+1;
+                            ATX_Properties_SetProperty(properties, "Tags/Title", &pvalue);
                         }
                     }
                 }
@@ -340,8 +384,14 @@ HttpInputStream_Seek(ATX_InputStream* _self,
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
 
+    // special case to detect if we seek to the very end of the stream
+    if (where != 0 && where == self->m_ContentLength) {
+        self->m_Eos = true;
+        return NPT_SUCCESS;
+    }
+    
     // check if we can seek
-    if (self->m_IsIcy || self->m_ContentLength == 0) {
+    if ((!self->m_CanSeek) || (self->m_ContentLength == 0)) {
         return BLT_ERROR_NOT_SUPPORTED;
     }
     
@@ -404,6 +454,7 @@ HttpInputStream_GetAvailable(ATX_InputStream* _self,
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(HttpInputStream)
     ATX_GET_INTERFACE_ACCEPT(HttpInputStream, ATX_Referenceable)
+    ATX_GET_INTERFACE_ACCEPT(HttpInputStream, ATX_Properties)
     ATX_GET_INTERFACE_ACCEPT(HttpInputStream, ATX_InputStream)
     ATX_GET_INTERFACE_ACCEPT(HttpInputStream, BLT_NetworkInputSource)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
@@ -418,6 +469,11 @@ ATX_BEGIN_INTERFACE_MAP(HttpInputStream, ATX_InputStream)
     HttpInputStream_GetSize,
     HttpInputStream_GetAvailable
 ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|   ATX_Properties interface
++---------------------------------------------------------------------*/
+ATX_IMPLEMENT_STATIC_PROPERTIES_INTERFACE(HttpInputStream)
 
 /*----------------------------------------------------------------------
 |    BLT_NetworkInputSource interface
@@ -448,12 +504,14 @@ HttpInputStream_Create(const char* url)
     stream->m_ContentLength   = 0;
     stream->m_Eos             = false;
     stream->m_IsIcy           = false;
+    stream->m_CanSeek         = false;
     stream->m_IcyMetaInterval = 0;
     stream->m_IcyMetaCounter  = 0;
     stream->m_Context         = NULL;
 
     // setup interfaces
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_InputStream);
+    ATX_SET_INTERFACE(stream, HttpInputStream, ATX_Properties);
     ATX_SET_INTERFACE(stream, HttpInputStream, BLT_NetworkInputSource);
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_Referenceable);
 

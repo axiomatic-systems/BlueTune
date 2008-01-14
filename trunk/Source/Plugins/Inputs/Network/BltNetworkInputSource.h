@@ -31,7 +31,7 @@ ATX_END_INTERFACE_DEFINITION
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_NetworkInputSource_Attach(BLT_NetworkInputSource* self, 
-                                         BLT_Stream*             stream);
+                              BLT_Stream*             stream);
 BLT_Result 
 BLT_NetworkInputSource_Detach(BLT_NetworkInputSource* self);
 

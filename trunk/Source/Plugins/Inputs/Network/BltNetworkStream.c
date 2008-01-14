@@ -27,17 +27,25 @@
 typedef struct {
     /* interfaces */
     ATX_IMPLEMENTS(ATX_InputStream);
+    ATX_IMPLEMENTS(ATX_Properties);
     ATX_IMPLEMENTS(ATX_Referenceable);
 
     /* members */
     ATX_Cardinal     reference_count;
     ATX_InputStream* source;
+    ATX_Properties*  source_properties;
     ATX_RingBuffer*  buffer;
     ATX_Size         buffer_size;
     ATX_Size         back_store;
     ATX_Offset       position;
     ATX_Boolean      eos;
+    ATX_Boolean      seek_as_read_threshold;
 } BLT_NetworkStream;
+
+/*----------------------------------------------------------------------
+|   logging
++---------------------------------------------------------------------*/
+ATX_SET_LOCAL_LOGGER("bluetune.network.stream")
 
 /*----------------------------------------------------------------------
 |   constants
@@ -46,7 +54,8 @@ typedef struct {
  * Threshold below which a seek forward is implemented by reading from
  * the source instead of seeking in the source.
  */
-#define BLT_NETWORK_STREAM_SEEK_AS_READ_THRESHOLD 
+#define BLT_NETWORK_STREAM_DEFAULT_SEEK_AS_READ_THRESHOLD 0     /* when seek is normal */ 
+#define BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD    32768 /* when seek is slow   */
 
 /**
  * Try to keep this amount of data in the back store 
@@ -57,6 +66,7 @@ typedef struct {
 |   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_InputStream)
+ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Properties)
 ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
@@ -86,9 +96,17 @@ BLT_NetworkStream_Create(BLT_Size          buffer_size,
     self->buffer_size = buffer_size;
     self->source = source;
     ATX_REFERENCE_OBJECT(source);
-
+    
+    /* get the properties interface of the source */
+    self->source_properties = ATX_CAST(source, ATX_Properties);
+    
+    /* determine when we should read data instead issuing a seek when */
+    /* the target position is clos enough                             */
+    self->seek_as_read_threshold = BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD;
+    
     /* setup the interfaces */
     ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_InputStream);
+    ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_Properties);
     ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_Referenceable);
     *stream = &ATX_BASE(self, ATX_InputStream);
 
@@ -118,6 +136,30 @@ BLT_NetworkStream_ClampBackStore(BLT_NetworkStream* self)
      * possible value */
     ATX_Size max_back = ATX_RingBuffer_GetSpace(self->buffer);
     if (self->back_store > max_back) self->back_store = max_back;
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_GetProperty
++---------------------------------------------------------------------*/
+ATX_METHOD
+BLT_NetworkStream_GetProperty(ATX_Properties*    _self, 
+                              const char*        name,
+                              ATX_PropertyValue* value)
+{
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_Properties);
+    
+    if (self->source_properties && name != NULL &&
+        ATX_StringsEqual(name, ATX_INPUT_STREAM_PROPERTY_SEEK_SPEED)) {        
+        /* ask the source if it has the seek speed property */
+        if (ATX_FAILED(ATX_Properties_GetProperty(self->source_properties, name, value))) {
+            /* the source does not have the property, use a default value */
+            value->type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value->data.integer = ATX_INPUT_STREAM_SEEK_SPEED_SLOW;
+        }
+        return ATX_SUCCESS;
+    } else {
+        return ATX_ERROR_NO_SUCH_PROPERTY;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -254,13 +296,28 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     }
 
     /* we're seeking outside the buffered zone */
-    result = ATX_InputStream_Seek(self->source, position);
-    if (ATX_FAILED(result)) return result;
-    ATX_RingBuffer_Reset(self->buffer);
-    self->back_store = 0;
-    self->position = position;
-
     self->eos = ATX_FALSE;
+    if (move > 0 && (unsigned int)move <= self->seek_as_read_threshold) {
+        /* simulate a seek by reading data up to the position */
+        char buffer[256];
+        ATX_LOG_FINE_1("BLT_NetworkStream::Seek - performing seek of %d as a read", move);
+        while (move) {
+            unsigned int chunk = ((unsigned int)move) > sizeof(buffer)?sizeof(buffer):(unsigned int)move;
+            ATX_Size     bytes_read;
+            result = BLT_NetworkStream_Read(_self, buffer, chunk, &bytes_read);
+            if (ATX_FAILED(result)) return result;
+            if (bytes_read != chunk) return ATX_ERROR_EOS;
+            move -= chunk;
+        }
+    } else {
+        /* perform a real seek in the source */
+        result = ATX_InputStream_Seek(self->source, position);
+        if (ATX_FAILED(result)) return result;
+        ATX_RingBuffer_Reset(self->buffer);
+        self->back_store = 0;
+        self->position = position;
+    }
+    
     return ATX_SUCCESS;
 }
 
@@ -305,6 +362,7 @@ BLT_NetworkStream_GetAvailable(ATX_InputStream* _self, ATX_Size* available)
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_NetworkStream)
     ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_InputStream)
+    ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_Properties)
     ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
@@ -318,6 +376,11 @@ ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, ATX_InputStream)
     BLT_NetworkStream_GetSize,
     BLT_NetworkStream_GetAvailable
 ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|       ATX_Properties interface
++---------------------------------------------------------------------*/
+ATX_IMPLEMENT_STATIC_PROPERTIES_INTERFACE(BLT_NetworkStream)
 
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface

@@ -11,6 +11,16 @@
 		CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0487880C99E13800638991 /* BltAdtsParser.c */; };
 		CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */; };
 		CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA6B38720C965CE9000D7A0A /* libHelixAAC.a */; };
+		CA0C9AFB0D15D29100E23496 /* BtPlay.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AEE0D15D24500E23496 /* BtPlay.c */; };
+		CA0C9AFF0D15D2A700E23496 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA0C9C1C0D1604D400E23496 /* BtPlayForceCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */; };
+		CA0C9CD50D1605C300E23496 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA0C9CD60D1605C600E23496 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
+		CA0C9CFF0D16068B00E23496 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
+		CA0C9D000D16068E00E23496 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
+		CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
+		CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */; };
 		CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; };
 		CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; };
 		CA5042CB0C5AE52B0060E6FE /* BltByteStreamProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */; };
@@ -228,6 +238,17 @@
 		CA504F840C5EC7310060E6FE /* flac_window.c in Sources */ = {isa = PBXBuildFile; fileRef = CA504F830C5EC7310060E6FE /* flac_window.c */; };
 		CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504E1B0C5E8D5A0060E6FE /* libMelo.a */; };
 		CA504FDF0C5ED62C0060E6FE /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504D7B0C5E8C870060E6FE /* libBento4.a */; };
+		CA550BA30D1F377500B22D72 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA550C7A0D1F377D00B22D72 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
+		CA550C7B0D1F377D00B22D72 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
+		CA550C7C0D1F377D00B22D72 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
+		CA550C7D0D1F378B00B22D72 /* BtController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9ADB0D15D24500E23496 /* BtController.cpp */; };
+		CA550C7E0D1F378D00B22D72 /* BtStreamController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9ADC0D15D24500E23496 /* BtStreamController.cpp */; };
+		CA550C9A0D20941500B22D72 /* BtPlayerServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */; };
+		CA550CC80D20985600B22D72 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA550CC90D20985600B22D72 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
+		CA550CCA0D20985600B22D72 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
+		CA550CCB0D20985600B22D72 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA64346E0C97197C00F67CD5 /* aacdec.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434350C97197C00F67CD5 /* aacdec.c */; };
 		CA64346F0C97197C00F67CD5 /* aactabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434360C97197C00F67CD5 /* aactabs.c */; };
 		CA6434700C97197C00F67CD5 /* aaccommon.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434380C97197C00F67CD5 /* aaccommon.h */; };
@@ -272,6 +293,69 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CA0C9A7F0D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C98B00D15C14800E23496;
+			remoteInfo = PropertiesTest;
+		};
+		CA0C9A810D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99A20D15CFBB00E23496;
+			remoteInfo = ContainersTest;
+		};
+		CA0C9A830D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99BD0D15D03500E23496;
+			remoteInfo = HttpTest;
+		};
+		CA0C9A850D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99CB0D15D06000E23496;
+			remoteInfo = RingBufferTest;
+		};
+		CA0C9A870D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99E90D15D0AA00E23496;
+			remoteInfo = StringsTest;
+		};
+		CA0C9A890D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99FD0D15D0E900E23496;
+			remoteInfo = MiscTest;
+		};
+		CA0C9A8B0D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C9A120D15D12100E23496;
+			remoteInfo = LoggingTest;
+		};
+		CA0C9A8D0D15D1EC00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C9A260D15D16C00E23496;
+			remoteInfo = NetPump;
+		};
+		CA0C9AF90D15D28500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
 		CA18AD280C9326CF00A5FE6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
@@ -285,6 +369,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Melo;
+		};
+		CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
 		};
 		CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -342,6 +433,27 @@
 			remoteGlobalIDString = CA504EB60C5EABCC0060E6FE;
 			remoteInfo = FLAC;
 		};
+		CA550BA00D1F373500B22D72 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CA550DAC0D23255E00B22D72 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA550D550D20A37E00B22D72;
+			remoteInfo = HttpServerTest1;
+		};
 		CA6435560C974C5200F67CD5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -349,12 +461,115 @@
 			remoteGlobalIDString = CA6B38710C965CE9000D7A0A;
 			remoteInfo = HelixAAC;
 		};
+		CAA97B090CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646ABB0CE97BFD009699D7;
+			remoteInfo = Mp4Dump;
+		};
+		CAA97B0B0CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646AD50CE97C80009699D7;
+			remoteInfo = Mp4Info;
+		};
+		CAA97B0D0CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646AEA0CE97CD2009699D7;
+			remoteInfo = Mp4Encrypt;
+		};
+		CAA97B0F0CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646AF70CE97CEE009699D7;
+			remoteInfo = Mp4Decrypt;
+		};
+		CAA97B110CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B0A0CE97D6E009699D7;
+			remoteInfo = Mp4Edit;
+		};
+		CAA97B130CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B1A0CE97D9C009699D7;
+			remoteInfo = Mp4Extract;
+		};
+		CAA97B150CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B2A0CE97DD1009699D7;
+			remoteInfo = Mp4Tag;
+		};
+		CAA97B170CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B3A0CE97DFD009699D7;
+			remoteInfo = Aac2Mp4;
+		};
+		CAA97B190CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B4A0CE97E27009699D7;
+			remoteInfo = Mp42Aac;
+		};
+		CAA97B1B0CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B5A0CE97E52009699D7;
+			remoteInfo = Mp4RtpHintInfo;
+		};
+		CAA97B1D0CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA646B6A0CE97E82009699D7;
+			remoteInfo = CryptoTest;
+		};
+		CAA97B210CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAA97A010CF164A700C01909;
+			remoteInfo = XmlTest1;
+		};
+		CAA97B230CF3639D00C01909 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAA97A1B0CF1654A00C01909;
+			remoteInfo = StringsTest1;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		CA0487870C99E13800638991 /* BltAdtsParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAdtsParser.h; sourceTree = "<group>"; };
 		CA0487880C99E13800638991 /* BltAdtsParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAdtsParser.c; sourceTree = "<group>"; };
 		CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltCommonMediaTypes.h; sourceTree = "<group>"; };
+		CA0C9ADB0D15D24500E23496 /* BtController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtController.cpp; sourceTree = "<group>"; };
+		CA0C9ADC0D15D24500E23496 /* BtStreamController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtStreamController.cpp; sourceTree = "<group>"; };
+		CA0C9ADD0D15D24500E23496 /* BtStreamController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtStreamController.h; sourceTree = "<group>"; };
+		CA0C9AEE0D15D24500E23496 /* BtPlay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BtPlay.c; sourceTree = "<group>"; };
+		CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayForceCpp.cpp; sourceTree = "<group>"; };
+		CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PcmDiff.cpp; sourceTree = "<group>"; };
+		CA0C9AF50D15D27D00E23496 /* btplay */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplay; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
+		CA0C9C150D16047100E23496 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
+		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
 		CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltBuiltins.h; sourceTree = "<group>"; };
 		CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamProvider.h; sourceTree = "<group>"; };
@@ -579,6 +794,9 @@
 		CA504F030C5EBB120060E6FE /* metadata_object.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = metadata_object.c; sourceTree = "<group>"; };
 		CA504F040C5EBB120060E6FE /* stream_decoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = stream_decoder.c; sourceTree = "<group>"; };
 		CA504F830C5EC7310060E6FE /* flac_window.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = flac_window.c; sourceTree = "<group>"; };
+		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
+		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA6434350C97197C00F67CD5 /* aacdec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aacdec.c; sourceTree = "<group>"; };
 		CA6434360C97197C00F67CD5 /* aactabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aactabs.c; sourceTree = "<group>"; };
 		CA6434380C97197C00F67CD5 /* aaccommon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = aaccommon.h; sourceTree = "<group>"; };
@@ -625,6 +843,25 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		CA0C9AF30D15D27D00E23496 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA0C9AFF0D15D2A700E23496 /* libBlueTune.a in Frameworks */,
+				CA0C9CFF0D16068B00E23496 /* CoreServices.framework in Frameworks */,
+				CA0C9D000D16068E00E23496 /* AudioToolbox.framework in Frameworks */,
+				CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA1ACEF80D30C5FA00C350CD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA504E6D0C5EA3960060E6FE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -636,6 +873,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA550B9A0D1F372C00B22D72 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA550BA30D1F377500B22D72 /* libBlueTune.a in Frameworks */,
+				CA550C7A0D1F377D00B22D72 /* CoreServices.framework in Frameworks */,
+				CA550C7B0D1F377D00B22D72 /* AudioToolbox.framework in Frameworks */,
+				CA550C7C0D1F377D00B22D72 /* AudioUnit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA550C930D2093D800B22D72 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA550CC80D20985600B22D72 /* libBlueTune.a in Frameworks */,
+				CA550CC90D20985600B22D72 /* CoreServices.framework in Frameworks */,
+				CA550CCA0D20985600B22D72 /* AudioToolbox.framework in Frameworks */,
+				CA550CCB0D20985600B22D72 /* AudioUnit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +914,8 @@
 				CA504E950C5EA3FF0060E6FE /* libTremor.a in Frameworks */,
 				CA504F540C5EBF710060E6FE /* libFLAC.a in Frameworks */,
 				CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */,
+				CA0C9CD50D1605C300E23496 /* libAtomix.a in Frameworks */,
+				CA0C9CD60D1605C600E23496 /* libNeptune.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,11 +925,8 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
-				CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */,
-				CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */,
-				CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */,
-				CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
+				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -683,6 +941,10 @@
 				CA504E6F0C5EA3960060E6FE /* libTremor.a */,
 				CA504EB70C5EABCC0060E6FE /* libFLAC.a */,
 				CA6B38720C965CE9000D7A0A /* libHelixAAC.a */,
+				CA0C9AF50D15D27D00E23496 /* btplay */,
+				CA550B9C0D1F372C00B22D72 /* btcontroller */,
+				CA550C950D2093D800B22D72 /* btplayerserver */,
+				CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -703,6 +965,60 @@
 			path = Adts;
 			sourceTree = "<group>";
 		};
+		CA0C9AD90D15D24500E23496 /* Apps */ = {
+			isa = PBXGroup;
+			children = (
+				CA0C9AED0D15D24500E23496 /* BtPlay */,
+				CA0C9ADA0D15D24500E23496 /* BtController */,
+				CA550C900D2093A500B22D72 /* BtPlayerServer */,
+				CA0C9AF00D15D24500E23496 /* PcmDiff */,
+			);
+			path = Apps;
+			sourceTree = "<group>";
+		};
+		CA0C9ADA0D15D24500E23496 /* BtController */ = {
+			isa = PBXGroup;
+			children = (
+				CA0C9ADB0D15D24500E23496 /* BtController.cpp */,
+				CA0C9ADC0D15D24500E23496 /* BtStreamController.cpp */,
+				CA0C9ADD0D15D24500E23496 /* BtStreamController.h */,
+			);
+			path = BtController;
+			sourceTree = "<group>";
+		};
+		CA0C9AED0D15D24500E23496 /* BtPlay */ = {
+			isa = PBXGroup;
+			children = (
+				CA0C9AEE0D15D24500E23496 /* BtPlay.c */,
+				CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */,
+			);
+			path = BtPlay;
+			sourceTree = "<group>";
+		};
+		CA0C9AF00D15D24500E23496 /* PcmDiff */ = {
+			isa = PBXGroup;
+			children = (
+				CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */,
+			);
+			path = PcmDiff;
+			sourceTree = "<group>";
+		};
+		CA1ACEF40D30C5D600C350CD /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				CA1ACEF50D30C5D600C350CD /* NetworkStream */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		CA1ACEF50D30C5D600C350CD /* NetworkStream */ = {
+			isa = PBXGroup;
+			children = (
+				CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */,
+			);
+			path = NetworkStream;
+			sourceTree = "<group>";
+		};
 		CA5041D50C5AE52B0060E6FE /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -712,6 +1028,8 @@
 				CA50421A0C5AE52B0060E6FE /* Fluo */,
 				CA50423C0C5AE52B0060E6FE /* Player */,
 				CA5042430C5AE52B0060E6FE /* Plugins */,
+				CA0C9AD90D15D24500E23496 /* Apps */,
+				CA1ACEF40D30C5D600C350CD /* Tests */,
 			);
 			name = Source;
 			path = ../../../Source;
@@ -1162,6 +1480,9 @@
 			isa = PBXGroup;
 			children = (
 				CA50437F0C5AE61E0060E6FE /* libNeptune.a */,
+				CAA97B220CF3639D00C01909 /* XmlTest1 */,
+				CAA97B240CF3639D00C01909 /* StringsTest1 */,
+				CA550DAD0D23255E00B22D72 /* HttpServerTest1 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1170,6 +1491,14 @@
 			isa = PBXGroup;
 			children = (
 				CA5043AE0C5AE6320060E6FE /* libAtomix.a */,
+				CA0C9A800D15D1EC00E23496 /* PropertiesTest */,
+				CA0C9A820D15D1EC00E23496 /* ContainersTest */,
+				CA0C9A840D15D1EC00E23496 /* HttpTest */,
+				CA0C9A860D15D1EC00E23496 /* RingBufferTest */,
+				CA0C9A880D15D1EC00E23496 /* StringsTest */,
+				CA0C9A8A0D15D1EC00E23496 /* MiscTest */,
+				CA0C9A8C0D15D1EC00E23496 /* LoggingTest */,
+				CA0C9A8E0D15D1EC00E23496 /* NetPump */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1270,6 +1599,17 @@
 			isa = PBXGroup;
 			children = (
 				CA504D7B0C5E8C870060E6FE /* libBento4.a */,
+				CAA97B0A0CF3639D00C01909 /* mp4dump */,
+				CAA97B0C0CF3639D00C01909 /* mp4info */,
+				CAA97B0E0CF3639D00C01909 /* mp4encrypt */,
+				CAA97B100CF3639D00C01909 /* mp4decrypt */,
+				CAA97B120CF3639D00C01909 /* mp4edit */,
+				CAA97B140CF3639D00C01909 /* mp4extract */,
+				CAA97B160CF3639D00C01909 /* mp4tag */,
+				CAA97B180CF3639D00C01909 /* aac2mp4 */,
+				CAA97B1A0CF3639D00C01909 /* mp42aac */,
+				CAA97B1C0CF3639D00C01909 /* mp4rtphintinfo */,
+				CAA97B1E0CF3639D00C01909 /* cryptotest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1390,6 +1730,28 @@
 				CA504EFE0C5EBB120060E6FE /* stream_encoder.h */,
 			);
 			path = protected;
+			sourceTree = "<group>";
+		};
+		CA550C900D2093A500B22D72 /* BtPlayerServer */ = {
+			isa = PBXGroup;
+			children = (
+				CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */,
+			);
+			path = BtPlayerServer;
+			sourceTree = "<group>";
+		};
+		CA5B32C70D2DCAAE00F3D391 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				CA0C9C150D16047100E23496 /* CoreServices.framework */,
+				CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */,
+				CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */,
+				CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */,
+				CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */,
+				CA504D760C5E8C870060E6FE /* Bento4.xcodeproj */,
+				CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */,
+			);
+			name = Libraries;
 			sourceTree = "<group>";
 		};
 		CA6434330C97197C00F67CD5 /* HelixAAC */ = {
@@ -1689,6 +2051,40 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		CA0C9AF40D15D27D00E23496 /* BtPlay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA0C9B020D15D2C500E23496 /* Build configuration list for PBXNativeTarget "BtPlay" */;
+			buildPhases = (
+				CA0C9AF20D15D27D00E23496 /* Sources */,
+				CA0C9AF30D15D27D00E23496 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA0C9AFA0D15D28500E23496 /* PBXTargetDependency */,
+			);
+			name = BtPlay;
+			productName = BtPlay;
+			productReference = CA0C9AF50D15D27D00E23496 /* btplay */;
+			productType = "com.apple.product-type.tool";
+		};
+		CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA1ACF000D30C62000C350CD /* Build configuration list for PBXNativeTarget "NetworkStreamTest" */;
+			buildPhases = (
+				CA1ACEF70D30C5FA00C350CD /* Sources */,
+				CA1ACEF80D30C5FA00C350CD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA1ACEFF0D30C60200C350CD /* PBXTargetDependency */,
+			);
+			name = NetworkStreamTest;
+			productName = NetworkStreamTest;
+			productReference = CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */;
+			productType = "com.apple.product-type.tool";
+		};
 		CA504E6E0C5EA3960060E6FE /* Tremor */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CA504EA80C5EA4110060E6FE /* Build configuration list for PBXNativeTarget "Tremor" */;
@@ -1722,6 +2118,40 @@
 			productName = FLAC;
 			productReference = CA504EB70C5EABCC0060E6FE /* libFLAC.a */;
 			productType = "com.apple.product-type.library.static";
+		};
+		CA550B9B0D1F372C00B22D72 /* BtController */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA550BA20D1F376900B22D72 /* Build configuration list for PBXNativeTarget "BtController" */;
+			buildPhases = (
+				CA550B990D1F372C00B22D72 /* Sources */,
+				CA550B9A0D1F372C00B22D72 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA550BA10D1F373500B22D72 /* PBXTargetDependency */,
+			);
+			name = BtController;
+			productName = BtController;
+			productReference = CA550B9C0D1F372C00B22D72 /* btcontroller */;
+			productType = "com.apple.product-type.tool";
+		};
+		CA550C940D2093D800B22D72 /* BtPlayerServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA550C990D20940900B22D72 /* Build configuration list for PBXNativeTarget "BtPlayerServer" */;
+			buildPhases = (
+				CA550C920D2093D800B22D72 /* Sources */,
+				CA550C930D2093D800B22D72 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA550CFE0D20A00400B22D72 /* PBXTargetDependency */,
+			);
+			name = BtPlayerServer;
+			productName = BtPlayerServer;
+			productReference = CA550C950D2093D800B22D72 /* btplayerserver */;
+			productType = "com.apple.product-type.tool";
 		};
 		CA6B38710C965CE9000D7A0A /* HelixAAC */ = {
 			isa = PBXNativeTarget;
@@ -1770,6 +2200,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTune */;
 			projectDirPath = "";
@@ -1791,16 +2222,77 @@
 					ProjectRef = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
 				},
 			);
+			projectRoot = ../../..;
 			targets = (
 				D2AAC045055464E500DB518D /* BlueTune */,
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
 				CA6B38710C965CE9000D7A0A /* HelixAAC */,
+				CA0C9AF40D15D27D00E23496 /* BtPlay */,
+				CA550B9B0D1F372C00B22D72 /* BtController */,
+				CA550C940D2093D800B22D72 /* BtPlayerServer */,
+				CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CA0C9A800D15D1EC00E23496 /* PropertiesTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = PropertiesTest;
+			remoteRef = CA0C9A7F0D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A820D15D1EC00E23496 /* ContainersTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ContainersTest;
+			remoteRef = CA0C9A810D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A840D15D1EC00E23496 /* HttpTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpTest;
+			remoteRef = CA0C9A830D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A860D15D1EC00E23496 /* RingBufferTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = RingBufferTest;
+			remoteRef = CA0C9A850D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A880D15D1EC00E23496 /* StringsTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = StringsTest;
+			remoteRef = CA0C9A870D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A8A0D15D1EC00E23496 /* MiscTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MiscTest;
+			remoteRef = CA0C9A890D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A8C0D15D1EC00E23496 /* LoggingTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = LoggingTest;
+			remoteRef = CA0C9A8B0D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9A8E0D15D1EC00E23496 /* NetPump */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetPump;
+			remoteRef = CA0C9A8D0D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA50437F0C5AE61E0060E6FE /* libNeptune.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1829,9 +2321,124 @@
 			remoteRef = CA504E1A0C5E8D5A0060E6FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA550DAD0D23255E00B22D72 /* HttpServerTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpServerTest1;
+			remoteRef = CA550DAC0D23255E00B22D72 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B0A0CF3639D00C01909 /* mp4dump */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4dump;
+			remoteRef = CAA97B090CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B0C0CF3639D00C01909 /* mp4info */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4info;
+			remoteRef = CAA97B0B0CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B0E0CF3639D00C01909 /* mp4encrypt */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4encrypt;
+			remoteRef = CAA97B0D0CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B100CF3639D00C01909 /* mp4decrypt */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4decrypt;
+			remoteRef = CAA97B0F0CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B120CF3639D00C01909 /* mp4edit */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4edit;
+			remoteRef = CAA97B110CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B140CF3639D00C01909 /* mp4extract */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4extract;
+			remoteRef = CAA97B130CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B160CF3639D00C01909 /* mp4tag */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4tag;
+			remoteRef = CAA97B150CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B180CF3639D00C01909 /* aac2mp4 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = aac2mp4;
+			remoteRef = CAA97B170CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B1A0CF3639D00C01909 /* mp42aac */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp42aac;
+			remoteRef = CAA97B190CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B1C0CF3639D00C01909 /* mp4rtphintinfo */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4rtphintinfo;
+			remoteRef = CAA97B1B0CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B1E0CF3639D00C01909 /* cryptotest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = cryptotest;
+			remoteRef = CAA97B1D0CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B220CF3639D00C01909 /* XmlTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = XmlTest1;
+			remoteRef = CAA97B210CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAA97B240CF3639D00C01909 /* StringsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = StringsTest1;
+			remoteRef = CAA97B230CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
+		CA0C9AF20D15D27D00E23496 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA0C9AFB0D15D29100E23496 /* BtPlay.c in Sources */,
+				CA0C9C1C0D1604D400E23496 /* BtPlayForceCpp.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA1ACEF70D30C5FA00C350CD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA504E6C0C5EA3960060E6FE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1873,6 +2480,23 @@
 				CA504F310C5EBB120060E6FE /* metadata_object.c in Sources */,
 				CA504F320C5EBB120060E6FE /* stream_decoder.c in Sources */,
 				CA504F840C5EC7310060E6FE /* flac_window.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA550B990D1F372C00B22D72 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA550C7D0D1F378B00B22D72 /* BtController.cpp in Sources */,
+				CA550C7E0D1F378D00B22D72 /* BtStreamController.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA550C920D2093D800B22D72 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA550C9A0D20941500B22D72 /* BtPlayerServer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1981,6 +2605,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CA0C9AFA0D15D28500E23496 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA0C9AF90D15D28500E23496 /* PBXContainerItemProxy */;
+		};
 		CA18AD290C9326CF00A5FE6D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Bento4;
@@ -1990,6 +2619,11 @@
 			isa = PBXTargetDependency;
 			name = Melo;
 			targetProxy = CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */;
+		};
+		CA1ACEFF0D30C60200C350CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */;
 		};
 		CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2011,6 +2645,16 @@
 			target = CA504EB60C5EABCC0060E6FE /* FLAC */;
 			targetProxy = CA504F8E0C5EC79A0060E6FE /* PBXContainerItemProxy */;
 		};
+		CA550BA10D1F373500B22D72 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA550BA00D1F373500B22D72 /* PBXContainerItemProxy */;
+		};
+		CA550CFE0D20A00400B22D72 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */;
+		};
 		CA6435570C974C5200F67CD5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CA6B38710C965CE9000D7A0A /* HelixAAC */;
@@ -2025,6 +2669,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2054,6 +2699,7 @@
 					BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2061,7 +2707,6 @@
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -2074,6 +2719,7 @@
 					i386,
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
@@ -2102,6 +2748,7 @@
 					BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2109,7 +2756,6 @@
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 			};
 			name = Release;
 		};
@@ -2132,7 +2778,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
@@ -2156,8 +2802,66 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				WARNING_CFLAGS = "-Wall";
+			};
+			name = Release;
+		};
+		CA0C9AF70D15D27D00E23496 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btplay;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA0C9AF80D15D27D00E23496 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btplay;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA1ACEFC0D30C5FA00C350CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = NetworkStreamTest;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA1ACEFD0D30C5FA00C350CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = NetworkStreamTest;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -2231,6 +2935,64 @@
 			};
 			name = Release;
 		};
+		CA550B9E0D1F372D00B22D72 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btcontroller;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA550B9F0D1F372D00B22D72 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btcontroller;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA550C970D2093D900B22D72 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btplayerserver;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		CA550C980D2093D900B22D72 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = btplayerserver;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		CA6B38770C965D00000D7A0A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2300,6 +3062,24 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CA0C9B020D15D2C500E23496 /* Build configuration list for PBXNativeTarget "BtPlay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA0C9AF70D15D27D00E23496 /* Debug */,
+				CA0C9AF80D15D27D00E23496 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA1ACF000D30C62000C350CD /* Build configuration list for PBXNativeTarget "NetworkStreamTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA1ACEFC0D30C5FA00C350CD /* Debug */,
+				CA1ACEFD0D30C5FA00C350CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		CA504EA80C5EA4110060E6FE /* Build configuration list for PBXNativeTarget "Tremor" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2314,6 +3094,24 @@
 			buildConfigurations = (
 				CA504EC90C5EABDB0060E6FE /* Debug */,
 				CA504ECA0C5EABDB0060E6FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA550BA20D1F376900B22D72 /* Build configuration list for PBXNativeTarget "BtController" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA550B9E0D1F372D00B22D72 /* Debug */,
+				CA550B9F0D1F372D00B22D72 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA550C990D20940900B22D72 /* Build configuration list for PBXNativeTarget "BtPlayerServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA550C970D2093D900B22D72 /* Debug */,
+				CA550C980D2093D900B22D72 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

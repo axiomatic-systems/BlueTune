@@ -48,6 +48,15 @@ BLT_Player::~BLT_Player()
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Player::SetEventListener
++---------------------------------------------------------------------*/
+void
+BLT_Player::SetEventListener(EventListener* listener)
+{
+    m_Listener = listener;
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Player::PumpMessage
 +---------------------------------------------------------------------*/
 BLT_Result
@@ -212,11 +221,12 @@ BLT_Player::AddNode(BLT_CString name)
 |    BLT_Player::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_Player::SetProperty(BLT_PropertyScope   scope,
-                        const char*         target,
-                        const ATX_Property& property)
+BLT_Player::SetProperty(BLT_PropertyScope        scope,
+                        const char*              target,
+                        const char*              name,
+                        const ATX_PropertyValue* value)
 {
-    ATX_LOG_FINE_1("BLT_Player::SetProperty - name=%s", BLT_SAFE_STRING(property.name));
+    ATX_LOG_FINE_1("BLT_Player::SetProperty - name=%s", BLT_SAFE_STRING(name));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
-    return m_Server->SetProperty(scope, target, property);
+    return m_Server->SetProperty(scope, target, name, value);
 }

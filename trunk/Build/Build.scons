@@ -2,12 +2,14 @@ import sys
 import os
 
 from BuildUtils import *
-
+
+
 #######################################################
 # Main Build
 #######################################################
 Import("env")
-env['NPT_EXTRA_LIBS'] = []
+
+env['NPT_EXTRA_LIBS'] = []
 env['ATX_EXTRA_LIBS'] = []
 env['BLT_EXTRA_LIBS'] = []
 
@@ -39,12 +41,13 @@ SetDefaultEnv(env)
 ############################# Atomix
 ATX_SOURCE_ROOT = 'Atomix/Source'
 ATX_EXTRA_CPP_DEFINES = env['build_config'] == 'Debug' and ['ATX_DEBUG'] or []
-MapSourceDir(ATX_SOURCE_ROOT, '#/../Atomix/Source')CompiledModule(name                  = 'Atomix',
+MapSourceDir(ATX_SOURCE_ROOT, '#/../Atomix/Source')
+CompiledModule(name                  = 'Atomix',
                module_type           = 'StaticLibrary',
                source_root           = ATX_SOURCE_ROOT,
                build_source_dirs     = ['Core'],
                build_source_files    = env['ATX_SYSTEM_SOURCES'],
-               included_only_modules = [ATX_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Atomix']],
+               build_include_dirs    = ['Config', 'Atomix'],
                linked_modules        = env['ATX_EXTRA_LIBS'],
                extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
 
@@ -350,7 +353,8 @@ if env['target'] == 'x86-unknown-linux':
                        environment      = gtk_env)
         OptionalModules.append('BtGtk')
     except:
-        pass
+        pass
+
 ################################################
 # Default Build Modues
 ################################################

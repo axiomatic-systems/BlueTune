@@ -108,21 +108,20 @@ BtStreamController::DoSetProperty(const char* property_spec)
     if (property_type == '\0') return;
     if (property_spec[eq+2] != ':') return;
     
-    ATX_Property property;
-    property.name = property_name.GetChars();
+    ATX_PropertyValue property_value;
     if (property_type == 's') {
-        property.type = ATX_PROPERTY_TYPE_STRING;
-        property.value.string = property_spec+eq+3;
+        property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+        property_value.data.string = property_spec+eq+3;
     } else if (property_type == 'i') {
         NPT_Int32 value;
         if (NPT_FAILED(NPT_ParseInteger32(property_spec+eq+3, value))) {
             return;
         }
-        property.type = ATX_PROPERTY_TYPE_INTEGER;
-        property.value.integer = value;
+        property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+        property_value.data.integer = value;
     }
     
-    m_Player.SetProperty(property_scope, NULL, property);
+    m_Player.SetProperty(property_scope, NULL, property_name.GetChars(), &property_value);
 }
 
 /*----------------------------------------------------------------------

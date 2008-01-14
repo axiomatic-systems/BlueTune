@@ -397,27 +397,28 @@ MpegAudioDecoder_UpdateReplayGainInfo(MpegAudioDecoder*  self,
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
             ATX_PropertyValue property_value;
+            property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
             if (self->replay_gain_info.flags &
                 FLO_REPLAY_GAIN_HAS_TRACK_VALUE) {
-                property_value.integer = self->replay_gain_info.track_gain;
+                property_value.data.integer = self->replay_gain_info.track_gain;
                 ATX_Properties_SetProperty(properties,
                                            BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
-                                           ATX_PROPERTY_TYPE_INTEGER,
                                            &property_value);
             } else {
-                ATX_Properties_UnsetProperty(properties,
-                                             BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN);
+                ATX_Properties_SetProperty(properties,
+                                             BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                                             NULL);
             }
             if (self->replay_gain_info.flags &
                 FLO_REPLAY_GAIN_HAS_ALBUM_VALUE) {
-                property_value.integer = self->replay_gain_info.album_gain;
+                property_value.data.integer = self->replay_gain_info.album_gain;
                 ATX_Properties_SetProperty(properties,
                                            BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
-                                           ATX_PROPERTY_TYPE_INTEGER,
                                            &property_value);
             } else {
-                ATX_Properties_UnsetProperty(properties,
-                                             BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN);
+                ATX_Properties_SetProperty(properties,
+                                             BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                                             NULL);
             }
         }
     }

@@ -269,6 +269,12 @@ handle_set_input_callback(GtkWidget* widget,
 
     BLT_COMPILER_UNUSED(widget);
 
+    // clear the status display
+    for (int i=0; i<=7; i++) {
+        gtk_clist_set_text(GTK_CLIST(player->m_PropertyList), i, 1, "");
+    }
+    
+    // set the input to the name entered in the edit field
     const gchar* input_name = gtk_entry_get_text((GtkEntry*)player->m_InputNameEntry);
     player->SetInput(input_name);
     player->Play();
@@ -436,7 +442,7 @@ BtPlayer::BtPlayer(NPT_SelectableMessageQueue* queue) :
     gtk_clist_append(GTK_CLIST(m_PropertyList), column);
     column[0] = "Stream Duration";
     gtk_clist_append(GTK_CLIST(m_PropertyList), column);
-    column[0] = "Stream Duration";
+    column[0] = "Stream Size";
     gtk_clist_append(GTK_CLIST(m_PropertyList), column);
     column[0] = "Data Type";
     column[1] = "Unknown";

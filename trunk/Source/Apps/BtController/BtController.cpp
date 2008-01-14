@@ -36,9 +36,10 @@ public:
     void OnDecoderStateNotification(BLT_DecoderServer::State state);
     void OnStreamTimeCodeNotification(BLT_TimeCode time_code);
     void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
-    void OnPropertyNotification(BLT_PropertyScope   scope,
-                                const char*         source,
-                                const ATX_Property& property);
+    void OnPropertyNotification(BLT_PropertyScope        scope,
+                                const char*              source,
+                                const char*              name,
+                                const ATX_PropertyValue* value);
     
     // command methods
     void DoSeekToTimeStamp(const char* time);
@@ -175,9 +176,10 @@ BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& inf
 |    BtController::OnPropertyNotification
 +---------------------------------------------------------------------*/
 void 
-BtController::OnPropertyNotification(BLT_PropertyScope   scope,
-                                     const char*       /*source*/,
-                                     const ATX_Property& property)
+BtController::OnPropertyNotification(BLT_PropertyScope        scope,
+                                     const char*              /* source */,
+                                     const char*              name,
+                                     const ATX_PropertyValue* value)
 {
     const char* scope_name;
     switch (scope) {
@@ -186,38 +188,38 @@ BtController::OnPropertyNotification(BLT_PropertyScope   scope,
         default: scope_name = "unknown";
     }
     
-    // when the name is NULL, it means that all the properties in that scope for
-    // that source have been deleted 
-    if (property.name == NULL || property.name[0] == '\0') {
+    // when the name is NULL or empty, it means that all the properties in that 
+    // scope fo that source have been deleted 
+    if (name == NULL || name[0] == '\0') {
         ATX_ConsoleOutputF("All properties in '%s' scope deleted\n", scope_name);
         return;
     }
     
-    ATX_ConsoleOutputF("Property %s (%s) ", property.name, scope_name);
-    
-    switch (property.type) {
-        case ATX_PROPERTY_TYPE_NONE:
-            ATX_ConsoleOutputF("deleted\n");
+    ATX_ConsoleOutputF("Property %s (%s) ", name, scope_name);
+    if (value == NULL) {
+        ATX_ConsoleOutputF("deleted]\n");
+        return;
+    }
+
+    switch (value->type) {
+        case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+            ATX_ConsoleOutputF("= [I] %d\n", value->data.integer);
             break;
             
-        case ATX_PROPERTY_TYPE_INTEGER:
-            ATX_ConsoleOutputF("= [I] %d\n", property.value.integer);
+        case ATX_PROPERTY_VALUE_TYPE_FLOAT:
+            ATX_ConsoleOutputF("= [F] %f\n", value->data.fp);
             break;
             
-        case ATX_PROPERTY_TYPE_FLOAT:
-            ATX_ConsoleOutputF("= [F] %f\n", property.value.fp);
+        case ATX_PROPERTY_VALUE_TYPE_STRING:
+            ATX_ConsoleOutputF("= [S] %s\n", value->data.string);
             break;
             
-        case ATX_PROPERTY_TYPE_STRING:
-            ATX_ConsoleOutputF("= [S] %s\n", property.value.string);
+        case ATX_PROPERTY_VALUE_TYPE_BOOLEAN:
+            ATX_ConsoleOutputF("= [B] %s\n", value->data.boolean == ATX_TRUE?"true":"false");
             break;
             
-        case ATX_PROPERTY_TYPE_BOOLEAN:
-            ATX_ConsoleOutputF("= [B] %s\n", property.value.boolean == ATX_TRUE?"true":"false");
-            break;
-            
-        case ATX_PROPERTY_TYPE_RAW_DATA:
-            ATX_ConsoleOutputF("= [R] %d bytes of data\n", property.value.raw_data.size);
+        case ATX_PROPERTY_VALUE_TYPE_RAW_DATA:
+            ATX_ConsoleOutputF("= [R] %d bytes of data\n", value->data.raw_data.size);
             break;
     }
 }

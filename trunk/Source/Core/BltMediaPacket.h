@@ -106,7 +106,7 @@ BLT_Any    BLT_MediaPacket_GetPayloadBuffer(BLT_MediaPacket* packet);
 
 /**
  * Sets the packet's payload buffer to be a subset (window) of the
- * actual memory buffer manages by the packet.
+ * actual memory buffer managed by the packet.
  * @param offset Offset in bytes from the beginning of the internal buffer
  * to the packet's payload.
  * @param size Size in bytes of the packet's payload.

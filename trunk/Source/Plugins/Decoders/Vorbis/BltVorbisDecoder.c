@@ -275,8 +275,8 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
         }
         
         /* instant bitrate (not computed for now) */
-        stream_info.instant_bitrate = 0;
-
+        stream_info.instant_bitrate = stream_info.average_bitrate;
+        
         /* duration */
         stream_info.duration = 0;
         if (info->rate) {
@@ -284,6 +284,12 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
             if (ogg_duration > 0) {
                 stream_info.duration = (long)(1000.0f*(float)ogg_duration/(float)info->rate);
                 stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+            } else {
+                /* try to estimate the duration from the stream size */
+                if (self->input.size && stream_info.average_bitrate) {
+                    stream_info.duration = (long)(1000.0f*(float)self->input.size/(float)stream_info.average_bitrate);
+                    stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+                }
             }
         }   
 

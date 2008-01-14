@@ -338,7 +338,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
             }
             if (alac) {
                 // pass the alac payload as the decoder info
-                mbs = new AP4_MemoryByteStream(alac->GetSize());
+                mbs = new AP4_MemoryByteStream((AP4_Size)(alac->GetSize()));
                 alac->WriteFields(*mbs);
             } 
         }

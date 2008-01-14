@@ -28,12 +28,96 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CA0C9AC60D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C98B00D15C14800E23496;
+			remoteInfo = PropertiesTest;
+		};
+		CA0C9AC80D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99A20D15CFBB00E23496;
+			remoteInfo = ContainersTest;
+		};
+		CA0C9ACA0D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99BD0D15D03500E23496;
+			remoteInfo = HttpTest;
+		};
+		CA0C9ACC0D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99CB0D15D06000E23496;
+			remoteInfo = RingBufferTest;
+		};
+		CA0C9ACE0D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99E90D15D0AA00E23496;
+			remoteInfo = StringsTest;
+		};
+		CA0C9AD00D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C99FD0D15D0E900E23496;
+			remoteInfo = MiscTest;
+		};
+		CA0C9AD20D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C9A120D15D12100E23496;
+			remoteInfo = LoggingTest;
+		};
+		CA0C9AD40D15D21500E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA50460C0C5AF4DF0060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C9A260D15D16C00E23496;
+			remoteInfo = NetPump;
+		};
+		CA0C9AFD0D15D29B00E23496 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA0C9AF50D15D27D00E23496;
+			remoteInfo = BtPlay;
+		};
 		CA18AF830C94C47B00A5FE6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
 			remoteInfo = Neptune;
+		};
+		CA1ACEEA0D30C55400C350CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA550B9C0D1F372C00B22D72 /* btcontroller */;
+			remoteInfo = BtController;
+		};
+		CA1ACEEC0D30C55400C350CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045C60C5AF2EB0060E6FE /* BlueTune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA550C950D2093D800B22D72 /* btplayerserver */;
+			remoteInfo = BtPlayerServer;
+		};
+		CA1ACEF10D30C55400C350CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA550D550D20A37E00B22D72 /* HttpServerTest1 */;
+			remoteInfo = HttpServerTest1;
 		};
 		CA5045CA0C5AF2EB0060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -118,6 +202,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = CA6B38720C965CE9000D7A0A;
 			remoteInfo = HelixAAC;
+		};
+		CA6464840D07A9CB0001391C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAA97A010CF164A700C01909;
+			remoteInfo = XmlTest1;
+		};
+		CA6464860D07A9CB0001391C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAA97A1B0CF1654A00C01909;
+			remoteInfo = StringsTest1;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -235,6 +333,9 @@
 				CA504E720C5EA3B50060E6FE /* libTremor.a */,
 				CA504ECE0C5EABDB0060E6FE /* libFLAC.a */,
 				CA6435520C974BF700F67CD5 /* libHelixAAC.a */,
+				CA0C9AFE0D15D29B00E23496 /* btplay */,
+				CA1ACEEB0D30C55400C350CD /* btcontroller */,
+				CA1ACEED0D30C55400C350CD /* btplayerserver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -290,6 +391,9 @@
 			isa = PBXGroup;
 			children = (
 				CA5046040C5AF4930060E6FE /* libNeptune.a */,
+				CA6464850D07A9CB0001391C /* XmlTest1 */,
+				CA6464870D07A9CB0001391C /* StringsTest1 */,
+				CA1ACEF20D30C55400C350CD /* HttpServerTest1 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -298,6 +402,14 @@
 			isa = PBXGroup;
 			children = (
 				CA5046110C5AF4DF0060E6FE /* libAtomix.a */,
+				CA0C9AC70D15D21500E23496 /* PropertiesTest */,
+				CA0C9AC90D15D21500E23496 /* ContainersTest */,
+				CA0C9ACB0D15D21500E23496 /* HttpTest */,
+				CA0C9ACD0D15D21500E23496 /* RingBufferTest */,
+				CA0C9ACF0D15D21500E23496 /* StringsTest */,
+				CA0C9AD10D15D21500E23496 /* MiscTest */,
+				CA0C9AD30D15D21500E23496 /* LoggingTest */,
+				CA0C9AD50D15D21500E23496 /* NetPump */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -366,6 +478,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "BlueTuneApps" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTuneApps */;
 			projectDirPath = "";
@@ -383,6 +496,7 @@
 					ProjectRef = CA5045EF0C5AF3CE0060E6FE /* Neptune.xcodeproj */;
 				},
 			);
+			projectRoot = ../../..;
 			targets = (
 				CA5045C30C5AF2DB0060E6FE /* BtController */,
 				CA5046350C5AF6520060E6FE /* BtPlay */,
@@ -392,6 +506,90 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CA0C9AC70D15D21500E23496 /* PropertiesTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = PropertiesTest;
+			remoteRef = CA0C9AC60D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9AC90D15D21500E23496 /* ContainersTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ContainersTest;
+			remoteRef = CA0C9AC80D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9ACB0D15D21500E23496 /* HttpTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpTest;
+			remoteRef = CA0C9ACA0D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9ACD0D15D21500E23496 /* RingBufferTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = RingBufferTest;
+			remoteRef = CA0C9ACC0D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9ACF0D15D21500E23496 /* StringsTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = StringsTest;
+			remoteRef = CA0C9ACE0D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9AD10D15D21500E23496 /* MiscTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MiscTest;
+			remoteRef = CA0C9AD00D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9AD30D15D21500E23496 /* LoggingTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = LoggingTest;
+			remoteRef = CA0C9AD20D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9AD50D15D21500E23496 /* NetPump */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetPump;
+			remoteRef = CA0C9AD40D15D21500E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0C9AFE0D15D29B00E23496 /* btplay */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = btplay;
+			remoteRef = CA0C9AFD0D15D29B00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA1ACEEB0D30C55400C350CD /* btcontroller */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = btcontroller;
+			remoteRef = CA1ACEEA0D30C55400C350CD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA1ACEED0D30C55400C350CD /* btplayerserver */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = btplayerserver;
+			remoteRef = CA1ACEEC0D30C55400C350CD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA1ACEF20D30C55400C350CD /* HttpServerTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpServerTest1;
+			remoteRef = CA1ACEF10D30C55400C350CD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA5045CB0C5AF2EB0060E6FE /* libBlueTune.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -432,6 +630,20 @@
 			fileType = archive.ar;
 			path = libHelixAAC.a;
 			remoteRef = CA6435510C974BF700F67CD5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA6464850D07A9CB0001391C /* XmlTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = XmlTest1;
+			remoteRef = CA6464840D07A9CB0001391C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA6464870D07A9CB0001391C /* StringsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = StringsTest1;
+			remoteRef = CA6464860D07A9CB0001391C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

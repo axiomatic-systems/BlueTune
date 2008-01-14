@@ -33,18 +33,19 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
         /* get a reference to the stream properties */
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(stream, &properties))) {
             ATX_PropertyValue property_value;
+            property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
             switch (track_gain_mode) {
                 case BLT_REPLAY_GAIN_SET_MODE_UPDATE:
-                    property_value.integer = (ATX_Int32)(track_gain*100.0f);
+                    property_value.data.integer = (ATX_Int32)(track_gain*100.0f);
                     ATX_Properties_SetProperty(properties,
                         BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
-                        ATX_PROPERTY_TYPE_INTEGER,
                         &property_value);
                     break;
 
                 case BLT_REPLAY_GAIN_SET_MODE_REMOVE:
-                    ATX_Properties_UnsetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN);
+                    ATX_Properties_SetProperty(properties,
+                        BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                        NULL);
                     break;
                     
                 case BLT_REPLAY_GAIN_SET_MODE_IGNORE:
@@ -52,16 +53,16 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
             }
             switch (track_gain_mode) {
                 case BLT_REPLAY_GAIN_SET_MODE_UPDATE:
-                    property_value.integer = (ATX_Int32)(album_gain*100.0f);
+                    property_value.data.integer = (ATX_Int32)(album_gain*100.0f);
                     ATX_Properties_SetProperty(properties,
                         BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
-                        ATX_PROPERTY_TYPE_INTEGER,
                         &property_value);
                     break;
 
                 case BLT_REPLAY_GAIN_SET_MODE_REMOVE:
-                    ATX_Properties_UnsetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN);
+                    ATX_Properties_SetProperty(properties,
+                        BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                        NULL);
                     break;
 
                 case BLT_REPLAY_GAIN_SET_MODE_IGNORE:

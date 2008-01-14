@@ -130,7 +130,6 @@ BLTP_ParseCommandLine(char** args)
 BLT_VOID_METHOD
 BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
                              ATX_CString              name,
-                             ATX_PropertyType         type,
                              const ATX_PropertyValue* value)    
 {
     BLT_COMPILER_UNUSED(self);
@@ -144,13 +143,13 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
             ATX_ConsoleOutputF("BLTP::OnStreamPropertyChanged - Property %s cleared\n", name);
         } else {
             ATX_ConsoleOutputF("BLTP::OnStreamPropretyChanged - %s = ", name);
-            switch (type) {
-              case ATX_PROPERTY_TYPE_STRING:
-                ATX_ConsoleOutputF("%s\n", value->string);
+            switch (value->type) {
+              case ATX_PROPERTY_VALUE_TYPE_STRING:
+                ATX_ConsoleOutputF("%s\n", value->data.string);
                 break;
 
-              case ATX_PROPERTY_TYPE_INTEGER:
-                ATX_ConsoleOutputF("%d\n", value->integer);
+              case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+                ATX_ConsoleOutputF("%d\n", value->data.integer);
                 break;
 
               default:

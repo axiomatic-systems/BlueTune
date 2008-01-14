@@ -35,10 +35,22 @@
  * commands that are sent to it when calling some of the methods of this
  * class. Those commands perform basic player controls, such as the ability
  * to select the input, the output, to play, stop, pause, seek, etc...
+ * 
+ * An application can choose to either subclass this class and override
+ * one or more of the virtual notification callbacks methods (the OnXXX
+ * methods of the BLT_DecoderClient_MessageHandler interface class from which 
+ * this class inherits), or create an instance of this class and pass an event 
+ * listener to the SetEventListener() method to receive notification callbacks.
  */
 class BLT_Player : public BLT_DecoderClient
 {
  public:
+    /**
+     * A class must derive from this interface class if it wants
+     * to receive event notifications from the player.
+     */
+    typedef BLT_DecoderClient_MessageHandler EventListener;
+     
     /**
      * Construct a new instance.
      * @param queue pointer to a message queue that should receive messages
@@ -58,6 +70,16 @@ class BLT_Player : public BLT_DecoderClient
      */
     virtual ~BLT_Player();
 
+    /**
+     * Set the event listener that will be called when notification
+     * messages are received. By default, there is no event listener
+     * when a player is created, so notification messages are just
+     * ignored, unless a subclass of this class overrides the virtual
+     * methods that handle notification messages (OnXXX virtual methods
+     * of the BLT_DecoderClient_MessageHandler class).
+     */
+    void SetEventListener(EventListener* listener);
+    
     /**
      * Dequeue and dispatch one message from the queue. 
      * @param blocking Indicate whether this call should block until a
@@ -164,12 +186,14 @@ class BLT_Player : public BLT_DecoderClient
      * @param target Name of the target to which this property applies. For
      * Core (BLT_PROPERTY_SCOPE_CORE) and Stream (BLT_PROPERTY_SCOPE_STREAM)
      * scopes this parameter must be NULL.
-     * @param property Property object specifying the name and value of the
-     * property to set.
+     * @param name Name of the property to set.
+     * @param value Pointer to the property's value. If this parameter is
+     * NULL, the property will be deleted.
      */
-    virtual BLT_Result SetProperty(BLT_PropertyScope   scope,
-                                   const char*         target,
-                                   const ATX_Property& property);
+    virtual BLT_Result SetProperty(BLT_PropertyScope        scope,
+                                   const char*              target,
+                                   const char*              name,
+                                   const ATX_PropertyValue* value);
 
     /**
      * Shutdown the player. 
@@ -189,12 +213,49 @@ class BLT_Player : public BLT_DecoderClient
      */
     virtual BLT_Result Interrupt();
 
+protected:
+    // BLT_DecoderClient_MessageHandler methods
+    virtual void OnAckNotification(BLT_DecoderServer_Message::CommandId id) {
+        if (m_Listener) m_Listener->OnAckNotification(id);
+    }
+    virtual void OnNackNotification(BLT_DecoderServer_Message::CommandId id,
+                                    BLT_Result                           result) {
+        if (m_Listener) m_Listener->OnNackNotification(id, result);
+    }
+    virtual void OnPongNotification(const void* cookie) {
+        if (m_Listener) m_Listener->OnPongNotification(cookie);
+    }
+    virtual void OnDecoderStateNotification(BLT_DecoderServer::State state) {
+        if (m_Listener) m_Listener->OnDecoderStateNotification(state);
+    }
+    virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode) {
+        if (m_Listener) m_Listener->OnStreamTimeCodeNotification(timecode);
+    }
+    virtual void OnStreamPositionNotification(BLT_StreamPosition& position) {
+        if (m_Listener) m_Listener->OnStreamPositionNotification(position);
+    }
+    virtual void OnStreamInfoNotification(BLT_Mask        update_mask, 
+                                          BLT_StreamInfo& info) {
+        if (m_Listener) m_Listener->OnStreamInfoNotification(update_mask, info);
+    }
+    virtual void OnPropertyNotification(BLT_PropertyScope        scope,
+                                        const char*              source,
+                                        const char*              name,
+                                        const ATX_PropertyValue* value) {
+        if (m_Listener) m_Listener->OnPropertyNotification(scope, source, name, value);
+    }
+
 private:
     /**
      * Instance of a decoding thread that implements the BLT_DecoderServer interface.
      * All player commands are delegated to this instance.
      */
     BLT_DecoderServer* m_Server;
+    
+    /**
+     * Object that will handle notification callbacks, if not NULL.
+     */
+    BLT_DecoderClient_MessageHandler* m_Listener;
 };
 
 /** @} */

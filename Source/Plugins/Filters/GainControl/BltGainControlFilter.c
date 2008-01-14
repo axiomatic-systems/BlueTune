@@ -337,8 +337,8 @@ GainControlFilter_Destroy(GainControlFilter* self)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 GainControlFilter_GetPortByName(BLT_MediaNode*  _self,
-                         BLT_CString     name,
-                         BLT_MediaPort** port)
+                                BLT_CString     name,
+                                BLT_MediaPort** port)
 {
     GainControlFilter* self = ATX_SELF_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -416,8 +416,8 @@ GainControlFilter_UpdateReplayGain(GainControlFilter* self)
 |    GainControlFilter_UpdateReplayGainTrackValue
 +---------------------------------------------------------------------*/
 static void
-GainControlFilter_UpdateReplayGainTrackValue(GainControlFilter*       self,
-                                             const ATX_PropertyValue* value)
+GainControlFilter_UpdateReplayGainTrackValue(GainControlFilter*           self,
+                                             const ATX_PropertyValueData* value)
 {
     if (value) {
         self->replay_gain_info.track_gain = value->integer;
@@ -433,8 +433,8 @@ GainControlFilter_UpdateReplayGainTrackValue(GainControlFilter*       self,
 |    GainControlFilter_UpdateReplayGainAlbumValue
 +---------------------------------------------------------------------*/
 static void
-GainControlFilter_UpdateReplayGainAlbumValue(GainControlFilter*       self,
-                                             const ATX_PropertyValue* value)
+GainControlFilter_UpdateReplayGainAlbumValue(GainControlFilter*           self,
+                                             const ATX_PropertyValueData* value)
 {
     if (value) {
         self->replay_gain_info.album_gain = value->integer;
@@ -462,7 +462,7 @@ GainControlFilter_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
         ATX_Properties* properties;
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
-            ATX_Property         property;
+            ATX_PropertyValue property;
             ATX_Properties_AddListener(properties, 
                                        BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                                        &ATX_BASE(self, ATX_PropertyListener),
@@ -481,15 +481,15 @@ GainControlFilter_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                     properties,
                     BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                     &property)) &&
-                property.type == ATX_PROPERTY_TYPE_INTEGER) {
-                GainControlFilter_UpdateReplayGainTrackValue(self, &property.value);
+                property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                GainControlFilter_UpdateReplayGainTrackValue(self, &property.data);
             }
             if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
                     properties,
                     BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                     &property)) &&
-                property.type == ATX_PROPERTY_TYPE_INTEGER) {
-                GainControlFilter_UpdateReplayGainAlbumValue(self, &property.value);
+                property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                GainControlFilter_UpdateReplayGainAlbumValue(self, &property.data);
             }
         }
     }
@@ -579,18 +579,16 @@ ATX_BEGIN_INTERFACE_MAP_EX(GainControlFilter, BLT_BaseMediaNode, BLT_MediaNode)
 BLT_VOID_METHOD
 GainControlFilter_OnPropertyChanged(ATX_PropertyListener*    _self,
                                     ATX_CString              name,
-                                    ATX_PropertyType         type,
                                     const ATX_PropertyValue* value)
 {
     GainControlFilter* self = ATX_SELF(GainControlFilter, ATX_PropertyListener);
 
-    if (name != NULL && 
-        (type == ATX_PROPERTY_TYPE_INTEGER || 
-         type == ATX_PROPERTY_TYPE_NONE)) {
+    if (name && 
+        (value == NULL || value->type == ATX_PROPERTY_VALUE_TYPE_INTEGER)) {
         if (ATX_StringsEqual(name, BLT_REPLAY_GAIN_TRACK_GAIN_VALUE)) {
-            GainControlFilter_UpdateReplayGainTrackValue(self, value);
+            GainControlFilter_UpdateReplayGainTrackValue(self, value?&value->data:NULL);
         } else if (ATX_StringsEqual(name, BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE)) {
-            GainControlFilter_UpdateReplayGainAlbumValue(self, value);
+            GainControlFilter_UpdateReplayGainAlbumValue(self, value?&value->data:NULL);
         }
     }
 }

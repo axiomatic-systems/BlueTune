@@ -37,9 +37,10 @@ public:
     virtual void OnStreamPositionNotification(BLT_StreamPosition& /*position*/) {}
     virtual void OnStreamInfoNotification(BLT_Mask        /*update_mask*/, 
                                           BLT_StreamInfo& /*info*/) {}
-    virtual void OnPropertyNotification(BLT_PropertyScope   /* scope    */,
-                                        const char*         /* source   */,
-                                        const ATX_Property& /* property */) {}
+    virtual void OnPropertyNotification(BLT_PropertyScope        /* scope    */,
+                                        const char*              /* source   */,
+                                        const char*              /* name     */,
+                                        const ATX_PropertyValue* /* value */) {}
 };
 
 /*----------------------------------------------------------------------
@@ -221,24 +222,28 @@ class BLT_DecoderClient_PropertyNotificationMessage :
 {
 public:
     // methods
-    BLT_DecoderClient_PropertyNotificationMessage(BLT_PropertyScope   scope,
-                                                  const char*         source,
-                                                  const ATX_Property& property) :
+    BLT_DecoderClient_PropertyNotificationMessage(BLT_PropertyScope        scope,
+                                                  const char*              source,
+                                                  const char*              name,
+                                                  const ATX_PropertyValue* value) :
       m_Scope(scope),
       m_Source(source),
-      m_PropertyWarpper(property) {}
+      m_Name(name),
+      m_PropertyValueWarpper(value) {}
     NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
         handler->OnPropertyNotification(m_Scope,
                                         m_Source,
-                                        m_PropertyWarpper.m_Property);
+                                        m_Name,
+                                        m_PropertyValueWarpper.m_Value);
         return NPT_SUCCESS;
     }
 
 private:
     // members
-    BLT_PropertyScope                 m_Scope;
-    NPT_String                        m_Source;
-    BLT_DecoderServer_PropertyWrapper m_PropertyWarpper;
+    BLT_PropertyScope                      m_Scope;
+    NPT_String                             m_Source;
+    NPT_String                             m_Name;
+    BLT_DecoderServer_PropertyValueWrapper m_PropertyValueWarpper;
 };
 
 /*----------------------------------------------------------------------

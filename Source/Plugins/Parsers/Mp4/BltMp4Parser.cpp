@@ -197,7 +197,7 @@ AP4_Result
 Mp4StreamAdapter::Tell(AP4_Position& position)
 {
     ATX_Position atx_position;
-    ATX_Result result = MapResult(ATX_InputStream_Tell(m_Stream, &atx_position));
+     ATX_Result result = MapResult(ATX_InputStream_Tell(m_Stream, &atx_position));
     position = atx_position;
     return result;
 }
@@ -257,7 +257,9 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     /* parse the MP4 file */
     ATX_LOG_FINE("Mp4ParserInput::SetStream - parsing MP4 file");
     Mp4StreamAdapter* stream_adapter = new Mp4StreamAdapter(stream);
-    self->input.mp4_file = new AP4_File(*stream_adapter);
+    self->input.mp4_file = new AP4_File(*stream_adapter, 
+                                        AP4_DefaultAtomFactory::Instance,
+                                        true); /* parse until moov only */
     stream_adapter->Release();
 
     /* declare variables here to avoid GCC warnings */

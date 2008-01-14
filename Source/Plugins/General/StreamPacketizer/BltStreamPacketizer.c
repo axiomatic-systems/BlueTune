@@ -52,9 +52,10 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
-    BLT_Size     packet_size;
-    BLT_Cardinal packet_count;
-    ATX_Int64    sample_count;
+    BLT_MediaPacket* packet;
+    BLT_Size         packet_size;
+    BLT_Cardinal     packet_count;
+    ATX_Int64        sample_count;
 } StreamPacketizerOutput;
 
 typedef struct {
@@ -116,6 +117,12 @@ StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
     self->output.packet_count = 0;
     ATX_Int64_Set_Int32(self->output.sample_count, 0);
 
+    /* release anything we may have buffered */
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
+        self->output.packet = NULL;
+    }
+    
     /* reset the eos flag */
     self->input.eos = BLT_FALSE;
 
@@ -175,47 +182,66 @@ StreamPacketizerOutput_GetPacket(BLT_PacketProducer* _self,
                                  BLT_MediaPacket**   packet)
 {
     StreamPacketizer* self = ATX_SELF_M(output, StreamPacketizer, BLT_PacketProducer);
-    BLT_Any           buffer;
-    BLT_Size          bytes_read;
+    BLT_Size          bytes_buffered;
+    BLT_Size          bytes_read = 0;
     BLT_Result        result;
+
+    /* default value */
+    *packet = NULL;
 
     /* check for EOS */
     if (self->input.eos) {
-        *packet = NULL;
         return BLT_ERROR_EOS;
     }
 
-    /* get a packet from the core */
-    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
-                                        self->output.packet_size,
-                                        self->input.media_type,
-                                        packet);
-    if (BLT_FAILED(result)) return result;
-
-    /* get the addr of the buffer */
-    buffer = BLT_MediaPacket_GetPayloadBuffer(*packet);
-
-    /* read the data from the input stream */
-    result = ATX_InputStream_Read(self->input.stream,
-                                  buffer,
-                                  self->output.packet_size,
-                                  &bytes_read);
-    if (BLT_FAILED(result)) {
-        if (result == BLT_ERROR_EOS) {
-            self->input.eos = BLT_TRUE;
-            bytes_read = 0;
-            BLT_MediaPacket_SetFlags(*packet, 
-                                     BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
-        } else {
-            BLT_MediaPacket_Release(*packet);
-            *packet = NULL;
-            return result;
-        }
+    if (self->output.packet == NULL) {
+        /* get a packet from the core */
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                            self->output.packet_size,
+                                            self->input.media_type,
+                                            &self->output.packet);
+        if (BLT_FAILED(result)) return result;
     }
+    
+    /* compute how many bytes we have already buffered */
+    bytes_buffered = BLT_MediaPacket_GetPayloadSize(self->output.packet);
+    
+    /* read more data if necessary to fill the buffer */
+    if (bytes_buffered < self->output.packet_size) {
+        /* get the addr of the buffer */
+        unsigned char* buffer = BLT_MediaPacket_GetPayloadBuffer(self->output.packet);
 
-    /* update the size of the packet */
-    BLT_MediaPacket_SetPayloadSize(*packet, bytes_read);
+        /* read some data from the input stream */
+        result = ATX_InputStream_Read(self->input.stream,
+                                      buffer+bytes_buffered,
+                                      self->output.packet_size-bytes_buffered,
+                                      &bytes_read);
+        if (BLT_FAILED(result)) {
+            if (result == BLT_ERROR_EOS) {
+                self->input.eos = BLT_TRUE;
+                BLT_MediaPacket_SetFlags(self->output.packet, 
+                                         BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
+            } else {
+                return result;
+            }
+        }
 
+        /* update the size of the packet */
+        bytes_buffered += bytes_read;
+        BLT_MediaPacket_SetPayloadSize(self->output.packet, bytes_buffered);
+    }
+    
+    /* if the buffer is not full, return now unless we're at the end of the stream */
+    if (bytes_buffered != self->output.packet_size && !self->input.eos) {
+        ATX_LOG_FINEST_2("StreamPacketizerOutput::GetPacket - buffer not full (%d of %d)",
+                         bytes_buffered, self->output.packet_size);
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
+    
+    /* we're returning the output packet, so we do not keep a handle to it */
+    *packet = self->output.packet;
+    self->output.packet = NULL;
+    
     /* set flags */     
     if (self->output.packet_count == 0) {
         /* this is the first packet */
@@ -368,6 +394,12 @@ StreamPacketizer_Deactivate(BLT_MediaNode* _self)
     /* call the base class method */
     BLT_BaseMediaNode_Deactivate(_self);
     
+    /* release the output packet if we still hold one */
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
+        self->output.packet = NULL;
+    }
+
     /* release the input stream */
     ATX_RELEASE_OBJECT(self->input.stream);
        
@@ -422,6 +454,12 @@ StreamPacketizer_Seek(BLT_MediaNode* _self,
     /* update the current sample */
     if (point->mask & BLT_SEEK_POINT_MASK_SAMPLE) {
         self->output.sample_count = point->sample;
+    }
+
+    /* release anything we may have buffered */
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
+        self->output.packet = NULL;
     }
 
     return BLT_SUCCESS;

@@ -40,7 +40,6 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
                           BLT_Size*        trailer_size, 
                           ATX_Properties*  properties)
 {
-    BLT_Size       bytes_read;
     unsigned char  footer[BLT_APE_TAG_FOOTER_SIZE];
     BLT_Flags      global_flags;
     BLT_UInt32     tag_size;
@@ -61,10 +60,7 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
     if (BLT_FAILED(result)) return result;
 
     /* read the footer */
-    result = ATX_InputStream_Read(stream, 
-                                  footer, 
-                                  BLT_APE_TAG_FOOTER_SIZE, 
-                                  &bytes_read);
+    result = ATX_InputStream_ReadFully(stream, footer, BLT_APE_TAG_FOOTER_SIZE);
 
     /* return if the read failed */
     if (BLT_FAILED(result)) goto end;
@@ -131,7 +127,7 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
     }
 
     /* read the entire tag */
-    result = ATX_InputStream_Read(stream, tag, tag_size, &bytes_read);
+    result = ATX_InputStream_ReadFully(stream, tag, tag_size);
     if (BLT_FAILED(result)) goto end;
 
     /* adjust the tag size to acount for the footer */
@@ -177,12 +173,12 @@ BLT_ApeParser_ParseStream(ATX_InputStream* stream,
             ATX_CopyMemory(property_value_string, 
                            &tag[8+key_length], value_length);
             property_value_string[value_length] = 0;
-            property_value.string = property_value_string;
+            property_value.data.string = property_value_string;
 
             /* set the property */
+            property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
             ATX_Properties_SetProperty(properties,
                                        property_name,
-                                       ATX_PROPERTY_TYPE_STRING,
                                        &property_value);
         }        
 

@@ -127,7 +127,11 @@ extern const BLT_MediaType BLT_GenericPcmMediaType;
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
-extern void
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    extern void
 BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type);
 
 extern BLT_Boolean
@@ -138,5 +142,9 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
                            BLT_MediaPacket*  in_packet, 
                            BLT_PcmMediaType* out_type, 
                            BLT_MediaPacket** out_packet);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _BLT_PCM_H_ */

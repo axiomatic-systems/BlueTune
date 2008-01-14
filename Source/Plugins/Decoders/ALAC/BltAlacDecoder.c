@@ -168,6 +168,20 @@ AlacDecoder_AllocateBuffers(AlacDecoder* self)
 }
 
 /*----------------------------------------------------------------------
+|   AlacDecoder_FreeBuffers
++---------------------------------------------------------------------*/
+static void
+AlacDecoder_FreeBuffers(AlacDecoder* self)
+{
+    /* free buffers (max 2 channels for now) */
+    unsigned int i;
+    for (i=0; i<2; i++) {
+        ATX_FreeMemory(self->buffers.prediction_errors[i]);
+        ATX_FreeMemory(self->buffers.samples[i]);
+    }
+}
+
+/*----------------------------------------------------------------------
 |   AlacDecoder_CLZ
 +---------------------------------------------------------------------*/
 #if defined(__GNUC__) && defined(__i386__)
@@ -891,7 +905,10 @@ AlacDecoder_Destroy(AlacDecoder* self)
     /* release any packet we may hold */
     AlacDecoderOutput_Flush(self);
     ATX_List_Destroy(self->output.packets);
-        
+    
+    /* free the buffers */
+    AlacDecoder_FreeBuffers(self);
+
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 

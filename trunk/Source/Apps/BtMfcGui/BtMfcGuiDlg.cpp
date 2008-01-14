@@ -60,9 +60,10 @@ public:
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode);
     virtual void OnStreamPositionNotification(BLT_StreamPosition& position);
     virtual void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
-    virtual void OnPropertyNotification(BLT_PropertyScope   scope,
-                                        const char*         source,
-                                        const ATX_Property& property);
+    virtual void OnPropertyNotification(BLT_PropertyScope        scope,
+                                        const char*              source,
+                                        const char*              name,
+                                        const ATX_PropertyValue& value);
 
     // members
     CBtMfcGuiDlg* m_Dialog;
@@ -184,19 +185,20 @@ MfcPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 |   MfcPlayer::OnStreamPropertyNotification
 +---------------------------------------------------------------------*/
 void
-MfcPlayer:: OnPropertyNotification(BLT_PropertyScope   scope,
-                                   const char*         source,
-                                   const ATX_Property& property)
+MfcPlayer:: OnPropertyNotification(BLT_PropertyScope        scope,
+                                   const char*              source,
+                                   const char*              name,
+                                   const ATX_PropertyValue& value)
 {
-    char value[16];
-    switch (property.type) {
-        case ATX_PROPERTY_TYPE_INTEGER:
-            NPT_FormatString(value, sizeof(value), "%d", property.value.integer);
-            m_Dialog->UpdateInfo(property.name, value);
+    char text[16];
+    switch (value.type) {
+        case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+            NPT_FormatString(text, sizeof(text), "%d", value.data.integer);
+            m_Dialog->UpdateInfo(name, text);
             break;
 
-        case ATX_PROPERTY_TYPE_STRING:
-            m_Dialog->UpdateInfo(property.name, property.value.string);
+        case ATX_PROPERTY_VALUE_TYPE_STRING:
+            m_Dialog->UpdateInfo(name, value.data.string);
             break;
     }
 }

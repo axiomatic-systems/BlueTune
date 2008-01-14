@@ -39,7 +39,7 @@ typedef struct {
     ATX_Size         back_store;
     ATX_Offset       position;
     ATX_Boolean      eos;
-    ATX_Boolean      seek_as_read_threshold;
+    ATX_Size         seek_as_read_threshold;
 } BLT_NetworkStream;
 
 /*----------------------------------------------------------------------

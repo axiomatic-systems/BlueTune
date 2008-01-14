@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -107,8 +107,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER"
+				AdditionalIncludeDirectories="..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -157,6 +157,10 @@
 			<Filter
 				Name="Core"
 				>
+				<File
+					RelativePath="..\..\..\..\Source\Core\BltBitStream.c"
+					>
+				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Common\BltBuiltins.c"
 					>
@@ -259,6 +263,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Parsers\Aiff\BltAiffParser.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Decoders\ALAC\BltAlacDecoder.c"
 					>
 				</File>
 				<File
@@ -567,6 +575,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Plugins\Parsers\Aiff\BltAiffParser.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Decoders\ALAC\BltAlacDecoder.h"
 					>
 				</File>
 				<File

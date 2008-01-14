@@ -31,7 +31,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.player")
 |    BLT_Player::BLT_Player
 +---------------------------------------------------------------------*/
 BLT_Player::BLT_Player(NPT_MessageQueue* queue) :
-    BLT_DecoderClient(queue)
+    BLT_DecoderClient(queue),
+    m_Listener(NULL)
 {
     // create a decoder server
     m_Server = new BLT_DecoderServer(this);

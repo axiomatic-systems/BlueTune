@@ -250,7 +250,7 @@ PluginsSettings = {
     'AlacDecoder'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',       'src_dir':'Decoders/ALAC'            },
     'VorbisDecoder'    : {'flags':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
     'AacDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
-    'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                             },
+    'WmaDecoder'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',        'src_dir':'Decoders/WMA'             },
     'WaveParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
     'AiffParser'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
     'TagParser'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },

@@ -199,7 +199,7 @@ class BLT_Player : public BLT_DecoderClient
      * Shutdown the player. 
      * Use this method before deleting the player if you need to ensure that
      * no more asynchronous event callbacks will be made. 
-     * When this method returns, no other method can be called appart from
+     * When this method returns, no other method can be called apart from
      * the destructor.
      */
     virtual BLT_Result Shutdown();

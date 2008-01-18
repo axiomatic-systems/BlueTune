@@ -292,7 +292,16 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
         }
     }
 
-
+    // set some optional stream info flags
+    if (self->m_IsIcy || self->m_ContentLength==0) {
+        // consider that this stream is continuous (not a discrete file)
+        BLT_StreamInfo info;
+        BLT_Stream_GetInfo(stream, &info);
+        info.flags |= BLT_STREAM_INFO_FLAG_CONTINUOUS; 
+        info.mask   = BLT_STREAM_INFO_MASK_FLAGS;
+        BLT_Stream_SetInfo(stream, &info);
+    }
+    
     return BLT_SUCCESS;
 }
 

@@ -46,6 +46,7 @@ typedef struct {
 
     /* members */
     BLT_Boolean eos;
+    BLT_Boolean is_continous_stream;
     ATX_List*   packets;
 } MpegAudioDecoderInput;
 
@@ -287,10 +288,15 @@ MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  self,
 
     /* get current info */
     BLT_Stream_GetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
-    info.mask = 
-        BLT_STREAM_INFO_MASK_DURATION        |
-        BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
+    
+    /* we always set the average bitrate */
+    info.mask = BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
 
+    /* update the duration unless this is a continuous stream */
+    if ((info.flags & BLT_STREAM_INFO_FLAG_CONTINUOUS) == 0) {
+        info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+    }
+    
     /* update the info */
     if (fluo_status->flags & FLO_DECODER_STATUS_STREAM_IS_VBR) {
         info.mask |= BLT_STREAM_INFO_MASK_FLAGS;
@@ -477,8 +483,10 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* self,
     if (FLO_FAILED(result)) {
         /* check fluo result */
         if (result == FLO_ERROR_NO_MORE_SAMPLES) {
-            /* we have already decoded everything */
-            self->output.eos = BLT_TRUE;
+            /* we have already decoded everything in the stream, but there     */
+            /* could be more coming if the input is a sequence of concatenated */
+            /* streams, such as in a streaming scenario                        */ 
+            FLO_Decoder_Reset(self->fluo, FLO_TRUE);
         }
 
         /* release the packet */
@@ -802,7 +810,7 @@ MpegAudioDecoder_Seek(BLT_MediaNode* _self,
 
     /* flush and reset the decoder */
     FLO_Decoder_Flush(self->fluo);
-    FLO_Decoder_Reset(self->fluo);
+    FLO_Decoder_Reset(self->fluo, FLO_FALSE);
 
     /* estimate the seek point in time_stamp mode */
     if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;

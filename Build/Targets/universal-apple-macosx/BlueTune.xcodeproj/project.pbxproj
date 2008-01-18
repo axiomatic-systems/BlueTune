@@ -6,6 +6,45 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		CA07A3240D40228100DC3E33 /* Applications */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = CA07A3420D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "Applications" */;
+			buildPhases = (
+			);
+			dependencies = (
+				CA07A32C0D40228D00DC3E33 /* PBXTargetDependency */,
+				CA07A32A0D40228D00DC3E33 /* PBXTargetDependency */,
+				CA07A3280D40228D00DC3E33 /* PBXTargetDependency */,
+			);
+			name = Applications;
+			productName = Applications;
+		};
+		CA07A32D0D40229E00DC3E33 /* Tests */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = CA07A3430D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "Tests" */;
+			buildPhases = (
+			);
+			dependencies = (
+				CA07A3310D4022AB00DC3E33 /* PBXTargetDependency */,
+			);
+			name = Tests;
+			productName = Tests;
+		};
+		CA07A3320D4022BC00DC3E33 /* All */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = CA07A3440D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "All" */;
+			buildPhases = (
+			);
+			dependencies = (
+				CA07A3360D4022C700DC3E33 /* PBXTargetDependency */,
+				CA07A3380D4022C700DC3E33 /* PBXTargetDependency */,
+			);
+			name = All;
+			productName = All;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487870C99E13800638991 /* BltAdtsParser.h */; };
 		CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0487880C99E13800638991 /* BltAdtsParser.c */; };
@@ -293,6 +332,48 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CA07A3270D40228D00DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA550C940D2093D800B22D72 /* BtPlayerServer */;
+			remoteInfo = BtPlayerServer;
+		};
+		CA07A3290D40228D00DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA550B9B0D1F372C00B22D72 /* BtController */;
+			remoteInfo = BtController;
+		};
+		CA07A32B0D40228D00DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA0C9AF40D15D27D00E23496 /* BtPlay */;
+			remoteInfo = BtPlay;
+		};
+		CA07A3300D4022AB00DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */;
+			remoteInfo = NetworkStreamTest;
+		};
+		CA07A3350D4022C700DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA07A3240D40228100DC3E33 /* Applications */;
+			remoteInfo = Applications;
+		};
+		CA07A3370D4022C700DC3E33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA07A32D0D40229E00DC3E33 /* Tests */;
+			remoteInfo = Tests;
+		};
 		CA0C9A7F0D15D1EC00E23496 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
@@ -2224,6 +2305,9 @@
 			);
 			projectRoot = ../../..;
 			targets = (
+				CA07A3320D4022BC00DC3E33 /* All */,
+				CA07A3240D40228100DC3E33 /* Applications */,
+				CA07A32D0D40229E00DC3E33 /* Tests */,
 				D2AAC045055464E500DB518D /* BlueTune */,
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
@@ -2605,6 +2689,36 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CA07A3280D40228D00DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA550C940D2093D800B22D72 /* BtPlayerServer */;
+			targetProxy = CA07A3270D40228D00DC3E33 /* PBXContainerItemProxy */;
+		};
+		CA07A32A0D40228D00DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA550B9B0D1F372C00B22D72 /* BtController */;
+			targetProxy = CA07A3290D40228D00DC3E33 /* PBXContainerItemProxy */;
+		};
+		CA07A32C0D40228D00DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA0C9AF40D15D27D00E23496 /* BtPlay */;
+			targetProxy = CA07A32B0D40228D00DC3E33 /* PBXContainerItemProxy */;
+		};
+		CA07A3310D4022AB00DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */;
+			targetProxy = CA07A3300D4022AB00DC3E33 /* PBXContainerItemProxy */;
+		};
+		CA07A3360D4022C700DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA07A3240D40228100DC3E33 /* Applications */;
+			targetProxy = CA07A3350D4022C700DC3E33 /* PBXContainerItemProxy */;
+		};
+		CA07A3380D4022C700DC3E33 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA07A32D0D40229E00DC3E33 /* Tests */;
+			targetProxy = CA07A3370D4022C700DC3E33 /* PBXContainerItemProxy */;
+		};
 		CA0C9AFA0D15D28500E23496 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
@@ -2804,6 +2918,69 @@
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				WARNING_CFLAGS = "-Wall";
+			};
+			name = Release;
+		};
+		CA07A3250D40228100DC3E33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = Applications;
+			};
+			name = Debug;
+		};
+		CA07A3260D40228100DC3E33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = Applications;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA07A32E0D40229E00DC3E33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = Tests;
+			};
+			name = Debug;
+		};
+		CA07A32F0D40229E00DC3E33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = Tests;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA07A3330D4022BC00DC3E33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = All;
+			};
+			name = Debug;
+		};
+		CA07A3340D4022BC00DC3E33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = All;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -3058,6 +3235,33 @@
 			buildConfigurations = (
 				1DEB91F008733DB70010E9CD /* Debug */,
 				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA07A3420D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "Applications" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA07A3250D40228100DC3E33 /* Debug */,
+				CA07A3260D40228100DC3E33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA07A3430D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA07A32E0D40229E00DC3E33 /* Debug */,
+				CA07A32F0D40229E00DC3E33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA07A3440D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "All" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA07A3330D4022BC00DC3E33 /* Debug */,
+				CA07A3340D4022BC00DC3E33 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

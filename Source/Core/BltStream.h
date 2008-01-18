@@ -43,7 +43,11 @@
 #define BLT_STREAM_INFO_MASK_FLAGS           0x080
 #define BLT_STREAM_INFO_MASK_DATA_TYPE       0x100
 
+/** Flag that indicates that the stream has variable bitrate */
 #define BLT_STREAM_INFO_FLAG_VBR             0x01
+
+/** Flag that indicates that the stream is a continuous stream */
+#define BLT_STREAM_INFO_FLAG_CONTINUOUS      0x02
 
 #define BLT_SEEK_POINT_MASK_TIME_STAMP       0x01
 #define BLT_SEEK_POINT_MASK_POSITION         0x02

@@ -386,20 +386,28 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
 |   FLO_Decoder_Reset
 +---------------------------------------------------------------------*/
 FLO_Result 
-FLO_Decoder_Reset(FLO_Decoder* decoder)
+FLO_Decoder_Reset(FLO_Decoder* decoder, FLO_Boolean new_stream)
 {
     /* reset the engine */
     FLO_Engine_Reset(decoder->engine);
 
-    /* reset some of the decoder state */
-    decoder->status.frame_count = 0;
-    decoder->status.sample_count = 0;
+    /* reset the skip count */
+    decoder->samples_to_skip = 0;
+    
+    /* reset the state */
     if (decoder->state == FLO_DECODER_STATE_HAS_FRAME) {
         decoder->state = FLO_DECODER_STATE_NEEDS_FRAME;
     }
 
-    /* reset the skip count */
-    decoder->samples_to_skip = 0;
-
+    /* reset the decoder status */
+    if (new_stream) {
+        /* if this is a new-stream reset, clear out all status fields */
+        FLO_SetMemory(&decoder->status, 0, sizeof(decoder->status));
+    } else {
+        /* not a new stream, only reset some of the status fields */
+        decoder->status.frame_count = 0;
+        decoder->status.sample_count = 0;
+    }
+    
     return FLO_SUCCESS;
 }

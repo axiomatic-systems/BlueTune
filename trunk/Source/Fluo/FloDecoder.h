@@ -95,7 +95,7 @@ typedef struct {
 +---------------------------------------------------------------------*/
 FLO_Result FLO_Decoder_Create(FLO_Decoder** decoder);
 FLO_Result FLO_Decoder_Destroy(FLO_Decoder* decoder);
-FLO_Result FLO_Decoder_Reset(FLO_Decoder* decoder);
+FLO_Result FLO_Decoder_Reset(FLO_Decoder* decoder, FLO_Boolean new_stream);
 FLO_Result FLO_Decoder_Feed(FLO_Decoder*   decoder, 
                             FLO_ByteBuffer buffer, 
                             FLO_Size*      size,

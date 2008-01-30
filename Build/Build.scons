@@ -127,8 +127,8 @@ if not env.has_key('FLO_DECODER_ENGINE'):
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
     
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
-    BuildModule(name        = 'FloDecoderEngine',
-                source_root = 'ThirdParty/mpg123/mpglib')
+    CompiledModule(name        = 'FloDecoderEngine',
+                   source_root = 'ThirdParty/mpg123/mpglib')
     fluo_decoder_deps = ['FloDecoderEngine']
     fluo_decoder_lib_dirs = []
     fluo_decoder_inc_dirs = []
@@ -340,6 +340,13 @@ CompiledModule(name             = 'BtController',
                module_type      = 'Executable',
                source_root      = 'Source/Apps/BtController',
                included_modules = ['BlueTune'])
+
+############################# PcmDiff
+CompiledModule(name             = 'PcmDiff',
+               module_type      = 'Executable',
+               source_root      = 'Source/Apps/PcmDiff',
+               included_modules = ['Neptune'])
+
 
 ############################# BtGtk
 if env['target'] == 'x86-unknown-linux':

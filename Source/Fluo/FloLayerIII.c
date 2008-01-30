@@ -864,11 +864,11 @@ FLO_LayerIII_ReadHuffmanSamples(FLO_BitStream* bits,
             }
             if (bits_left) FLO_BitStream_ReadBits(bits, bits_left);
         } else {
-            /*while (bits_left <= -32) {
+            while (bits_left <= -32) {
                 FLO_BitStream_Rewind(bits, 32);
                 bits_left += 32;
             }
-            if (bits_left) FLO_BitStream_Rewind(bits, -bits_left);*/
+            if (bits_left) FLO_BitStream_Rewind(bits, -bits_left);
         }
     }
 }
@@ -1156,9 +1156,6 @@ FLO_LayerIII_DecodeFrame(const unsigned char* frame_data,
         result = FLO_ERROR_INVALID_BITSTREAM;
         goto err;
     }
-
-    /* put the side info into the main bit stream */
-    FLO_BitStream_SetData(&bits, frame_data, side_info_size);
     
     /* setup the bitstream */
     FLO_BitStream_SetData(&bits, frame_data, frame_payload_size);

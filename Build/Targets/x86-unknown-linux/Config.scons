@@ -33,8 +33,10 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'AlsaInput']
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
-#env['BLT_PLUGINS_AAC_LIBRARY']      = 'Helix'
 env['BLT_DEFAULT_OUTPUT']           = 'alsa:default'
+
+env['FLO_DECODER_ENGINE']      = 'FLO_DECODER_ENGINE_MPG123'
+#env['BLT_PLUGINS_AAC_LIBRARY'] = 'Helix'
 
 ### relaxed warnings for WMA
 env['WMA_ENV'] = env['BLT_RELAXED_ENV'].Copy() 

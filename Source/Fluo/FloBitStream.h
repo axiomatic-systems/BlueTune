@@ -53,6 +53,7 @@ FLO_Result FLO_BitStream_SetData(FLO_BitStream*  bits,
                                  FLO_Size        data_size);
 FLO_Result FLO_BitStream_Reset(FLO_BitStream* bits);
 FLO_Size   FLO_BitStream_GetBitsLeft(FLO_BitStream* bits);
+FLO_Result FLO_BitStream_Rewind(FLO_BitStream* bits, unsigned int n);
 
 #ifdef __cplusplus
 }
@@ -181,7 +182,7 @@ FLO_BitStream_PeekBit(const FLO_BitStream* bits)
    /* the cache is empty */
    if (bits->bits_cached == 0) {
       /* read the next word into the cache */
-      FLO_BitsWord cache = FLO_BitStream_ReadCache (bits);
+      FLO_BitsWord cache = FLO_BitStream_ReadCache(bits);
 
       /* return the first bit */
       return cache >> (FLO_WORD_BITS - 1);
@@ -206,7 +207,7 @@ FLO_BitStream_SkipBits(FLO_BitStream* bits, unsigned int n)
          n -= FLO_WORD_BITS;
       }
       if (n) {
-         bits->cache = FLO_BitStream_ReadCache (bits);
+         bits->cache = FLO_BitStream_ReadCache(bits);
          bits->bits_cached = FLO_WORD_BITS-n;
          bits->pos +=  FLO_WORD_BYTES;
       } else {
@@ -223,7 +224,7 @@ static inline void
 FLO_BitStream_SkipBit(FLO_BitStream* bits)
 {
    if (bits->bits_cached == 0) {
-      bits->cache = FLO_BitStream_ReadCache (bits);
+      bits->cache = FLO_BitStream_ReadCache(bits);
       bits->pos +=  FLO_WORD_BYTES;
       bits->bits_cached = FLO_WORD_BITS - 1;
    } else {

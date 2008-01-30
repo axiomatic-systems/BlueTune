@@ -92,7 +92,7 @@ ParseCommandLine(char** args)
 |    main
 +---------------------------------------------------------------------*/
 int
-main(int argc, char** argv)
+main(int /*argc*/, char** argv)
 {
     NPT_Result result;
 

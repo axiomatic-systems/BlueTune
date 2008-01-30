@@ -46,6 +46,42 @@ FLO_BitStream_GetBitsLeft(FLO_BitStream* bits)
 }
 
 /*----------------------------------------------------------------------
+|       FLO_BitStream_Rewind
++---------------------------------------------------------------------*/
+FLO_Result
+FLO_BitStream_Rewind(FLO_BitStream* bits, unsigned int n)
+{
+    /* check that we don't rewind more than what we have */
+    if (n > FLO_BitStream_GetBitsLeft(bits)) return FLO_ERROR_INVALID_PARAMETERS;
+    
+    /* rewind the cached bits first */
+    {
+        unsigned int can_rewind = FLO_WORD_BITS-bits->bits_cached;
+        if (n <= can_rewind) {
+            bits->bits_cached += n;
+            return FLO_SUCCESS;
+        }
+        n -= can_rewind;
+    }
+    bits->bits_cached = 0;
+    bits->pos -= FLO_WORD_BYTES;
+    
+    /* rewind remaining bits by chunks of FLO_WORD_BITS */
+    while (n>FLO_WORD_BITS) {
+        bits->pos -= FLO_WORD_BYTES;
+        n -= FLO_WORD_BITS;
+    }
+    
+    /* rewind whatever is left */
+    if (n) {
+        bits->pos -= FLO_WORD_BYTES;
+        FLO_BitStream_SkipBits(bits, FLO_WORD_BITS-n);
+    }
+    
+    return FLO_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |       FLO_BitStream_SetData
 +---------------------------------------------------------------------*/
 FLO_Result 

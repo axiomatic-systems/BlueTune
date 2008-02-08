@@ -455,91 +455,91 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libBento4.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = Bento4;
 		};
 		CA44C46A0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646ABB0CE97BFD009699D7 /* mp4dump */;
+			remoteGlobalIDString = CA646ABB0CE97BFD009699D7;
 			remoteInfo = Mp4Dump;
 		};
 		CA44C46C0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646AD50CE97C80009699D7 /* mp4info */;
+			remoteGlobalIDString = CA646AD50CE97C80009699D7;
 			remoteInfo = Mp4Info;
 		};
 		CA44C46E0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646AEA0CE97CD2009699D7 /* mp4encrypt */;
+			remoteGlobalIDString = CA646AEA0CE97CD2009699D7;
 			remoteInfo = Mp4Encrypt;
 		};
 		CA44C4700D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646AF70CE97CEE009699D7 /* mp4decrypt */;
+			remoteGlobalIDString = CA646AF70CE97CEE009699D7;
 			remoteInfo = Mp4Decrypt;
 		};
 		CA44C4720D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B0A0CE97D6E009699D7 /* mp4edit */;
+			remoteGlobalIDString = CA646B0A0CE97D6E009699D7;
 			remoteInfo = Mp4Edit;
 		};
 		CA44C4740D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B1A0CE97D9C009699D7 /* mp4extract */;
+			remoteGlobalIDString = CA646B1A0CE97D9C009699D7;
 			remoteInfo = Mp4Extract;
 		};
 		CA44C4760D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B2A0CE97DD1009699D7 /* mp4tag */;
+			remoteGlobalIDString = CA646B2A0CE97DD1009699D7;
 			remoteInfo = Mp4Tag;
 		};
 		CA44C4780D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B3A0CE97DFD009699D7 /* aac2mp4 */;
+			remoteGlobalIDString = CA646B3A0CE97DFD009699D7;
 			remoteInfo = Aac2Mp4;
 		};
 		CA44C47A0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B4A0CE97E27009699D7 /* mp42aac */;
+			remoteGlobalIDString = CA646B4A0CE97E27009699D7;
 			remoteInfo = Mp42Aac;
 		};
 		CA44C47C0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B5A0CE97E52009699D7 /* mp4rtphintinfo */;
+			remoteGlobalIDString = CA646B5A0CE97E52009699D7;
 			remoteInfo = Mp4RtpHintInfo;
 		};
 		CA44C47E0D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA646B6A0CE97E82009699D7 /* cryptotest */;
+			remoteGlobalIDString = CA646B6A0CE97E82009699D7;
 			remoteInfo = CryptoTest;
 		};
 		CA44C4AA0D45231100173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* Bento4 */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Bento4;
 		};
 		CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */ = {
@@ -618,6 +618,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = CA6B38710C965CE9000D7A0A;
 			remoteInfo = HelixAAC;
+		};
+		CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA44C52A0D46375F00173F5F;
+			remoteInfo = Mp4DcfPackager;
 		};
 		CAA97B210CF3639D00C01909 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1107,6 +1114,7 @@
 				CA44C46B0D4522DA00173F5F /* mp4dump */,
 				CA44C46D0D4522DA00173F5F /* mp4info */,
 				CA44C46F0D4522DA00173F5F /* mp4encrypt */,
+				CA7DAD5E0D50EA9C00BF2DAA /* mp4dcfpackager */,
 				CA44C4710D4522DA00173F5F /* mp4decrypt */,
 				CA44C4730D4522DA00173F5F /* mp4edit */,
 				CA44C4750D4522DA00173F5F /* mp4extract */,
@@ -2489,6 +2497,13 @@
 			remoteRef = CA550DAC0D23255E00B22D72 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA7DAD5E0D50EA9C00BF2DAA /* mp4dcfpackager */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4dcfpackager;
+			remoteRef = CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CAA97B220CF3639D00C01909 /* XmlTest1 */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -2877,6 +2892,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -2901,6 +2917,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;

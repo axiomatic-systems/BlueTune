@@ -342,13 +342,13 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                 alac->WriteFields(*mbs);
             } 
         }
-        unsigned int decoder_info_length = mbs?mbs->GetSize():0;
+        AP4_LargeSize decoder_info_length = mbs?mbs->GetDataSize():0;
         BLT_IsoBaseAudioMediaType* media_type = (BLT_IsoBaseAudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_IsoBaseAudioMediaType)+decoder_info_length-1);
         BLT_MediaType_Init(&media_type->base, self->output.iso_base_es_type_id);
         media_type->format = sample_desc->GetFormat();
         media_type->base.extension_size = sizeof(BLT_IsoBaseAudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType);
         media_type->decoder_info_length =  decoder_info_length;
-        if (mbs) ATX_CopyMemory(&media_type->decoder_info[0], mbs->GetData(), mbs->GetSize());
+        if (mbs) ATX_CopyMemory(&media_type->decoder_info[0], mbs->GetData(), mbs->GetDataSize());
         self->output.media_type = (BLT_MediaType*)media_type;
         
         if (mbs) mbs->Release();

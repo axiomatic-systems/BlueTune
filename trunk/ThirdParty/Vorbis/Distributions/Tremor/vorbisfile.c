@@ -652,7 +652,9 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
       
       _make_decode_ready(vf);
     }
-    ogg_stream_pagein(vf->os,&og);
+    if (og.header) { /* GBG: added this to avoid crash on streaming boundaries */
+        ogg_stream_pagein(vf->os,&og);
+    }
   }
  cleanup:
   ogg_packet_release(&op);
@@ -1570,13 +1572,8 @@ long ov_read(OggVorbis_File *vf,char *buffer,int bytes_req,int *bitstream){
     
     long channels=ov_info(vf,-1)->channels;
 
-    if(channels==1){
-      if(samples>(bytes_req/2))
-        samples=bytes_req/2;      
-    }else{
-      if(samples>(bytes_req/4))
-        samples=bytes_req/4;
-    }
+    if(samples>(bytes_req/(2*channels)))
+      samples=bytes_req/(2*channels);      
     
     for(i=0;i<channels;i++) { /* It's faster in this order */
       ogg_int32_t *src=pcm[i];

@@ -42,7 +42,8 @@ typedef struct {
 
 } vorbis_look_residue0;
 
-static void res0_free_info(vorbis_info_residue *i){
+static /* GBG: added to avoid warnings */
+void res0_free_info(vorbis_info_residue *i){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)i;
   if(info){
     memset(info,0,sizeof(*info));
@@ -50,7 +51,8 @@ static void res0_free_info(vorbis_info_residue *i){
   }
 }
 
-static void res0_free_look(vorbis_look_residue *i){
+static /* GBG: added to avoid warnings */
+void res0_free_look(vorbis_look_residue *i){
   int j;
   if(i){
 
@@ -87,7 +89,8 @@ static int icount(unsigned int v){
 }
 
 /* vorbis_info is for range checking */
-static vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
+static /* GBG: added to avoid warnings */
+vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)_ogg_calloc(1,sizeof(*info));
   codec_setup_info     *ci=(codec_setup_info *)vi->codec_setup;
@@ -119,7 +122,8 @@ static vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   return(NULL);
 }
 
-static vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
+static /* GBG: added to avoid warnings */
+vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)_ogg_calloc(1,sizeof(*look));
@@ -187,8 +191,11 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
-  int n=info->end-info->begin;
+  int max=vb->pcmend>>1;
+  int end=(info->end<max?info->end:max);
+  int n=end-info->begin;
   
+  if(n>0){
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   int ***partword=(int ***)alloca(ch*sizeof(*partword));
@@ -225,13 +232,14 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
 	}
     } 
   }
-  
+  }
  errout:
  eopbreak:
   return(0);
 }
 
-static int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static /* GBG: added to avoid warnings */
+int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 		 ogg_int32_t **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -243,7 +251,8 @@ static int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-static int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static /* GBG: added to avoid warnings */
+int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 		 ogg_int32_t **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -256,7 +265,8 @@ static int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 /* duplicate code here as speed is somewhat more important */
-static int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static /* GBG: added to avoid warnings */
+int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 		 ogg_int32_t **in,int *nonzero,int ch){
   long i,k,l,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
@@ -265,7 +275,11 @@ static int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
-  int n=info->end-info->begin;
+  int max=(vb->pcmend*ch)>>1;
+  int end=(info->end<max?info->end:max);
+  int n=end-info->begin;
+
+  if(n>0){
 
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
@@ -303,7 +317,7 @@ static int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 	}
     } 
   }
-  
+  }
  errout:
  eopbreak:
   return(0);

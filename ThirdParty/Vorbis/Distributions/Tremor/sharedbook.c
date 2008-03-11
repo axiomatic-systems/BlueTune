@@ -67,7 +67,8 @@ static ogg_int32_t _float32_unpack(long val,int *point){
 /* given a list of word lengths, generate a list of codewords.  Works
    for length ordered or unordered, always assigns the lowest valued
    codewords first.  Extended to handle unused entries (length 0) */
-static ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
+static /* GBG: added to avoid warnings */
+ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
   long i,j,count=0;
   ogg_uint32_t marker[33];
   ogg_uint32_t *r=(ogg_uint32_t *)_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
@@ -178,7 +179,8 @@ long _book_maptype1_quantvals(const static_codebook *b){
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
 
-static ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
+static /* GBG: added to avoid warnings */
+ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 			      int *maxpoint){
   long j,k,count=0;
   if(b->maptype==1 || b->maptype==2){
@@ -334,9 +336,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   c->used_entries=n;
   c->dim=s->dim;
 
-  c->q_min=s->q_min;
-  c->q_delta=s->q_delta;
-
+  if(n>0){
   /* two different remappings go on here.  
 
      First, we collapse the likely sparse codebook down only to
@@ -347,7 +347,6 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
      Second, we reorder all vectors, including the entry index above,
      by sorted bitreversed codeword to allow treeless decode. */
 
-  {
     /* perform sort */
     ogg_uint32_t *codes=_make_words(s->lengthlist,s->entries,c->used_entries);
     ogg_uint32_t **codep=(ogg_uint32_t **)alloca(sizeof(*codep)*n);
@@ -372,7 +371,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     for(i=0;i<n;i++)
       c->codelist[sortindex[i]]=codes[i];
     _ogg_free(codes);
-  }
+    
 
   
   c->valuelist=_book_unquantize(s,n,sortindex,&c->binarypoint);
@@ -432,7 +431,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       }
     }
   }
-  
+  }
 
   return(0);
  err_out:

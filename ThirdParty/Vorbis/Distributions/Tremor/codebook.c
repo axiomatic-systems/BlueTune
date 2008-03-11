@@ -171,7 +171,11 @@ STIN long decode_packed_entry_number(codebook *book,
 
   while(lok<0 && read>1)
     lok = oggpack_look(b, --read);
-  if(lok<0)return -1;
+
+  if(lok<0){
+    oggpack_adv(b,1); /* force eop */
+    return -1;
+  }
 
   /* bisect search for the codeword in the ordered list */
   {
@@ -190,7 +194,7 @@ STIN long decode_packed_entry_number(codebook *book,
     }
   }
   
-  oggpack_adv(b, read);
+  oggpack_adv(b, read+1);
   return(-1);
 }
 
@@ -210,17 +214,20 @@ STIN long decode_packed_entry_number(codebook *book,
 
 /* returns the [original, not compacted] entry number or -1 on eof *********/
 long vorbis_book_decode(codebook *book, oggpack_buffer *b){
+  if(book->used_entries>0){
   long packed_entry=decode_packed_entry_number(book,b);
   if(packed_entry>=0)
     return(book->dec_index[packed_entry]);
+  }
   
   /* if there's no dec_index, the codebook unpacking isn't collapsed */
-  return(packed_entry);
+  return(-1);
 }
 
 /* returns 0 on OK or -1 on eof *************************************/
 long vorbis_book_decodevs_add(codebook *book,ogg_int32_t *a,
 			      oggpack_buffer *b,int n,int point){
+  if(book->used_entries>0){  
   int step=n/book->dim;
   long *entry = (long *)alloca(sizeof(*entry)*step);
   ogg_int32_t **t = (ogg_int32_t **)alloca(sizeof(*t)*step);
@@ -246,11 +253,13 @@ long vorbis_book_decodevs_add(codebook *book,ogg_int32_t *a,
       for (j=0;j<step;j++)
 	a[o+j]+=t[j][i]<<-shift;
   }
+  }
   return(0);
 }
 
 long vorbis_book_decodev_add(codebook *book,ogg_int32_t *a,
 			     oggpack_buffer *b,int n,int point){
+  if(book->used_entries>0){
   int i,j,entry;
   ogg_int32_t *t;
   int shift=point-book->binarypoint;
@@ -272,11 +281,13 @@ long vorbis_book_decodev_add(codebook *book,ogg_int32_t *a,
 	a[i++]+=t[j++]<<-shift;
     }
   }
+  }
   return(0);
 }
 
 long vorbis_book_decodev_set(codebook *book,ogg_int32_t *a,
 			     oggpack_buffer *b,int n,int point){
+  if(book->used_entries>0){
   int i,j,entry;
   ogg_int32_t *t;
   int shift=point-book->binarypoint;
@@ -302,12 +313,22 @@ long vorbis_book_decodev_set(codebook *book,ogg_int32_t *a,
       }
     }
   }
+  }else{
+
+    int i,j;
+    for(i=0;i<n;){
+      for (j=0;j<book->dim;){
+	a[i++]=0;
+      }
+    }
+  }
   return(0);
 }
 
 long vorbis_book_decodevv_add(codebook *book,ogg_int32_t **a,\
 			      long offset,int ch,
 			      oggpack_buffer *b,int n,int point){
+  if(book->used_entries>0){
   long i,j,entry;
   int chptr=0;
   int shift=point-book->binarypoint;
@@ -344,6 +365,7 @@ long vorbis_book_decodevv_add(codebook *book,ogg_int32_t **a,\
 	}
       }
     }
+  }
   }
   return(0);
 }

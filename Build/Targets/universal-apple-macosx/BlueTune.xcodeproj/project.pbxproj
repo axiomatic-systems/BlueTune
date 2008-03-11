@@ -451,6 +451,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
+		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA3EDA7E0D7E0B81007AE943 /* avcinfo */;
+			remoteInfo = AvcInfo;
+		};
 		CA44C4680D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -828,7 +835,7 @@
 		CA504A7A0C5C53440060E6FE /* res012.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = res012.c; sourceTree = "<group>"; };
 		CA504A7B0C5C53440060E6FE /* sharedbook.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sharedbook.c; sourceTree = "<group>"; };
 		CA504A7C0C5C53440060E6FE /* synthesis.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = synthesis.c; sourceTree = "<group>"; };
-		CA504A7D0C5C53440060E6FE /* vorbisfile.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = vorbisfile.c; sourceTree = "<group>"; };
+		CA504A7D0C5C53440060E6FE /* vorbisfile.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = vorbisfile.c; sourceTree = "<group>"; tabWidth = 8; };
 		CA504A7E0C5C53440060E6FE /* window.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = window.c; sourceTree = "<group>"; };
 		CA504A7F0C5C53440060E6FE /* window.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		CA504A800C5C53440060E6FE /* window_lookup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = window_lookup.h; sourceTree = "<group>"; };
@@ -1123,6 +1130,7 @@
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
 				CA44C47F0D4522DA00173F5F /* cryptotest */,
+				CA3650810D8364EB004A4DCB /* avcinfo */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2383,6 +2391,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = NetPump;
 			remoteRef = CA0C9A8D0D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA3650810D8364EB004A4DCB /* avcinfo */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = avcinfo;
+			remoteRef = CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA44C4690D4522DA00173F5F /* libBento4.a */ = {

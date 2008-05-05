@@ -221,6 +221,10 @@ BtController::OnPropertyNotification(BLT_PropertyScope        scope,
         case ATX_PROPERTY_VALUE_TYPE_RAW_DATA:
             ATX_ConsoleOutputF("= [R] %d bytes of data\n", value->data.raw_data.size);
             break;
+
+        case ATX_PROPERTY_VALUE_TYPE_POINTER:
+            ATX_ConsoleOutputF("= [P] pointer at %x\n", value->data.pointer);
+            break;
     }
 }
 

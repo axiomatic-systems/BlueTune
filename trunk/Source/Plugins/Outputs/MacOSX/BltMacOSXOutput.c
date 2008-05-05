@@ -265,6 +265,13 @@ MacOSXOutput_SetStreamFormat(MacOSXOutput*           self,
     
     /* select the sample format */
     switch (media_type->sample_format) {
+        case BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_BE:
+            audio_desc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
+            break;
+        
+        case BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE:
+            break;
+            
         case BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE:
             audio_desc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
             audio_desc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;

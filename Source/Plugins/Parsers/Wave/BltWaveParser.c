@@ -188,7 +188,13 @@ WaveParser_ParseHeader(WaveParser*      self,
                     if (format_tag == BLT_WAVE_FORMAT_IEEE_FLOAT) {
                         media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_FLOAT_LE;
                     } else {
-                        media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
+                        if (media_type.bits_per_sample == 8) {
+                            // 8 bits is always unsigned
+                            media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE;
+                        } else {
+                            // more than 8 bits is always signed
+                            media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
+                        }
                     }
                     BLT_MediaType_Clone((const BLT_MediaType*)&media_type, &self->output.media_type);
 

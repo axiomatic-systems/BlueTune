@@ -60,6 +60,8 @@
 		CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */; };
+		CA4277EE0DA3A47400557A8B /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
+		CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA44C4FD0D4628A900173F5F /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
 		CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; };
 		CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; };
@@ -455,7 +457,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA3EDA7E0D7E0B81007AE943 /* avcinfo */;
+			remoteGlobalIDString = CA3EDA7E0D7E0B81007AE943;
 			remoteInfo = AvcInfo;
 		};
 		CA44C4680D4522DA00173F5F /* PBXContainerItemProxy */ = {
@@ -618,13 +620,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = CA550D550D20A37E00B22D72;
 			remoteInfo = HttpServerTest1;
-		};
-		CA6435560C974C5200F67CD5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CA6B38710C965CE9000D7A0A;
-			remoteInfo = HelixAAC;
 		};
 		CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2053,6 +2048,7 @@
 				CA6434840C97197C00F67CD5 /* coder.h in Headers */,
 				CA6434900C97197C00F67CD5 /* sbr.h in Headers */,
 				CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */,
+				CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2282,7 +2278,6 @@
 				CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */,
 				CA504F8D0C5EC79A0060E6FE /* PBXTargetDependency */,
 				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
-				CA6435570C974C5200F67CD5 /* PBXTargetDependency */,
 				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
 			);
@@ -2647,6 +2642,7 @@
 				CA6434B60C971C2200F67CD5 /* BltAacDecoder.c in Sources */,
 				CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */,
 				CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */,
+				CA4277EE0DA3A47400557A8B /* BltAacDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2798,11 +2794,6 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */;
-		};
-		CA6435570C974C5200F67CD5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CA6B38710C965CE9000D7A0A /* HelixAAC */;
-			targetProxy = CA6435560C974C5200F67CD5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

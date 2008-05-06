@@ -84,6 +84,34 @@ typedef struct {
 } AlsaInput;
 
 /*----------------------------------------------------------------------
+|    macros
++---------------------------------------------------------------------*/
+
+/* 
+  we redefine some of the alsa macros here because the original alsa version
+  of these macros have an assert() that will cause a warning with some versions
+  of GCC.
+*/
+#define snd_pcm_status_alloca_no_assert(ptr)                     \
+do {                                                             \
+    *ptr = (snd_pcm_status_t *) alloca(snd_pcm_status_sizeof()); \
+    memset(*ptr, 0, snd_pcm_status_sizeof());                    \
+} while (0)
+
+#define snd_pcm_hw_params_alloca_no_assert(ptr)                        \
+do {                                                                   \
+    *ptr = (snd_pcm_hw_params_t *) alloca(snd_pcm_hw_params_sizeof()); \
+    memset(*ptr, 0, snd_pcm_hw_params_sizeof());                       \
+} while (0)
+
+#define snd_pcm_sw_params_alloca_no_assert(ptr)                        \
+do {                                                                   \
+    *ptr = (snd_pcm_sw_params_t *) alloca(snd_pcm_sw_params_sizeof()); \
+    memset(*ptr, 0, snd_pcm_sw_params_sizeof());                       \
+} while (0)
+
+
+/*----------------------------------------------------------------------
 |    AlsaInputStream_ParseName
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -217,7 +245,7 @@ AlsaInputStream_Construct(AlsaInputStream* self, BLT_CString name)
     }
 
     /* allocate a new blank configuration */
-    snd_pcm_hw_params_alloca(&hw_params);
+    snd_pcm_hw_params_alloca_no_assert(&hw_params);
     snd_pcm_hw_params_any(self->device_handle, hw_params);
 
     /* use interleaved access */
@@ -281,7 +309,7 @@ AlsaInputStream_Construct(AlsaInputStream* self, BLT_CString name)
     }
 
     /* configure the software parameters */
-    snd_pcm_sw_params_alloca(&sw_params);
+    snd_pcm_sw_params_alloca_no_assert(&sw_params);
     snd_pcm_sw_params_current(self->device_handle, sw_params);
 
     /* set the buffer alignment */
@@ -426,7 +454,7 @@ AlsaInputStream_Read(ATX_InputStream* _self,
             snd_pcm_status_t* status;
             snd_pcm_state_t   state;
 
-            snd_pcm_status_alloca(&status);
+            snd_pcm_status_alloca_no_assert(&status);
             io_result = snd_pcm_status(self->device_handle, status);
             if (io_result != 0) {
                 return BLT_FAILURE;

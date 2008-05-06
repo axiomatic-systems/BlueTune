@@ -305,10 +305,10 @@ handle_input_callback(gpointer          data,
 +---------------------------------------------------------------------*/
 static GtkItemFactoryEntry
 MenuItems[] = {
-    {"/_File",        NULL,         NULL,      0, "<Branch>", NULL },
-    {"/File/_Open",   "<control>O", GtkItemFactoryCallback(menu_open), 
+    {const_cast<gchar*>("/_File"),        NULL,         NULL,      0, const_cast<gchar*>("<Branch>"), NULL },
+    {const_cast<gchar*>("/File/_Open"),   const_cast<gchar*>("<control>O"), GtkItemFactoryCallback(menu_open), 
      0, NULL, NULL},
-    {"/File/_Exit",   "<control>E", GtkItemFactoryCallback(menu_exit), 
+    {const_cast<gchar*>("/File/_Exit"),   const_cast<gchar*>("<control>E"), GtkItemFactoryCallback(menu_exit), 
      0, NULL, NULL}
 };
 
@@ -429,24 +429,24 @@ BtPlayer::BtPlayer(NPT_SelectableMessageQueue* queue) :
     // create a list for the properties
     m_PropertyList = gtk_clist_new(2);
     gtk_clist_set_column_width(GTK_CLIST(m_PropertyList), 0, 150);
-    gchar *column[2] = {NULL, "0"};
+    const gchar *column[2] = {NULL, "0"};
     column[0] = "Nominal Bitrate";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Average Bitrate";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Instant Bitrate";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Sample Rate";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Channels";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Stream Duration";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Stream Size";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
     column[0] = "Data Type";
     column[1] = "Unknown";
-    gtk_clist_append(GTK_CLIST(m_PropertyList), column);
+    gtk_clist_append(GTK_CLIST(m_PropertyList), const_cast<gchar**>(column));
 
     // pack the menu and the button box vertically
     gtk_box_pack_start(GTK_BOX(main_box), m_MainMenu,     FALSE, TRUE, 0);
@@ -489,7 +489,7 @@ BtPlayer::BtPlayer(NPT_SelectableMessageQueue* queue) :
 void 
 BtPlayer::OnDecoderStateNotification(BLT_DecoderServer::State state)
 {
-    char* label;
+    const char* label;
 
     switch (state) {
       case BLT_DecoderServer::STATE_STOPPED:

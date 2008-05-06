@@ -189,10 +189,10 @@ WaveParser_ParseHeader(WaveParser*      self,
                         media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_FLOAT_LE;
                     } else {
                         if (media_type.bits_per_sample == 8) {
-                            // 8 bits is always unsigned
+                            /* 8 bits is always unsigned */
                             media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE;
                         } else {
-                            // more than 8 bits is always signed
+                            /* more than 8 bits is always signed */
                             media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE;
                         }
                     }

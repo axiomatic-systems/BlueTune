@@ -68,35 +68,26 @@ typedef BLT_TimeStamp BLT_Time;
     )                                             \
 )
 
-#define BLT_TimeStamp_Add(t0,t1,t2) do {                        \
-    (t0).seconds = (t1).seconds + (t2).seconds;                 \
-    (t0).nanoseconds = (t1).nanoseconds + (t2).nanoseconds;     \
-    if ((t0).nanoseconds > 1000000000) {                        \
-        (t0).seconds++;                                         \
-        (t0).nanoseconds -= 1000000000;                         \
-    }                                                           \
-} while (0)
-
-#define BLT_TimeStamp_Sub(t0,t1,t2) do {                        \
-    (t0).seconds = (t1).seconds - (t2).seconds;                 \
-    (t0).nanoseconds = (t1).nanoseconds - (t2).nanoseconds;     \
-    if ((t0).nanoseconds < 0) {                                 \
-        (t0).seconds--;                                         \
-        (t0).nanoseconds += 1000000000;                         \
-    }                                                           \
-} while (0)
-
-#define BLT_TimeStamp_ToInt64(t, i) do {                        \
-    ATX_Int64_Set_Int32(i, t.seconds);                          \
-    ATX_Int64_Mul_Int32(i, 1000000000);                         \
-    ATX_Int64_Add_Int32(i, t.nanoseconds);                      \
-} while (0)
-
 /*----------------------------------------------------------------------
 |   functions
 +---------------------------------------------------------------------*/
-BLT_TimeStamp
-BLT_TimeStamp_FromSamples(ATX_Int64 sample_count,
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+BLT_TimeStamp BLT_TimeStamp_Add(BLT_TimeStamp t0, BLT_TimeStamp t1);
+BLT_TimeStamp BLT_TimeStamp_Sub(BLT_TimeStamp t1, BLT_TimeStamp t2);
+BLT_TimeStamp BLT_TimeStamp_FromNanos(ATX_UInt64 nanos);
+BLT_TimeStamp BLT_TimeStamp_FromMicros(ATX_UInt64 micros);
+BLT_TimeStamp BLT_TimeStamp_FromMillis(ATX_UInt64 millis);
+ATX_UInt64    BLT_TimeStamp_ToNanos(BLT_TimeStamp ts);
+ATX_UInt64    BLT_TimeStamp_ToMicros(BLT_TimeStamp ts);
+ATX_UInt64    BLT_TimeStamp_ToMillis(BLT_TimeStamp ts);
+BLT_TimeStamp BLT_TimeStamp_FromSamples(ATX_Int64 sample_count,
                           ATX_Int32 sample_rate);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_TIME_H_ */

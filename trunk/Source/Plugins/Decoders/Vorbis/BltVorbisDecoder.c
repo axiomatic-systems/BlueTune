@@ -366,7 +366,7 @@ VorbisDecoderInput_SetStream(BLT_InputStreamUser* _self,
     self->input.size = 0;
     self->input.eos  = BLT_FALSE;
     self->output.packet_count = 0;
-    ATX_Int64_Set_Int32(self->output.sample_count, 0);
+    self->output.sample_count = 0;
 
     /* open the stream */
     self->input.stream = stream;
@@ -493,7 +493,7 @@ VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         /* update sample count */
         sample_count = bytes_read/(self->output.media_type.channel_count*
                                    self->output.media_type.bits_per_sample/8);
-        ATX_Int64_Add_Int32(self->output.sample_count, sample_count);
+        self->output.sample_count += sample_count;
     } 
 
     /* update the packet count */

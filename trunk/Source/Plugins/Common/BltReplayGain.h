@@ -32,8 +32,10 @@ typedef enum {
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN "ReplayGain/TrackGain"
-#define BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN "ReplayGain/AlbumGain"
+#define BLT_REPLAY_GAIN_TRACK_GAIN_VALUE  "ReplayGain.TrackGain"
+#define BLT_REPLAY_GAIN_TRACK_PEAK_VALUE  "ReplayGain.TrackPeak"
+#define BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE  "ReplayGain.AlbumGain"
+#define BLT_REPLAY_GAIN_ALBUM_PEAK_VALUE  "ReplayGain.AlbumPeak"
 
 #define BLT_VORBIS_COMMENT_REPLAY_GAIN_TRACK_GAIN "REPLAYGAIN_TRACK_GAIN"
 #define BLT_VORBIS_COMMENT_REPLAY_GAIN_ALBUM_GAIN "REPLAYGAIN_ALBUM_GAIN"

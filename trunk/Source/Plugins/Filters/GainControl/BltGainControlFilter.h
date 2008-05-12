@@ -34,12 +34,7 @@
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_GAIN_CONTROL_FILTER_OPTION_DO_REPLAY_GAIN "Plugins/GainControlFilter/DoReplayGain"
-
-#define BLT_REPLAY_GAIN_TRACK_GAIN_VALUE  "ReplayGain/TrackGain"
-#define BLT_REPLAY_GAIN_TRACK_PEAK_VALUE  "ReplayGain/TrackPeak"
-#define BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE  "ReplayGain/AlbumGain"
-#define BLT_REPLAY_GAIN_ALBUM_PEAK_VALUE  "ReplayGain/AlbumPeak"
+#define BLT_GAIN_CONTROL_FILTER_OPTION_DO_REPLAY_GAIN "Plugins.GainControlFilter.DoReplayGain"
 
 /*----------------------------------------------------------------------
 |   module

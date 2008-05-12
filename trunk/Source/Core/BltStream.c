@@ -1464,7 +1464,7 @@ done:
             BLT_Time      duration = BLT_MediaPacket_GetDuration(packet);
             if (ts.seconds == 0 && ts.nanoseconds == 0) {
                 /* this packet has a zero timestamp, which means that   */
-                /* the timing information was probably not set my any   */
+                /* the timing information was probably not set by any   */
                 /* of the media nodes, so we compute the real timestamp */
                 /* from the previous one plus the packet duration       */
                 self->output.last_time_stamp = self->output.next_time_stamp;
@@ -1487,9 +1487,7 @@ done:
                     }
                 }
             }
-            BLT_TimeStamp_Add(self->output.next_time_stamp,
-                              self->output.last_time_stamp,
-                              duration);
+            self->output.next_time_stamp = BLT_TimeStamp_Add(self->output.last_time_stamp, duration);
         }
         if (from_node->output.connected == BLT_FALSE) {
             /* we're now connected */
@@ -1869,14 +1867,8 @@ Stream_GetStatus(BLT_Stream* _self, BLT_StreamStatus* status)
     status->time_stamp = self->output.next_time_stamp;
     if (self->info.duration) {
         /* estimate the position from the time stamp and duration */
-        ATX_Int64 offset;
-        ATX_Int64_Set_Int32(offset, status->time_stamp.seconds);
-        ATX_Int64_Mul_Int32(offset, 1000);
-        ATX_Int64_Add_Int32(offset, status->time_stamp.nanoseconds/1000000);
-        ATX_Int64_Mul_Int32(offset, self->info.size);
-        ATX_Int64_Div_Int32(offset, self->info.duration);
-        status->position.offset = ATX_Int64_Get_Int32(offset);
-        status->position.range  = self->info.size;
+        status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
+        status->position.range  = self->info.duration;
     } else {
         status->position.offset = 0;
         status->position.range  = 0;
@@ -1923,21 +1915,18 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
         if ((point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) &&
             self->info.duration) {
             /* estimate the offset from the time stamp and duration */
-            ATX_Int64 offset;
-            ATX_Int64_Set_Int32(offset, point->time_stamp.seconds);
-            ATX_Int64_Mul_Int32(offset, 1000);
-            ATX_Int64_Add_Int32(offset, point->time_stamp.nanoseconds/1000000);
-            ATX_Int64_Mul_Int32(offset, self->info.size);
-            ATX_Int64_Div_Int32(offset, self->info.duration);
+            ATX_UInt64 offset = BLT_TimeStamp_ToMillis(point->time_stamp);
+            offset *= self->info.size;
+            offset /= self->info.duration;
             if (!(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
-                point->offset = ATX_Int64_Get_Int32(offset);
+                point->offset = (ATX_Offset)offset;
                 point->mask |= BLT_SEEK_POINT_MASK_OFFSET;
             }
                 
             /* estimate the position from the offset and size */
             if (!(point->mask & BLT_SEEK_POINT_MASK_POSITION)) {
                 point->mask |= BLT_SEEK_POINT_MASK_POSITION;
-                point->position.offset = ATX_Int64_Get_Int32(offset);
+                point->position.offset = (ATX_Offset)(offset);
                 point->position.range  = self->info.size;
                 point->mask |= BLT_SEEK_POINT_MASK_POSITION;
             }
@@ -1950,27 +1939,18 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
         /* estimate from the position */
         if (point->mask & BLT_SEEK_POINT_MASK_POSITION) {
             /* estimate the offset from the position and size */
-            ATX_Int64 offset;
-            ATX_Int64_Set_Int32(offset, point->position.offset);
-            ATX_Int64_Mul_Int32(offset, self->info.size);
-            ATX_Int64_Div_Int32(offset, point->position.range);
+            ATX_UInt64 offset = (((ATX_UInt64)point->position.offset) *
+                                self->info.size)/point->position.range;
             if (!(point->mask & BLT_SEEK_POINT_MASK_OFFSET)) {
-                point->offset = ATX_Int64_Get_Int32(offset);
+                point->offset = (ATX_Offset)offset;
                 point->mask |= BLT_SEEK_POINT_MASK_OFFSET;
             }
 
             /* estimate the time stamp from the position and duration */
             if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) &&
                 point->position.range) {
-                ATX_Int64    time64;   
-                BLT_Cardinal time;
-                ATX_Int64_Set_Int32(time64, self->info.duration);
-                ATX_Int64_Mul_Int32(time64, point->position.offset);
-                ATX_Int64_Div_Int32(time64, point->position.range);
-                time = ATX_Int64_Get_Int32(time64);
-                point->time_stamp.seconds = time/1000;
-                point->time_stamp.nanoseconds = 
-                    (time-1000*point->time_stamp.seconds)*1000000;
+                ATX_UInt64 time_stamp_ms = ((ATX_UInt64)self->info.duration*point->position.offset)/point->position.range;
+                point->time_stamp = BLT_TimeStamp_FromMillis(time_stamp_ms);
                 point->mask |= BLT_SEEK_POINT_MASK_TIME_STAMP;
             }
             break;
@@ -1984,16 +1964,8 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
             if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) &&
                 self->info.size) {
                 /* estimate the time stamp from offset, size and duration */
-                ATX_Int64    time64;
-                BLT_Cardinal time;
-                ATX_Int64_Set_Int32(time64, self->info.duration);
-                ATX_Int64_Mul_Int32(time64, point->offset);
-                ATX_Int64_Div_Int32(time64, self->info.size);
-                time = ATX_Int64_Get_Int32(time64);
-                point->time_stamp.seconds = time/1000;
-                point->time_stamp.seconds = time/1000;
-                point->time_stamp.nanoseconds = 
-                    (time-1000*point->time_stamp.seconds)*1000000;
+                ATX_UInt64 time_stamp_ms = (((ATX_UInt64)self->info.duration)*point->offset)/self->info.size;
+                point->time_stamp = BLT_TimeStamp_FromMillis(time_stamp_ms);
                 point->mask |= BLT_SEEK_POINT_MASK_TIME_STAMP;
             }
             if (!(point->mask & BLT_SEEK_POINT_MASK_POSITION) &&
@@ -2012,45 +1984,19 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
         if (point->mask & BLT_SEEK_POINT_MASK_SAMPLE) {
             if (self->info.duration && self->info.sample_rate) {
                 /* compute position from duration and sample rate */
-                ATX_Int64 samples;
-                ATX_Int64 sample;
-                ATX_Int64 position;
-                ATX_Int64 range;
-                ATX_Int64 offset;
-                ATX_Int64_Set_Int32(samples, self->info.duration);
-                ATX_Int64_Mul_Int32(samples, self->info.sample_rate);
-                ATX_Int64_Div_Int32(samples, 1000);
-                range    = samples;
-                position = point->sample;
-                ATX_Int64_Div_Int32(position, 100);
-                ATX_Int64_Div_Int32(range,    100);
-                point->position.offset = ATX_Int64_Get_Int32(position);
-                point->position.range  = ATX_Int64_Get_Int32(range);
+                ATX_UInt64 duration_samples = (((ATX_UInt64)self->info.duration)*self->info.sample_rate)/1000;
+                point->position.offset = (ATX_Offset)(point->sample/100);
+                point->position.range  = (ATX_Range)(duration_samples/100);
                 point->mask |= BLT_SEEK_POINT_MASK_POSITION;
 
                 /* compute offset from size and duration */
-                sample = point->sample;
-                ATX_Int64_Div_Int32(sample, 100);
-                ATX_Int64_Div_Int32(samples, 100);
-                ATX_Int64_Set_Int32(offset, self->info.size);
-                ATX_Int64_Mul_Int64(offset, sample);
-                ATX_Int64_Div_Int64(offset, samples);
-                point->offset = ATX_Int64_Get_Int32(offset);
+                point->offset = (ATX_Offset)((ATX_UInt64)self->info.size*(ATX_UInt64)point->sample)/duration_samples;
                 point->mask |= BLT_SEEK_POINT_MASK_OFFSET;
                 
                 /* compute time stamp */
-                {
-                    ATX_Int64    msecs64 = point->sample;
-                    ATX_Cardinal msecs;
-                    ATX_Int64_Mul_Int32(msecs64, 1000);
-                    ATX_Int64_Div_Int32(msecs64, self->info.sample_rate);
-                    msecs = ATX_Int64_Get_Int32(msecs64);
-                    point->time_stamp.seconds     = msecs/1000;
-                    point->time_stamp.nanoseconds = 
-                        1000000*(msecs-1000*(point->time_stamp.seconds));
+                point->time_stamp = BLT_TimeStamp_FromSamples(point->sample, self->info.sample_rate);
                     point->mask |= BLT_SEEK_POINT_MASK_TIME_STAMP;
                 }
-            }
             break;
         } else {
             return BLT_FAILURE;
@@ -2059,14 +2005,9 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
 
     /* estimate the sample offset from the time stamp and sample rate */
     if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP &&
-        !(point->mask & BLT_SEEK_POINT_MASK_SAMPLE) &&
-        self->info.sample_rate) {
-        ATX_Int64 sample;
-        ATX_Int64_Set_Int32(sample, point->time_stamp.seconds*1000);
-        ATX_Int64_Add_Int32(sample, point->time_stamp.nanoseconds/1000000);
-        ATX_Int64_Mul_Int32(sample, self->info.sample_rate);
-        ATX_Int64_Div_Int32(sample, 1000);
-        point->sample = sample;
+        !(point->mask & BLT_SEEK_POINT_MASK_SAMPLE) && self->info.sample_rate) {
+        ATX_UInt64 time_stamp_ms = BLT_TimeStamp_ToMillis(point->time_stamp);
+        point->sample = (time_stamp_ms*self->info.sample_rate)/1000;
         point->mask |= BLT_SEEK_POINT_MASK_SAMPLE;
     }
 

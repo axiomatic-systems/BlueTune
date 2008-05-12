@@ -375,11 +375,7 @@ AiffParser_ParseChunks(AiffParser*      self,
         self->output.media_type.bits_per_sample/8;
 
     if (stream_info.size != 0 && bytes_per_second != 0) {
-        ATX_Int64 duration;
-        ATX_Int64_Set_Int32(duration, stream_info.size);
-        ATX_Int64_Mul_Int32(duration, 1000);
-        ATX_Int64_Div_Int32(duration, bytes_per_second);
-        stream_info.duration = ATX_Int64_Get_Int32(duration);
+        stream_info.duration = ((ATX_UInt64)stream_info.size*1000)/bytes_per_second;
         stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
     } else {
         stream_info.duration = 0;

@@ -40,28 +40,16 @@ FLO_Vbr_ComputeDurationAndBitrate(FLO_FrameInfo*     frame_info,
                                   FLO_DecoderStatus* decoder_status)
 {
     if (frame_info->sample_rate) {
-        ATX_Int64 sample_count;
-        ATX_Int64 duration;
+        ATX_UInt64 sample_count = (ATX_UInt64)decoder_status->stream_info.duration_frames *
+                                  (ATX_UInt64)frame_info->sample_count;
+        ATX_UInt64 duration_ms = (1000*sample_count)/frame_info->sample_rate;
 
-        /* compute the number of samples */
-        ATX_Int64_Set_Int32(sample_count, 
-                            decoder_status->stream_info.duration_frames);
-        ATX_Int64_Mul_Int32(sample_count, frame_info->sample_count);
-        
-        /* compute the duration in ms */
-        ATX_Int64_Set_Int32(duration, 1000);
-        ATX_Int64_Mul_Int64(duration, sample_count);
-        ATX_Int64_Div_Int32(duration, frame_info->sample_rate);
-        decoder_status->stream_info.duration_ms = 
-            ATX_Int64_Get_Int32(duration);
+        decoder_status->stream_info.duration_ms = (ATX_UInt32)duration_ms;
 
         /* compute the bitrate */
         if (decoder_status->stream_info.duration_ms) {
-            ATX_Int64 bitrate;
-            ATX_Int64_Set_Int32(bitrate, 8*1000);
-            ATX_Int64_Mul_Int32(bitrate, decoder_status->stream_info.size);
-            ATX_Int64_Div_Int64(bitrate, duration);
-            decoder_status->stream_info.bitrate = ATX_Int64_Get_Int32(bitrate);
+            ATX_UInt64 bitrate = (8*1000*(ATX_UInt64)decoder_status->stream_info.size)/duration_ms;
+            decoder_status->stream_info.bitrate = (ATX_UInt32)(bitrate);
         } else {
             decoder_status->stream_info.bitrate = 0;
         }

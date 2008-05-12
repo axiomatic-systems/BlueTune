@@ -38,13 +38,13 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
                 case BLT_REPLAY_GAIN_SET_MODE_UPDATE:
                     property_value.data.integer = (ATX_Int32)(track_gain*100.0f);
                     ATX_Properties_SetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                        BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                         &property_value);
                     break;
 
                 case BLT_REPLAY_GAIN_SET_MODE_REMOVE:
                     ATX_Properties_SetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                        BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                         NULL);
                     break;
                     
@@ -55,13 +55,13 @@ BLT_ReplayGain_SetStreamProperties(BLT_Stream*           stream,
                 case BLT_REPLAY_GAIN_SET_MODE_UPDATE:
                     property_value.data.integer = (ATX_Int32)(album_gain*100.0f);
                     ATX_Properties_SetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                        BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE,
                         &property_value);
                     break;
 
                 case BLT_REPLAY_GAIN_SET_MODE_REMOVE:
                     ATX_Properties_SetProperty(properties,
-                        BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                        BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE,
                         NULL);
                     break;
 

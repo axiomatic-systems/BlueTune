@@ -245,15 +245,15 @@ MpegAudioDecoder_UpdateBitrateAverage(BLT_Cardinal previous_bitrate,
     long         diff_bitrate;
 
     if (previous_bitrate == 0) {
-        ATX_Int64_Set_Int32(*accumulator, current_bitrate << scale);
+        *accumulator = current_bitrate << scale;
         return current_bitrate;
     }
 
-    ATX_Int64_Mul_Int32(*accumulator, window-1);
-    ATX_Int64_Add_Int32(*accumulator, current_bitrate << scale);
-    ATX_Int64_Div_Int32(*accumulator, window);
+    *accumulator *= window-1;
+    *accumulator += current_bitrate << scale;
+    *accumulator /= window;
     
-    new_bitrate = ATX_Int64_Get_Int32(*accumulator);
+    new_bitrate = (ATX_UInt32)(*accumulator);
     new_bitrate = (new_bitrate + (1<<(scale-1))) >> scale;
     new_bitrate = new_bitrate /
         BLT_BITRATE_AVERAGING_PRECISION *
@@ -327,13 +327,10 @@ MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  self,
             self->stream_info.average_bitrate = info.average_bitrate;
         }   
 
-        /* compute the duration */
+        /* compute the duration from the size and the average bitrate */
         if (info.size && info.average_bitrate) {
-            ATX_Int64 duration;
-            ATX_Int64_Set_Int32(duration, info.size);
-            ATX_Int64_Mul_Int32(duration, 8*1000);
-            ATX_Int64_Div_Int32(duration, info.average_bitrate);
-            info.duration = ATX_Int64_Get_Int32(duration);
+            ATX_UInt64 duration_ms = (8*1000*(ATX_UInt64)info.size)/info.average_bitrate;
+            info.duration = (ATX_UInt32)duration_ms;
         } else {
             info.duration = 0;
         }
@@ -408,22 +405,22 @@ MpegAudioDecoder_UpdateReplayGainInfo(MpegAudioDecoder*  self,
                 FLO_REPLAY_GAIN_HAS_TRACK_VALUE) {
                 property_value.data.integer = self->replay_gain_info.track_gain;
                 ATX_Properties_SetProperty(properties,
-                                           BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                                           BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                                            &property_value);
             } else {
                 ATX_Properties_SetProperty(properties,
-                                             BLT_REPLAY_GAIN_PROPERTY_TRACK_GAIN,
+                                             BLT_REPLAY_GAIN_TRACK_GAIN_VALUE,
                                              NULL);
             }
             if (self->replay_gain_info.flags &
                 FLO_REPLAY_GAIN_HAS_ALBUM_VALUE) {
                 property_value.data.integer = self->replay_gain_info.album_gain;
                 ATX_Properties_SetProperty(properties,
-                                           BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                                           BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE,
                                            &property_value);
             } else {
                 ATX_Properties_SetProperty(properties,
-                                             BLT_REPLAY_GAIN_PROPERTY_ALBUM_GAIN,
+                                             BLT_REPLAY_GAIN_ALBUM_GAIN_VALUE,
                                              NULL);
             }
         }
@@ -509,9 +506,7 @@ MpegAudioDecoder_DecodeFrame(MpegAudioDecoder* self,
 
     /* set start of stream packet flags */
     {
-        ATX_Int64 zero;
-        ATX_Int64_Zero(zero);
-        if (ATX_Int64_Equal(zero, self->output.sample_count)) {
+        if (self->output.sample_count == 0) {
             BLT_MediaPacket_SetFlags(*packet, 
                                      BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
         }
@@ -671,7 +666,7 @@ MpegAudioDecoder_SetupPorts(MpegAudioDecoder* self)
     /* setup the output port */
     self->output.eos = BLT_FALSE;
     BLT_PcmMediaType_Init(&self->output.media_type);
-    ATX_Int64_Set_Int32(self->output.sample_count, 0);
+    self->output.sample_count = 0;
     BLT_TimeStamp_Set(self->output.time_stamp, 0, 0);
 
     return BLT_SUCCESS;

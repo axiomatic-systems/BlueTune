@@ -103,7 +103,7 @@ BtController::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
 void
 BtController::OnDecoderStateNotification(BLT_DecoderServer::State state)
 {
-    ATX_ConsoleOutput("BLT_Player::OnDecoderStateNotification state=");
+    ATX_ConsoleOutput("INFO: State = ");
 
     switch (state) {
       case BLT_DecoderServer::STATE_STOPPED:
@@ -140,7 +140,7 @@ BtController::OnStreamTimeCodeNotification(BLT_TimeCode time_code)
                       time_code.h,
                       time_code.m,
                       time_code.s);
-    ATX_ConsoleOutputF("BtController::OnStreamTimeCodeNotification - %s\n", time);
+    ATX_ConsoleOutputF("INFO: Time Code = %s\n", time);
 }
 
 /*----------------------------------------------------------------------
@@ -150,25 +150,25 @@ void
 BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {       
     if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-        ATX_ConsoleOutputF("Nominal Bitrate = %ld\n", info.nominal_bitrate);
+        ATX_ConsoleOutputF("INFO: Nominal Bitrate = %ld\n", info.nominal_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-        ATX_ConsoleOutputF("Average Bitrate = %ld\n", info.average_bitrate);
+        ATX_ConsoleOutputF("INFO: Average Bitrate = %ld\n", info.average_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-        ATX_ConsoleOutputF("Instant Bitrate = %ld\n", info.instant_bitrate);
+        ATX_ConsoleOutputF("INFO: Instant Bitrate = %ld\n", info.instant_bitrate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-        ATX_ConsoleOutputF("Sample Rate = %ld\n", info.sample_rate);
+        ATX_ConsoleOutputF("INFO: Sample Rate = %ld\n", info.sample_rate);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
-        ATX_ConsoleOutputF("Channels = %d\n", info.channel_count);
+        ATX_ConsoleOutputF("INFO: Channels = %d\n", info.channel_count);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        ATX_ConsoleOutputF("Stream Size = %ld\n", info.size);
+        ATX_ConsoleOutputF("INFO: Stream Size = %ld\n", info.size);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
-        ATX_ConsoleOutputF("Data Type = %s\n", info.data_type);
+        ATX_ConsoleOutputF("INFO: Data Type = %s\n", info.data_type?info.data_type:"(null)");
     }
 }
 
@@ -191,11 +191,11 @@ BtController::OnPropertyNotification(BLT_PropertyScope        scope,
     // when the name is NULL or empty, it means that all the properties in that 
     // scope fo that source have been deleted 
     if (name == NULL || name[0] == '\0') {
-        ATX_ConsoleOutputF("All properties in '%s' scope deleted\n", scope_name);
+        ATX_ConsoleOutputF("INFO: All properties in '%s' scope deleted\n", scope_name);
         return;
     }
     
-    ATX_ConsoleOutputF("Property %s (%s) ", name, scope_name);
+    ATX_ConsoleOutputF("INFO: Property %s (%s) ", name, scope_name);
     if (value == NULL) {
         ATX_ConsoleOutputF("deleted]\n");
         return;
@@ -240,7 +240,7 @@ main(int /*argc*/, char** /*argv*/)
     // pump notification messages
     while (controller->PumpMessage() == NPT_SUCCESS) {/* */}
 
-    ATX_Debug("BtController::main Received Terminate Message\n");
+    ATX_Debug("INFO: Received Terminate Message\n");
 
     // delete the controller
     delete controller;

@@ -285,25 +285,16 @@ BLT_DecoderServer::UpdateStatus()
     if (BLT_FAILED(result)) return result;
 
     // notify if the time has changed by more than the update threshold
-    ATX_Int64 previous;
-    BLT_TimeStamp_ToInt64(m_DecoderStatus.time_stamp, previous);
-    ATX_Int64_Div_Int32(previous, 1000000);
-    ATX_Int64 current;
-    BLT_TimeStamp_ToInt64(status.time_stamp, current);
-    ATX_Int64_Div_Int32(current, 1000000);
+    // NOTE: current and previous here are measured in milliseconds
+    ATX_UInt64 previous = BLT_TimeStamp_ToNanos(m_DecoderStatus.time_stamp)/1000000;
+    ATX_UInt64 current  = BLT_TimeStamp_ToNanos(status.time_stamp)/1000000;
     if (m_TimeStampUpdateQuantum) {
         // make the new time stamp a multiple of the update quantum
-        ATX_Int64_Div_Int32(current, m_TimeStampUpdateQuantum);
-        ATX_Int64_Mul_Int32(current, m_TimeStampUpdateQuantum);
+        current /= m_TimeStampUpdateQuantum;
+        current *= m_TimeStampUpdateQuantum;
     }
-    BLT_Int32 c32 = ATX_Int64_Get_Int32(current);
-    if (ATX_Int64_Get_Int32(previous) != c32) {
-        BLT_TimeStamp_Set(m_DecoderStatus.time_stamp, 
-                          c32/1000,
-                          1000000*(c32 - 1000*(c32/1000)));
-        //BLT_Debug("********* timestamp : %d.%09d\n", 
-        //          m_DecoderStatus.time_stamp.seconds,
-        //          m_DecoderStatus.time_stamp.nanoseconds);
+    if (current != previous) {
+        m_DecoderStatus.time_stamp = BLT_TimeStamp_FromMillis(current);
         NotifyTimeCode();
     }
 

@@ -16,6 +16,7 @@
 #include "BltConfig.h"
 #include "BltCore.h"
 #include "BltGainControlFilter.h"
+#include "BltReplayGain.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltPcm.h"

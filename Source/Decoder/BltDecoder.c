@@ -123,9 +123,8 @@ BLT_Decoder_UpdateStatus(BLT_Decoder* decoder)
         /* adjust the timestamp */
         if (BLT_TimeStamp_IsLaterOrEqual(decoder->status.time_stamp, 
                                          status.output_status.delay)) {
-            BLT_TimeStamp_Sub(decoder->status.time_stamp, 
-                              decoder->status.time_stamp,
-                              status.output_status.delay);
+            decoder->status.time_stamp = BLT_TimeStamp_Sub(decoder->status.time_stamp, 
+                                                           status.output_status.delay);
         } else {
             decoder->status.time_stamp.seconds     = 0;
             decoder->status.time_stamp.nanoseconds = 0;

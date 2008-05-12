@@ -362,7 +362,7 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
     if (FLO_SUCCEEDED(result)) {
         /* clip the size of the buffer if needed */
         if (samples_left != 0 && samples_left < buffer->sample_count) {
-            buffer->sample_count = ATX_Int64_Get_Int32(samples_left);
+            buffer->sample_count = (ATX_UInt32)samples_left;
             FLO_UpdateBufferSize(buffer);
             if (buffer->sample_count == 0) {
                 return FLO_ERROR_SAMPLES_SKIPPED;
@@ -370,8 +370,7 @@ FLO_Decoder_DecodeFrame(FLO_Decoder*      decoder,
         }
 
         /* count the samples */
-        ATX_Int64_Add_Int32(decoder->status.sample_count, 
-                            buffer->sample_count);
+        decoder->status.sample_count += buffer->sample_count;
     }
 
     /* update the state */      

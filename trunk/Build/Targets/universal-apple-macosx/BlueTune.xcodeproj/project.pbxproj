@@ -49,7 +49,6 @@
 		CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487870C99E13800638991 /* BltAdtsParser.h */; };
 		CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0487880C99E13800638991 /* BltAdtsParser.c */; };
 		CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */; };
-		CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA6B38720C965CE9000D7A0A /* libHelixAAC.a */; };
 		CA0C9AFB0D15D29100E23496 /* BtPlay.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AEE0D15D24500E23496 /* BtPlay.c */; };
 		CA0C9AFF0D15D2A700E23496 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA0C9C1C0D1604D400E23496 /* BtPlayForceCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */; };
@@ -63,6 +62,8 @@
 		CA4277EE0DA3A47400557A8B /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA44C4FD0D4628A900173F5F /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
+		CA44DE720DEDEB0E0020CB81 /* PcmDiff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */; };
+		CA44DE750DEDEB300020CB81 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
 		CA5042C90C5AE52B0060E6FE /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; };
 		CA5042CA0C5AE52B0060E6FE /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; };
 		CA5042CB0C5AE52B0060E6FE /* BltByteStreamProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */; };
@@ -327,6 +328,7 @@
 		CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */; };
 		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
+		CA7F90C70DEE3C5E003DDB91 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */; };
 		CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; };
 		CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; };
@@ -661,6 +663,7 @@
 		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA44C4480D4522D900173F5F /* Bento4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Bento4.xcodeproj; path = "../../../../Bento4/Build/Targets/universal-apple-macosx/Bento4.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CA44DE6E0DEDEAE50020CB81 /* pcmdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pcmdiff; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
 		CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltBuiltins.h; sourceTree = "<group>"; };
 		CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamProvider.h; sourceTree = "<group>"; };
@@ -952,6 +955,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA44DE6C0DEDEAE50020CB81 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA44DE750DEDEB300020CB81 /* libNeptune.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA504E6D0C5EA3960060E6FE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1002,7 +1013,6 @@
 				CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */,
 				CA504E950C5EA3FF0060E6FE /* libTremor.a in Frameworks */,
 				CA504F540C5EBF710060E6FE /* libFLAC.a in Frameworks */,
-				CA04894A0C9B0E8B00638991 /* libHelixAAC.a in Frameworks */,
 				CA0C9CD50D1605C300E23496 /* libAtomix.a in Frameworks */,
 				CA0C9CD60D1605C600E23496 /* libNeptune.a in Frameworks */,
 				CA44C4FD0D4628A900173F5F /* libBento4.a in Frameworks */,
@@ -1035,6 +1045,7 @@
 				CA550B9C0D1F372C00B22D72 /* btcontroller */,
 				CA550C950D2093D800B22D72 /* btplayerserver */,
 				CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */,
+				CA44DE6E0DEDEAE50020CB81 /* pcmdiff */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2178,6 +2189,22 @@
 			productReference = CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */;
 			productType = "com.apple.product-type.tool";
 		};
+		CA44DE6D0DEDEAE50020CB81 /* PcmDiff */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA44DE740DEDEB2D0020CB81 /* Build configuration list for PBXNativeTarget "PcmDiff" */;
+			buildPhases = (
+				CA44DE6B0DEDEAE50020CB81 /* Sources */,
+				CA44DE6C0DEDEAE50020CB81 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PcmDiff;
+			productName = PcmDiff;
+			productReference = CA44DE6E0DEDEAE50020CB81 /* pcmdiff */;
+			productType = "com.apple.product-type.tool";
+		};
 		CA504E6E0C5EA3960060E6FE /* Tremor */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CA504EA80C5EA4110060E6FE /* Build configuration list for PBXNativeTarget "Tremor" */;
@@ -2327,6 +2354,7 @@
 				CA550B9B0D1F372C00B22D72 /* BtController */,
 				CA550C940D2093D800B22D72 /* BtPlayerServer */,
 				CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */,
+				CA44DE6D0DEDEAE50020CB81 /* PcmDiff */,
 			);
 		};
 /* End PBXProject section */
@@ -2537,6 +2565,7 @@
 			files = (
 				CA0C9AFB0D15D29100E23496 /* BtPlay.c in Sources */,
 				CA0C9C1C0D1604D400E23496 /* BtPlayForceCpp.cpp in Sources */,
+				CA7F90C70DEE3C5E003DDB91 /* BltAacDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2545,6 +2574,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA44DE6B0DEDEAE50020CB81 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA44DE720DEDEB0E0020CB81 /* PcmDiff.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3065,6 +3102,40 @@
 			};
 			name = Release;
 		};
+		CA44DE700DEDEAE60020CB81 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = pcmdiff;
+			};
+			name = Debug;
+		};
+		CA44DE710DEDEAE60020CB81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = pcmdiff;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		CA504EA90C5EA4110060E6FE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3303,6 +3374,15 @@
 			buildConfigurations = (
 				CA1ACEFC0D30C5FA00C350CD /* Debug */,
 				CA1ACEFD0D30C5FA00C350CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA44DE740DEDEB2D0020CB81 /* Build configuration list for PBXNativeTarget "PcmDiff" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA44DE700DEDEAE60020CB81 /* Debug */,
+				CA44DE710DEDEAE60020CB81 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

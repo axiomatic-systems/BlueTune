@@ -7,7 +7,6 @@
 |
  ****************************************************************/
 
-
 /*-------------------------------------------------------------------------
 |       includes
 +-------------------------------------------------------------------------*/
@@ -154,7 +153,8 @@ FLO_LayerIII_ReadSideInfo_Mpeg1(FLO_BitStream* bits, FLO_Frame_III* frame)
                 gp->subblock_gain[2]    = FLO_BitStream_ReadBits(bits, 3);
 
                 /* these are set by default */
-                gp->region1_start = 36;
+                gp->region1_start = 36; /* no need to lookup in tables, the value */
+                                        /* is always the same.                    */
                 gp->region2_start = 576; /* that means no region 2 */
             } else {
                 gp->block_type          = 0;
@@ -164,15 +164,17 @@ FLO_LayerIII_ReadSideInfo_Mpeg1(FLO_BitStream* bits, FLO_Frame_III* frame)
                 gp->table_selection[2]  = FLO_BitStream_ReadBits(bits, 5);
                 gp-> region0_count      = FLO_BitStream_ReadBits(bits, 4);
                 gp->region1_start       = 
-                    FLO_SubbandInfo_Long[1][frame->header.sampling_frequency]
-                    [1+gp->region0_count].start;
+                    FLO_SubbandInfo_Long[1]
+                                        [frame->header.sampling_frequency]
+                                        [1+gp->region0_count].start;
                 gp->region1_count       = FLO_BitStream_ReadBits(bits, 3);
                 if (1+gp->region0_count + 1+gp->region1_count >= 22) {
                     gp->region2_start = 576;
                 } else {
                     gp->region2_start = 
-                        FLO_SubbandInfo_Long[1][frame->header.sampling_frequency]
-                        [1+gp->region0_count + 1+gp->region1_count].start;
+                        FLO_SubbandInfo_Long[1]
+                                            [frame->header.sampling_frequency]
+                                            [1+gp->region0_count + 1+gp->region1_count].start;
                 }
             }
             gp->preflag                 = FLO_BitStream_ReadBits(bits, 1);
@@ -237,30 +239,36 @@ FLO_LayerIII_ReadSideInfo_Mpeg2(FLO_BitStream* bits, FLO_Frame_III* frame)
             gp->subblock_gain[2]    = FLO_BitStream_ReadBits(bits, 3);
 
             /* these are set by default */
-            if (gp->block_type == FLO_SYNTAX_MPEG_LAYER_III_BLOCK_TYPE_SHORT_WINDOWS) {
-                gp->region1_start = 36;
+            if (gp->block_type == FLO_SYNTAX_MPEG_LAYER_III_BLOCK_TYPE_SHORT_WINDOWS &&
+                !gp->mixed_block_flag) {
+                gp->region0_count = 8;
+                gp->region1_start = FLO_SubbandInfo_Short[frame->header.id]
+                                                         [frame->header.sampling_frequency]
+                                                         [9].start*3; /* 9th subband */
             } else {
-                gp->region1_start = 54;
+                gp->region0_count = 7;
+                gp->region1_start = FLO_SubbandInfo_Long[frame->header.id]
+                                                        [frame->header.sampling_frequency]
+                                                        [8].start*3; /* 8th subband */
             }
+            gp->region1_count = 36;
             gp->region2_start = 576; /* that means no region 2 */
         } else {
             gp->block_type          = 0;
             gp->table_selection[0]  = FLO_BitStream_ReadBits(bits, 5);
             gp->table_selection[1]  = FLO_BitStream_ReadBits(bits, 5);
             gp->table_selection[2]  = FLO_BitStream_ReadBits(bits, 5);
-            gp-> region0_count      = FLO_BitStream_ReadBits(bits, 4);
-            gp->region1_start       = 
-                FLO_SubbandInfo_Long[frame->header.id]
-                [frame->header.sampling_frequency]
-                [1+gp->region0_count].start;
+            gp->region0_count       = FLO_BitStream_ReadBits(bits, 4);
+            gp->region1_start       = FLO_SubbandInfo_Long[frame->header.id]
+                                                          [frame->header.sampling_frequency]
+                                                          [1+gp->region0_count].start;
             gp->region1_count       = FLO_BitStream_ReadBits(bits, 3);
             if (1+gp->region0_count + 1+gp->region1_count >= 22) {
                 gp->region2_start = 576;
             } else {
-                gp->region2_start = 
-                    FLO_SubbandInfo_Long[frame->header.id]
-                    [frame->header.sampling_frequency]
-                    [1+gp->region0_count + 1+gp->region1_count].start;
+                gp->region2_start = FLO_SubbandInfo_Long[frame->header.id]
+                                                        [frame->header.sampling_frequency]
+                                                        [1+gp->region0_count + 1+gp->region1_count].start;
             }
         }
         gp->scalefactor_scale       = FLO_BitStream_ReadBits(bits, 1);
@@ -508,9 +516,53 @@ FLO_LayerIII_ReadScalefactors_Mpeg2(FLO_BitStream* bits,
 
     if (gp->block_type == FLO_SYNTAX_MPEG_LAYER_III_BLOCK_TYPE_SHORT_WINDOWS) {
         if (gp->mixed_block_flag) {
-            /*printf("MIXED\n");*/
+            const int* nb_subbands = 
+                FLO_LayerIII_ScalefactorPartitions[table][2][info->table];
+            
+            for (partition = 0; partition < 4; partition++) {
+                int length = info->length[partition];
+                int number_of_bands = nb_subbands[partition];
+                int band;
+                int in_long = FLO_TRUE;
+
+                if (length) {
+                    for (band = 0; band < number_of_bands; band += (in_long?1:3)) {
+                        if (in_long) {
+                            gp->scalefactors.l[index]    = FLO_BitStream_ReadBits(bits, length);
+                            gp->scalefactors.s[index][0] = 0;
+                            gp->scalefactors.s[index][1] = 0;
+                            gp->scalefactors.s[index][2] = 0;
+                            gp->part_2_length += length;
+                        } else {
+                            gp->scalefactors.s[index][0] = FLO_BitStream_ReadBits(bits, length);
+                            gp->scalefactors.s[index][1] = FLO_BitStream_ReadBits(bits, length);
+                            gp->scalefactors.s[index][2] = FLO_BitStream_ReadBits(bits, length);
+                            gp->scalefactors.l[index]    = 0;
+                            gp->part_2_length += 3*length;
+                        }
+                        index++;
+                    }
+                } else {
+                    for (band = 0; band < number_of_bands; band += (in_long?1:3)) {
+                        gp->scalefactors.s[index][0] =
+                        gp->scalefactors.s[index][1] =
+                        gp->scalefactors.s[index][2] =
+                        gp->scalefactors.l[index]    = 0;
+                        index++;
+                    }
+                }
+                if (in_long && index == 6) {
+                    /* switch to short */
+                    in_long = FLO_FALSE;
+                    index = 3;
+                }
+            }
+            gp->scalefactors.s[12][0] =
+            gp->scalefactors.s[12][1] =
+            gp->scalefactors.s[12][2] =
+            gp->scalefactors.l[21]    = 0;
         } else {
-            const int *nb_subbands = 
+            const int* nb_subbands = 
                 FLO_LayerIII_ScalefactorPartitions[table][1][info->table];
 
             for (partition = 0; partition < 4; partition++) {
@@ -540,7 +592,7 @@ FLO_LayerIII_ReadScalefactors_Mpeg2(FLO_BitStream* bits,
             gp->scalefactors.s[12][2] = 0;
         }
     } else {
-        const int *nb_subbands = 
+        const int* nb_subbands = 
             FLO_LayerIII_ScalefactorPartitions[table][0][info->table];
 
         for (partition = 0; partition < 4; partition++) {
@@ -675,7 +727,7 @@ FLO_LayerIII_ReadHuffmanSamples(FLO_BitStream* bits,
     const FLO_LayerIII_BandInfo* subband_info;
     int                          gain_shift = 1 + gp->scalefactor_scale;
     FLO_Float                    factor = FLO_ZERO;
-    
+
     /* compute the size of the regions */
     {
         unsigned int big_values = gp->big_values*2;
@@ -715,7 +767,7 @@ FLO_LayerIII_ReadHuffmanSamples(FLO_BitStream* bits,
         FLO_Float*       samples_start = samples;
 
         if (gp->mixed_block_flag) {
-            switch_point = 8; /* start with long, and the switch to short */
+            switch_point = 8; /* start with long, and then switch to short */
             subband_info = 
                 &FLO_SubbandInfo_Long
                 [frame->header.id]
@@ -961,7 +1013,7 @@ FLO_LayerIII_Hybrid(FLO_Frame_III* frame, int granule, int channel)
     **   anti-alising */
     if (non_zero != FLO_HYBRID_NB_BANDS) non_zero++;
 
-    /* if we sumbsample, force more bands to zero */
+    /* if we subsample, force more bands to zero */
     if (frame->subsampling) {
         int max_subband = FLO_HYBRID_NB_BANDS >> frame->subsampling;
         if (non_zero > max_subband) non_zero = max_subband;

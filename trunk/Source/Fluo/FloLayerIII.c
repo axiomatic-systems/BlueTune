@@ -249,7 +249,7 @@ FLO_LayerIII_ReadSideInfo_Mpeg2(FLO_BitStream* bits, FLO_Frame_III* frame)
                 gp->region0_count = 7;
                 gp->region1_start = FLO_SubbandInfo_Long[frame->header.id]
                                                         [frame->header.sampling_frequency]
-                                                        [8].start*3; /* 8th subband */
+                                                        [8].start; /* 8th subband */
             }
             gp->region1_count = 36;
             gp->region2_start = 576; /* that means no region 2 */

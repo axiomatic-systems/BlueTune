@@ -27,6 +27,7 @@ options = Options()
 options.AddOptions(
     EnumOption('target', 'Build Target', DefaultTarget(), allowed_values=PLATFORM_TO_TARGET_MAP.values()+CROSS_PLATFORMS),
     BoolOption('enable_profiling', 'Enable Profiling', False),
+    BoolOption('relaxed_warnings', 'Relaxed Settings for Warnings (does not stop on warnings)', True),
     ListOption('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release']),
     ListOption('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
 )
@@ -40,3 +41,4 @@ for build_config in env['build_config']:
     print '********** Configuring Build Target =', env['target']+'/'+build_config, '********'  
     SConscript('Build.scons', build_dir='Targets/'+env['target']+'/'+build_config, exports='env', duplicate=0)
              
+

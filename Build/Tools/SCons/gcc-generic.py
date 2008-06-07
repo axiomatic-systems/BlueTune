@@ -1,6 +1,9 @@
 import os
 
 def generate(env, gcc_cross_prefix=None, gcc_extra_options='', gcc_relaxed_warnings=False):
+    ### the environment may override some flags
+    if env['relaxed_warnings']: gcc_relaxed_warnings=True
+    
     ### general compiler flags
     if gcc_relaxed_warnings:
         c_compiler_compliance_flags = ''

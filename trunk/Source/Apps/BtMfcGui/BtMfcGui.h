@@ -17,8 +17,6 @@
 class CBtMfcGuiApp : public CWinApp
 {
 public:
-	CBtMfcGuiApp();
-
 // Overrides
 	public:
 	virtual BOOL InitInstance();

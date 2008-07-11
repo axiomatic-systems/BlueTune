@@ -131,7 +131,7 @@ class CompiledModule(Module):
                         extra_lib_dirs)
 
         # setup the environment        
-        self.env = environment and environment.Copy() or DefaultEnv.Copy()
+        self.env = environment and environment.Clone() or DefaultEnv.Clone()
         if extra_cpp_defines:
             self.env.Append(CPPDEFINES=extra_cpp_defines)
         

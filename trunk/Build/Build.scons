@@ -186,49 +186,52 @@ CompiledModule(name             = 'BltPlayer',
                included_modules = ['Atomix', 'Neptune', 'BltCore', 'BltDecoder'])
 
 ############################ WmaDecoder Plugin
-if os.environ.has_key('WMSDK_HOME'):
-    env.AppendUnique(BLT_PLUGINS='WmaDecoder')
-    WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
-    WMA_EXTRA_CPP_DEFINES = ['BUILD_INT_FLOAT', 
-                             'ENABLE_LPC',
-                             'ENABLE_ALL_ENCOPT',
-                             'DISABLE_OPT',
-                             'BITSTREAM_CORRUPTION_ASSERTS',
-                             'WMA_DECPK_BUILD',
-                             'WMAAPI_NO_DRM',
-                             'WMAAPI_NO_DRM_STREAM',
-                             'DISABLE_UES']  
-    if env['build_config'] == 'Release':
-        WMA_EXTRA_CPP_DEFINES.append('NDEBUG')
-    MapSourceDir(WMA_SOURCE_ROOT, '#/../WMSDK/WMPK/WMA10Dec')
-    CompiledModule(name        = 'BltWmaDecoder',
-            source_root        = WMA_SOURCE_ROOT,
-            build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
-            build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
-                                  'audio/wmaudio/v10/common',
-                                  'audio/wmaudio/v10/decoder',
-                                  'audio/wmaudio/v10/fmthlpr',
-                                  'audio/wmaudio/v10/include',
-                                  'audio/wmaudio/v10/win32/decoder',
-                                  'audio/common/primitive',
-                                  'audio/common/pcmfmt',
-                                  'audio/common/chanmtx'],
-            build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
-                                  ['common/include',
-                                  'common/logging',
-                                   'audio/common/include']],
-            included_only_modules = 'Source/Plugins/Decoders/WMA',
-            linked_modules        = ['Atomix', 'BltCore'],
-            environment           = env['BLT_RELAXED_ENV'],
-            extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
-elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
-    env.AppendUnique(BLT_PLUGINS='WmaDecoder')
-    BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
-    Module(name             = 'BltWmaDecoder',
-           included_modules = 'Source/Plugins/Decoders/WMA',
-           linked_modules   = 'BltWmaDecoderPlugin',
-           lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
-           
+if 'WmaDecoder' in env['BLT_PLUGINS']:
+    if os.environ.has_key('WMSDK_HOME'):
+        env.AppendUnique(BLT_PLUGINS='WmaDecoder')
+        WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
+        WMA_EXTRA_CPP_DEFINES = ['BUILD_INT_FLOAT', 
+                                 'ENABLE_LPC',
+                                 'ENABLE_ALL_ENCOPT',
+                                 'DISABLE_OPT',
+                                 'BITSTREAM_CORRUPTION_ASSERTS',
+                                 'WMA_DECPK_BUILD',
+                                 'WMAAPI_NO_DRM',
+                                 'WMAAPI_NO_DRM_STREAM',
+                                 'DISABLE_UES']  
+        if env['build_config'] == 'Release':
+            WMA_EXTRA_CPP_DEFINES.append('NDEBUG')
+        MapSourceDir(WMA_SOURCE_ROOT, '#/../WMSDK/WMPK/WMA10Dec')
+        CompiledModule(name        = 'BltWmaDecoder',
+                source_root        = WMA_SOURCE_ROOT,
+                build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
+                build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
+                                      'audio/wmaudio/v10/common',
+                                      'audio/wmaudio/v10/decoder',
+                                      'audio/wmaudio/v10/fmthlpr',
+                                      'audio/wmaudio/v10/include',
+                                      'audio/wmaudio/v10/win32/decoder',
+                                      'audio/common/primitive',
+                                      'audio/common/pcmfmt',
+                                      'audio/common/chanmtx'],
+                build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
+                                      ['common/include',
+                                      'common/logging',
+                                       'audio/common/include']],
+                included_only_modules = 'Source/Plugins/Decoders/WMA',
+                linked_modules        = ['Atomix', 'BltCore'],
+                environment           = env['BLT_RELAXED_ENV'],
+                extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
+    elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
+        env.AppendUnique(BLT_PLUGINS='WmaDecoder')
+        BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
+        Module(name             = 'BltWmaDecoder',
+               included_modules = 'Source/Plugins/Decoders/WMA',
+               linked_modules   = 'BltWmaDecoderPlugin',
+               lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
+    else:
+        raise Exception("location of WMA plugin support not found (set WMSDK_HOME or BLT_WMA_PLUGIN_HOME)")
+    
 ############################# BltPluginsSupport
 CompiledModule(name               = 'BltPluginsSupport',
                build_source_dirs  = [],

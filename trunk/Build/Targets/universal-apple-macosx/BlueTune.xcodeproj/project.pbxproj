@@ -329,6 +329,9 @@
 		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
 		CA7F90C70DEE3C5E003DDB91 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
+		CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */; };
+		CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */; };
+		CAEA9D0B0E144CE6008C396D /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
 		CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */; };
 		CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; };
 		CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; };
@@ -440,6 +443,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
+		};
+		CA0D92160E2732E5005667F1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA197D1E0E1AE4360018E87C /* QueueTest1 */;
+			remoteInfo = QueueTest1;
 		};
 		CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -643,6 +653,146 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAA97A1B0CF1654A00C01909;
 			remoteInfo = StringsTest1;
+		};
+		CAE418930E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416B90E0DBDF800A530D1;
+			remoteInfo = ArraysTest1;
+		};
+		CAE418950E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416C60E0DBE2F00A530D1;
+			remoteInfo = BufferedStreamsTest1;
+		};
+		CAE418970E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416D30E0DBE5A00A530D1;
+			remoteInfo = HttpClientTest1;
+		};
+		CAE418990E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416E00E0DBE7F00A530D1;
+			remoteInfo = ListsTest1;
+		};
+		CAE4189B0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416ED0E0DBEAF00A530D1;
+			remoteInfo = LoggingTest1;
+		};
+		CAE4189D0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE416FA0E0DBEDD00A530D1;
+			remoteInfo = MapsTest1;
+		};
+		CAE4189F0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417070E0DBF0900A530D1;
+			remoteInfo = MessagesTest1;
+		};
+		CAE418A10E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417140E0DBF2800A530D1;
+			remoteInfo = MessagesTest2;
+		};
+		CAE418A30E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE4169B0E0DBD6600A530D1;
+			remoteInfo = MiscTest1;
+		};
+		CAE418A50E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE4172D0E0DC03500A530D1;
+			remoteInfo = RingBufferTest1;
+		};
+		CAE418A70E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE4173A0E0DC06700A530D1;
+			remoteInfo = ThreadsTest1;
+		};
+		CAE418A90E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417470E0DC08C00A530D1;
+			remoteInfo = UdpTest1;
+		};
+		CAE418AB0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417540E0DC0A800A530D1;
+			remoteInfo = UrlTest1;
+		};
+		CAE418AD0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417610E0DC0D200A530D1;
+			remoteInfo = ZipTest1;
+		};
+		CAE418AF0E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE4179D0E0DC13A00A530D1;
+			remoteInfo = NetPump;
+		};
+		CAE418B10E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417BB0E0DC19400A530D1;
+			remoteInfo = NetEcho;
+		};
+		CAE418B30E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417C80E0DC1B400A530D1;
+			remoteInfo = NetConfig;
+		};
+		CAE418B50E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE417D50E0DC1D600A530D1;
+			remoteInfo = NetPing;
+		};
+		CAEA9CEC0E144683008C396D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAEA9CE40E144664008C396D;
+			remoteInfo = Bento4Atomix;
+		};
+		CAEA9D090E144C9C008C396D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = CAEA9CE30E144664008C396D;
+			remoteInfo = Bento4Atomix;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -928,6 +1078,8 @@
 		CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
 		CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
 		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDcfParser.cpp; sourceTree = "<group>"; };
+		CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDcfParser.h; sourceTree = "<group>"; };
 		CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAlacDecoder.c; sourceTree = "<group>"; };
 		CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAlacDecoder.h; sourceTree = "<group>"; };
 		CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltBitStream.h; sourceTree = "<group>"; };
@@ -1016,6 +1168,7 @@
 				CA0C9CD50D1605C300E23496 /* libAtomix.a in Frameworks */,
 				CA0C9CD60D1605C600E23496 /* libNeptune.a in Frameworks */,
 				CA44C4FD0D4628A900173F5F /* libBento4.a in Frameworks */,
+				CAEA9D0B0E144CE6008C396D /* libBento4Atomix.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1124,6 +1277,7 @@
 			isa = PBXGroup;
 			children = (
 				CA44C4690D4522DA00173F5F /* libBento4.a */,
+				CAEA9CED0E144683008C396D /* libBento4Atomix.a */,
 				CA44C46B0D4522DA00173F5F /* mp4dump */,
 				CA44C46D0D4522DA00173F5F /* mp4info */,
 				CA44C46F0D4522DA00173F5F /* mp4encrypt */,
@@ -1551,6 +1705,7 @@
 			children = (
 				CA0487860C99E13800638991 /* Adts */,
 				CA5042A80C5AE52B0060E6FE /* Aiff */,
+				CAE415080E0AFD8800A530D1 /* Dcf */,
 				CA5042AB0C5AE52B0060E6FE /* Mp4 */,
 				CA5042AE0C5AE52B0060E6FE /* Tags */,
 				CA5042B50C5AE52B0060E6FE /* Wave */,
@@ -1602,9 +1757,28 @@
 			isa = PBXGroup;
 			children = (
 				CA50437F0C5AE61E0060E6FE /* libNeptune.a */,
-				CAA97B220CF3639D00C01909 /* XmlTest1 */,
-				CAA97B240CF3639D00C01909 /* StringsTest1 */,
+				CAE418940E0DD91C00A530D1 /* ArraysTest1 */,
+				CAE418960E0DD91C00A530D1 /* BufferedStreamsTest1 */,
 				CA550DAD0D23255E00B22D72 /* HttpServerTest1 */,
+				CAE418980E0DD91C00A530D1 /* HttpClientTest1 */,
+				CAE4189A0E0DD91C00A530D1 /* ListsTest1 */,
+				CAE4189C0E0DD91C00A530D1 /* LoggingTest1 */,
+				CAE4189E0E0DD91C00A530D1 /* MapsTest1 */,
+				CAE418A00E0DD91C00A530D1 /* MessagesTest1 */,
+				CAE418A20E0DD91C00A530D1 /* MessagesTest2 */,
+				CAE418A40E0DD91C00A530D1 /* MiscTest1 */,
+				CA0D92170E2732E5005667F1 /* QueueTest1 */,
+				CAE418A60E0DD91C00A530D1 /* RingBufferTest1 */,
+				CAA97B240CF3639D00C01909 /* StringsTest1 */,
+				CAE418A80E0DD91C00A530D1 /* ThreadsTest1 */,
+				CAE418AA0E0DD91C00A530D1 /* UdpTest1 */,
+				CAE418AC0E0DD91C00A530D1 /* UrlTest1 */,
+				CAA97B220CF3639D00C01909 /* XmlTest1 */,
+				CAE418AE0E0DD91C00A530D1 /* ZipTest1 */,
+				CAE418B00E0DD91C00A530D1 /* NetPump */,
+				CAE418B20E0DD91C00A530D1 /* NetEcho */,
+				CAE418B40E0DD91C00A530D1 /* NetConfig */,
+				CAE418B60E0DD91C00A530D1 /* NetPing */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1972,6 +2146,15 @@
 			path = HelixAAC;
 			sourceTree = "<group>";
 		};
+		CAE415080E0AFD8800A530D1 /* Dcf */ = {
+			isa = PBXGroup;
+			children = (
+				CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */,
+				CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */,
+			);
+			path = Dcf;
+			sourceTree = "<group>";
+		};
 		CAFBDAE80CAD717F00E6B62F /* ALAC */ = {
 			isa = PBXGroup;
 			children = (
@@ -2149,6 +2332,7 @@
 				CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */,
 				CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */,
 				CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */,
+				CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2307,6 +2491,7 @@
 				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
 				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
+				CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */,
 			);
 			name = BlueTune;
 			productName = BlueTune;
@@ -2414,6 +2599,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = NetPump;
 			remoteRef = CA0C9A8D0D15D1EC00E23496 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA0D92170E2732E5005667F1 /* QueueTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = QueueTest1;
+			remoteRef = CA0D92160E2732E5005667F1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
@@ -2554,6 +2746,139 @@
 			fileType = "compiled.mach-o.executable";
 			path = StringsTest1;
 			remoteRef = CAA97B230CF3639D00C01909 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418940E0DD91C00A530D1 /* ArraysTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ArraysTest1;
+			remoteRef = CAE418930E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418960E0DD91C00A530D1 /* BufferedStreamsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = BufferedStreamsTest1;
+			remoteRef = CAE418950E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418980E0DD91C00A530D1 /* HttpClientTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpClientTest1;
+			remoteRef = CAE418970E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE4189A0E0DD91C00A530D1 /* ListsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ListsTest1;
+			remoteRef = CAE418990E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE4189C0E0DD91C00A530D1 /* LoggingTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = LoggingTest1;
+			remoteRef = CAE4189B0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE4189E0E0DD91C00A530D1 /* MapsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MapsTest1;
+			remoteRef = CAE4189D0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418A00E0DD91C00A530D1 /* MessagesTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MessagesTest1;
+			remoteRef = CAE4189F0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418A20E0DD91C00A530D1 /* MessagesTest2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MessagesTest2;
+			remoteRef = CAE418A10E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418A40E0DD91C00A530D1 /* MiscTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MiscTest1;
+			remoteRef = CAE418A30E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418A60E0DD91C00A530D1 /* RingBufferTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = RingBufferTest1;
+			remoteRef = CAE418A50E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418A80E0DD91C00A530D1 /* ThreadsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ThreadsTest1;
+			remoteRef = CAE418A70E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418AA0E0DD91C00A530D1 /* UdpTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = UdpTest1;
+			remoteRef = CAE418A90E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418AC0E0DD91C00A530D1 /* UrlTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = UrlTest1;
+			remoteRef = CAE418AB0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418AE0E0DD91C00A530D1 /* ZipTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ZipTest1;
+			remoteRef = CAE418AD0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418B00E0DD91C00A530D1 /* NetPump */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetPump;
+			remoteRef = CAE418AF0E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418B20E0DD91C00A530D1 /* NetEcho */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetEcho;
+			remoteRef = CAE418B10E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418B40E0DD91C00A530D1 /* NetConfig */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetConfig;
+			remoteRef = CAE418B30E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAE418B60E0DD91C00A530D1 /* NetPing */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetPing;
+			remoteRef = CAE418B50E0DD91C00A530D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAEA9CED0E144683008C396D /* libBento4Atomix.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libBento4Atomix.a;
+			remoteRef = CAEA9CEC0E144683008C396D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2746,6 +3071,7 @@
 				CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */,
 				CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */,
 				CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */,
+				CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2832,6 +3158,11 @@
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */;
 		};
+		CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4Atomix;
+			targetProxy = CAEA9D090E144C9C008C396D /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -2860,6 +3191,7 @@
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
@@ -2909,6 +3241,7 @@
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,

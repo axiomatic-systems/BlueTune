@@ -549,11 +549,11 @@ WaveParser_Deactivate(BLT_MediaNode* _self)
 
     ATX_LOG_FINER("WaveParser::Deactivate");
 
-    /* call the base class method */
-    BLT_BaseMediaNode_Deactivate(_self);
-
     /* release the stream */
     ATX_RELEASE_OBJECT(self->output.stream);
+
+    /* call the base class method */
+    BLT_BaseMediaNode_Deactivate(_self);
 
     return BLT_SUCCESS;
 }

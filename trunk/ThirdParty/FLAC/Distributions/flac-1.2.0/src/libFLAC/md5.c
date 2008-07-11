@@ -137,7 +137,7 @@ static void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16])
 }
 
 #if WORDS_BIGENDIAN
-//@@@@@@ OPT: use bswap/intrinsics
+/*@@@@@@ OPT: use bswap/intrinsics*/
 static void byteSwap(FLAC__uint32 *buf, unsigned words)
 {
 	register FLAC__uint32 x;

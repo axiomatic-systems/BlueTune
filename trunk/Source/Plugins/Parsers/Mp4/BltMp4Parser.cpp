@@ -11,6 +11,7 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Ap4.h"
+#include "Ap4AtomixAdapters.h"
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltMp4Parser.h"
@@ -36,38 +37,10 @@ struct Mp4ParserModule {
     ATX_EXTENDS(BLT_BaseModule);
 
     /* members */
-    BLT_UInt32 mp4_type_id;
+    BLT_UInt32 mp4_audio_type_id;
+    BLT_UInt32 mp4_video_type_id;
     BLT_UInt32 mp4_es_type_id;
     BLT_UInt32 iso_base_es_type_id;
-};
-
-class Mp4StreamAdapter : public AP4_ByteStream {
-public:
-    Mp4StreamAdapter(ATX_InputStream* stream);
-    virtual ~Mp4StreamAdapter();
-
-    // AP4_ByteStream methods
-    virtual AP4_Result ReadPartial(void*     buffer, 
-                                   AP4_Size  bytes_to_read, 
-                                   AP4_Size& bytes_read);
-    virtual AP4_Result WritePartial(const void* buffer, 
-                                    AP4_Size    bytes_to_write, 
-                                    AP4_Size&   bytes_written);
-    virtual AP4_Result Seek(AP4_Position position);
-    virtual AP4_Result Tell(AP4_Position& position);
-    virtual AP4_Result GetSize(AP4_LargeSize& size);
-
-    // AP4_Referenceable methods
-    virtual void AddReference();
-    virtual void Release();
-
-private:
-    // methods
-    AP4_Result MapResult(ATX_Result result);
-
-    // members
-    ATX_InputStream* m_Stream;
-    ATX_Cardinal     m_ReferenceCount;
 };
 
 // it is important to keep this structure a POD (no methods)
@@ -79,7 +52,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_InputStreamUser);
 
     /* members */
-    BLT_MediaType media_type;
+    BLT_MediaType audio_media_type;
+    BLT_MediaType video_media_type;
     AP4_File*     mp4_file;
     AP4_Track*    mp4_track;
 } Mp4ParserInput;
@@ -113,115 +87,14 @@ typedef struct {
 } Mp4Parser;
 
 /*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Mp4StreamAdapter
-+---------------------------------------------------------------------*/
-Mp4StreamAdapter::Mp4StreamAdapter(ATX_InputStream* stream) :
-    m_Stream(stream),
-    m_ReferenceCount(1)
-{
-    ATX_REFERENCE_OBJECT(stream);
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::~Mp4StreamAdapter
-+---------------------------------------------------------------------*/
-Mp4StreamAdapter::~Mp4StreamAdapter()
-{
-    ATX_RELEASE_OBJECT(m_Stream);
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::MapResult
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::MapResult(ATX_Result result)
-{
-    switch (result) {
-        case ATX_ERROR_EOS: return AP4_ERROR_EOS;
-        default: return result;
-    }
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::AddReference
-+---------------------------------------------------------------------*/
-void
-Mp4StreamAdapter::AddReference()
-{
-    ++m_ReferenceCount;
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Release
-+---------------------------------------------------------------------*/
-void
-Mp4StreamAdapter::Release()
-{
-    if (--m_ReferenceCount == 0) {
-        delete this;
-    }
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::ReadPartial
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::ReadPartial(void* buffer, AP4_Size bytes_to_read, AP4_Size& bytes_read)
-{
-    ATX_Result result = ATX_InputStream_Read(m_Stream, buffer, bytes_to_read, &bytes_read);
-    return MapResult(result);
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Write
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::WritePartial(const void*, AP4_Size, AP4_Size&)
-{
-    return AP4_FAILURE;
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Seek
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::Seek(AP4_Position position)
-{
-    return MapResult(ATX_InputStream_Seek(m_Stream, (ATX_Position)position));
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::Tell
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::Tell(AP4_Position& position)
-{
-    ATX_Position atx_position;
-     ATX_Result result = MapResult(ATX_InputStream_Tell(m_Stream, &atx_position));
-    position = atx_position;
-    return result;
-}
-
-/*----------------------------------------------------------------------
-|   Mp4StreamAdapter::GetSize
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4StreamAdapter::GetSize(AP4_LargeSize& size)
-{
-    AP4_Size atx_size;
-    ATX_Result result = MapResult(ATX_InputStream_GetSize(m_Stream, &atx_size));
-    size = atx_size;
-    return result;
-}
-
-/*----------------------------------------------------------------------
 |   Mp4ParserInput_Construct
 +---------------------------------------------------------------------*/
 static void
 Mp4ParserInput_Construct(Mp4ParserInput* self, BLT_Module* module)
 {
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
-    BLT_MediaType_Init(&self->media_type, mp4_parser_module->mp4_type_id);
+    BLT_MediaType_Init(&self->audio_media_type, mp4_parser_module->mp4_audio_type_id);
+    BLT_MediaType_Init(&self->video_media_type, mp4_parser_module->mp4_video_type_id);
     self->mp4_file = NULL;
     self->mp4_track = NULL;
 }
@@ -247,7 +120,8 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* check media type */
     if (stream_media_type == NULL || 
-        stream_media_type->id != self->input.media_type.id) {
+        (stream_media_type->id != self->input.audio_media_type.id &&
+         stream_media_type->id != self->input.video_media_type.id)) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
@@ -256,7 +130,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* parse the MP4 file */
     ATX_LOG_FINE("Mp4ParserInput::SetStream - parsing MP4 file");
-    Mp4StreamAdapter* stream_adapter = new Mp4StreamAdapter(stream);
+    AP4_ByteStream* stream_adapter = new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
     self->input.mp4_file = new AP4_File(*stream_adapter, 
                                         AP4_DefaultAtomFactory::Instance,
                                         true); /* parse until moov only */
@@ -373,7 +247,10 @@ Mp4ParserInput_QueryMediaType(BLT_MediaPort*        _self,
     Mp4ParserInput* self = ATX_SELF(Mp4ParserInput, BLT_MediaPort);
     
     if (index == 0) {
-        *media_type = &self->media_type;
+        *media_type = &self->audio_media_type;
+        return BLT_SUCCESS;
+    } else if (index == 0) {
+        *media_type = &self->video_media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -742,6 +619,12 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                             "audio/mp4");
     if (BLT_FAILED(result)) return result;
 
+    /* register the ".m4v" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".m4v",
+                                            "video/mp4");
+    if (BLT_FAILED(result)) return result;
+
     /* register the ".3gp" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".3gp",
@@ -759,10 +642,19 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/mp4",
-        &self->mp4_type_id);
+        &self->mp4_audio_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/mp4 type = %d)", self->mp4_type_id);
+    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/mp4 type = %d)", self->mp4_audio_type_id);
     
+    /* get the type id for "video/mp4" */
+    result = BLT_Registry_GetIdForName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        "video/mp4",
+        &self->mp4_video_type_id);
+    if (BLT_FAILED(result)) return result;
+    ATX_LOG_FINE_1("MP4 Parser Module::Attach (video/mp4 type = %d)", self->mp4_video_type_id);
+
     /* register the type id for BLT_MP4_ES_MIME_TYPE */
     result = BLT_Registry_RegisterName(
         registry,
@@ -780,6 +672,14 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         &self->iso_base_es_type_id);
     if (BLT_FAILED(result)) return result;
     ATX_LOG_FINE_1("MP4 Parser Module::Attach (" BLT_ISO_BASE_ES_MIME_TYPE " type = %d)", self->iso_base_es_type_id);
+
+    /* register mime type aliases */
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/m4a", self->mp4_audio_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "video/m4v", self->mp4_video_type_id);
 
     return BLT_SUCCESS;
 }
@@ -804,20 +704,17 @@ Mp4ParserModule_Probe(BLT_Module*              _self,
                 (BLT_MediaNodeConstructor*)parameters;
 
             /* we need the input protocol to be STREAM_PULL and the output */
-            /* protocol to be STREAM_PULL                                  */
-             if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL)) {
+            /* protocol to be PACKET                                       */
+             if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                  constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) ||
+                 (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                  constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
                 return BLT_FAILURE;
             }
 
-            /* we need the input media type to be 'audio/mp4' */
-            if (constructor->spec.input.media_type->id != self->mp4_type_id) {
+            /* we need the input media type to be 'audio/mp4' or 'video/mp4' */
+            if (constructor->spec.input.media_type->id != self->mp4_audio_type_id &&
+                constructor->spec.input.media_type->id != self->mp4_video_type_id) {
                 return BLT_FAILURE;
             }
 

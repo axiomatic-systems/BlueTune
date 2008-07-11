@@ -82,9 +82,10 @@ MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
 CompiledModule(name                  = 'Bento4',
                module_type           = 'StaticLibrary',
                source_root           = AP4_SOURCE_ROOT,
-               build_source_dirs     = ['Core', 'MetaData', 'Crypto'],
+               build_source_dirs     = ['Core', 'MetaData', 'Crypto', 'Adapters'],
                build_source_files    = env['AP4_SYSTEM_SOURCES'],
-               included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto']],
+               linked_modules        = ['Atomix'],
+               included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto', 'Adapters']],
                extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
 
 ############################ select AAC library
@@ -106,7 +107,7 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Mel
     CompiledModule(name              = 'Melo',
                    source_root       = MLO_SOURCE_ROOT,
                    extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
-	
+    
 ############################ HelixAAC
 if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
     BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/HelixAAC'
@@ -154,14 +155,14 @@ CompiledModule(name               = 'Fluo',
 
 ############################ Tremor
 if 'VorbisDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
-    CompiledModule(name		   = 'Tremor',
+    CompiledModule(name	       = 'Tremor',
                    source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
                    environment = env.has_key('BLT_RELAXED_ENV') and env['BLT_RELAXED_ENV'] or env)
 
 ############################ FLAC
 if 'FlacDecoder' in env['BLT_PLUGINS']:
     FLAC_SOURCE_ROOT='ThirdParty/FLAC/Distributions/flac-1.2.0'
-    CompiledModule(name		          = 'FLAC',
+    CompiledModule(name	              = 'FLAC',
                    source_root        = FLAC_SOURCE_ROOT,
                    build_source_dirs  = ['src/libFLAC'],
                    build_include_dirs = [FLAC_SOURCE_ROOT+'/include', FLAC_SOURCE_ROOT+'/src/libFLAC/include'],
@@ -243,6 +244,7 @@ PluginsSettings = {
     'FileOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',        'src_dir':'Outputs/File'             },
     'OssOutput'        : {'flags':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',         'src_dir':'Outputs/OSS'              },
     'AlsaOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',        'src_dir':'Outputs/Alsa'             },
+    'MacOSXOutput'     : {'flags':'BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT',      'src_dir':'Outputs/MacOSX'           },
     'DebugOutput'      : {'flags':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',       'src_dir':'Outputs/Debug'            },
     'NullOutput'       : {'flags':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',        'src_dir':'Outputs/Null'             },
     'MpegAudioDecoder' : {'flags':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
@@ -351,7 +353,7 @@ CompiledModule(name             = 'PcmDiff',
 ############################# BtGtk
 if env['target'] == 'x86-unknown-linux':
     try:    
-        gtk_env = env.Copy()
+        gtk_env = env.Clone()
         gtk_env.ParseConfig('pkg-config --silence-errors --cflags --libs gtk+-2.0')
         CompiledModule(name             = 'BtGtk',
                        module_type      = 'Executable',

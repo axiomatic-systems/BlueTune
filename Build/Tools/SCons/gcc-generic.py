@@ -11,9 +11,7 @@ def generate(env, gcc_cross_prefix=None, gcc_strict=True, gcc_stop_on_warning=No
     else:
         env.AppendUnique(CCFLAGS = ['-Wall'])
     
-    compiler_defines = ['-D_REENTRANT']
-    env.AppendUnique(CCFLAGS  = compiler_defines)
-    env.AppendUnique(CPPFLAGS = compiler_defines)
+    env.AppendUnique(CPPFLAGS = ['-D_REENTRANT'])
     
     if env['build_config'] == 'Debug':
         env.AppendUnique(CCFLAGS = ['-g'])

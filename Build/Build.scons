@@ -39,6 +39,17 @@ OptionalModules = []
 ### default build env
 SetDefaultEnv(env)
 
+############################ select AAC library
+BLT_AAC_DECODER_PLUGIN_DIR    = ''
+BLT_AAC_DECODER_PLUGIN_EXTRAS = {}
+if 'AacDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
+    env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
+
+############################ select VORBIS library
+BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
+if 'VorbisDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):  
+    env['BLT_PLUGINS_VORBIS_LIBRARY'] = 'Vorbis'
+
 ############################# Atomix
 ATX_SOURCE_ROOT = 'Atomix/Source'
 ATX_EXTRA_CPP_DEFINES = env['build_config'] == 'Debug' and ['ATX_DEBUG'] or []
@@ -89,16 +100,12 @@ CompiledModule(name                  = 'Bento4',
                included_only_modules = [AP4_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Core', 'MetaData', 'Crypto', 'Adapters']],
                extra_cpp_defines     = AP4_EXTRA_CPP_DEFINES)
 
-############################ select AAC library
-if 'AacDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
-    env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
-
 ############################ Melo
 if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
     MLO_SOURCE_ROOT = 'Melo/Source'
     MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
-    BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/AAC'
-    BLT_AAC_DECODER_PLUGIN_DEPS = ['Melo']
+    BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/AAC'
+    BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['Melo']}
     if env['build_config'] == 'Debug':
         MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
     if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
@@ -111,8 +118,8 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Mel
     
 ############################ HelixAAC
 if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
-    BLT_AAC_DECODER_PLUGIN_DIR  = 'Decoders/HelixAAC'
-    BLT_AAC_DECODER_PLUGIN_DEPS = ['HelixAAC']
+    BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/HelixAAC'
+    BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['HelixAAC']}
     if env.has_key('BLT_PLUGINS_HELIX_AAC_ASM_DIR'):
         BLT_HELIX_AAC_ASM_DIRS = env['BLT_PLUGINS_HELIX_AAC_ASM_DIR']
     else:
@@ -187,8 +194,7 @@ CompiledModule(name             = 'BltPlayer',
 
 ############################ WmaDecoder Plugin
 if 'WmaDecoder' in env['BLT_PLUGINS']:
-    if os.environ.has_key('WMSDK_HOME'):
-        env.AppendUnique(BLT_PLUGINS='WmaDecoder')
+    if 'BLT_WMSDK_HOME' in os.environ:
         WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
         WMA_EXTRA_CPP_DEFINES = ['BUILD_INT_FLOAT', 
                                  'ENABLE_LPC',
@@ -201,10 +207,9 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
                                  'DISABLE_UES']  
         if env['build_config'] == 'Release':
             WMA_EXTRA_CPP_DEFINES.append('NDEBUG')
-        MapSourceDir(WMA_SOURCE_ROOT, '#/../WMSDK/WMPK/WMA10Dec')
-        CompiledModule(name        = 'BltWmaDecoder',
+        MapSourceDir(WMA_SOURCE_ROOT, os.environ['BLT_WMSDK_HOME']+'/WMPK/WMA10Dec')
+        CompiledModule(name        = 'BltWmaDecoderRuntime',
                 source_root        = WMA_SOURCE_ROOT,
-                build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
                 build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
                                       'audio/wmaudio/v10/common',
                                       'audio/wmaudio/v10/decoder',
@@ -216,21 +221,17 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
                                       'audio/common/chanmtx'],
                 build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
                                       ['common/include',
-                                      'common/logging',
+                                       'common/logging',
                                        'audio/common/include']],
-                included_only_modules = 'Source/Plugins/Decoders/WMA',
-                linked_modules        = ['Atomix', 'BltCore'],
                 environment           = env['BLT_RELAXED_ENV'],
                 extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
-    elif os.environ.has_key('BLT_WMA_PLUGIN_HOME'):
-        env.AppendUnique(BLT_PLUGINS='WmaDecoder')
-        BLT_EXTRAS_ROOT = os.environ['BLT_WMA_PLUGIN_HOME']
-        Module(name             = 'BltWmaDecoder',
-               included_modules = 'Source/Plugins/Decoders/WMA',
-               linked_modules   = 'BltWmaDecoderPlugin',
-               lib_dirs         = [BLT_EXTRAS_ROOT+'/Targets/'+env['target']+'/lib/'+env['build_config']])
+        BLT_WMA_DECODER_PLUGIN_EXTRAS = {'dep_mods':['BltWmaDecoderRuntime'], 'env':env['BLT_RELAXED_ENV']}
+    elif 'BLT_WMA_PLUGIN_HOME' in os.environ:
+        BLT_WMA_PLUGIN_HOME = os.environ['BLT_WMA_PLUGIN_HOME']
+        BLT_WMA_DECODER_PLUGIN_EXTRAS = {'lib_dirs':[BLT_WMA_PLUGIN_HOME+'/Targets/'+env['target']+'/lib/'+env['build_config']],
+                                         'env':env['BLT_RELAXED_ENV']}
     else:
-        raise Exception("location of WMA plugin support not found (set WMSDK_HOME or BLT_WMA_PLUGIN_HOME)")
+        raise Exception("location of WMA plugin support not found (set BLT_WMSDK_HOME or BLT_WMA_PLUGIN_HOME)")
     
 ############################# BltPluginsSupport
 CompiledModule(name               = 'BltPluginsSupport',
@@ -271,27 +272,27 @@ PluginsSettings = {
 PluginsExtras = {
     'Mp4Parser':        {'dep_mods':['Bento4']},   
     'MpegAudioDecoder': {'dep_mods':['Fluo']},   
-    'AacDecoder':       {'dep_mods':BLT_AAC_DECODER_PLUGIN_DEPS},   
+    'AacDecoder':       BLT_AAC_DECODER_PLUGIN_EXTRAS,   
+    'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS,
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Distributions/flac-1.2.0/include'],
                          'dep_mods':['FLAC']},
-    'VorbisDecoder':    {'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
-                         'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib'],
-                         'dep_mods':['vorbisfile','vorbis','ogg']},
     'AlsaOutput':       {'dep_mods':['asound']},   
     'AlsaInput':        {'dep_mods':['asound']},
 }
 if 'CddaInput' in env['BLT_PLUGINS']:
     PluginsExtras['CddaInput'] = {'src_dirs':['Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
 
-if 'VorbisDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
+if 'VorbisDecoder' in env['BLT_PLUGINS']:
     if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
-        PluginsExtras['VorbisDecoder']['dep_mods'] = ['Tremor']
-        PluginsExtras['VorbisDecoder']['flags'] = ['BLT_CONFIG_VORBIS_USE_TREMOR']
-
-if 'AacDecoder' in env['BLT_PLUGINS'] and env.has_key('BLT_PLUGINS_AAC_LIBRARY'):
-    if env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
-        PluginsExtras['AacDecoder']['dep_mods'] = ['HelixAAC']
-    
+        PluginsExtras['VorbisDecoder'] = {
+            'dep_mods':['Tremor'],
+            'flags'   :['BLT_CONFIG_VORBIS_USE_TREMOR']}
+    else:
+        PluginsExtras['VorbisDecoder'] = {
+            'dep_mods':['vorbisfile','vorbis','ogg'],
+            'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
+            'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib']}
+        
 for plugin in env['BLT_PLUGINS']:
     if not PluginsSettings[plugin].has_key('src_dir'): continue # skip binary only plugins
     extra_includes = []
@@ -301,8 +302,8 @@ for plugin in env['BLT_PLUGINS']:
     extra_flags    = {}
     extra_env      = None
     if PluginsExtras.has_key(plugin):
-        if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes += PluginsExtras[plugin]['inc_dirs']
-        if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods += PluginsExtras[plugin]['dep_mods']
+        if PluginsExtras[plugin].has_key('inc_dirs'): extra_includes = PluginsExtras[plugin]['inc_dirs']
+        if PluginsExtras[plugin].has_key('dep_mods'): extra_dep_mods = PluginsExtras[plugin]['dep_mods']
         if PluginsExtras[plugin].has_key('lib_dirs'): extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
         if PluginsExtras[plugin].has_key('src_dirs'): extra_src_dirs = PluginsExtras[plugin]['src_dirs']
         if PluginsExtras[plugin].has_key('flags'):    extra_flags    = PluginsExtras[plugin]['flags']

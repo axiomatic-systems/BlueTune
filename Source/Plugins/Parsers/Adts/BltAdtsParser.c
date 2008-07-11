@@ -416,7 +416,7 @@ AdtsParserOutput_GetPacket(BLT_PacketProducer* _self,
             }
             if (self->buffer_fullness == self->frame_header.aac_frame_length) {
                 /* the frame is complete, look for the next header */
-                AdtsHeader next_header;
+                AdtsHeader next_header = self->frame_header;
                 result = AdtsParser_ReadHeader(self, &next_header);
                 if (BLT_FAILED(result)) {
                     /* at the end of the stream, it is ok not to have */

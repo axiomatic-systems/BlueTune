@@ -216,7 +216,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                 alac->WriteFields(*mbs);
             } 
         }
-        AP4_LargeSize decoder_info_length = mbs?mbs->GetDataSize():0;
+        AP4_Size decoder_info_length = mbs?(AP4_Size)mbs->GetDataSize():0;
         BLT_IsoBaseAudioMediaType* media_type = (BLT_IsoBaseAudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_IsoBaseAudioMediaType)+decoder_info_length-1);
         BLT_MediaType_Init(&media_type->base, self->output.iso_base_es_type_id);
         media_type->format = sample_desc->GetFormat();

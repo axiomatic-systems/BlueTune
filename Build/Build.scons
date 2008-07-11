@@ -59,7 +59,6 @@ CompiledModule(name                  = 'Atomix',
                source_root           = ATX_SOURCE_ROOT,
                build_source_dirs     = ['Core'],
                build_source_files    = env['ATX_SYSTEM_SOURCES'],
-               build_include_dirs    = ['Config', 'Atomix'],
                linked_modules        = env['ATX_EXTRA_LIBS'],
                extra_cpp_defines     = ATX_EXTRA_CPP_DEFINES)
 
@@ -80,7 +79,6 @@ CompiledModule(name                  = 'Neptune',
                source_root           = NPT_SOURCE_ROOT,
                build_source_dirs     = ['Core'],
                build_source_files    = env['NPT_SYSTEM_SOURCES'],
-               included_only_modules = [NPT_SOURCE_ROOT+'/'+dir for dir in ['Config', 'Neptune']],
                linked_modules        = env['NPT_EXTRA_LIBS']+['Zlib'],
                extra_cpp_defines     = NPT_EXTRA_CPP_DEFINES)
 
@@ -195,8 +193,12 @@ CompiledModule(name             = 'BltPlayer',
 ############################ WmaDecoder Plugin
 if 'WmaDecoder' in env['BLT_PLUGINS']:
     if 'BLT_WMSDK_HOME' in os.environ:
+        if env.has_key('BLT_WMA_DECODER_MODE') and env['BLT_WMA_DECODER_MODE'] == 'Integer':
+            WMA_DECODER_MODE = 'BUILD_INTEGER'
+        else:
+            WMA_DECODER_MODE = 'BUILD_INT_FLOAT'
         WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
-        WMA_EXTRA_CPP_DEFINES = ['BUILD_INT_FLOAT', 
+        WMA_EXTRA_CPP_DEFINES = [WMA_DECODER_MODE, 
                                  'ENABLE_LPC',
                                  'ENABLE_ALL_ENCOPT',
                                  'DISABLE_OPT',
@@ -218,11 +220,10 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
                                       'audio/wmaudio/v10/win32/decoder',
                                       'audio/common/primitive',
                                       'audio/common/pcmfmt',
-                                      'audio/common/chanmtx'],
-                build_include_dirs = [WMA_SOURCE_ROOT+'/'+x for x in 
-                                      ['common/include',
-                                       'common/logging',
-                                       'audio/common/include']],
+                                      'audio/common/chanmtx',
+                                      'audio/common/include',
+                                      'common/include',
+                                      'common/logging'],
                 environment           = env['BLT_RELAXED_ENV'],
                 extra_cpp_defines     = WMA_EXTRA_CPP_DEFINES)
         BLT_WMA_DECODER_PLUGIN_EXTRAS = {'dep_mods':['BltWmaDecoderRuntime'], 'env':env['BLT_RELAXED_ENV']}

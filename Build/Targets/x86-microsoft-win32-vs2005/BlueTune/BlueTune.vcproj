@@ -238,6 +238,26 @@
 				Name="Plugins"
 				>
 				<File
+					RelativePath="..\..\..\..\..\Bento4\Source\C++\Adapters\Ap4AtomixAdapters.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\..\..\Source\Plugins\Decoders\AAC\BltAacDecoder.c"
 					>
 					<FileConfiguration
@@ -327,7 +347,7 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Adapters&quot;"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -335,7 +355,7 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\MetaData&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Adapters&quot;"
 						/>
 					</FileConfiguration>
 				</File>

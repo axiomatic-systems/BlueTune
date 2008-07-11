@@ -1,3 +1,5 @@
+env['BLT_RELAXED_ENV'] = env.Clone() 
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_strict=False, gcc_stop_on_warning=False)  
 LoadTool('gcc-generic', env)
 
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
@@ -24,8 +26,4 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'OssOutput']
 env['BLT_PLUGINS_CDDA_TYPE'] = 'Linux'
 env['BLT_DEFAULT_OUTPUT']    = 'oss:0'
-
-### relaxed warnings for WMA9
-env['WMA_ENV'] = env.Copy() 
-LoadTool('gcc-generic', env['WMA_ENV'], gcc_relaxed_warnings=True)  
          

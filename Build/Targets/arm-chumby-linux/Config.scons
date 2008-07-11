@@ -1,7 +1,7 @@
 GCC_ARM_OPTIONS='-mcpu=arm9e -mtune=arm9e'
-LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
 env['BLT_RELAXED_ENV'] = env.Copy()
-LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_extra_options=GCC_ARM_OPTIONS, gcc_relaxed_warnings=True)
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_extra_options=GCC_ARM_OPTIONS, gcc_strict=False, gcc_stop_on_warning=False)
+LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
 
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
@@ -33,6 +33,7 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'OssOutput',
                       'AlsaOutput',
                       'VorbisDecoder']
+
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE']  = 'Linux'
 env['BLT_DEFAULT_OUTPUT']            = 'alsa:default'
 #env['BLT_DEFAULT_OUTPUT']            = 'oss:0'

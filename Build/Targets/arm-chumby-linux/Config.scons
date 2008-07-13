@@ -1,4 +1,4 @@
-GCC_ARM_OPTIONS='-mcpu=arm9e -mtune=arm9e'
+GCC_ARM_OPTIONS='-mcpu=arm9e -mtune=arm9e -fdollars-in-identifiers'
 env['BLT_RELAXED_ENV'] = env.Copy()
 LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix = 'arm-linux', gcc_extra_options=GCC_ARM_OPTIONS, gcc_strict=False, gcc_stop_on_warning=False)
 LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
@@ -39,4 +39,5 @@ env['BLT_DEFAULT_OUTPUT']            = 'alsa:default'
 #env['BLT_DEFAULT_OUTPUT']            = 'oss:0'
 env['BLT_PLUGINS_VORBIS_LIBRARY']    = 'Tremor'
 env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
-env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']                                   
+env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']
+env['BLT_WMA_DECODER_MODE']          = 'Integer'                                   

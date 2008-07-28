@@ -126,6 +126,8 @@ See the BLT_Player class for details.
 #include "BltDecoder.h"
 #include "BltEvent.h"
 #include "BltEventListener.h"
+#include "BltKeyManager.h"
+#include "BltPcm.h"
 
 #ifdef __cplusplus
 #include "BltPlayer.h"

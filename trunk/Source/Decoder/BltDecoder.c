@@ -218,6 +218,17 @@ BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Decoder_AddNode
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_AddNode(BLT_Decoder*   decoder, 
+                    BLT_MediaNode* where, 
+                    BLT_MediaNode* node)
+{
+    return BLT_Stream_AddNode(decoder->stream, where, node);
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Decoder_AddNodeByName
 +---------------------------------------------------------------------*/
 BLT_Result

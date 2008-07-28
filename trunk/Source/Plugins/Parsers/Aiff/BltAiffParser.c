@@ -375,7 +375,7 @@ AiffParser_ParseChunks(AiffParser*      self,
         self->output.media_type.bits_per_sample/8;
 
     if (stream_info.size != 0 && bytes_per_second != 0) {
-        stream_info.duration = ((ATX_UInt64)stream_info.size*1000)/bytes_per_second;
+        stream_info.duration = (BLT_UInt32)(((ATX_UInt64)stream_info.size*1000)/bytes_per_second);
         stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
     } else {
         stream_info.duration = 0;

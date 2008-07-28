@@ -201,6 +201,9 @@ ATX_INTERFACE(object)->ResetOutput(object)
 #define BLT_Stream_SetOutput(object, name, media_type) \
 ATX_INTERFACE(object)->SetOutput(object, name, media_type)
 
+#define BLT_Stream_AddNode(object, where, node) \
+ATX_INTERFACE(object)->AddNode(object, where, node)
+
 #define BLT_Stream_AddNodeByName(object, where, name) \
 ATX_INTERFACE(object)->AddNodeByName(object, where, name)
 

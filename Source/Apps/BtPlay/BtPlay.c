@@ -104,7 +104,7 @@ BLTP_ParseCommandLine(char** args)
         } else if (ATX_StringsEqualN(arg, "--output-type=", 14)) {
             Options.output_type = arg+14;
         } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
-            long duration = 0;
+            int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
             Options.duration = duration;
         } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {

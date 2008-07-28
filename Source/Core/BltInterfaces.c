@@ -29,3 +29,4 @@ const ATX_InterfaceId ATX_INTERFACE_ID(BLT_InputStreamUser)      = {0x010B, 0x00
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_OutputStreamUser)     = {0x010C, 0x0001};
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_EventListener)        = {0x010D, 0x0001};
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_OutputNode)           = {0x010E, 0x0001};
+const ATX_InterfaceId ATX_INTERFACE_ID(BLT_KeyManager)           = {0x010F, 0x0001};

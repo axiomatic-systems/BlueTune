@@ -33,6 +33,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltNetworkInput.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT)
+#include "BltCallbackInput.h"
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT)
 #include "BltCddaInput.h"
 #endif
@@ -160,6 +164,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltFileOutput.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_CALLBACK_OUTPUT)
+#include "BltCallbackOutput.h"
+#endif
+
 /*----------------------------------------------------------------------
 |    constants
 +---------------------------------------------------------------------*/
@@ -193,6 +201,16 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT)
     ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_NetworkInputModule");
     result = BLT_NetworkInputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
+#endif
+
+    /* callback input module */
+#if defined(BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT)
+    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_CallbackInputModule");
+    result = BLT_CallbackInputModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) {
         result = BLT_Core_RegisterModule(core, module);
         if (BLT_FAILED(result)) return result;
@@ -492,6 +510,16 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     /* null output */
 #if defined(BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT)
     ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_NullOutputModule");
+    result = BLT_NullOutputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
+#endif
+
+    /* callback output */
+#if defined(BLT_CONFIG_MODULES_ENABLE_CALLBACK_OUTPUT)
+    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_CallbackOutputModule");
     result = BLT_NullOutputModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) {
         result = BLT_Core_RegisterModule(core, module);

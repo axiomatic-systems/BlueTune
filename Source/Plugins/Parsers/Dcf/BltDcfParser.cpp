@@ -22,6 +22,7 @@
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
+#include "BltKeyManager.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -87,6 +88,7 @@ typedef struct {
     /* members */
     DcfParserInput  input;
     DcfParserOutput output;
+    BLT_KeyManager* key_manager;
 } DcfParser;
 
 /*----------------------------------------------------------------------
@@ -131,6 +133,34 @@ DcfParser_ReadUintvar(ATX_InputStream* stream,
     /* too many bytes */
     value = 0;
     return BLT_ERROR_INVALID_MEDIA_FORMAT;
+}
+
+/*----------------------------------------------------------------------
+|   DcfParser_GetContentKey
++---------------------------------------------------------------------*/
+static BLT_Result
+DcfParser_GetContentKey(DcfParser*     self, 
+                        const char*    content_id,
+                        unsigned char* key, 
+                        unsigned int*  key_size)
+{
+    //const unsigned char test_key_1[16] = {
+    //    0x74, 0x7c, 0x29, 0xd8, 
+    //    0x7a, 0x8e, 0x49, 0x4d, 
+    //    0x10, 0x0f, 0x83, 0xf4,
+    //    0xbd, 0x4a, 0x54, 0xdd
+    //};
+    //ATX_CopyMemory(key, test_key_1, 16);
+    //*key_size = 16;
+    
+    // check parameters
+    if (key == NULL || key_size == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+
+    // check that we have a key manager
+    if (self->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
+
+    // ask the key manager to resolve the key
+    return BLT_KeyManager_GetKeyByName(self->key_manager, content_id, key, key_size);
 }
 
 /*----------------------------------------------------------------------
@@ -182,6 +212,17 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
     if (data_length < 32) return BLT_ERROR_INVALID_MEDIA_FORMAT;
     self->input.encrypted_size = data_length;
     
+    /* get the content key */
+    unsigned char key[16];
+    unsigned int  key_size = 16;
+    result = DcfParser_GetContentKey(self, self->input.content_uri, key, &key_size);
+    if (BLT_FAILED(result)) {
+        ATX_LOG_FINE_2("GetKeyForContent(%s) returned %d", 
+            self->input.content_uri, 
+            result);
+        return BLT_ERROR_NO_MEDIA_KEY;
+    }
+
     /* read the headers */
     if (headers_length > BLT_DCF_PARSER_MAX_HEADERS_LENGTH) return BLT_ERROR_INVALID_MEDIA_FORMAT;
     char* headers = new char[headers_length+1];
@@ -275,24 +316,11 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
     ATX_RELEASE_OBJECT(data_stream);
     
     /* create a decrypting stream for the content */ // FIXME: temporary hack
-    /*const AP4_UI08 key[16] = {
-        0x94, 0x42, 0x43, 0x0b, 
-        0xe0, 0xa5, 0x4f, 0xdd, 
-        0x4d, 0x62, 0xa5, 0x8a, 
-        0xc8, 0xd1, 0x84, 0x30
-    };*/
-    const AP4_UI08 key[16] = {
-        0xC5, 0x47, 0x39, 0x01, 
-        0x5B, 0x79, 0xCA, 0x6F, 
-        0x5F, 0x55, 0x51, 0x7A, 
-        0x65, 0x76, 0xD6, 0x0A
-    };
-    
     AP4_ByteStream* decrypting_stream = NULL;
     result = AP4_DecryptingStream::Create(AP4_DecryptingStream::CIPHER_MODE_CBC,
                                           *encrypted_stream,
                                           self->output.size,
-                                          iv, 16, key, 16,
+                                          iv, 16, key, key_size,
                                           &AP4_DefaultBlockCipherFactory::Instance,
                                           decrypting_stream);
     encrypted_stream->Release();
@@ -320,25 +348,36 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
     AP4_Result result = AP4_DefaultAtomFactory::Instance.CreateAtomsFromStream(*mp4_stream, atoms);
     mp4_stream->Release();
     
-    /* create a decryping stream */
-    AP4_BlockCipherFactory* block_cipher_factory = &AP4_DefaultBlockCipherFactory::Instance;
-    const unsigned char key[16] = {
-        0x74, 0x7c, 0x29, 0xd8, 
-        0x7a, 0x8e, 0x49, 0x4d, 
-        0x10, 0x0f, 0x83, 0xf4,
-        0xbd, 0x4a, 0x54, 0xdd
-    };
     AP4_ByteStream* decrypting_stream = NULL;
-    AP4_ContainerAtom* odrm = dynamic_cast<AP4_ContainerAtom*>(atoms.FindChild("odrm"));
+    AP4_ContainerAtom* odrm = dynamic_cast<AP4_ContainerAtom*>(atoms.GetChild(AP4_ATOM_TYPE_ODRM));
     if (odrm) {
-        AP4_OdheAtom* odhe = dynamic_cast<AP4_OdheAtom*>(odrm->FindChild("odhe"));
-        AP4_OddaAtom* odda = dynamic_cast<AP4_OddaAtom*>(odrm->FindChild("odda"));
+        AP4_OdheAtom* odhe = dynamic_cast<AP4_OdheAtom*>(odrm->GetChild(AP4_ATOM_TYPE_ODHE));
+        AP4_OddaAtom* odda = dynamic_cast<AP4_OddaAtom*>(odrm->GetChild(AP4_ATOM_TYPE_ODDA));
         if (odhe && odda) {
+            const char* content_id = "";
+
+            /* get the content ID */
+            AP4_OhdrAtom* ohdr = dynamic_cast<AP4_OhdrAtom*>(odhe->GetChild(AP4_ATOM_TYPE_OHDR));
+            if (ohdr) {
+                content_id = ohdr->GetContentId().GetChars();
+            }
+
+            /* get the content key */
+            unsigned char key[16];
+            unsigned int  key_size = 16;
+            result = DcfParser_GetContentKey(self, content_id, key, &key_size);
+            if (BLT_FAILED(result)) {
+                ATX_LOG_FINE_2("GetKeyForContent(%s) returned %d", 
+                               content_id, 
+                               result);
+                return BLT_ERROR_NO_MEDIA_KEY;
+            }
+
             /* create the decrypting stream */
             result = AP4_OmaDcfAtomDecrypter::CreateDecryptingStream(*odrm,
                                                                      key,
-                                                                     16,
-                                                                     block_cipher_factory,
+                                                                     key_size,
+                                                                     &AP4_DefaultBlockCipherFactory::Instance,
                                                                      decrypting_stream);
             if (AP4_SUCCEEDED(result)) {
                 /* update the content type */
@@ -503,7 +542,7 @@ DcfParserOutput_Destruct(DcfParserOutput* self)
 }
 
 /*----------------------------------------------------------------------
-|   DcfParserOutput_QueryMediaType
+|   DcfParserOutput_GetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
 DcfParserOutput_GetStream(BLT_InputStreamProvider* _self,
@@ -511,7 +550,11 @@ DcfParserOutput_GetStream(BLT_InputStreamProvider* _self,
 {
     DcfParserOutput* self = ATX_SELF(DcfParserOutput, BLT_InputStreamProvider);
 
+    // copy our stream pointer
     *stream = self->stream;
+    if (self->stream == NULL) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+
+    // give a reference count to the caller
     ATX_REFERENCE_OBJECT(*stream);
     
     return BLT_SUCCESS;
@@ -696,6 +739,21 @@ DcfParser_Construct(DcfParser* self, BLT_Module* module, BLT_Core* core)
     /* construct the members */
     DcfParserInput_Construct(&self->input, module);
     DcfParserOutput_Construct(&self->output);
+    
+    /* look for a key manager */
+    ATX_Properties* properties = NULL;
+    if (BLT_SUCCEEDED(BLT_Core_GetProperties(core, &properties))) {
+        ATX_PropertyValue value;
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                     BLT_KEY_MANAGER_PROPERTY, 
+                                                     &value))) {
+            if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                self->key_manager = (BLT_KeyManager*)value.data.pointer;
+            }
+        } else {
+            ATX_LOG_INFO("no key manager");
+        }
+    }
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, DcfParser, BLT_BaseMediaNode, BLT_MediaNode);

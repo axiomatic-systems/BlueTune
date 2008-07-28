@@ -84,7 +84,7 @@ ATX_UInt64    BLT_TimeStamp_ToNanos(BLT_TimeStamp ts);
 ATX_UInt64    BLT_TimeStamp_ToMicros(BLT_TimeStamp ts);
 ATX_UInt64    BLT_TimeStamp_ToMillis(BLT_TimeStamp ts);
 BLT_TimeStamp BLT_TimeStamp_FromSamples(ATX_Int64 sample_count,
-                          ATX_Int32 sample_rate);
+                                        ATX_Int32 sample_rate);
 
 #if defined(__cplusplus)
 }

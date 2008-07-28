@@ -44,7 +44,7 @@ BLT_TcpNetworkStream_Create(const char* name, ATX_InputStream** stream)
     sep = ATX_String_FindCharFrom(&hostname, ':', 6);
     if (sep > 0) {
         /* we have a port number */
-        long port_long = 0;
+        int port_long = 0;
         result = ATX_ParseInteger(name+sep+1, &port_long, ATX_FALSE);
         if (ATX_FAILED(result)) {
             ATX_LOG_WARNING("BLT_TcpNetworkStream_Create - invalid port spec");

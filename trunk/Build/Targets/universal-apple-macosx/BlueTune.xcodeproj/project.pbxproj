@@ -329,6 +329,8 @@
 		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
 		CA7F90C70DEE3C5E003DDB91 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
+		CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
+		CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */; };
 		CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */; };
 		CAEA9D0B0E144CE6008C396D /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
@@ -448,7 +450,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA197D1E0E1AE4360018E87C /* QueueTest1 */;
+			remoteGlobalIDString = CA197D1E0E1AE4360018E87C;
 			remoteInfo = QueueTest1;
 		};
 		CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */ = {
@@ -653,6 +655,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAA97A1B0CF1654A00C01909;
 			remoteInfo = StringsTest1;
+		};
+		CAAA4D620E3D5AB200783AE4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA97E0200E2FDFB30090CC9B;
+			remoteInfo = StreamsTest1;
 		};
 		CAE418930E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1779,6 +1788,7 @@
 				CAE418B20E0DD91C00A530D1 /* NetEcho */,
 				CAE418B40E0DD91C00A530D1 /* NetConfig */,
 				CAE418B60E0DD91C00A530D1 /* NetPing */,
+				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2333,6 +2343,7 @@
 				CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */,
 				CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */,
 				CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */,
+				CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2748,6 +2759,13 @@
 			remoteRef = CAA97B230CF3639D00C01909 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = StreamsTest1;
+			remoteRef = CAAA4D620E3D5AB200783AE4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CAE418940E0DD91C00A530D1 /* ArraysTest1 */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -3072,6 +3090,7 @@
 				CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */,
 				CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */,
 				CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */,
+				CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3282,6 +3301,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";

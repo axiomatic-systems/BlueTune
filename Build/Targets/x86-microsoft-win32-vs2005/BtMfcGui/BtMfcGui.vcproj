@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\System\Win32"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\System\Win32"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\System\Win32"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;..\..\..\..\..\Neptune\Source\System\Win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

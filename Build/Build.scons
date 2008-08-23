@@ -248,6 +248,7 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
 CompiledModule(name                          = 'BltPluginsSupport',
                build_source_dirs             = [],
                build_source_files            = {'/Source/Plugins/Common':'BltReplayGain.c'},
+               exported_include_dirs         = ['Source/Plugins/Common'],
                chained_link_and_include_deps = ['BltCore'])
        
 ############################# Plugins
@@ -286,8 +287,8 @@ PluginsExtras = {
     'AacDecoder':       BLT_AAC_DECODER_PLUGIN_EXTRAS,   
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Distributions/flac-1.2.0/include'],
                          'dep_mods':['FLAC']},
-    'AlsaOutput':       {'dep_mods':['asound']},   
-    'AlsaInput':        {'dep_mods':['asound']},
+    'AlsaOutput':       {'libs':['asound']},   
+    'AlsaInput':        {'libs':['asound']},
     'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS
 }
 if 'CddaInput' in env['BLT_PLUGINS']:
@@ -312,6 +313,7 @@ plugins_modules        = []
 for plugin in env['BLT_PLUGINS']:
     extra_includes = []
     extra_dep_mods = []
+    extra_libs     = []
     extra_lib_dirs = []
     extra_src_dirs = []
     extra_defines  = []
@@ -320,6 +322,7 @@ for plugin in env['BLT_PLUGINS']:
     if plugin in PluginsExtras:
         if 'inc_dirs' in PluginsExtras[plugin]: extra_includes = PluginsExtras[plugin]['inc_dirs']
         if 'dep_mods' in PluginsExtras[plugin]: extra_dep_mods = PluginsExtras[plugin]['dep_mods']
+        if 'libs'     in PluginsExtras[plugin]: extra_libs     = PluginsExtras[plugin]['libs']
         if 'lib_dirs' in PluginsExtras[plugin]: extra_lib_dirs = PluginsExtras[plugin]['lib_dirs']
         if 'src_dirs' in PluginsExtras[plugin]: extra_src_dirs = PluginsExtras[plugin]['src_dirs']
         if 'defines'  in PluginsExtras[plugin]: extra_defines  = PluginsExtras[plugin]['defines']
@@ -332,6 +335,7 @@ for plugin in env['BLT_PLUGINS']:
                        build_source_dirs        = [PluginsSettings[plugin]['src_dir']]+extra_src_dirs,
                        build_include_dirs       = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                        chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
+                       extra_libs               = extra_libs,
                        extra_lib_dirs           = extra_lib_dirs,
                        extra_cpp_defines        = extra_defines,
                        environment              = extra_env)

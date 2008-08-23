@@ -142,7 +142,7 @@ AlsaInputStream_ParseName(AlsaInputStream* self,
     do {
         c = *look;
         if (*look == ';' || *look == '\0') {
-            long value = 0;
+            int value = 0;
 
             /* force-terminate the option */
             *look = '\0';

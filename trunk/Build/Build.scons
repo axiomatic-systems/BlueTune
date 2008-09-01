@@ -370,7 +370,8 @@ StaticLibraryModule(name                          = 'BlueTune',
 ############################# BtPlay
 ExecutableModule(name                  = 'BtPlay',
                  source_root           = 'Source/Apps/BtPlay',
-                 link_and_include_deps = ['BlueTune-Sync'])
+                 link_and_include_deps = ['BlueTune-Sync'],
+                 include_only_deps     = ['BlueTune'])
 
 ############################# BtController
 ExecutableModule(name                  = 'BtController',

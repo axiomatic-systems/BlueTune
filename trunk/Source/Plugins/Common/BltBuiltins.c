@@ -140,8 +140,12 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltOssOutput.h"
 #endif
 
-#if defined(BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT)
-#include "BltMacOSXOutput.h"
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT)
+#include "BltOsxAudioUnitsOutput.h"
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT)
+#include "BltOsxAudioQueueOutput.h"
 #endif
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT)
@@ -467,10 +471,20 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     }
 #endif
 
-    /* alsa output */
-#if defined(BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT)
-    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_MacOSXOutputModule");
-    result = BLT_MacOSXOutputModule_GetModuleObject(&module);
+    /* osx audio units output */
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT)
+    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_OsxAudioUnitsOutputModule");
+    result = BLT_OsxAudioUnitsOutputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Core_RegisterModule(core, module);
+        if (BLT_FAILED(result)) return result;
+    }
+#endif
+
+    /* osx audio queue output */
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT)
+    ATX_LOG_FINE("BLT_Builtins_RegisterModules - registering BLT_OsxAudioQueueOutputModule");
+    result = BLT_OsxAudioQueueOutputModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) {
         result = BLT_Core_RegisterModule(core, module);
         if (BLT_FAILED(result)) return result;

@@ -88,6 +88,8 @@ typedef struct {
 #define BLT_MODULE_PROBE_MATCH_EXACT   254
 #define BLT_MODULE_PROBE_MATCH_FORCE   255
 
+#define BLT_MODULE_FLAG_MEDIA_NODE_FACTORY 1
+
 /*----------------------------------------------------------------------
 |   error codes
 +---------------------------------------------------------------------*/

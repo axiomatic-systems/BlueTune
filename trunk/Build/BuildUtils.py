@@ -327,6 +327,7 @@ class ExecutableModule(CompiledModule):
                  extra_lib_dirs        = [],
                  extra_cpp_defines     = [],
                  link_and_include_deps = [],
+                 include_only_deps     = [],
                  environment           = None):
         CompiledModule.__init__(self, name,
                                 module_type                   = 'Executable',
@@ -336,6 +337,7 @@ class ExecutableModule(CompiledModule):
                                 build_source_files            = build_source_files,
                                 build_include_dirs            = build_include_dirs,
                                 chained_link_only_deps        = link_and_include_deps,
+                                chained_include_only_deps     = include_only_deps,
                                 excluded_files                = excluded_files,
                                 extra_cpp_defines             = extra_cpp_defines,
                                 extra_libs                    = extra_libs,

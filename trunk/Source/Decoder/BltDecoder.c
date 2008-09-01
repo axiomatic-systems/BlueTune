@@ -15,6 +15,7 @@
 #include "BltStream.h"
 #include "BltBuiltins.h"
 #include "BltCorePriv.h"
+#include "BltDynamicPlugins.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -94,6 +95,32 @@ BLT_Result
 BLT_Decoder_RegisterModule(BLT_Decoder* decoder, BLT_Module* module)
 {
     return BLT_Core_RegisterModule(decoder->core, module);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_LoadPlugin
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Decoder_LoadPlugin(BLT_Decoder* decoder, 
+                       const char*  name, 
+                       BLT_Flags    search_flags)
+{
+    return BLT_Plugins_LoadModulesFromFile(decoder->core, 
+                                           name, 
+                                           search_flags);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_LoadPlugins
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Decoder_LoadPlugins(BLT_Decoder* decoder, 
+                        const char*  directory,
+                        const char*  file_extension)
+{
+    return BLT_Plugins_LoadModulesFromDirectory(decoder->core, 
+                                                directory, 
+                                                file_extension);
 }
 
 /*----------------------------------------------------------------------
@@ -215,17 +242,6 @@ BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
             return BLT_Stream_SetOutput(decoder->stream, name, type);
 	    }
     }
-}
-
-/*----------------------------------------------------------------------
-|    BLT_Decoder_AddNode
-+---------------------------------------------------------------------*/
-BLT_Result
-BLT_Decoder_AddNode(BLT_Decoder*   decoder, 
-                    BLT_MediaNode* where, 
-                    BLT_MediaNode* node)
-{
-    return BLT_Stream_AddNode(decoder->stream, where, node);
 }
 
 /*----------------------------------------------------------------------

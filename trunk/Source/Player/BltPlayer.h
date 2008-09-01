@@ -1,13 +1,13 @@
 /*****************************************************************
 |
-|   BlueTune - Async Layer
+|   BlueTune - Asynchronous API
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2008 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
 /** @file
- * BLT_Player API
+ * Asynchronous Player API
  */
 
 #ifndef _BLT_PLAYER_H_
@@ -20,16 +20,26 @@
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
-#include "Neptune.h"
 #include "BltDecoder.h"
+
+#if defined(__cplusplus)
+#include "Neptune.h"
 #include "BltDecoderClient.h"
 #include "BltDecoderServer.h"
+#else
+#include "Atomix.h"
+#endif
+
+/*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+#define BLT_TIMEOUT_INFINITE ((BLT_UInt32)(-1))
 
 /*----------------------------------------------------------------------
 |   BLT_Player
 +---------------------------------------------------------------------*/
 /**
- * The BLT_Player class is the asynchronous client API.
+ * The BLT_Player class is the asynchronous player API.
  * A BLT_Player player creates internally a thread in which a decoder 
  * (BLT_Decoder) runs in a decoding loop. The decoding loop receives
  * commands that are sent to it when calling some of the methods of this
@@ -42,6 +52,7 @@
  * this class inherits), or create an instance of this class and pass an event 
  * listener to the SetEventListener() method to receive notification callbacks.
  */
+#if defined(__cplusplus)
 class BLT_Player : public BLT_DecoderClient
 {
  public:
@@ -86,7 +97,7 @@ class BLT_Player : public BLT_DecoderClient
      * message is available, or if it should return right away, regardless
      * of whether a message is available or not.
      */
-    virtual BLT_Result PumpMessage(bool blocking = true);
+    virtual BLT_Result PumpMessage(BLT_UInt32 timeout = BLT_TIMEOUT_INFINITE);
 
     /**
      * Set the input of the decoder.
@@ -214,7 +225,7 @@ class BLT_Player : public BLT_DecoderClient
     virtual BLT_Result Interrupt();
 
 protected:
-    // BLT_DecoderClient_MessageHandler methods
+    /* BLT_DecoderClient_MessageHandler methods */
     virtual void OnAckNotification(BLT_DecoderServer_Message::CommandId id) {
         if (m_Listener) m_Listener->OnAckNotification(id);
     }
@@ -257,6 +268,106 @@ private:
      */
     BLT_DecoderClient_MessageHandler* m_Listener;
 };
+#endif
+
+/*----------------------------------------------------------------------
+|   BLT_Player C-style API
++---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#else
+typedef struct BLT_Player BLT_Player;
+#endif
+
+typedef enum {
+    BLT_PLAYER_EVENT_TYPE_ACK,
+    BLT_PLAYER_EVENT_TYPE_NACK,
+    BLT_PLAYER_EVENT_TYPE_PONG_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_DECODER_STATE_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_STREAM_TIMECODE_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_STREAM_POSITION_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_STREAM_INFO_NOTIFICATION
+} BLT_Player_EventType;
+
+typedef enum {
+    BLT_PLAYER_COMMAND_ID_SET_INPUT,
+    BLT_PLAYER_COMMAND_ID_SET_OUTPUT,
+    BLT_PLAYER_COMMAND_ID_PLAY,
+    BLT_PLAYER_COMMAND_ID_PAUSE,
+    BLT_PLAYER_COMMAND_ID_STOP,
+    BLT_PLAYER_COMMAND_ID_PING,
+    BLT_PLAYER_COMMAND_ID_SEEK_TO_TIME,
+    BLT_PLAYER_COMMAND_ID_SEEK_TO_POSITION,
+    BLT_PLAYER_COMMAND_ID_REGISTER_MODULE,
+    BLT_PLAYER_COMMAND_ID_ADD_NODE,
+    BLT_PLAYER_COMMAND_ID_SET_PROPERTY
+} BLT_Player_CommandId;
+
+typedef enum {
+    BLT_PLAYER_DECODER_STATE_STOPPED,
+    BLT_PLAYER_DECODER_STATE_PLAYING,
+    BLT_PLAYER_DECODER_STATE_PAUSED,
+    BLT_PLAYER_DECODER_STATE_EOS
+} BLT_Player_DecoderState;
+
+typedef struct {
+    BLT_Player_EventType type;
+} BLT_Player_Event;
+
+typedef struct {
+    BLT_Player_Event     base;
+    BLT_Player_CommandId command;
+} BLT_Player_AckEvent;
+
+typedef struct {
+    BLT_Player_Event     base;
+    BLT_Player_CommandId command;
+    BLT_Result          result;
+} BLT_Player_NackEvent;
+
+typedef struct {
+    BLT_Player_Event base;
+    const void*      cookie;
+} BLT_Player_PongNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event        base;
+    BLT_Player_DecoderState state;
+} BLT_Player_DecoderStateNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event base;
+    BLT_TimeCode     timecode;
+} BLT_Player_StreamTimeCodeNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event   base;
+    BLT_StreamPosition position;
+} BLT_Player_StreamPositionNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event base;
+    BLT_Mask         update_mask;
+    BLT_StreamInfo   info;
+} BLT_Player_StreamInfoNotificationEvent;
+
+typedef struct {
+    void* instance;
+    void  (*handler)(void* instance, const BLT_Player_Event* event);
+} BLT_Player_EventListener;
+
+BLT_Result BLT_Player_Create(BLT_Player_EventListener listener, 
+                             BLT_Player**             player);
+BLT_Result BLT_Player_Destroy(BLT_Player* player);
+BLT_Result BLT_Player_PumpMessage(BLT_Player* player, BLT_UInt32 timeout);
+BLT_Result BLT_Player_SetInput(BLT_Player* player,
+                               BLT_CString name, 
+                               BLT_CString mime_type);
+BLT_Result BLT_Player_Play(BLT_Player* player);
+
+#if defined(__cplusplus)
+}
+#endif
 
 /** @} */
 

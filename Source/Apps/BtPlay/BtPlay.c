@@ -27,6 +27,8 @@ typedef struct {
     BLT_CString  output_type;
     unsigned int duration;
     unsigned int verbosity;
+    ATX_List*    plugin_directories;
+    ATX_List*    plugin_files;
 } BLTP_Options;
 
 typedef struct  {
@@ -75,6 +77,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --output=<name>\n"
         "  --output-type=<type>\n"
         "  --duration=<n> (seconds)\n"
+        "  --load-plugins=<directory>[,<file-extension>]\n"
+        "  --load-plugin=<plugin-filename>\n"
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n");
@@ -94,6 +98,8 @@ BLTP_ParseCommandLine(char** args)
     Options.output_type = NULL;
     Options.duration    = 0;
     Options.verbosity   = 0;
+    ATX_List_Create(&Options.plugin_directories);
+    ATX_List_Create(&Options.plugin_files);
     
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
@@ -107,6 +113,14 @@ BLTP_ParseCommandLine(char** args)
             int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
             Options.duration = duration;
+        } else if (ATX_StringsEqualN(arg, "--load-plugins=", 15)) {
+            ATX_String* directory = (ATX_String*)ATX_AllocateMemory(sizeof(ATX_String));
+            *directory = ATX_String_Create(arg+15);
+            ATX_List_AddData(Options.plugin_directories, directory);
+        } else if (ATX_StringsEqualN(arg, "--load-plugin=", 14)) {
+            ATX_String* plugin = (ATX_String*)ATX_AllocateMemory(sizeof(ATX_String));
+            *plugin = ATX_String_Create(arg+14);
+            ATX_List_AddData(Options.plugin_files, plugin);
         } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {
             if (ATX_StringsEqual(arg+10, "stream-topology")) {
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;
@@ -382,6 +396,21 @@ main(int argc, char** argv)
     result = BLT_Decoder_RegisterBuiltins(decoder);
     BLTP_CHECK(result);
 
+    /* load and register loadable plugins */
+    {
+        ATX_ListItem* item;
+        for (item = ATX_List_GetFirstItem(Options.plugin_files); item; item = ATX_ListItem_GetNext(item)) {
+            ATX_String* plugin = (ATX_String*)ATX_ListItem_GetData(item);
+            BLT_Decoder_LoadPlugin(decoder, ATX_String_GetChars(plugin), BLT_PLUGIN_LOADER_FLAGS_SEARCH_ALL);
+        }
+        ATX_List_Destroy(Options.plugin_files);
+        for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
+            /*ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);*/
+            /* NOT IMPLEMENTED YET */
+        }
+        ATX_List_Destroy(Options.plugin_directories);
+    }
+    
     /* set the output */
     result = BLT_Decoder_SetOutput(decoder,
                                    Options.output_name, 
@@ -431,5 +460,22 @@ main(int argc, char** argv)
     /* destroy the decoder */
     BLT_Decoder_Destroy(decoder);
 
+    /* cleanup */
+    {
+        ATX_ListItem* item;
+        for (item = ATX_List_GetFirstItem(Options.plugin_files); item; item = ATX_ListItem_GetNext(item)) {
+            ATX_String* s = (ATX_String*)ATX_ListItem_GetData(item);
+            ATX_String_Destruct(s);
+            ATX_FreeMemory(s);
+        }
+        ATX_List_Destroy(Options.plugin_files);
+        for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
+            ATX_String* s = (ATX_String*)ATX_ListItem_GetData(item);
+            ATX_String_Destruct(s);
+            ATX_FreeMemory(s);
+        }
+        ATX_List_Destroy(Options.plugin_directories);
+    }
+    
     return 0;
 }

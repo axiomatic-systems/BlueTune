@@ -61,9 +61,9 @@ BLT_Player::SetEventListener(EventListener* listener)
 |    BLT_Player::PumpMessage
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Player::PumpMessage(bool blocking)
+BLT_Player::PumpMessage(BLT_UInt32 timeout)
 {
-    return m_MessageQueue->PumpMessage(blocking);
+    return m_MessageQueue->PumpMessage(timeout);
 }
 
 /*----------------------------------------------------------------------
@@ -231,3 +231,161 @@ BLT_Player::SetProperty(BLT_PropertyScope        scope,
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SetProperty(scope, target, name, value);
 }
+
+/*----------------------------------------------------------------------
+|    BLT_PlayerAdapter
++---------------------------------------------------------------------*/
+class BLT_PlayerAdapter : public BLT_Player 
+{
+public:
+    static BLT_Player_CommandId MapCommandId(BLT_DecoderServer_Message::CommandId id) {
+        switch (id) {
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_INPUT:
+            return BLT_PLAYER_COMMAND_ID_SET_INPUT;
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_OUTPUT:
+            return BLT_PLAYER_COMMAND_ID_SET_OUTPUT;
+          case BLT_DecoderServer_Message::COMMAND_ID_PLAY:
+            return BLT_PLAYER_COMMAND_ID_PLAY;
+          case BLT_DecoderServer_Message::COMMAND_ID_STOP:
+            return BLT_PLAYER_COMMAND_ID_PLAY;
+          case BLT_DecoderServer_Message::COMMAND_ID_PAUSE:
+            return BLT_PLAYER_COMMAND_ID_PAUSE;
+          case BLT_DecoderServer_Message::COMMAND_ID_PING:
+            return BLT_PLAYER_COMMAND_ID_PING;
+          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_TIME:
+            return BLT_PLAYER_COMMAND_ID_SEEK_TO_TIME;
+          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_POSITION:
+            return BLT_PLAYER_COMMAND_ID_SEEK_TO_POSITION;
+          case BLT_DecoderServer_Message::COMMAND_ID_REGISTER_MODULE:
+            return BLT_PLAYER_COMMAND_ID_REGISTER_MODULE;
+          case BLT_DecoderServer_Message::COMMAND_ID_ADD_NODE:
+            return BLT_PLAYER_COMMAND_ID_ADD_NODE;
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY:
+            return BLT_PLAYER_COMMAND_ID_SET_PROPERTY;
+        }
+        return (BLT_Player_CommandId)(-1);
+    }
+    
+    static BLT_Player_DecoderState MapDecoderState(BLT_DecoderServer::State state) {
+        switch (state) {
+          case BLT_DecoderServer::STATE_PLAYING: return BLT_PLAYER_DECODER_STATE_PLAYING;
+          case BLT_DecoderServer::STATE_STOPPED: return BLT_PLAYER_DECODER_STATE_STOPPED;
+          case BLT_DecoderServer::STATE_PAUSED:  return BLT_PLAYER_DECODER_STATE_PAUSED;
+          case BLT_DecoderServer::STATE_EOS:     return BLT_PLAYER_DECODER_STATE_EOS;
+          default: return BLT_PLAYER_DECODER_STATE_PLAYING;
+        }
+    }
+    
+    BLT_PlayerAdapter(BLT_Player_EventListener listener) : m_CListener(listener) {
+        if (listener.handler == NULL) SetEventListener(NULL);
+    }
+    virtual void OnAckNotification(BLT_DecoderServer_Message::CommandId id) {
+        BLT_Player_AckEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_ACK}, 
+            MapCommandId(id)
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnNackNotification(BLT_DecoderServer_Message::CommandId id,
+                                    BLT_Result                           result) {
+        BLT_Player_NackEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_NACK}, 
+            MapCommandId(id),
+            result
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnPongNotification(const void* cookie) {
+        BLT_Player_PongNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_PONG_NOTIFICATION}, 
+            cookie
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnDecoderStateNotification(BLT_DecoderServer::State state) {
+        BLT_Player_DecoderStateNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_DECODER_STATE_NOTIFICATION}, 
+            MapDecoderState(state)
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode) {
+        BLT_Player_StreamTimeCodeNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_STREAM_TIMECODE_NOTIFICATION}, 
+            timecode
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnStreamPositionNotification(BLT_StreamPosition& position) {
+        BLT_Player_StreamPositionNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_STREAM_POSITION_NOTIFICATION}, 
+            position
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnStreamInfoNotification(BLT_Mask        update_mask, 
+                                          BLT_StreamInfo& info) {
+        BLT_Player_StreamInfoNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_STREAM_INFO_NOTIFICATION}, 
+            update_mask,
+            info
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
+    }
+    virtual void OnPropertyNotification(BLT_PropertyScope        scope,
+                                        const char*              source,
+                                        const char*              name,
+                                        const ATX_PropertyValue* value) {
+    }
+    
+private:
+    BLT_Player_EventListener m_CListener;
+};
+
+/*----------------------------------------------------------------------
+|    BLT_Player_Create
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Player_Create(BLT_Player_EventListener listener, BLT_Player** player)
+{
+    *player = new BLT_PlayerAdapter(listener);
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player_Destroy
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Player_Destroy(BLT_Player* self)
+{
+    delete self;
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player_PumpMessage
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Player_PumpMessage(BLT_Player* self, BLT_UInt32 timeout)
+{
+    return self->PumpMessage(timeout);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player_SetInput
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Player_SetInput(BLT_Player* self, BLT_CString name, BLT_CString mime_type)
+{
+    return self->SetInput(name, mime_type);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player_Play
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Player_Play(BLT_Player* self)
+{
+    return self->Play();
+}
+

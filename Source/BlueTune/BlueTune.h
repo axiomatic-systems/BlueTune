@@ -128,9 +128,8 @@ See the BLT_Player class for details.
 #include "BltEventListener.h"
 #include "BltKeyManager.h"
 #include "BltPcm.h"
-
-#ifdef __cplusplus
 #include "BltPlayer.h"
-#endif /* __cplusplus */
+#include "BltVersion.h"
+#include "BltDynamicPlugins.h"
 
 #endif /* _BLUETUNE_H_ */

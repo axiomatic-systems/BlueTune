@@ -94,6 +94,28 @@ BLT_Result BLT_Decoder_RegisterModule(BLT_Decoder* decoder,
                                       BLT_Module*  module);
 
 /**
+ * Load and Register a plugin.
+ * @param name Name of a plugin (filename of the plugin or special name)
+ * @param search_flags Flags that select how the actual plugin file will
+ * be located. It is an OR'ed combination or the BLT_PLUGIN_LOADER_FLAGS_XXX
+ * constants defined in BltDynamicPlugins.h
+ */
+BLT_Result BLT_Decoder_LoadPlugin(BLT_Decoder* decoder, 
+                                  const char*  name, 
+                                  BLT_Flags    search_flags);
+
+/**
+ * Load and Register all plugins located in a directory.
+ * @param directory Path of the directory that contains the plugins
+ * @param file_extension File extension of the plugin files, or NULL to load
+ * all files regardless of extension. The file extension includes the '.' 
+ * characters (ex: ".plugin")
+ */
+BLT_Result BLT_Decoder_LoadPlugins(BLT_Decoder* decoder, 
+                                   const char*  directory,
+                                   const char*  file_extension);
+
+/**
  * Set a BLT_Decoder object's input.
  * @param name Name of the input.
  * @param type Mime-type of the input, if known, or NULL.

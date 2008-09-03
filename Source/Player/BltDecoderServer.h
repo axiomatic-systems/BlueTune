@@ -47,8 +47,8 @@ public:
     virtual void OnStopCommand() = 0;
     virtual void OnPauseCommand() = 0;
     virtual void OnPingCommand(const void* cookie) = 0;
-    virtual void OnSeekToTimeCommand(BLT_Cardinal time) = 0;
-    virtual void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range) = 0;
+    virtual void OnSeekToTimeCommand(BLT_UInt64 time) = 0;
+    virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range) = 0;
     virtual void OnRegisterModuleCommand(BLT_Module* module) = 0;
     virtual void OnAddNodeCommand(BLT_CString name) = 0;
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
@@ -219,7 +219,7 @@ class BLT_DecoderServer_SeekToTimeCommandMessage : public BLT_DecoderServer_Mess
 {
 public:
     // methods
-    BLT_DecoderServer_SeekToTimeCommandMessage(BLT_Cardinal time) :
+    BLT_DecoderServer_SeekToTimeCommandMessage(BLT_UInt64 time) :
         BLT_DecoderServer_Message(COMMAND_ID_SEEK_TO_TIME),
         m_Time(time) {}
     NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
@@ -229,7 +229,7 @@ public:
 
  private:
     // members
-    BLT_Cardinal m_Time;
+    BLT_UInt64 m_Time;
 };
 
 /*----------------------------------------------------------------------
@@ -239,8 +239,8 @@ class BLT_DecoderServer_SeekToPositionCommandMessage : public BLT_DecoderServer_
 {
 public:
     // methods
-    BLT_DecoderServer_SeekToPositionCommandMessage(BLT_Size offset,
-                                                   BLT_Size range) :
+    BLT_DecoderServer_SeekToPositionCommandMessage(BLT_UInt64 offset,
+                                                   BLT_UInt64 range) :
         BLT_DecoderServer_Message(COMMAND_ID_SEEK_TO_POSITION),
         m_Offset(offset), m_Range(range) {}
     NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
@@ -250,8 +250,8 @@ public:
 
  private:
     // members
-    BLT_Size m_Offset;
-    BLT_Size m_Range;
+    BLT_UInt64 m_Offset;
+    BLT_UInt64 m_Range;
 };
 
 /*----------------------------------------------------------------------
@@ -374,8 +374,8 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual BLT_Result Stop();
     virtual BLT_Result Pause();
     virtual BLT_Result Ping(const void* cookie);
-    virtual BLT_Result SeekToTime(BLT_Cardinal time);
-    virtual BLT_Result SeekToPosition(BLT_Size offset, BLT_Size range);
+    virtual BLT_Result SeekToTime(BLT_UInt64 time);
+    virtual BLT_Result SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range);
     virtual BLT_Result RegisterModule(BLT_Module* module);
     virtual BLT_Result AddNode(BLT_CString name);
     virtual BLT_Result SetProperty(BLT_PropertyScope        scope,
@@ -393,8 +393,8 @@ class BLT_DecoderServer : public NPT_Thread,
     void OnStopCommand();
     void OnPauseCommand();
     void OnPingCommand(const void* cookie);
-    void OnSeekToTimeCommand(BLT_Cardinal time);
-    void OnSeekToPositionCommand(BLT_Size offset, BLT_Size range);
+    void OnSeekToTimeCommand(BLT_UInt64 time);
+    void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range);
     void OnRegisterModuleCommand(BLT_Module* module);
     void OnAddNodeCommand(BLT_CString name);
     void OnSetPropertyCommand(BLT_PropertyScope        scope,

@@ -136,9 +136,9 @@ MfcPlayer::OnStreamPositionNotification(BLT_StreamPosition& position)
     if (m_Scrolling) return;
 
     // show the position on the scroll bar
-    int range = m_Dialog->m_Slider.GetRangeMax()-m_Dialog->m_Slider.GetRangeMin();
-    int pos = (position.offset*range)/position.range;
-    m_Dialog->m_Slider.SetPos(pos);
+    ATX_Int64 range = m_Dialog->m_Slider.GetRangeMax()-m_Dialog->m_Slider.GetRangeMin();
+    ATX_Int64 pos = (position.offset*range)/position.range;
+    m_Dialog->m_Slider.SetPos((unsigned int)pos);
 }
 
 /*----------------------------------------------------------------------

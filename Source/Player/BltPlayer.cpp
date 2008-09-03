@@ -153,9 +153,9 @@ BLT_Player::Pause()
 |    BLT_Player::SeekToTime
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Player::SeekToTime(BLT_Cardinal time)
+BLT_Player::SeekToTime(BLT_UInt64 time)
 {
-    ATX_LOG_FINE_1("BLT_Player::SeekToTime - time=%d", time);
+    ATX_LOG_FINE_1("BLT_Player::SeekToTime - time=%d", (int)time);
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SeekToTime(time);
 }
@@ -178,7 +178,7 @@ BLT_Player::SeekToTimeStamp(BLT_UInt8 h,
 |    BLT_Player::SeekToPosition
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Player::SeekToPosition(BLT_Size offset, BLT_Size range)
+BLT_Player::SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range)
 {
     ATX_LOG_FINE_2("BLT_Player::SeekToPosition, offset=%d, range=%d", offset, range);
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;

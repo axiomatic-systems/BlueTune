@@ -134,10 +134,10 @@ class BLT_Player : public BLT_DecoderClient
     virtual BLT_Result Pause();
 
     /**
-     * Instruct the decoder to seek to a specifc time value.
+     * Instruct the decoder to seek to a specific time value.
      * @param time the time to seek to, expressed in milliseconds.
      */
-    virtual BLT_Result SeekToTime(BLT_UInt32 time);
+    virtual BLT_Result SeekToTime(BLT_UInt64 time);
 
     /**
      * Instruct the decoder to seek to a specific time stamp.
@@ -156,11 +156,11 @@ class BLT_Player : public BLT_DecoderClient
      * @param offset Offset between 0 and range
      * @param range Maximum value of offset. The range is an arbitrary
      * scale. For example, if offset=1 and range=2, this means that
-     * the decoder should seek to exacly the middle point of the input.
+     * the decoder should seek to exactly the middle point of the input.
      * Or if offset=25 and range=100, this means that the decoder should
      * seek to the point that is at 25/100 of the total input.
      */
-    virtual BLT_Result SeekToPosition(BLT_Size offset, BLT_Size range);
+    virtual BLT_Result SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range);
 
     /**
      * Ping the decoder.

@@ -294,7 +294,7 @@ BLT_Decoder_Pause(BLT_Decoder* decoder)
 |    BLT_Decoder_SeekToTime
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time)
+BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt64 time)
 {
     return BLT_Stream_SeekToTime(decoder->stream, time);
 }
@@ -304,8 +304,8 @@ BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time)
 +---------------------------------------------------------------------*/
 BLT_Result 
 BLT_Decoder_SeekToPosition(BLT_Decoder* decoder,
-                           BLT_Size     offset,
-                           BLT_Size     range)
+                           BLT_UInt64   offset,
+                           BLT_UInt64   range)
 {
     return BLT_Stream_SeekToPosition(decoder->stream, offset, range);
 }

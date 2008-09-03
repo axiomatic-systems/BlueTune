@@ -200,7 +200,7 @@ BLT_Result BLT_Decoder_Pause(BLT_Decoder* decoder);
  * Seek to a specific time.
  * @param Time to which to seek, in milliseconds.
  */
-BLT_Result BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time);
+BLT_Result BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt64 time);
 
 /** Seek to a specific position.
  * @param offset Offset between 0 and range
@@ -211,8 +211,8 @@ BLT_Result BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt32 time);
  * seek to the point that is at 25/100 of the total input.
  */
 BLT_Result BLT_Decoder_SeekToPosition(BLT_Decoder* decoder,
-                                      BLT_Size     offset,
-                                      BLT_Size     range);
+                                      BLT_UInt64   offset,
+                                      BLT_UInt64   range);
 
 /**
  * Set a BLT_Decoder object's event listener. The listener object's

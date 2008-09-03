@@ -37,7 +37,7 @@ typedef struct {
     ATX_RingBuffer*  buffer;
     ATX_Size         buffer_size;
     ATX_Size         back_store;
-    ATX_Offset       position;
+    ATX_Position     position;
     ATX_Boolean      eos;
     ATX_Size         seek_as_read_threshold;
 } BLT_NetworkStream;
@@ -266,7 +266,7 @@ static ATX_Result
 BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
-    int                move = position-self->position;
+    ATX_Int64          move = position-self->position;
     ATX_Result         result;
 
     /* shortcut */
@@ -283,14 +283,14 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     }
     
     /* see if we can seek entirely within our buffer */
-    if ((move < 0 && -move <= (int)self->back_store) ||
-        (move > 0 && move < (int)ATX_RingBuffer_GetAvailable(self->buffer))) {
-        ATX_RingBuffer_MoveOut(self->buffer, move);
+    if ((move < 0 && -move <= (ATX_Int64)self->back_store) ||
+        (move > 0 && move < (ATX_Int64)ATX_RingBuffer_GetAvailable(self->buffer))) {
+        ATX_RingBuffer_MoveOut(self->buffer, (ATX_Size)move);
         self->position = position;
         self->eos = ATX_FALSE;
 
         /* adjust the back-store counter */
-        self->back_store += move;
+        self->back_store += (ATX_Size)move;
 
         return ATX_SUCCESS;
     }

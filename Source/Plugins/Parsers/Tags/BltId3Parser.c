@@ -147,7 +147,7 @@ BLT_Id3Parser_TrimString(char* buffer, BLT_Size max_size)
 +---------------------------------------------------------------------*/
 static BLT_Result
 BLT_Id3Parser_ParseV1(ATX_InputStream* stream, 
-                      BLT_Size         stream_size,
+                      BLT_LargeSize    stream_size,
                       BLT_Size*        tag_size,
                       ATX_Properties*  properties)
 {
@@ -274,7 +274,7 @@ BLT_Id3Parser_ParseV1(ATX_InputStream* stream,
 +---------------------------------------------------------------------*/
 static BLT_Result
 BLT_Id3Parser_ParseV2(ATX_InputStream* stream, 
-                      BLT_Size         stream_size, 
+                      BLT_LargeSize    stream_size, 
                       BLT_Size*        tag_size,
                       ATX_Properties*  properties)
 {
@@ -327,8 +327,8 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Id3Parser_ParseStream(ATX_InputStream* stream, 
-                          BLT_Offset       stream_start,
-                          BLT_Size         stream_size,
+                          BLT_Position     stream_start,
+                          BLT_LargeSize    stream_size,
                           BLT_Size*        header_size,
                           BLT_Size*        trailer_size, 
                           ATX_Properties*  properties)

@@ -113,7 +113,7 @@ TagParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* get the stream size */
     result = ATX_InputStream_GetSize(stream, &stream_size);
-    if (BLT_FAILED(result) || stream_size < (BLT_Size)stream_start) {
+    if (BLT_FAILED(result) || stream_size < stream_start) {
         stream_size = 0;
     } else {
         stream_size -= stream_start;

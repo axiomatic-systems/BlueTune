@@ -1867,7 +1867,7 @@ Stream_GetStatus(BLT_Stream* _self, BLT_StreamStatus* status)
     status->time_stamp = self->output.next_time_stamp;
     if (self->info.duration) {
         /* estimate the position from the time stamp and duration */
-        status->position.offset = (BLT_Size)BLT_TimeStamp_ToMillis(status->time_stamp);
+        status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
         status->position.range  = self->info.duration;
     } else {
         status->position.offset = 0;
@@ -1990,7 +1990,7 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
                 point->mask |= BLT_SEEK_POINT_MASK_POSITION;
 
                 /* compute offset from size and duration */
-                point->offset = (BLT_Size)(((ATX_UInt64)self->info.size*(ATX_UInt64)point->sample)/duration_samples);
+                point->offset = (((ATX_UInt64)self->info.size*(ATX_UInt64)point->sample)/duration_samples);
                 point->mask |= BLT_SEEK_POINT_MASK_OFFSET;
                 
                 /* compute time stamp */

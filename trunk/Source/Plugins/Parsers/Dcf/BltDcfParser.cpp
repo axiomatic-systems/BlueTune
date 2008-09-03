@@ -61,7 +61,7 @@ typedef struct {
     BLT_MediaType           dcf2_media_type;
     char                    content_type[257];
     char                    content_uri[257];
-    BLT_Size                encrypted_size;
+    BLT_LargeSize           encrypted_size;
 } DcfParserInput;
 
 // it is important to keep this structure a POD (no methods)
@@ -386,7 +386,7 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
                                 sizeof(self->input.content_type));
                     
                 /* update the encrypted size */
-                self->input.encrypted_size = (BLT_Size)odda->GetEncryptedDataLength();
+                self->input.encrypted_size = odda->GetEncryptedDataLength();
             }
         }
     }
@@ -397,7 +397,7 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
     /* update the output size */
     AP4_LargeSize plaintext_size = 0;
     if (AP4_SUCCEEDED(decrypting_stream->GetSize(plaintext_size))) {
-        self->output.size = (BLT_Size)plaintext_size;
+        self->output.size = plaintext_size;
     } else {
         self->output.size = self->input.encrypted_size;
     }

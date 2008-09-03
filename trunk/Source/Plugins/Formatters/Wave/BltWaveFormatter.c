@@ -42,7 +42,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_OutputStreamProvider);
 
     /* members */
-    BLT_Size         size;
+    BLT_LargeSize    size;
     BLT_PcmMediaType media_type;
 } WaveFormatterInput;
 
@@ -91,7 +91,7 @@ WaveFormatter_WriteWavHeader(WaveFormatter*          self,
     ATX_OutputStream_Write(self->output.stream, "RIFF", 4, NULL);
 
     /* RIFF chunk size */
-    ATX_BytesFromInt32Le(buffer, self->input.size + 8+16+12);
+    ATX_BytesFromInt32Le(buffer, (ATX_Size)self->input.size + 8+16+12);
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 
     ATX_OutputStream_Write(self->output.stream, "WAVE", 4, NULL);
@@ -132,7 +132,7 @@ WaveFormatter_WriteWavHeader(WaveFormatter*          self,
     ATX_OutputStream_Write(self->output.stream, "data", 4, NULL);
 
     /* data size */
-    ATX_BytesFromInt32Le(buffer, self->input.size);        
+    ATX_BytesFromInt32Le(buffer, (ATX_Size)self->input.size);        
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 
     return BLT_SUCCESS;
@@ -150,13 +150,13 @@ WaveFormatter_UpdateWavHeader(WaveFormatter* self)
     ATX_LOG_FINER_1("WaveFormatter::UpdateWavHeader - size = %d", self->input.size);
 
     result = ATX_OutputStream_Seek(self->output.stream, 4);
-    ATX_BytesFromInt32Le(buffer, self->input.size + 8+16+12);
+    ATX_BytesFromInt32Le(buffer, (ATX_Size)self->input.size + 8+16+12);
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 
     result = ATX_OutputStream_Seek(self->output.stream, 40);
     if (BLT_FAILED(result)) return result;
 
-    ATX_BytesFromInt32Le(buffer, self->input.size);        
+    ATX_BytesFromInt32Le(buffer, (ATX_Size)self->input.size);        
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 
     ATX_LOG_FINER("WaveFormatter::UpdateWavHeader - updated");

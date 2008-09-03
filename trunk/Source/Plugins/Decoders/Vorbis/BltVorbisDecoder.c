@@ -120,7 +120,7 @@ static int
 VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
 {
     VorbisDecoder* self = (VorbisDecoder *)datasource;
-    BLT_Offset     where;
+    BLT_Position   where;
     BLT_Result     result;
 
     /* compute where to seek */
@@ -140,8 +140,8 @@ VorbisDecoder_SeekCallback(void *datasource, ogg_int64_t offset, int whence)
             }
         }
     } else if (whence == SEEK_END) {
-        if (offset <= self->input.size) {
-            where = self->input.size - (long)offset;
+        if (offset <= (ogg_int64_t)self->input.size) {
+            where = self->input.size - offset;
         } else {
             where = 0;
         }
@@ -186,7 +186,7 @@ VorbisDecoder_TellCallback(void *datasource)
 
     result = ATX_InputStream_Tell(self->input.stream, &position);
     if (BLT_SUCCEEDED(result)) {
-        return position;
+        return (long)position;
     } else {
         return 0;
     }

@@ -207,13 +207,13 @@ CallbackInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     /* update the stream info */
     {
         BLT_StreamInfo info;
-        ATX_Size       size;
+        ATX_LargeSize  size;
         BLT_Result     result;
 
         result = ATX_InputStream_GetSize(self->stream, &size);
         if (BLT_SUCCEEDED(result)) {
             info.mask = BLT_STREAM_INFO_MASK_SIZE;
-            info.size = (BLT_UInt32)size;
+            info.size = size;
             BLT_Stream_SetInfo(stream, &info);
         }
     }

@@ -74,7 +74,7 @@ typedef struct {
 
     /* members */
     ATX_InputStream* stream;
-    BLT_Size         size;
+    BLT_LargeSize    size;
     BLT_MediaType    media_type;
 } DcfParserOutput;
 

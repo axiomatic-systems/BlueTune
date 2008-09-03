@@ -55,7 +55,7 @@ typedef struct {
 
     /* members */
     ATX_InputStream* stream;
-    BLT_Size         size;
+    BLT_LargeSize    size;
     BLT_PcmMediaType media_type;
 } AiffParserOutput;
 
@@ -213,7 +213,9 @@ AiffParser_OnCommChunk(AiffParser*      self,
 |   AiffParser_OnSsndChunk
 +---------------------------------------------------------------------*/
 static BLT_Result
-AiffParser_OnSsndChunk(AiffParser* self, ATX_InputStream* stream, BLT_Size size)
+AiffParser_OnSsndChunk(AiffParser*      self, 
+                       ATX_InputStream* stream, 
+                       BLT_LargeSize    size)
 {
     unsigned char ssnd_buffer[BLT_AIFF_SSND_CHUNK_MIN_SIZE];
     unsigned long offset;
@@ -332,7 +334,7 @@ AiffParser_ParseChunks(AiffParser*      self,
                         ATX_InputStream_GetSize(stream, &input_size);
                         ATX_InputStream_Tell(stream, &position);
                         if (input_size > (ATX_Size)(position+8)) {
-                            data_size = input_size-position-8;
+                            data_size = (ATX_Size)(input_size-position-8);
                         }
                     } else {
                         return BLT_ERROR_INVALID_MEDIA_FORMAT;

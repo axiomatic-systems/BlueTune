@@ -22,8 +22,8 @@
 |   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_Id3Parser_ParseStream(ATX_InputStream* stream,
-                                     BLT_Offset       stream_start,
-                                     BLT_Size         stream_size,
+                                     BLT_Position     stream_start,
+                                     BLT_LargeSize    stream_size,
                                      BLT_Size*        header_size,
                                      BLT_Size*        trailer_size,
                                      ATX_Properties*  properties);

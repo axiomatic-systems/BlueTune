@@ -48,7 +48,7 @@ typedef struct {
     struct {
         FLO_Size     size;
         FLO_Cardinal bitrate;
-        FLO_Cardinal duration_ms;
+        FLO_Int64    duration_ms;
         FLO_Cardinal duration_frames;
         FLO_Int64    duration_samples;
         FLO_Cardinal decoder_delay;

@@ -300,8 +300,8 @@ BLT_DecoderServer::UpdateStatus()
 
     // convert the stream position into a decoder position 
     if (m_PositionUpdateRange != 0) {
-        unsigned long ratio = status.position.range/m_PositionUpdateRange;
-        unsigned long offset;
+        ATX_UInt64 ratio = status.position.range/m_PositionUpdateRange;
+        ATX_UInt64 offset;
         if (ratio == 0) {
  	        offset = 0;
 	    } else {
@@ -476,7 +476,7 @@ BLT_DecoderServer::OnPingCommand(const void* cookie)
 |    BLT_DecoderServer::SeekToTime
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderServer::SeekToTime(BLT_Cardinal time)
+BLT_DecoderServer::SeekToTime(BLT_UInt64 time)
 {
     return PostMessage(new BLT_DecoderServer_SeekToTimeCommandMessage(time));
 }
@@ -485,11 +485,11 @@ BLT_DecoderServer::SeekToTime(BLT_Cardinal time)
 |    BLT_DecoderServer::OnSeekToTimeCommand
 +---------------------------------------------------------------------*/
 void
-BLT_DecoderServer::OnSeekToTimeCommand(BLT_Cardinal time)
+BLT_DecoderServer::OnSeekToTimeCommand(BLT_UInt64 time)
 {
     BLT_Result result;
     ATX_LOG_FINE_1("BLT_DecoderServer::OnSeekToTimeCommand "
-                   "[%02d]", time);
+                   "[%02d]", (int)time);
     result = BLT_Decoder_SeekToTime(m_Decoder, time);
     if (BLT_SUCCEEDED(result)) {
         UpdateStatus();
@@ -505,7 +505,7 @@ BLT_DecoderServer::OnSeekToTimeCommand(BLT_Cardinal time)
 |    BLT_DecoderServer::SeekToPosition
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderServer::SeekToPosition(BLT_Size offset, BLT_Size range)
+BLT_DecoderServer::SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range)
 {
     return PostMessage(
         new BLT_DecoderServer_SeekToPositionCommandMessage(offset, range));
@@ -515,7 +515,7 @@ BLT_DecoderServer::SeekToPosition(BLT_Size offset, BLT_Size range)
 |    BLT_DecoderServer::OnSeekToPositionCommnand
 +---------------------------------------------------------------------*/
 void
-BLT_DecoderServer::OnSeekToPositionCommand(BLT_Size offset, BLT_Size range)
+BLT_DecoderServer::OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range)
 {
     BLT_Result result;
     ATX_LOG_FINE_2("BLT_DecoderServer::OnSeekToPositionCommand "

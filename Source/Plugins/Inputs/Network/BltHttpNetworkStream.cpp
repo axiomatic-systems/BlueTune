@@ -48,7 +48,7 @@ typedef struct {
     NPT_HttpUrl*              m_Url;
     NPT_HttpResponse*         m_Response;
     NPT_InputStreamReference* m_InputStream;
-    NPT_Size                  m_ContentLength;
+    NPT_LargeSize             m_ContentLength;
     bool                      m_Eos;
     bool                      m_IsIcy;
     bool                      m_CanSeek;
@@ -435,7 +435,7 @@ HttpInputStream_Tell(ATX_InputStream* _self,
 +---------------------------------------------------------------------*/
 BLT_METHOD
 HttpInputStream_GetSize(ATX_InputStream* _self, 
-                        ATX_Size*        size)
+                        ATX_LargeSize*   size)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
     *size = self->m_ContentLength;
@@ -447,12 +447,12 @@ HttpInputStream_GetSize(ATX_InputStream* _self,
 +---------------------------------------------------------------------*/
 BLT_METHOD
 HttpInputStream_GetAvailable(ATX_InputStream* _self, 
-                             ATX_Size*        available)
+                             ATX_LargeSize*   available)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
     *available = 0;
     if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
-    NPT_Size _available;
+    NPT_LargeSize _available;
     ATX_Result result = HttpInputStream_MapResult((*(self->m_InputStream))->GetAvailable(_available));
     if (available) *available = _available;
     return result;

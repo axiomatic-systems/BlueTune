@@ -50,7 +50,7 @@ typedef struct {
     /* members */
     BLT_Boolean                     eos;
     ATX_InputStream*                stream;
-    BLT_Size                        size;
+    BLT_LargeSize                   size;
     BLT_MediaTypeId                 media_type_id;
     FLAC__StreamDecoder*            decoder;
     FLAC__StreamMetadata_StreamInfo stream_info;
@@ -88,7 +88,7 @@ ATX_DECLARE_INTERFACE_MAP(FlacDecoder, ATX_Referenceable)
 |   FlacDecoderInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FlacDecoderInput_SetStream(BLT_InputStreamUser*     _self, 
+FlacDecoderInput_SetStream(BLT_InputStreamUser* _self, 
                            ATX_InputStream*     stream,
                            const BLT_MediaType* media_type)
 {
@@ -358,9 +358,9 @@ FlacDecoder_LengthCallback(const FLAC__StreamDecoder* decoder,
                            FLAC__uint64*              stream_length, 
                            void*                      client_data)
 {
-    FlacDecoder* self = (FlacDecoder*)client_data;
-    BLT_Size     size;
-    BLT_Result   result;
+    FlacDecoder*  self = (FlacDecoder*)client_data;
+    BLT_LargeSize size;
+    BLT_Result    result;
 
     /* unused parameters */
     BLT_COMPILER_UNUSED(decoder);
@@ -372,8 +372,6 @@ FlacDecoder_LengthCallback(const FLAC__StreamDecoder* decoder,
     } else {
         *stream_length = size;
     }
-
-    /*BLT_Debug("FlacDecoder::LengthCallback - length = %ld\n", *stream_length);*/
 
     return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
 }
@@ -390,7 +388,6 @@ FlacDecoder_EofCallback(const FLAC__StreamDecoder* decoder,
     /* unused parameters */
     BLT_COMPILER_UNUSED(decoder);
 
-    /*if (self->input.eos) BLT_Debug("FlacDecoder::EofCallback - EOF\n");*/
     return self->input.eos == BLT_TRUE ? 1:0;
 }
 
@@ -410,9 +407,6 @@ FlacDecoder_WriteCallback(const FLAC__StreamDecoder* decoder,
 
     /* unused parameters */
     BLT_COMPILER_UNUSED(decoder);
-
-    /*BLT_Debug("FlacDecoder::WriteCallback - size=%ld\n", 
-      frame->header.blocksize);*/
 
     /* check format */
     if (frame->header.channels == 0 ||

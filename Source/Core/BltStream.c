@@ -2052,7 +2052,7 @@ Stream_Seek(Stream*        self,
 |    Stream_SeekToTime
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Stream_SeekToTime(BLT_Stream* _self, BLT_Cardinal time)
+Stream_SeekToTime(BLT_Stream* _self, BLT_UInt64 time)
 {
     Stream*       self = ATX_SELF(Stream, BLT_Stream);
     BLT_SeekPoint point;
@@ -2062,9 +2062,10 @@ Stream_SeekToTime(BLT_Stream* _self, BLT_Cardinal time)
     ATX_SetMemory(&point, 0, sizeof(point));
     mode       = BLT_SEEK_MODE_BY_TIME_STAMP;
     point.mask = BLT_SEEK_POINT_MASK_TIME_STAMP;
-    point.time_stamp.seconds     = time/1000;
+    point.time_stamp.seconds     = (BLT_Int32)(time/1000);
     point.time_stamp.nanoseconds = 
-        (time-(point.time_stamp.seconds*1000))*1000000;
+        (BLT_Int32)
+        ((time-(point.time_stamp.seconds*1000))*1000000);
 
     /* fill in the other seek point fields */
     Stream_EstimateSeekPoint(_self, mode, &point);
@@ -2078,8 +2079,8 @@ Stream_SeekToTime(BLT_Stream* _self, BLT_Cardinal time)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 Stream_SeekToPosition(BLT_Stream* _self, 
-                      BLT_Size    offset,
-                      BLT_Size    range)
+                      BLT_UInt64  offset,
+                      BLT_UInt64  range)
 {
     Stream*       self = ATX_SELF(Stream, BLT_Stream);
     BLT_SeekPoint point;

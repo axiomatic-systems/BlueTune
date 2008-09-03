@@ -60,7 +60,7 @@ FLO_Vbr_ComputeDurationAndBitrate(FLO_FrameInfo*     frame_info,
     if (frame_info->sample_rate) {
         /* compute the duration in ms */
         ATX_UInt64 duration = (1000*(ATX_UInt64)sample_count)/frame_info->sample_rate;
-        decoder_status->stream_info.duration_ms = (ATX_UInt32)duration;
+        decoder_status->stream_info.duration_ms = duration;
 
         /* compute the bitrate */
         if (decoder_status->stream_info.duration_ms) {

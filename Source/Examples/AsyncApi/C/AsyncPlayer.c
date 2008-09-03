@@ -109,7 +109,7 @@ OnEvent(void* instance, const BLT_Player_Event* event)
                 printf("  INFO: Channels = %d\n", ((BLT_Player_StreamInfoNotificationEvent*)event)->info.channel_count);
             }
             if (((BLT_Player_StreamInfoNotificationEvent*)event)->update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-                printf("  INFO: Stream Size = %d\n", ((BLT_Player_StreamInfoNotificationEvent*)event)->info.size);
+                printf("  INFO: Stream Size = %d\n", (BLT_Int32)((BLT_Player_StreamInfoNotificationEvent*)event)->info.size);
             }
             if (((BLT_Player_StreamInfoNotificationEvent*)event)->update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
                 printf("  INFO: Data Type = %s\n", ((BLT_Player_StreamInfoNotificationEvent*)event)->info.data_type?((BLT_Player_StreamInfoNotificationEvent*)event)->info.data_type:"(null)");

@@ -54,7 +54,7 @@ typedef struct {
     /* members */
     BLT_Boolean      eos;
     ATX_InputStream* stream;
-    BLT_Size         size;
+    BLT_LargeSize    size;
     BLT_MediaTypeId  media_type_id;
     OggVorbis_File   vorbis_file;
 } VorbisDecoderInput;

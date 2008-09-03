@@ -355,9 +355,9 @@ BtPlayerServer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& i
 +---------------------------------------------------------------------*/
 void 
 BtPlayerServer::OnPropertyNotification(BLT_PropertyScope        scope,
-                                     const char*              /* source */,
-                                     const char*              name,
-                                     const ATX_PropertyValue* value)
+                                       const char*              /* source */,
+                                       const char*              name,
+                                       const ATX_PropertyValue* value)
 {
     ATX_Properties* properties = NULL;
     switch (scope) {

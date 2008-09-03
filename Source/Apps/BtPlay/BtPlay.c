@@ -70,7 +70,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "usage: btplay [options] <input-spec> [<input-spec>..]\n"
         "  each <input-spec> is either an input name (file or URL), or an input type\n"
         "  (--input-type=<type>) followed by an input name\n"
-        "\n"
+        "\n");
+    ATX_ConsoleOutput(
         "options:\n"
         "  -h\n"
         "  --help\n" 

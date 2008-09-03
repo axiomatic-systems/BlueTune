@@ -55,3 +55,4 @@ BLT_Result BLT_Plugins_LoadModulesFromDirectory(BLT_Core*   core,
 #endif
                      
 #endif /* _BLT_DYNAMIC_PLUGIN_H_ */
+

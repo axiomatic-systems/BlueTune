@@ -50,6 +50,7 @@ def GlobSources(directory, patterns, excluded_files=[]):
 ### Return the scons-style directory path for a directory name, with support
 ### for the global source directory map
 def GetDirPath(directory):
+    if directory.startswith('/'): return directory
     for key in SourceDirMap.keys():
         if directory.startswith(key):
             return SourceDirMap[key]+directory[len(key):]
@@ -223,6 +224,7 @@ class CompiledModule(Module):
                  extra_cpp_defines             = [],
                  extra_libs                    = [],
                  extra_lib_dirs                = [],
+                 object_name_map               = {},
                  force_non_shared              = False,
                  environment                   = None):
 
@@ -288,10 +290,15 @@ class CompiledModule(Module):
             generator = env.StaticObject
         else:
             generator = env.SharedObject
-        self.objects = [generator(source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines) for x in sources]
+        self.objects = []
+        for x in sources:
+            if x in object_name_map:
+                object_name = object_name_map[x]
+            	self.objects.append(generator(target=object_name, source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
+	    else:
+            	self.objects.append(generator(source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
         if module_type == 'Objects':
-            self.nodes = [] #env.StaticLibrary(target=name, source=self.objects)
-            self.library = self.nodes
+            self.nodes = []
         elif module_type == 'Executable':
             link_deps = self.flat_link_deps
             libs = GetProducts(link_deps)
@@ -304,7 +311,7 @@ class CompiledModule(Module):
         else:
             raise Exception('Unknown Module Type')
             
-        self.product = self.nodes   
+	self.product = self.nodes   
         env.Alias(name, self.nodes)
 
 ############################################################################
@@ -367,11 +374,11 @@ class ExecutableModule(CompiledModule):
 ############################################################################
 class SharedLibraryModule(Module):
     def __init__(self, name,
-                 library_name = None,
-                 anchor_module = '',
-                 link_deps = [],
+                 library_name          = None,
+                 anchor_module         = '',
+                 link_deps             = [],
                  exported_include_dirs = [],
-                 environment = None) :
+                 environment           = None) :
         Module.__init__(self, name, include_dirs=exported_include_dirs) # chained_include_only_deps=exported_include_dirs
         
          # setup the environment        
@@ -384,7 +391,10 @@ class SharedLibraryModule(Module):
         lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
         lib_path += GetLibDirs(all_deps)
         
-        self.nodes = env.SharedLibrary(target=(library_name and library_name or name), source=objects, LIBS=libs, LIBPATH=lib_path)
+	if library_name:
+            self.nodes = env.SharedLibrary(target=library_name, SHLIBPREFIX='', source=objects, LIBS=libs, LIBPATH=lib_path)
+	else:
+            self.nodes = env.SharedLibrary(target=name, source=objects, LIBS=libs, LIBPATH=lib_path)
         
         ### we must use just the basename of the shared library here so that the dynamic linker won't
         ### try to keep the build-time root-relative path name of the lib when linking
@@ -424,7 +434,6 @@ class StaticLibraryModule(Module):
         self.libs = GetLibs(   chained_link_only_deps+chained_link_and_include_deps)
         
         self.nodes = env.StaticLibrary(target=(library_name and library_name or name), source=objects)
-        self.library = self.nodes
         self.product = self.nodes
         env.Alias(name, self.nodes)
         

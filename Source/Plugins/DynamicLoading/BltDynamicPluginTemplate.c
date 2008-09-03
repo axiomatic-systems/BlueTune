@@ -46,4 +46,4 @@ BLT_PLUGIN_GET_MODULE_FUNCTION_NAME(BLT_UInt32   abi_version,
     
     return BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION(module);
 }
-                     
+

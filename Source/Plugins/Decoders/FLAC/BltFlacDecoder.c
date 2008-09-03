@@ -279,7 +279,7 @@ FlacDecoder_ReadCallback(const FLAC__StreamDecoder* flac,
     /* read from the input stream */
     result = ATX_InputStream_Read(self->input.stream,
                                   buffer,
-                                  (ATX_Size)*bytes,
+                                  *bytes,
                                   &bytes_read);
     if (BLT_FAILED(result)) {
         if (result == BLT_ERROR_EOS) {

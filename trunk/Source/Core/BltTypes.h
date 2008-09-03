@@ -34,6 +34,7 @@ typedef ATX_Result       BLT_Result;
 typedef ATX_Flags        BLT_Flags;
 typedef ATX_Mask         BLT_Mask;
 typedef ATX_Offset       BLT_Offset;
+typedef ATX_Position     BLT_Position;
 typedef ATX_Address      BLT_Address;
 typedef ATX_Range        BLT_Range;
 typedef ATX_Cardinal     BLT_Cardinal;
@@ -44,6 +45,7 @@ typedef ATX_Any          BLT_Any;
 typedef ATX_AnyConst     BLT_AnyConst;
 typedef ATX_ByteBuffer   BLT_ByteBuffer;
 typedef ATX_Size         BLT_Size;
+typedef ATX_LargeSize    BLT_LargeSize;
 typedef ATX_Boolean      BLT_Boolean;
 
 /*----------------------------------------------------------------------

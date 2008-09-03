@@ -287,13 +287,13 @@ WaveParser_ParseHeader(WaveParser*      self,
             if (chunk_size) {
                 stream_info->size = chunk_size;
             } else {
-                ATX_Size stream_size = 0;
+                ATX_LargeSize stream_size = 0;
                 ATX_InputStream_GetSize(stream, &stream_size);
                 stream_info->size = stream_size;
             }
             stream_info->mask |= BLT_STREAM_INFO_MASK_SIZE;
             if (stream_info->size != 0 && bytes_per_second != 0) {
-                stream_info->duration = (ATX_UInt32)(((ATX_UInt64)stream_info->size*1000)/bytes_per_second);
+                stream_info->duration = (((ATX_UInt64)stream_info->size*1000)/bytes_per_second);
                 stream_info->mask |= BLT_STREAM_INFO_MASK_DURATION;
             } else {
                 stream_info->duration = 0;

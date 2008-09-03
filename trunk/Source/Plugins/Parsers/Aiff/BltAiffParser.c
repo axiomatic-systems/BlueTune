@@ -327,8 +327,8 @@ AiffParser_ParseChunks(AiffParser*      self,
                     if (data_size == 0) {
                         /* this could be caused by a software that wrote a */
                         /* temporary header and was not able to update it  */
-                        ATX_Size     input_size;
-                        ATX_Position position;
+                        ATX_LargeSize input_size;
+                        ATX_Position  position;
                         ATX_InputStream_GetSize(stream, &input_size);
                         ATX_InputStream_Tell(stream, &position);
                         if (input_size > (ATX_Size)(position+8)) {
@@ -375,7 +375,7 @@ AiffParser_ParseChunks(AiffParser*      self,
         self->output.media_type.bits_per_sample/8;
 
     if (stream_info.size != 0 && bytes_per_second != 0) {
-        stream_info.duration = (BLT_UInt32)(((ATX_UInt64)stream_info.size*1000)/bytes_per_second);
+        stream_info.duration = (((ATX_UInt64)stream_info.size*1000)/bytes_per_second);
         stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
     } else {
         stream_info.duration = 0;

@@ -337,7 +337,7 @@ BLT_NetworkStream_Tell(ATX_InputStream* _self, ATX_Position* offset)
 |   BLT_NetworkStream_GetSize
 +---------------------------------------------------------------------*/
 static ATX_Result 
-BLT_NetworkStream_GetSize(ATX_InputStream* _self, ATX_Size* size)
+BLT_NetworkStream_GetSize(ATX_InputStream* _self, ATX_LargeSize* size)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
     return ATX_InputStream_GetSize(self->source, size);
@@ -347,10 +347,10 @@ BLT_NetworkStream_GetSize(ATX_InputStream* _self, ATX_Size* size)
 |   BLT_NetworkStream_GetAvailable
 +---------------------------------------------------------------------*/
 static ATX_Result 
-BLT_NetworkStream_GetAvailable(ATX_InputStream* _self, ATX_Size* available)
+BLT_NetworkStream_GetAvailable(ATX_InputStream* _self, ATX_LargeSize* available)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
-    ATX_Size available_from_source = 0;
+    ATX_LargeSize available_from_source = 0;
     ATX_InputStream_GetAvailable(self->source, &available_from_source);
     *available = available_from_source+ATX_RingBuffer_GetAvailable(self->buffer);
 

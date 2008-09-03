@@ -64,8 +64,8 @@ typedef struct {
     BLT_UInt32  nominal_bitrate;  /**< Nominal bitrate                        */
     BLT_UInt32  average_bitrate;  /**< Average bitrate                        */
     BLT_UInt32  instant_bitrate;  /**< Instant bitrate                        */
-    BLT_UInt32  size;             /**< Size in bytes                          */
-    BLT_UInt32  duration;         /**< Duration in milliseconds               */
+    BLT_UInt64  size;             /**< Size in bytes                          */
+    BLT_UInt64  duration;         /**< Duration in milliseconds               */
     BLT_UInt32  sample_rate;      /**< Sample rate in Hz                      */
     BLT_UInt16  channel_count;    /**< Number of channels                     */
     BLT_Flags   flags;            /**< Stream Flags                           */
@@ -81,15 +81,15 @@ typedef enum {
 } BLT_SeekMode;
 
 typedef struct {
-    BLT_Size offset;       /**< Offset from start (between 0 and range)*/
-    BLT_Size range;        /**< Range of possible offsets              */
+    BLT_UInt64 offset;       /**< Offset from start (between 0 and range)*/
+    BLT_UInt64 range;        /**< Range of possible offsets              */
 } BLT_StreamPosition;
 
 typedef struct {
     BLT_Mask           mask;       /**< Mask indicating valid fields         */
     BLT_TimeStamp      time_stamp; /**< Time stamp (seconds,nanoseconds)     */
     BLT_StreamPosition position;   /**< Position (offset,range)              */
-    BLT_Size           offset;     /**< Absolute offset in bytes             */
+    BLT_Position       offset;     /**< Absolute offset in bytes             */
     ATX_Int64          sample;
 } BLT_SeekPoint;
 
@@ -171,10 +171,10 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
     BLT_Result (*EstimateSeekPoint)(BLT_Stream*    self,
                                     BLT_SeekMode   mode,
                                     BLT_SeekPoint* point);
-    BLT_Result (*SeekToTime)(BLT_Stream* self, BLT_UInt32 time);
+    BLT_Result (*SeekToTime)(BLT_Stream* self, BLT_UInt64 time);
     BLT_Result (*SeekToPosition)(BLT_Stream* self,
-                                 BLT_Size    offset,
-                                 BLT_Size    range);
+                                 BLT_UInt64  offset,
+                                 BLT_UInt64  range);
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------

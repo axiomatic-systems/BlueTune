@@ -69,9 +69,9 @@ Test(int buffer_size, int source_size)
             chunk = ATX_System_GetRandomInteger()%7;
         }
         if ((ATX_System_GetRandomInteger()%5) == 0) {
-            ATX_Offset position = ATX_System_GetRandomInteger()%(10+source_size);
-            ATX_Size   new_position;
-            ATX_Result result = ATX_InputStream_Seek(stream, position);
+            ATX_Position position = ATX_System_GetRandomInteger()%(10+source_size);
+            ATX_Position new_position;
+            ATX_Result   result = ATX_InputStream_Seek(stream, position);
             if (ATX_SUCCEEDED(result)) {
                 ATX_InputStream_Tell(stream, &new_position);
                 CHECK(new_position == position);

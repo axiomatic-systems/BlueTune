@@ -91,7 +91,7 @@ TagParserInput_SetStream(BLT_InputStreamUser* _self,
     BLT_Size        header_size      = 0;
     BLT_Size        trailer_size     = 0;
     ATX_Position    stream_start;
-    BLT_Size        stream_size;
+    BLT_LargeSize   stream_size;
     ATX_Properties* stream_properties;
     BLT_Result      result;
 

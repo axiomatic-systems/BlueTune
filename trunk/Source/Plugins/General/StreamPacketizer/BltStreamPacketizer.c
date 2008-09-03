@@ -129,7 +129,7 @@ StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
     /* update the stream info */
     {
         BLT_StreamInfo info;
-        ATX_Size       stream_size = 0;
+        ATX_LargeSize  stream_size = 0;
         BLT_Result     result;
 
         result = ATX_InputStream_GetSize(stream, &stream_size);

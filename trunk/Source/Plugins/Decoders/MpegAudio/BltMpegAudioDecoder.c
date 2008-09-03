@@ -330,7 +330,7 @@ MpegAudioDecoder_UpdateDurationAndBitrate(MpegAudioDecoder*  self,
         /* compute the duration from the size and the average bitrate */
         if (info.size && info.average_bitrate) {
             ATX_UInt64 duration_ms = (8*1000*(ATX_UInt64)info.size)/info.average_bitrate;
-            info.duration = (ATX_UInt32)duration_ms;
+            info.duration = duration_ms;
         } else {
             info.duration = 0;
         }

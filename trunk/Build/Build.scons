@@ -180,7 +180,7 @@ if 'FlacDecoder' in env['BLT_PLUGINS']:
 ############################# Core
 CompiledModule(name                          = 'BltCore',
                source_root                   = 'Source/Core',
-               exported_include_dirs         = ['Source/BlueTune'],
+               exported_include_dirs         = ['Source/BlueTune', 'Source/Plugins/Common', 'Source/Plugins/DynamicLoading'],
                chained_link_and_include_deps = ['Atomix', 'Neptune'])
 
 ############################# Decoder
@@ -240,15 +240,17 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
         BLT_WMA_DECODER_PLUGIN_EXTRAS = {'external':True,
                                          'libs':    ['BltWmaDecoder'],
                                          'lib_dirs':[os.environ['BLT_WMA_PLUGIN_HOME']+'/Targets/'+env['target']+'/lib/'+env['build_config']],
-                                         'inc_dirs':[os.environ['BLT_WMA_PLUGIN_HOME']+'/Targets/'+env['target']+'/include']}
+                                         'inc_dirs':[os.environ['BLT_WMA_PLUGIN_HOME']+'/Targets/'+env['target']+'/include',
+                                                     'Source/Plugins/Decoders/WMA']}
     else:
         raise Exception("location of WMA plugin support not found (set BLT_WMSDK_HOME or BLT_WMA_PLUGIN_HOME)")
 
 ############################# BltPluginsSupport
 CompiledModule(name                          = 'BltPluginsSupport',
                build_source_dirs             = [],
-               build_source_files            = {'/Source/Plugins/Common':'BltReplayGain.c'},
-               exported_include_dirs         = ['Source/Plugins/Common'],
+               build_source_files            = {'/Source/Plugins/Common':'BltReplayGain.c',
+                                                '/Source/Plugins/DynamicLoading':'BltDynamicPlugins.cpp'},
+               exported_include_dirs         = ['Source/Plugins/Common', 'Source/Plugins/DynamicLoading'],
                chained_link_and_include_deps = ['BltCore'])
        
 ############################# Plugins
@@ -306,10 +308,11 @@ if 'VorbisDecoder' in env['BLT_PLUGINS']:
             'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib']}
         
 ### plugins
-plugins_extra_libs     = []
-plugins_extra_lib_dirs = []
-plugins_inc_dirs       = []
-plugins_modules        = []
+plugins_extra_libs      = []
+plugins_extra_lib_dirs  = []
+plugins_inc_dirs        = []
+plugins_static_modules  = []
+plugins_dynamic_modules = []
 for plugin in env['BLT_PLUGINS']:
     extra_includes = []
     extra_dep_mods = []
@@ -328,6 +331,14 @@ for plugin in env['BLT_PLUGINS']:
         if 'defines'  in PluginsExtras[plugin]: extra_defines  = PluginsExtras[plugin]['defines']
         if 'env'      in PluginsExtras[plugin]: extra_env      = PluginsExtras[plugin]['env']
         if 'external' in PluginsExtras[plugin]: external       = True
+    
+    CompiledModule(name               = 'Blt'+plugin+'Loader',
+                   build_source_dirs  = [],
+                   build_source_files = {'/Source/Plugins/DynamicLoading':'BltDynamicPluginTemplate.c'},
+                   object_name_map    = {'Source/Plugins/DynamicLoading/BltDynamicPluginTemplate.c':'Source/Plugins/DynamicLoading/Blt'+plugin+'PluginLoader'},
+                   build_include_dirs       = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
+                   chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
+                   extra_cpp_defines  = [('BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION','BLT_'+plugin+'Module_GetModuleObject')])
     if 'src_dir' in PluginsSettings[plugin]:
         ### source code plugins
         CompiledModule(name                     = 'Blt'+plugin,
@@ -339,13 +350,19 @@ for plugin in env['BLT_PLUGINS']:
                        extra_lib_dirs           = extra_lib_dirs,
                        extra_cpp_defines        = extra_defines,
                        environment              = extra_env)
+	SharedLibraryModule(name          = 'Blt'+plugin+'Plugin',
+                            library_name  = 'Blt'+plugin+'.plugin',
+                            anchor_module = 'Blt'+plugin+'Loader',
+			    link_deps     = ['Blt'+plugin])
+    	plugins_dynamic_modules.append('Blt'+plugin+'Plugin')
+                            
     else:
         ### binary plugins
         if 'libs'     in PluginsExtras[plugin]: plugins_extra_libs     += PluginsExtras[plugin]['libs']
         if 'lib_dirs' in PluginsExtras[plugin]: plugins_extra_lib_dirs += PluginsExtras[plugin]['lib_dirs']
         if 'inc_dirs' in PluginsExtras[plugin]: plugins_inc_dirs       += PluginsExtras[plugin]['inc_dirs']
 
-    if not external: plugins_modules.append('Blt'+plugin)
+    if not external: plugins_static_modules.append('Blt'+plugin)
         
 plugins_cpp_defines = [PluginsSettings[p]['defines'] for p in env['BLT_PLUGINS']]
 plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME', '"'+env['BLT_DEFAULT_OUTPUT']+'"')]
@@ -354,7 +371,7 @@ CompiledModule(name                          = 'BltPlugins',
                build_source_dirs             = [],
                build_source_files            = {'/Source/Plugins/Common':'BltBuiltins.c'},
                build_include_dirs            = plugins_inc_dirs,
-               chained_link_and_include_deps = ['Atomix', 'BltCore', 'BltPluginsSupport']+plugins_modules,
+               chained_link_and_include_deps = ['Atomix', 'BltCore', 'BltPluginsSupport']+plugins_static_modules,
                extra_libs                    = plugins_extra_libs,
                extra_lib_dirs                = plugins_extra_lib_dirs,
                extra_cpp_defines             = plugins_cpp_defines)
@@ -399,5 +416,5 @@ if env['target'] == 'x86-unknown-linux':
 ################################################
 # Default Build Modues
 ################################################
-env.Default(['BtPlay', 'BtController'] + OptionalModules)
+env.Default(['BtPlay', 'BtController'] + OptionalModules + plugins_dynamic_modules)
 

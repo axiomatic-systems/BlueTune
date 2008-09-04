@@ -42,7 +42,8 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
     if (NPT_FAILED(result)) return result;
     
     // call the function for each module in the library
-    BLT_Plugin_GetModule_Function function = (BLT_Plugin_GetModule_Function)symbol;
+    BLT_Plugin_GetModule_Function function;
+    *((void**)&function) = symbol;
     for (unsigned int i=0; BLT_SUCCEEDED(result); ++i) {
         BLT_Module* module = NULL;
         result = function(BLT_PLUGIN_ABI_VERSION, i, &module);

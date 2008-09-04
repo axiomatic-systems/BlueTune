@@ -35,7 +35,7 @@ env['BLT_PLUGINS'] = ['FileInput',
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
 env['BLT_DEFAULT_OUTPUT']           = 'alsa:default'
-env['FLO_DECODER_ENGINE']      = 'FLO_DECODER_ENGINE_MPG123'
+#env['FLO_DECODER_ENGINE']      = 'FLO_DECODER_ENGINE_MPG123'
 #env['BLT_PLUGINS_AAC_LIBRARY'] = 'Helix'
 
                                              

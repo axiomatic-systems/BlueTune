@@ -274,10 +274,10 @@ BLTP_OnEvent(BLT_EventListener* self,
             ATX_ConsoleOutputF("  instant_bitrate = %ld\n", e->info.instant_bitrate);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-            ATX_ConsoleOutputF("  size            = "ATX_INT64_PRINTF_FORMAT"d\n", e->info.size);
+            ATX_ConsoleOutputF("  size            = %" ATX_INT64_PRINTF_FORMAT "d\n", e->info.size);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-            ATX_ConsoleOutputF("  duration        = "ATX_INT64_PRINTF_FORMAT"d\n", e->info.duration);
+            ATX_ConsoleOutputF("  duration        = %" ATX_INT64_PRINTF_FORMAT "d\n", e->info.duration);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
             ATX_ConsoleOutputF("  sample_rate     = %ld\n", e->info.sample_rate);

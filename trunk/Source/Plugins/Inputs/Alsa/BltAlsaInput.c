@@ -512,7 +512,8 @@ AlsaInputStream_Tell(ATX_InputStream* _self, ATX_Position* position)
 |    AlsaInputStream_GetSize
 +---------------------------------------------------------------------*/
 ATX_METHOD 
-AlsaInputStream_GetSize(ATX_InputStream* _self, ATX_Size* size)
+AlsaInputStream_GetSize(ATX_InputStream* _self, 
+                        ATX_LargeSize*   size)
 {
     AlsaInputStream*  self = ATX_SELF(AlsaInputStream, ATX_InputStream);
 
@@ -526,7 +527,7 @@ AlsaInputStream_GetSize(ATX_InputStream* _self, ATX_Size* size)
 +---------------------------------------------------------------------*/
 ATX_METHOD 
 AlsaInputStream_GetAvailable(ATX_InputStream* self, 
-                             ATX_Size*        available)
+                             ATX_LargeSize*   available)
 {
     ATX_COMPILER_UNUSED(self);
 

@@ -286,7 +286,8 @@ typedef enum {
     BLT_PLAYER_EVENT_TYPE_DECODER_STATE_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_STREAM_TIMECODE_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_STREAM_POSITION_NOTIFICATION,
-    BLT_PLAYER_EVENT_TYPE_STREAM_INFO_NOTIFICATION
+    BLT_PLAYER_EVENT_TYPE_STREAM_INFO_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_PROPERTY_NOTIFICATION
 } BLT_Player_EventType;
 
 typedef enum {
@@ -350,6 +351,14 @@ typedef struct {
     BLT_Mask         update_mask;
     BLT_StreamInfo   info;
 } BLT_Player_StreamInfoNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event         base;
+    BLT_PropertyScope        scope;
+    const char*              source;
+    const char*              name;
+    const ATX_PropertyValue* value;
+} BLT_Player_PropertyNotificationEvent;
 
 typedef struct {
     void* instance;

@@ -165,10 +165,10 @@ BtController::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& inf
         ATX_ConsoleOutputF("INFO: Channels = %d\n", info.channel_count);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        ATX_ConsoleOutputF("INFO: Stream Size = "ATX_INT64_PRINTF_FORMAT"d\n", info.size);
+        ATX_ConsoleOutputF("INFO: Stream Size = %" ATX_INT64_PRINTF_FORMAT "d\n", info.size);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-        ATX_ConsoleOutputF("INFO: Stream Duration = "ATX_INT64_PRINTF_FORMAT"d\n", info.duration);
+        ATX_ConsoleOutputF("INFO: Stream Duration = %" ATX_INT64_PRINTF_FORMAT "d\n", info.duration);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
         ATX_ConsoleOutputF("INFO: Data Type = %s\n", info.data_type?info.data_type:"(null)");

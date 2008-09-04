@@ -336,6 +336,14 @@ public:
                                         const char*              source,
                                         const char*              name,
                                         const ATX_PropertyValue* value) {
+        BLT_Player_PropertyNotificationEvent event = { 
+            {BLT_PLAYER_EVENT_TYPE_PROPERTY_NOTIFICATION},
+            scope, 
+            source,
+            name,
+            value
+        };
+        m_CListener.handler(m_CListener.instance, &event.base);
     }
     
 private:

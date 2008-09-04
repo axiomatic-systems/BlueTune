@@ -246,7 +246,7 @@ BLT_CddaTrack_Tell(ATX_InputStream* _self, ATX_Position* position)
 |       BLT_CddaTrack_GetSize
 +---------------------------------------------------------------------*/
 ATX_METHOD
-BLT_CddaTrack_GetSize(ATX_InputStream* _self, ATX_Size* size)
+BLT_CddaTrack_GetSize(ATX_InputStream* _self, ATX_LargeSize* size)
 {
     BLT_CddaTrack* self = ATX_SELF(BLT_CddaTrack, ATX_InputStream);
     *size = self->size;
@@ -258,7 +258,7 @@ BLT_CddaTrack_GetSize(ATX_InputStream* _self, ATX_Size* size)
 +---------------------------------------------------------------------*/
 ATX_METHOD
 BLT_CddaTrack_GetAvailable(ATX_InputStream* _self,
-                           ATX_Size*        available)
+                           ATX_LargeSize*   available)
 {
     BLT_CddaTrack* self = ATX_SELF(BLT_CddaTrack, ATX_InputStream);
     *available = self->size - self->position;

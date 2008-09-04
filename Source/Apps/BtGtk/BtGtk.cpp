@@ -576,11 +576,11 @@ BtPlayer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 4, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DURATION) {
-        sprintf(text, "%d", info.duration);
+        sprintf(text, "%" ATX_INT64_PRINTF_FORMAT "d", info.duration);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 5, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
-        sprintf(text, "%d", info.size);
+        sprintf(text, "%" ATX_INT64_PRINTF_FORMAT "d", info.size);
         gtk_clist_set_text(GTK_CLIST(m_PropertyList), 6, 1, text);
     }
     if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {

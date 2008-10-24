@@ -119,6 +119,8 @@ static BLT_Result StreamNode_Stop(StreamNode* self);
 static BLT_Result
 StreamNode_Create(BLT_Stream*    stream,
                   BLT_MediaNode* media_node, 
+                  BLT_CString    input_port,
+                  BLT_CString    output_port,
                   StreamNode**   stream_node)
 {
     StreamNode* node;
@@ -150,7 +152,7 @@ StreamNode_Create(BLT_Stream*    stream,
     node->input.connected = BLT_FALSE;
     node->input.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;
     result = BLT_MediaNode_GetPortByName(media_node, 
-                                         "input",
+                                         input_port?input_port:"input",
                                          &node->input.port);
     if (BLT_SUCCEEDED(result)) {
         /* this is a valid input */
@@ -180,7 +182,7 @@ StreamNode_Create(BLT_Stream*    stream,
         }
         if (node->input.iface.any == NULL) {
             ATX_FreeMemory((void*)node);
-            return BLT_ERROR_INVALID_INTERFACE;
+            return result;
         }
     }
 
@@ -189,7 +191,7 @@ StreamNode_Create(BLT_Stream*    stream,
     node->output.connected = BLT_FALSE;
     node->output.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;
     result = BLT_MediaNode_GetPortByName(media_node, 
-                                         "output",
+                                         output_port?output_port:"output",
                                          &node->output.port);
     if (BLT_SUCCEEDED(result)) {
         /* this is a valid output */
@@ -219,7 +221,7 @@ StreamNode_Create(BLT_Stream*    stream,
         }
         if (node->output.iface.any == NULL) {
             ATX_FreeMemory((void*)node);
-            return BLT_ERROR_INVALID_INTERFACE;
+            return result;
         }
     }
 
@@ -807,7 +809,8 @@ Stream_ResetInput(BLT_Stream* _self)
 +---------------------------------------------------------------------*/
 BLT_METHOD 
 Stream_SetInputNode(BLT_Stream*    _self, 
-		            BLT_CString    name,
+		    BLT_CString    name,
+                    BLT_CString    port,
                     BLT_MediaNode* node)
 
 {
@@ -824,7 +827,7 @@ Stream_SetInputNode(BLT_Stream*    _self,
     Stream_ResetInputNode(self);
 
     /* create a stream node to represent the media node */
-    result = StreamNode_Create(_self, node, &stream_node);
+    result = StreamNode_Create(_self, node, NULL, port, &stream_node);
     if (BLT_FAILED(result)) return result;
 
     /* copy the name */
@@ -858,7 +861,7 @@ Stream_SetInput(BLT_Stream* _self,
     /* normalize type */
     if (type && type[0] == '\0') type = NULL;
 
-    ATX_LOG_FINE_1("Stream::SetInput = name=%s", name);
+    ATX_LOG_FINE_1("Stream::SetInput - name=%s", name);
 
     /* ask the core to create the corresponding input node */
     constructor.spec.input.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;
@@ -891,7 +894,7 @@ Stream_SetInput(BLT_Stream* _self,
     if (BLT_FAILED(result)) return result;
 
     /* set the media node as the new input */
-    result = Stream_SetInputNode(_self, name, media_node);
+    result = Stream_SetInputNode(_self, name, NULL, media_node);
     ATX_RELEASE_OBJECT(media_node);
     if (BLT_FAILED(result)) return result;
 
@@ -965,7 +968,7 @@ Stream_SetOutputNode(BLT_Stream*    _self,
     Stream_ResetOutput(_self);
 
     /* create a stream node to represent the media node */
-    result = StreamNode_Create(_self, node, &stream_node);
+    result = StreamNode_Create(_self, node, NULL, NULL, &stream_node);
     if (BLT_FAILED(result)) return result;
 
     /* get the BLT_OutputNode interface */
@@ -997,23 +1000,9 @@ Stream_SetOutput(BLT_Stream* _self,
     BLT_MediaNodeConstructor constructor;
     BLT_Result               result;
 
-    /* normalize type */
-    if (type && type[0] == '\0') type = NULL;
-
-    /* default output */
-    if (name == NULL) {
-        BLT_CString default_name;
-        BLT_Builtins_GetDefaultOutput(&default_name, NULL);
-        name = default_name;
-
-        /* default output */
-        if (type == NULL) {
-            BLT_CString default_type;
-            BLT_Builtins_GetDefaultOutput(NULL, &default_type);
-            type = default_type;
-        }
-    }
-
+    /* check parameters */
+    if (name == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+    
     /* ask the core to create the corresponding output node */
     constructor.spec.input.protocol  = BLT_MEDIA_PORT_PROTOCOL_ANY;
     constructor.spec.output.protocol = BLT_MEDIA_PORT_PROTOCOL_NONE;
@@ -1119,7 +1108,7 @@ Stream_AddNode(BLT_Stream*    _self,
     }
 
     /* create a stream node to represent the media node */
-    result = StreamNode_Create(_self, node, &stream_node);
+    result = StreamNode_Create(_self, node, NULL, NULL, &stream_node);
     if (BLT_FAILED(result)) return result;
 
     /* insert the node in the chain */
@@ -1384,7 +1373,7 @@ Stream_InterpolateChain(Stream*              self,
     if (BLT_FAILED(result)) return result;
 
     /* create a stream node to represent the media node */
-    result = StreamNode_Create(&ATX_BASE(self, BLT_Stream), media_node, new_node);
+    result = StreamNode_Create(&ATX_BASE(self, BLT_Stream), media_node, NULL, NULL, new_node);
     ATX_RELEASE_OBJECT(media_node);
     if (BLT_FAILED(result)) return result;
     (*new_node)->flags |= BLT_STREAM_NODE_FLAG_TRANSIENT;
@@ -1416,18 +1405,15 @@ Stream_DeliverPacket(Stream*          self,
 
     /* if we're connected, we can only try once */
     if (from_node->output.connected == BLT_TRUE) {
-        result = BLT_PacketConsumer_PutPacket(
-            to_node->input.iface.packet_consumer, packet);
+        result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
         goto done;
     } 
     
     /* check if the recipient uses the PACKET protocol */
     if (to_node->input.protocol == BLT_MEDIA_PORT_PROTOCOL_PACKET) {
         /* try to deliver the packet to the recipient */
-        result = BLT_PacketConsumer_PutPacket(
-            to_node->input.iface.packet_consumer, packet);
-        if (BLT_SUCCEEDED(result) || 
-	    result != BLT_ERROR_INVALID_MEDIA_FORMAT) {
+        result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
+        if (BLT_SUCCEEDED(result) || result != BLT_ERROR_INVALID_MEDIA_FORMAT) {
             /* success, or fatal error */
             goto done;
         }
@@ -1452,14 +1438,12 @@ Stream_DeliverPacket(Stream*          self,
 
     /* try to deliver the packet */
     to_node = new_node;
-    result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, 
-                                          packet);
+    result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
 
 done:
     if (BLT_SUCCEEDED(result)) {
         if (to_node == self->output.node) {
-            /* if the packet has been delivered to the output, keep */
-            /* its timestamp                                        */
+            /* if the packet has been delivered to the output, keep its timestamp */
             BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
             BLT_Time      duration = BLT_MediaPacket_GetDuration(packet);
             if (ts.seconds == 0 && ts.nanoseconds == 0) {
@@ -1676,6 +1660,7 @@ Stream_PumpPacket(BLT_Stream* _self)
     /* check that we have an input and an output */
     if (self->input.node  == NULL ||
         self->output.node == NULL) {
+        ATX_LOG_WARNING("Stream_PumpPacket - no input node");
         return BLT_FAILURE;
     }
 
@@ -1701,7 +1686,9 @@ Stream_PumpPacket(BLT_Stream* _self)
             } else {
                 if (result != BLT_ERROR_PORT_HAS_NO_DATA) {
                     return result;
-                }
+		} else {
+		    result = BLT_SUCCESS;
+		}
             }
             break;
 
@@ -1875,7 +1862,7 @@ Stream_GetStatus(BLT_Stream* _self, BLT_StreamStatus* status)
     }
     
     /* compute the output node status */
-    BLT_TimeStamp_Set(status->output_status.delay, 0, 0);
+    BLT_TimeStamp_Set(status->output_status.media_time, 0, 0);
     if (self->output.output_node) {
         /* get the output status from the output node */
         BLT_OutputNode_GetStatus(self->output.output_node, 
@@ -1995,8 +1982,8 @@ Stream_EstimateSeekPoint(BLT_Stream*    _self,
                 
                 /* compute time stamp */
                 point->time_stamp = BLT_TimeStamp_FromSamples(point->sample, self->info.sample_rate);
-                    point->mask |= BLT_SEEK_POINT_MASK_TIME_STAMP;
-                }
+                point->mask |= BLT_SEEK_POINT_MASK_TIME_STAMP;
+            }
             break;
         } else {
             return BLT_FAILURE;

@@ -833,10 +833,10 @@ AlacDecoder_Create(BLT_Module*              module,
                    BLT_CString              parameters, 
                    BLT_MediaNode**          object)
 {
-    AlacDecoder*               self;
-    BLT_IsoBaseAudioMediaType* media_type;
-    BLT_MediaNodeConstructor*  constructor;
-    BLT_Result                 result;
+    AlacDecoder*              self;
+    BLT_Mp4AudioMediaType*    media_type;
+    BLT_MediaNodeConstructor* constructor;
+    BLT_Result                result;
 
     ATX_LOG_FINE("AlacDecoder::Create");
 
@@ -858,7 +858,7 @@ AlacDecoder_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* configure the decoder base on the media type details */
-    media_type = (BLT_IsoBaseAudioMediaType*)constructor->spec.input.media_type;
+    media_type = (BLT_Mp4AudioMediaType*)constructor->spec.input.media_type;
     if (BLT_FAILED(AlacDecoder_Configure(self,
                                          media_type->decoder_info, 
                                          media_type->decoder_info_length))) {
@@ -1039,11 +1039,11 @@ AlacDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_ISO_BASE_ES_MIME_TYPE,
+        BLT_ISO_BASE_AUDIO_ES_MIME_TYPE,
         &self->iso_base_es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("AlacDecoderModule::Attach (" BLT_ISO_BASE_ES_MIME_TYPE " = %d)", 
+    ATX_LOG_FINE_1("AlacDecoderModule::Attach (" BLT_ISO_BASE_AUDIO_ES_MIME_TYPE " = %d)", 
                    self->iso_base_es_type_id);
 
     return BLT_SUCCESS;
@@ -1069,25 +1069,21 @@ AlacDecoderModule_Probe(BLT_Module*              _self,
                 (BLT_MediaNodeConstructor*)parameters;
 
             /* the input and output protocols should be PACKET */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
+            if ((constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
                 return BLT_FAILURE;
             }
 
             /* the input type should be BLT_ISO_BASE_ES_MIME_TYPE */
-            if (constructor->spec.input.media_type->id != 
-                self->iso_base_es_type_id) {
+            if (constructor->spec.input.media_type->id != self->iso_base_es_type_id) {
                 return BLT_FAILURE;
             } else {
                 /* check the format */
-                BLT_IsoBaseAudioMediaType* media_type = (BLT_IsoBaseAudioMediaType*)constructor->spec.input.media_type;
-                if (media_type->format != BLT_ALAC_FORMAT_ID) {
+                BLT_Mp4MediaType* media_type = (BLT_Mp4MediaType*)constructor->spec.input.media_type;
+                if (media_type->stream_type != BLT_MP4_STREAM_TYPE_AUDIO ||
+                    media_type->format_or_object_type_id != BLT_ALAC_FORMAT_ID) {
                     return BLT_FAILURE;
                 }
             }

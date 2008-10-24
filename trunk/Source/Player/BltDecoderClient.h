@@ -200,7 +200,7 @@ class BLT_DecoderClient_StreamInfoNotificationMessage :
 {
 public:
     // methods
-    BLT_DecoderClient_StreamInfoNotificationMessage(BLT_Mask       update_mask,
+    BLT_DecoderClient_StreamInfoNotificationMessage(BLT_Mask        update_mask,
                                                     BLT_StreamInfo& info):
         m_UpdateMask(update_mask), m_StreamInfo(info) {
         if (info.data_type) m_DataType = info.data_type;

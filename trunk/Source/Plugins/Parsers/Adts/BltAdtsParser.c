@@ -63,8 +63,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
-    BLT_UInt32               media_type_id;
-    BLT_Mpeg4AudioMediaType* media_type;
+    BLT_UInt32             media_type_id;
+    BLT_Mp4AudioMediaType* media_type;
 } AdtsParserOutput;
 
 typedef enum {
@@ -344,7 +344,7 @@ AdtsParser_UpdateMediaType(AdtsParser* self)
 {
     unsigned int dsi = 0;
     
-    self->output.media_type->object_type_id = 
+    self->output.media_type->base.format_or_object_type_id = 
         self->frame_header.id == 0 ?
         BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO :
         BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC;
@@ -382,7 +382,7 @@ BLT_METHOD
 AdtsParserOutput_GetPacket(BLT_PacketProducer* _self,
                            BLT_MediaPacket**   packet)
 {
-    AdtsParser* self = ATX_SELF_M(output, AdtsParser, BLT_PacketProducer);
+    AdtsParser* self   = ATX_SELF_M(output, AdtsParser, BLT_PacketProducer);
     BLT_Result  result = BLT_SUCCESS;
     
     /* default value */
@@ -545,12 +545,11 @@ AdtsParser_Create(BLT_Module*              module,
     BLT_MediaType_Init(&self->input.media_type,
                        ((AdtsParserModule*)module)->adts_type_id);
     self->input.stream = NULL;
-    self->output.media_type_id = ((AdtsParserModule*)module)->mp4es_type_id;    
-    self->output.media_type = (BLT_Mpeg4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mpeg4AudioMediaType)+2);
-    BLT_MediaType_Init(&self->output.media_type->base, self->output.media_type_id);
-    self->output.media_type->base.extension_size = sizeof(BLT_Mpeg4AudioMediaType)+2-sizeof(BLT_MediaType);
-    self->output.media_type->object_type_id      = 0;
-    self->output.media_type->decoder_info_length =  2;
+    self->output.media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+1);
+    BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4MediaType)+1);
+    self->output.media_type->base.stream_type              = BLT_MP4_STREAM_TYPE_AUDIO;
+    self->output.media_type->base.format_or_object_type_id = 0; 
+    self->output.media_type->decoder_info_length           = 2;
 
     self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
     self->buffer_fullness = 0;
@@ -725,11 +724,11 @@ AdtsParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_MP4_ES_MIME_TYPE,
+        BLT_MP4_AUDIO_ES_MIME_TYPE,
         &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("ADTS Parser Module::Attach (" BLT_MP4_ES_MIME_TYPE " type = %d)", self->mp4es_type_id);
+    ATX_LOG_FINE_1("ADTS Parser Module::Attach (" BLT_MP4_AUDIO_ES_MIME_TYPE " type = %d)", self->mp4es_type_id);
     ATX_LOG_FINE_1("ADTS Parser Module::Attach (audio/aac type = %d)", self->adts_type_id);
 
     return BLT_SUCCESS;
@@ -841,7 +840,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AdtsParserModule,
 /*----------------------------------------------------------------------
 |   node constructor
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AdtsParserModule, "Adts Parser", 0)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AdtsParserModule, "ADTS Parser", 0)
 
 /*----------------------------------------------------------------------
 |   module object

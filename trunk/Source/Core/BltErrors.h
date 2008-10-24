@@ -51,6 +51,7 @@
 #define BLT_ERROR_BASE_GENERIC        (BLT_ERROR_BASE-0)
 #define BLT_ERROR_PROTOCOL_FAILURE    (BLT_ERROR_BASE_GENERIC-0)
 #define BLT_ERROR_NOT_SUPPORTED       (BLT_ERROR_BASE_GENERIC-1)
+#define BLT_ERROR_BUFFER_TOO_SMALL    (BLT_ERROR_BASE_GENERIC-2)
 
 /* Media errors */
 #define BLT_ERROR_BASE_MEDIA          (BLT_ERROR_BASE-100)
@@ -69,5 +70,8 @@
 
 /* Module errors */
 #define BLT_ERROR_BASE_MODULE         (BLT_ERROR_BASE-600)
+
+/* Plugins errors */
+#define BLT_ERROR_BASE_KEY_MANAGER    (BLT_ERROR_BASE-700)
 
 #endif /* _BLT_ERRORS_H_ */

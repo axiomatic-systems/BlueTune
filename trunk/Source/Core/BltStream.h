@@ -136,7 +136,8 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
                            BLT_CString name,
                            BLT_CString type);
     BLT_Result (*SetInputNode)(BLT_Stream*    self,
-			                   BLT_CString    name,
+			       BLT_CString    name,
+                               BLT_CString    port,
                                BLT_MediaNode* node);
     BLT_Result (*GetInputNode)(BLT_Stream* self, BLT_MediaNode** node);
     BLT_Result (*ResetOutput)(BLT_Stream* self);
@@ -189,8 +190,8 @@ ATX_INTERFACE(object)->ResetInput(object)
 #define BLT_Stream_SetInput(object, name, media_type) \
 ATX_INTERFACE(object)->SetInput(object, name, media_type)
 
-#define BLT_Stream_SetInputNode(object, node) \
-ATX_INTERFACE(object)->SetInputNode(object, node)
+#define BLT_Stream_SetInputNode(object, name, port, node) \
+ATX_INTERFACE(object)->SetInputNode(object, name, port, node)
 
 #define BLT_Stream_GetInputNode(object, node) \
 ATX_INTERFACE(object)->GetInputNode(object, node)
@@ -200,6 +201,9 @@ ATX_INTERFACE(object)->ResetOutput(object)
 
 #define BLT_Stream_SetOutput(object, name, media_type) \
 ATX_INTERFACE(object)->SetOutput(object, name, media_type)
+
+#define BLT_Stream_GetOutputNode(object, node) \
+ATX_INTERFACE(object)->GetOutputNode(object, node)
 
 #define BLT_Stream_AddNode(object, where, node) \
 ATX_INTERFACE(object)->AddNode(object, where, node)
@@ -236,9 +240,6 @@ ATX_INTERFACE(object)->GetStatus(object, status)
 
 #define BLT_Stream_GetProperties(object, properties) \
 ATX_INTERFACE(object)->GetProperties(object, properties)
-
-#define BLT_Stream_GetSettings(object, settings) \
-ATX_INTERFACE(object)->GetSettings(object, settings)
 
 #define BLT_Stream_EstimateSeekPoint(object, mode, point) \
 ATX_INTERFACE(object)->EstimateSeekPoint(object, mode, point)

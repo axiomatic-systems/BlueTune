@@ -58,6 +58,15 @@ BLT_Player::SetEventListener(EventListener* listener)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Player::GetEventListener
++---------------------------------------------------------------------*/
+BLT_Player::EventListener*
+BLT_Player::GetEventListener()
+{
+    return m_Listener;
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Player::PumpMessage
 +---------------------------------------------------------------------*/
 BLT_Result
@@ -237,52 +246,14 @@ BLT_Player::SetProperty(BLT_PropertyScope        scope,
 +---------------------------------------------------------------------*/
 class BLT_PlayerAdapter : public BLT_Player 
 {
-public:
-    static BLT_Player_CommandId MapCommandId(BLT_DecoderServer_Message::CommandId id) {
-        switch (id) {
-          case BLT_DecoderServer_Message::COMMAND_ID_SET_INPUT:
-            return BLT_PLAYER_COMMAND_ID_SET_INPUT;
-          case BLT_DecoderServer_Message::COMMAND_ID_SET_OUTPUT:
-            return BLT_PLAYER_COMMAND_ID_SET_OUTPUT;
-          case BLT_DecoderServer_Message::COMMAND_ID_PLAY:
-            return BLT_PLAYER_COMMAND_ID_PLAY;
-          case BLT_DecoderServer_Message::COMMAND_ID_STOP:
-            return BLT_PLAYER_COMMAND_ID_PLAY;
-          case BLT_DecoderServer_Message::COMMAND_ID_PAUSE:
-            return BLT_PLAYER_COMMAND_ID_PAUSE;
-          case BLT_DecoderServer_Message::COMMAND_ID_PING:
-            return BLT_PLAYER_COMMAND_ID_PING;
-          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_TIME:
-            return BLT_PLAYER_COMMAND_ID_SEEK_TO_TIME;
-          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_POSITION:
-            return BLT_PLAYER_COMMAND_ID_SEEK_TO_POSITION;
-          case BLT_DecoderServer_Message::COMMAND_ID_REGISTER_MODULE:
-            return BLT_PLAYER_COMMAND_ID_REGISTER_MODULE;
-          case BLT_DecoderServer_Message::COMMAND_ID_ADD_NODE:
-            return BLT_PLAYER_COMMAND_ID_ADD_NODE;
-          case BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY:
-            return BLT_PLAYER_COMMAND_ID_SET_PROPERTY;
-        }
-        return (BLT_Player_CommandId)(-1);
-    }
-    
-    static BLT_Player_DecoderState MapDecoderState(BLT_DecoderServer::State state) {
-        switch (state) {
-          case BLT_DecoderServer::STATE_PLAYING: return BLT_PLAYER_DECODER_STATE_PLAYING;
-          case BLT_DecoderServer::STATE_STOPPED: return BLT_PLAYER_DECODER_STATE_STOPPED;
-          case BLT_DecoderServer::STATE_PAUSED:  return BLT_PLAYER_DECODER_STATE_PAUSED;
-          case BLT_DecoderServer::STATE_EOS:     return BLT_PLAYER_DECODER_STATE_EOS;
-          default: return BLT_PLAYER_DECODER_STATE_PLAYING;
-        }
-    }
-    
+public:    
     BLT_PlayerAdapter(BLT_Player_EventListener listener) : m_CListener(listener) {
         if (listener.handler == NULL) SetEventListener(NULL);
     }
     virtual void OnAckNotification(BLT_DecoderServer_Message::CommandId id) {
         BLT_Player_AckEvent event = { 
             {BLT_PLAYER_EVENT_TYPE_ACK}, 
-            MapCommandId(id)
+            BLT_PlayerApiMapper::MapCommandId(id)
         };
         m_CListener.handler(m_CListener.instance, &event.base);
     }
@@ -290,7 +261,7 @@ public:
                                     BLT_Result                           result) {
         BLT_Player_NackEvent event = { 
             {BLT_PLAYER_EVENT_TYPE_NACK}, 
-            MapCommandId(id),
+            BLT_PlayerApiMapper::MapCommandId(id),
             result
         };
         m_CListener.handler(m_CListener.instance, &event.base);
@@ -305,7 +276,7 @@ public:
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State state) {
         BLT_Player_DecoderStateNotificationEvent event = { 
             {BLT_PLAYER_EVENT_TYPE_DECODER_STATE_NOTIFICATION}, 
-            MapDecoderState(state)
+            BLT_PlayerApiMapper::MapDecoderState(state)
         };
         m_CListener.handler(m_CListener.instance, &event.base);
     }

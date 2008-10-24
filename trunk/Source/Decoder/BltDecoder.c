@@ -146,16 +146,6 @@ BLT_Decoder_UpdateStatus(BLT_Decoder* decoder)
     if (BLT_SUCCEEDED(result)) {
         decoder->status.time_stamp = status.time_stamp;
         decoder->status.position   = status.position;
-
-        /* adjust the timestamp */
-        if (BLT_TimeStamp_IsLaterOrEqual(decoder->status.time_stamp, 
-                                         status.output_status.delay)) {
-            decoder->status.time_stamp = BLT_TimeStamp_Sub(decoder->status.time_stamp, 
-                                                           status.output_status.delay);
-        } else {
-            decoder->status.time_stamp.seconds     = 0;
-            decoder->status.time_stamp.nanoseconds = 0;
-        }
     }
 
     return BLT_SUCCESS;
@@ -230,13 +220,23 @@ BLT_Decoder_SetInput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
 BLT_Result
 BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
 {
-    if (name == NULL || name[0] == '\0') {
+    /* normalize the name and type */
+    if (name && name[0] == '\0') name = NULL;
+    if (type && type[0] == '\0') type = NULL;
+
+    if (name == NULL) {
         /* if the name is NULL or empty, it means reset */
         return BLT_Stream_ResetOutput(decoder->stream);
     } else {
         if (ATX_StringsEqual(name, BLT_DECODER_DEFAULT_OUTPUT_NAME)) {
 	        /* if the name is BLT_DECODER_DEFAULT_OUTPUT_NAME, use default */ 
-  	        return BLT_Stream_SetOutput(decoder->stream, NULL, type);
+            BLT_CString default_name;
+            BLT_CString default_type;
+            BLT_Builtins_GetDefaultAudioOutput(&default_name, &default_type);
+            name = default_name;
+            if (type == NULL) type = default_type;
+
+  	        return BLT_Stream_SetOutput(decoder->stream, name, type);
 	    } else {
             /* set the output of the stream by name */
             return BLT_Stream_SetOutput(decoder->stream, name, type);

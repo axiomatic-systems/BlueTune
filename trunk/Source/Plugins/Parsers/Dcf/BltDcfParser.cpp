@@ -144,15 +144,6 @@ DcfParser_GetContentKey(DcfParser*     self,
                         unsigned char* key, 
                         unsigned int*  key_size)
 {
-    //const unsigned char test_key_1[16] = {
-    //    0x74, 0x7c, 0x29, 0xd8, 
-    //    0x7a, 0x8e, 0x49, 0x4d, 
-    //    0x10, 0x0f, 0x83, 0xf4,
-    //    0xbd, 0x4a, 0x54, 0xdd
-    //};
-    //ATX_CopyMemory(key, test_key_1, 16);
-    //*key_size = 16;
-    
     // check parameters
     if (key == NULL || key_size == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
@@ -423,7 +414,7 @@ DcfParserInput_SetStream(BLT_InputStreamUser* _self,
     /* check parameters and media type */
     if (stream == NULL            ||
         stream_media_type == NULL || 
-        (stream_media_type->id != self->input.dcf1_media_type.id &&
+       (stream_media_type->id != self->input.dcf1_media_type.id &&
         stream_media_type->id != self->input.dcf2_media_type.id)) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
@@ -751,7 +742,7 @@ DcfParser_Construct(DcfParser* self, BLT_Module* module, BLT_Core* core)
                 self->key_manager = (BLT_KeyManager*)value.data.pointer;
             }
         } else {
-            ATX_LOG_INFO("no key manager");
+            ATX_LOG_FINE("no key manager");
         }
     }
 

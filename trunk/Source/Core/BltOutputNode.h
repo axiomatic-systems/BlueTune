@@ -2,7 +2,7 @@
 |
 |   BlueTune - Output Node Interface
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2008 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -23,10 +23,16 @@
 #include "BltTime.h"
 
 /*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+#define BLT_OUTPUT_NODE_STATUS_QUEUE_FULL  1
+
+/*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
 typedef struct {
-    BLT_Time delay;
+    BLT_TimeStamp media_time;
+    BLT_Flags     flags;
 } BLT_OutputNodeStatus;
 
 /*----------------------------------------------------------------------

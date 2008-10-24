@@ -88,8 +88,14 @@ class BLT_Player : public BLT_DecoderClient
      * ignored, unless a subclass of this class overrides the virtual
      * methods that handle notification messages (OnXXX virtual methods
      * of the BLT_DecoderClient_MessageHandler class).
+     * @param listener Pointer to a listener, or NULL.
      */
     void SetEventListener(EventListener* listener);
+
+    /**
+     * Returns the event listener currently associated with this player.
+     */
+    EventListener* GetEventListener();
     
     /**
      * Dequeue and dispatch one message from the queue. 
@@ -376,7 +382,90 @@ BLT_Result BLT_Player_Play(BLT_Player* player);
 
 #if defined(__cplusplus)
 }
+
+class BLT_PlayerApiMapper {
+public:
+    static BLT_Player_CommandId MapCommandId(BLT_DecoderServer_Message::CommandId id) {
+        switch (id) {
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_INPUT:
+            return BLT_PLAYER_COMMAND_ID_SET_INPUT;
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_OUTPUT:
+            return BLT_PLAYER_COMMAND_ID_SET_OUTPUT;
+          case BLT_DecoderServer_Message::COMMAND_ID_PLAY:
+            return BLT_PLAYER_COMMAND_ID_PLAY;
+          case BLT_DecoderServer_Message::COMMAND_ID_STOP:
+            return BLT_PLAYER_COMMAND_ID_PLAY;
+          case BLT_DecoderServer_Message::COMMAND_ID_PAUSE:
+            return BLT_PLAYER_COMMAND_ID_PAUSE;
+          case BLT_DecoderServer_Message::COMMAND_ID_PING:
+            return BLT_PLAYER_COMMAND_ID_PING;
+          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_TIME:
+            return BLT_PLAYER_COMMAND_ID_SEEK_TO_TIME;
+          case BLT_DecoderServer_Message::COMMAND_ID_SEEK_TO_POSITION:
+            return BLT_PLAYER_COMMAND_ID_SEEK_TO_POSITION;
+          case BLT_DecoderServer_Message::COMMAND_ID_REGISTER_MODULE:
+            return BLT_PLAYER_COMMAND_ID_REGISTER_MODULE;
+          case BLT_DecoderServer_Message::COMMAND_ID_ADD_NODE:
+            return BLT_PLAYER_COMMAND_ID_ADD_NODE;
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY:
+            return BLT_PLAYER_COMMAND_ID_SET_PROPERTY;
+        }
+        return (BLT_Player_CommandId)(-1);
+    }
+    
+    static BLT_Player_DecoderState MapDecoderState(BLT_DecoderServer::State state) {
+        switch (state) {
+          case BLT_DecoderServer::STATE_PLAYING: return BLT_PLAYER_DECODER_STATE_PLAYING;
+          case BLT_DecoderServer::STATE_STOPPED: return BLT_PLAYER_DECODER_STATE_STOPPED;
+          case BLT_DecoderServer::STATE_PAUSED:  return BLT_PLAYER_DECODER_STATE_PAUSED;
+          case BLT_DecoderServer::STATE_EOS:     return BLT_PLAYER_DECODER_STATE_EOS;
+          default: return BLT_PLAYER_DECODER_STATE_PLAYING;
+        }
+    }
+};
+
 #endif
+
+/*----------------------------------------------------------------------
+|   BLT_Player Objective C API
++---------------------------------------------------------------------*/
+#if defined(__OBJC__)
+
+#import <Cocoa/Cocoa.h>
+
+@interface BLT_PlayerObject : NSObject
+{
+ @private
+    BLT_Player* player;
+    id          delegate;
+    void*       messageQueue;
+}
+
+-(BLT_PlayerObject *) init;
+-(id)                 delegate;
+-(void)               setDelegate: (id) delegate;
+-(BLT_Player*)        player;
+-(BLT_Result)         setInput: (NSString*) name;
+-(BLT_Result)         setInput: (NSString*) name withType: (NSString*) mime_type;
+-(BLT_Result)         play;
+-(BLT_Result)         pause;
+-(BLT_Result)         stop;
+@end
+
+@interface BLT_PlayerObjectDelegate : NSObject
+{
+}
+-(void) ackWasReceived: (BLT_Player_CommandId) command_id;
+-(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result;
+-(void) pongWasReceived: (const void*) cookie;
+-(void) decoderStateDidChange: (BLT_Player_DecoderState) state;
+-(void) streamTimecodeDidChange: (BLT_TimeCode) timecode;
+-(void) streamPositionDidChange: (BLT_StreamPosition) position;
+-(void) streamInfoDidChange: (const BLT_StreamInfo*) info updateMask: (BLT_Mask) mask;
+-(void) propertyDidChange: (BLT_PropertyScope) scope source: (const char*) source name: (const char*) name value: (const ATX_PropertyValue*) value;
+@end
+
+#endif /* defined(__OBJC__) */
 
 /** @} */
 

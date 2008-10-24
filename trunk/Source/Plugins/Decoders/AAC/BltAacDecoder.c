@@ -103,15 +103,15 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check to see if we need to create a decoder for this */
     if (self->melo == NULL) {
-        MLO_DecoderConfig              decoder_config;
-        const BLT_MediaType*           media_type;
-        const BLT_Mpeg4AudioMediaType* mp4_media_type;
+        MLO_DecoderConfig            decoder_config;
+        const BLT_MediaType*         media_type;
+        const BLT_Mp4AudioMediaType* mp4_media_type;
 
         BLT_MediaPacket_GetMediaType(packet, &media_type);
         if (media_type == NULL || media_type->id != self->mp4es_type_id) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-        mp4_media_type = (const BLT_Mpeg4AudioMediaType*)media_type;
+        mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
         if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, mp4_media_type->decoder_info_length, &decoder_config))) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
@@ -479,11 +479,11 @@ AacDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_MP4_ES_MIME_TYPE,
+        BLT_MP4_AUDIO_ES_MIME_TYPE,
         &self->mp4es_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("AacDecoderModule::Attach (" BLT_MP4_ES_MIME_TYPE " = %d)", self->mp4es_type_id);
+    ATX_LOG_FINE_1("AacDecoderModule::Attach (" BLT_MP4_AUDIO_ES_MIME_TYPE " = %d)", self->mp4es_type_id);
 
     return BLT_SUCCESS;
 }
@@ -525,12 +525,13 @@ AacDecoderModule_Probe(BLT_Module*              _self,
                 return BLT_FAILURE;
             } else {
                 /* check the object type id */
-                BLT_Mpeg4AudioMediaType* media_type = (BLT_Mpeg4AudioMediaType*)constructor->spec.input.media_type;
-                if (media_type->object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC &&
-                    media_type->object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
+                BLT_Mp4AudioMediaType* media_type = (BLT_Mp4AudioMediaType*)constructor->spec.input.media_type;
+				if (media_type->base.stream_type != BLT_MP4_STREAM_TYPE_AUDIO) return BLT_FAILURE;
+                if (media_type->base.format_or_object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC &&
+                    media_type->base.format_or_object_type_id != BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
                     return BLT_FAILURE;
                 }
-                if (media_type->object_type_id == BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
+                if (media_type->base.format_or_object_type_id == BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
                     /* check that this is AAC LC */
                     MLO_DecoderConfig decoder_config;
                     if (MLO_FAILED(MLO_DecoderConfig_Parse(media_type->decoder_info, media_type->decoder_info_length, &decoder_config))) {

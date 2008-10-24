@@ -115,7 +115,7 @@ StreamPacketizerInput_SetStream(BLT_InputStreamUser* _self,
     
     /* reset the packet count */
     self->output.packet_count = 0;
-    ATX_Int64_Set_Int32(self->output.sample_count, 0);
+    self->output.sample_count = 0;
 
     /* release anything we may have buffered */
     if (self->output.packet) {
@@ -269,7 +269,7 @@ StreamPacketizerOutput_GetPacket(BLT_PacketProducer* _self,
             /* update sample count */
             sample_count = bytes_read/(pcm_type->channel_count*
                                        pcm_type->bits_per_sample/8);
-            ATX_Int64_Add_Int32(self->output.sample_count, sample_count);
+            self->output.sample_count += sample_count;
 
             /* set the packet duration */
             BLT_MediaPacket_SetDuration(*packet, BLT_TimeStamp_FromSamples(sample_count, 

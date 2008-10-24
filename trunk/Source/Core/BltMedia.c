@@ -49,6 +49,24 @@ BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_MediaType_InitEx
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_MediaType_InitEx(BLT_MediaType* type, BLT_MediaTypeId id, BLT_Size struct_size)
+{
+    type->id    = id;
+    type->flags = 0;
+    if (struct_size < sizeof(BLT_MediaType)) {
+        type->extension_size = 0;
+        return BLT_ERROR_INVALID_PARAMETERS;
+    } else {
+        type->extension_size = struct_size-sizeof(BLT_MediaType);
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   BLT_MediaType_Clone
 +---------------------------------------------------------------------*/
 BLT_Result 

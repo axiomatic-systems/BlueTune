@@ -81,8 +81,8 @@ BLT_TimeStamp
 BLT_TimeStamp_FromNanos(ATX_UInt64 nanos)
 {
     BLT_TimeStamp result;
-    result.seconds     = (BLT_Int32)(nanos/1000000000);
-    result.nanoseconds = (BLT_Int32)(nanos%1000000000);
+    result.seconds     = (ATX_Int32)(nanos/1000000000);
+    result.nanoseconds = (ATX_Int32)(nanos%1000000000);
     
     return result;
 }
@@ -94,8 +94,8 @@ BLT_TimeStamp
 BLT_TimeStamp_FromMicros(ATX_UInt64 micros)
 {
     BLT_TimeStamp result;
-    result.seconds     = (BLT_Int32)(micros/1000000);
-    result.nanoseconds = (BLT_Int32)(1000*(micros%1000000));
+    result.seconds     = (ATX_Int32)(micros/1000000);
+    result.nanoseconds = (ATX_Int32)(1000*(micros%1000000));
 
     return result;
 }
@@ -107,8 +107,8 @@ BLT_TimeStamp
 BLT_TimeStamp_FromMillis(ATX_UInt64 millis)
 {
     BLT_TimeStamp result;
-    result.seconds     = (BLT_Int32)(millis/1000);
-    result.nanoseconds = (BLT_Int32)(1000000*(millis%1000));
+    result.seconds     = (ATX_Int32)(millis/1000);
+    result.nanoseconds = (ATX_Int32)(1000000*(millis%1000));
     
     return result;
 }

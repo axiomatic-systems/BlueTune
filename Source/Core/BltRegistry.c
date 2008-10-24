@@ -245,7 +245,7 @@ Registry_Initialize(Registry* registry)
     BLT_Result result;
 
     /* initial id base */
-    registry->id_base = 3;
+    registry->id_base = 100;
 
     /* create the root key */
     registry->root = Key_Create("@", 1);
@@ -272,13 +272,16 @@ Registry_Initialize(Registry* registry)
     /* register the default types and formats */
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "none", 0, BLT_TRUE);
+                               "none", BLT_MEDIA_TYPE_ID_NONE, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "unknown", 1, BLT_TRUE);
+                               "unknown", BLT_MEDIA_TYPE_ID_UNKNOWN, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-                               "audio/pcm", 2, BLT_TRUE);
+                               "audio/pcm", BLT_MEDIA_TYPE_ID_AUDIO_PCM, BLT_TRUE);
+    Registry_RegisterNameAndId(registry, 
+                               BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                               "video/raw", BLT_MEDIA_TYPE_ID_VIDEO_RAW, BLT_TRUE);
 
     /* create the file extensions namespace key */
     result = Registry_CreateKey(&ATX_BASE(registry, BLT_Registry), 

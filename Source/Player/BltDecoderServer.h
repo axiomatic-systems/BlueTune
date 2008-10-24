@@ -387,17 +387,17 @@ class BLT_DecoderServer : public NPT_Thread,
     void Run();
 
     // BLT_DecoderServer_MessageHandler methods
-    void OnSetInputCommand(BLT_CString name, BLT_CString type);
-    void OnSetOutputCommand(BLT_CString name, BLT_CString type);
-    void OnPlayCommand();
-    void OnStopCommand();
-    void OnPauseCommand();
-    void OnPingCommand(const void* cookie);
-    void OnSeekToTimeCommand(BLT_UInt64 time);
-    void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range);
-    void OnRegisterModuleCommand(BLT_Module* module);
-    void OnAddNodeCommand(BLT_CString name);
-    void OnSetPropertyCommand(BLT_PropertyScope        scope,
+    virtual void OnSetInputCommand(BLT_CString name, BLT_CString type);
+    virtual void OnSetOutputCommand(BLT_CString name, BLT_CString type);
+    virtual void OnPlayCommand();
+    virtual void OnStopCommand();
+    virtual void OnPauseCommand();
+    virtual void OnPingCommand(const void* cookie);
+    virtual void OnSeekToTimeCommand(BLT_UInt64 time);
+    virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range);
+    virtual void OnRegisterModuleCommand(BLT_Module* module);
+    virtual void OnAddNodeCommand(BLT_CString name);
+    virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
                               const NPT_String&        target,
                               const NPT_String&        name,
                               const ATX_PropertyValue* value);

@@ -190,7 +190,7 @@ BLT_DecoderServer::Run()
     // decoding loop
     do {
         do {
-            result = m_MessageQueue->PumpMessage(false);
+            result = m_MessageQueue->PumpMessage(0); // non-blocking
         } while (BLT_SUCCEEDED(result));
         
         if (result != NPT_ERROR_LIST_EMPTY) {
@@ -208,10 +208,10 @@ BLT_DecoderServer::Run()
             }
         } else {
             ATX_LOG_FINE("BLT_DecoderServer::Run - waiting for message");
-            result = m_MessageQueue->PumpMessage(true);
+            result = m_MessageQueue->PumpMessage(NPT_TIMEOUT_INFINITE);
             ATX_LOG_FINE("BLT_DecoderServer::Run - got message");
         }
-    } while (BLT_SUCCEEDED(result));
+    } while (BLT_SUCCEEDED(result) || result == NPT_ERROR_TIMEOUT);
 
     ATX_LOG_FINE("BLT_DecoderServer::Run - Received Terminate Message");
 
@@ -358,7 +358,7 @@ BLT_DecoderServer::OnSetInputCommand(BLT_CString name, BLT_CString type)
                    BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     result = BLT_Decoder_SetInput(m_Decoder, name, type);
 
-    // update the state we were in the STATE_EOS state
+    // update the state if we were in the STATE_EOS state
     if (m_State == STATE_EOS) SetState(STATE_STOPPED);
     
     UpdateStatus();

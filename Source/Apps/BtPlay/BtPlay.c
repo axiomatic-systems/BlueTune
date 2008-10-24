@@ -35,6 +35,7 @@ typedef struct  {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_EventListener);
     ATX_IMPLEMENTS(ATX_PropertyListener);
+    ATX_IMPLEMENTS(BLT_KeyManager);
 } BLTP;
 
 /*----------------------------------------------------------------------
@@ -140,6 +141,21 @@ BLTP_ParseCommandLine(char** args)
 }
 
 /*----------------------------------------------------------------------
+|    BLTP_SetupKeyManager
++---------------------------------------------------------------------*/
+static void
+BLTP_SetupKeyManager(BLTP* player, BLT_Decoder* decoder)
+{
+    ATX_Properties* properties;
+    BLT_Decoder_GetProperties(decoder, &properties);
+
+    ATX_PropertyValue value;
+    value.type         = ATX_PROPERTY_VALUE_TYPE_POINTER;
+    value.data.pointer = &ATX_BASE(player, BLT_KeyManager);
+    ATX_Properties_SetProperty(properties, BLT_KEY_MANAGER_PROPERTY, &value);
+}
+
+/*----------------------------------------------------------------------
 |    BLTP_OnStreamPropertyChanged
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD
@@ -172,6 +188,51 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
             }
         }
     }
+}
+
+/*----------------------------------------------------------------------
+|    BLTP_GetKeyByName
++---------------------------------------------------------------------*/
+static BLT_Result
+BLTP_GetKeyByName(BLT_KeyManager* self, 
+                  const char*     name,
+                  unsigned char*  key,
+                  unsigned int*   key_size)
+{
+    BLT_COMPILER_UNUSED(self);
+    
+    /* check the parameters */
+    if (name == NULL || key == NULL || key_size == NULL) {
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+    if (*key_size < 16) {
+        *key_size = 16;
+        return BLT_ERROR_BUFFER_TOO_SMALL;
+    }
+    
+    if (strcmp(name, "@track.1") == 0) {
+        unsigned char fixed_key[16] = {
+            0x00, 0x01, 0x02, 0x03,
+            0x04, 0x05, 0x06, 0x07,
+            0x08, 0x09, 0x0A, 0x0B,
+            0x0C, 0x0D, 0x0E, 0x0F
+        };
+        ATX_CopyMemory(key, fixed_key, 16);
+        *key_size = 16;
+    } else if (strcmp(name, "@track.2") == 0) {
+        unsigned char fixed_key[16] = {
+            0x0F, 0x0E, 0x0D, 0x0C,
+            0x0B, 0x0A, 0x09, 0x08,
+            0x07, 0x06, 0x05, 0x04,
+            0x03, 0x02, 0x01, 0x00
+        };
+        ATX_CopyMemory(key, fixed_key, 16);
+        *key_size = 16;
+    } else {
+        return BLT_ERROR_NO_MEDIA_KEY;
+    }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -340,6 +401,13 @@ ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_EventListener)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
+|    BLT_KeyManager interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_KeyManager)
+    BLTP_GetKeyByName
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
 |    BLTP_CheckElapsedTime
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -382,6 +450,7 @@ main(int argc, char** argv)
     /* setup our interfaces */
     ATX_SET_INTERFACE(&player, BLTP, BLT_EventListener);
     ATX_SET_INTERFACE(&player, BLTP, ATX_PropertyListener);
+    ATX_SET_INTERFACE(&player, BLTP, BLT_KeyManager);
 
     /* listen to stream events */
     BLT_Decoder_SetEventListener(decoder, &ATX_BASE(&player, BLT_EventListener));
@@ -393,6 +462,9 @@ main(int argc, char** argv)
         ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
     }
 
+    /* setup a key manager for encrypted files */
+    BLTP_SetupKeyManager(&player, decoder);
+    
     /* register builtin modules */
     result = BLT_Decoder_RegisterBuiltins(decoder);
     BLTP_CHECK(result);
@@ -404,12 +476,10 @@ main(int argc, char** argv)
             ATX_String* plugin = (ATX_String*)ATX_ListItem_GetData(item);
             BLT_Decoder_LoadPlugin(decoder, ATX_String_GetChars(plugin), BLT_PLUGIN_LOADER_FLAGS_SEARCH_ALL);
         }
-        ATX_List_Destroy(Options.plugin_files);
         for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
             /*ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);*/
             /* NOT IMPLEMENTED YET */
         }
-        ATX_List_Destroy(Options.plugin_directories);
     }
     
     /* set the output */

@@ -2,7 +2,7 @@
 |
 |   MP4 Parser Module
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2008 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -23,6 +23,7 @@
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
+#include "BltKeyManager.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -39,14 +40,16 @@ struct Mp4ParserModule {
     /* members */
     BLT_UInt32 mp4_audio_type_id;
     BLT_UInt32 mp4_video_type_id;
-    BLT_UInt32 mp4_es_type_id;
-    BLT_UInt32 iso_base_es_type_id;
+    BLT_UInt32 mp4_audio_es_type_id;
+    BLT_UInt32 mp4_video_es_type_id;
+    BLT_UInt32 iso_base_audio_es_type_id;
+    BLT_UInt32 iso_base_video_es_type_id;
 };
 
 // it is important to keep this structure a POD (no methods)
 // because the strict compilers will not like use using
 // the offsetof() macro necessary when using ATX_SELF()
-typedef struct {
+struct Mp4ParserInput {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_MediaPort);
     ATX_IMPLEMENTS(BLT_InputStreamUser);
@@ -55,36 +58,48 @@ typedef struct {
     BLT_MediaType audio_media_type;
     BLT_MediaType video_media_type;
     AP4_File*     mp4_file;
-    AP4_Track*    mp4_track;
-} Mp4ParserInput;
+};
+
+struct Mp4Parser; // forward declaration
 
 // it is important to keep this structure a POD (no methods)
 // because the strict compilers will not like use using
 // the offsetof() macro necessary when using ATX_SELF()
-typedef struct {
+struct Mp4ParserOutput {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_MediaPort);
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
-    BLT_UInt32      mp4_es_type_id;
-    BLT_UInt32      iso_base_es_type_id;
-    BLT_MediaType*  media_type;
-    BLT_Ordinal     sample;
-    AP4_DataBuffer* sample_buffer;
-} Mp4ParserOutput;
+    Mp4Parser*           parser;
+    BLT_UInt32           mp4_es_type_id;
+    BLT_UInt32           iso_base_es_type_id;
+    BLT_MediaType*       media_type;
+    AP4_Track*           track;
+    BLT_Ordinal          sample;
+    AP4_DataBuffer*      sample_buffer;
+    AP4_SampleDecrypter* sample_decrypter;
+    AP4_DataBuffer*      sample_decrypted_buffer;
+};
 
 // it is important to keep this structure a POD (no methods)
 // because the strict compilers will not like use using
 // the offsetof() macro necessary when using ATX_SELF()
-typedef struct {
+struct Mp4Parser {
     /* base class */
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
     Mp4ParserInput  input;
-    Mp4ParserOutput output;
-} Mp4Parser;
+    Mp4ParserOutput audio_output;
+    Mp4ParserOutput video_output;
+    BLT_KeyManager* key_manager;
+};
+
+/*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+const unsigned int BLT_MP4_PARSER_MAX_KEY_SIZE = 32;
 
 /*----------------------------------------------------------------------
 |   Mp4ParserInput_Construct
@@ -96,7 +111,6 @@ Mp4ParserInput_Construct(Mp4ParserInput* self, BLT_Module* module)
     BLT_MediaType_Init(&self->audio_media_type, mp4_parser_module->mp4_audio_type_id);
     BLT_MediaType_Init(&self->video_media_type, mp4_parser_module->mp4_video_type_id);
     self->mp4_file = NULL;
-    self->mp4_track = NULL;
 }
 
 /*----------------------------------------------------------------------
@@ -106,6 +120,264 @@ static void
 Mp4ParserInput_Destruct(Mp4ParserInput* self)
 {
     delete self->mp4_file;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4Parser_ProcessCryptoInfo
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self, 
+                                  AP4_SampleDescription*& sample_desc)
+{
+    // check if the track is encrypted
+    if (sample_desc->GetType() == AP4_SampleDescription::TYPE_PROTECTED) {
+        ATX_LOG_FINE("track is encrypted");
+        AP4_ProtectedSampleDescription* prot_desc = dynamic_cast<AP4_ProtectedSampleDescription*>(sample_desc);
+        if (prot_desc == NULL) {
+            ATX_LOG_FINE("unable to obtain cipher info");
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        }
+
+        // obtain the key manager
+        if (self->parser->key_manager == NULL) {
+            ATX_Properties* properties = NULL;
+            if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
+                                                              &properties))) {
+                ATX_PropertyValue value;
+                if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                             BLT_KEY_MANAGER_PROPERTY, 
+                                                             &value))) {
+                    if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                        self->parser->key_manager = (BLT_KeyManager*)value.data.pointer;
+                    }
+                } else {
+                    ATX_LOG_FINE("no key manager");
+                }
+            }
+        }
+        if (self->parser->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
+        
+        // figure out the content ID for this track
+        // TODO: support different content ID schemes
+        // for now, we just make up a content ID based on the track ID
+        char content_id[32];
+        NPT_FormatString(content_id, sizeof(content_id), "@track.%d", self->track->GetId());
+        
+        // get the key for this content
+        unsigned char key[BLT_MP4_PARSER_MAX_KEY_SIZE];
+        unsigned int  key_size = BLT_MP4_PARSER_MAX_KEY_SIZE;
+        BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key, &key_size);
+        if (BLT_FAILED(result)) return result;
+        
+        delete self->sample_decrypter;
+        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, key, key_size);
+        if (self->sample_decrypter == NULL) {
+            ATX_LOG_FINE("unable to create decrypter");
+            return BLT_ERROR_CRYPTO_FAILURE;
+        }
+        
+        // switch to the original sample description
+        sample_desc = prot_desc->GetOriginalSampleDescription();
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4Parser_SetupAudioOutput
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
+{
+    // if we had a decrypter before, release it now
+    delete self->audio_output.sample_decrypter;
+    self->audio_output.sample_decrypter = NULL;
+
+    // get the media tracks
+    AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
+    self->audio_output.track = track;
+    if (track == NULL) return BLT_SUCCESS;
+
+    ATX_LOG_FINE("found audio track");
+    
+    // check that the audio track is of the right type
+    AP4_SampleDescription* sample_desc = track->GetSampleDescription(0);
+    if (sample_desc == NULL) {
+        ATX_LOG_FINE("no sample description for audio track");
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+    // handle encrypted tracks
+    BLT_Result result = Mp4ParserOutput_ProcessCryptoInfo(&self->audio_output, sample_desc);
+    if (BLT_FAILED(result)) return result;
+
+    // analyze the details of the media format
+    AP4_AudioSampleDescription* audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
+    if (audio_desc == NULL) {
+        ATX_LOG_FINE("audio track sample description is not audio");
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    // update the stream info
+    BLT_StreamInfo stream_info;
+    stream_info.duration      = track->GetDurationMs();
+    stream_info.channel_count = audio_desc->GetChannelCount();
+    stream_info.sample_rate   = audio_desc->GetSampleRate();
+    stream_info.mask = BLT_STREAM_INFO_MASK_DURATION        |
+                       BLT_STREAM_INFO_MASK_CHANNEL_COUNT   |
+                       BLT_STREAM_INFO_MASK_SAMPLE_RATE;
+    
+    AP4_MpegSampleDescription* mpeg_desc = NULL;
+    if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
+        ATX_LOG_FINE("sample description is of type MPEG");
+        mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
+    }
+    if (mpeg_desc) {
+        stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
+        stream_info.average_bitrate = mpeg_desc->GetAvgBitrate();
+        stream_info.nominal_bitrate = mpeg_desc->GetAvgBitrate();
+        stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE |
+                            BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
+                            BLT_STREAM_INFO_MASK_DATA_TYPE;
+    }
+    
+    // setup the output media type
+    BLT_Mp4AudioMediaType* media_type;
+    if (mpeg_desc) {
+        // standard mpeg-style sample description
+        unsigned int decoder_info_length = mpeg_desc->GetDecoderInfo().GetDataSize();
+        media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1);
+        BLT_MediaType_Init(&media_type->base.base, self->audio_output.mp4_es_type_id);
+        media_type->base.base.extension_size      = sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType);
+        media_type->base.format_or_object_type_id = mpeg_desc->GetObjectTypeId();
+        media_type->decoder_info_length           =  decoder_info_length;
+        if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], mpeg_desc->GetDecoderInfo().GetData(), decoder_info_length);
+    } else {
+        // here we have to be format-specific for the decoder info
+        AP4_MemoryByteStream* mbs = NULL;
+        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_ALAC) {
+            // look for an 'alac' atom (either top-level or inside a 'wave') 
+            AP4_Atom* alac = sample_desc->GetDetails().GetChild(AP4_SAMPLE_FORMAT_ALAC);
+            if (alac == NULL) {
+                AP4_ContainerAtom* wave = dynamic_cast<AP4_ContainerAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_WAVE));
+                if (wave) {
+                    alac = wave->GetChild(AP4_SAMPLE_FORMAT_ALAC);
+                }
+            }
+            if (alac) {
+                // pass the alac payload as the decoder info
+                mbs = new AP4_MemoryByteStream((AP4_Size)alac->GetSize());
+                alac->WriteFields(*mbs);
+            } 
+        }
+        
+        AP4_LargeSize decoder_info_length = mbs?mbs->GetDataSize():0;
+        media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory((ATX_UInt32)(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1));
+        BLT_MediaType_Init(&media_type->base.base, self->audio_output.iso_base_es_type_id);
+        media_type->base.format_or_object_type_id = sample_desc->GetFormat();
+        media_type->base.base.extension_size      = (BLT_Size)(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType));
+        media_type->decoder_info_length           = (BLT_Size)decoder_info_length;
+        if (mbs) {
+            ATX_CopyMemory(&media_type->decoder_info[0], mbs->GetData(), mbs->GetDataSize());
+            mbs->Release();
+        }
+    }
+
+    media_type->base.stream_type = BLT_MP4_STREAM_TYPE_AUDIO;
+    self->audio_output.media_type = (BLT_MediaType*)media_type;
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4Parser_SetupVideoOutput
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
+{
+    // if we had a decrypter before, release it now
+    delete self->video_output.sample_decrypter;
+    self->video_output.sample_decrypter = NULL;
+
+    // get the video track
+    AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_VIDEO);
+    self->video_output.track = track;
+    if (track == NULL) return BLT_SUCCESS;
+
+    ATX_LOG_FINE("found video track");
+
+    // check that the video track is of the right type
+    AP4_SampleDescription* sample_desc = track->GetSampleDescription(0);
+    if (sample_desc == NULL) {
+        ATX_LOG_FINE("no sample description for video track");
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+    
+    // handle encrypted tracks
+    BLT_Result result = Mp4ParserOutput_ProcessCryptoInfo(&self->video_output, sample_desc);
+    if (BLT_FAILED(result)) return result;
+
+    // analyze the details of the media format
+    AP4_VideoSampleDescription* video_desc = dynamic_cast<AP4_VideoSampleDescription*>(sample_desc);
+    if (video_desc == NULL) {
+        ATX_LOG_FINE("video track sample description is not video");
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    // update the stream info
+    BLT_StreamInfo stream_info;
+    stream_info.duration = track->GetDurationMs();
+    stream_info.mask = BLT_STREAM_INFO_MASK_DURATION;
+    
+    AP4_MpegSampleDescription* mpeg_desc = NULL;
+    if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
+        ATX_LOG_FINE("sample description is of type MPEG");
+        mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
+    }
+    if (mpeg_desc) {
+        stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
+        stream_info.average_bitrate = mpeg_desc->GetAvgBitrate();
+        stream_info.nominal_bitrate = mpeg_desc->GetAvgBitrate();
+        stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE |
+                            BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
+                            BLT_STREAM_INFO_MASK_DATA_TYPE;
+    }
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
+
+    // setup the output media type
+    const void*     decoder_info = NULL;
+    unsigned int    decoder_info_length = 0;
+    AP4_UI32        media_stream_format = 0;
+    BLT_MediaTypeId media_type_id = BLT_MEDIA_TYPE_ID_NONE;
+    if (mpeg_desc) {
+        decoder_info        = mpeg_desc->GetDecoderInfo().GetData();
+        decoder_info_length = mpeg_desc->GetDecoderInfo().GetDataSize();
+        media_type_id       = self->video_output.mp4_es_type_id;
+        media_stream_format = mpeg_desc->GetObjectTypeId();
+    } else {
+        // here we have to be format-specific for the decoder info
+        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_AVC1) {
+            // look for an 'avcC' atom
+            AP4_AvccAtom* avcc = static_cast<AP4_AvccAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_AVCC));
+            if (avcc) {
+                // pass the avcc payload as the decoder info
+                decoder_info        = avcc->GetRawBytes().GetData();
+                decoder_info_length = avcc->GetRawBytes().GetDataSize();
+            } 
+        }
+        media_type_id       = self->video_output.iso_base_es_type_id;
+        media_stream_format = sample_desc->GetFormat();
+    }
+    unsigned int struct_size = sizeof(BLT_Mp4VideoMediaType)+(decoder_info_length?decoder_info_length-1:0);
+    BLT_Mp4VideoMediaType* media_type = (BLT_Mp4VideoMediaType*)ATX_AllocateZeroMemory(struct_size);
+    BLT_MediaType_Init(&media_type->base.base, media_type_id);
+    media_type->base.base.extension_size = struct_size-sizeof(BLT_MediaType); 
+    media_type->base.stream_type = BLT_MP4_STREAM_TYPE_VIDEO;
+    media_type->base.format_or_object_type_id = media_stream_format;
+    media_type->decoder_info_length = decoder_info_length;
+    if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], decoder_info, decoder_info_length);
+    self->video_output.media_type = (BLT_MediaType*)media_type;
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -127,105 +399,33 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* if we had a file before, release it now */
     delete self->input.mp4_file;
+    self->input.mp4_file = NULL;
 
     /* parse the MP4 file */
-    ATX_LOG_FINE("Mp4ParserInput::SetStream - parsing MP4 file");
-    AP4_ByteStream* stream_adapter = new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
+    ATX_LOG_FINE("parsing MP4 file");
+    ATX_InputStream_To_AP4_ByteStream_Adapter* stream_adapter = 
+        new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
     self->input.mp4_file = new AP4_File(*stream_adapter, 
                                         AP4_DefaultAtomFactory::Instance,
                                         true); /* parse until moov only */
     stream_adapter->Release();
 
-    /* declare variables here to avoid GCC warnings */
-    AP4_SampleDescription*      sample_desc = NULL;
-    AP4_MpegSampleDescription*  mpeg_desc = NULL;
-    AP4_AudioSampleDescription* audio_desc = NULL;
-    BLT_StreamInfo              stream_info;
-
-    /* find the audio track */
+    // get the global file info
     AP4_Movie* movie = self->input.mp4_file->GetMovie();
     if (movie == NULL) {
-        ATX_LOG_FINE("Mp4ParserInput::SetStream - no movie in file");
+        ATX_LOG_FINE("no movie in file");
         goto fail;
     }
-    self->input.mp4_track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
-    if (self->input.mp4_track == NULL) {
-        ATX_LOG_FINE("Mp4ParserInput::SetStream - no audio track found");
-        goto fail;
-    }
-
-    // check that the track is of the right type
-    sample_desc = self->input.mp4_track->GetSampleDescription(0);
-    if (sample_desc == NULL) {
-        ATX_LOG_FINE("Mp4ParserInput::SetStream - no sample description");
-        goto fail;
-    }
-    audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
-    if (audio_desc == NULL) {
-        ATX_LOG_FINE("Mp4ParserInput::SetStream - sample description is not audio");
-        goto fail;
-    }
-
-    // update the stream info
-    stream_info.duration        = self->input.mp4_track->GetDurationMs();
-    stream_info.channel_count   = audio_desc->GetChannelCount();
-    stream_info.sample_rate     = audio_desc->GetSampleRate();
-    stream_info.mask = BLT_STREAM_INFO_MASK_DURATION        |
-                       BLT_STREAM_INFO_MASK_CHANNEL_COUNT   |
-                       BLT_STREAM_INFO_MASK_SAMPLE_RATE;
     
-    if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
-        ATX_LOG_FINE("Mp4ParserInput::SetStream - sample description is of type MPEG");
-        mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
-    }
-    if (mpeg_desc) {
-        stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
-        stream_info.average_bitrate = mpeg_desc->GetAvgBitrate();
-        stream_info.nominal_bitrate = mpeg_desc->GetAvgBitrate();
-        stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE |
-                            BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
-                            BLT_STREAM_INFO_MASK_DATA_TYPE;
-    }
-    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
-
-    // setup the output media type
-    if (mpeg_desc) {
-        unsigned int decoder_info_length = mpeg_desc->GetDecoderInfo().GetDataSize();
-        BLT_Mpeg4AudioMediaType* media_type = (BLT_Mpeg4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mpeg4AudioMediaType)+decoder_info_length-1);
-        BLT_MediaType_Init(&media_type->base, self->output.mp4_es_type_id);
-        media_type->base.extension_size = sizeof(BLT_Mpeg4AudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType);
-        media_type->object_type_id      = mpeg_desc->GetObjectTypeId();
-        media_type->decoder_info_length =  decoder_info_length;
-        if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], mpeg_desc->GetDecoderInfo().GetData(), decoder_info_length);
-        self->output.media_type = (BLT_MediaType*)media_type;
-    } else {
-        // here we have to be format-specific for the decoder info
-        AP4_MemoryByteStream* mbs = NULL;
-        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_ALAC) {
-            // look for an 'alac' atom (either top-level or inside a 'wave') 
-            AP4_Atom* alac = sample_desc->GetDetails().GetChild(AP4_SAMPLE_FORMAT_ALAC);
-            if (alac == NULL) {
-                AP4_ContainerAtom* wave = dynamic_cast<AP4_ContainerAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_WAVE));
-                if (wave) {
-                    alac = wave->GetChild(AP4_SAMPLE_FORMAT_ALAC);
-                }
-            }
-            if (alac) {
-                // pass the alac payload as the decoder info
-                mbs = new AP4_MemoryByteStream((AP4_Size)alac->GetSize());
-                alac->WriteFields(*mbs);
-            } 
-        }
-        AP4_Size decoder_info_length = mbs?(AP4_Size)mbs->GetDataSize():0;
-        BLT_IsoBaseAudioMediaType* media_type = (BLT_IsoBaseAudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_IsoBaseAudioMediaType)+decoder_info_length-1);
-        BLT_MediaType_Init(&media_type->base, self->output.iso_base_es_type_id);
-        media_type->format = sample_desc->GetFormat();
-        media_type->base.extension_size = sizeof(BLT_IsoBaseAudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType);
-        media_type->decoder_info_length =  decoder_info_length;
-        if (mbs) ATX_CopyMemory(&media_type->decoder_info[0], mbs->GetData(), mbs->GetDataSize());
-        self->output.media_type = (BLT_MediaType*)media_type;
-        
-        if (mbs) mbs->Release();
+    // setup the tracks
+    Mp4Parser_SetupAudioOutput(self, movie);
+    Mp4Parser_SetupVideoOutput(self, movie);
+    
+    // check that we have at least one media track
+    if (self->audio_output.track == NULL && 
+        self->video_output.track == NULL) {
+        ATX_LOG_FINE("no media track found");
+        goto fail;
     }
     
     return BLT_SUCCESS;
@@ -291,11 +491,14 @@ ATX_END_INTERFACE_MAP
 |   Mp4ParserOutput_Construct
 +---------------------------------------------------------------------*/
 static void
-Mp4ParserOutput_Construct(Mp4ParserOutput* self)
+Mp4ParserOutput_Construct(Mp4ParserOutput* self, Mp4Parser* parser)
 {
-    self->media_type    = NULL;
-    self->sample        = 0;
-    self->sample_buffer = new AP4_DataBuffer();
+    self->parser                  = parser;
+    self->media_type              = NULL;
+    self->sample                  = 0;
+    self->sample_buffer           = new AP4_DataBuffer();
+    self->sample_decrypted_buffer = new AP4_DataBuffer();
+    self->sample_decrypter        = NULL;
 }
 
 /*----------------------------------------------------------------------
@@ -306,6 +509,7 @@ Mp4ParserOutput_Destruct(Mp4ParserOutput* self)
 {
     /* release the sample buffer */
     delete self->sample_buffer;
+    delete self->sample_decrypted_buffer;
 
     /* free the media type extensions */
     BLT_MediaType_Free((BLT_MediaType*)self->media_type);
@@ -337,37 +541,44 @@ BLT_METHOD
 Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
                           BLT_MediaPacket**   packet)
 {
-    Mp4Parser* self = ATX_SELF_M(output, Mp4Parser, BLT_PacketProducer);
+    Mp4ParserOutput* self = ATX_SELF(Mp4ParserOutput, BLT_PacketProducer);
 
     *packet = NULL;
-    if (self->input.mp4_track == NULL) {
-        return BLT_ERROR_PORT_HAS_NO_DATA;
+    if (self->track == NULL) {
+        return BLT_ERROR_EOS;
     } else {
         // check for end-of-stream
-        if (self->output.sample >= self->input.mp4_track->GetSampleCount()) {
+        if (self->sample >= self->track->GetSampleCount()) {
             return BLT_ERROR_EOS;
         }
 
         // read one sample
         AP4_Sample sample;
-        AP4_Result result = self->input.mp4_track->ReadSample(self->output.sample++, sample, *self->output.sample_buffer);
+        AP4_DataBuffer* sample_buffer = self->sample_buffer;
+        AP4_Result result = self->track->ReadSample(self->sample++, sample, *sample_buffer);
         if (AP4_FAILED(result)) {
-            ATX_LOG_WARNING_1("Mp4ParserOutput::GetPacket - ReadSample failed (%d)", result);
+            ATX_LOG_WARNING_1("ReadSample failed (%d)", result);
             return BLT_ERROR_PORT_HAS_NO_DATA;
         }
 
-        AP4_Size packet_size = self->output.sample_buffer->GetDataSize();
-        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+        // decrypt the sample if needed
+        if (self->sample_decrypter) {
+            self->sample_decrypter->DecryptSampleData(*sample_buffer, *self->sample_decrypted_buffer);
+            sample_buffer = self->sample_decrypted_buffer;
+        }
+
+        AP4_Size packet_size = sample_buffer->GetDataSize();
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self->parser, BLT_BaseMediaNode).core,
                                             packet_size,
-                                            (BLT_MediaType*)self->output.media_type,
+                                            (const BLT_MediaType*)self->media_type,
                                             packet);
         if (BLT_FAILED(result)) return result;
         BLT_MediaPacket_SetPayloadSize(*packet, packet_size);
         void* buffer = BLT_MediaPacket_GetPayloadBuffer(*packet);
-        ATX_CopyMemory(buffer, self->output.sample_buffer->GetData(), packet_size);
+        ATX_CopyMemory(buffer, sample_buffer->GetData(), packet_size);
 
         // set the timestamp
-        AP4_UI32 media_timescale = self->input.mp4_track->GetMediaTimeScale();
+        AP4_UI32 media_timescale = self->track->GetMediaTimeScale();
         if (media_timescale) {
             AP4_UI64 ts = ((AP4_UI64)sample.GetCts())*1000000;
             ts /= media_timescale;
@@ -379,7 +590,7 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         }
 
         // set packet flags
-        if (self->output.sample == 0) {
+        if (self->sample == 1) {
             BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
         }
 
@@ -422,30 +633,17 @@ ATX_END_INTERFACE_MAP
 static BLT_Result
 Mp4Parser_Destroy(Mp4Parser* self)
 {
-    ATX_LOG_FINE("Mp4Parser::Destroy");
+    ATX_LOG_FINE("start");
 
     /* destruct the members */
     Mp4ParserInput_Destruct(&self->input);
-    Mp4ParserOutput_Destruct(&self->output);
+    Mp4ParserOutput_Destruct(&self->audio_output);
+    Mp4ParserOutput_Destruct(&self->video_output);
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
     delete self;
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    Mp4Parser_Deactivate
-+---------------------------------------------------------------------*/
-BLT_METHOD
-Mp4Parser_Deactivate(BLT_MediaNode* _self)
-{
-    ATX_LOG_FINER("Mp4Parser::Deactivate");
-
-    /* call the base class method */
-    BLT_BaseMediaNode_Deactivate(_self);
 
     return BLT_SUCCESS;
 }
@@ -463,8 +661,12 @@ Mp4Parser_GetPortByName(BLT_MediaNode*  _self,
     if (ATX_StringsEqual(name, "input")) {
         *port = &ATX_BASE(&self->input, BLT_MediaPort);
         return BLT_SUCCESS;
-    } else if (ATX_StringsEqual(name, "output")) {
-        *port = &ATX_BASE(&self->output, BLT_MediaPort);
+    } else if (ATX_StringsEqual(name, "output") ||
+               ATX_StringsEqual(name, "audio")) {
+        *port = &ATX_BASE(&self->audio_output, BLT_MediaPort);
+        return BLT_SUCCESS;
+    } else if (ATX_StringsEqual(name, "video")) {
+        *port = &ATX_BASE(&self->video_output, BLT_MediaPort);
         return BLT_SUCCESS;
     } else {
         *port = NULL;
@@ -489,17 +691,27 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
         return BLT_FAILURE;
     }
 
-    /* seek to the estimated offset */
+    /* seek to the estimated offset on all tracks */
     AP4_Ordinal   sample_index = 0;
     AP4_TimeStamp ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
-    AP4_Result result = self->input.mp4_track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
-    if (AP4_FAILED(result)) {
-        ATX_LOG_WARNING_1("Mp4Parser::Seek - GetSampleIndexForTimeStampMs failed (%d)", result);
-        return BLT_FAILURE;
+    if (self->audio_output.track) {
+        AP4_Result result = self->audio_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+        if (AP4_FAILED(result)) {
+            ATX_LOG_WARNING_1("audio GetSampleIndexForTimeStampMs failed (%d)", result);
+            return BLT_FAILURE;
+        }
+        self->audio_output.sample = sample_index;
     }
-    self->output.sample = sample_index;
-
-    /* set the mode so that the nodes down the chaine know the seek has */
+    if (self->video_output.track) {
+        AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+        if (AP4_FAILED(result)) {
+            ATX_LOG_WARNING_1("video GetSampleIndexForTimeStampMs failed (%d)", result);
+            return BLT_FAILURE;
+        }
+        self->video_output.sample = sample_index;
+    }
+    
+    /* set the mode so that the nodes down the chain know the seek has */
     /* already been done on the stream                                  */
     *mode = BLT_SEEK_MODE_IGNORE;
 
@@ -521,7 +733,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(Mp4Parser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     Mp4Parser_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    Mp4Parser_Deactivate,
+    BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
@@ -545,22 +757,30 @@ Mp4Parser_Construct(Mp4Parser* self, BLT_Module* module, BLT_Core* core)
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
+    /* initialize some fields */
+    self->key_manager = NULL;
+    
     /* construct the members */
     Mp4ParserInput_Construct(&self->input, module);
-    Mp4ParserOutput_Construct(&self->output);
-
+    Mp4ParserOutput_Construct(&self->audio_output, self);
+    Mp4ParserOutput_Construct(&self->video_output, self);
+    
     /* setup media types */
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
-    self->output.mp4_es_type_id = mp4_parser_module->mp4_es_type_id;
-    self->output.iso_base_es_type_id = mp4_parser_module->iso_base_es_type_id;
-
+    self->audio_output.mp4_es_type_id = mp4_parser_module->mp4_audio_es_type_id;
+    self->audio_output.iso_base_es_type_id = mp4_parser_module->iso_base_audio_es_type_id;
+    self->video_output.mp4_es_type_id = mp4_parser_module->mp4_video_es_type_id;
+    self->video_output.iso_base_es_type_id = mp4_parser_module->iso_base_video_es_type_id;
+    
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, Mp4Parser, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, Mp4Parser, BLT_BaseMediaNode, ATX_Referenceable);
     ATX_SET_INTERFACE(&self->input,  Mp4ParserInput,  BLT_MediaPort);
     ATX_SET_INTERFACE(&self->input,  Mp4ParserInput,  BLT_InputStreamUser);
-    ATX_SET_INTERFACE(&self->output, Mp4ParserOutput, BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->output, Mp4ParserOutput, BLT_PacketProducer);
+    ATX_SET_INTERFACE(&self->audio_output, Mp4ParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->audio_output, Mp4ParserOutput, BLT_PacketProducer);
+    ATX_SET_INTERFACE(&self->video_output, Mp4ParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->video_output, Mp4ParserOutput, BLT_PacketProducer);
 }
 
 /*----------------------------------------------------------------------
@@ -575,7 +795,7 @@ Mp4Parser_Create(BLT_Module*              module,
 {
     Mp4Parser* self;
 
-    ATX_LOG_FINE("Mp4Parser::Create");
+    ATX_LOG_FINE("start");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -625,6 +845,12 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                             "video/mp4");
     if (BLT_FAILED(result)) return result;
 
+    /* register the ".m4p" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".m4p",
+                                            "video/mp4");
+    if (BLT_FAILED(result)) return result;
+
     /* register the ".3gp" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".3gp",
@@ -644,7 +870,7 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/mp4",
         &self->mp4_audio_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (audio/mp4 type = %d)", self->mp4_audio_type_id);
+    ATX_LOG_FINE_1("audio/mp4 type = %d", self->mp4_audio_type_id);
     
     /* get the type id for "video/mp4" */
     result = BLT_Registry_GetIdForName(
@@ -653,25 +879,43 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "video/mp4",
         &self->mp4_video_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (video/mp4 type = %d)", self->mp4_video_type_id);
+    ATX_LOG_FINE_1("video/mp4 type = %d", self->mp4_video_type_id);
 
-    /* register the type id for BLT_MP4_ES_MIME_TYPE */
+    /* register the type id for BLT_MP4_AUDIO_ES_MIME_TYPE */
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_MP4_ES_MIME_TYPE,
-        &self->mp4_es_type_id);
+        BLT_MP4_AUDIO_ES_MIME_TYPE,
+        &self->mp4_audio_es_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (" BLT_MP4_ES_MIME_TYPE " type = %d)", self->mp4_es_type_id);
+    ATX_LOG_FINE_1(BLT_MP4_AUDIO_ES_MIME_TYPE " type = %d", self->mp4_audio_es_type_id);
 
-    /* register the type id for BLT_ISO_BASE_ES_MIME_TYPE */
+    /* register the type id for BLT_MP4_VIDEO_ES_MIME_TYPE */
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_ISO_BASE_ES_MIME_TYPE,
-        &self->iso_base_es_type_id);
+        BLT_MP4_VIDEO_ES_MIME_TYPE,
+        &self->mp4_video_es_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("MP4 Parser Module::Attach (" BLT_ISO_BASE_ES_MIME_TYPE " type = %d)", self->iso_base_es_type_id);
+    ATX_LOG_FINE_1(BLT_MP4_VIDEO_ES_MIME_TYPE " type = %d", self->mp4_video_es_type_id);
+
+    /* register the type id for BLT_ISO_BASE_AUDIO_ES_MIME_TYPE */
+    result = BLT_Registry_RegisterName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        BLT_ISO_BASE_AUDIO_ES_MIME_TYPE,
+        &self->iso_base_audio_es_type_id);
+    if (BLT_FAILED(result)) return result;
+    ATX_LOG_FINE_1(BLT_ISO_BASE_AUDIO_ES_MIME_TYPE " type = %d", self->iso_base_audio_es_type_id);
+
+    /* register the type id for BLT_ISO_BASE_VIDEO_ES_MIME_TYPE */
+    result = BLT_Registry_RegisterName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        BLT_ISO_BASE_VIDEO_ES_MIME_TYPE,
+        &self->iso_base_video_es_type_id);
+    if (BLT_FAILED(result)) return result;
+    ATX_LOG_FINE_1(BLT_ISO_BASE_VIDEO_ES_MIME_TYPE " type = %d", self->iso_base_video_es_type_id);
 
     /* register mime type aliases */
     BLT_Registry_RegisterNameForId(registry, 
@@ -739,7 +983,7 @@ Mp4ParserModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            ATX_LOG_FINE_1("Mp4ParserModule::Probe - Ok [%d]", *match);
+            ATX_LOG_FINE_1("match %d", *match);
             return BLT_SUCCESS;
         }    
         break;

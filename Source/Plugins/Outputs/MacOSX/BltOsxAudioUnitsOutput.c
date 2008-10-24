@@ -58,6 +58,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_MediaPort);
 
     /* members */
+    AudioDeviceID     audio_device_id;
     AudioUnit         audio_unit;
     pthread_mutex_t   lock;
     ATX_List*         packet_queue;
@@ -65,6 +66,10 @@ typedef struct {
     BLT_PcmMediaType  expected_media_type;
     BLT_PcmMediaType  media_type;
     BLT_Boolean       paused;
+    struct {
+        BLT_TimeStamp media_time;
+        UInt64        host_time;
+    }                 last_measured_timestamp;
 } OsxAudioUnitsOutput;
 
 /*----------------------------------------------------------------------
@@ -89,12 +94,15 @@ OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
 {
     unsigned int watchdog = 20000000/BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL;
     
+    ATX_LOG_FINEST("start"); 
+
     /* lock the queue */
     pthread_mutex_lock(&self->lock);
     
     /* wait until there are no more packets in the queue */
     while (ATX_List_GetItemCount(self->packet_queue)) {
         pthread_mutex_unlock(&self->lock);
+        ATX_LOG_FINEST("waiting..."); 
         usleep(BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL);
         pthread_mutex_lock(&self->lock);
         
@@ -107,6 +115,8 @@ OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
     /* unlock the queue */
     pthread_mutex_unlock(&self->lock);
     
+    ATX_LOG_FINEST("end"); 
+
     return BLT_SUCCESS;
 }
 
@@ -125,6 +135,8 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     ATX_ListItem*        item;
     unsigned int         requested = ioData->mBuffers[0].mDataByteSize;
     unsigned char*       out = (unsigned char*)ioData->mBuffers[0].mData;
+    UInt64               device_time_nanos;
+    ATX_Boolean          timestamp_taken = ATX_FALSE;
     
     BLT_COMPILER_UNUSED(ioActionFlags);
     BLT_COMPILER_UNUSED(inTimeStamp);
@@ -137,7 +149,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     /* in case we have a strange request with more than one buffer, just return silence */
     if (ioData->mNumberBuffers != 1) {
         unsigned int i;
-        ATX_LOG_FINEST_1("OsxAudioUnitsOutput::RenderCallback - strange request with %d buffers", 
+        ATX_LOG_FINEST_1("strange request with %d buffers", 
                          ioData->mNumberBuffers);
         for (i=0; i<ioData->mNumberBuffers; i++) {
             ATX_SetMemory(ioData->mBuffers[i].mData, 0, ioData->mBuffers[i].mDataByteSize);
@@ -145,7 +157,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         return 0;
     }
     
-    ATX_LOG_FINEST_2("OsxAudioUnitsOutput::RenderCallback - request for %d bytes, %d frames", 
+    ATX_LOG_FINEST_2("request for %d bytes, %d frames", 
                      requested, inNumberFrames);
     
     /* lock the packet queue */
@@ -162,31 +174,54 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         BLT_MediaPacket*        packet = ATX_ListItem_GetData(item);
         const BLT_PcmMediaType* media_type;
         BLT_Size                payload_size;
+        BLT_Size                chunk_size;
         
         /* get the packet info */
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+        
+        /* remember at which host time this packet was delivered */
+        if (!timestamp_taken) {
+            self->last_measured_timestamp.host_time  = device_time_nanos;
+            self->last_measured_timestamp.media_time = BLT_MediaPacket_GetTimeStamp(packet);
+            timestamp_taken = ATX_TRUE;
+
+            ATX_LOG_FINEST_2("packet media time: %lld at device time %lld",
+                             BLT_TimeStamp_ToNanos(self->last_measured_timestamp.media_time),
+                             device_time_nanos);
+        }
         
         /* compute how much to copy from this packet */
         payload_size = BLT_MediaPacket_GetPayloadSize(packet);
         if (payload_size <= requested) {
             /* copy the entire payload and remove the packet from the queue */
-            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), payload_size);
+            chunk_size = payload_size;
+            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);
             ATX_List_RemoveItem(self->packet_queue, item);            
-            requested -= payload_size;
-            out += payload_size;
         } else {
             /* only copy a portion of the payload */
-            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), requested);
-            BLT_MediaPacket_SetPayloadOffset(packet, BLT_MediaPacket_GetPayloadOffset(packet)+requested);
-            requested = 0;
-            out += requested;
+            chunk_size = requested;
+            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);
+            
+            /* update the packet offset and timestamp */
+            BLT_MediaPacket_SetPayloadOffset(packet, BLT_MediaPacket_GetPayloadOffset(packet)+chunk_size);
+            {
+                unsigned int bytes_per_frame = media_type->channel_count*media_type->bits_per_sample/8;
+                if (bytes_per_frame) {
+                    unsigned int frames_in_chunk = chunk_size/bytes_per_frame;
+                    BLT_TimeStamp chunk_duration = BLT_TimeStamp_FromSamples(frames_in_chunk, media_type->sample_rate);
+                    BLT_TimeStamp packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
+                    BLT_MediaPacket_SetTimeStamp(packet, BLT_TimeStamp_Add(packet_ts, chunk_duration));
+                }
+            }
         }
+        requested -= chunk_size;
+        out       += chunk_size;
     }
    
 end:
     /* fill whatever is left with silence */    
     if (requested) {
-        ATX_LOG_FINEST_1("OsxAudioUnitsOutput::RenderCallback - filling with %d bytes of silence", requested);
+        ATX_LOG_FINEST_1("filling with %d bytes of silence", requested);
         ATX_SetMemory(out, 0, requested);
     }
     
@@ -215,7 +250,7 @@ OsxAudioUnitsOutput_QueueItemDestructor(ATX_ListDataDestructor* self,
 static BLT_Result
 OsxAudioUnitsOutput_QueuePacket(OsxAudioUnitsOutput* self, BLT_MediaPacket* packet)
 {
-    BLT_Result result = BLT_SUCCESS;
+    BLT_Result   result = BLT_SUCCESS;
     unsigned int watchdog = BLT_OSX_AUDIO_UNITS_OUTPUT_MAX_QUEUE_WAIT_COUNT;
     
     /* lock the queue */
@@ -373,11 +408,12 @@ OsxAudioUnitsOutput_PutPacket(BLT_PacketConsumer* _self,
         if (BLT_FAILED(result)) return result;
     }
     
-    /* ensure we're not paused */
-    OsxAudioUnitsOutput_Resume(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
-
     /* queue the packet */
-    return OsxAudioUnitsOutput_QueuePacket(self, packet);
+    result = OsxAudioUnitsOutput_QueuePacket(self, packet);
+    if (BLT_FAILED(result)) return result;
+    
+    /* ensure we're not paused */
+    return OsxAudioUnitsOutput_Resume(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
 }
 
 /*----------------------------------------------------------------------
@@ -452,6 +488,7 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
+    self->audio_device_id            = 0; /* default */
     self->audio_unit                 = audio_unit;
     self->media_type.sample_rate     = 0;
     self->media_type.channel_count   = 0;
@@ -578,11 +615,28 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
                               BLT_OutputNodeStatus* status)
 {
     OsxAudioUnitsOutput* self = ATX_SELF(OsxAudioUnitsOutput, BLT_OutputNode);
-    BLT_COMPILER_UNUSED(self);
     
-    /* default value */
-    status->delay.seconds     = 0;
-    status->delay.nanoseconds = 0;
+    /* default values */
+    status->flags = 0;
+    
+    pthread_mutex_lock(&self->lock);
+    
+    /* check if the queue is full */
+    if (ATX_List_GetItemCount(self->packet_queue) >= self->max_packets_in_queue) {
+        status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
+    }
+
+    /* compute the media time */
+    {
+        UInt64   host_time = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
+        BLT_Time time_delta = {0,0};
+        if (host_time >= self->last_measured_timestamp.host_time) {
+            time_delta = BLT_TimeStamp_FromNanos(host_time-self->last_measured_timestamp.host_time);
+        } 
+        status->media_time = BLT_TimeStamp_Add(self->last_measured_timestamp.media_time, time_delta);
+    }
+
+    pthread_mutex_unlock(&self->lock);
 
     return BLT_SUCCESS;
 }
@@ -847,22 +901,16 @@ OsxAudioUnitsOutputModule_Probe(BLT_Module*              self,
 
             /* the input protocol should be PACKET and the */
             /* output protocol should be NONE              */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_NONE)) {
+            if ((constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_NONE)) {
                 return BLT_FAILURE;
             }
 
             /* the input type should be unknown, or audio/pcm */
-            if (!(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            if (!(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
+                !(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
                 return BLT_FAILURE;
             }
 

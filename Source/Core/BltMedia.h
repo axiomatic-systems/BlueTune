@@ -39,7 +39,8 @@ typedef struct {
 +---------------------------------------------------------------------*/
 #define BLT_MEDIA_TYPE_ID_NONE             0
 #define BLT_MEDIA_TYPE_ID_UNKNOWN          1
-#define BLT_MEDIA_TYPE_ID_AUDIO_PCM        2
+#define BLT_MEDIA_TYPE_ID_AUDIO_PCM        2 /** see BltPcm.h    */
+#define BLT_MEDIA_TYPE_ID_VIDEO_RAW        3 /** see BltPixels.h */
 
 /*----------------------------------------------------------------------
 |   error codes
@@ -63,6 +64,7 @@ extern const BLT_MediaType BLT_MediaType_Unknown;
 |   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id);
+BLT_Result BLT_MediaType_InitEx(BLT_MediaType* type, BLT_MediaTypeId id, BLT_Size type_struct_size);
 BLT_Result BLT_MediaType_Free(BLT_MediaType* type);
 BLT_Result BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to);
 

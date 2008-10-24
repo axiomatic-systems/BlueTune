@@ -22,6 +22,7 @@
 |   prototypes
 +---------------------------------------------------------------------*/
 BLT_Result BLT_Builtins_RegisterModules(BLT_Core* core);
-BLT_Result BLT_Builtins_GetDefaultOutput(BLT_CString* name, BLT_CString* type);
+BLT_Result BLT_Builtins_GetDefaultAudioOutput(BLT_CString* name, BLT_CString* type);
+BLT_Result BLT_Builtins_GetDefaultVideoOutput(BLT_CString* name, BLT_CString* type);
 
 #endif /* _BLT_BUILTINS_H_ */

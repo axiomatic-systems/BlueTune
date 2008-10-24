@@ -402,34 +402,28 @@ PacketStreamerModule_Probe(BLT_Module*              self,
             BLT_MediaNodeConstructor* constructor = 
                 (BLT_MediaNodeConstructor*)parameters;
 
+            *match = BLT_MODULE_PROBE_MATCH_DEFAULT;
+
             /* media types must match */
-            if (constructor->spec.input.media_type->id !=
-                BLT_MEDIA_TYPE_ID_UNKNOWN &&
-                constructor->spec.output.media_type->id !=
-                BLT_MEDIA_TYPE_ID_UNKNOWN &&
-                constructor->spec.input.media_type->id !=
-                constructor->spec.output.media_type->id) {
+            if (constructor->spec.input.media_type->id  != BLT_MEDIA_TYPE_ID_UNKNOWN &&
+                constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN &&
+                constructor->spec.input.media_type->id  != constructor->spec.output.media_type->id) {
                 return BLT_FAILURE;
             }
 
             /* compute match based on specified name */
             if (constructor->name == NULL) {
-                *match = BLT_MODULE_PROBE_MATCH_DEFAULT;
-
-                /* the input protocol should be PACKET */
-                if (constructor->spec.input.protocol != 
-                    BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+                /* the input protocol must be PACKET */
+                if (constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) {
                     return BLT_FAILURE;
                 }
 
-                /* output protocol should be STREAM_PUSH or ANY */
-                if (constructor->spec.output.protocol == 
-                    BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH) {
-                    *match += 10;
-                } else if (constructor->spec.output.protocol !=
-                           BLT_MEDIA_PORT_PROTOCOL_ANY) {
+                /* the output protocol must be STREAM_PUSH */
+                if (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH) {
                     return BLT_FAILURE;
                 }
+
+                *match = BLT_MODULE_PROBE_MATCH_DEFAULT+10;
             } else {
                 /* if a name is a specified, it needs to match exactly */
                 if (!ATX_StringsEqual(constructor->name, "PacketStreamer")) {
@@ -438,19 +432,15 @@ PacketStreamerModule_Probe(BLT_Module*              self,
                     *match = BLT_MODULE_PROBE_MATCH_EXACT;
                 }
 
-                /* the input protocol should be PACKET or ANY */
-                if (constructor->spec.input.protocol !=
-                    BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                    constructor->spec.input.protocol != 
-                    BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+                /* the input protocol must be PACKET or ANY */
+                if (constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                    constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) {
                     return BLT_FAILURE;
                 }
 
-                /* output protocol should be STREAM_PUSH or ANY */
-                if ((constructor->spec.output.protocol !=
-                    BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                    constructor->spec.output.protocol != 
-                    BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH)) {
+                /* the output protocol must be STREAM_PUSH or ANY */
+                if (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                    constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH) {
                     return BLT_FAILURE;
                 }
             }

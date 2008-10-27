@@ -131,8 +131,12 @@ BLT_Result BLT_DecoderX_GetStatus(BLT_DecoderX*       decoder,
  * APX_Properties object will be returned. The caller can then call
  * methods of the ATX_Properties object to query stream properties.
  */
-BLT_Result BLT_DecoderX_GetStreamProperties(BLT_DecoderX*    decoder,
-                                            ATX_Properties** properties);
+BLT_Result BLT_DecoderX_GetInputStreamProperties(BLT_DecoderX*    decoder,
+                                                 ATX_Properties** properties);
+BLT_Result BLT_DecoderX_GetAudioStreamProperties(BLT_DecoderX*    decoder,
+                                                 ATX_Properties** properties);
+BLT_Result BLT_DecoderX_GetVideoStreamProperties(BLT_DecoderX*    decoder,
+                                                 ATX_Properties** properties);
 
 /**
  * Process on media packet through a BLT_DecoderX object's stream.

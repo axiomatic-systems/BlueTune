@@ -149,10 +149,12 @@ BLTP_SetupKeyManager(BLTP* player, BLT_Decoder* decoder)
     ATX_Properties* properties;
     BLT_Decoder_GetProperties(decoder, &properties);
 
-    ATX_PropertyValue value;
-    value.type         = ATX_PROPERTY_VALUE_TYPE_POINTER;
-    value.data.pointer = &ATX_BASE(player, BLT_KeyManager);
-    ATX_Properties_SetProperty(properties, BLT_KEY_MANAGER_PROPERTY, &value);
+    {
+        ATX_PropertyValue value;
+        value.type         = ATX_PROPERTY_VALUE_TYPE_POINTER;
+        value.data.pointer = &ATX_BASE(player, BLT_KeyManager);
+        ATX_Properties_SetProperty(properties, BLT_KEY_MANAGER_PROPERTY, &value);
+    }
 }
 
 /*----------------------------------------------------------------------

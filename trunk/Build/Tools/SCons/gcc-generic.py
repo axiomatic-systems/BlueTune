@@ -16,7 +16,7 @@ def generate(env, gcc_cross_prefix=None, gcc_extra_options='', gcc_strict=True, 
     if env['build_config'] == 'Debug':
         env.AppendUnique(CCFLAGS = ['-g'])
     else:
-        env.AppendUnique(CCFLAGS = ['-O3', '-fomit-frame-pointer'])
+        env.AppendUnique(CCFLAGS = ['-O3', '-fomit-frame-pointer', '-ffunction-sections', '-fdata-sections'])
     
     if gcc_stop_on_warning:
         env.AppendUnique(CCFLAGS = ['-Werror'])
@@ -29,4 +29,4 @@ def generate(env, gcc_cross_prefix=None, gcc_extra_options='', gcc_strict=True, 
         env['CPP']    = gcc_cross_prefix+'-cpp'
         env['CC']     = gcc_cross_prefix+'-gcc ' + gcc_extra_options
         env['CXX']    = gcc_cross_prefix+'-g++ ' + gcc_extra_options
-        env['LINK']   = gcc_cross_prefix+'-g++ ' + gcc_extra_options
+        env['LINK']   = gcc_cross_prefix+'-g++ -Wl,-gc-sections ' + gcc_extra_options

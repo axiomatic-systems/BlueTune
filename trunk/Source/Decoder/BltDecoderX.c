@@ -28,6 +28,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.decoder")
 +---------------------------------------------------------------------*/
 struct BLT_DecoderX {
     BLT_Core*         core;
+    BLT_Stream*       input_stream;
     BLT_OutputNode*   audio_output;
     BLT_Stream*       audio_stream;
     BLT_OutputNode*   video_output;
@@ -56,6 +57,8 @@ BLT_DecoderX_Create(BLT_DecoderX** decoder)
     if (BLT_FAILED(result)) goto failed;
 
     /* create streams */
+    result = BLT_Core_CreateStream((*decoder)->core, &(*decoder)->input_stream);
+    if (BLT_FAILED(result)) goto failed;
     result = BLT_Core_CreateStream((*decoder)->core, &(*decoder)->audio_stream);
     if (BLT_FAILED(result)) goto failed;
     result = BLT_Core_CreateStream((*decoder)->core, &(*decoder)->video_stream);
@@ -77,6 +80,7 @@ BLT_DecoderX_Destroy(BLT_DecoderX* decoder)
 {
     ATX_LOG_FINE("BLT_DecoderX::Destroy");
     
+    ATX_RELEASE_OBJECT(decoder->input_stream);
     ATX_RELEASE_OBJECT(decoder->audio_stream);
     ATX_RELEASE_OBJECT(decoder->video_stream);
     if (decoder->core) BLT_Core_Destroy(decoder->core);
@@ -162,13 +166,23 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_DecoderX_GetStreamProperties
+|    BLT_DecoderX_GetAudioStreamProperties
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderX_GetStreamProperties(BLT_DecoderX*     decoder, 
-                                 ATX_Properties** properties) 
+BLT_DecoderX_GetAudioStreamProperties(BLT_DecoderX*     decoder, 
+                                      ATX_Properties** properties) 
 {
     return BLT_Stream_GetProperties(decoder->audio_stream, properties);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_GetVideoStreamProperties
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderX_GetVideoStreamProperties(BLT_DecoderX*     decoder, 
+                                      ATX_Properties** properties) 
+{
+    return BLT_Stream_GetProperties(decoder->video_stream, properties);
 }
 
 /*----------------------------------------------------------------------
@@ -190,7 +204,6 @@ BLT_DecoderX_SetEventListener(BLT_DecoderX*       decoder,
 static BLT_Result
 BLT_DecoderX_CreateInputNode(BLT_DecoderX*    self, 
                              BLT_CString     name,
-                             BLT_Stream*     stream,
                              BLT_MediaNode** mp4_parser_node)
 {
     BLT_MediaType            input_media_type;
@@ -285,7 +298,7 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
         if (BLT_FAILED(result)) return result;
     } else {
         /* create the node */
-        result = BLT_DecoderX_CreateInputNode(decoder, name, decoder->audio_stream, &node);
+        result = BLT_DecoderX_CreateInputNode(decoder, name, &node);
         if (BLT_FAILED(result)) return result;
         
         /* set the input of the streams */
@@ -501,6 +514,7 @@ BLT_Result
 BLT_DecoderX_Stop(BLT_DecoderX* decoder)
 {
     /* stop the stream */
+    BLT_Stream_Stop(decoder->input_stream);
     BLT_Stream_Stop(decoder->audio_stream);
     BLT_Stream_Stop(decoder->video_stream);
     
@@ -514,6 +528,7 @@ BLT_Result
 BLT_DecoderX_Pause(BLT_DecoderX* decoder)
 {
     /* pause the stream */
+    BLT_Stream_Pause(decoder->input_stream);
     BLT_Stream_Pause(decoder->audio_stream);
     BLT_Stream_Pause(decoder->video_stream);
     

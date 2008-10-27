@@ -344,7 +344,12 @@ BLTP_CheckElapsedTime(BLT_DecoderX* decoder, unsigned int duration)
 
 /* optional plugins */
 #include "BltFfmpegDecoder.h"
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT)
 #include "BltOsxVideoOutput.h"
+#endif
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT)
+#include "BltDx9VideoOutput.h"
+#endif
 
 /*----------------------------------------------------------------------
 |    BLTP_RegisterPlugins
@@ -358,8 +363,15 @@ BLTP_RegisterPlugins(BLT_DecoderX* decoder)
     result = BLT_FfmpegDecoderModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
 
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT)
     result = BLT_OsxVideoOutputModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
+#endif
+
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT)
+    result = BLT_Dx9VideoOutputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
+#endif
 }
 
 /*----------------------------------------------------------------------

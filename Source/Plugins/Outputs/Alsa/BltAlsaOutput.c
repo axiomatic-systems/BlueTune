@@ -883,13 +883,14 @@ AlsaOutput_Seek(BLT_MediaNode* _self,
 +---------------------------------------------------------------------*/
 BLT_METHOD
 AlsaOutput_GetStatus(BLT_OutputNode*       self,
-                      BLT_OutputNodeStatus* status)
+                     BLT_OutputNodeStatus* status)
 {
     /*AlsaOutput* self = (AlsaOutput*)instance;*/
     BLT_COMPILER_UNUSED(self);
 
-    status->delay.seconds = 0;
-    status->delay.nanoseconds = 0;
+    status->media_time.seconds = 0;
+    status->media_time.nanoseconds = 0;
+    status->flags = 0;
 
     return BLT_SUCCESS;
 }

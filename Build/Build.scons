@@ -350,10 +350,12 @@ for plugin in env['BLT_PLUGINS']:
                        extra_lib_dirs           = extra_lib_dirs,
                        extra_cpp_defines        = extra_defines,
                        environment              = extra_env)
+	StaticLibraryModule(name                  = 'Blt'+plugin+'PluginStatic',
+                    chained_link_and_include_deps = ['Blt'+plugin])
 	SharedLibraryModule(name          = 'Blt'+plugin+'Plugin',
                             library_name  = 'Blt'+plugin+'.plugin',
                             anchor_module = 'Blt'+plugin+'Loader',
-			    link_deps     = ['Blt'+plugin])
+			    link_deps     = ['Blt'+plugin+'PluginStatic'])
     	plugins_dynamic_modules.append('Blt'+plugin+'Plugin')
                             
     else:
@@ -365,7 +367,7 @@ for plugin in env['BLT_PLUGINS']:
     if not external: plugins_static_modules.append('Blt'+plugin)
         
 plugins_cpp_defines = [PluginsSettings[p]['defines'] for p in env['BLT_PLUGINS']]
-plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_OUTPUT_NAME', '"'+env['BLT_DEFAULT_OUTPUT']+'"')]
+plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME', '"'+env['BLT_DEFAULT_AUDIO_OUTPUT']+'"')]
 
 CompiledModule(name                          = 'BltPlugins',
                build_source_dirs             = [],

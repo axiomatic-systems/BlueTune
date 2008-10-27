@@ -260,8 +260,8 @@ BLT_DecoderX_CreateInputNode(BLT_DecoderX*    self,
     if (BLT_FAILED(result)) return result;
     
     /* setup the contexts */
-    BLT_MediaNode_Activate(file_input_node, stream);
-    BLT_MediaNode_Activate(*mp4_parser_node, stream);
+    BLT_MediaNode_Activate(file_input_node, self->input_stream);
+    BLT_MediaNode_Activate(*mp4_parser_node, self->input_stream);
     
     /* connect the nodes */
     BLT_MediaNode_GetPortByName(file_input_node, "output", &output_port);

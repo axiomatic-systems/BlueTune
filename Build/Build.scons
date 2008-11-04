@@ -125,11 +125,11 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Hel
     else:
         BLT_HELIX_AAC_ASM_DIRS = []
     CompiledModule(name		            = 'HelixAAC',
-                   source_root          = 'ThirdParty/HelixAAC/Source',
-                   build_source_dirs    = ['.', 'pub', 'real']+BLT_HELIX_AAC_ASM_DIRS,
-                   build_source_pattern = ['*.c', '*.s'],
-                   extra_cpp_defines    = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
-                   environment          = env['BLT_RELAXED_ENV'])
+                   source_root           = 'ThirdParty/HelixAAC/Source',
+                   build_source_dirs     = ['.', 'pub', 'real']+BLT_HELIX_AAC_ASM_DIRS,
+                   build_source_patterns = ['*.c', '*.s'],
+                   extra_cpp_defines     = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
+                   environment           = env['BLT_RELAXED_ENV'])
 
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  

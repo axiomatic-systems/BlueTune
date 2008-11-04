@@ -40,6 +40,24 @@ typedef long FLO_Float;
 #define FLO_FC9_BITS 5
 #else /* FLO_CONFIG_INTEGER_32 */
 #if defined(__GNUC__) && defined(__arm__) && !defined(BLT_DEBUG)
+
+/* define the following for  multiple inline functions */
+/* (one per bit shift constant)                        */
+/*#define FLO_FIX_MUL_MULTI_DECLARE 1 */
+#if defined(FLO_FIX_MUL_MULTI_DECLARE)
+#define FLO_DECLARE_FIX_MUL(_name, _bits)                      \
+static inline long FLO_##_name##_MUL(FLO_Float x, FLO_Float y) \
+{                                                              \
+    long result;                                               \
+    asm("smull r8, r9, %1, %2\n\t"                             \
+        "mov r9, r9, lsl %3\n\t"                               \
+        "orr %0, r9, r8, lsr %4"                               \
+        : "=r" (result)                                        \
+        : "r" (x), "r" (y), "I" (32-(_bits)), "I" (_bits)      \
+        : "r8", "r9"); /* r8 and r9 are clobbered */           \
+    return result;                                             \
+}
+#else
 static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
 {                                                                          
     long result;                                                            
@@ -51,6 +69,8 @@ static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
         : "r8", "r9"); /* r8 and r9 are clobbered */         
     return result;                                                                 
 }
+#endif
+
 #else
 #define FLO_FIX_MUL(x, y, bits) ((FLO_Float)(((long long)(x)*(long long)(y))>>(bits)))
 #endif
@@ -86,6 +106,20 @@ static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
 #define FLO_FC8_SCL(x) ((x)>>(FLO_FC8_BITS-(FLO_FIX_BITS-1)))
 #define FLO_FC9(x) FLO_FIX_CONV((x)*(1<<FLO_FC9_BITS))
 
+#if defined(FLO_FIX_MUL_MULTI_DECLARE)
+#if FLO_FC0_DSCL > 0
+FLO_DECLARE_FIX_MUL(FC0, FLO_FC0_DSCL)
+#else
+#define FLO_FC0_MUL(x, y) ((x)*(y))
+#endif
+FLO_DECLARE_FIX_MUL(FC1, FLO_FC1_BITS)
+FLO_DECLARE_FIX_MUL(FC3, (FLO_FC3_BITS+1-FLO_FIX_BITS))
+FLO_DECLARE_FIX_MUL(FC4, FLO_FC4_BITS)
+FLO_DECLARE_FIX_MUL(FC5, FLO_FC5_BITS)
+FLO_DECLARE_FIX_MUL(FC6, FLO_FC6_BITS)
+FLO_DECLARE_FIX_MUL(FC7, FLO_FC7_BITS) 
+FLO_DECLARE_FIX_MUL(FC8, (FLO_FC9_BITS+FLO_FC8_BITS-(FLO_FIX_BITS-1)))
+#else /* FLO_FIX_MUL_MULTI_DECLARE */
 #if FLO_FC0_DSCL > 0
 #define FLO_FC0_MUL(x, y) FLO_FIX_MUL(x, y, FLO_FC0_DSCL)
 #else
@@ -98,6 +132,8 @@ static inline long FLO_FIX_MUL(FLO_Float x, FLO_Float y, int bits)
 #define FLO_FC6_MUL(x, y) FLO_FIX_MUL(x, y, FLO_FC6_BITS)
 #define FLO_FC7_MUL(x, y) FLO_FIX_MUL(x, y, FLO_FC7_BITS) 
 #define FLO_FC8_MUL(x, y) FLO_FIX_MUL(x, y, (FLO_FC9_BITS+FLO_FC8_BITS-(FLO_FIX_BITS-1)))
+#endif /* FLO_FIX_MUL_MULTI_DECLARE */
+
 #else
 
 #define FLO_ZERO  0.0f

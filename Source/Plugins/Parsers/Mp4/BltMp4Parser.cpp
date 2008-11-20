@@ -944,9 +944,22 @@ Mp4ParserModule_Probe(BLT_Module*              _self,
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:
         {
-            BLT_MediaNodeConstructor* constructor = 
-                (BLT_MediaNodeConstructor*)parameters;
+            BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
 
+            /* check if we're being probed by name */
+            if (constructor->name != NULL) {
+                /* we're being probed by name */
+                if (ATX_StringsEqual(constructor->name, "com.bluetune.parsers.mp4")) {
+                    /* our name */
+                    *match = BLT_MODULE_PROBE_MATCH_EXACT;
+                    return BLT_SUCCESS;
+                } else {
+                    /* not out name */
+                    *match = 0;
+                    return BLT_FAILURE;
+                }
+            }
+            
             /* we need the input protocol to be STREAM_PULL and the output */
             /* protocol to be PACKET                                       */
              if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
@@ -963,25 +976,12 @@ Mp4ParserModule_Probe(BLT_Module*              _self,
             }
 
             /* the output type should be unknown at this point */
-            if (constructor->spec.output.media_type->id != 
-                BLT_MEDIA_TYPE_ID_UNKNOWN) {
+            if (constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN) {
                 return BLT_FAILURE;
             }
 
-            /* compute the match level */
-            if (constructor->name != NULL) {
-                /* we're being probed by name */
-                if (ATX_StringsEqual(constructor->name, "Mp4Parser")) {
-                    /* our name */
-                    *match = BLT_MODULE_PROBE_MATCH_EXACT;
-                } else {
-                    /* not out name */
-                    return BLT_FAILURE;
-                }
-            } else {
-                /* we're probed by protocol/type specs only */
-                *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
-            }
+            /* set the match level */
+            *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
 
             ATX_LOG_FINE_1("match %d", *match);
             return BLT_SUCCESS;

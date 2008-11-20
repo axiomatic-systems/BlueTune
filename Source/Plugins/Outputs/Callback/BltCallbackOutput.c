@@ -99,7 +99,7 @@ CallbackOutput_Create(BLT_Module*              module,
                       BLT_MediaNode**          object)
 {
     CallbackOutput*           self;
-    ATX_UInt32                target_addr = 0;
+    ATX_UInt64                target_addr = 0;
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
     
@@ -119,8 +119,7 @@ CallbackOutput_Create(BLT_Module*              module,
     }
 
     /* parse the name */
-    /* FIXME: this only supports 32 bit pointers for now */
-    result = ATX_ParseInteger32U(constructor->name+16, &target_addr, ATX_FALSE);
+    result = ATX_ParseInteger64U(constructor->name+16, &target_addr, ATX_FALSE);
     if (ATX_FAILED(result)) return result;
 
     /* allocate memory for the object */
@@ -134,7 +133,7 @@ CallbackOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* keep a reference to the callback target */
-    self->callback_target = (BLT_PacketConsumer*)((ATX_PointerLong)target_addr);
+    self->callback_target = (BLT_PacketConsumer*)target_addr;
 
     /* keep the media type info */
     BLT_MediaType_Clone(constructor->spec.input.media_type, 
@@ -191,6 +190,22 @@ CallbackOutput_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
+|   CallbackOutput_GetStatus
++---------------------------------------------------------------------*/
+BLT_METHOD
+CallbackOutput_GetStatus(BLT_OutputNode*       _self, 
+                         BLT_OutputNodeStatus* status)
+{
+    ATX_COMPILER_UNUSED(_self);
+
+    status->media_time.seconds     = 0;
+    status->media_time.nanoseconds = 0;
+    status->flags                  = 0;
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(CallbackOutput)
@@ -233,6 +248,13 @@ ATX_BEGIN_INTERFACE_MAP_EX(CallbackOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_Resume,
     BLT_BaseMediaNode_Seek
 ATX_END_INTERFACE_MAP_EX
+
+/*----------------------------------------------------------------------
+|    BLT_OutputNode interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(CallbackOutput, BLT_OutputNode)
+    CallbackOutput_GetStatus
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
@@ -332,7 +354,7 @@ BLT_CallbackOutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("Debug Output", NULL, 0, 
+    return BLT_BaseModule_Create("Callback Output", NULL, 0, 
                                  &CallbackOutputModule_BLT_ModuleInterface,
                                  &CallbackOutputModule_ATX_ReferenceableInterface,
                                  object);

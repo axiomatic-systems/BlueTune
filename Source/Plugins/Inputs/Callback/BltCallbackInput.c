@@ -68,7 +68,7 @@ CallbackInput_Create(BLT_Module*              module,
 {
     CallbackInput*            input;
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
-    ATX_UInt32                stream_addr = 0;
+    ATX_UInt64                stream_addr = 0;
     BLT_Result                result;
 
     ATX_LOG_FINE("create");
@@ -88,7 +88,7 @@ CallbackInput_Create(BLT_Module*              module,
 
     /* parse the name */
     /* FIXME: this only supports 32 bit pointers for now */
-    result = ATX_ParseInteger32U(constructor->name+15, &stream_addr, ATX_FALSE);
+    result = ATX_ParseInteger64U(constructor->name+15, &stream_addr, ATX_FALSE);
     if (ATX_FAILED(result)) return result;
 
     /* allocate memory for the object */
@@ -102,7 +102,7 @@ CallbackInput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(input, BLT_BaseMediaNode), module, core);
     
     /* keep a reference to the stream */
-    input->stream = (ATX_InputStream*)((ATX_PointerLong)stream_addr);
+    input->stream = (ATX_InputStream*)stream_addr;
     ATX_REFERENCE_OBJECT(input->stream);
 
     /* remember media type */

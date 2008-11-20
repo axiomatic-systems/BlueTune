@@ -28,6 +28,14 @@
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_FfmpegDecoderModule_GetModuleObject(BLT_Module** module);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_FFMPEG_DECODER_H_ */

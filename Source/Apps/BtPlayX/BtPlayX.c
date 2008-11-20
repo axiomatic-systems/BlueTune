@@ -404,10 +404,24 @@ main(int argc, char** argv)
     /* listen to stream events */
     BLT_DecoderX_SetEventListener(decoder, &ATX_BASE(&player, BLT_EventListener));
              
-    /* listen to stream properties events */
+    /* listen to audio stream properties events */
     {
         ATX_Properties* properties;
-        BLT_DecoderX_GetStreamProperties(decoder, &properties);
+        BLT_DecoderX_GetAudioStreamProperties(decoder, &properties);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
+    }
+
+    /* listen to video stream properties events */
+    {
+        ATX_Properties* properties;
+        BLT_DecoderX_GetVideoStreamProperties(decoder, &properties);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
+    }
+
+    /* listen to input stream properties events */
+    {
+        ATX_Properties* properties;
+        BLT_DecoderX_GetInputStreamProperties(decoder, &properties);
         ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
     }
 

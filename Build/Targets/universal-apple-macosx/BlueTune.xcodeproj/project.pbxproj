@@ -70,6 +70,18 @@
 		CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */; };
+		CA1EC1010ED299BD0033F894 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA1EC1020ED299CD0033F894 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9ED8E30EB02413003CE43C /* Cocoa.framework */; };
+		CA1EC1820ED29B080033F894 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CA1EC1800ED29B080033F894 /* MainMenu.xib */; };
+		CA1EC1870ED29B8C0033F894 /* BtCocoaPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA1EC1850ED29B8C0033F894 /* BtCocoaPlayerController.m */; };
+		CA1EC1880ED29B8C0033F894 /* BtCocoaPlayerMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */; };
+		CA1EC1EF0ED29EF40033F894 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
+		CA1EC1F10ED29F030033F894 /* libMelo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504E1B0C5E8D5A0060E6FE /* libMelo.a */; };
+		CA1EC1F20ED29F080033F894 /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
+		CA1EC1F30ED29F090033F894 /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
+		CA1EC1F50ED29F820033F894 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA1EC2190ED29FCD0033F894 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
+		CA1EC2360ED2A0400033F894 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA4277EE0DA3A47400557A8B /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA44DE720DEDEB0E0020CB81 /* PcmDiff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */; };
@@ -364,8 +376,6 @@
 		CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */; };
 		CA9ED8440EAFAB56003CE43C /* BtPlayX.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED8420EAFAB56003CE43C /* BtPlayX.c */; };
 		CA9ED8450EAFAB56003CE43C /* BtPlayXForceCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED8430EAFAB56003CE43C /* BtPlayXForceCpp.cpp */; };
-		CA9ED8490EAFABAA003CE43C /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
-		CA9ED84A0EAFABAA003CE43C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA9ED84B0EAFABAA003CE43C /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA9ED84C0EAFABAA003CE43C /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
 		CA9ED84D0EAFABAA003CE43C /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
@@ -535,6 +545,55 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
+		};
+		CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CA1EC1D40ED29E920033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Bento4;
+		};
+		CA1EC1D60ED29E920033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = CAEA9CE30E144664008C396D;
+			remoteInfo = Bento4Atomix;
+		};
+		CA1EC1D80ED29E990033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
+		CA1EC1DA0ED29E9E0033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Melo;
+		};
+		CA1EC1DC0ED29EAC0033F894 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
+			remoteInfo = Neptune;
+		};
+		CA2F53A60EC0F48900AEBC12 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA1A5EA90EC0152A00A9040C;
+			remoteInfo = axTLS;
 		};
 		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -746,6 +805,13 @@
 			remoteGlobalIDString = CA44C52A0D46375F00173F5F;
 			remoteInfo = Mp4DcfPackager;
 		};
+		CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA9A16D80ED4F42A00C60FDF /* PassthroughWriterTest */;
+			remoteInfo = PassthroughWriterTest;
+		};
 		CA9ED1E80EACFA6A003CE43C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -935,6 +1001,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
+		CAFB21BC0EC2960C009C3459 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA2F54240EC115E600AEBC12;
+			remoteInfo = TlsTest1;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -953,6 +1026,12 @@
 		CA0C9C150D16047100E23496 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BtCocoaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA1EC0FB0ED299AE0033F894 /* BtCocoaPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "BtCocoaPlayer-Info.plist"; path = "BtCocoaPlayer/BtCocoaPlayer-Info.plist"; sourceTree = "<group>"; };
+		CA1EC1810ED29B080033F894 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = BtCocoaPlayer/English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		CA1EC1840ED29B8C0033F894 /* BtCocoaPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtCocoaPlayerController.h; sourceTree = "<group>"; };
+		CA1EC1850ED29B8C0033F894 /* BtCocoaPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BtCocoaPlayerController.m; sourceTree = "<group>"; };
+		CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BtCocoaPlayerMain.mm; sourceTree = "<group>"; };
 		CA44C4480D4522D900173F5F /* Bento4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Bento4.xcodeproj; path = "../../../../Bento4/Build/Targets/universal-apple-macosx/Bento4.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		CA44DE6E0DEDEAE50020CB81 /* pcmdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pcmdiff; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
@@ -1285,6 +1364,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA1EC0F70ED299AD0033F894 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA1EC1F20ED29F080033F894 /* libBento4.a in Frameworks */,
+				CA1EC1F30ED29F090033F894 /* libBento4Atomix.a in Frameworks */,
+				CA1EC1F10ED29F030033F894 /* libMelo.a in Frameworks */,
+				CA1EC1F50ED29F820033F894 /* libAtomix.a in Frameworks */,
+				CA1EC1EF0ED29EF40033F894 /* libNeptune.a in Frameworks */,
+				CA1EC1010ED299BD0033F894 /* libBlueTune.a in Frameworks */,
+				CA1EC1020ED299CD0033F894 /* Cocoa.framework in Frameworks */,
+				CA1EC2190ED29FCD0033F894 /* AudioUnit.framework in Frameworks */,
+				CA1EC2360ED2A0400033F894 /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA44DE6C0DEDEAE50020CB81 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1358,12 +1453,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */,
-				CA9ED8490EAFABAA003CE43C /* CoreServices.framework in Frameworks */,
-				CA9ED84A0EAFABAA003CE43C /* AudioToolbox.framework in Frameworks */,
-				CA9ED84B0EAFABAA003CE43C /* AudioUnit.framework in Frameworks */,
-				CA9ED8CE0EAFCB26003CE43C /* CoreVideo.framework in Frameworks */,
 				CA9ED8E40EB02413003CE43C /* Cocoa.framework in Frameworks */,
+				CA9ED8CE0EAFCB26003CE43C /* CoreVideo.framework in Frameworks */,
+				CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */,
+				CA9ED84B0EAFABAA003CE43C /* AudioUnit.framework in Frameworks */,
 				CA9ED8EA0EB02441003CE43C /* OpenGL.framework in Frameworks */,
 				CA9ED84C0EAFABAA003CE43C /* libAtomix.a in Frameworks */,
 				CA9ED84D0EAFABAA003CE43C /* libBlueTune.a in Frameworks */,
@@ -1411,6 +1504,7 @@
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				CA1EC10E0ED29A1C0033F894 /* Resources */,
 			);
 			name = BlueTune;
 			sourceTree = "<group>";
@@ -1430,6 +1524,7 @@
 				CAF2EE270E60C38D00948C04 /* AsyncPlayerC */,
 				CA5827130E68B39D006CC501 /* libBltWmaDecoderPlugin.dylib */,
 				CA9ED8340EAFAAFC003CE43C /* btplayx */,
+				CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1453,6 +1548,7 @@
 		CA0C9AD90D15D24500E23496 /* Apps */ = {
 			isa = PBXGroup;
 			children = (
+				CA1EC1830ED29B8C0033F894 /* BtCocoaPlayer */,
 				CA9ED8410EAFAB56003CE43C /* BtPlayX */,
 				CA0C9AED0D15D24500E23496 /* BtPlay */,
 				CA0C9ADA0D15D24500E23496 /* BtController */,
@@ -1505,6 +1601,33 @@
 			path = NetworkStream;
 			sourceTree = "<group>";
 		};
+		CA1EC10E0ED29A1C0033F894 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CA1EC2460ED2A07E0033F894 /* BtCocoaPlayer */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		CA1EC1830ED29B8C0033F894 /* BtCocoaPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				CA1EC1840ED29B8C0033F894 /* BtCocoaPlayerController.h */,
+				CA1EC1850ED29B8C0033F894 /* BtCocoaPlayerController.m */,
+				CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */,
+			);
+			path = BtCocoaPlayer;
+			sourceTree = "<group>";
+		};
+		CA1EC2460ED2A07E0033F894 /* BtCocoaPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				CA1EC0FB0ED299AE0033F894 /* BtCocoaPlayer-Info.plist */,
+				CA1EC1800ED29B080033F894 /* MainMenu.xib */,
+			);
+			name = BtCocoaPlayer;
+			sourceTree = "<group>";
+		};
 		CA44C4490D4522DA00173F5F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1525,6 +1648,7 @@
 				CA44C47F0D4522DA00173F5F /* cryptotest */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
 				CA9ED1E90EACFA6A003CE43C /* avctrackwritertest */,
+				CA9A17AF0ED50F6D00C60FDF /* PassthroughWriterTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2003,6 +2127,7 @@
 			isa = PBXGroup;
 			children = (
 				CA50437F0C5AE61E0060E6FE /* libNeptune.a */,
+				CA2F53A70EC0F48900AEBC12 /* libaxTLS.a */,
 				CAE418940E0DD91C00A530D1 /* ArraysTest1 */,
 				CAE418960E0DD91C00A530D1 /* BufferedStreamsTest1 */,
 				CA550DAD0D23255E00B22D72 /* HttpServerTest1 */,
@@ -2027,6 +2152,7 @@
 				CAE418B60E0DD91C00A530D1 /* NetPing */,
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
+				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2725,6 +2851,29 @@
 			productReference = CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */;
 			productType = "com.apple.product-type.tool";
 		};
+		CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA1EC0FE0ED299AE0033F894 /* Build configuration list for PBXNativeTarget "BtCocoaPlayer" */;
+			buildPhases = (
+				CA1EC0F50ED299AD0033F894 /* Resources */,
+				CA1EC0F60ED299AD0033F894 /* Sources */,
+				CA1EC0F70ED299AD0033F894 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA1EC1000ED299B50033F894 /* PBXTargetDependency */,
+				CA1EC1D50ED29E920033F894 /* PBXTargetDependency */,
+				CA1EC1D70ED29E920033F894 /* PBXTargetDependency */,
+				CA1EC1D90ED29E990033F894 /* PBXTargetDependency */,
+				CA1EC1DB0ED29E9E0033F894 /* PBXTargetDependency */,
+				CA1EC1DD0ED29EAC0033F894 /* PBXTargetDependency */,
+			);
+			name = BtCocoaPlayer;
+			productName = BtCocoaPlayer;
+			productReference = CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */;
+			productType = "com.apple.product-type.application";
+		};
 		CA44DE6D0DEDEAE50020CB81 /* PcmDiff */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CA44DE740DEDEB2D0020CB81 /* Build configuration list for PBXNativeTarget "PcmDiff" */;
@@ -2948,6 +3097,7 @@
 				CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */,
 				CA44DE6D0DEDEAE50020CB81 /* PcmDiff */,
 				CAF2EE260E60C38D00948C04 /* AsyncPlayerC */,
+				CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */,
 			);
 		};
 /* End PBXProject section */
@@ -3014,6 +3164,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = QueueTest1;
 			remoteRef = CA0D92160E2732E5005667F1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA2F53A70EC0F48900AEBC12 /* libaxTLS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libaxTLS.a;
+			remoteRef = CA2F53A60EC0F48900AEBC12 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
@@ -3148,6 +3305,14 @@
 			path = mp4dcfpackager;
 			remoteRef = CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA9A17AF0ED50F6D00C60FDF /* PassthroughWriterTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			name = PassthroughWriterTest;
+			path = build/Debug/PassthroughWriterTest;
+			remoteRef = CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */;
+			sourceTree = "<group>";
 		};
 		CA9ED1E90EACFA6A003CE43C /* avctrackwritertest */ = {
 			isa = PBXReferenceProxy;
@@ -3317,7 +3482,25 @@
 			remoteRef = CAEA9CEC0E144683008C396D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CAFB21BD0EC2960C009C3459 /* TlsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = TlsTest1;
+			remoteRef = CAFB21BC0EC2960C009C3459 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CA1EC0F50ED299AD0033F894 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA1EC1820ED29B080033F894 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CA0C9AF20D15D27D00E23496 /* Sources */ = {
@@ -3334,6 +3517,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA1EC0F60ED299AD0033F894 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA1EC1870ED29B8C0033F894 /* BtCocoaPlayerController.m in Sources */,
+				CA1EC1880ED29B8C0033F894 /* BtCocoaPlayerMain.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3594,6 +3786,36 @@
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */;
 		};
+		CA1EC1000ED299B50033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */;
+		};
+		CA1EC1D50ED29E920033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4;
+			targetProxy = CA1EC1D40ED29E920033F894 /* PBXContainerItemProxy */;
+		};
+		CA1EC1D70ED29E920033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4Atomix;
+			targetProxy = CA1EC1D60ED29E920033F894 /* PBXContainerItemProxy */;
+		};
+		CA1EC1D90ED29E990033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA1EC1D80ED29E990033F894 /* PBXContainerItemProxy */;
+		};
+		CA1EC1DB0ED29E9E0033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Melo;
+			targetProxy = CA1EC1DA0ED29E9E0033F894 /* PBXContainerItemProxy */;
+		};
+		CA1EC1DD0ED29EAC0033F894 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA1EC1DC0ED29EAC0033F894 /* PBXContainerItemProxy */;
+		};
 		CA44C4AB0D45231100173F5F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Bento4;
@@ -3665,6 +3887,17 @@
 			targetProxy = CAF2EE2B0E60C39900948C04 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		CA1EC1800ED29B080033F894 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA1EC1810ED29B080033F894 /* English */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
@@ -3939,6 +4172,54 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = NetworkStreamTest;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA1EC0FC0ED299AE0033F894 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = BtCocoaPlayer/BtCocoaPlayer_Prefix.pch;
+				INFOPLIST_FILE = "BtCocoaPlayer/BtCocoaPlayer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = BtCocoaPlayer;
+			};
+			name = Debug;
+		};
+		CA1EC0FD0ED299AE0033F894 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = BtCocoaPlayer/BtCocoaPlayer_Prefix.pch;
+				INFOPLIST_FILE = "BtCocoaPlayer/BtCocoaPlayer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = BtCocoaPlayer;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4218,7 +4499,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = ATX_CONFIG_ENABLE_LOGGING;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil",
@@ -4242,7 +4526,10 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_PREPROCESSOR_DEFINITIONS = ATX_CONFIG_ENABLE_LOGGING;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil",
@@ -4351,6 +4638,15 @@
 			buildConfigurations = (
 				CA1ACEFC0D30C5FA00C350CD /* Debug */,
 				CA1ACEFD0D30C5FA00C350CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA1EC0FE0ED299AE0033F894 /* Build configuration list for PBXNativeTarget "BtCocoaPlayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA1EC0FC0ED299AE0033F894 /* Debug */,
+				CA1EC0FD0ED299AE0033F894 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

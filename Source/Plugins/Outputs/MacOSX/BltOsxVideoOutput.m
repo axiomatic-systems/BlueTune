@@ -30,12 +30,12 @@
 /*----------------------------------------------------------------------
 |   logging
 +---------------------------------------------------------------------*/
-ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.macosx.video")
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.video")
 
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE 5
+#define BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE 4
 #define BLT_MACOSX_VIDEO_MIN_VIEW_WIDTH     8
 #define BLT_MACOSX_VIDEO_MIN_VIEW_HEIGHT    8
 #define BLT_MACOSX_VIDEO_MIN_PICTURE_WIDTH  8
@@ -59,6 +59,7 @@ typedef struct {
 
 - (void)             dealloc;
 - (CVPixelBufferRef) buffer;
+- (void*)            memory;
 - (float)            width;
 - (float)            height;
 - (uint64_t)         displayTime;
@@ -77,8 +78,9 @@ typedef struct {
 	CVOpenGLTextureCacheRef texture_cache;
 	CVOpenGLTextureRef      texture;
     OsxVideoPicture*        pictures[BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE];
-    unsigned int            picture_out;
-    unsigned int            picture_count;
+    unsigned int            pictures_in_queue; /* number of valid pictures in the queue     */
+    unsigned int            picture_tail;      /* index of picture at the tail of the queue */
+    OsxVideoPicture*        picture_active;    /* currently active picture                  */
     CVDisplayLinkRef        display_link;
 }
 
@@ -181,6 +183,14 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 - (CVPixelBufferRef) buffer
 {
     return pixel_buffer;
+}
+
+/*----------------------------------------------------------------------
+|    OsxVideoPicture::memory
++---------------------------------------------------------------------*/
+- (void*) memory
+{
+    return pixel_memory;
 }
 
 /*----------------------------------------------------------------------
@@ -319,8 +329,9 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
     // free all pictures
     unsigned int i;
     for (i=0; i<BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE; i++) {
-        if (pictures[i]) [pictures[i] dealloc];
+        [pictures[i] dealloc];
     }
+    [picture_active dealloc];
     
     [lock release];
     [super dealloc];
@@ -506,7 +517,7 @@ end:
 
    	// set up the GL contexts swap interval -- passing 1 means that
     // the buffers are swapped only during the vertical retrace of the monitor
-	long swap_interval = 1;
+	GLint swap_interval = 1;
 	[[self openGLContext] setValues:&swap_interval forParameter:NSOpenGLCPSwapInterval];
 
     // create a texture cache
@@ -545,7 +556,7 @@ end:
 {
     // wait for some space in the queue
     [lock lock];
-    while (picture_count == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
+    while (pictures_in_queue == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
         [lock unlock];
         ATX_LOG_FINEST("waiting for space in picture queue");
         ATX_TimeInterval sleep_duration = {0,10000000}; /* 10 ms */
@@ -553,16 +564,20 @@ end:
         [lock lock];
     }
     
-    unsigned int picture_in = (picture_out+picture_count)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
+    unsigned int picture_in = (pictures_in_queue+picture_tail)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
     if (pictures[picture_in] == NULL) {
         pictures[picture_in] = [OsxVideoPicture alloc];
     }
     OsxVideoPicture* picture = pictures[picture_in];
     [picture setPixels:pixels format:format];
     [picture setDisplayTime: displayTime];
-    ++picture_count;
+    ++pictures_in_queue;
     
-    ATX_LOG_FINEST_3("picture queued at %d (%d in queue, next out=%d)", picture_in, picture_count, picture_out);
+    ATX_LOG_FINEST_4("picture queued at %d (%d in queue, tail=%d), pts=%lld", 
+                      picture_in, 
+                      pictures_in_queue, 
+                      picture_tail, 
+                      displayTime);
 
     [lock unlock];
      
@@ -576,7 +591,7 @@ end:
 {
     BLT_Boolean queue_is_full = BLT_FALSE;
     [lock lock];
-    if (picture_count == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
+    if (pictures_in_queue == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
         queue_is_full = BLT_TRUE;
     }
     [lock unlock];
@@ -606,7 +621,10 @@ end:
 - (void) selectNextPicture
 {   
     // do nothing if we don't have a picture
-    if (picture_count == 0) return;
+    if (pictures_in_queue == 0) {
+        ATX_LOG_FINEST("no picture");
+        return;
+    }
     
     // release the previous texture
     if (texture) {
@@ -617,20 +635,15 @@ end:
     // let the GL texture cache do some housekeeping
     CVOpenGLTextureCacheFlush(texture_cache, 0);
 
-    // move to the next picture
-    OsxVideoPicture* picture = pictures[picture_out];
-    picture_out = (picture_out+1)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
-    --picture_count;
+    // swap the active picture and the queue tail
+    OsxVideoPicture* picture = pictures[picture_tail];
+    ATX_LOG_FINEST_3("selecting picture %d pts=%lld (%d in queue)", picture_tail, [picture displayTime], pictures_in_queue);
+    pictures[picture_tail] = picture_active;
+    picture_active = picture;
+    picture_tail = (picture_tail+1)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
+    --pictures_in_queue;
     if (picture == NULL || [picture buffer] == NULL) return;
-    
-    {
-        static uint64_t previous_pts = 0;
-        uint64_t delta = [picture displayTime]-previous_pts;
-        ATX_LOG_FINEST_1("picture pts delta=%lld", delta);
-        previous_pts = [picture displayTime];
-    }
-    ATX_LOG_FINEST_2("selecting next picture pts=%lld (%d still in queue)", [picture displayTime], picture_count);
-    
+        
     // create a new GL texture from the pixels
     CVReturn err;
 	err = CVOpenGLTextureCacheCreateTextureFromImage(NULL,             // allocator
@@ -668,8 +681,8 @@ end:
     
     [lock lock];
     BLT_Boolean need_to_render = BLT_FALSE;
-    if (picture_count) {
-        OsxVideoPicture* picture = pictures[picture_out];
+    if (pictures_in_queue) {
+        OsxVideoPicture* picture = pictures[picture_tail];
         if (picture) {
             if ([picture displayTime] <= output_time->hostTime) {
                 // select the next picture for display
@@ -711,7 +724,6 @@ OsxVideoOutput_PutPacket(BLT_PacketConsumer* _self,
         // FIXME: this is not the final way to do it
         BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
         double tsd = (double)(ts.seconds)+(double)(ts.nanoseconds)/1000000000.0;
-        tsd /= 10;
         double htd = (double)AudioConvertHostTimeToNanos(CVGetCurrentHostTime())/1000000000.0;
         double delta = tsd+self->time_offset-htd;
         if (tsd == 0.0 || delta > 2.0 || delta < -2.0) {
@@ -777,7 +789,7 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self)
      
     /* create the video view */
     self->videoView = [[OsxVideoView alloc] initWithFrame: frame
-                                                 pixelFormat: [NSOpenGLView defaultPixelFormat]];
+                                              pixelFormat: [NSOpenGLView defaultPixelFormat]];
     if (self->videoView == NULL) {
         [pool release];
         return BLT_FAILURE;

@@ -32,7 +32,15 @@
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_Dx9VideoOutputModule_GetModuleObject(BLT_Module** module);
+
+#if defined(__cplusplus)
+}
+#endif
 
 /** @} */
 

@@ -35,7 +35,9 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.dx9")
 +---------------------------------------------------------------------*/
 #define BLT_DX9_VIDEO_OUTPUT_WINDOW_CLASS       TEXT("BlueTune Video")
 #define BLT_DX9_VIDEO_OUTPUT_WINDOW_NAME        TEXT("BlueTune Video")
-#define BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE 3
+#define BLT_DX9_VIDEO_OUTPUT_FULLSCREEN_WINDOW_CLASS       TEXT("BlueTune Fullscreen Video")
+#define BLT_DX9_VIDEO_OUTPUT_FULLSCREEN_WINDOW_NAME        TEXT("BlueTune Fullscreen Video")
+#define BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE 4
 #define BLT_DX9_VIDEO_OUTPUT_FVF_CUSTOM_VERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
 
 /*----------------------------------------------------------------------
@@ -59,6 +61,9 @@ typedef struct {
     ATX_EXTENDS   (BLT_BaseMediaNode);
 
     /* interfaces */
+    ATX_IMPLEMENTS(ATX_PropertyListener);
+
+    /* interfaces */
     ATX_IMPLEMENTS(BLT_PacketConsumer);
     ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
@@ -71,6 +76,7 @@ typedef struct {
     UINT                        picture_width;
     UINT                        picture_height;
     Dx9VideoOutput_Picture      pictures[BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE];
+    volatile UINT               cur_picture, num_pictures;
     D3DFORMAT                   d3d_source_format;
     D3DFORMAT                   d3d_target_format;
     HMODULE                     d3d_library;
@@ -80,7 +86,16 @@ typedef struct {
     LPDIRECT3DVERTEXBUFFER9     d3d_vertex_buffer;
     BLT_MediaType               expected_media_type;
     BLT_MediaType               media_type;
-    
+
+    BLT_Boolean                 in_fullscreen;
+    HWND                        fullscreen_window;
+
+    ATX_PropertyListenerHandle  property_listener_handle;
+
+    // video output thread vars
+    HANDLE                      render_thread;
+    volatile ATX_Boolean        time_to_quit;
+    CRITICAL_SECTION            render_crit_section;
 } Dx9VideoOutput;
 
 typedef struct
@@ -102,6 +117,8 @@ ATX_DECLARE_INTERFACE_MAP(Dx9VideoOutput, BLT_OutputNode)
 ATX_DECLARE_INTERFACE_MAP(Dx9VideoOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(Dx9VideoOutput, BLT_PacketConsumer)
 
+ATX_DECLARE_INTERFACE_MAP(Dx9VideoOutput, ATX_PropertyListener)
+
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -110,6 +127,7 @@ static BLT_Result Dx9VideoOutput_Destroy(Dx9VideoOutput* self);
 static BLT_Result Dx9VideoOutput_Reshape(Dx9VideoOutput* self,
                                          unsigned int    width,
                                          unsigned int    height);
+static BLT_Result Dx9VideoOutput_ResetDevice(Dx9VideoOutput* self);
 
 /*----------------------------------------------------------------------
 |   Dx9VideoOutput_GetPlatformInfo
@@ -148,7 +166,7 @@ Dx9VideoOutput_WindowProc(HWND window, UINT message, WPARAM w_param, LPARAM l_pa
         return 0;
       }
       case WM_WINDOWPOSCHANGED: {
-          ATX_LOG_FINE("Dx9VideoOutput::WindowProc - WM_WINDOWPOSCHANGED");
+        ATX_LOG_FINE("Dx9VideoOutput::WindowProc - WM_WINDOWPOSCHANGED");
         break;
       }
     }
@@ -179,7 +197,7 @@ Dx9VideoOutput_CreateWindow(Dx9VideoOutput* self)
     window_class_info.lpszMenuName  = NULL;
 
     if (!RegisterClassEx(&window_class_info)) {
-        ATX_LOG_WARNING_1("Dx9VideoOutput::SetupWindow - RegisterClassEx failed (%d)",
+        ATX_LOG_WARNING_1("Dx9VideoOutput::CreateWindow - RegisterClassEx failed (%d)",
                           GetLastError());
         return BLT_FAILURE;
     }
@@ -195,11 +213,104 @@ Dx9VideoOutput_CreateWindow(Dx9VideoOutput* self)
                                   module_instance,
                                   NULL);
     if (self->window == NULL) {
-        ATX_LOG_WARNING_1("Dx9VideoOutput::SetupWindow - CreateWindowEx failed (%d)",
+        ATX_LOG_WARNING_1("Dx9VideoOutput::CreateWindow - CreateWindowEx failed (%d)",
                           GetLastError());
         return BLT_FAILURE;
     }
     ShowWindow(self->window, SW_SHOW);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Dx9VideoOutput_FullscreenWindowProc
++---------------------------------------------------------------------*/
+static LRESULT CALLBACK 
+Dx9VideoOutput_FullscreenWindowProc(HWND window, UINT message, WPARAM w_param, LPARAM l_param)
+{
+    Dx9VideoOutput* self = (Dx9VideoOutput*)(long long)GetWindowLongPtr(window, GWLP_USERDATA);
+
+    switch (message) {
+      case WM_DESTROY: {
+        PostQuitMessage(0);
+        return 0;
+      }
+      case WM_KEYUP: {
+        ATX_LOG_INFO_1("key %d", w_param);
+                     }
+      case WM_WINDOWPOSCHANGED: {
+        ATX_LOG_FINE("Dx9VideoOutput_FullscreenWindowProc::WindowProc - WM_WINDOWPOSCHANGED");
+        break;
+      }
+    }
+
+    return DefWindowProc(window, message, w_param, l_param);
+}
+
+/*----------------------------------------------------------------------
+|    Dx9VideoOutput_CreateFullscreenWindow
++---------------------------------------------------------------------*/
+static BLT_Result
+Dx9VideoOutput_CreateFullscreenWindow(Dx9VideoOutput* self)
+{
+    WNDCLASSEX window_class_info;
+    HINSTANCE  module_instance = GetModuleHandle(NULL);
+    int window_width, window_height;
+    window_width = GetSystemMetrics(SM_CXSCREEN);
+    window_height = GetSystemMetrics(SM_CYSCREEN);
+
+    /* register a class for our window */
+    ZeroMemory(&window_class_info, sizeof(window_class_info));
+    window_class_info.cbSize        = sizeof(WNDCLASSEX);
+    window_class_info.style         = 0;
+    window_class_info.lpfnWndProc   = Dx9VideoOutput_FullscreenWindowProc;
+    window_class_info.hInstance     = module_instance;
+    window_class_info.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    window_class_info.lpszClassName = BLT_DX9_VIDEO_OUTPUT_FULLSCREEN_WINDOW_CLASS;
+    window_class_info.lpszMenuName  = NULL;
+
+    if (!RegisterClassEx(&window_class_info)) {
+        ATX_LOG_WARNING_1("Dx9VideoOutput::CreateFullscreenWindow - RegisterClassEx failed (%d)",
+                          GetLastError());
+        return BLT_FAILURE;
+    }
+
+    self->fullscreen_window = CreateWindowEx(WS_EX_TOOLWINDOW,
+                                  BLT_DX9_VIDEO_OUTPUT_FULLSCREEN_WINDOW_CLASS,
+                                  BLT_DX9_VIDEO_OUTPUT_FULLSCREEN_WINDOW_NAME,
+                                  WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+                                  CW_USEDEFAULT, CW_USEDEFAULT, 
+                                  window_width, window_height,
+                                  NULL,
+                                  NULL,
+                                  module_instance,
+                                  NULL);
+    if (self->fullscreen_window == NULL) {
+        ATX_LOG_WARNING_1("Dx9VideoOutput::CreateFullscreenWindow - CreateWindowEx failed (%d)",
+                          GetLastError());
+        return BLT_FAILURE;
+    }
+
+    {
+        // send pointer to self to new window
+        LONG_PTR last_val;
+        SetLastError(0); // so we can check error
+        last_val = SetWindowLongPtr(self->fullscreen_window, GWLP_USERDATA, (LONG)(long long)self);
+        if (last_val == 0 && GetLastError() != 0) {
+            ATX_LOG_WARNING_1("SetWindowLongPtr failed %d", GetLastError());
+        }
+    }
+
+    // bring the fullscreen window forward
+    SetForegroundWindow(self->fullscreen_window);
+    {
+        BOOL worked = BringWindowToTop(self->fullscreen_window);
+        if (!worked) {
+            ATX_LOG_WARNING("no z order");
+        }
+    }
+    ShowWindow(self->fullscreen_window, SW_SHOW);
+    SetWindowPos(self->fullscreen_window, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE| SWP_NOMOVE | SWP_SHOWWINDOW);
 
     return BLT_SUCCESS;
 }
@@ -277,7 +388,11 @@ Dx9VideoOutput_GetDirect3DParams(Dx9VideoOutput*        self,
     /* setup the parameters */
     d3d_params->Flags                  = D3DPRESENTFLAG_VIDEO;
     d3d_params->Windowed               = TRUE;
-    d3d_params->hDeviceWindow          = self->window;
+    if (self->in_fullscreen) {
+        d3d_params->hDeviceWindow      = self->fullscreen_window;
+    } else {
+        d3d_params->hDeviceWindow      = self->window;
+    }
     d3d_params->BackBufferWidth        = self->window_width;
     d3d_params->BackBufferHeight       = self->window_height;
     d3d_params->SwapEffect             = D3DSWAPEFFECT_COPY;
@@ -306,17 +421,16 @@ Dx9VideoOutput_SelectTextureFormat(Dx9VideoOutput* self)
         D3DFORMAT format = formats[i];
         
         /* ask the device if it can create a surface with that format */
-        result = IDirect3D9_CheckDeviceFormat(self->d3d_object, 
+        result = IDirect3D9_CheckDeviceFormat(self->d3d_object,
                                               D3DADAPTER_DEFAULT,
-                                              D3DDEVTYPE_HAL, 
-                                              self->d3d_target_format, 
-                                              0, 
-                                              D3DRTYPE_SURFACE, 
+                                              D3DDEVTYPE_HAL,
+                                              self->d3d_target_format,
+                                              0,
+                                              D3DRTYPE_SURFACE,
                                               format);
         if (result == D3DERR_NOTAVAILABLE) continue;
         if (FAILED(result)) {
-            ATX_LOG_WARNING_1("Dx9VideoOutput::SelectTextureFormat - IDirect3D9::CheckDeviceFormat failed (%d)",
-                              result);
+            ATX_LOG_WARNING_1("Dx9VideoOutput::SelectTextureFormat - IDirect3D9::CheckDeviceFormat failed (%d)", result);
             return D3DFMT_UNKNOWN;
         }
 
@@ -328,8 +442,7 @@ Dx9VideoOutput_SelectTextureFormat(Dx9VideoOutput* self)
                                                         self->d3d_target_format);
         if (result == D3DERR_NOTAVAILABLE) continue;
         if (FAILED(result)) {
-            ATX_LOG_WARNING_1("Dx9VideoOutput::SelectTextureFormat - IDirect3D9_CheckDeviceFormatConversion::CheckDeviceFormat failed (%d)",
-                              result);
+            ATX_LOG_WARNING_1("Dx9VideoOutput::SelectTextureFormat - IDirect3D9_CheckDeviceFormatConversion::CheckDeviceFormat failed (%d)", result);
             return D3DFMT_UNKNOWN;
         }
 
@@ -341,14 +454,27 @@ Dx9VideoOutput_SelectTextureFormat(Dx9VideoOutput* self)
 }
 
 /*----------------------------------------------------------------------
-|    Dx9VideoOutput_ResetDevice
+|    Dx9VideoOutput_CreateVertexBuffer
 +---------------------------------------------------------------------*/
 static BLT_Result
-Dx9VideoOutput_ResetDevice(Dx9VideoOutput* self)
+Dx9VideoOutput_CreateVertexBuffer(Dx9VideoOutput* self)
 {
-    /* TODO */
-    (void)self;
-    return BLT_ERROR_NOT_IMPLEMENTED;
+    BLT_Result hresult;
+
+    /* create the vertex buffer */
+    hresult = IDirect3DDevice9_CreateVertexBuffer(self->d3d_device,
+        4*sizeof(BLT_Dx9VideoOutput_CustomVertex),
+        D3DUSAGE_DYNAMIC|D3DUSAGE_WRITEONLY,
+        BLT_DX9_VIDEO_OUTPUT_FVF_CUSTOM_VERTEX,
+        D3DPOOL_DEFAULT,
+        &self->d3d_vertex_buffer,
+        NULL);
+    if (FAILED(hresult)) {
+        ATX_LOG_WARNING_1("Dx9VideoOutput::InitializeDirect3D - IDirect3DDevice9::CreateVertexBuffer failed (%d)", hresult);
+        return hresult;
+    }
+
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -450,18 +576,7 @@ Dx9VideoOutput_InitializeDirect3D(Dx9VideoOutput* self)
     IDirect3DDevice9_SetTextureStageState(self->d3d_device, 0, D3DTSS_COLORARG2,D3DTA_DIFFUSE);
     IDirect3DDevice9_SetTextureStageState(self->d3d_device, 0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
-    /* create the vertex buffer */
-    hresult = IDirect3DDevice9_CreateVertexBuffer(self->d3d_device,
-        4*sizeof(BLT_Dx9VideoOutput_CustomVertex),
-        D3DUSAGE_DYNAMIC|D3DUSAGE_WRITEONLY,
-        BLT_DX9_VIDEO_OUTPUT_FVF_CUSTOM_VERTEX,
-        D3DPOOL_DEFAULT,
-        &self->d3d_vertex_buffer,
-        NULL);
-    if (FAILED(hresult)) {
-        ATX_LOG_WARNING_1("Dx9VideoOutput::InitializeDirect3D - IDirect3DDevice9::CreateVertexBuffer failed (%d)", hresult);
-        return BLT_FAILURE;
-    }
+    if (BLT_FAILED(hresult = Dx9VideoOutput_CreateVertexBuffer(self))) return hresult;
 
     /* FIXME: temporary */
     Dx9VideoOutput_Reshape(self, 720, 480);
@@ -519,6 +634,8 @@ Dx9VideoOutput_CreatePictures(Dx9VideoOutput* self,
                               unsigned int    height)
 {
     unsigned int i;
+ 
+    EnterCriticalSection(&self->render_crit_section);
 
     /* create new pictures with the right size */
     for (i=0; i<BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE; i++) {
@@ -548,6 +665,9 @@ Dx9VideoOutput_CreatePictures(Dx9VideoOutput* self,
     /* remember the size */
     self->picture_width  = width;
     self->picture_height = height;
+    self->cur_picture = self->num_pictures = 0;
+
+    LeaveCriticalSection(&self->render_crit_section);
 
     return BLT_SUCCESS;
 }
@@ -665,9 +785,21 @@ Dx9VideoOutput_Reshape(Dx9VideoOutput* self,
 static BLT_Result
 Dx9VideoOutput_RenderPicture(Dx9VideoOutput* self)
 {
-    Dx9VideoOutput_Picture* picture = &self->pictures[0]; /* FIXME */
+    Dx9VideoOutput_Picture* picture;
     LPDIRECT3DSURFACE9      d3d_dest_surface;
     HRESULT                 result = 0;
+    RECT                    dst_rect = {0, 0, 0, 0}; /* this will determine the output rect for blitting */
+
+    // make sure we don't go under
+    // this whole func is in render critical section
+    if (self->num_pictures == 0) {
+        ATX_LOG_WARNING("no picture to render");
+        return BLT_FAILURE;
+    }
+    self->num_pictures--;
+    picture = &self->pictures[self->cur_picture];
+    ATX_LOG_FINEST_1("rndr pic %d", self->cur_picture );
+    self->cur_picture = (self->cur_picture + 1) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE; // loop
 
     /* check that we have something to render */
     if (self->d3d_texture == NULL ||
@@ -712,17 +844,64 @@ Dx9VideoOutput_RenderPicture(Dx9VideoOutput* self)
         return BLT_FAILURE;
     }
 
+    /* clear surface. TODO: not necessary if dest surface exact right dimensions */
+    IDirect3DDevice9_ColorFill(self->d3d_device, 
+                               d3d_dest_surface, 
+                               NULL, 
+                               D3DCOLOR_ARGB(0xFF, 0, 0, 0));
+
+    {
+        D3DSURFACE_DESC src_surf_desc;
+        RECT            wnd_rect;
+
+        /* get dimensions of source surface (which will also be dims of dest surface) */
+        result = IDirect3DSurface9_GetDesc(picture->d3d_surface, &src_surf_desc);
+        if (FAILED(result)) {
+            ATX_LOG_WARNING_1("Dx9VideoOutput::RenderPicture - IDirect3DSurface9::GetDesc failed(%d)", result);
+            return BLT_FAILURE;
+        }
+        /* get dimensions of output window */
+        GetWindowRect(self->window, &wnd_rect);
+
+        {
+            /* we're going to figure out how to position the video in the window without distortion */
+            /* the key here is the scaling references the destination surface, which is always the */
+            /* same size. however, we move our picture around inside that surface according to how */
+            /* we project it will be scaled onto the window. */
+            LONG wnd_width = wnd_rect.right - wnd_rect.left;
+            LONG wnd_height = wnd_rect.bottom - wnd_rect.top;
+            float view_aspect_ratio = (float)wnd_width / (float)wnd_height;
+            float texture_aspect_ratio = (float)src_surf_desc.Width / (float)src_surf_desc.Height;
+            if (view_aspect_ratio > texture_aspect_ratio) {
+                /* we need space on the left and right sides of the picture */
+                dst_rect.bottom = src_surf_desc.Height;
+                dst_rect.right  = (LONG)(src_surf_desc.Width * (texture_aspect_ratio / view_aspect_ratio));
+                dst_rect.left   = (src_surf_desc.Width - dst_rect.right) / 2;
+                dst_rect.right += dst_rect.left;
+                dst_rect.top    = 0;
+            } else {
+                /* we need space on the top and bottom sides of the picture */
+                dst_rect.bottom = (LONG)(src_surf_desc.Height * (view_aspect_ratio / texture_aspect_ratio));
+                dst_rect.right  = src_surf_desc.Width;
+                dst_rect.left   = 0;
+                dst_rect.top    = (src_surf_desc.Height - dst_rect.bottom) / 2;
+                dst_rect.bottom += dst_rect.top;
+            }
+        }
+
+    }
+
     /* blit the picture onto the destination surface */
     result = IDirect3DDevice9_StretchRect(self->d3d_device, 
                                           picture->d3d_surface, 
                                           NULL, 
                                           d3d_dest_surface, 
-                                          NULL, 
+                                          &dst_rect, 
                                           D3DTEXF_NONE);
     IDirect3DSurface9_Release(d3d_dest_surface);
     d3d_dest_surface = NULL;
     if (FAILED(result)) {
-        ATX_LOG_WARNING_1("Dx9VideoOutput::RenderPicture - IDirect3DTexture9::Release failed (%d)", result);
+        ATX_LOG_WARNING_1("Dx9VideoOutput::RenderPicture - IDirect3DTexture9::StretchRect failed (%d)", result);
         return BLT_FAILURE;
     }
 
@@ -735,7 +914,7 @@ Dx9VideoOutput_RenderPicture(Dx9VideoOutput* self)
 
     result = IDirect3DDevice9_SetTexture(self->d3d_device, 0, (LPDIRECT3DBASETEXTURE9)self->d3d_texture);
     if (FAILED(result)) {
-        ATX_LOG_WARNING_1("Dx9VideoOutput::RenderPicture - IDirect3DDevice9::BeginScene failed (%d)", result);
+        ATX_LOG_WARNING_1("Dx9VideoOutput::RenderPicture - IDirect3DDevice9::SetTexture failed (%d)", result);
         goto end;
     }
 
@@ -774,13 +953,52 @@ end:
 }
 
 /*----------------------------------------------------------------------
+|    RenderingThread
++---------------------------------------------------------------------*/
+long WINAPI
+RenderingThread(Dx9VideoOutput* vid_output)
+{
+    BLT_Result result;
+    ATX_TimeStamp now, then, delta;
+    while (vid_output->time_to_quit == ATX_FALSE) {
+        ATX_System_GetCurrentTimeStamp(&now);
+
+        // we surround the output with a critical section to manage access between us and the decoding thread
+        EnterCriticalSection(&vid_output->render_crit_section);
+        // only try to render if we have one in the bank
+        if (vid_output->num_pictures > 0) {
+            ATX_LOG_FINEST_2("rendering pic %d, num in bank: %d", vid_output->cur_picture, vid_output->num_pictures );
+            result = Dx9VideoOutput_RenderPicture(vid_output);
+            result = IDirect3DDevice9_Present(vid_output->d3d_device, NULL, NULL, NULL, NULL);
+        }
+        LeaveCriticalSection(&vid_output->render_crit_section);
+
+        // how long did it take us to render that?
+        ATX_System_GetCurrentTimeStamp(&then);
+        ATX_TimeStamp_Sub(delta, then, now);
+        ATX_LOG_FINEST_1("render time: %d", delta.nanoseconds / 1000000L);
+
+        // TODO: time based on timestamp
+        {
+            ATX_TimeInterval sleep = {0, 5000000};
+            ATX_System_Sleep(&sleep);
+        }
+
+        //Sleep(100);
+    }
+    ATX_LOG_INFO("exiting video output thread");
+
+    return 0;
+}
+
+/*----------------------------------------------------------------------
 |    Dx9VideoOutput_Create
 +---------------------------------------------------------------------*/
 static BLT_Result
 Dx9VideoOutput_Create(BLT_Module*              module,
-                      BLT_Core*                core, 
+                      BLT_Core*                core,
                       BLT_ModuleParametersType parameters_type,
-                      BLT_CString              parameters, 
+                      BLT_CString              parameters,
                       BLT_MediaNode**          object)
 {
     Dx9VideoOutput*           self;
@@ -799,6 +1017,7 @@ Dx9VideoOutput_Create(BLT_Module*              module,
     }
 
     /* compute the window handle */
+    // TODO: 64-bit
     result = ATX_ParseIntegerU(constructor->name+4, &window_handle, ATX_FALSE);
     if (ATX_FAILED(result)) return result;
 
@@ -820,8 +1039,8 @@ Dx9VideoOutput_Create(BLT_Module*              module,
 
     /* setup the window to render the video */
     if (window_handle) {
-        self->window = (HWND)window_handle;
-        self->window_width = 1280;
+        self->window = (HWND)(long long)window_handle;
+        self->window_width = 480;
         self->window_height= 720;
     } else {
         result = Dx9VideoOutput_CreateWindow(self);
@@ -834,14 +1053,29 @@ Dx9VideoOutput_Create(BLT_Module*              module,
 
     Dx9VideoOutput_Reshape(self, self->window_width, self->window_height);
 
+    // create rendering thread
+    {
+        BOOL bool_res;
+        InitializeCriticalSection(&self->render_crit_section);
+        self->time_to_quit = ATX_FALSE;
+        self->render_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RenderingThread, self, 0, 0);
+        bool_res = SetThreadPriority(self->render_thread, THREAD_PRIORITY_HIGHEST);
+        if (bool_res) {
+            ATX_LOG_FINER("set vid out thread priority to high");
+        } else {
+            ATX_LOG_WARNING("failed to set thread priority");
+        }
+    }
+
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, Dx9VideoOutput, BLT_BaseMediaNode, ATX_Referenceable);
     ATX_SET_INTERFACE   (self, Dx9VideoOutput, BLT_PacketConsumer);
     ATX_SET_INTERFACE   (self, Dx9VideoOutput, BLT_OutputNode);
     ATX_SET_INTERFACE   (self, Dx9VideoOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (self, Dx9VideoOutput, ATX_PropertyListener);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
-
+    
     return BLT_SUCCESS;
 
 fail:
@@ -855,6 +1089,11 @@ fail:
 static BLT_Result
 Dx9VideoOutput_Destroy(Dx9VideoOutput* self)
 {
+    // kill our display thread
+    self->time_to_quit = ATX_TRUE;
+    WaitForSingleObject(self->render_thread, INFINITE);
+    DeleteCriticalSection(&self->render_crit_section);
+
     /* close the window if we have one */
 
     /* destroy the pictures and texture */
@@ -887,8 +1126,12 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
 {
     Dx9VideoOutput*              self = ATX_SELF(Dx9VideoOutput, BLT_PacketConsumer);
     const BLT_RawVideoMediaType* media_type;
+    Dx9VideoOutput_Picture       picture;
 
     ATX_LOG_FINEST("Dx9VideoOutput::PutPacket");
+
+    //if (self->fullscreen_window != NULL)
+    //BringWindowToTop(self->fullscreen_window);
 
     /* check the media type */
     BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
@@ -896,16 +1139,50 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
     if (media_type->format != BLT_PIXEL_FORMAT_YV12) return BLT_ERROR_INVALID_MEDIA_FORMAT;
 
     if (media_type->width != self->picture_width || media_type->height != self->picture_height) {
+        // inform stream listeners of our size
+        ATX_Properties* properties;
+        BLT_BaseMediaNode* bmn = &ATX_BASE(self, BLT_BaseMediaNode);
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(bmn->context, &properties))) {
+            ATX_PropertyValue property_value;
+            property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            property_value.data.integer = media_type->width;
+            ATX_Properties_SetProperty(properties,
+                BLT_OUTPUT_NODE_WIDTH,
+                &property_value);
+            property_value.data.integer = media_type->height;
+            ATX_Properties_SetProperty(properties,
+                BLT_OUTPUT_NODE_HEIGHT,
+                &property_value);
+        }
+
         Dx9VideoOutput_DestroyPictures(self);
         Dx9VideoOutput_CreatePictures(self, media_type->width, media_type->height);
         Dx9VideoOutput_DestroyTexture(self);
         Dx9VideoOutput_CreateTexture(self);
     }
 
-    if (self->pictures[0].d3d_surface) {
+    // figure out where we are in the ring buffer
+    EnterCriticalSection(&self->render_crit_section);
+
+    if (self->num_pictures == BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE) {
+        // we're full!
+        ATX_LOG_WARNING("PutPacket is full!");
+        LeaveCriticalSection(&self->render_crit_section);
+        return BLT_SUCCESS;
+    }
+
+    // stick in next slot
+    {
+        int slot = (self->cur_picture + self->num_pictures) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE;
+        picture = self->pictures[slot];
+        ATX_LOG_FINEST_1("new slot... %d", slot);
+    }
+    LeaveCriticalSection(&self->render_crit_section);
+
+    if (picture.d3d_surface) {
         HRESULT        result;
         D3DLOCKED_RECT d3d_rect;
-        result = IDirect3DSurface9_LockRect(self->pictures[0].d3d_surface, &d3d_rect, NULL, 0);
+        result = IDirect3DSurface9_LockRect(picture.d3d_surface, &d3d_rect, NULL, 0);
         if (SUCCEEDED(result)) {
             const unsigned char* pixels = BLT_MediaPacket_GetPayloadBuffer(packet);
             const unsigned char* src_y = pixels+media_type->planes[0].offset;
@@ -936,13 +1213,20 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
                 for (row=0; row<media_type->height; row++) {
                     ATX_UInt32* dst = (ATX_UInt32*)dst_line;
                     for (col=0; col<media_type->width; col++) {
+                        /* from http://msdn.microsoft.com/en-us/library/ms893078.aspx */
                         int r,g,b;
                         int y = src_y[col];
                         int u = src_u[col/2];
                         int v = src_v[col/2];
-                        r = (int)(y + (1.370705 * (v-128)));
-                        g = (int)(y - (0.698001 * (v-128)) - (0.337633 * (u-128)));
-                        b = (int)(y + (1.732446 * (u-128)));
+                        int C = y - 16;
+                        int D = u - 128;
+                        int E = v - 128;
+
+                        r = (( 298 * C           + 409 * E + 128) >> 8);
+                        g = (( 298 * C - 100 * D - 208 * E + 128) >> 8);
+                        b = (( 298 * C + 516 * D           + 128) >> 8);
+
+                        /* clamp values */
                         if (r > 255) r = 255;
                         if (g > 255) g = 255;
                         if (b > 255) b = 255;
@@ -962,9 +1246,10 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
             }
         }
 
-        result = IDirect3DSurface9_UnlockRect(self->pictures[0].d3d_surface);
-        Dx9VideoOutput_RenderPicture(self);
-        result = IDirect3DDevice9_Present(self->d3d_device, NULL, NULL, NULL, NULL);
+        result = IDirect3DSurface9_UnlockRect(picture.d3d_surface);
+        EnterCriticalSection(&self->render_crit_section);
+        self->num_pictures++;
+        LeaveCriticalSection(&self->render_crit_section);
     }
 
     /* FIXME: temporary */
@@ -975,12 +1260,6 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-    }
-
-    /* queue the picture */
-    {
-        ATX_TimeInterval sleep = {0,10000000};
-        ATX_System_Sleep(&sleep);
     }
 
     return BLT_SUCCESS;
@@ -1024,6 +1303,66 @@ Dx9VideoOutput_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
+|    Dx9VideoOutput_Activate
++---------------------------------------------------------------------*/
+BLT_METHOD
+Dx9VideoOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
+{
+    Dx9VideoOutput* self = ATX_SELF_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
+
+    /* keep a reference to the stream */
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
+
+    /* listen to settings on the new stream */
+    if (stream) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
+                                                   &properties))) {
+            ATX_PropertyValue property;
+            ATX_Properties_AddListener(properties, 
+                                       BLT_OUTPUT_NODE_FULLSCREEN,
+                                       &ATX_BASE(self, ATX_PropertyListener),
+                                       &self->property_listener_handle);
+            ATX_LOG_FINER("added property listener for fullscreen");
+
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
+                    properties,
+                    BLT_OUTPUT_NODE_FULLSCREEN,
+                    &property)) &&
+                property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+            }
+        }
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Dx9VideoOutput_Deactivate
++---------------------------------------------------------------------*/
+BLT_METHOD
+Dx9VideoOutput_Deactivate(BLT_MediaNode* _self)
+{
+    Dx9VideoOutput* self = ATX_SELF_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
+
+    /* remove our listener */
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
+                                                   &properties))) {
+            ATX_Properties_RemoveListener(properties, 
+                                          &self->property_listener_handle);
+            ATX_LOG_FINER("removed property listener for fullscreen");
+        }
+    }
+
+    /* we're detached from the stream */
+    ATX_BASE(self, BLT_BaseMediaNode).context = NULL;
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   Dx9VideoOutput_Start
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -1061,6 +1400,13 @@ Dx9VideoOutput_GetStatus(BLT_OutputNode*       _self,
 
     status->flags = 0;
 
+    // don't let them push more pix to us if we are full
+    EnterCriticalSection(&self->render_crit_section);
+    if (self->num_pictures == BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE) {
+        status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
+    }
+    LeaveCriticalSection(&self->render_crit_section);
+
 	return BLT_SUCCESS;
 }
 
@@ -1073,7 +1419,102 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Dx9VideoOutput)
     ATX_GET_INTERFACE_ACCEPT   (Dx9VideoOutput, BLT_OutputNode)
     ATX_GET_INTERFACE_ACCEPT   (Dx9VideoOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT   (Dx9VideoOutput, BLT_PacketConsumer)
+    ATX_GET_INTERFACE_ACCEPT   (Dx9VideoOutput, ATX_PropertyListener)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+
+/*----------------------------------------------------------------------
+|    Dx9VideoOutput_ResetDevice
++---------------------------------------------------------------------*/
+/*
+* the idea here is to call reset on our device.
+* this involves breaking down many existing structures and recreating them.
+* this might be called switching to fullscreen and back, or when a device changes.
+*/
+static BLT_Result
+Dx9VideoOutput_ResetDevice(Dx9VideoOutput* self)
+{
+    D3DPRESENT_PARAMETERS d3d_params;
+    BLT_Result result;
+    
+    /* get the Direct3D parameters to update the device */
+    result = Dx9VideoOutput_GetDirect3DParams(self, &d3d_params);
+    if (BLT_FAILED(result)) {
+        ATX_LOG_WARNING_1("Dx9VideoOutput::GetDirect3DParams() failed (%d)", result);
+        return result;
+    }
+
+    Dx9VideoOutput_DestroyPictures(self);
+    Dx9VideoOutput_DestroyTexture(self);
+    IDirect3DVertexBuffer9_Release(self->d3d_vertex_buffer);
+    self->d3d_vertex_buffer = NULL;
+
+    /* reset it: this fails unless all memory released as above. use dx in debug mode to trace. */
+    result = IDirect3DDevice9_Reset(self->d3d_device, &d3d_params);
+    if (BLT_FAILED(result)) {
+        ATX_LOG_WARNING_1("Dx9VideoOutput::IDirect3DDevice9_Reset() failed (%d)", result);
+        return result;
+    }
+
+    result = Dx9VideoOutput_CreateVertexBuffer(self);
+    if (FAILED(result)) {
+        ATX_LOG_WARNING_1("IDirect3DDevice9::CreateVertexBuffer failed (%d)", result);
+        return result;
+    }
+
+    Dx9VideoOutput_CreatePictures(self, d3d_params.BackBufferWidth, d3d_params.BackBufferHeight);
+    Dx9VideoOutput_CreateTexture(self);
+
+    Dx9VideoOutput_Reshape(self, d3d_params.BackBufferWidth, d3d_params.BackBufferHeight);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Dx9VideoOutput_OnPropertyChanged
++---------------------------------------------------------------------*/
+BLT_VOID_METHOD
+Dx9VideoOutput_OnPropertyChanged(ATX_PropertyListener*    _self,
+                                 ATX_CString              name,
+                                 const ATX_PropertyValue* value)
+{
+    Dx9VideoOutput* self = ATX_SELF(Dx9VideoOutput, ATX_PropertyListener);
+    BLT_Result result;
+
+    ATX_LOG_FINEST_1("prop changed: %s", name);
+
+    if (name && 
+        (value == NULL || value->type == ATX_PROPERTY_VALUE_TYPE_INTEGER)) {
+        if (ATX_StringsEqual(name, BLT_OUTPUT_NODE_FULLSCREEN)) {
+            int going_full = 0;
+            if (value != NULL) going_full = value->data.integer;
+            ATX_LOG_FINEST_1("fullscreen prop set to: %d", going_full);
+            if (going_full) {
+                if (self->in_fullscreen == BLT_TRUE) {
+                    ATX_LOG_WARNING("cannot enter full screen mode: already in it");
+                    return;
+                }
+                // open it up!
+                result = Dx9VideoOutput_CreateFullscreenWindow(self);
+                if (BLT_FAILED(result)) {
+                } else {
+                    self->in_fullscreen = BLT_TRUE;
+                    result = Dx9VideoOutput_ResetDevice(self);
+                    if (FAILED(result)) {
+                        ATX_LOG_WARNING_1("reset device failed (%d)", result);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*----------------------------------------------------------------------
+|    ATX_PropertyListener interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(Dx9VideoOutput, ATX_PropertyListener)
+    Dx9VideoOutput_OnPropertyChanged,
+};
 
 /*----------------------------------------------------------------------
 |    BLT_MediaPort interface
@@ -1099,8 +1540,8 @@ ATX_END_INTERFACE_MAP
 ATX_BEGIN_INTERFACE_MAP_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     Dx9VideoOutput_GetPortByName,
-    BLT_BaseMediaNode_Activate,
-    BLT_BaseMediaNode_Deactivate,
+    Dx9VideoOutput_Activate,
+    Dx9VideoOutput_Deactivate,
     Dx9VideoOutput_Start,
     Dx9VideoOutput_Stop,
     BLT_BaseMediaNode_Pause,

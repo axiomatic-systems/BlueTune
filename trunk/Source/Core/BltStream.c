@@ -809,7 +809,7 @@ Stream_ResetInput(BLT_Stream* _self)
 +---------------------------------------------------------------------*/
 BLT_METHOD 
 Stream_SetInputNode(BLT_Stream*    _self, 
-		    BLT_CString    name,
+                    BLT_CString    name,
                     BLT_CString    port,
                     BLT_MediaNode* node)
 
@@ -915,6 +915,7 @@ Stream_GetInputNode(BLT_Stream* _self, BLT_MediaNode** node)
     /* return the input media node */
     if (self->input.node != NULL) {
         *node = self->input.node->media_node;
+        ATX_REFERENCE_OBJECT(*node);
     } else {
         *node = NULL;
     }
@@ -957,7 +958,7 @@ Stream_ResetOutput(BLT_Stream* _self)
 +---------------------------------------------------------------------*/
 BLT_METHOD 
 Stream_SetOutputNode(BLT_Stream*    _self, 
-		             BLT_CString    name,
+		     BLT_CString    name,
                      BLT_MediaNode* node)
 {
     Stream*     self = ATX_SELF(Stream, BLT_Stream);
@@ -968,7 +969,7 @@ Stream_SetOutputNode(BLT_Stream*    _self,
     Stream_ResetOutput(_self);
 
     /* create a stream node to represent the media node */
-    result = StreamNode_Create(_self, node, NULL, NULL, &stream_node);
+    result = StreamNode_Create(_self, node, NULL, "", &stream_node);
     if (BLT_FAILED(result)) return result;
 
     /* get the BLT_OutputNode interface */
@@ -1053,6 +1054,7 @@ Stream_GetOutputNode(BLT_Stream* _self, BLT_MediaNode** node)
     /* return the output media node */
     if (self->output.node != NULL) {
         *node = self->output.node->media_node;
+        ATX_REFERENCE_OBJECT(*node);
     } else {
         *node = NULL;
     }
@@ -1686,9 +1688,9 @@ Stream_PumpPacket(BLT_Stream* _self)
             } else {
                 if (result != BLT_ERROR_PORT_HAS_NO_DATA) {
                     return result;
-		} else {
-		    result = BLT_SUCCESS;
-		}
+                } else {
+                    result = BLT_SUCCESS;
+                } 
             }
             break;
 
@@ -1713,6 +1715,24 @@ Stream_PumpPacket(BLT_Stream* _self)
     }
 
     return result;
+}
+
+/*----------------------------------------------------------------------
+|    Stream_Start
++---------------------------------------------------------------------*/
+BLT_METHOD 
+Stream_Start(BLT_Stream* _self)
+{
+    Stream*     self = ATX_SELF(Stream, BLT_Stream);
+    StreamNode* node = self->nodes.head;
+
+    /* stop all the nodes */
+    while (node) {
+        StreamNode_Start(node);
+        node = node->next;
+    }
+
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -2135,6 +2155,7 @@ ATX_BEGIN_INTERFACE_MAP(Stream, BLT_Stream)
     Stream_GetFirstNode,
     Stream_GetNextNode,
     Stream_PumpPacket,
+    Stream_Start,
     Stream_Stop,
     Stream_Pause,
     Stream_SetInfo,

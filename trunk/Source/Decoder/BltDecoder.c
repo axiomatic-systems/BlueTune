@@ -215,6 +215,33 @@ BLT_Decoder_SetInput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Decoder_SetInputNode
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_SetInputNode(BLT_Decoder*   decoder, 
+                         BLT_CString    name,
+                         BLT_CString    port,
+                         BLT_MediaNode* node)
+{
+    /* clear the status */
+    BLT_Decoder_ClearStatus(decoder);
+
+    /* set the input of the stream */
+    return BLT_Stream_SetInputNode(decoder->stream, name, port, node);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_GetInputNode
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_GetInputNode(BLT_Decoder*    decoder, 
+                         BLT_MediaNode** node)
+{
+    /* return the input node of the stream */
+    return BLT_Stream_GetInputNode(decoder->stream, node);
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Decoder_SetOutput
 +---------------------------------------------------------------------*/
 BLT_Result
@@ -242,6 +269,32 @@ BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
             return BLT_Stream_SetOutput(decoder->stream, name, type);
 	    }
     }
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_SetOutputNode
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_SetOutputNode(BLT_Decoder*   decoder, 
+                          BLT_CString    name,
+                          BLT_MediaNode* node)
+{
+    /* clear the status */
+    BLT_Decoder_ClearStatus(decoder);
+
+    /* set the input of the stream */
+    return BLT_Stream_SetOutputNode(decoder->stream, name, node);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_GetOutputNode
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_GetOutputNode(BLT_Decoder*    decoder, 
+                          BLT_MediaNode** node)
+{
+    /* return the output node of the stream */
+    return BLT_Stream_GetOutputNode(decoder->stream, node);
 }
 
 /*----------------------------------------------------------------------

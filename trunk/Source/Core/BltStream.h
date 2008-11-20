@@ -136,7 +136,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
                            BLT_CString name,
                            BLT_CString type);
     BLT_Result (*SetInputNode)(BLT_Stream*    self,
-			       BLT_CString    name,
+                               BLT_CString    name,
                                BLT_CString    port,
                                BLT_MediaNode* node);
     BLT_Result (*GetInputNode)(BLT_Stream* self, BLT_MediaNode** node);
@@ -163,6 +163,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Stream)
                               BLT_MediaNode*      node,
                               BLT_MediaNode**     next);
     BLT_Result (*PumpPacket)(BLT_Stream* self);
+    BLT_Result (*Start)(BLT_Stream* self);
     BLT_Result (*Stop)(BLT_Stream* self);
     BLT_Result (*Pause)(BLT_Stream* self);
     BLT_Result (*SetInfo)(BLT_Stream* self, const BLT_StreamInfo* info);
@@ -202,6 +203,9 @@ ATX_INTERFACE(object)->ResetOutput(object)
 #define BLT_Stream_SetOutput(object, name, media_type) \
 ATX_INTERFACE(object)->SetOutput(object, name, media_type)
 
+#define BLT_Stream_SetOutputNode(object, name, node) \
+ATX_INTERFACE(object)->SetOutputNode(object, name, node)
+
 #define BLT_Stream_GetOutputNode(object, node) \
 ATX_INTERFACE(object)->GetOutputNode(object, node)
 
@@ -222,6 +226,9 @@ ATX_INTERFACE(object)->GetNextNode(object, node, next)
 
 #define BLT_Stream_PumpPacket(object) \
 ATX_INTERFACE(object)->PumpPacket(object)
+
+#define BLT_Stream_Start(object) \
+ATX_INTERFACE(object)->Start(object)
 
 #define BLT_Stream_Stop(object) \
 ATX_INTERFACE(object)->Stop(object)

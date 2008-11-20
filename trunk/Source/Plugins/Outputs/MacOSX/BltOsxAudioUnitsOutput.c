@@ -135,7 +135,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     ATX_ListItem*        item;
     unsigned int         requested = ioData->mBuffers[0].mDataByteSize;
     unsigned char*       out = (unsigned char*)ioData->mBuffers[0].mData;
-    UInt64               device_time_nanos;
+    UInt64               device_time_nanos = 0;
     ATX_Boolean          timestamp_taken = ATX_FALSE;
     
     BLT_COMPILER_UNUSED(ioActionFlags);

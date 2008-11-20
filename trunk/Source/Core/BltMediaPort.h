@@ -70,7 +70,7 @@ ATX_END_INTERFACE_DEFINITION
 |   convenience macros
 +---------------------------------------------------------------------*/
 #define BLT_MediaPort_GetName(object, name)\
-ATX_INTERFACE(object)->GetProtocol(object, name)
+ATX_INTERFACE(object)->GetName(object, name)
 
 #define BLT_MediaPort_GetProtocol(object, protocol)\
 ATX_INTERFACE(object)->GetProtocol(object, protocol)

@@ -116,7 +116,7 @@ BLT_Result BLT_Decoder_LoadPlugins(BLT_Decoder* decoder,
                                    const char*  file_extension);
 
 /**
- * Set a BLT_Decoder object's input.
+ * Set a BLT_Decoder object's input by name.
  * @param name Name of the input.
  * @param type Mime-type of the input, if known, or NULL.
  */
@@ -125,13 +125,49 @@ BLT_Result BLT_Decoder_SetInput(BLT_Decoder*  decoder,
                                 BLT_CString   type);
 
 /**
- * Set a BLT_Decoder object's output.
+ * Set a BLT_Decoder object's input node.
+ * @param node The node that will become the new input.
+ * @param type Mime-type of the input, if known, or NULL.
+ */
+BLT_Result BLT_Decoder_SetInputNode(BLT_Decoder*   decoder, 
+                                    BLT_CString    name,
+                                    BLT_CString    port,
+                                    BLT_MediaNode* node);
+
+/**
+ * Get a BLT_Decoder object's input node.
+ * @param node Address of a pointer to where the decoder's
+ * input node will be returned.
+ */
+BLT_Result BLT_Decoder_GetInputNode(BLT_Decoder*    decoder, 
+                                    BLT_MediaNode** node);
+
+/**
+ * Set a BLT_Decoder object's output by name.
  * @param name Name of the output.
  * @param type Mime-type of the output, if known, or NULL.
  */
 BLT_Result BLT_Decoder_SetOutput(BLT_Decoder* decoder, 
                                  BLT_CString  name, 
                                  BLT_CString  type);
+
+/**
+ * Set a BLT_Decoder object's output node.
+ * @param node The node object that will be the decoder's output node.
+ * @param type Mime-type of the output, if known, or NULL.
+ */
+BLT_Result BLT_Decoder_SetOutputNode(BLT_Decoder*   decoder, 
+                                     BLT_CString    name,
+                                     BLT_MediaNode* node);
+
+/**
+ * Get a BLT_Decoder object's output node.
+ * @param node Address of a pointer to where the decoder's
+ * output node will be returned.
+ */
+BLT_Result BLT_Decoder_GetOutputNode(BLT_Decoder*    decoder, 
+                                     BLT_MediaNode** node);
+
 
 /**
  * Add a node to a BLT_Decoder object's stream node graph.

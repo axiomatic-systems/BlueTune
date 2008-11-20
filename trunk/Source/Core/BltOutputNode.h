@@ -27,6 +27,10 @@
 +---------------------------------------------------------------------*/
 #define BLT_OUTPUT_NODE_STATUS_QUEUE_FULL  1
 
+#define BLT_OUTPUT_NODE_WIDTH      "OutputNode.Width"
+#define BLT_OUTPUT_NODE_HEIGHT     "OutputNode.Height"
+#define BLT_OUTPUT_NODE_FULLSCREEN "OutputNode.FullScreen"
+
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/

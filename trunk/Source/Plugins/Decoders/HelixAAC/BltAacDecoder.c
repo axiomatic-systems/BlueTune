@@ -395,23 +395,23 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
 
         BLT_MediaPacket_GetMediaType(packet, &media_type);
         if (media_type == NULL || media_type->id != self->mp4es_type_id) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
         if (mp4_media_type->base.stream_type != BLT_MP4_STREAM_TYPE_AUDIO) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         if (BLT_FAILED(AacDecoderConfig_Parse(mp4_media_type->decoder_info, mp4_media_type->decoder_info_length, &decoder_config))) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
         if (decoder_config.object_type != BLT_AAC_OBJECT_TYPE_AAC_LC &&
             decoder_config.object_type != BLT_AAC_OBJECT_TYPE_SBR) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* create the decoder */
         self->helix_decoder = AACInitDecoder();
-        if (self->helix_decoder == NULL) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        if (self->helix_decoder == NULL) return BLT_ERROR_OUT_OF_MEMORY;
 
         /* configure the decoder */
         ATX_SetMemory(&aac_frame_info, 0, sizeof(aac_frame_info));

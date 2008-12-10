@@ -108,7 +108,7 @@ FileOutput_GetStream(BLT_OutputStreamProvider* _self,
             BLT_MediaType_Free(self->media_type);
             BLT_MediaType_Clone(media_type, &self->media_type);
         } else if (self->media_type->id != media_type->id) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
     }
     return BLT_SUCCESS;

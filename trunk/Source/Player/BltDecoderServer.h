@@ -51,6 +51,7 @@ public:
     virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range) = 0;
     virtual void OnRegisterModuleCommand(BLT_Module* module) = 0;
     virtual void OnAddNodeCommand(BLT_CString name) = 0;
+    virtual void OnSetVolumeCommand(float volume) = 0;
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
                                       const NPT_String&        target,
                                       const NPT_String&        name,
@@ -75,6 +76,7 @@ public:
         COMMAND_ID_SEEK_TO_POSITION,
         COMMAND_ID_REGISTER_MODULE,
         COMMAND_ID_ADD_NODE,
+        COMMAND_ID_SET_VOLUME,
         COMMAND_ID_SET_PROPERTY
     } CommandId;
 
@@ -295,6 +297,26 @@ public:
 };
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer_SetVolumeCommandMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderServer_SetVolumeCommandMessage : public BLT_DecoderServer_Message
+{
+public:
+    // methods
+    BLT_DecoderServer_SetVolumeCommandMessage(float volume) :
+      BLT_DecoderServer_Message(COMMAND_ID_SET_VOLUME),
+      m_Volume(volume) {}
+    NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
+        handler->OnSetVolumeCommand(m_Volume);
+        return NPT_SUCCESS;
+    }
+
+ private:
+    // members
+    float m_Volume;
+};
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer_SetPropertyCommandMessage
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer_SetPropertyCommandMessage : public BLT_DecoderServer_Message
@@ -378,6 +400,7 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual BLT_Result SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range);
     virtual BLT_Result RegisterModule(BLT_Module* module);
     virtual BLT_Result AddNode(BLT_CString name);
+    virtual BLT_Result SetVolume(float volume);
     virtual BLT_Result SetProperty(BLT_PropertyScope        scope,
                                    const char*              target,
                                    const char*              name,
@@ -397,6 +420,7 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range);
     virtual void OnRegisterModuleCommand(BLT_Module* module);
     virtual void OnAddNodeCommand(BLT_CString name);
+    virtual void OnSetVolumeCommand(float volume);
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
                               const NPT_String&        target,
                               const NPT_String&        name,

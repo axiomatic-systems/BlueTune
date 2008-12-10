@@ -42,10 +42,10 @@
 }
 
 /* generic errors */
-#define FLO_ERROR_BASE_GENERAL           (-10000)
+#define FLO_ERROR_BASE_GENERAL           (-80000)
 
 /* Decoder errors */
-#define FLO_ERROR_BASE_DECODER           (-10100)
+#define FLO_ERROR_BASE_DECODER           (-80100)
 
 /*----------------------------------------------------------------------
 |    import some Atomix error codes

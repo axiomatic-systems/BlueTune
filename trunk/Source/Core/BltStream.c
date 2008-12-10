@@ -1415,7 +1415,7 @@ Stream_DeliverPacket(Stream*          self,
     if (to_node->input.protocol == BLT_MEDIA_PORT_PROTOCOL_PACKET) {
         /* try to deliver the packet to the recipient */
         result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
-        if (BLT_SUCCEEDED(result) || result != BLT_ERROR_INVALID_MEDIA_FORMAT) {
+        if (BLT_SUCCEEDED(result) || result != BLT_ERROR_INVALID_MEDIA_TYPE) {
             /* success, or fatal error */
             goto done;
         }
@@ -1575,6 +1575,7 @@ Stream_ConnectPort(Stream*     self,
     if (from_node->output.protocol == to_node->input.protocol) {
         result = Stream_SetupByteStreams(self, from_node, to_node);
         if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
+        if (result != BLT_ERROR_INVALID_MEDIA_TYPE) return result;
     }
     
     /* get the media type of the 'from' node's output port */

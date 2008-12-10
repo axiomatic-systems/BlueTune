@@ -162,7 +162,7 @@ OsxAudioQueueOutput_SetStreamFormat(OsxAudioQueueOutput*    self,
             break;
             
         default:
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* reset any existing queue before we create a new one */
@@ -261,7 +261,7 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* exit early if the packet is empty */
@@ -285,7 +285,7 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
             media_type->bits_per_sample != 16 &&
             media_type->bits_per_sample != 24 &&
             media_type->bits_per_sample != 32) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
                         
         /* update the audio unit */

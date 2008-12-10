@@ -257,7 +257,7 @@ WmaDecoderInput_SetStream(BLT_InputStreamUser* _self,
     /* check the stream's media type */
     if (media_type == NULL || 
         media_type->id != self->input.media_type_id) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* if we had a stream, release it */

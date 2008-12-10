@@ -86,7 +86,7 @@ PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
         BLT_MediaType_Clone(media_type, &self->output.media_type);
     } else {
         if (self->output.media_type->id != media_type->id) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
     }
 

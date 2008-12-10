@@ -87,7 +87,6 @@ CallbackInput_Create(BLT_Module*              module,
     }
 
     /* parse the name */
-    /* FIXME: this only supports 32 bit pointers for now */
     result = ATX_ParseInteger64U(constructor->name+15, &stream_addr, ATX_FALSE);
     if (ATX_FAILED(result)) return result;
 

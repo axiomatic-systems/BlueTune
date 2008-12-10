@@ -67,9 +67,10 @@ typedef struct {
     BLT_PcmMediaType  media_type;
     BLT_Boolean       paused;
     struct {
-        BLT_TimeStamp media_time;
-        UInt64        host_time;
-    }                 last_measured_timestamp;
+        BLT_TimeStamp rendered_packet_ts;
+        UInt64        rendered_host_time;
+        BLT_TimeStamp rendered_duration;
+    }                 media_time_snapshot;
 } OsxAudioUnitsOutput;
 
 /*----------------------------------------------------------------------
@@ -135,8 +136,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     ATX_ListItem*        item;
     unsigned int         requested = ioData->mBuffers[0].mDataByteSize;
     unsigned char*       out = (unsigned char*)ioData->mBuffers[0].mData;
-    UInt64               device_time_nanos = 0;
-    ATX_Boolean          timestamp_taken = ATX_FALSE;
+    ATX_Boolean          timestamp_measured = ATX_FALSE;
     
     BLT_COMPILER_UNUSED(ioActionFlags);
     BLT_COMPILER_UNUSED(inTimeStamp);
@@ -175,47 +175,63 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         const BLT_PcmMediaType* media_type;
         BLT_Size                payload_size;
         BLT_Size                chunk_size;
-        
+        BLT_TimeStamp           chunk_duration;
+        BLT_TimeStamp           packet_ts;
+        unsigned int            bytes_per_frame;
+                
         /* get the packet info */
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-        
-        /* remember at which host time this packet was delivered */
-        if (!timestamp_taken) {
-            self->last_measured_timestamp.host_time  = device_time_nanos;
-            self->last_measured_timestamp.media_time = BLT_MediaPacket_GetTimeStamp(packet);
-            timestamp_taken = ATX_TRUE;
-
-            ATX_LOG_FINEST_2("packet media time: %lld at device time %lld",
-                             BLT_TimeStamp_ToNanos(self->last_measured_timestamp.media_time),
-                             device_time_nanos);
+        packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
+                
+        /* record the timestamp if we have not already done so */
+        if (!timestamp_measured) {
+            self->media_time_snapshot.rendered_packet_ts = packet_ts;
+            self->media_time_snapshot.rendered_host_time = 
+                AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
+            BLT_TimeStamp_Set(self->media_time_snapshot.rendered_duration, 0, 0);
+            timestamp_measured = ATX_TRUE;
+            
+            ATX_LOG_FINEST_2("rendered TS: packet ts=%" ATX_INT64_PRINTF_FORMAT
+                             " host ts=%" ATX_INT64_PRINTF_FORMAT,
+                             BLT_TimeStamp_ToNanos(packet_ts),
+                             self->media_time_snapshot.rendered_host_time);
         }
-        
+         
         /* compute how much to copy from this packet */
         payload_size = BLT_MediaPacket_GetPayloadSize(packet);
         if (payload_size <= requested) {
             /* copy the entire payload and remove the packet from the queue */
             chunk_size = payload_size;
             ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);
-            ATX_List_RemoveItem(self->packet_queue, item);            
+            ATX_List_RemoveItem(self->packet_queue, item);
+            packet = NULL;
         } else {
             /* only copy a portion of the payload */
             chunk_size = requested;
-            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);
-            
-            /* update the packet offset and timestamp */
-            BLT_MediaPacket_SetPayloadOffset(packet, BLT_MediaPacket_GetPayloadOffset(packet)+chunk_size);
-            {
-                unsigned int bytes_per_frame = media_type->channel_count*media_type->bits_per_sample/8;
-                if (bytes_per_frame) {
-                    unsigned int frames_in_chunk = chunk_size/bytes_per_frame;
-                    BLT_TimeStamp chunk_duration = BLT_TimeStamp_FromSamples(frames_in_chunk, media_type->sample_rate);
-                    BLT_TimeStamp packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
-                    BLT_MediaPacket_SetTimeStamp(packet, BLT_TimeStamp_Add(packet_ts, chunk_duration));
-                }
-            }
+            ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);            
         }
+        
+        /* update the counters */
         requested -= chunk_size;
         out       += chunk_size;
+        
+        /* update the media time snapshot */
+        bytes_per_frame = media_type->channel_count*media_type->bits_per_sample/8;
+        if (bytes_per_frame) {
+            unsigned int frames_in_chunk = chunk_size/bytes_per_frame;
+            chunk_duration = BLT_TimeStamp_FromSamples(frames_in_chunk, media_type->sample_rate);
+        } else {
+            BLT_TimeStamp_Set(chunk_duration, 0, 0);
+        }
+        self->media_time_snapshot.rendered_duration = 
+            BLT_TimeStamp_Add(self->media_time_snapshot.rendered_duration, chunk_duration);
+        
+        /* update the packet unless we're done with it */
+        if (packet) {
+            /* update the packet offset and timestamp */
+            BLT_MediaPacket_SetPayloadOffset(packet, BLT_MediaPacket_GetPayloadOffset(packet)+chunk_size);
+            BLT_MediaPacket_SetTimeStamp(packet, BLT_TimeStamp_Add(packet_ts, chunk_duration));
+        }
     }
    
 end:
@@ -330,7 +346,7 @@ OsxAudioUnitsOutput_SetStreamFormat(OsxAudioUnitsOutput*    self,
             break;
             
         default:
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* drain any pending packets before we switch */
@@ -379,7 +395,7 @@ OsxAudioUnitsOutput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* compare the media format with the current format */
@@ -400,7 +416,7 @@ OsxAudioUnitsOutput_PutPacket(BLT_PacketConsumer* _self,
             media_type->bits_per_sample != 16 &&
             media_type->bits_per_sample != 24 &&
             media_type->bits_per_sample != 32) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
                         
         /* update the audio unit */
@@ -627,15 +643,21 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
     }
 
     /* compute the media time */
-    {
-        UInt64   host_time = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
-        BLT_Time time_delta = {0,0};
-        if (host_time >= self->last_measured_timestamp.host_time) {
-            time_delta = BLT_TimeStamp_FromNanos(host_time-self->last_measured_timestamp.host_time);
+    BLT_TimeStamp_Set(status->media_time, 0, 0);
+    if (self->media_time_snapshot.rendered_host_time) {
+        UInt64 host_time  = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
+        UInt64 media_time = BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_packet_ts); 
+        UInt64 max_media_time;
+        if (host_time > self->media_time_snapshot.rendered_host_time) {
+            media_time += host_time-self->media_time_snapshot.rendered_host_time;
         } 
-        status->media_time = BLT_TimeStamp_Add(self->last_measured_timestamp.media_time, time_delta);
+        max_media_time = BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_packet_ts) +
+                         BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_duration);
+        if (media_time > max_media_time) media_time = max_media_time;
+        status->media_time = BLT_TimeStamp_FromNanos(media_time);
+        ATX_LOG_FINEST_1("media time = %" ATX_INT64_PRINTF_FORMAT, media_time);
     }
-
+    
     pthread_mutex_unlock(&self->lock);
 
     return BLT_SUCCESS;

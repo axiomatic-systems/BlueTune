@@ -239,6 +239,7 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
                             BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
                             BLT_STREAM_INFO_MASK_DATA_TYPE;
     }
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     
     // setup the output media type
     BLT_Mp4AudioMediaType* media_type;
@@ -389,12 +390,13 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                          const BLT_MediaType* stream_media_type)
 {
     Mp4Parser* self = ATX_SELF_M(input, Mp4Parser, BLT_InputStreamUser);
-
+    BLT_Result result = BLT_ERROR_INVALID_MEDIA_FORMAT;
+    
     /* check media type */
     if (stream_media_type == NULL || 
         (stream_media_type->id != self->input.audio_media_type.id &&
          stream_media_type->id != self->input.video_media_type.id)) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* if we had a file before, release it now */
@@ -418,8 +420,10 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     }
     
     // setup the tracks
-    Mp4Parser_SetupAudioOutput(self, movie);
+    result = Mp4Parser_SetupAudioOutput(self, movie);
+    if (BLT_FAILED(result)) goto fail;
     Mp4Parser_SetupVideoOutput(self, movie);
+    if (BLT_FAILED(result)) goto fail;
     
     // check that we have at least one media track
     if (self->audio_output.track == NULL && 
@@ -433,7 +437,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 fail:
     delete self->input.mp4_file;
     self->input.mp4_file = NULL;
-    return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -544,6 +548,12 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
     Mp4ParserOutput* self = ATX_SELF(Mp4ParserOutput, BLT_PacketProducer);
 
     *packet = NULL;
+     
+    // if we don't have an input yet, we can't produce packets
+    //if (self->parser->input.mp4_file == NULL) {
+    //    return BLT_ERROR_PORT_HAS_NO_DATA;
+    //}
+    
     if (self->track == NULL) {
         return BLT_ERROR_EOS;
     } else {

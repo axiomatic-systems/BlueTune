@@ -45,10 +45,11 @@ typedef struct {
 /*----------------------------------------------------------------------
 |   error codes
 +---------------------------------------------------------------------*/
-#define BLT_ERROR_INVALID_MEDIA_FORMAT           (BLT_ERROR_BASE_MEDIA - 0)
-#define BLT_ERROR_UNSUPPORTED_CODEC              (BLT_ERROR_BASE_MEDIA - 1)
-#define BLT_ERROR_UNSUPPORTED_FORMAT             (BLT_ERROR_BASE_MEDIA - 2)
-#define BLT_ERROR_NO_MEDIA_KEY                   (BLT_ERROR_BASE_MEDIA - 3)
+#define BLT_ERROR_INVALID_MEDIA_TYPE             (BLT_ERROR_BASE_MEDIA - 0)
+#define BLT_ERROR_INVALID_MEDIA_FORMAT           (BLT_ERROR_BASE_MEDIA - 1)
+#define BLT_ERROR_UNSUPPORTED_CODEC              (BLT_ERROR_BASE_MEDIA - 2)
+#define BLT_ERROR_UNSUPPORTED_FORMAT             (BLT_ERROR_BASE_MEDIA - 3)
+#define BLT_ERROR_NO_MEDIA_KEY                   (BLT_ERROR_BASE_MEDIA - 4)
 
 #if defined(__cplusplus)
 extern "C" {

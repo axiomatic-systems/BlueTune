@@ -99,7 +99,7 @@ ScanPacket(BLT_MediaPacket* packet,
     BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* for now, we only support 16-bit, stereo, PCM */

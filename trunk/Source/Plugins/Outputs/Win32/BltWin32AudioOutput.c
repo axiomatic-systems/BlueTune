@@ -89,6 +89,7 @@ typedef struct {
     BLT_PcmMediaType  media_type;
     BLT_Boolean       paused;
     BLT_UInt64        nb_samples_written;
+    BLT_UInt64        timestamp_after_buffer;
     struct {
         ATX_List* packets;
     }                 free_queue;
@@ -306,7 +307,7 @@ Win32AudioOutput_Open(Win32AudioOutput* self)
     MMRESULT     mm_result;
     BLT_Cardinal retry;
 
-#if defined(BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
+#if defined(BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
     /* used for 24 and 32 bits per sample */
     WAVEFORMATEXTENSIBLE format;
 #else
@@ -323,14 +324,12 @@ Win32AudioOutput_Open(Win32AudioOutput* self)
     self->nb_samples_written = 0;
 
     /* fill in format structure */
-#if defined(BLT_WIN32_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
+#if defined(BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
     format.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
     format.Format.nChannels = self->media_type.channel_count;
     format.Format.nSamplesPerSec = self->media_type.sample_rate;
-    format.Format.nBlockAlign = self->media_type.channel_count *
-                                self->media_type.bits_per_sample/8;
-    format.Format.nAvgBytesPerSec = format.Format.nBlockAlign *
-                                    format.Format.nSamplesPerSec;
+    format.Format.nBlockAlign = self->media_type.channel_count * self->media_type.bits_per_sample/8;
+    format.Format.nAvgBytesPerSec = format.Format.nBlockAlign * format.Format.nSamplesPerSec;
     format.Format.wBitsPerSample = self->media_type.bits_per_sample;
     format.Format.cbSize = 22;
     format.Samples.wValidBitsPerSample = self->media_type.bits_per_sample;
@@ -400,7 +399,7 @@ Win32AudioOutput_Open(Win32AudioOutput* self)
     }
     if (mm_result == WAVERR_BADFORMAT) {
         self->device_handle = NULL;
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     if (mm_result != MMSYSERR_NOERROR) {
         self->device_handle = NULL;
@@ -473,7 +472,7 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        result = BLT_ERROR_INVALID_MEDIA_FORMAT;
+        result = BLT_ERROR_INVALID_MEDIA_TYPE;
         goto failed;
     }
 
@@ -492,13 +491,13 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
         
         /* perform basic validity checks of the format */
         if (media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         if (media_type->bits_per_sample !=  8 &&
             media_type->bits_per_sample != 16 &&
             media_type->bits_per_sample != 24 &&
             media_type->bits_per_sample != 32) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         /* copy the format */
@@ -552,8 +551,21 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
         goto failed;
     }
 
-    /* keep a count of the number of samples written */
-    self->nb_samples_written += BLT_MediaPacket_GetPayloadSize(packet)/(media_type->channel_count*(media_type->bits_per_sample/8));
+    /* keep a count of the number of samples written               */
+    /* keep track of the timestamp after the *last* sample written */
+    {
+        BLT_UInt64 packet_samples  = BLT_MediaPacket_GetPayloadSize(packet)/(media_type->channel_count*(media_type->bits_per_sample/8));
+        BLT_UInt64 packet_duration = (packet_samples*1000000000)/media_type->sample_rate;
+        BLT_UInt64 packet_ts       = BLT_TimeStamp_ToNanos(BLT_MediaPacket_GetTimeStamp(packet));
+        self->nb_samples_written += packet_samples;
+        if (packet_ts == 0) {
+            /* handle the case where we receive packets with timestamps all set to 0 */
+            self->timestamp_after_buffer += packet_duration;
+        } else {
+            /* use the packet timestamp as our timestamp reference */
+            self->timestamp_after_buffer = packet_ts+packet_duration;
+        }
+    }
 
     /* queue the packet */
     ATX_List_AddItem(self->pending_queue.packets, queue_item);
@@ -706,6 +718,11 @@ Win32AudioOutput_Seek(BLT_MediaNode* _self,
 
     /* reset counters */
     self->nb_samples_written = 0;
+    if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
+        self->timestamp_after_buffer = BLT_TimeStamp_ToNanos(point->time_stamp);
+    } else {
+        self->timestamp_after_buffer = 0;
+    }
 
     return BLT_SUCCESS;
 }
@@ -717,28 +734,33 @@ BLT_METHOD
 Win32AudioOutput_GetStatus(BLT_OutputNode*       _self,
                            BLT_OutputNodeStatus* status)
 {
-    /*Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_OutputNode);
+    Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_OutputNode);
     MMRESULT          result;
-    MMTIME            position;*/
-	BLT_COMPILER_UNUSED(_self);
+    MMTIME            position;
 	
     /* default value */
-    status->media_time.seconds     = 0;
-    status->media_time.nanoseconds = 0;
+    status->flags = 0;
 
-#if 0
 	/* get the output position from the device */
     position.wType = TIME_SAMPLES;
     result = waveOutGetPosition(self->device_handle,  
                                 &position, sizeof(position)); 
-    if (result == MMSYSERR_NOERROR && self->media_type.sample_rate) {
-        BLT_UInt64 delay;
-        delay  = ((BLT_UInt64)(self->nb_samples_written - position.u.sample) *
-                  1000000000) /self->media_type.sample_rate;
-        status->delay.seconds     = (BLT_UInt32)(delay/1000000000);
-        status->delay.nanoseconds = (BLT_UInt32)(delay - ((BLT_UInt64)status->delay.seconds * 1000000000));
+    if (result == MMSYSERR_NOERROR     && 
+        position.wType == TIME_SAMPLES && 
+        self->media_type.sample_rate != 0) {
+        /* compute the buffer delay (taking into account the fact that */
+        /* position.u.sample only has 32-bit of presision              */
+        BLT_UInt64 delay_samples = ((BLT_UInt64)(self->nb_samples_written - position.u.sample))%0x100000000;
+        BLT_UInt64 delay_nanos = (delay_samples * 1000000000) / self->media_type.sample_rate;
+        if (self->timestamp_after_buffer >= delay_nanos) {
+            status->media_time = BLT_TimeStamp_FromNanos(self->timestamp_after_buffer-delay_nanos);
+        } else {
+            status->media_time.seconds = status->media_time.nanoseconds = 0;
+        }
+    } else {
+        /* can't measure the buffer delay, use some estimate */
+        status->media_time = BLT_TimeStamp_FromNanos(self->timestamp_after_buffer);
     } 
-#endif
 
     return BLT_SUCCESS;
 }

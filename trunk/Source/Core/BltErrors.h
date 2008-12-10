@@ -14,6 +14,11 @@
 #define _BLT_ERRORS_H_
 
 /*----------------------------------------------------------------------
+|    includes
++---------------------------------------------------------------------*/
+#include "BltTypes.h"
+
+/*----------------------------------------------------------------------
 |    error codes
 +---------------------------------------------------------------------*/
 #define BLT_SUCCESS      0
@@ -73,5 +78,21 @@
 
 /* Plugins errors */
 #define BLT_ERROR_BASE_KEY_MANAGER    (BLT_ERROR_BASE-700)
+
+/*----------------------------------------------------------------------
+|    functions
++---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/**
+ * Return the textual name for a result/error code
+ */
+const char* BLT_ResultText(BLT_Result result);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_ERRORS_H_ */

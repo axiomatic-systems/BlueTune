@@ -117,7 +117,7 @@ AlacDecoder_Configure(AlacDecoder*         self,
     
     self->config.samples_per_frame = ATX_BytesToInt32Be(decoder_info);
     if (self->config.samples_per_frame > BLT_ALAC_MAX_SAMPLES_PER_FRAME) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     decoder_info += 4;
     
@@ -876,7 +876,7 @@ AlacDecoder_Create(BLT_Module*              module,
     /* check that we support all the parameters */
     if (self->config.channel_count > 2 ||
         self->config.bits_per_sample != 16) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_UNSUPPORTED_CODEC;
     }
 
     /* allocate decoding buffers */

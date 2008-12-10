@@ -17,6 +17,7 @@
 #include "BltCorePriv.h"
 #include "BltByteStreamUser.h"
 #include "BltByteStreamProvider.h"
+#include "BltSynchronization.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -27,6 +28,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.decoder")
 |    types
 +---------------------------------------------------------------------*/
 struct BLT_DecoderX {
+    ATX_IMPLEMENTS(BLT_TimeSource);
+    
     BLT_Core*         core;
     BLT_Stream*       input_stream;
     BLT_OutputNode*   audio_output;
@@ -35,6 +38,11 @@ struct BLT_DecoderX {
     BLT_Stream*       video_stream;
     BLT_DecoderStatus status;
 };
+
+/*----------------------------------------------------------------------
+|    forward declarations
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE_MAP(BLT_DecoderX, BLT_TimeSource)
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderX_Create
@@ -64,11 +72,15 @@ BLT_DecoderX_Create(BLT_DecoderX** decoder)
     result = BLT_Core_CreateStream((*decoder)->core, &(*decoder)->video_stream);
     if (BLT_FAILED(result)) goto failed;
 
+    /* setup interfaces */
+    ATX_SET_INTERFACE(*decoder, BLT_DecoderX, BLT_TimeSource);
+    
     /* done */
     return BLT_SUCCESS;
 
  failed:
     BLT_DecoderX_Destroy(*decoder);
+    *decoder = NULL;
     return result;
 }
 
@@ -80,6 +92,8 @@ BLT_DecoderX_Destroy(BLT_DecoderX* decoder)
 {
     ATX_LOG_FINE("BLT_DecoderX::Destroy");
     
+    ATX_RELEASE_OBJECT(decoder->audio_output);
+    ATX_RELEASE_OBJECT(decoder->video_output);
     ATX_RELEASE_OBJECT(decoder->input_stream);
     ATX_RELEASE_OBJECT(decoder->audio_stream);
     ATX_RELEASE_OBJECT(decoder->video_stream);
@@ -119,34 +133,6 @@ BLT_DecoderX_ClearStatus(BLT_DecoderX* decoder)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_DecoderX_UpdateStatus
-+---------------------------------------------------------------------*/
-static BLT_Result
-BLT_DecoderX_UpdateStatus(BLT_DecoderX* decoder) 
-{
-    BLT_StreamStatus status;
-    BLT_Result       result;
-
-    result = BLT_Stream_GetStatus(decoder->input_stream, &status);
-    if (BLT_SUCCEEDED(result)) {
-        decoder->status.position = status.position;
-    } else {
-        decoder->status.position.offset = 0;
-        decoder->status.position.range  = 0;
-    }
-    
-    result = BLT_Stream_GetStatus(decoder->audio_stream, &status);
-    if (BLT_SUCCEEDED(result)) {
-        decoder->status.time_stamp = status.time_stamp;
-    } else {
-        decoder->status.time_stamp.seconds     = 0;
-        decoder->status.time_stamp.nanoseconds = 0;
-    }
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
 |    BLT_DecoderX_GetProperties
 +---------------------------------------------------------------------*/
 BLT_Result
@@ -161,11 +147,38 @@ BLT_DecoderX_GetProperties(BLT_DecoderX* decoder, ATX_Properties** properties)
 BLT_Result
 BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status) 
 {
-    /* update the status cache */
-    BLT_DecoderX_UpdateStatus(decoder);
+    BLT_StreamStatus input_status;
+    BLT_StreamInfo   input_info;
+    BLT_StreamStatus audio_status;
+    BLT_StreamInfo   audio_info;
+    BLT_StreamStatus video_status;
+    BLT_StreamInfo   video_info;
 
-    /* return the cached info */
-    *status = decoder->status;
+    BLT_Stream_GetStatus(decoder->input_stream, &input_status);
+    BLT_Stream_GetStatus(decoder->audio_stream, &audio_status);
+    BLT_Stream_GetStatus(decoder->video_stream, &video_status);
+    BLT_Stream_GetInfo(decoder->input_stream, &input_info);
+    BLT_Stream_GetInfo(decoder->audio_stream, &audio_info);
+    BLT_Stream_GetInfo(decoder->video_stream, &video_info);
+
+    /* return a composite status */
+    status->stream_info = input_info;
+    /*status->time_stamp  = input_status.time_stamp;*/
+    BLT_TimeStamp_Set(status->time_stamp, 0, 0);
+    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
+        status->time_stamp = audio_status.time_stamp;
+    }
+    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
+        status->time_stamp = video_status.time_stamp;
+    }
+    if (input_info.duration) {
+        /* estimate the position from the time stamp and duration */
+        status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
+        status->position.range  = status->stream_info.duration;
+    } else {
+        status->position.offset = 0;
+        status->position.range  = 0;
+    }
 
     return BLT_SUCCESS;
 }
@@ -219,6 +232,7 @@ BLT_DecoderX_SetEventListener(BLT_DecoderX*       decoder,
 static BLT_Result
 BLT_DecoderX_CreateInputNode(BLT_DecoderX*   self, 
                              BLT_CString     name,
+                             BLT_CString     type,
                              BLT_MediaNode** input_node)
 {
     BLT_Result result;
@@ -227,10 +241,10 @@ BLT_DecoderX_CreateInputNode(BLT_DecoderX*   self,
     *input_node = NULL;
     
     /* set the input of the input stream */
-    result = BLT_Stream_SetInput(self->input_stream, name, NULL);
+    result = BLT_Stream_SetInput(self->input_stream, name, type);
     if (BLT_FAILED(result)) return result;
     
-    /* the output of the input stream */
+    /* set the output of the input stream */
     result = BLT_Stream_SetOutput(self->input_stream, "com.bluetune.parsers.mp4", NULL);
     if (BLT_FAILED(result)) return result;
    
@@ -247,8 +261,6 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
     BLT_Result     result = BLT_SUCCESS;
     BLT_MediaNode* node = NULL;
     
-    ATX_COMPILER_UNUSED(type);
-    
     /* clear the status */
     BLT_DecoderX_ClearStatus(decoder);
 
@@ -260,11 +272,20 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
         if (BLT_FAILED(result)) return result;
     } else {
         /* create the node */
-        result = BLT_DecoderX_CreateInputNode(decoder, name, &node);
+        result = BLT_DecoderX_CreateInputNode(decoder, name, type, &node);
         if (BLT_FAILED(result)) return result;
         
         /* activate the input stream */
-        BLT_Stream_Start(decoder->input_stream);
+        /* NOTE: this is a temporary hacky solution: we pump a few packets to ensure  */
+        /* that all intermediate nodes get created and connected.                     */
+        /* This works here, because we're not really pumping any packets, just making */
+        /* connections from media node to media node.                                 */
+        result = BLT_Stream_PumpPacket(decoder->input_stream);
+        if (BLT_FAILED(result)) goto end;
+        result = BLT_Stream_PumpPacket(decoder->input_stream);
+        if (BLT_FAILED(result)) goto end;
+        result = BLT_Stream_PumpPacket(decoder->input_stream);
+        if (BLT_FAILED(result)) goto end;
         
         /* set the input of the streams */
         result = BLT_Stream_SetInputNode(decoder->audio_stream, name, "audio", node);
@@ -277,6 +298,19 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
 end:
     ATX_RELEASE_OBJECT(node);
     return result;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_AudioOutputChanged
++---------------------------------------------------------------------*/
+static void
+BLT_DecoderX_AudioOutputChanged(BLT_DecoderX* decoder, BLT_MediaNode* node)
+{
+    if (node) {
+        decoder->audio_output = ATX_CAST(node, BLT_OutputNode);
+    } else {
+        decoder->audio_output = NULL;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -313,9 +347,7 @@ BLT_DecoderX_SetAudioOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
         if (BLT_SUCCEEDED(result)) {
             BLT_MediaNode* node = NULL;
             BLT_Stream_GetOutputNode(decoder->audio_stream, &node);
-            if (node) {
-                decoder->audio_output = ATX_CAST(node, BLT_OutputNode);
-            }
+            BLT_DecoderX_AudioOutputChanged(decoder, node);
         }
     }
 
@@ -333,11 +365,10 @@ BLT_DecoderX_SetAudioOutputNode(BLT_DecoderX*  decoder,
     BLT_Result result;
 
     result = BLT_Stream_SetOutputNode(decoder->audio_stream, name, node);
-
-    if (node) {
-        decoder->audio_output = ATX_CAST(node, BLT_OutputNode);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_DecoderX_AudioOutputChanged(decoder, node);
     }
-
+    
     return result;
 }
 
@@ -354,6 +385,27 @@ BLT_DecoderX_GetAudioOutputNode(BLT_DecoderX*   decoder,
         *output = NULL;
     }
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_VideoOutputChanged
++---------------------------------------------------------------------*/
+static void
+BLT_DecoderX_VideoOutputChanged(BLT_DecoderX* decoder, BLT_MediaNode* node)
+{
+    if (node) {
+        BLT_SyncSlave* video_output_as_slave;
+        decoder->video_output = ATX_CAST(node, BLT_OutputNode);
+        
+        /* setup the synchronization */
+        video_output_as_slave = ATX_CAST(node, BLT_SyncSlave);
+        if (video_output_as_slave) {
+            BLT_SyncSlave_SetTimeSource(video_output_as_slave, 
+                                        &ATX_BASE(decoder, BLT_TimeSource));
+        }
+    } else {
+        decoder->video_output = NULL;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -390,9 +442,7 @@ BLT_DecoderX_SetVideoOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
         if (BLT_SUCCEEDED(result)) {
             BLT_MediaNode* node = NULL;
             BLT_Stream_GetOutputNode(decoder->video_stream, &node);
-            if (node) {
-                decoder->video_output = ATX_CAST(node, BLT_OutputNode);
-            }
+            BLT_DecoderX_VideoOutputChanged(decoder, node);
         }
     }
 
@@ -410,9 +460,8 @@ BLT_DecoderX_SetVideoOutputNode(BLT_DecoderX*  decoder,
     BLT_Result result;
 
     result = BLT_Stream_SetOutputNode(decoder->video_stream, name, node);
-
-    if (node) {
-        decoder->video_output = ATX_CAST(node, BLT_OutputNode);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_DecoderX_VideoOutputChanged(decoder, node);
     }
 
     return result;
@@ -570,5 +619,38 @@ BLT_DecoderX_SeekToPosition(BLT_DecoderX* decoder,
     
     return BLT_SUCCESS;
 }
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_GetMediaTime
++---------------------------------------------------------------------*/
+ATX_METHOD
+BLT_DecoderX_GetMediaTime(BLT_TimeSource* _self, BLT_TimeStamp* media_time)
+{
+    BLT_DecoderX* self = ATX_SELF(BLT_DecoderX, BLT_TimeSource);
+    
+    BLT_TimeStamp_Set(*media_time, 0, 0);
+    if (self->audio_output) {
+        BLT_OutputNodeStatus status;
+        if (BLT_SUCCEEDED(BLT_OutputNode_GetStatus(self->audio_output, &status))) {
+            *media_time = status.media_time;
+        }
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   GetInterface implementation
++---------------------------------------------------------------------*/
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_DecoderX)
+    ATX_GET_INTERFACE_ACCEPT(BLT_DecoderX, BLT_TimeSource)
+ATX_END_GET_INTERFACE_IMPLEMENTATION
+
+/*----------------------------------------------------------------------
+|    BLT_MediaTime interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLT_DecoderX, BLT_TimeSource)
+    BLT_DecoderX_GetMediaTime
+ATX_END_INTERFACE_MAP
 
 

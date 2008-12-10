@@ -173,7 +173,7 @@ CddaInput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 
     /* check that track is audio */
     if (track_info.type != BLT_CDDA_TRACK_TYPE_AUDIO) {
-      return BLT_ERROR_INVALID_MEDIA_FORMAT;
+      return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* create a track object to read from */

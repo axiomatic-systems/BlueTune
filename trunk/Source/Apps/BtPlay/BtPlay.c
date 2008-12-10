@@ -25,6 +25,7 @@
 typedef struct {
     BLT_CString  output_name;
     BLT_CString  output_type;
+    float        output_volume;
     unsigned int duration;
     unsigned int verbosity;
     ATX_List*    plugin_directories;
@@ -78,6 +79,7 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --help\n" 
         "  --output=<name>\n"
         "  --output-type=<type>\n"
+        "  --output-volume=<volume> (between 0.0 and 1.0)\n"
         "  --duration=<n> (seconds)\n"
         "  --load-plugins=<directory>[,<file-extension>]\n"
         "  --load-plugin=<plugin-filename>\n"
@@ -96,10 +98,11 @@ BLTP_ParseCommandLine(char** args)
     char* arg;
 
     /* setup default values for options */
-    Options.output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
-    Options.output_type = NULL;
-    Options.duration    = 0;
-    Options.verbosity   = 0;
+    Options.output_name   = BLT_DECODER_DEFAULT_OUTPUT_NAME;
+    Options.output_type   = NULL;
+    Options.output_volume = -1.0f;
+    Options.duration      = 0;
+    Options.verbosity     = 0;
     ATX_List_Create(&Options.plugin_directories);
     ATX_List_Create(&Options.plugin_files);
     
@@ -111,6 +114,17 @@ BLTP_ParseCommandLine(char** args)
             Options.output_name = arg+9;
         } else if (ATX_StringsEqualN(arg, "--output-type=", 14)) {
             Options.output_type = arg+14;
+        } else if (ATX_StringsEqualN(arg, "--output-volume=", 16)) {
+            float volume;
+            if (ATX_SUCCEEDED(ATX_ParseFloat(arg+16, &volume, ATX_TRUE))) {
+                if (volume >= 0.0f && volume <= 1.0f) {
+                    Options.output_volume = volume;
+                } else {
+                    fprintf(stderr, "ERROR: output volume value out of range\n");
+                }
+            } else {
+                fprintf(stderr, "ERROR: invalid output volume value\n");
+            }
         } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
             int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
@@ -489,10 +503,18 @@ main(int argc, char** argv)
                                    Options.output_name, 
                                    Options.output_type);
     if (BLT_FAILED(result)) {
-        fprintf(stderr, "SetOutput failed (%d)\n", result);
+        fprintf(stderr, "SetOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);
     }
 
+    /* set the output volume */
+    if (Options.output_volume >= 0.0f) {
+        result = BLT_Decoder_SetVolume(decoder, Options.output_volume);
+        if (BLT_FAILED(result)) {
+            fprintf(stderr, "SetVolume failed: %d (%s)\n", result, BLT_ResultText(result));
+        }
+    }
+    
     /* enable the gain control filter */
     BLT_Decoder_AddNodeByName(decoder, NULL, "GainControlFilter");
 
@@ -509,7 +531,7 @@ main(int argc, char** argv)
         /* set the input name */
         result = BLT_Decoder_SetInput(decoder, input_name, input_type);
         if (BLT_FAILED(result)) {
-            ATX_ConsoleOutputF("BtPlay:: SetInput failed (%d)\n", result);
+            ATX_ConsoleOutputF("SetInput failed: %d (%s)\n", result, BLT_ResultText(result));
             input_type = NULL;
             continue;
         }
@@ -523,7 +545,7 @@ main(int argc, char** argv)
             if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, Options.duration);
         } while (BLT_SUCCEEDED(result));
         if (Options.verbosity & BLTP_VERBOSITY_MISC) {
-            ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
+            ATX_ConsoleOutputF("final result = %d (%s)\n", result, BLT_ResultText(result));
         }
 
         /* reset input type */

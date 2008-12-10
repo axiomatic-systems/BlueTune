@@ -228,6 +228,17 @@ BLT_Player::AddNode(BLT_CString name)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Player::SetVolume
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Player::SetVolume(float volume)
+{
+    ATX_LOG_FINE_1("volume=%f", volume);
+    if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
+    return m_Server->SetVolume(volume);
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Player::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result 

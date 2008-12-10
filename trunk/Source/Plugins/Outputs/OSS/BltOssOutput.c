@@ -249,14 +249,14 @@ OssOutput_Configure(OssOutput* self)
         switch (self->media_type.bits_per_sample) {
         	case  8: param = AFMT_U8;     break;
         	case 16: param = AFMT_S16_NE; break;
-        	default: return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        	default: return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         io_result = ioctl(self->device_handle, SNDCTL_DSP_SETFMT, &param);
         if (io_result != 0) {
             ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_SETFMT(%d) failed (%d)",
                               param, io_result);
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         /* sample rate */
@@ -265,7 +265,7 @@ OssOutput_Configure(OssOutput* self)
         if (io_result != 0) {
             ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_SPEED(%d) failed (%d)", 
                               param, io_result);
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         /* channels */
@@ -274,7 +274,7 @@ OssOutput_Configure(OssOutput* self)
         if (io_result != 0) {
             ATX_LOG_WARNING_2("OssOutput::Configure - SNDCTL_DSP_STEREO(%d) failed (%d)", 
                               param, io_result);
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         
         /* compute trigger */
@@ -317,12 +317,12 @@ OssOutput_SetFormat(OssOutput*              self,
         if (format->sample_rate     == 0 ||
             format->channel_count   == 0 ||
             format->bits_per_sample == 0) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         
         /* perform basic validity checks of the format */
         if (format->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         /* copy the format */
@@ -430,7 +430,7 @@ OssOutput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* set the format of the samples */

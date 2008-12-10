@@ -454,7 +454,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         }
 
         if (pcm_format_id == SND_PCM_FORMAT_UNKNOWN) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         ior = snd_pcm_hw_params_set_format(self->device_handle, hw_params,
                                            pcm_format_id);
@@ -626,7 +626,7 @@ AlsaOutput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* configure the device for this format */

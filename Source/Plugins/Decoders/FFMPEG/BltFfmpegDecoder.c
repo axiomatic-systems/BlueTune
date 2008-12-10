@@ -143,8 +143,8 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
         if (media_type->base.base.id != self->module->iso_base_video_es_type_id ||
             media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
-            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - invalid format");
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - invalid media type");
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         if (media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC1) {
             ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - content type is AVC");
@@ -153,24 +153,24 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             decoder_config_size = media_type->decoder_info_length;
         }
         
-         if (codec_id == CODEC_ID_NONE) {
+        if (codec_id == CODEC_ID_NONE) {
             /* no compatible codec found */
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - no compatible codec found");
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* find the codec handle */
         codec = avcodec_find_decoder(codec_id);
         if (codec == NULL) {
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_find_decoder failed");
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* allocate the codec context */
         self->codec_context = avcodec_alloc_context();
         if (self->codec_context == NULL) {
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_OUT_OF_MEMORY;
         }
         
         /* setup the codec options */

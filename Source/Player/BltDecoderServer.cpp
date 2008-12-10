@@ -576,6 +576,28 @@ BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer::SetVolume
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderServer::SetVolume(float volume)
+{
+    return PostMessage(new BLT_DecoderServer_SetVolumeCommandMessage(volume));
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer::OnSetVolumeCommand
++---------------------------------------------------------------------*/
+void 
+BLT_DecoderServer::OnSetVolumeCommand(float volume)
+{
+    BLT_Result result;
+    ATX_LOG_FINE_1("volume=%f", volume);
+
+    result = BLT_Decoder_SetVolume(m_Decoder, volume);
+    SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_VOLUME, result);
+}
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer::SetProperty
 +---------------------------------------------------------------------*/
 BLT_Result

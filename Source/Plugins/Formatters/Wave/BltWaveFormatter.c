@@ -184,7 +184,7 @@ WaveFormatterInput_GetStream(BLT_OutputStreamProvider* _self,
     /* we're providing the stream, but we *receive* the type */
     if (media_type) {
         if (media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         } else {
             /* copy the input type parameters */
             self->input.media_type = *(const BLT_PcmMediaType*)media_type;

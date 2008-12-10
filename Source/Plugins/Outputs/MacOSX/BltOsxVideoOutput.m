@@ -26,6 +26,7 @@
 #include "BltMediaPacket.h"
 #include "BltPixels.h"
 #include "BltTime.h"
+#include "BltSynchronization.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -35,11 +36,13 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.video")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE 4
-#define BLT_MACOSX_VIDEO_MIN_VIEW_WIDTH     8
-#define BLT_MACOSX_VIDEO_MIN_VIEW_HEIGHT    8
-#define BLT_MACOSX_VIDEO_MIN_PICTURE_WIDTH  8
-#define BLT_MACOSX_VIDEO_MIN_PICTURE_HEIGHT 8
+#define BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE 4
+#define BLT_OSX_VIDEO_MIN_VIEW_WIDTH     8
+#define BLT_OSX_VIDEO_MIN_VIEW_HEIGHT    8
+#define BLT_OSX_VIDEO_MIN_PICTURE_WIDTH  8
+#define BLT_OSX_VIDEO_MIN_PICTURE_HEIGHT 8
+
+#define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY   2000000000 /* 2 seconds */
 
 /*----------------------------------------------------------------------
 |    types
@@ -77,7 +80,7 @@ typedef struct {
 	NSRect                  texture_bounds;
 	CVOpenGLTextureCacheRef texture_cache;
 	CVOpenGLTextureRef      texture;
-    OsxVideoPicture*        pictures[BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE];
+    OsxVideoPicture*        pictures[BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE];
     unsigned int            pictures_in_queue; /* number of valid pictures in the queue     */
     unsigned int            picture_tail;      /* index of picture at the tail of the queue */
     OsxVideoPicture*        picture_active;    /* currently active picture                  */
@@ -115,15 +118,17 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
     ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
-
+    ATX_IMPLEMENTS(BLT_SyncSlave);
+    
     /* members */
     BLT_MediaType expected_media_type;
     BLT_MediaType media_type;
     
-    NSWindow*     window;
-    NSView*       hostView;
-    OsxVideoView* videoView;
-    double        time_offset;
+    NSWindow*       window;
+    NSView*         host_view;
+    OsxVideoView*   video_view;
+    BLT_TimeSource* time_source;
+    BLT_SyncMode    sync_mode;
 } OsxVideoOutput;
 
 /*----------------------------------------------------------------------
@@ -136,6 +141,7 @@ ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, ATX_Referenceable)
 ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, BLT_OutputNode)
 ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, BLT_PacketConsumer)
+ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, BLT_SyncSlave)
 
 /*----------------------------------------------------------------------
 |    OsxVideoPicture::PixelBufferReleaseCallback
@@ -328,7 +334,7 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 
     // free all pictures
     unsigned int i;
-    for (i=0; i<BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE; i++) {
+    for (i=0; i<BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE; i++) {
         [pictures[i] dealloc];
     }
     [picture_active dealloc];
@@ -396,14 +402,14 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 
     // compute the aspect ratio and the positioning of the image in the view
     NSRect view_bounds = [self bounds];
-    if (view_bounds.size.height < BLT_MACOSX_VIDEO_MIN_VIEW_HEIGHT) goto end;
-    if (view_bounds.size.height < BLT_MACOSX_VIDEO_MIN_VIEW_WIDTH) goto end;
+    if (view_bounds.size.height < BLT_OSX_VIDEO_MIN_VIEW_HEIGHT) goto end;
+    if (view_bounds.size.height < BLT_OSX_VIDEO_MIN_VIEW_WIDTH) goto end;
     if (view_bounds.size.width  < 0.0) goto end;
     GLfloat view_aspect_ratio = view_bounds.size.width/view_bounds.size.height;
     GLfloat texture_width  = bottom_right[0]-bottom_left[0];
     GLfloat texture_height = bottom_left[1]-top_left[1];
-    if (texture_width  < BLT_MACOSX_VIDEO_MIN_PICTURE_WIDTH) goto end;
-    if (texture_height < BLT_MACOSX_VIDEO_MIN_PICTURE_HEIGHT) goto end;
+    if (texture_width  < BLT_OSX_VIDEO_MIN_PICTURE_WIDTH) goto end;
+    if (texture_height < BLT_OSX_VIDEO_MIN_PICTURE_HEIGHT) goto end;
     GLfloat texture_aspect_ratio = texture_width/texture_height;
     NSRect picture_bounds;
     if (view_aspect_ratio > texture_aspect_ratio) {
@@ -556,7 +562,7 @@ end:
 {
     // wait for some space in the queue
     [lock lock];
-    while (pictures_in_queue == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
+    while (pictures_in_queue == BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE) {
         [lock unlock];
         ATX_LOG_FINEST("waiting for space in picture queue");
         ATX_TimeInterval sleep_duration = {0,10000000}; /* 10 ms */
@@ -564,7 +570,7 @@ end:
         [lock lock];
     }
     
-    unsigned int picture_in = (pictures_in_queue+picture_tail)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
+    unsigned int picture_in = (pictures_in_queue+picture_tail)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE;
     if (pictures[picture_in] == NULL) {
         pictures[picture_in] = [OsxVideoPicture alloc];
     }
@@ -591,7 +597,7 @@ end:
 {
     BLT_Boolean queue_is_full = BLT_FALSE;
     [lock lock];
-    if (pictures_in_queue == BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE) {
+    if (pictures_in_queue == BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE) {
         queue_is_full = BLT_TRUE;
     }
     [lock unlock];
@@ -640,7 +646,7 @@ end:
     ATX_LOG_FINEST_3("selecting picture %d pts=%lld (%d in queue)", picture_tail, [picture displayTime], pictures_in_queue);
     pictures[picture_tail] = picture_active;
     picture_active = picture;
-    picture_tail = (picture_tail+1)%BLT_MACOSX_VIDEO_PICTURE_QUEUE_SIZE;
+    picture_tail = (picture_tail+1)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE;
     --pictures_in_queue;
     if (picture == NULL || [picture buffer] == NULL) return;
         
@@ -713,24 +719,31 @@ OsxVideoOutput_PutPacket(BLT_PacketConsumer* _self,
         
     // check the media type
     BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_VIDEO_RAW) return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    if (media_type->format != BLT_PIXEL_FORMAT_YV12) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    if (media_type->base.id != BLT_MEDIA_TYPE_ID_VIDEO_RAW) return BLT_ERROR_INVALID_MEDIA_TYPE;
+    if (media_type->format != BLT_PIXEL_FORMAT_YV12) return BLT_ERROR_INVALID_MEDIA_TYPE;
     
     // queue the picture
-    if (self->videoView) {    
+    if (self->video_view) {    
         // FIXME: this is temporary
-        [self->videoView processEvents];
+        [self->video_view processEvents];
         
-        // FIXME: this is not the final way to do it
-        BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
-        double tsd = (double)(ts.seconds)+(double)(ts.nanoseconds)/1000000000.0;
-        double htd = (double)AudioConvertHostTimeToNanos(CVGetCurrentHostTime())/1000000000.0;
-        double delta = tsd+self->time_offset-htd;
-        if (tsd == 0.0 || delta > 2.0 || delta < -2.0) {
-            self->time_offset = htd-tsd;
+        // compute the time at which the packet must be displayed
+        UInt64 delay = 0;
+        if (self->time_source) {
+            BLT_TimeStamp master_ts;
+            BLT_TimeSource_GetTime(self->time_source, &master_ts);
+            BLT_TimeStamp packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
+            if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
+                delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
+                
+                // clamp the delay to a safe maximum
+                if (delay > BLT_OSX_VIDEO_OUTPUT_MAX_DELAY) {
+                    delay = BLT_OSX_VIDEO_OUTPUT_MAX_DELAY;
+                }
+            }
         }
-        uint64_t display_time = (uint64_t)((tsd+self->time_offset)*1000000000.0);    
-        return [self->videoView queuePicture: pixel_data format: media_type displayTime: display_time];
+        UInt64 display_time = AudioConvertHostTimeToNanos(CVGetCurrentHostTime())+delay;
+        return [self->video_view queuePicture: pixel_data format: media_type displayTime: display_time];
     }
     
     return BLT_SUCCESS;
@@ -774,30 +787,30 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self)
             ATX_PropertyValue property;
             result = ATX_Properties_GetProperty(properties, "Output.Video.HostView", &property);
             if (ATX_SUCCEEDED(result) && property.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
-                self->hostView = (NSView*)property.data.pointer;
+                self->host_view = (NSView*)property.data.pointer;
             }
         }
     }
     
     /* use the host view's bounds or choose a default */
     NSRect frame;
-    if (self->hostView) {
-        frame = [self->hostView bounds];
+    if (self->host_view) {
+        frame = [self->host_view bounds];
     } else {
         frame = NSMakeRect(0,0,640,400); // FIXME: default value
     }
      
     /* create the video view */
-    self->videoView = [[OsxVideoView alloc] initWithFrame: frame
-                                              pixelFormat: [NSOpenGLView defaultPixelFormat]];
-    if (self->videoView == NULL) {
+    self->video_view = [[OsxVideoView alloc] initWithFrame: frame
+                                               pixelFormat: [NSOpenGLView defaultPixelFormat]];
+    if (self->video_view == NULL) {
         [pool release];
         return BLT_FAILURE;
     }
 
     /* attach the video view */
-    if (self->hostView) {
-        [self->hostView addSubview: self->videoView];
+    if (self->host_view) {
+        [self->host_view addSubview: self->video_view];
     } else {
         // create a standlone window
         self->window = [[NSWindow alloc] initWithContentRect: frame 
@@ -809,12 +822,12 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self)
                                                      backing: NSBackingStoreBuffered 
                                                        defer: NO];
         if (self->window == NULL) {
-            [self->videoView release];
+            [self->video_view release];
             [pool release];
             return BLT_FAILURE;
         }
         
-        [self->window setContentView: self->videoView];
+        [self->window setContentView: self->video_view];
         //[window setDelegate: self->view];
         //[window setInitialFirstResponder: self->view];
         [self->window setAcceptsMouseMovedEvents:YES];
@@ -841,9 +854,9 @@ OsxVideoOutput_DestroyView(OsxVideoOutput* self)
     if (self->window) {
         [self->window setContentView: nil];
         [self->window close];
-        [self->videoView release];
+        [self->video_view release];
     } else {
-        [self->videoView removeFromSuperview];
+        [self->video_view removeFromSuperview];
     }
         
     [pool release];
@@ -893,6 +906,7 @@ OsxVideoOutput_Create(BLT_Module*              module,
     ATX_SET_INTERFACE   (self, OsxVideoOutput, BLT_PacketConsumer);
     ATX_SET_INTERFACE   (self, OsxVideoOutput, BLT_OutputNode);
     ATX_SET_INTERFACE   (self, OsxVideoOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (self, OsxVideoOutput, BLT_SyncSlave);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
@@ -942,7 +956,7 @@ BLT_METHOD
 OsxVideoOutput_Start(BLT_MediaNode*  _self)
 {
     OsxVideoOutput* self = ATX_SELF_EX(OsxVideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
-    [self->videoView start];
+    [self->video_view start];
     return BLT_SUCCESS;
 }
 
@@ -953,7 +967,7 @@ BLT_METHOD
 OsxVideoOutput_Stop(BLT_MediaNode*  _self)
 {
     OsxVideoOutput* self = ATX_SELF_EX(OsxVideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
-    [self->videoView stop];
+    [self->video_view stop];
     return BLT_SUCCESS;
 }
 
@@ -965,16 +979,41 @@ OsxVideoOutput_GetStatus(BLT_OutputNode*       _self,
                          BLT_OutputNodeStatus* status)
 {
     OsxVideoOutput* self = ATX_SELF(OsxVideoOutput, BLT_OutputNode);
-    BLT_COMPILER_UNUSED(self);
     
     /* default value */
     status->media_time.seconds     = 0;
     status->media_time.nanoseconds = 0;
 
     status->flags = 0;
-    if ([self->videoView queueIsFull]) {
+    if ([self->video_view queueIsFull]) {
         status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
     }
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    OsxVideoOutput_SetTimeSource
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxVideoOutput_SetTimeSource(BLT_SyncSlave*  _self,
+                             BLT_TimeSource* source)
+{
+    OsxVideoOutput* self = ATX_SELF(OsxVideoOutput, BLT_SyncSlave);
+    
+    self->time_source = source;
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    OsxVideoOutput_SetSyncMode
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxVideoOutput_SetSyncMode(BLT_SyncSlave* _self,
+                          BLT_SyncMode    mode)
+{
+    OsxVideoOutput* self = ATX_SELF(OsxVideoOutput, BLT_SyncSlave);
+    
+    self->sync_mode = mode;
     return BLT_SUCCESS;
 }
 
@@ -987,6 +1026,7 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxVideoOutput)
     ATX_GET_INTERFACE_ACCEPT   (OsxVideoOutput, BLT_OutputNode)
     ATX_GET_INTERFACE_ACCEPT   (OsxVideoOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT   (OsxVideoOutput, BLT_PacketConsumer)
+    ATX_GET_INTERFACE_ACCEPT   (OsxVideoOutput, BLT_SyncSlave)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -1027,6 +1067,14 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxVideoOutput, BLT_OutputNode)
     OsxVideoOutput_GetStatus
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_SyncSlave interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(OsxVideoOutput, BLT_SyncSlave)
+    OsxVideoOutput_SetTimeSource,
+    OsxVideoOutput_SetSyncMode
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

@@ -109,13 +109,13 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
 
         BLT_MediaPacket_GetMediaType(packet, &media_type);
         if (media_type == NULL || media_type->id != self->mp4es_type_id) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
         if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, mp4_media_type->decoder_info_length, &decoder_config))) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-        if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_ERROR_UNSUPPORTED_CODEC;
         result = MLO_Decoder_Create(&decoder_config, &self->melo);
         if (MLO_FAILED(result)) return BLT_ERROR_INVALID_MEDIA_FORMAT;
 

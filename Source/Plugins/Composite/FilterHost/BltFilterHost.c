@@ -225,7 +225,7 @@ FilterHost_Create(BLT_Module*              module,
 
     /* check the media type */
     if (constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* construct the object */

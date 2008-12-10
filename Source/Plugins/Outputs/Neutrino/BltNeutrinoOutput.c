@@ -384,7 +384,7 @@ NeutrinoOutputInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
 
     /* check the media type */
     if (media_type.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* get the standard extension */

@@ -70,7 +70,7 @@ DebugOutput_PutPacket(BLT_PacketConsumer* _self,
     BLT_MediaPacket_GetMediaType(packet, &media_type);
     if (self->expected_media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN &&
         self->expected_media_type->id != media_type->id) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
 #if defined(ATX_CONFIG_ENABLE_LOGGING)

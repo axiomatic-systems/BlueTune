@@ -516,24 +516,17 @@ StreamPacketizerModule_Probe(BLT_Module*              self,
 
             /* the input protocol should be  STREAM_PULL and the */
             /* output protocol should be PACKET                  */
-             if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
+             if ((constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                  constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) ||
+                 (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                  constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
                 return BLT_FAILURE;
             }
 
             /* media types must match */
-            if (constructor->spec.input.media_type->id !=
-                BLT_MEDIA_TYPE_ID_UNKNOWN &&
-                constructor->spec.output.media_type->id !=
-                BLT_MEDIA_TYPE_ID_UNKNOWN &&
-                constructor->spec.input.media_type->id !=
-                constructor->spec.output.media_type->id) {
+            if (constructor->spec.input.media_type->id  != BLT_MEDIA_TYPE_ID_UNKNOWN &&
+                constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN &&
+                constructor->spec.input.media_type->id  != constructor->spec.output.media_type->id) {
                 return BLT_FAILURE;
             }
 

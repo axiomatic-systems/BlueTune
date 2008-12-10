@@ -90,7 +90,7 @@ CrossFader_SetupInput(CrossFader* fader, BLT_PcmMediaType* media_type)
 
     /* check the media type */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* clone the media type parameters */
@@ -249,7 +249,7 @@ CrossFaderInputPort_PutPacket(BLT_PacketConsumerInstance* instance,
 
     /* check the if media type is PCM */
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* check if the media type has changed */

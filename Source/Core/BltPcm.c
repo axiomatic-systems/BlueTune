@@ -258,7 +258,7 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
     /* check the media type */
     if (in_type->base.id  != BLT_MEDIA_TYPE_ID_AUDIO_PCM ||
         out_type_spec->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     
     /* do automatic setting of output parameters */
@@ -285,16 +285,16 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
 
         case BLT_PCM_SAMPLE_FORMAT_FLOAT_BE:
             in_function = BLT_Pcm_ReadFloatBE;
-            if (in_type->bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            if (in_type->bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_TYPE;
             break;
 
         case BLT_PCM_SAMPLE_FORMAT_FLOAT_LE:
             in_function = BLT_Pcm_ReadFloatLE;
-            if (in_type->bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            if (in_type->bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_TYPE;
             break;
 
         default:
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     switch (out_type.sample_format) {
         case BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE:
@@ -307,16 +307,16 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
 
         case BLT_PCM_SAMPLE_FORMAT_FLOAT_BE:
             out_function = BLT_Pcm_WriteFloatBE;
-            if (out_type.bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            if (out_type.bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_TYPE;
             break;
 
         case BLT_PCM_SAMPLE_FORMAT_FLOAT_LE:
             out_function = BLT_Pcm_WriteFloatLE;
-            if (out_type.bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            if (out_type.bits_per_sample != 32) return BLT_ERROR_INVALID_MEDIA_TYPE;
             break;
 
         default:
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
     /* allocate the output packet */

@@ -395,6 +395,10 @@
 		CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
+		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
+		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
+		CAB7B2AB0EDCA8AB00195273 /* BltSynchronization.c in Sources */ = {isa = PBXBuildFile; fileRef = CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */; };
+		CAB7B2AC0EDCA8AB00195273 /* BltSynchronization.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */; };
 		CABC79000E562CE10000C55F /* BltOsxAudioQueueOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */; };
 		CABC79010E562CE20000C55F /* BltOsxAudioQueueOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */; };
 		CAC7D56C0E45375900037D81 /* BltOsxAudioUnitsOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */; };
@@ -809,7 +813,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA9A16D80ED4F42A00C60FDF /* PassthroughWriterTest */;
+			remoteGlobalIDString = CA9A16D80ED4F42A00C60FDF;
 			remoteInfo = PassthroughWriterTest;
 		};
 		CA9ED1E80EACFA6A003CE43C /* PBXContainerItemProxy */ = {
@@ -1320,6 +1324,10 @@
 		CA9ED92F0EB02685003CE43C /* BltFfmpegDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltFfmpegDecoder.c; sourceTree = "<group>"; };
 		CA9ED9300EB02685003CE43C /* BltFfmpegDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltFfmpegDecoder.h; sourceTree = "<group>"; };
 		CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVolumeControl.h; sourceTree = "<group>"; };
+		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
+		CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltSynchronization.c; sourceTree = "<group>"; };
+		CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSynchronization.h; sourceTree = "<group>"; };
 		CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioQueueOutput.c; sourceTree = "<group>"; };
 		CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioQueueOutput.h; sourceTree = "<group>"; };
 		CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioUnitsOutput.c; sourceTree = "<group>"; };
@@ -1648,7 +1656,7 @@
 				CA44C47F0D4522DA00173F5F /* cryptotest */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
 				CA9ED1E90EACFA6A003CE43C /* avctrackwritertest */,
-				CA9A17AF0ED50F6D00C60FDF /* PassthroughWriterTest */,
+				CA9A17AF0ED50F6D00C60FDF /* passthroughwritertest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1683,6 +1691,10 @@
 		CA5041F10C5AE52B0060E6FE /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */,
+				CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */,
+				CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */,
+				CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */,
 				CA9ED2920EAD3A8D003CE43C /* BltPixels.c */,
 				CA9ED2930EAD3A8D003CE43C /* BltPixels.h */,
 				CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */,
@@ -2811,6 +2823,8 @@
 				CA5827E00E68CF15006CC501 /* BltDynamicPlugins.h in Headers */,
 				CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */,
 				CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */,
+				CAB7B2AC0EDCA8AB00195273 /* BltSynchronization.h in Headers */,
+				CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3306,13 +3320,12 @@
 			remoteRef = CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		CA9A17AF0ED50F6D00C60FDF /* PassthroughWriterTest */ = {
+		CA9A17AF0ED50F6D00C60FDF /* passthroughwritertest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
-			name = PassthroughWriterTest;
-			path = build/Debug/PassthroughWriterTest;
+			path = passthroughwritertest;
 			remoteRef = CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */;
-			sourceTree = "<group>";
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA9ED1E90EACFA6A003CE43C /* avctrackwritertest */ = {
 			isa = PBXReferenceProxy;
@@ -3735,6 +3748,8 @@
 				CA5827E50E68CFD4006CC501 /* BltUnixDynamicPlugins.c in Sources */,
 				CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */,
 				CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */,
+				CAB7B2AB0EDCA8AB00195273 /* BltSynchronization.c in Sources */,
+				CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

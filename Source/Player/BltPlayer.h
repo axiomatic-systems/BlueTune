@@ -198,6 +198,12 @@ class BLT_Player : public BLT_DecoderClient
     virtual BLT_Result AddNode(BLT_CString name);
 
     /**
+     * Set the audio volume.
+     * @param volume Audio volume (between 0.0 and 1.0).
+     */
+    virtual BLT_Result SetVolume(float volume);
+
+    /**
      * Set a property.
      * @param scope Scope enum specifying what type of property is being set.
      * @param target Name of the target to which this property applies. For
@@ -307,6 +313,7 @@ typedef enum {
     BLT_PLAYER_COMMAND_ID_SEEK_TO_POSITION,
     BLT_PLAYER_COMMAND_ID_REGISTER_MODULE,
     BLT_PLAYER_COMMAND_ID_ADD_NODE,
+    BLT_PLAYER_COMMAND_ID_SET_VOLUME,
     BLT_PLAYER_COMMAND_ID_SET_PROPERTY
 } BLT_Player_CommandId;
 
@@ -407,6 +414,8 @@ public:
             return BLT_PLAYER_COMMAND_ID_REGISTER_MODULE;
           case BLT_DecoderServer_Message::COMMAND_ID_ADD_NODE:
             return BLT_PLAYER_COMMAND_ID_ADD_NODE;
+          case BLT_DecoderServer_Message::COMMAND_ID_SET_VOLUME:
+            return BLT_PLAYER_COMMAND_ID_SET_VOLUME;
           case BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY:
             return BLT_PLAYER_COMMAND_ID_SET_PROPERTY;
         }

@@ -24,16 +24,23 @@
 |    types
 +---------------------------------------------------------------------*/
 typedef struct {
+    ATX_String    name;
+    unsigned char value[16];
+} BLTP_Key;
+
+typedef struct {
     BLT_CString  audio_output_name;
     BLT_CString  video_output_name;
     unsigned int duration;
     unsigned int verbosity;
+    ATX_List*    keys;
 } BLTP_Options;
 
 typedef struct  {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_EventListener);
     ATX_IMPLEMENTS(ATX_PropertyListener);
+    ATX_IMPLEMENTS(BLT_KeyManager);
 } BLTP;
 
 /*----------------------------------------------------------------------
@@ -66,7 +73,7 @@ static void
 BLTP_PrintUsageAndExit(int exit_code)
 {
     ATX_ConsoleOutput(
-        "usage: btplay [options] <input-spec> [<input-spec>..]\n"
+        "usage: btplayx [options] <input-spec> [<input-spec>..]\n"
         "  each <input-spec> is either an input name (file or URL), or an input type\n"
         "  (--input-type=<type>) followed by an input name\n"
         "\n"
@@ -78,8 +85,76 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --duration=<n> (seconds)\n"
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', or 'all'\n"
-        "                     (multiple --verbose= options can be specified)\n");
+        "                     (multiple --verbose= options can be specified)\n"
+        "  --key=<name>:<value> : content decryption key for content ID <name>.\n"
+        "                         The key value is in hexadecimal\n");
     exit(exit_code);
+}
+
+/*----------------------------------------------------------------------
+|    BLTP_ParseHexNibble
++---------------------------------------------------------------------*/
+static int
+BLTP_ParseHexNibble(char nibble)
+{
+    switch (nibble) {
+        case '0': return 0;
+        case '1': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case '8': return 8;
+        case '9': return 9;
+        case 'a':
+        case 'A': return 0x0A;
+        case 'b':
+        case 'B': return 0x0B;
+        case 'c':
+        case 'C': return 0x0C;
+        case 'd':
+        case 'D': return 0x0D;
+        case 'e':
+        case 'E': return 0x0E;
+        case 'f':
+        case 'F': return 0x0F;
+        default: return -1;
+    }
+}
+
+/*----------------------------------------------------------------------
+|    BLTP_ParseKey
++---------------------------------------------------------------------*/
+static void
+BLTP_ParseKey(const char* name_and_value)
+{
+    BLTP_Key*    key;
+    unsigned int length = ATX_StringLength(name_and_value);
+    
+    // we need at least a ':' followed by 32 hex chars
+    if (length < 33) {
+        fprintf(stderr, "ERROR: invalid syntax for --key argument\n");
+        return;
+    }
+    
+    key = (BLTP_Key*)ATX_AllocateZeroMemory(sizeof(BLTP_Key));
+    ATX_String_AssignN(&key->name, name_and_value, length-33);
+    {
+        unsigned int i;
+        unsigned int x = 0;
+        for (i=length-32; i<length; i+=2) {
+            int nib1 = BLTP_ParseHexNibble(name_and_value[i  ]);
+            int nib2 = BLTP_ParseHexNibble(name_and_value[i+1]);
+            if (nib1 < 0 || nib2 < 0) {
+                fprintf(stderr, "ERROR: invalid syntax for --key argument\n");
+            }
+            key->value[x++] = (nib1<<4) | nib2;
+        }
+    }
+    
+    ATX_List_AddData(Options.keys, key);
 }
 
 /*----------------------------------------------------------------------
@@ -95,6 +170,7 @@ BLTP_ParseCommandLine(char** args)
     Options.video_output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
     Options.duration    = 0;
     Options.verbosity   = 0;
+    ATX_List_Create(&Options.keys);
     
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
@@ -116,6 +192,8 @@ BLTP_ParseCommandLine(char** args)
             } else if (ATX_StringsEqual(arg+10, "all")) {
                 Options.verbosity = 0xFFFFFFFF;
             }
+        } else if (ATX_StringsEqualN(arg, "--key=", 6)) {
+            BLTP_ParseKey(arg+6);
         } else {
             return args;
         }
@@ -160,6 +238,36 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
     }
 }
 
+/*----------------------------------------------------------------------
+|    BLTP_GetKeyByName
++---------------------------------------------------------------------*/
+BLT_METHOD
+BLTP_GetKeyByName(BLT_KeyManager* self,
+                  const char*     name,
+                  unsigned char*  key, 
+                  unsigned int*   key_size)
+{
+    ATX_ListItem* item = ATX_List_GetFirstItem(Options.keys);
+    
+    /* check the key size */
+    if (*key_size < 16) {
+        *key_size = 16;
+        return BLT_ERROR_BUFFER_TOO_SMALL;
+    }
+    
+    for (; item; item = ATX_ListItem_GetNext(item)) {
+        BLTP_Key* key_info = (BLTP_Key*)ATX_ListItem_GetData(item);
+        if (ATX_String_Equals(&key_info->name, name, ATX_FALSE)) {
+            /* found a match */
+            ATX_CopyMemory(key, key_info->value, 16);
+            *key_size = 16;
+            return BLT_SUCCESS;
+        }
+    }
+    
+    return ATX_ERROR_NO_SUCH_ITEM;
+}
+                               
 /*----------------------------------------------------------------------
 |    BLTP_ShowStreamTopology
 +---------------------------------------------------------------------*/
@@ -309,6 +417,7 @@ BLTP_OnEvent(BLT_EventListener* self,
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLTP)
     ATX_GET_INTERFACE_ACCEPT(BLTP, BLT_EventListener)
     ATX_GET_INTERFACE_ACCEPT(BLTP, ATX_PropertyListener)
+    ATX_GET_INTERFACE_ACCEPT(BLTP, BLT_KeyManager)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -323,6 +432,13 @@ ATX_END_INTERFACE_MAP
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_EventListener)
     BLTP_OnEvent
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_KeyManager interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLTP, BLT_KeyManager)
+    BLTP_GetKeyByName
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -400,6 +516,7 @@ main(int argc, char** argv)
     /* setup our interfaces */
     ATX_SET_INTERFACE(&player, BLTP, BLT_EventListener);
     ATX_SET_INTERFACE(&player, BLTP, ATX_PropertyListener);
+    ATX_SET_INTERFACE(&player, BLTP, BLT_KeyManager);
 
     /* listen to stream events */
     BLT_DecoderX_SetEventListener(decoder, &ATX_BASE(&player, BLT_EventListener));
@@ -420,11 +537,23 @@ main(int argc, char** argv)
 
     /* listen to input stream properties events */
     {
-        ATX_Properties* properties;
+        ATX_Properties*   properties;
         BLT_DecoderX_GetInputStreamProperties(decoder, &properties);
         ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
     }
 
+    /* register as the key manager */
+    {
+        ATX_Properties*   properties;
+        ATX_PropertyValue key_manager_prop;
+        BLT_DecoderX_GetProperties(decoder, &properties);
+        ATX_Properties_AddListener(properties, NULL, &ATX_BASE(&player, ATX_PropertyListener), NULL);
+        
+        key_manager_prop.type = ATX_PROPERTY_VALUE_TYPE_POINTER;
+        key_manager_prop.data.pointer = &ATX_BASE(&player, BLT_KeyManager);
+        ATX_Properties_SetProperty(properties, BLT_KEY_MANAGER_PROPERTY, &key_manager_prop);
+    }
+    
     /* register builtin modules */
     result = BLT_DecoderX_RegisterBuiltins(decoder);
     BLTP_CHECK(result);

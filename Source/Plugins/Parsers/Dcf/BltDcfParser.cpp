@@ -443,7 +443,7 @@ DcfParserInput_SetStream(BLT_InputStreamUser* _self,
     result = BLT_Registry_GetIdForName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        /*"audio/aac"*/ self->input.content_type, // FIXME: temporary hack
+        self->input.content_type,
         &self->output.media_type.id);
     if (BLT_FAILED(result)) {
         ATX_LOG_FINE_1("unregistered content type (%s)", self->input.content_type);
@@ -817,9 +817,9 @@ DcfParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                             "application/vnd.oma.drm.dcf");
     if (BLT_FAILED(result)) return result;
 
-    /* register the ".oda" file extension */
+    /* register the ".odv" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
-                                            ".oda",
+                                            ".odv",
                                             "application/vnd.oma.drm.dcf");
     if (BLT_FAILED(result)) return result;
 

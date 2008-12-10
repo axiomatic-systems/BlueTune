@@ -16,6 +16,7 @@
 #include "BltBuiltins.h"
 #include "BltCorePriv.h"
 #include "BltDynamicPlugins.h"
+#include "BltVolumeControl.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -306,6 +307,64 @@ BLT_Decoder_AddNodeByName(BLT_Decoder*   decoder,
                           BLT_CString    name)
 {
     return BLT_Stream_AddNodeByName(decoder->stream, where, name);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_GetVolume
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_GetVolume(BLT_Decoder* decoder, float* volume)
+{
+    BLT_MediaNode* output_node;
+    BLT_Result     result;
+    
+    /* check parameters */
+    if (volume == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+    
+    /* default value */
+    *volume = 0.0f;
+    
+    /* get the volume from the output node */
+    result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
+        if (volume_control) {
+            result = BLT_VolumeControl_GetVolume(volume_control, volume);
+        } else {
+            result = BLT_ERROR_NOT_SUPPORTED;
+        }
+        ATX_RELEASE_OBJECT(output_node);
+    } else {
+        result = BLT_ERROR_INVALID_STATE;
+    }
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_SetVolume
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_SetVolume(BLT_Decoder* decoder, float volume)
+{
+    BLT_MediaNode* output_node;
+    BLT_Result     result;
+    
+    /* get the volume from the output node */
+    result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
+        if (volume_control) {
+            result = BLT_VolumeControl_SetVolume(volume_control, volume);
+        } else {
+            result = BLT_ERROR_NOT_SUPPORTED;
+        }
+        ATX_RELEASE_OBJECT(output_node);
+    } else {
+        result = BLT_ERROR_INVALID_STATE;
+    }
+    
+    return result;
 }
 
 /*----------------------------------------------------------------------

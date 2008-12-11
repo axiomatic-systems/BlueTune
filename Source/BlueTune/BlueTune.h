@@ -130,6 +130,7 @@ See the BLT_Player class for details.
 #include "BltPcm.h"
 #include "BltPlayer.h"
 #include "BltVersion.h"
+#include "BltSvnVersion.h"
 #include "BltDynamicPlugins.h"
 
 #endif /* _BLUETUNE_H_ */

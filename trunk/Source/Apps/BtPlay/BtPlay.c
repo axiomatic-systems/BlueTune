@@ -69,6 +69,8 @@ static void
 BLTP_PrintUsageAndExit(int exit_code)
 {
     ATX_ConsoleOutput(
+        "--- BlueTune command line player\n"
+        "--- BlueTune version " BLT_BLUETUNE_SDK_VERSION_STRING " build " BLT_SVN_VERSION_STRING "\n\n"
         "usage: btplay [options] <input-spec> [<input-spec>..]\n"
         "  each <input-spec> is either an input name (file or URL), or an input type\n"
         "  (--input-type=<type>) followed by an input name\n"

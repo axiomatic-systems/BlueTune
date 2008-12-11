@@ -178,11 +178,14 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         BLT_TimeStamp           chunk_duration;
         BLT_TimeStamp           packet_ts;
         unsigned int            bytes_per_frame;
-                
+        unsigned int            sample_rate;
+        
         /* get the packet info */
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
         packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
-                
+        bytes_per_frame = media_type->channel_count*media_type->bits_per_sample/8;
+        sample_rate = media_type->sample_rate;
+        
         /* record the timestamp if we have not already done so */
         if (!timestamp_measured) {
             self->media_time_snapshot.rendered_packet_ts = packet_ts;
@@ -205,6 +208,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
             ATX_CopyMemory(out, BLT_MediaPacket_GetPayloadBuffer(packet), chunk_size);
             ATX_List_RemoveItem(self->packet_queue, item);
             packet = NULL;
+            media_type = NULL;
         } else {
             /* only copy a portion of the payload */
             chunk_size = requested;
@@ -216,10 +220,9 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         out       += chunk_size;
         
         /* update the media time snapshot */
-        bytes_per_frame = media_type->channel_count*media_type->bits_per_sample/8;
         if (bytes_per_frame) {
             unsigned int frames_in_chunk = chunk_size/bytes_per_frame;
-            chunk_duration = BLT_TimeStamp_FromSamples(frames_in_chunk, media_type->sample_rate);
+            chunk_duration = BLT_TimeStamp_FromSamples(frames_in_chunk, sample_rate);
         } else {
             BLT_TimeStamp_Set(chunk_duration, 0, 0);
         }

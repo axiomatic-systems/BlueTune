@@ -180,7 +180,7 @@ if 'FlacDecoder' in env['BLT_PLUGINS']:
 ############################# Core
 CompiledModule(name                          = 'BltCore',
                source_root                   = 'Source/Core',
-               exported_include_dirs         = ['Source/BlueTune', 'Source/Plugins/Common', 'Source/Plugins/DynamicLoading'],
+               exported_include_dirs         = ['Source/BlueTune', 'Source/Fluo', 'Source/Decoder', 'Source/Player', 'Source/Plugins/Common', 'Source/Plugins/DynamicLoading'],
                chained_link_and_include_deps = ['Atomix', 'Neptune'])
 
 ############################# Decoder

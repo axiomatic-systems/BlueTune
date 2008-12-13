@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

@@ -32,7 +32,7 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'MacOSXOutput']
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
-env['BLT_DEFAULT_OUTPUT']           = 'macosx:0'
+env['BLT_DEFAULT_AUDIO_OUTPUT']     = 'osxau:0'
 
 #env['FLO_DECODER_ENGINE']      = 'FLO_DECODER_ENGINE_MPG123'
 #env['BLT_PLUGINS_AAC_LIBRARY'] = 'Helix'

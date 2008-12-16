@@ -504,8 +504,8 @@ AlsaOutput_Configure(AlsaOutput*             self,
                                               buffer_size/2);
 
         /* set the buffer alignment */
-        snd_pcm_sw_params_set_xfer_align(self->device_handle, 
-                                         sw_params, 1);
+        /* NOTE: this call is now obsolete */
+        /* snd_pcm_sw_params_set_xfer_align(self->device_handle, sw_params, 1); */
 
         /* activate the sofware parameters */
         ior = snd_pcm_sw_params(self->device_handle, sw_params);

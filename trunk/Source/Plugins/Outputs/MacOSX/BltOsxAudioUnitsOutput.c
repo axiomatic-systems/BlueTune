@@ -209,6 +209,8 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
             ATX_List_RemoveItem(self->packet_queue, item);
             packet = NULL;
             media_type = NULL;
+            packet = NULL;
+            media_type = NULL;
         } else {
             /* only copy a portion of the payload */
             chunk_size = requested;

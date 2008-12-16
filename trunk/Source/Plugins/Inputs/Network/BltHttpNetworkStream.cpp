@@ -27,7 +27,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.network.http")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 65536;
+const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 1048576; //65536;
 
 /*----------------------------------------------------------------------
 |   HttpInputStream
@@ -245,7 +245,7 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
     }
     const NPT_String* icy_metaint = self->m_Response->GetHeaders().GetHeaderValue("icy-metaint");
     if (icy_metaint) {
-        unsigned long interval = 0;
+        unsigned int interval = 0;
         icy_metaint->ToInteger(interval, ATX_TRUE);
         self->m_IcyMetaInterval = interval;
         self->m_IsIcy = true;

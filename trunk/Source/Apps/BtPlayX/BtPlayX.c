@@ -199,7 +199,7 @@ BLTP_ParseCommandLine(char** args)
         } else {
             return args;
         }
-        args++;
+        ++args;
     }
 
     return args;
@@ -566,13 +566,13 @@ main(int argc, char** argv)
     /* set the audio output */
     result = BLT_DecoderX_SetAudioOutput(decoder, Options.audio_output_name, NULL);
     if (BLT_FAILED(result)) {
-        fprintf(stderr, "SetAudioOutput failed (%d)\n", result);
+        fprintf(stderr, "SetAudioOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);
     }
     /* set the video output */
     result = BLT_DecoderX_SetVideoOutput(decoder, Options.video_output_name, NULL);
     if (BLT_FAILED(result)) {
-        fprintf(stderr, "SetVideoOutput failed (%d)\n", result);
+        fprintf(stderr, "SetVideoOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);
     }
 
@@ -581,7 +581,7 @@ main(int argc, char** argv)
         /* set the input name */
         result = BLT_DecoderX_SetInput(decoder, input_name, input_type);
         if (BLT_FAILED(result)) {
-            ATX_ConsoleOutputF("BtPlay:: SetInput failed (%d)\n", result);
+            ATX_ConsoleOutputF("SetInput failed: %d (%s)\n", result, BLT_ResultText(result));
             input_type = NULL;
             continue;
         }
@@ -595,7 +595,7 @@ main(int argc, char** argv)
             if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, Options.duration);
         } while (BLT_SUCCEEDED(result));
         if (Options.verbosity & BLTP_VERBOSITY_MISC) {
-            ATX_ConsoleOutputF("BtPlay:: final result = %d\n", result);
+            ATX_ConsoleOutputF("final result = %d (%s)\n", result, BLT_ResultText(result));
         }
 
         /* reset input type */

@@ -313,8 +313,8 @@ AlsaInputStream_Construct(AlsaInputStream* self, BLT_CString name)
     snd_pcm_sw_params_current(self->device_handle, sw_params);
 
     /* set the buffer alignment */
-    snd_pcm_sw_params_set_xfer_align(self->device_handle, 
-                                     sw_params, 1);
+    /* NOTE: this call is now obsolete */
+    /* snd_pcm_sw_params_set_xfer_align(self->device_handle, sw_params, 1); */
 
     /* activate the sofware parameters */
     ior = snd_pcm_sw_params(self->device_handle, sw_params);

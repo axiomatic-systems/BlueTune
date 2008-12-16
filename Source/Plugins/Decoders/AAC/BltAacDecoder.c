@@ -538,6 +538,14 @@ AacDecoderModule_Probe(BLT_Module*              _self,
                         return BLT_FAILURE;
                     }
                     if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_FAILURE;
+                    if (decoder_config.channel_configuration == 0) {
+                        ATX_LOG_INFO("AAC channel configuration is 0");
+                        return BLT_FAILURE;
+                    }
+                    if (decoder_config.channel_configuration > 2) {
+                        ATX_LOG_INFO_1("AAC channel configuration not supported (%d)", decoder_config.channel_configuration);
+                        return BLT_FAILURE;
+                    }
                 }
             }
 

@@ -150,7 +150,7 @@ BLTP_ParseCommandLine(char** args)
         } else {
             return args;
         }
-        args++;
+        ++args;
     }
 
     return args;

@@ -282,6 +282,9 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         return ATX_SUCCESS;
     }
     
+    ATX_LOG_FINER_3("move by %ld, back_store=%ld, forward_store=%ld",
+                    (long)move, (long)self->back_store, (long)ATX_RingBuffer_GetAvailable(self->buffer));
+                  
     /* see if we can seek entirely within our buffer */
     if ((move < 0 && -move <= (ATX_Int64)self->back_store) ||
         (move > 0 && move < (ATX_Int64)ATX_RingBuffer_GetAvailable(self->buffer))) {
@@ -300,7 +303,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     if (move > 0 && (unsigned int)move <= self->seek_as_read_threshold) {
         /* simulate a seek by reading data up to the position */
         char buffer[256];
-        ATX_LOG_FINE_1("BLT_NetworkStream::Seek - performing seek of %d as a read", move);
+        ATX_LOG_FINE_1("performing seek of %d as a read", move);
         while (move) {
             unsigned int chunk = ((unsigned int)move) > sizeof(buffer)?sizeof(buffer):(unsigned int)move;
             ATX_Size     bytes_read;
@@ -311,6 +314,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         }
     } else {
         /* perform a real seek in the source */
+        ATX_LOG_FINE_2("performing seek of %ld as input seek(%ld)", move, (long)position);
         result = ATX_InputStream_Seek(self->source, position);
         if (ATX_FAILED(result)) return result;
         ATX_RingBuffer_Reset(self->buffer);

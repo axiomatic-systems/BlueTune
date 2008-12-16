@@ -3041,9 +3041,9 @@
 			productReference = CAF2EE270E60C38D00948C04 /* AsyncPlayerC */;
 			productType = "com.apple.product-type.tool";
 		};
-		D2AAC045055464E500DB518D /* BlueTune */ = {
+		D2AAC045055464E500DB518D /* ENA */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "ENA" */;
 			buildPhases = (
 				D2AAC043055464E500DB518D /* Headers */,
 				D2AAC044055464E500DB518D /* Sources */,
@@ -3060,7 +3060,7 @@
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
 				CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */,
 			);
-			name = BlueTune;
+			name = ENA;
 			productName = BlueTune;
 			productReference = D2AAC046055464E500DB518D /* libBlueTune.a */;
 			productType = "com.apple.product-type.library.static";
@@ -3099,7 +3099,7 @@
 				CA07A3240D40228100DC3E33 /* Applications */,
 				CA5827B80E68C7B1006CC501 /* DynamicPlugins */,
 				CA07A32D0D40229E00DC3E33 /* Tests */,
-				D2AAC045055464E500DB518D /* BlueTune */,
+				D2AAC045055464E500DB518D /* ENA */,
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
 				CA6B38710C965CE9000D7A0A /* HelixAAC */,
@@ -3788,7 +3788,7 @@
 		};
 		CA0C9AFA0D15D28500E23496 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA0C9AF90D15D28500E23496 /* PBXContainerItemProxy */;
 		};
 		CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */ = {
@@ -3798,12 +3798,12 @@
 		};
 		CA1ACEFF0D30C60200C350CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */;
 		};
 		CA1EC1000ED299B50033F894 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */;
 		};
 		CA1EC1D50ED29E920033F894 /* PBXTargetDependency */ = {
@@ -3858,17 +3858,17 @@
 		};
 		CA550BA10D1F373500B22D72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA550BA00D1F373500B22D72 /* PBXContainerItemProxy */;
 		};
 		CA550CFE0D20A00400B22D72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */;
 		};
 		CA5827170E68B3C2006CC501 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA5827160E68B3C2006CC501 /* PBXContainerItemProxy */;
 		};
 		CA5827B70E68C78C006CC501 /* PBXTargetDependency */ = {
@@ -3888,7 +3888,7 @@
 		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CA9ED8460EAFAB6C003CE43C /* PBXContainerItemProxy */;
 		};
 		CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */ = {
@@ -3898,7 +3898,7 @@
 		};
 		CAF2EE2C0E60C39900948C04 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
+			target = D2AAC045055464E500DB518D /* ENA */;
 			targetProxy = CAF2EE2B0E60C39900948C04 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -4594,7 +4594,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */ = {
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "ENA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB91EC08733DB70010E9CD /* Debug */,

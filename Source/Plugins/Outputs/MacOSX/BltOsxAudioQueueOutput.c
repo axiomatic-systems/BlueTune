@@ -102,6 +102,7 @@ OsxAudioQueueOutput_Callback(void*               _self,
                              AudioQueueBufferRef buffer)
 {
     OsxAudioQueueOutput* self = (OsxAudioQueueOutput*)_self;
+    BLT_COMPILER_UNUSED(queue);
     
     /* mark the buffer as free */
     pthread_mutex_lock(&self->lock);
@@ -341,8 +342,8 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
 
                 /* automatically start the queue if it is not already running */
                 if (!self->audio_queue_started) {
-                    ATX_LOG_FINE("auto-starting the queue");
                     OSStatus status = AudioQueueStart(self->audio_queue, NULL);
+                    ATX_LOG_FINE("auto-starting the queue");
                     if (status != noErr) {
                         ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
                         return BLT_ERROR_INTERNAL;
@@ -514,9 +515,10 @@ OsxAudioQueueOutput_GetStatus(BLT_OutputNode*       _self,
     BLT_COMPILER_UNUSED(self);
     
     /* default value */
-    status->delay.seconds     = 0;
-    status->delay.nanoseconds = 0;
-
+    status->media_time.seconds     = 0;
+    status->media_time.nanoseconds = 0;
+    status->flags = 0;
+    
     return BLT_SUCCESS;
 }
 

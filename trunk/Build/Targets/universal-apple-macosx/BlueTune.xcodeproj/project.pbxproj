@@ -3057,9 +3057,9 @@
 			productReference = CAF2EE270E60C38D00948C04 /* AsyncPlayerC */;
 			productType = "com.apple.product-type.tool";
 		};
-		D2AAC045055464E500DB518D /* ENA */ = {
+		D2AAC045055464E500DB518D /* BlueTune */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "ENA" */;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */;
 			buildPhases = (
 				D2AAC043055464E500DB518D /* Headers */,
 				D2AAC044055464E500DB518D /* Sources */,
@@ -3076,7 +3076,7 @@
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
 				CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */,
 			);
-			name = ENA;
+			name = BlueTune;
 			productName = BlueTune;
 			productReference = D2AAC046055464E500DB518D /* libBlueTune.a */;
 			productType = "com.apple.product-type.library.static";
@@ -3115,7 +3115,7 @@
 				CA07A3240D40228100DC3E33 /* Applications */,
 				CA5827B80E68C7B1006CC501 /* DynamicPlugins */,
 				CA07A32D0D40229E00DC3E33 /* Tests */,
-				D2AAC045055464E500DB518D /* ENA */,
+				D2AAC045055464E500DB518D /* BlueTune */,
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
 				CA6B38710C965CE9000D7A0A /* HelixAAC */,
@@ -3818,7 +3818,7 @@
 		};
 		CA0C9AFA0D15D28500E23496 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA0C9AF90D15D28500E23496 /* PBXContainerItemProxy */;
 		};
 		CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */ = {
@@ -3828,12 +3828,12 @@
 		};
 		CA1ACEFF0D30C60200C350CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */;
 		};
 		CA1EC1000ED299B50033F894 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */;
 		};
 		CA1EC1D50ED29E920033F894 /* PBXTargetDependency */ = {
@@ -3888,17 +3888,17 @@
 		};
 		CA550BA10D1F373500B22D72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA550BA00D1F373500B22D72 /* PBXContainerItemProxy */;
 		};
 		CA550CFE0D20A00400B22D72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA550CFD0D20A00400B22D72 /* PBXContainerItemProxy */;
 		};
 		CA5827170E68B3C2006CC501 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA5827160E68B3C2006CC501 /* PBXContainerItemProxy */;
 		};
 		CA5827B70E68C78C006CC501 /* PBXTargetDependency */ = {
@@ -3918,7 +3918,7 @@
 		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA9ED8460EAFAB6C003CE43C /* PBXContainerItemProxy */;
 		};
 		CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */ = {
@@ -3928,7 +3928,7 @@
 		};
 		CAF2EE2C0E60C39900948C04 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* ENA */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CAF2EE2B0E60C39900948C04 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -3990,7 +3990,6 @@
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 				ZERO_LINK = YES;
@@ -4043,7 +4042,6 @@
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Debug\"";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
 			};
@@ -4054,6 +4052,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
+				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -4067,6 +4066,8 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MELO_HOME = "$(SRCROOT)/../../../../Melo";
+				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
@@ -4080,6 +4081,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
+				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -4093,6 +4095,8 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MELO_HOME = "$(SRCROOT)/../../../../Melo";
+				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.0/**";
@@ -4624,7 +4628,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "ENA" */ = {
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "BlueTune" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB91EC08733DB70010E9CD /* Debug */,

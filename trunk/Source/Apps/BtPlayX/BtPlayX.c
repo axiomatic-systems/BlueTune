@@ -578,6 +578,11 @@ main(int argc, char** argv)
 
     /* process each input in turn */
     while ((input_name = *argv++)) {
+        if (ATX_StringsEqualN(input_name, "--input-type=", 13)) {
+            input_type = input_name+13;
+            continue;
+        }
+
         /* set the input name */
         result = BLT_DecoderX_SetInput(decoder, input_name, input_type);
         if (BLT_FAILED(result)) {

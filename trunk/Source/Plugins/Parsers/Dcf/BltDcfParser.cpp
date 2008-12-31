@@ -264,7 +264,7 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
         NPT_String* plaintext_length = NULL;
         if (NPT_SUCCEEDED(encryption_params.Get("plaintext-length", plaintext_length))) {
             NPT_UInt64 value = 0;
-            if (NPT_SUCCEEDED(plaintext_length->ToInteger(value, true))) {
+            if (NPT_SUCCEEDED(plaintext_length->ToInteger64(value, true))) {
                 self->output.size = value;
             }
         }

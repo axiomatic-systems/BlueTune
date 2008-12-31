@@ -1568,8 +1568,10 @@ Dx9VideoOutput_ResetDevice(Dx9VideoOutput* self,
     /* release current resources */
     Dx9VideoOutput_DestroyPictures(self);
     Dx9VideoOutput_DestroyTexture(self);
-    IDirect3DVertexBuffer9_Release(self->d3d_vertex_buffer);
-    self->d3d_vertex_buffer = NULL;
+    if (self->d3d_vertex_buffer) {
+        IDirect3DVertexBuffer9_Release(self->d3d_vertex_buffer);
+        self->d3d_vertex_buffer = NULL;
+    }
 
     /* get the Direct3D parameters to update the device */
     result = Dx9VideoOutput_GetDirect3DParams(self, &d3d_params, pic_width, pic_height);

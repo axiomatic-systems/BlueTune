@@ -1005,6 +1005,20 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
 		};
+		CAF478A40F07640C004073ED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CABB61F30F02BABC00B53D31;
+			remoteInfo = TracksTest;
+		};
+		CAF479DB0F0989C3004073ED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAF4792B0F0951B8004073ED;
+			remoteInfo = BenchmarksTest;
+		};
 		CAFB21BC0EC2960C009C3459 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -1657,6 +1671,8 @@
 				CA3650810D8364EB004A4DCB /* avcinfo */,
 				CA9ED1E90EACFA6A003CE43C /* avctrackwritertest */,
 				CA9A17AF0ED50F6D00C60FDF /* passthroughwritertest */,
+				CAF478A50F07640C004073ED /* TracksTest */,
+				CAF479DC0F0989C3004073ED /* benchmarkstest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3493,6 +3509,20 @@
 			fileType = archive.ar;
 			path = libBento4Atomix.a;
 			remoteRef = CAEA9CEC0E144683008C396D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAF478A50F07640C004073ED /* TracksTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = TracksTest;
+			remoteRef = CAF478A40F07640C004073ED /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAF479DC0F0989C3004073ED /* benchmarkstest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = benchmarkstest;
+			remoteRef = CAF479DB0F0989C3004073ED /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CAFB21BD0EC2960C009C3459 /* TlsTest1 */ = {

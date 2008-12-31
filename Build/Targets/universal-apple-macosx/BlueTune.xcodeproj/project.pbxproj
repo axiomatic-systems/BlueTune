@@ -397,8 +397,6 @@
 		CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
-		CAB7B2AB0EDCA8AB00195273 /* BltSynchronization.c in Sources */ = {isa = PBXBuildFile; fileRef = CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */; };
-		CAB7B2AC0EDCA8AB00195273 /* BltSynchronization.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */; };
 		CABC79000E562CE10000C55F /* BltOsxAudioQueueOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */; };
 		CABC79010E562CE20000C55F /* BltOsxAudioQueueOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */; };
 		CAC7D56C0E45375900037D81 /* BltOsxAudioUnitsOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */; };
@@ -2839,7 +2837,6 @@
 				CA5827E00E68CF15006CC501 /* BltDynamicPlugins.h in Headers */,
 				CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */,
 				CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */,
-				CAB7B2AC0EDCA8AB00195273 /* BltSynchronization.h in Headers */,
 				CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3778,7 +3775,6 @@
 				CA5827E50E68CFD4006CC501 /* BltUnixDynamicPlugins.c in Sources */,
 				CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */,
 				CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */,
-				CAB7B2AB0EDCA8AB00195273 /* BltSynchronization.c in Sources */,
 				CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

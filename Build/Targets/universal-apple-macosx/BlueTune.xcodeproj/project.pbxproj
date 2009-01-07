@@ -597,6 +597,13 @@
 			remoteGlobalIDString = CA1A5EA90EC0152A00A9040C;
 			remoteInfo = axTLS;
 		};
+		CA30B7740F0DCEB80085B46E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA30B76B0F0DCE990085B46E /* LoggingTest2 */;
+			remoteInfo = LoggingTest2;
+		};
 		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -2179,6 +2186,7 @@
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
+				CA30B7750F0DCEB80085B46E /* LoggingTest2 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3199,6 +3207,14 @@
 			path = libaxTLS.a;
 			remoteRef = CA2F53A60EC0F48900AEBC12 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA30B7750F0DCEB80085B46E /* LoggingTest2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			name = LoggingTest2;
+			path = build/Debug/LoggingTest2;
+			remoteRef = CA30B7740F0DCEB80085B46E /* PBXContainerItemProxy */;
+			sourceTree = "<group>";
 		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
 			isa = PBXReferenceProxy;

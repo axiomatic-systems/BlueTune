@@ -496,7 +496,7 @@ main(int argc, char** argv)
         }
         for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
             ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);
-            BLT_Decoder_LoadPlugins(directory, "plugin");
+            BLT_Decoder_LoadPlugins(decoder, ATX_String_GetChars(directory), "plugin");
         }
     }
     

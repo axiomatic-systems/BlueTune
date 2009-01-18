@@ -495,8 +495,8 @@ main(int argc, char** argv)
             BLT_Decoder_LoadPlugin(decoder, ATX_String_GetChars(plugin), BLT_PLUGIN_LOADER_FLAGS_SEARCH_ALL);
         }
         for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
-            /*ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);*/
-            /* NOT IMPLEMENTED YET */
+            ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);
+            BLT_Decoder_LoadPlugins(directory, "plugin");
         }
     }
     

@@ -79,6 +79,17 @@ def FlattenLinkDeps(modules):
         deps = [dep for dep in deps if dep not in module_deps]+module_deps
     return deps
 
+### Construct a list of module names with all the modules
+### passed as input and their dependencies (and so on recursively)
+### The dependency order is preserved
+def FlattenObjectDeps(modules):
+    deps = []
+    for module in modules:
+        module_obj = Modules[module]
+        module_deps = [module]+module_obj.flat_object_deps
+        deps = [dep for dep in deps if dep not in module_deps]+module_deps
+    return deps
+
 ### Return the list of include directories necessary when depending on
 ### the modules passed as the input parameter.
 def GetIncludeDirs(modules):
@@ -98,20 +109,16 @@ def GetLibDirs(modules):
     return MergeListsUnique([Modules[mod].lib_dirs for mod in modules+deps])
 
 ### Return the list of objects for a list of modules and their dependents 
-### (and so on recursively)
+### (and so on recursively), only if the module is of type 'Object'
 def GetObjects(modules):
-    deps = MergeListsUnique([Modules[mod].flat_link_deps for mod in modules])
+    deps = MergeListsUnique([Modules[mod].flat_object_deps for mod in modules])
     return MergeListsUnique([Modules[mod].objects for mod in modules+deps])
 
 ### Return the list of products for a list of modules and their dependents 
 ### (and so on recursively)
 def GetProducts(modules):
-    deps = FlattenLinkDeps(modules)
-    products = []
-    for dep in deps:
-        product = Modules[dep].product
-        if product: products.extend(product)
-    return products
+    deps = MergeListsUnique([Modules[mod].flat_link_deps for mod in modules])
+    return MergeListsUnique([Modules[mod].product for mod in modules+deps])
 
 ### Return the scons nodes corresponding to module names
 def GetModuleSconsNodes(modules):
@@ -124,7 +131,8 @@ def GetModuleSconsNodes(modules):
 ###########################################################
 Modules = {}
 class Module:
-    def __init__(self, name, 
+    def __init__(self, name,
+                 module_type                    = None,
                  chained_link_only_deps         = [], 
                  chained_link_and_include_deps  = [],
                  chained_include_only_deps      = [],
@@ -132,6 +140,7 @@ class Module:
                  libs                           = [],
                  lib_dirs                       = []):
         self.name                          = name
+        self.module_type                   = module_type
         self.chained_link_only_deps        = Split(chained_link_only_deps)
         self.chained_link_and_include_deps = Split(chained_link_and_include_deps)
         self.chained_include_only_deps     = Split(chained_include_only_deps)
@@ -143,10 +152,14 @@ class Module:
 
         self.flat_include_deps = FlattenIncludeDeps(self.GetIncludeDeps())
         self.flat_link_deps    = FlattenLinkDeps(self.GetLinkDeps())
+        self.flat_object_deps  = FlattenObjectDeps(self.GetObjectDeps())
             
     def GetLinkDeps(self):
         return self.chained_link_and_include_deps+self.chained_link_only_deps
     
+    def GetObjectDeps(self):
+        return [dep for dep in self.chained_link_and_include_deps+self.chained_link_only_deps if Modules[dep].module_type == 'Objects']
+
     def GetIncludeDeps(self):
         return self.chained_link_and_include_deps+self.chained_include_only_deps
     
@@ -234,7 +247,8 @@ class CompiledModule(Module):
         
         # create the superclass and store this new object in the module dictionary
         Module.__init__(self, 
-                        name, 
+                        name,
+                        module_type,
                         chained_link_and_include_deps = chained_link_and_include_deps, 
                         chained_link_only_deps        = chained_link_only_deps,
                         chained_include_only_deps     = chained_include_only_deps,
@@ -290,15 +304,16 @@ class CompiledModule(Module):
             generator = env.StaticObject
         else:
             generator = env.SharedObject
-        self.objects = []
+        objects = []
         for x in sources:
             if x in object_name_map:
                 object_name = object_name_map[x]
-            	self.objects.append(generator(target=object_name, source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
-	    else:
-            	self.objects.append(generator(source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
+                objects.append(generator(target=object_name, source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
+            else:
+                objects.append(generator(source=x, CPPPATH=cpp_path, CPPDEFINES=cpp_defines))
         if module_type == 'Objects':
-            self.nodes = []
+            self.nodes   = []
+            self.objects = objects
         elif module_type == 'Executable':
             link_deps = self.flat_link_deps
             libs = GetProducts(link_deps)
@@ -307,11 +322,12 @@ class CompiledModule(Module):
             libs += self.libs
             lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
             lib_path += GetLibDirs(self.GetLinkDeps())
-            self.nodes = env.Program(target=name.lower(), source=self.objects, LIBS=libs, LIBPATH=lib_path)
+            self.nodes = env.Program(target=name.lower(), source=objects, LIBS=libs, LIBPATH=lib_path)
+            self.objects = []
         else:
             raise Exception('Unknown Module Type')
             
-	self.product = self.nodes   
+        self.product = self.nodes   
         env.Alias(name, self.nodes)
 
 ############################################################################
@@ -379,7 +395,10 @@ class SharedLibraryModule(Module):
                  link_deps             = [],
                  exported_include_dirs = [],
                  environment           = None) :
-        Module.__init__(self, name, include_dirs=exported_include_dirs) # chained_include_only_deps=exported_include_dirs
+        Module.__init__(self,
+                        name,
+                        module_type  = 'SharedLibrary',
+                        include_dirs = exported_include_dirs)
         
          # setup the environment        
         env = environment or DefaultEnv
@@ -391,9 +410,9 @@ class SharedLibraryModule(Module):
         lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
         lib_path += GetLibDirs(all_deps)
         
-	if library_name:
+        if library_name:
             self.nodes = env.SharedLibrary(target=library_name, SHLIBPREFIX='', source=objects, LIBS=libs, LIBPATH=lib_path)
-	else:
+        else:
             self.nodes = env.SharedLibrary(target=name, source=objects, LIBS=libs, LIBPATH=lib_path)
         
         ### we must use just the basename of the shared library here so that the dynamic linker won't
@@ -416,15 +435,16 @@ class SharedLibraryModule(Module):
 class StaticLibraryModule(Module):
     def __init__(self,
                  name,
+                 module_type                   = 'StaticLibrary',
                  library_name                  = None,
                  chained_link_and_include_deps = [], 
                  chained_link_only_deps        = [],
                  chained_include_only_deps     = [],
                  environment                   = None) :
         Module.__init__(self, name,
-                        chained_link_and_include_deps = chained_link_and_include_deps,
                         chained_link_only_deps        = chained_link_only_deps,
-                        chained_include_only_deps     = chained_include_only_deps)
+                        chained_include_only_deps     = chained_include_only_deps,
+                        chained_link_and_include_deps = chained_link_and_include_deps)
    
         # setup the environment        
         env = environment or DefaultEnv

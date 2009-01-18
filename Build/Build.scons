@@ -14,9 +14,9 @@ env.Append(CPPDEFINES = ['ATX_CONFIG_ENABLE_LOGGING', 'NPT_CONFIG_ENABLE_LOGGING
 
 ### build config specifics
 if env['build_config'] == 'Debug':
-	env.Append(CPPDEFINES = ['BLT_DEBUG'])
+    env.Append(CPPDEFINES = ['BLT_DEBUG'])
 else:
-	env.Append(CPPDEFINES = ['NDEBUG'])
+    env.Append(CPPDEFINES = ['NDEBUG'])
 
 ### default values for some settings
 env['NPT_EXTRA_LIBS']  = []
@@ -124,7 +124,7 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Hel
         BLT_HELIX_AAC_ASM_DIRS = env['BLT_PLUGINS_HELIX_AAC_ASM_DIR']
     else:
         BLT_HELIX_AAC_ASM_DIRS = []
-    CompiledModule(name		            = 'HelixAAC',
+    CompiledModule(name                 = 'HelixAAC',
                    source_root           = 'ThirdParty/HelixAAC/Source',
                    build_source_dirs     = ['.', 'pub', 'real']+BLT_HELIX_AAC_ASM_DIRS,
                    build_source_patterns = ['*.c', '*.s'],
@@ -164,14 +164,14 @@ CompiledModule(name                          = 'Fluo',
 
 ############################ Tremor
 if 'VorbisDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
-    CompiledModule(name	       = 'Tremor',
+    CompiledModule(name        = 'Tremor',
                    source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
                    environment = env['BLT_RELAXED_ENV'])
 
 ############################ FLAC
 if 'FlacDecoder' in env['BLT_PLUGINS']:
     FLAC_SOURCE_ROOT='ThirdParty/FLAC/Distributions/flac-1.2.0'
-    CompiledModule(name	              = 'FLAC',
+    CompiledModule(name               = 'FLAC',
                    source_root        = FLAC_SOURCE_ROOT,
                    build_source_dirs  = ['src/libFLAC'],
                    build_include_dirs = [FLAC_SOURCE_ROOT+'/include', FLAC_SOURCE_ROOT+'/src/libFLAC/include'],
@@ -255,33 +255,35 @@ CompiledModule(name                          = 'BltPluginsSupport',
        
 ############################# Plugins
 PluginsSettings = {
-    'FileInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',         'src_dir':'Inputs/File'              },
-    'CddaInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',         'src_dir':'Inputs/CDDA'              },
-    'AlsaInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',         'src_dir':'Inputs/Alsa'              },
-    'NetworkInput'     : {'defines':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',      'src_dir':'Inputs/Network'           },
-    'FileOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',        'src_dir':'Outputs/File'             },
-    'OssOutput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',         'src_dir':'Outputs/OSS'              },
-    'AlsaOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',        'src_dir':'Outputs/Alsa'             },
-    'MacOSXOutput'     : {'defines':'BLT_CONFIG_MODULES_ENABLE_MACOSX_OUTPUT',      'src_dir':'Outputs/MacOSX'           },
-    'DebugOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',       'src_dir':'Outputs/Debug'            },
-    'NullOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',        'src_dir':'Outputs/Null'             },
-    'MpegAudioDecoder' : {'defines':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER', 'src_dir':'Decoders/MpegAudio'       },
-    'FlacDecoder'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',       'src_dir':'Decoders/FLAC'            },
-    'AlacDecoder'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',       'src_dir':'Decoders/ALAC'            },
-    'VorbisDecoder'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',     'src_dir':'Decoders/Vorbis'          },
-    'AacDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
-    'WmaDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                             },
-    'WaveParser'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',        'src_dir':'Parsers/Wave'             },
-    'AiffParser'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',        'src_dir':'Parsers/Aiff'             },
-    'TagParser'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',         'src_dir':'Parsers/Tags'             },
-    'Mp4Parser'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_MP4_PARSER',         'src_dir':'Parsers/Mp4'              },
-    'AdtsParser'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER',        'src_dir':'Parsers/Adts'             },
-    'WaveFormatter'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER',     'src_dir':'Formatters/Wave'          },
-    'GainControlFilter': {'defines':'BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER','src_dir':'Filters/GainControl'      },
-    'PcmAdapter'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER',        'src_dir':'Adapters/PCM'             },
-    'SilenceRemover'   : {'defines':'BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER',    'src_dir':'General/SilenceRemover'   },
-    'StreamPacketizer' : {'defines':'BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER',  'src_dir':'General/StreamPacketizer' },
-    'PacketStreamer'   : {'defines':'BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER',    'src_dir':'General/PacketStreamer'   }
+    'FileInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',             'src_dir':'Inputs/File'              },
+    'CddaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',             'src_dir':'Inputs/CDDA'              },
+    'AlsaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',             'src_dir':'Inputs/Alsa'              },
+    'NetworkInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',          'src_dir':'Inputs/Network'           },
+    'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
+    'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },
+    'AlsaOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',            'src_dir':'Outputs/Alsa'             },
+    'OsxVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_VIDEO_OUTPUT',       'src_dir':'Outputs/OsxVideo'         },
+    'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
+    'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },
+    'DebugOutput'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',           'src_dir':'Outputs/Debug'            },
+    'NullOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',            'src_dir':'Outputs/Null'             },
+    'MpegAudioDecoder'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER',     'src_dir':'Decoders/MpegAudio'       },
+    'FlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',           'src_dir':'Decoders/FLAC'            },
+    'AlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',           'src_dir':'Decoders/ALAC'            },
+    'VorbisDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',         'src_dir':'Decoders/Vorbis'          },
+    'AacDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',            'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
+    'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                                 },
+    'WaveParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',            'src_dir':'Parsers/Wave'             },
+    'AiffParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',            'src_dir':'Parsers/Aiff'             },
+    'TagParser'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',             'src_dir':'Parsers/Tags'             },
+    'Mp4Parser'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_MP4_PARSER',             'src_dir':'Parsers/Mp4'              },
+    'AdtsParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER',            'src_dir':'Parsers/Adts'             },
+    'WaveFormatter'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER',         'src_dir':'Formatters/Wave'          },
+    'GainControlFilter'   : {'defines':'BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER',    'src_dir':'Filters/GainControl'      },
+    'PcmAdapter'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER',            'src_dir':'Adapters/PCM'             },
+    'SilenceRemover'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER',        'src_dir':'General/SilenceRemover'   },
+    'StreamPacketizer'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER',      'src_dir':'General/StreamPacketizer' },
+    'PacketStreamer'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER',        'src_dir':'General/PacketStreamer'   }
 }
 PluginsExtras = {
     'Mp4Parser':        {'dep_mods':['Bento4']},   
@@ -334,8 +336,8 @@ for plugin in env['BLT_PLUGINS']:
     
     CompiledModule(name               = 'Blt'+plugin+'Loader',
                    build_source_dirs  = [],
-                   build_source_files = {'/Source/Plugins/DynamicLoading':'BltDynamicPluginTemplate.c'},
-                   object_name_map    = {'Source/Plugins/DynamicLoading/BltDynamicPluginTemplate.c':'Source/Plugins/DynamicLoading/Blt'+plugin+'PluginLoader'},
+                   build_source_files = {'/Source/Plugins/DynamicLoading':'BltDynamicPluginTemplate.cpp'},
+                   object_name_map    = {'Source/Plugins/DynamicLoading/BltDynamicPluginTemplate.cpp':'Source/Plugins/DynamicLoading/Blt'+plugin+'PluginLoader'},
                    build_include_dirs       = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                    chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
                    extra_cpp_defines  = [('BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION','BLT_'+plugin+'Module_GetModuleObject')])
@@ -350,13 +352,13 @@ for plugin in env['BLT_PLUGINS']:
                        extra_lib_dirs           = extra_lib_dirs,
                        extra_cpp_defines        = extra_defines,
                        environment              = extra_env)
-	StaticLibraryModule(name                  = 'Blt'+plugin+'PluginStatic',
-                    chained_link_and_include_deps = ['Blt'+plugin])
-	SharedLibraryModule(name          = 'Blt'+plugin+'Plugin',
+        StaticLibraryModule(name                          = 'Blt'+plugin+'PluginStatic',
+                            chained_link_and_include_deps = ['Blt'+plugin])
+        SharedLibraryModule(name          = 'Blt'+plugin+'Plugin',
                             library_name  = 'Blt'+plugin+'.plugin',
                             anchor_module = 'Blt'+plugin+'Loader',
-			    link_deps     = ['Blt'+plugin+'PluginStatic'])
-    	plugins_dynamic_modules.append('Blt'+plugin+'Plugin')
+                            link_deps     = ['Blt'+plugin+'PluginStatic'])
+        plugins_dynamic_modules.append('Blt'+plugin+'Plugin')
                             
     else:
         ### binary plugins
@@ -378,19 +380,14 @@ CompiledModule(name                          = 'BltPlugins',
                extra_lib_dirs                = plugins_extra_lib_dirs,
                extra_cpp_defines             = plugins_cpp_defines)
 
-############################# Sync API
-StaticLibraryModule(name                          = 'BlueTune-Sync',
-                    chained_link_and_include_deps = ['BltCore', 'BltDecoder', 'BltPlugins'])
-
-############################# SDK
+############################# BlueTune SDK
 StaticLibraryModule(name                          = 'BlueTune',
                     chained_link_and_include_deps = ['BltCore', 'BltDecoder', 'BltPlayer', 'BltPlugins'])
 
 ############################# BtPlay
 ExecutableModule(name                  = 'BtPlay',
                  source_root           = 'Source/Apps/BtPlay',
-                 link_and_include_deps = ['BlueTune-Sync'],
-                 include_only_deps     = ['BlueTune'])
+                 link_and_include_deps = ['BlueTune'])
 
 ############################# BtController
 ExecutableModule(name                  = 'BtController',

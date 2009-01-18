@@ -244,8 +244,8 @@ if 'WmaDecoder' in PluginsMap:
                 environment           = env['BLT_RELAXED_ENV'])
         #StaticLibraryModule(name                          = 'BltWmaDecoder',
         #                    chained_link_and_include_deps = ['BltWmaDecoderRuntime'])
-	BLT_WMA_DECODER_PLUGIN_DIR = 'Decoders/WMA'
-	BLT_WMA_DECODER_PLUGIN_EXTRAS = {'inc_dirs': [WMA_SOURCE_ROOT+'/'+dir for dir in ['common/include', 'audio/common/include', 'audio/wmaudio/v10/asfparse_s']],
+        BLT_WMA_DECODER_PLUGIN_DIR = 'Decoders/WMA'
+        BLT_WMA_DECODER_PLUGIN_EXTRAS = {'inc_dirs': [WMA_SOURCE_ROOT+'/'+dir for dir in ['common/include', 'audio/common/include', 'audio/wmaudio/v10/asfparse_s']],
                                          'dep_mods': ['BltWmaDecoderRuntime']}
     elif 'BLT_WMA_PLUGIN_HOME' in os.environ:
         BLT_WMA_DECODER_PLUGIN_EXTRAS = {'external':True,
@@ -352,7 +352,7 @@ for plugin in PluginsMap:
                    build_include_dirs       = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                    chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
                    extra_cpp_defines  = [('BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION','BLT_'+plugin+'Module_GetModuleObject')])
-    if 'src_dir' in PluginsSettings[plugin] and PluginsSettings[plugin]:
+    if 'src_dir' in PluginsSettings[plugin] and PluginsSettings[plugin]['src_dir']:
         ### source code plugins
         CompiledModule(name                     = 'Blt'+plugin,
                        source_root              = 'Source/Plugins',

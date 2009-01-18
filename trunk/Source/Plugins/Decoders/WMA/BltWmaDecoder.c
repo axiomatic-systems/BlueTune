@@ -48,7 +48,7 @@ typedef struct {
     /* members */
     ATX_InputStream* stream;
     ATX_Position     position;
-    BLT_Size         size;
+    BLT_LargeSize    size;
     BLT_MediaTypeId  media_type_id;
 } WmaDecoderInput;
 

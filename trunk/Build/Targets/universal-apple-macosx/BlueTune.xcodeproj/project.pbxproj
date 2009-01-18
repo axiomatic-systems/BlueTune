@@ -68,6 +68,10 @@
 		CA0C9CFF0D16068B00E23496 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
 		CA0C9D000D16068E00E23496 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
+		CA1859BA0F22D0F700CF3552 /* BltOsxAudioUnitsOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1859B50F22D0E500CF3552 /* BltOsxAudioUnitsOutput.c */; };
+		CA1859BB0F22D0F900CF3552 /* BltOsxAudioUnitsOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA1859B60F22D0E500CF3552 /* BltOsxAudioUnitsOutput.h */; };
+		CA1859BC0F22D10600CF3552 /* BltOsxVideoOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = CA1859B90F22D0E500CF3552 /* BltOsxVideoOutput.m */; };
+		CA1859CB0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
 		CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */; };
 		CA1EC1010ED299BD0033F894 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
@@ -312,7 +316,6 @@
 		CA550CCA0D20985600B22D72 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA550CCB0D20985600B22D72 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA58271A0E68B3F8006CC501 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
-		CA58271C0E68B9E1006CC501 /* BltDynamicPluginTemplate.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5827060E68B32D006CC501 /* BltDynamicPluginTemplate.c */; };
 		CA5827570E68BE2D006CC501 /* BltWmaDecoderStub.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */; };
 		CA58276E0E68C14F006CC501 /* BltVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA58276D0E68C14F006CC501 /* BltVersion.h */; };
 		CA5827740E68C2EC006CC501 /* BltSvnVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5827730E68C2EC006CC501 /* BltSvnVersion.h */; };
@@ -386,7 +389,6 @@
 		CA9ED8E40EB02413003CE43C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9ED8E30EB02413003CE43C /* Cocoa.framework */; };
 		CA9ED8EA0EB02441003CE43C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9ED8E90EB02441003CE43C /* OpenGL.framework */; };
 		CA9EDA800EB0F899003CE43C /* BltDecoderX.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED81C0EAF9F18003CE43C /* BltDecoderX.c */; };
-		CA9EDA970EB0FB03003CE43C /* BltOsxVideoOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED88D0EAFC8B3003CE43C /* BltOsxVideoOutput.m */; };
 		CA9EDA980EB0FB0B003CE43C /* BltFfmpegDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED92F0EB02685003CE43C /* BltFfmpegDecoder.c */; };
 		CA9EDAAC0EB0FBFF003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA9EDAAD0EB0FC06003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
@@ -397,10 +399,6 @@
 		CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
-		CABC79000E562CE10000C55F /* BltOsxAudioQueueOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */; };
-		CABC79010E562CE20000C55F /* BltOsxAudioQueueOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */; };
-		CAC7D56C0E45375900037D81 /* BltOsxAudioUnitsOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */; };
-		CAC7D56D0E45375900037D81 /* BltOsxAudioUnitsOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5690E45375900037D81 /* BltOsxAudioUnitsOutput.h */; };
 		CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; };
 		CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */; };
 		CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */; };
@@ -601,7 +599,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA30B76B0F0DCE990085B46E /* LoggingTest2 */;
+			remoteGlobalIDString = CA30B76B0F0DCE990085B46E;
 			remoteInfo = LoggingTest2;
 		};
 		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
@@ -1047,6 +1045,13 @@
 		CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		CA0C9C150D16047100E23496 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		CA1859B20F22D0E500CF3552 /* BltOsxAudioQueueOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioQueueOutput.c; sourceTree = "<group>"; };
+		CA1859B30F22D0E500CF3552 /* BltOsxAudioQueueOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioQueueOutput.h; sourceTree = "<group>"; };
+		CA1859B50F22D0E500CF3552 /* BltOsxAudioUnitsOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioUnitsOutput.c; sourceTree = "<group>"; };
+		CA1859B60F22D0E500CF3552 /* BltOsxAudioUnitsOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioUnitsOutput.h; sourceTree = "<group>"; };
+		CA1859B80F22D0E500CF3552 /* BltOsxVideoOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxVideoOutput.h; sourceTree = "<group>"; };
+		CA1859B90F22D0E500CF3552 /* BltOsxVideoOutput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BltOsxVideoOutput.m; sourceTree = "<group>"; };
+		CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPluginTemplate.cpp; sourceTree = "<group>"; };
 		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BtCocoaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1281,7 +1286,6 @@
 		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
 		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA5827060E68B32D006CC501 /* BltDynamicPluginTemplate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltDynamicPluginTemplate.c; sourceTree = "<group>"; };
 		CA5827130E68B39D006CC501 /* libBltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoderStub.c; sourceTree = "<group>"; };
 		CA58276D0E68C14F006CC501 /* BltVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVersion.h; sourceTree = "<group>"; };
@@ -1335,8 +1339,6 @@
 		CA9ED8340EAFAAFC003CE43C /* btplayx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayx; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA9ED8420EAFAB56003CE43C /* BtPlayX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BtPlayX.c; sourceTree = "<group>"; };
 		CA9ED8430EAFAB56003CE43C /* BtPlayXForceCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayXForceCpp.cpp; sourceTree = "<group>"; };
-		CA9ED88C0EAFC8B3003CE43C /* BltOsxVideoOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxVideoOutput.h; sourceTree = "<group>"; };
-		CA9ED88D0EAFC8B3003CE43C /* BltOsxVideoOutput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BltOsxVideoOutput.m; sourceTree = "<group>"; };
 		CA9ED8CD0EAFCB26003CE43C /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		CA9ED8E30EB02413003CE43C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		CA9ED8E90EB02441003CE43C /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -1345,12 +1347,7 @@
 		CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVolumeControl.h; sourceTree = "<group>"; };
 		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
-		CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltSynchronization.c; sourceTree = "<group>"; };
 		CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSynchronization.h; sourceTree = "<group>"; };
-		CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioQueueOutput.c; sourceTree = "<group>"; };
-		CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioQueueOutput.h; sourceTree = "<group>"; };
-		CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioUnitsOutput.c; sourceTree = "<group>"; };
-		CAC7D5690E45375900037D81 /* BltOsxAudioUnitsOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioUnitsOutput.h; sourceTree = "<group>"; };
 		CAC7D5770E453A1100037D81 /* BltKeyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltKeyManager.h; sourceTree = "<group>"; };
 		CAE415090E0AFD8800A530D1 /* BltDcfParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDcfParser.cpp; sourceTree = "<group>"; };
 		CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDcfParser.h; sourceTree = "<group>"; };
@@ -1612,6 +1609,33 @@
 			path = PcmDiff;
 			sourceTree = "<group>";
 		};
+		CA1859B10F22D0E500CF3552 /* OsxAudioQueue */ = {
+			isa = PBXGroup;
+			children = (
+				CA1859B20F22D0E500CF3552 /* BltOsxAudioQueueOutput.c */,
+				CA1859B30F22D0E500CF3552 /* BltOsxAudioQueueOutput.h */,
+			);
+			path = OsxAudioQueue;
+			sourceTree = "<group>";
+		};
+		CA1859B40F22D0E500CF3552 /* OsxAudioUnits */ = {
+			isa = PBXGroup;
+			children = (
+				CA1859B50F22D0E500CF3552 /* BltOsxAudioUnitsOutput.c */,
+				CA1859B60F22D0E500CF3552 /* BltOsxAudioUnitsOutput.h */,
+			);
+			path = OsxAudioUnits;
+			sourceTree = "<group>";
+		};
+		CA1859B70F22D0E500CF3552 /* OsxVideo */ = {
+			isa = PBXGroup;
+			children = (
+				CA1859B80F22D0E500CF3552 /* BltOsxVideoOutput.h */,
+				CA1859B90F22D0E500CF3552 /* BltOsxVideoOutput.m */,
+			);
+			path = OsxVideo;
+			sourceTree = "<group>";
+		};
 		CA1ACEF40D30C5D600C350CD /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -1714,7 +1738,6 @@
 			children = (
 				CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */,
 				CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */,
-				CAB7B2A90EDCA8AB00195273 /* BltSynchronization.c */,
 				CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */,
 				CA9ED2920EAD3A8D003CE43C /* BltPixels.c */,
 				CA9ED2930EAD3A8D003CE43C /* BltPixels.h */,
@@ -2068,7 +2091,9 @@
 		CA5042900C5AE52B0060E6FE /* Outputs */ = {
 			isa = PBXGroup;
 			children = (
-				CA5046A70C5BC54A0060E6FE /* MacOSX */,
+				CA1859B10F22D0E500CF3552 /* OsxAudioQueue */,
+				CA1859B40F22D0E500CF3552 /* OsxAudioUnits */,
+				CA1859B70F22D0E500CF3552 /* OsxVideo */,
 				CA5042940C5AE52B0060E6FE /* Debug */,
 				CA5042980C5AE52B0060E6FE /* File */,
 				CA50429E0C5AE52B0060E6FE /* Null */,
@@ -2167,6 +2192,7 @@
 				CAE418980E0DD91C00A530D1 /* HttpClientTest1 */,
 				CAE4189A0E0DD91C00A530D1 /* ListsTest1 */,
 				CAE4189C0E0DD91C00A530D1 /* LoggingTest1 */,
+				CA30B7750F0DCEB80085B46E /* LoggingTest2 */,
 				CAE4189E0E0DD91C00A530D1 /* MapsTest1 */,
 				CAE418A00E0DD91C00A530D1 /* MessagesTest1 */,
 				CAE418A20E0DD91C00A530D1 /* MessagesTest2 */,
@@ -2186,7 +2212,6 @@
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
-				CA30B7750F0DCEB80085B46E /* LoggingTest2 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2205,19 +2230,6 @@
 				CA0C9A8E0D15D1EC00E23496 /* NetPump */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		CA5046A70C5BC54A0060E6FE /* MacOSX */ = {
-			isa = PBXGroup;
-			children = (
-				CA9ED88C0EAFC8B3003CE43C /* BltOsxVideoOutput.h */,
-				CA9ED88D0EAFC8B3003CE43C /* BltOsxVideoOutput.m */,
-				CAC7D5660E45375900037D81 /* BltOsxAudioQueueOutput.c */,
-				CAC7D5670E45375900037D81 /* BltOsxAudioQueueOutput.h */,
-				CAC7D5680E45375900037D81 /* BltOsxAudioUnitsOutput.c */,
-				CAC7D5690E45375900037D81 /* BltOsxAudioUnitsOutput.h */,
-			);
-			path = MacOSX;
 			sourceTree = "<group>";
 		};
 		CA5049B10C5C53440060E6FE /* ThirdParty */ = {
@@ -2432,10 +2444,10 @@
 		CA5827050E68B32D006CC501 /* DynamicLoading */ = {
 			isa = PBXGroup;
 			children = (
+				CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */,
 				CA5827E30E68CFD4006CC501 /* Unix */,
 				CA5827DF0E68CF15006CC501 /* BltDynamicPlugins.h */,
 				CA5827DA0E68CED7006CC501 /* BltDynamicPlugins.cpp */,
-				CA5827060E68B32D006CC501 /* BltDynamicPluginTemplate.c */,
 			);
 			path = DynamicLoading;
 			sourceTree = "<group>";
@@ -2837,15 +2849,14 @@
 				CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */,
 				CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */,
 				CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */,
-				CAC7D56D0E45375900037D81 /* BltOsxAudioUnitsOutput.h in Headers */,
 				CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */,
-				CABC79000E562CE10000C55F /* BltOsxAudioQueueOutput.h in Headers */,
 				CA58276E0E68C14F006CC501 /* BltVersion.h in Headers */,
 				CA5827740E68C2EC006CC501 /* BltSvnVersion.h in Headers */,
 				CA5827E00E68CF15006CC501 /* BltDynamicPlugins.h in Headers */,
 				CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */,
 				CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */,
 				CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */,
+				CA1859BB0F22D0F900CF3552 /* BltOsxAudioUnitsOutput.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3211,10 +3222,9 @@
 		CA30B7750F0DCEB80085B46E /* LoggingTest2 */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
-			name = LoggingTest2;
-			path = build/Debug/LoggingTest2;
+			path = LoggingTest2;
 			remoteRef = CA30B7740F0DCEB80085B46E /* PBXContainerItemProxy */;
-			sourceTree = "<group>";
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
 			isa = PBXReferenceProxy;
@@ -3658,8 +3668,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA58271C0E68B9E1006CC501 /* BltDynamicPluginTemplate.c in Sources */,
 				CA5827570E68BE2D006CC501 /* BltWmaDecoderStub.c in Sources */,
+				CA1859CB0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3707,8 +3717,8 @@
 				CA9ED8440EAFAB56003CE43C /* BtPlayX.c in Sources */,
 				CA9ED8450EAFAB56003CE43C /* BtPlayXForceCpp.cpp in Sources */,
 				CA9EDA800EB0F899003CE43C /* BltDecoderX.c in Sources */,
-				CA9EDA970EB0FB03003CE43C /* BltOsxVideoOutput.m in Sources */,
 				CA9EDA980EB0FB0B003CE43C /* BltFfmpegDecoder.c in Sources */,
+				CA1859BC0F22D10600CF3552 /* BltOsxVideoOutput.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3785,13 +3795,12 @@
 				CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */,
 				CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */,
 				CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */,
-				CAC7D56C0E45375900037D81 /* BltOsxAudioUnitsOutput.c in Sources */,
-				CABC79010E562CE20000C55F /* BltOsxAudioQueueOutput.c in Sources */,
 				CA5827DB0E68CED7006CC501 /* BltDynamicPlugins.cpp in Sources */,
 				CA5827E50E68CFD4006CC501 /* BltUnixDynamicPlugins.c in Sources */,
 				CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */,
 				CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */,
 				CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */,
+				CA1859BA0F22D0F700CF3552 /* BltOsxAudioUnitsOutput.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3993,7 +4002,7 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -4045,7 +4054,7 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;

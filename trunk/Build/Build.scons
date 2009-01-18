@@ -195,6 +195,7 @@ CompiledModule(name                          = 'BltPlayer',
 
 ############################ WmaDecoder Plugin
 BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
+BLT_WMA_DECODER_PLUGIN_DIR = None
 if 'WmaDecoder' in env['BLT_PLUGINS']:
     if 'BLT_WMSDK_HOME' in os.environ:
         if env.has_key('BLT_WMA_DECODER_MODE') and env['BLT_WMA_DECODER_MODE'] == 'Integer':
@@ -216,7 +217,6 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
         MapSourceDir(WMA_SOURCE_ROOT, os.environ['BLT_WMSDK_HOME']+'/WMPK/WMA10Dec')
         CompiledModule(name        = 'BltWmaDecoderRuntime',
                 source_root        = WMA_SOURCE_ROOT,
-                build_source_files = {'/Source/Plugins/Decoders/WMA':'*.c'},
                 build_source_dirs  = ['audio/wmaudio/v10/asfparse_s',
                                       'audio/wmaudio/v10/common',
                                       'audio/wmaudio/v10/decoder',
@@ -234,8 +234,11 @@ if 'WmaDecoder' in env['BLT_PLUGINS']:
                 build_include_deps    = ['Atomix', 'BltCore'],
                 extra_cpp_defines     = wma_extra_cpp_defines,
                 environment           = env['BLT_RELAXED_ENV'])
-        StaticLibraryModule(name                          = 'BltWmaDecoder',
-                            chained_link_and_include_deps = ['BltWmaDecoderRuntime'])
+        #StaticLibraryModule(name                          = 'BltWmaDecoder',
+        #                    chained_link_and_include_deps = ['BltWmaDecoderRuntime'])
+	BLT_WMA_DECODER_PLUGIN_DIR = 'Decoders/WMA'
+	BLT_WMA_DECODER_PLUGIN_EXTRAS = {'inc_dirs': [WMA_SOURCE_ROOT+'/'+dir for dir in ['common/include', 'audio/common/include', 'audio/wmaudio/v10/asfparse_s']],
+                                         'dep_mods': ['BltWmaDecoderRuntime']}
     elif 'BLT_WMA_PLUGIN_HOME' in os.environ:
         BLT_WMA_DECODER_PLUGIN_EXTRAS = {'external':True,
                                          'libs':    ['BltWmaDecoder'],
@@ -272,7 +275,7 @@ PluginsSettings = {
     'AlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',           'src_dir':'Decoders/ALAC'            },
     'VorbisDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',         'src_dir':'Decoders/Vorbis'          },
     'AacDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',            'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
-    'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',                                                 },
+    'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',            'src_dir':BLT_WMA_DECODER_PLUGIN_DIR },
     'WaveParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',            'src_dir':'Parsers/Wave'             },
     'AiffParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',            'src_dir':'Parsers/Aiff'             },
     'TagParser'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',             'src_dir':'Parsers/Tags'             },
@@ -341,7 +344,7 @@ for plugin in env['BLT_PLUGINS']:
                    build_include_dirs       = ['Source/Plugins/Common', 'Source/Config']+extra_includes,
                    chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
                    extra_cpp_defines  = [('BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION','BLT_'+plugin+'Module_GetModuleObject')])
-    if 'src_dir' in PluginsSettings[plugin]:
+    if 'src_dir' in PluginsSettings[plugin] and PluginsSettings[plugin]:
         ### source code plugins
         CompiledModule(name                     = 'Blt'+plugin,
                        source_root              = 'Source/Plugins',

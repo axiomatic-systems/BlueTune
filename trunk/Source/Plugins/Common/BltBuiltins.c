@@ -215,8 +215,15 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 BLT_Result
 BLT_Builtins_RegisterModules(BLT_Core* core)
 {
-    BLT_Result  result;
-    BLT_Module* module;
+    BLT_Result  result = ATX_SUCCESS;
+    BLT_Module* module = NULL;
+
+    ATX_LOG_FINE("registering builtin modules");
+
+    /* in the case where there are no builtin modules, avoid compiler warnings */
+    ATX_COMPILER_UNUSED(core);
+    ATX_COMPILER_UNUSED(result);
+    ATX_COMPILER_UNUSED(module);
 
     /* test input module */
 #if defined(BLT_CONFIG_MODULES_ENABLE_TEST_INPUT)

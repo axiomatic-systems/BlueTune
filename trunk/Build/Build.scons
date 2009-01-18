@@ -40,15 +40,23 @@ OptionalModules = []
 ### default build env
 SetDefaultEnv(env)
 
+############################ compute the plugins map
+PluginsMap = {}
+for plugin in env['BLT_PLUGINS']:
+    if type(plugin) == tuple:
+        PluginsMap[plugin[0]] = plugin[1]
+    else:
+        PluginsMap[plugin] = 'static'
+
 ############################ select AAC library
 BLT_AAC_DECODER_PLUGIN_DIR    = ''
 BLT_AAC_DECODER_PLUGIN_EXTRAS = {}
-if 'AacDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
+if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
     env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
 ############################ select VORBIS library
 BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
-if 'VorbisDecoder' in env['BLT_PLUGINS'] and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):  
+if 'VorbisDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):  
     env['BLT_PLUGINS_VORBIS_LIBRARY'] = 'Vorbis'
 
 ############################# Atomix
@@ -101,7 +109,7 @@ StaticLibraryModule(name                          = 'Bento4',
                     chained_link_and_include_deps = ['Bento4Objects'])
 
 ############################ Melo
-if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
+if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
     MLO_SOURCE_ROOT = 'Melo/Source'
     MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/AAC'
@@ -117,7 +125,7 @@ if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Mel
                    extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
     
 ############################ HelixAAC
-if 'AacDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
+if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/HelixAAC'
     BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['HelixAAC']}
     if env.has_key('BLT_PLUGINS_HELIX_AAC_ASM_DIR'):
@@ -163,13 +171,13 @@ CompiledModule(name                          = 'Fluo',
                extra_lib_dirs                = fluo_decoder_lib_dirs)
 
 ############################ Tremor
-if 'VorbisDecoder' in env['BLT_PLUGINS'] and env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
+if 'VorbisDecoder' in PluginsMap and env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
     CompiledModule(name        = 'Tremor',
                    source_root = 'ThirdParty/Vorbis/Distributions/Tremor',
                    environment = env['BLT_RELAXED_ENV'])
 
 ############################ FLAC
-if 'FlacDecoder' in env['BLT_PLUGINS']:
+if 'FlacDecoder' in PluginsMap:
     FLAC_SOURCE_ROOT='ThirdParty/FLAC/Distributions/flac-1.2.0'
     CompiledModule(name               = 'FLAC',
                    source_root        = FLAC_SOURCE_ROOT,
@@ -196,7 +204,7 @@ CompiledModule(name                          = 'BltPlayer',
 ############################ WmaDecoder Plugin
 BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
 BLT_WMA_DECODER_PLUGIN_DIR = None
-if 'WmaDecoder' in env['BLT_PLUGINS']:
+if 'WmaDecoder' in PluginsMap:
     if 'BLT_WMSDK_HOME' in os.environ:
         if env.has_key('BLT_WMA_DECODER_MODE') and env['BLT_WMA_DECODER_MODE'] == 'Integer':
             wma_decoder_mode = 'BUILD_INTEGER'
@@ -298,10 +306,10 @@ PluginsExtras = {
     'AlsaInput':        {'libs':['asound']},
     'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS
 }
-if 'CddaInput' in env['BLT_PLUGINS']:
+if 'CddaInput' in PluginsMap:
     PluginsExtras['CddaInput'] = {'src_dirs':['Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
 
-if 'VorbisDecoder' in env['BLT_PLUGINS']:
+if 'VorbisDecoder' in PluginsMap:
     if env['BLT_PLUGINS_VORBIS_LIBRARY'] == 'Tremor':
         PluginsExtras['VorbisDecoder'] = {
             'dep_mods':['Tremor'],
@@ -318,7 +326,7 @@ plugins_extra_lib_dirs  = []
 plugins_inc_dirs        = []
 plugins_static_modules  = []
 plugins_dynamic_modules = []
-for plugin in env['BLT_PLUGINS']:
+for plugin in PluginsMap:
     extra_includes = []
     extra_dep_mods = []
     extra_libs     = []
@@ -371,7 +379,7 @@ for plugin in env['BLT_PLUGINS']:
 
     if not external: plugins_static_modules.append('Blt'+plugin)
         
-plugins_cpp_defines = [PluginsSettings[p]['defines'] for p in env['BLT_PLUGINS']]
+plugins_cpp_defines = [PluginsSettings[p]['defines'] for p in PluginsMap if PluginsMap[p] == 'static']
 plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME', '"'+env['BLT_DEFAULT_AUDIO_OUTPUT']+'"')]
 
 CompiledModule(name                          = 'BltPlugins',

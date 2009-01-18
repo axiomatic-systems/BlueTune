@@ -549,6 +549,7 @@ AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
     int          watchdog = 5;
     int          io_result;
     unsigned int sample_count;
+    unsigned int sample_size;
     BLT_Result   result;
 
     /* ensure that the device is prepared */
@@ -556,17 +557,30 @@ AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
     if (BLT_FAILED(result)) return result;
 
     /* compute the number of samples */
-    sample_count = size / (self->media_type.channel_count*
-                           self->media_type.bits_per_sample/8);
+    sample_size  = self->media_type.channel_count*self->media_type.bits_per_sample/8;
+    sample_count = size / sample_size;
                            
     /* write samples to the device and handle underruns */       
     do {
-        io_result = snd_pcm_writei(self->device_handle, 
-                                   buffer, sample_count);        
-        if (io_result == (int)sample_count) return BLT_SUCCESS;
+	while (sample_count) {
+            io_result = snd_pcm_writei(self->device_handle, 
+                                       buffer, sample_count);
+            if (io_result > 0) {
+                buffer = (void*)((char*)buffer + io_result*sample_size);
+                if ((unsigned int)io_result <= sample_count) {
+                    sample_count -= io_result;
+                } else {
+                    /* strange, snd_pcm_writei returned more than we wrote */
+                    sample_count = 0;
+                }
+            } else {
+                break;
+            }
+        }        
+        if (sample_count == 0) return BLT_SUCCESS;
 
         /* we reach this point if the first write failed */
-        {
+        if (io_result < 0) {
             snd_pcm_status_t* status;
             snd_pcm_state_t   state;
             snd_pcm_status_alloca_no_assert(&status);
@@ -577,7 +591,7 @@ AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
             }
             state = snd_pcm_status_get_state(status);
             if (state == SND_PCM_STATE_XRUN) {
-                ATX_LOG_WARNING("AlsaOutput::Write - **** UNDERRUN *****");
+                ATX_LOG_FINE("**** UNDERRUN *****");
             
                 /* re-prepare the channel */
                 io_result = snd_pcm_prepare(self->device_handle);
@@ -585,15 +599,17 @@ AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
                     return BLT_FAILURE;
                 }
             } else {
-               ATX_LOG_WARNING_1("AlsaOutput::Write - **** STATE = %d ****", state);
+               ATX_LOG_WARNING_1("**** STATE = %d ****", state);
             }
+        } else {
+            ATX_LOG_WARNING_1("snd_pcm_writei() returned %d", io_result); 
         }
         
-        ATX_LOG_WARNING("AlsaOutput::Write - **** RETRY *****");
+        ATX_LOG_FINE("**** RETRY *****");
 
     } while(watchdog--);
 
-    ATX_LOG_SEVERE("AlsaOutput::Write - **** THE WATCHDOG BIT US ****");
+    ATX_LOG_SEVERE("**** THE WATCHDOG BIT US ****");
     return BLT_FAILURE;
 }
 

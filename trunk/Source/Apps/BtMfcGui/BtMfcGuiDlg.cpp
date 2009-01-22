@@ -57,6 +57,7 @@ public:
 
     // message handlers
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State state);
+    virtual void OnVolumeNotification(float volume);
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode);
     virtual void OnStreamPositionNotification(BLT_StreamPosition& position);
     virtual void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
@@ -136,9 +137,9 @@ MfcPlayer::OnStreamPositionNotification(BLT_StreamPosition& position)
     if (m_Scrolling) return;
 
     // show the position on the scroll bar
-    ATX_Int64 range = m_Dialog->m_Slider.GetRangeMax()-m_Dialog->m_Slider.GetRangeMin();
+    ATX_Int64 range = m_Dialog->m_TrackSlider.GetRangeMax()-m_Dialog->m_TrackSlider.GetRangeMin();
     ATX_Int64 pos = (position.offset*range)/position.range;
-    m_Dialog->m_Slider.SetPos((unsigned int)pos);
+    m_Dialog->m_TrackSlider.SetPos((unsigned int)pos);
 }
 
 /*----------------------------------------------------------------------
@@ -203,6 +204,15 @@ MfcPlayer:: OnPropertyNotification(BLT_PropertyScope        scope,
     }
 }
 
+/*----------------------------------------------------------------------
+|   MfcPlayer::OnVolumeNotification
++---------------------------------------------------------------------*/
+void
+MfcPlayer::OnVolumeNotification(float volume)
+{
+    m_Dialog->m_VolumeSlider.SetPos((unsigned int)(volume*100));
+}
+
 CBtMfcGuiDlg::CBtMfcGuiDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CBtMfcGuiDlg::IDD, pParent)
 {
@@ -213,7 +223,8 @@ CBtMfcGuiDlg::CBtMfcGuiDlg(CWnd* pParent /*=NULL*/)
 void CBtMfcGuiDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_TRACK_SLIDER, m_Slider);
+    DDX_Control(pDX, IDC_TRACK_SLIDER,     m_TrackSlider);
+    DDX_Control(pDX, IDC_VOLUME_SLIDER,    m_VolumeSlider);
     DDX_Control(pDX, IDC_STREAM_INFO_LIST, m_StreamInfoList);
 }
 
@@ -264,8 +275,9 @@ BOOL CBtMfcGuiDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-    // setup the slider
-	m_Slider.SetRange(0, 500);
+    // setup the sliders
+	m_TrackSlider.SetRange(0, 500);
+    m_VolumeSlider.SetRange(0, 100);
 
     // setup the stream info list
     m_StreamInfoList.InsertColumn(0, "Name", LVCFMT_LEFT, 100);
@@ -374,7 +386,7 @@ void CBtMfcGuiDlg::OnBnClickedStopButton()
 
 void CBtMfcGuiDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-    if (pScrollBar->m_hWnd == m_Slider.m_hWnd) {
+    if (pScrollBar->m_hWnd == m_TrackSlider.m_hWnd) {
         switch (nSBCode) {
           case SB_LINELEFT:
           case SB_LINERIGHT:
@@ -387,7 +399,7 @@ void CBtMfcGuiDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             break;
 
           case SB_ENDSCROLL: 
-            m_Player->SeekToPosition(m_Slider.GetPos(), m_Slider.GetRangeMax()-m_Slider.GetRangeMin());
+            m_Player->SeekToPosition(m_TrackSlider.GetPos(), m_TrackSlider.GetRangeMax()-m_TrackSlider.GetRangeMin());
             if (m_Player->m_Scrolling) {
                 m_Player->m_Scrolling = FALSE; 
                 //if (m_Player->m_State == XA_PLAYER_STATE_PLAYING) {
@@ -406,6 +418,16 @@ void CBtMfcGuiDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
           case SB_THUMBPOSITION: 
             //m_Player->Seek(nPos, 400);
             break;
+        }
+    } else if (pScrollBar->m_hWnd == m_VolumeSlider.m_hWnd) {
+        switch (nSBCode) {
+          case SB_THUMBTRACK:
+              m_Player->SetVolume((float)m_VolumeSlider.GetPos()/((float)m_VolumeSlider.GetRangeMax()-(float)m_VolumeSlider.GetRangeMin()));
+              break;
+
+          case SB_THUMBPOSITION: 
+              m_Player->SetVolume((float)nPos/((float)m_VolumeSlider.GetRangeMax()-(float)m_VolumeSlider.GetRangeMin()));
+              break;
         }
     }
 

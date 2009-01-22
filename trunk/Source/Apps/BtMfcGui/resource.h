@@ -15,6 +15,8 @@
 #define IDC_SLIDER1                     1004
 #define IDC_TRACK_SLIDER                1004
 #define IDC_STREAM_INFO                 1005
+#define IDC_TRACK_SLIDER2               1005
+#define IDC_VOLUME_SLIDER               1005
 #define IDC_PLAYER_STATUS_LABEL         1006
 #define IDC_EDIT1                       1007
 #define IDC_INPUT_NAME_EDIT             1007

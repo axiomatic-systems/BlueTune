@@ -26,11 +26,12 @@
 #include "BltCore.h"
 #include "BltPacketConsumer.h"
 #include "BltMediaPacket.h"
+#include "BltVolumeControl.h"
 
 /*----------------------------------------------------------------------
 |   logging
 +---------------------------------------------------------------------*/
-/*ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.audio")*/
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.audio")
 
 /*----------------------------------------------------------------------
 |   options
@@ -57,6 +58,7 @@ ATX_DECLARE_INTERFACE_MAP(Win32AudioOutput, ATX_Referenceable)
 ATX_DECLARE_INTERFACE_MAP(Win32AudioOutput, BLT_OutputNode)
 ATX_DECLARE_INTERFACE_MAP(Win32AudioOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(Win32AudioOutput, BLT_PacketConsumer)
+ATX_DECLARE_INTERFACE_MAP(Win32AudioOutput, BLT_VolumeControl)
 
 BLT_METHOD Win32AudioOutput_Resume(BLT_MediaNode* self);
 
@@ -81,6 +83,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
     ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_VolumeControl);
 
     /* members */
     UINT              device_id;
@@ -655,6 +658,7 @@ Win32AudioOutput_Create(BLT_Module*              module,
     ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_PacketConsumer);
     ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_OutputNode);
     ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_VolumeControl);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
@@ -806,6 +810,50 @@ Win32AudioOutput_Resume(BLT_MediaNode* _self)
 }
 
 /*----------------------------------------------------------------------
+|    Win32AudioOutput_SetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+Win32AudioOutput_SetVolume(BLT_VolumeControl* _self, float volume)
+{
+    Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_VolumeControl);
+    DWORD ivolume = (DWORD)(volume*65535.0f);
+    MMRESULT result;
+    
+    result = waveOutSetVolume(self->device_handle, ivolume | (ivolume<<16));
+    if (result != MMSYSERR_NOERROR) {
+        ATX_LOG_WARNING_1("waveOutSetVolume() failed (%x)", result);
+        return BLT_FAILURE;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Win32AudioOutput_GetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+Win32AudioOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
+{
+    Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_VolumeControl);
+    DWORD ivolume = 0;
+    MMRESULT result;
+
+    *volume = 0.0f; /* default value */
+
+    result = waveOutGetVolume(self->device_handle, &ivolume);
+    if (result != MMSYSERR_NOERROR) {
+        ATX_LOG_WARNING_1("waveOutGetVolume() failed (%x)", result);
+        return BLT_FAILURE;
+    } else {
+        unsigned short left  =  (unsigned short)((ivolume>>16)&0xFFFF);
+        unsigned short right =  (unsigned short)(ivolume&0xFFFF);
+        *volume = ((float)(left+right))/(2.0f*65535.0f);
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Win32AudioOutput)
@@ -814,6 +862,7 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Win32AudioOutput)
     ATX_GET_INTERFACE_ACCEPT(Win32AudioOutput, BLT_OutputNode)
     ATX_GET_INTERFACE_ACCEPT(Win32AudioOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT(Win32AudioOutput, BLT_PacketConsumer)
+    ATX_GET_INTERFACE_ACCEPT(Win32AudioOutput, BLT_VolumeControl)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -854,6 +903,14 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(Win32AudioOutput, BLT_OutputNode)
     Win32AudioOutput_GetStatus
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_VolumeControl interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(Win32AudioOutput, BLT_VolumeControl)
+    Win32AudioOutput_GetVolume,
+    Win32AudioOutput_SetVolume
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

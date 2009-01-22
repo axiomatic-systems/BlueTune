@@ -187,6 +187,13 @@ BLT_DecoderServer::Run()
     NotifyTimeCode();
     NotifyPosition();
 
+    // initial volume
+    float volume=0.0f;
+    result = BLT_Decoder_GetVolume(m_Decoder, &volume);
+    if (BLT_SUCCEEDED(result)) {
+        m_Client->PostMessage(new BLT_DecoderClient_VolumeNotificationMessage(volume));
+    }
+
     // decoding loop
     do {
         do {
@@ -385,6 +392,15 @@ BLT_DecoderServer::OnSetOutputCommand(BLT_CString name, BLT_CString type)
 
     ATX_LOG_FINE("BLT_DecoderServer::OnSetOutputCommand");
     result = BLT_Decoder_SetOutput(m_Decoder, name, type);
+    if (BLT_SUCCEEDED(result)) {
+        // notify of the new volume
+        float volume=0.0f;
+        result = BLT_Decoder_GetVolume(m_Decoder, &volume);
+        if (BLT_SUCCEEDED(result)) {
+            m_Client->PostMessage(new BLT_DecoderClient_VolumeNotificationMessage(volume));
+        }
+        result = BLT_SUCCESS;
+    }
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_OUTPUT, result);
 }
 
@@ -594,6 +610,14 @@ BLT_DecoderServer::OnSetVolumeCommand(float volume)
     ATX_LOG_FINE_1("volume=%f", volume);
 
     result = BLT_Decoder_SetVolume(m_Decoder, volume);
+    if (BLT_SUCCEEDED(result)) {
+        result = BLT_Decoder_GetVolume(m_Decoder, &volume);
+        if (BLT_SUCCEEDED(result)) {
+            m_Client->PostMessage(new BLT_DecoderClient_VolumeNotificationMessage(volume));
+        }
+        result = BLT_SUCCESS; // ignore any error from the previous call
+    }
+
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_VOLUME, result);
 }
 

@@ -33,6 +33,7 @@ public:
                                     BLT_Result                     /*result*/) {}
     virtual void OnPongNotification(const void* /*cookie*/) {}
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State /*state*/) {}
+    virtual void OnVolumeNotification(float /*volume*/) {}
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode /*timecode*/) {}
     virtual void OnStreamPositionNotification(BLT_StreamPosition& /*position*/) {}
     virtual void OnStreamInfoNotification(BLT_Mask        /*update_mask*/, 
@@ -150,6 +151,25 @@ public:
 private:
     // members
     BLT_DecoderServer::State m_State;
+};
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderClient_VolumeNotificationMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderClient_VolumeNotificationMessage :
+    public BLT_DecoderClient_Message
+{
+public:
+    // methods
+    BLT_DecoderClient_VolumeNotificationMessage(float volume) : m_Volume(volume) {}
+    NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
+        handler->OnVolumeNotification(m_Volume);
+        return NPT_SUCCESS;
+    }
+
+private:
+    // members
+    float m_Volume;
 };
 
 /*----------------------------------------------------------------------

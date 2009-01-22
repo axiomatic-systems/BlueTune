@@ -48,7 +48,8 @@ public:
     afx_msg void OnBnClickedSetInputButton();
 
 protected:
-    CSliderCtrl m_Slider;
+    CSliderCtrl m_TrackSlider;
+    CSliderCtrl m_VolumeSlider;
     CListCtrl   m_StreamInfoList;
 
 friend class MfcPlayer;

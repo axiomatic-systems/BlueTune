@@ -81,7 +81,7 @@ BLT_Plugins_LoadModulesFromFile(BLT_Core* core, const char* name, BLT_Flags sear
     if (search_flags & BLT_PLUGIN_LOADER_FLAGS_SEARCH_WORKING_DIRECTORY) {
         ATX_LOG_FINE("searching working directory");
         NPT_String working_directory;
-        result = NPT_File::GetWorkingDirectory(working_directory);
+        result = NPT_File::GetWorkingDir(working_directory);
         if (NPT_SUCCEEDED(result)) {
             NPT_String path = working_directory + NPT_FilePath::Separator + name;
             return BLT_Plugins_LoadModulesFromLibrary(core, path);
@@ -107,7 +107,7 @@ BLT_Plugins_LoadModulesFromDirectory(BLT_Core*   core,
     ATX_LOG_FINE_1("loading modules in directory %s", directory);
     
     NPT_List<NPT_String> entries;
-    NPT_Result result = NPT_File::ListDirectory(directory, entries);
+    NPT_Result result = NPT_File::ListDir(directory, entries);
     ATX_CHECK_FINE(result);
 
     for (NPT_List<NPT_String>::Iterator i = entries.GetFirstItem(); i; ++i) {

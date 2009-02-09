@@ -4574,10 +4574,8 @@
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = (
-					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil",
-					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/universal-apple-macosx/lib";
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
@@ -4601,10 +4599,8 @@
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = (
-					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil",
-					"/Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/universal-apple-macosx/lib";
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",

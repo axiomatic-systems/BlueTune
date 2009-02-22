@@ -116,8 +116,7 @@ static BLT_Result
 AlsaOutput_SetState(AlsaOutput* self, AlsaOutputState state)
 {
     if (state != self->state) {
-        ATX_LOG_FINER_2("AlsaOutput::SetState - from %d to %d",
-                        self->state, state);
+        ATX_LOG_FINER_2("state changed from %d to %d", self->state, state);
     }
     self->state = state;
     return BLT_SUCCESS;
@@ -131,11 +130,11 @@ AlsaOutput_Open(AlsaOutput* self)
 {
     int io_result;
 
-    ATX_LOG_FINE_1("AlsaOutput::Open - name=%s", ATX_CSTR(self->device_name));
+    ATX_LOG_FINE_1("openning output - name=%s", ATX_CSTR(self->device_name));
 
     switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
-        ATX_LOG_FINER("AlsaOutput::Open - snd_pcm_open");
+        ATX_LOG_FINER("snd_pcm_open");
         io_result = snd_pcm_open(&self->device_handle,
                                  ATX_CSTR(self->device_name),
                                  SND_PCM_STREAM_PLAYBACK,
@@ -167,7 +166,7 @@ AlsaOutput_Open(AlsaOutput* self)
 static BLT_Result
 AlsaOutput_Close(AlsaOutput* self)
 {
-    ATX_LOG_FINER("AlsaOutput::Close");
+    ATX_LOG_FINER("closing output");
 
     switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
@@ -176,14 +175,14 @@ AlsaOutput_Close(AlsaOutput* self)
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* wait for buffers to finish */
-        ATX_LOG_FINER("AlsaOutput::Close - snd_pcm_drain");
+        ATX_LOG_FINER("snd_pcm_drain");
         snd_pcm_drain(self->device_handle);
         /* FALLTHROUGH */
 
       case BLT_ALSA_OUTPUT_STATE_OPEN:
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
         /* close the device */
-        ATX_LOG_FINER("AlsaOutput::Close - snd_pcm_close");
+        ATX_LOG_FINER("snd_pcm_close");
         snd_pcm_close(self->device_handle);
         self->device_handle = NULL;
         break;
@@ -201,7 +200,7 @@ AlsaOutput_Close(AlsaOutput* self)
 static BLT_Result
 AlsaOutput_Drain(AlsaOutput* self)
 {
-    ATX_LOG_FINER("AlsaOutput::Drain");
+    ATX_LOG_FINER("draining output");
 
     switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
@@ -212,7 +211,7 @@ AlsaOutput_Drain(AlsaOutput* self)
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* drain samples buffered by the driver (wait until they are played) */
-        ATX_LOG_FINER("AlsaOutput::Drain - snd_pcm_drain");
+        ATX_LOG_FINER("snd_pcm_drain");
         snd_pcm_drain(self->device_handle);
         break;
     }
@@ -226,7 +225,7 @@ AlsaOutput_Drain(AlsaOutput* self)
 static BLT_Result
 AlsaOutput_Reset(AlsaOutput* self)
 {
-    ATX_LOG_FINER("AlsaOutput::Reset");
+    ATX_LOG_FINER("resetting output");
 
     switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
@@ -236,7 +235,7 @@ AlsaOutput_Reset(AlsaOutput* self)
         return BLT_SUCCESS;
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
-        ATX_LOG_FINER("AlsaOutput::Reset - snd_pcm_drop");
+        ATX_LOG_FINER("snd_pcm_drop");
         snd_pcm_drop(self->device_handle);
         AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
         break;
@@ -261,11 +260,11 @@ AlsaOutput_Prepare(AlsaOutput* self)
 
       case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
         /* prepare the device */
-        ATX_LOG_FINER("AlsaOutput::Prepare - snd_pcm_prepare");
+        ATX_LOG_FINER("snd_pcm_prepare");
 
         ior = snd_pcm_prepare(self->device_handle);
         if (ior != 0) {
-            ATX_LOG_FINER_1("AlsaOutput::Prepare: - snd_pcm_prepare failed (%d)", ior);
+            ATX_LOG_FINER_2("snd_pcm_prepare() failed (%d)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
         break;
@@ -289,7 +288,7 @@ AlsaOutput_Unprepare(AlsaOutput* self)
 {
     BLT_Result result;
 
-    ATX_LOG_FINER("AlsaOutput::Unprepare");
+    ATX_LOG_FINER("unpreparing output");
 
     switch (self->state) {
       case BLT_ALSA_OUTPUT_STATE_CLOSED:
@@ -363,15 +362,15 @@ AlsaOutput_Configure(AlsaOutput*             self,
 
       case BLT_ALSA_OUTPUT_STATE_OPEN:
         /* configure the device with the new format */
-        ATX_LOG_FINER("AlsaOutput::Configure");
+        ATX_LOG_FINER("configuring ALSA device");
 
         /* copy the format */
         self->media_type = *format;
 
-        ATX_LOG_FINER_3("AlsaOutput::Configure - new format: sr=%d, ch=%d, bps=%d",
-                        format->sample_rate,
-                        format->channel_count,
-                        format->bits_per_sample);
+        ATX_LOG_FINE_3("new format: sr=%d, ch=%d, bps=%d",
+                       format->sample_rate,
+                       format->channel_count,
+                       format->bits_per_sample);
 
         /* allocate a new blank configuration */
         snd_pcm_hw_params_alloca_no_assert(&hw_params);
@@ -381,7 +380,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         ior = snd_pcm_hw_params_set_access(self->device_handle, hw_params, 
                                            SND_PCM_ACCESS_RW_INTERLEAVED);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'access' failed (%d)", ior);
+            ATX_LOG_WARNING_2("snd_pcm_hw_params_set_access failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
@@ -390,21 +389,23 @@ AlsaOutput_Configure(AlsaOutput*             self,
                                               hw_params, 
                                               &rate, NULL);
         if (ior != 0) {
-            ATX_LOG_WARNING_2("AlsaOutput::Configure - set 'rate' (%d) failed (%d)", rate, ior);
+            ATX_LOG_WARNING_3("snd_pcm_hw_params_set_rate_near(%d) failed (%d:%s)", rate, ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
         /* set the number of channels */
-        ior = snd_pcm_hw_params_set_channels(self->device_handle, hw_params,
+        ior = snd_pcm_hw_params_set_channels(self->device_handle, 
+                                             hw_params,
                                              format->channel_count);
         if (ior != 0) {
-            ATX_LOG_WARNING_2("AlsaOutput::Configure - set 'channels' (%d) failed (%d)", format->channel_count, ior);
+            ATX_LOG_WARNING_3("snd_pcm_hw_params_set_channels(%d) failed (%d:%s)", format->channel_count, ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
         /* set the sample format */
         switch (format->sample_format) {
         	case BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_LE");
         		switch (format->bits_per_sample) {
         			case  8: pcm_format_id = SND_PCM_FORMAT_S8;      break;
         			case 16: pcm_format_id = SND_PCM_FORMAT_S16_LE;  break;
@@ -414,6 +415,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         		break;
         		
         	case BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE");
         		switch (format->bits_per_sample) {
         			case  8: pcm_format_id = SND_PCM_FORMAT_U8;      break;
         			case 16: pcm_format_id = SND_PCM_FORMAT_U16_LE;  break;
@@ -423,12 +425,14 @@ AlsaOutput_Configure(AlsaOutput*             self,
         		break;
 
         	case BLT_PCM_SAMPLE_FORMAT_FLOAT_LE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_FLOAT_LE");
         		switch (format->bits_per_sample) {
         			case 32: pcm_format_id = SND_PCM_FORMAT_FLOAT_LE; break;
         		}
         		break;
 
         	case BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE");
         		switch (format->bits_per_sample) {
         			case  8: pcm_format_id = SND_PCM_FORMAT_S8;      break;
         			case 16: pcm_format_id = SND_PCM_FORMAT_S16_BE;  break;
@@ -438,6 +442,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         		break;
         		
         	case BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_BE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_BE");
         		switch (format->bits_per_sample) {
         			case  8: pcm_format_id = SND_PCM_FORMAT_U8;      break;
         			case 16: pcm_format_id = SND_PCM_FORMAT_U16_BE;  break;
@@ -447,6 +452,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         		break;
 
         	case BLT_PCM_SAMPLE_FORMAT_FLOAT_BE:
+                ATX_LOG_FINE("sample format is BLT_PCM_SAMPLE_FORMAT_FLOAT_LE");
         		switch (format->bits_per_sample) {
         			case 32: pcm_format_id = SND_PCM_FORMAT_FLOAT_BE; break;
         		}
@@ -456,10 +462,11 @@ AlsaOutput_Configure(AlsaOutput*             self,
         if (pcm_format_id == SND_PCM_FORMAT_UNKNOWN) {
             return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-        ior = snd_pcm_hw_params_set_format(self->device_handle, hw_params,
+        ior = snd_pcm_hw_params_set_format(self->device_handle, 
+                                           hw_params,
                                            pcm_format_id);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'format' failed (%d)", ior);
+            ATX_LOG_WARNING_2("snd_pcm_hw_params_set_format() failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
@@ -469,7 +476,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
                                                      &period_size,
                                                      NULL);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'period size' failed (%d)", ior);
+            ATX_LOG_WARNING_2("snd_pcm_hw_params_set_period_size_near() failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
         
@@ -480,7 +487,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
                                                      &buffer_time,
                                                      NULL);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure - set 'buffer time' failed (%d)", ior);
+            ATX_LOG_WARNING_2("snd_pcm_hw_params_set_buffer_time_near() failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
@@ -490,7 +497,7 @@ AlsaOutput_Configure(AlsaOutput*             self,
         /* activate this configuration */
         ior = snd_pcm_hw_params(self->device_handle, hw_params);
         if (ior != 0) {
-            ATX_LOG_WARNING_1("AlsaOutput::Configure: - snd_pcm_hw_params failed (%d)", ior);
+            ATX_LOG_WARNING_2("snd_pcm_hw_params() failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
@@ -510,25 +517,25 @@ AlsaOutput_Configure(AlsaOutput*             self,
         /* activate the sofware parameters */
         ior = snd_pcm_sw_params(self->device_handle, sw_params);
         if (ior != 0) {
-            ATX_LOG_SEVERE_1("AlsaOutput::Configure - snd_pcm_sw_params failed (%d)", ior);
+            ATX_LOG_SEVERE_2("snd_pcm_sw_params() failed (%d:%s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
 
         /* print status info */
         {
             snd_pcm_uframes_t val;
-            ATX_LOG_FINER_1("AlsaOutput::Configure - sample type = %x", pcm_format_id);
+            ATX_LOG_FINER_1("sample type = %x", pcm_format_id);
             if (rate != format->sample_rate) {
-                ATX_LOG_FINER_1("AlsaOutput::Configure - actual sample = %d", rate);
+                ATX_LOG_FINER_1("actual sample = %d", rate);
             }
-            ATX_LOG_FINER_1("AlsaOutput::Configure - actual buffer time = %d", buffer_time);
-            ATX_LOG_FINER_1("AlsaOutput::Configure - buffer size = %d", buffer_size); 
+            ATX_LOG_FINER_1("actual buffer time = %d", buffer_time);
+            ATX_LOG_FINER_1("buffer size = %d", buffer_size); 
             snd_pcm_sw_params_get_start_threshold(sw_params, &val);
-            ATX_LOG_FINER_1("AlsaOutput::Configure - start threshold = %d", val); 
+            ATX_LOG_FINER_1("start threshold = %d", val); 
             snd_pcm_sw_params_get_stop_threshold(sw_params, &val);
-            ATX_LOG_FINER_1("AlsaOutput::Configure - stop threshold = %d", val); 
+            ATX_LOG_FINER_1("stop threshold = %d", val); 
             snd_pcm_hw_params_get_period_size(hw_params, &val, NULL);
-            ATX_LOG_FINER_1("AlsaOutput::Configure - period size = %d", val);
+            ATX_LOG_FINER_1("period size = %d", val);
         }
 
         break;
@@ -686,7 +693,7 @@ AlsaOutput_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = 
         (BLT_MediaNodeConstructor*)parameters;
 
-    ATX_LOG_FINE("AlsaOutput::Create");
+    ATX_LOG_FINE("creating output");
 
     /* check parameters */
     if (parameters == NULL || 
@@ -738,7 +745,7 @@ AlsaOutput_Create(BLT_Module*              module,
 static BLT_Result
 AlsaOutput_Destroy(AlsaOutput* self)
 {
-    ATX_LOG_FINE("AlsaOutput::Destroy");
+    ATX_LOG_FINE("destroying output");
 
     /* close the device */
     AlsaOutput_Close(self);
@@ -764,7 +771,7 @@ AlsaOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
     BLT_COMPILER_UNUSED(stream);
         
-    ATX_LOG_FINER("AlsaOutput::Activate");
+    ATX_LOG_FINER("activating output");
 
     /* open the device */
     AlsaOutput_Open(self);
@@ -780,7 +787,7 @@ AlsaOutput_Deactivate(BLT_MediaNode* _self)
 {
     AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
-    ATX_LOG_FINER("AlsaOutput::Deactivate");
+    ATX_LOG_FINER("deactivating output");
 
     /* close the device */
     AlsaOutput_Close(self);
@@ -796,7 +803,7 @@ AlsaOutput_Stop(BLT_MediaNode* _self)
 {
     AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
-    ATX_LOG_FINER("AlsaOutput::Stop");
+    ATX_LOG_FINER("stopping output");
 
     /* reset the device */
     AlsaOutput_Reset(self);
@@ -812,7 +819,7 @@ AlsaOutput_Pause(BLT_MediaNode* _self)
 {
     AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
         
-    ATX_LOG_FINER("AlsaOutput::Pause");
+    ATX_LOG_FINER("pausing output");
 
     /* pause the device */
     switch (self->state) {
@@ -836,7 +843,7 @@ AlsaOutput_Resume(BLT_MediaNode* _self)
 {
     AlsaOutput* self = ATX_SELF_EX(AlsaOutput, BLT_BaseMediaNode, BLT_MediaNode);
         
-    ATX_LOG_FINER("AlsaOutput::Resume");
+    ATX_LOG_FINER("resuming output");
 
     /* pause the device */
     switch (self->state) {
@@ -1018,7 +1025,7 @@ AlsaOutputModule_Probe(BLT_Module*              self,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            ATX_LOG_FINE_1("AlsaOutputModule::Probe - Ok [%d]", *match);
+            ATX_LOG_FINE_1("probe ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;

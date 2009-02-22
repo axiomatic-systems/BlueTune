@@ -1,5 +1,7 @@
 import sys
 
+EnsureSConsVersion(0,98,1)
+
 #######################################################
 # reusable functions and data structures
 #######################################################
@@ -23,19 +25,18 @@ def DefaultTarget():
 #######################################################
 # Main Build
 #######################################################
-options = Options()
-options.AddOptions(
-    EnumOption('target', 'Build Target', DefaultTarget(), allowed_values=PLATFORM_TO_TARGET_MAP.values()+CROSS_PLATFORMS),
-    BoolOption('stop_on_warning', 'Stop the build on warnings', False),
-    ListOption('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release']),
-    ListOption('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
+options = Variables()
+options.AddVariables(
+    EnumVariable('target', 'Build Target', DefaultTarget(), allowed_values=PLATFORM_TO_TARGET_MAP.values()+CROSS_PLATFORMS),
+    BoolVariable('stop_on_warning', 'Stop the build on warnings', False),
+    ListVariable('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release']),
+    ListVariable('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
 )
 
-env = Environment(options=options)
+env = Environment(variables=options)
 Help(options.GenerateHelpText(env))
 
 ### call the actual build script for each build config
-if not hasattr(env, 'Clone'): env.Clone = env.Copy ## old scons compatibility
 base_env = env
 for build_config in env['build_config']:
     env = base_env.Clone()

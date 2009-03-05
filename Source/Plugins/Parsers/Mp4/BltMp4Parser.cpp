@@ -702,8 +702,8 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
     }
 
     /* seek to the estimated offset on all tracks */
-    AP4_Ordinal   sample_index = 0;
-    AP4_TimeStamp ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
+    AP4_Ordinal sample_index = 0;
+    AP4_UI32    ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
     if (self->audio_output.track) {
         AP4_Result result = self->audio_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
         if (AP4_FAILED(result)) {

@@ -609,6 +609,20 @@
 			remoteGlobalIDString = CA3EDA7E0D7E0B81007AE943;
 			remoteInfo = AvcInfo;
 		};
+		CA40CAA50F40C4DE0008649B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA78483D0F3B6E69009E84AD;
+			remoteInfo = MiniHttpServer;
+		};
+		CA40CB310F40DC2E0008649B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA40CB290F40DC100008649B;
+			remoteInfo = BasicTest;
+		};
 		CA44C4680D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -1702,6 +1716,7 @@
 				CA9A17AF0ED50F6D00C60FDF /* passthroughwritertest */,
 				CAF478A50F07640C004073ED /* TracksTest */,
 				CAF479DC0F0989C3004073ED /* benchmarkstest */,
+				CA40CB320F40DC2E0008649B /* basictest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2212,6 +2227,7 @@
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
+				CA40CAA60F40C4DE0008649B /* minihttpserver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3231,6 +3247,20 @@
 			fileType = "compiled.mach-o.executable";
 			path = avcinfo;
 			remoteRef = CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA40CAA60F40C4DE0008649B /* minihttpserver */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = minihttpserver;
+			remoteRef = CA40CAA50F40C4DE0008649B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA40CB320F40DC2E0008649B /* basictest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = basictest;
+			remoteRef = CA40CB310F40DC2E0008649B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA44C4690D4522DA00173F5F /* libBento4.a */ = {

@@ -223,7 +223,9 @@ public:
     BLT_DecoderClient_StreamInfoNotificationMessage(BLT_Mask        update_mask,
                                                     BLT_StreamInfo& info):
         m_UpdateMask(update_mask), m_StreamInfo(info) {
-        if (info.data_type) m_DataType = info.data_type;
+        if ((update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) && info.data_type) {
+            m_DataType = info.data_type;
+        }
         m_StreamInfo.data_type = m_DataType.GetChars();
     }
     NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {

@@ -360,6 +360,19 @@ BLTP_OnEvent(BLT_EventListener* self,
         const BLT_StreamInfoEvent* e = (BLT_StreamInfoEvent*)event;
         ATX_ConsoleOutputF("BLTP::OnEvent - info update=%x\n", e->update_mask);
 
+        if (e->update_mask & BLT_STREAM_INFO_MASK_TYPE) {
+            ATX_ConsoleOutputF("  stream type     = %ld (", (int)e->info.type);
+            switch (e->info.type) {
+                case BLT_STREAM_TYPE_UNKNOWN:     ATX_ConsoleOutputF("UNKNOWN)\n");     break;
+                case BLT_STREAM_TYPE_MULTIPLEXED: ATX_ConsoleOutputF("MULTIPLEXED)\n"); break;
+                case BLT_STREAM_TYPE_AUDIO:       ATX_ConsoleOutputF("AUDIO)\n");       break;
+                case BLT_STREAM_TYPE_VIDEO:       ATX_ConsoleOutputF("VIDEO)\n");       break;
+                default:                          ATX_ConsoleOutputF("OTHER)\n");       break;
+            }
+        }
+        if (e->update_mask & BLT_STREAM_INFO_MASK_ID) {
+            ATX_ConsoleOutputF("  id              = %ld\n", e->info.id);
+        }
         if (e->update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
             ATX_ConsoleOutputF("  nominal_bitrate = %ld\n", e->info.nominal_bitrate);
         }
@@ -380,6 +393,12 @@ BLTP_OnEvent(BLT_EventListener* self,
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
             ATX_ConsoleOutputF("  channel_count   = %ld\n", e->info.channel_count);
+        }
+        if (e->update_mask & BLT_STREAM_INFO_MASK_WIDTH) {
+            ATX_ConsoleOutputF("  width           = %ld\n", e->info.width);
+        }
+        if (e->update_mask & BLT_STREAM_INFO_MASK_HEIGHT) {
+            ATX_ConsoleOutputF("  height          = %ld\n", e->info.height);
         }
         if (e->update_mask & BLT_STREAM_INFO_MASK_FLAGS) {
             ATX_ConsoleOutputF("  flags           = %x", e->info.flags);

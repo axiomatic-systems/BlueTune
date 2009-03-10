@@ -861,7 +861,7 @@ Stream_SetInput(BLT_Stream* _self,
     /* normalize type */
     if (type && type[0] == '\0') type = NULL;
 
-    ATX_LOG_FINE_1("Stream::SetInput - name=%s", name);
+    ATX_LOG_FINE_1("input name=%s", name);
 
     /* ask the core to create the corresponding input node */
     constructor.spec.input.protocol  = BLT_MEDIA_PORT_PROTOCOL_NONE;
@@ -1781,6 +1781,16 @@ Stream_SetInfo(BLT_Stream* _self, const BLT_StreamInfo* info)
     Stream*  self = ATX_SELF(Stream, BLT_Stream);
     BLT_Mask update_mask = 0;
 
+    if ((info->mask & BLT_STREAM_INFO_MASK_TYPE) &&
+        self->info.type != info->type) {
+        self->info.type  = info->type;
+        update_mask |= BLT_STREAM_INFO_MASK_TYPE;
+    }
+    if ((info->mask & BLT_STREAM_INFO_MASK_ID) &&
+        self->info.id != info->id) {
+        self->info.id  = info->id;
+        update_mask |= BLT_STREAM_INFO_MASK_ID;
+    }
     if ((info->mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) &&
         self->info.nominal_bitrate != info->nominal_bitrate) {
         self->info.nominal_bitrate  = info->nominal_bitrate;
@@ -1815,6 +1825,16 @@ Stream_SetInfo(BLT_Stream* _self, const BLT_StreamInfo* info)
         self->info.channel_count != info->channel_count) {
         self->info.channel_count  = info->channel_count;
         update_mask |= BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
+    }
+    if ((info->mask & BLT_STREAM_INFO_MASK_WIDTH) &&
+        self->info.width != info->width) {
+        self->info.width  = info->width;
+        update_mask |= BLT_STREAM_INFO_MASK_WIDTH;
+    }
+    if ((info->mask & BLT_STREAM_INFO_MASK_HEIGHT) &&
+        self->info.height != info->height) {
+        self->info.height  = info->height;
+        update_mask |= BLT_STREAM_INFO_MASK_HEIGHT;
     }
     if ((info->mask & BLT_STREAM_INFO_MASK_FLAGS) &&
         self->info.flags != info->flags) {

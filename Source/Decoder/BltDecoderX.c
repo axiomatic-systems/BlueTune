@@ -197,7 +197,7 @@ BLT_DecoderX_GetInputStreamProperties(BLT_DecoderX*     decoder,
 |    BLT_DecoderX_GetAudioStreamProperties
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderX_GetAudioStreamProperties(BLT_DecoderX*     decoder, 
+BLT_DecoderX_GetAudioStreamProperties(BLT_DecoderX*    decoder, 
                                       ATX_Properties** properties) 
 {
     return BLT_Stream_GetProperties(decoder->audio_stream, properties);
@@ -207,7 +207,7 @@ BLT_DecoderX_GetAudioStreamProperties(BLT_DecoderX*     decoder,
 |    BLT_DecoderX_GetVideoStreamProperties
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderX_GetVideoStreamProperties(BLT_DecoderX*     decoder, 
+BLT_DecoderX_GetVideoStreamProperties(BLT_DecoderX*    decoder, 
                                       ATX_Properties** properties) 
 {
     return BLT_Stream_GetProperties(decoder->video_stream, properties);
@@ -221,6 +221,7 @@ BLT_DecoderX_SetEventListener(BLT_DecoderX*       decoder,
                               BLT_EventListener* listener)
 {
     /* set the listener of the stream */
+    BLT_Stream_SetEventListener(decoder->input_stream, listener);
     BLT_Stream_SetEventListener(decoder->audio_stream, listener);
     BLT_Stream_SetEventListener(decoder->video_stream, listener);
     return BLT_SUCCESS;

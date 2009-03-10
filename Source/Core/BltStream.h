@@ -31,17 +31,21 @@
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_STREAM_INFO_MASK_ALL             0xFFFF
+#define BLT_STREAM_INFO_MASK_ALL             0xFFFFFFFF
 
-#define BLT_STREAM_INFO_MASK_NOMINAL_BITRATE 0x001
-#define BLT_STREAM_INFO_MASK_AVERAGE_BITRATE 0x002
-#define BLT_STREAM_INFO_MASK_INSTANT_BITRATE 0x004
-#define BLT_STREAM_INFO_MASK_SIZE            0x008
-#define BLT_STREAM_INFO_MASK_DURATION        0x010
-#define BLT_STREAM_INFO_MASK_SAMPLE_RATE     0x020
-#define BLT_STREAM_INFO_MASK_CHANNEL_COUNT   0x040
-#define BLT_STREAM_INFO_MASK_FLAGS           0x080
-#define BLT_STREAM_INFO_MASK_DATA_TYPE       0x100
+#define BLT_STREAM_INFO_MASK_TYPE            0x0001
+#define BLT_STREAM_INFO_MASK_ID              0x0002
+#define BLT_STREAM_INFO_MASK_NOMINAL_BITRATE 0x0004
+#define BLT_STREAM_INFO_MASK_AVERAGE_BITRATE 0x0008
+#define BLT_STREAM_INFO_MASK_INSTANT_BITRATE 0x0010
+#define BLT_STREAM_INFO_MASK_SIZE            0x0020
+#define BLT_STREAM_INFO_MASK_DURATION        0x0040
+#define BLT_STREAM_INFO_MASK_SAMPLE_RATE     0x0080
+#define BLT_STREAM_INFO_MASK_CHANNEL_COUNT   0x0100
+#define BLT_STREAM_INFO_MASK_WIDTH           0x0200
+#define BLT_STREAM_INFO_MASK_HEIGHT          0x0400
+#define BLT_STREAM_INFO_MASK_FLAGS           0x0800
+#define BLT_STREAM_INFO_MASK_DATA_TYPE       0x1000
 
 /** Flag that indicates that the stream has variable bitrate */
 #define BLT_STREAM_INFO_FLAG_VBR             0x01
@@ -59,17 +63,28 @@
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
+typedef enum {
+    BLT_STREAM_TYPE_UNKNOWN,
+    BLT_STREAM_TYPE_MULTIPLEXED,
+    BLT_STREAM_TYPE_AUDIO,
+    BLT_STREAM_TYPE_VIDEO
+} BLT_StreamType;
+
 typedef struct {
-    BLT_Mask    mask;             /**< Mask indicating which fields are valid */
-    BLT_UInt32  nominal_bitrate;  /**< Nominal bitrate                        */
-    BLT_UInt32  average_bitrate;  /**< Average bitrate                        */
-    BLT_UInt32  instant_bitrate;  /**< Instant bitrate                        */
-    BLT_UInt64  size;             /**< Size in bytes                          */
-    BLT_UInt64  duration;         /**< Duration in milliseconds               */
-    BLT_UInt32  sample_rate;      /**< Sample rate in Hz                      */
-    BLT_UInt16  channel_count;    /**< Number of channels                     */
-    BLT_Flags   flags;            /**< Stream Flags                           */
-    BLT_CString data_type;        /**< Human-readable data type               */
+    BLT_Mask       mask;             /**< Mask indicating which fields are valid */
+    BLT_StreamType type;             /**< Stream Type                            */
+    BLT_UInt32     id;               /**< Stream ID                              */
+    BLT_UInt32     nominal_bitrate;  /**< Nominal bitrate                        */
+    BLT_UInt32     average_bitrate;  /**< Average bitrate                        */
+    BLT_UInt32     instant_bitrate;  /**< Instant bitrate                        */
+    BLT_UInt64     size;             /**< Size in bytes                          */
+    BLT_UInt64     duration;         /**< Duration in milliseconds               */
+    BLT_UInt32     sample_rate;      /**< Sample rate in Hz                      */
+    BLT_UInt16     channel_count;    /**< Number of channels                     */
+    BLT_UInt16     width;            /**< Picture Width                          */
+    BLT_UInt16     height;           /**< Picture Height                         */
+    BLT_Flags      flags;            /**< Stream Flags                           */
+    BLT_CString    data_type;        /**< Human-readable data type               */
 } BLT_StreamInfo;
 
 typedef enum {
@@ -81,8 +96,8 @@ typedef enum {
 } BLT_SeekMode;
 
 typedef struct {
-    BLT_UInt64 offset;       /**< Offset from start (between 0 and range)*/
-    BLT_UInt64 range;        /**< Range of possible offsets              */
+    BLT_UInt64 offset;       /**< Offset from start (between 0 and range) */
+    BLT_UInt64 range;        /**< Range of possible offsets               */
 } BLT_StreamPosition;
 
 typedef struct {

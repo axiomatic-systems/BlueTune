@@ -167,7 +167,7 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
         unsigned char key[BLT_MP4_PARSER_MAX_KEY_SIZE];
         unsigned int  key_size = BLT_MP4_PARSER_MAX_KEY_SIZE;
         BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key, &key_size);
-        if (BLT_FAILED(result)) return result;
+        if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
         
         delete self->sample_decrypter;
         self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, key, key_size);
@@ -219,10 +219,14 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
 
     // update the stream info
     BLT_StreamInfo stream_info;
+    stream_info.type          = BLT_STREAM_TYPE_AUDIO;
+    stream_info.id            = track->GetId();
     stream_info.duration      = track->GetDurationMs();
     stream_info.channel_count = audio_desc->GetChannelCount();
     stream_info.sample_rate   = audio_desc->GetSampleRate();
-    stream_info.mask = BLT_STREAM_INFO_MASK_DURATION        |
+    stream_info.mask = BLT_STREAM_INFO_MASK_TYPE            |
+                       BLT_STREAM_INFO_MASK_ID              |
+                       BLT_STREAM_INFO_MASK_DURATION        |
                        BLT_STREAM_INFO_MASK_CHANNEL_COUNT   |
                        BLT_STREAM_INFO_MASK_SAMPLE_RATE;
     
@@ -326,8 +330,16 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
 
     // update the stream info
     BLT_StreamInfo stream_info;
+    stream_info.type     = BLT_STREAM_TYPE_VIDEO;
+    stream_info.id       = track->GetId();
     stream_info.duration = track->GetDurationMs();
-    stream_info.mask = BLT_STREAM_INFO_MASK_DURATION;
+    stream_info.width    = video_desc->GetWidth();
+    stream_info.height   = video_desc->GetHeight();
+    stream_info.mask = BLT_STREAM_INFO_MASK_TYPE     |
+                       BLT_STREAM_INFO_MASK_ID       |
+                       BLT_STREAM_INFO_MASK_DURATION |
+                       BLT_STREAM_INFO_MASK_WIDTH    |
+                       BLT_STREAM_INFO_MASK_HEIGHT;
     
     AP4_MpegSampleDescription* mpeg_desc = NULL;
     if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
@@ -342,7 +354,6 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
                             BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
                             BLT_STREAM_INFO_MASK_DATA_TYPE;
     }
-    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
 
     // setup the output media type
     const void*     decoder_info = NULL;
@@ -367,6 +378,9 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
         }
         media_type_id       = self->video_output.iso_base_es_type_id;
         media_stream_format = sample_desc->GetFormat();
+        
+        stream_info.data_type = "H.264";
+        stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
     }
     unsigned int struct_size = sizeof(BLT_Mp4VideoMediaType)+(decoder_info_length?decoder_info_length-1:0);
     BLT_Mp4VideoMediaType* media_type = (BLT_Mp4VideoMediaType*)ATX_AllocateZeroMemory(struct_size);
@@ -378,6 +392,8 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
     if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], decoder_info, decoder_info_length);
     self->video_output.media_type = (BLT_MediaType*)media_type;
     
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
+
     return BLT_SUCCESS;
 }
 
@@ -418,6 +434,16 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
         ATX_LOG_FINE("no movie in file");
         goto fail;
     }
+    
+    // update the stream info
+    BLT_StreamInfo stream_info;
+    stream_info.type     = BLT_STREAM_TYPE_MULTIPLEXED;
+    stream_info.id       = 0;
+    stream_info.duration = movie->GetDurationMs();
+    stream_info.mask = BLT_STREAM_INFO_MASK_TYPE |
+                       BLT_STREAM_INFO_MASK_ID   |
+                       BLT_STREAM_INFO_MASK_DURATION;    
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     
     // setup the tracks
     result = Mp4Parser_SetupAudioOutput(self, movie);
@@ -568,7 +594,12 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         AP4_Result result = self->track->ReadSample(self->sample++, sample, *sample_buffer);
         if (AP4_FAILED(result)) {
             ATX_LOG_WARNING_1("ReadSample failed (%d)", result);
-            return BLT_ERROR_PORT_HAS_NO_DATA;
+            if (result == AP4_ERROR_EOS) {
+                ATX_LOG_WARNING("incomplete media");
+                return BLT_ERROR_INCOMPLETE_MEDIA;
+            } else {
+                return BLT_ERROR_PORT_HAS_NO_DATA;
+            }
         }
 
         // decrypt the sample if needed
@@ -722,7 +753,7 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
     }
     
     /* set the mode so that the nodes down the chain know the seek has */
-    /* already been done on the stream                                  */
+    /* already been done on the stream                                 */
     *mode = BLT_SEEK_MODE_IGNORE;
 
     return BLT_SUCCESS;

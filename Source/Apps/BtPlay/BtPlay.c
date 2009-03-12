@@ -90,7 +90,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --output-volume=<volume> (between 0.0 and 1.0)\n"
         "  --duration=<n> (seconds)\n"
         "  --load-plugins=<directory>[,<file-extension>]\n"
-        "  --load-plugin=<plugin-filename>\n"
+        "  --load-plugin=<plugin-filename>\n");
+    ATX_ConsoleOutput(
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n"
@@ -141,7 +142,7 @@ BLTP_ParseKey(const char* name_and_value)
     BLTP_Key*    key;
     unsigned int length = ATX_StringLength(name_and_value);
     
-    // we need at least a ':' followed by 32 hex chars
+    /* we need at least a ':' followed by 32 hex chars */
     if (length < 33) {
         fprintf(stderr, "ERROR: invalid syntax for --key argument\n");
         return;
@@ -295,6 +296,7 @@ BLTP_GetKeyByName(BLT_KeyManager* self,
                   unsigned int*   key_size)
 {
     ATX_ListItem* item = ATX_List_GetFirstItem(Options.keys);
+    BLT_COMPILER_UNUSED(self);
     
     /* check the key size */
     if (*key_size < 16) {

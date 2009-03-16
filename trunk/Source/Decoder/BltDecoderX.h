@@ -132,6 +132,17 @@ BLT_Result BLT_DecoderX_AddNodeByName(BLT_DecoderX*  decoder,
                                       BLT_CString    name);
 
 /**
+ * Get the audio volume of the output.
+ */
+BLT_Result BLT_DecoderX_GetVolume(BLT_DecoderX* decoder, float* volume);
+
+/**
+ * Set the audio volume of the output.
+ */
+BLT_Result BLT_DecoderX_SetVolume(BLT_DecoderX* decoder, float volume);
+
+
+/**
  * Get the ATX_Properties object representing the properties of a
  * BLT_DecoderX object.
  */

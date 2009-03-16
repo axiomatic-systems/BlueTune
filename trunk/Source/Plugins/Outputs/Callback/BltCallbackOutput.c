@@ -134,6 +134,7 @@ CallbackOutput_Create(BLT_Module*              module,
 
     /* keep a reference to the callback target */
     self->callback_target = (BLT_PacketConsumer*)target_addr;
+    ATX_REFERENCE_OBJECT(self->callback_target);
 
     /* keep the media type info */
     BLT_MediaType_Clone(constructor->spec.input.media_type, 
@@ -157,6 +158,9 @@ static BLT_Result
 CallbackOutput_Destroy(CallbackOutput* self)
 {
     ATX_LOG_FINE("CallbackOutput::Destroy");
+
+    /* release our target */
+    ATX_RELEASE_OBJECT(self->callback_target);
 
     /* free the media type extensions */
     BLT_MediaType_Free(self->expected_media_type);

@@ -1012,25 +1012,25 @@ Dx9VideoOutput_RenderingThread(Dx9VideoOutput* self)
     BLT_Result result;
 
     while (self->time_to_quit == ATX_FALSE) {
-        BLT_UInt64 sleep_time;
-        BLT_UInt64 now = Dx9VideoOutput_GetHostTime(self);
-        ATX_LOG_FINEST_1("now=%lld", now);
-
-        // default sleep time
-        sleep_time = BLT_DX9_VIDEO_DEFAULT_SLEEP_TIME;
+        BLT_UInt64   sleep_time = BLT_DX9_VIDEO_DEFAULT_SLEEP_TIME;
+        unsigned int picture_count = 0;
+        Dx9VideoOutput_Picture* picture = NULL;
 
         // only try to render if we have one in the bank
         EnterCriticalSection(&self->render_crit_section);
-        if (self->num_pictures > 0) {
+        picture_count = self->num_pictures;
+        picture = &self->pictures[self->cur_picture];
+        LeaveCriticalSection(&self->render_crit_section);
+
+        // if a picture is available, check if it is time to show it
+        if (picture_count > 0) {
             // get the next picture to display
-            Dx9VideoOutput_Picture* picture = &self->pictures[self->cur_picture];
+            BLT_UInt64 now = Dx9VideoOutput_GetHostTime(self);
+            ATX_LOG_FINEST_1("now=%lld", now);
 
             if (picture->display_time <= now+BLT_DX9_VIDEO_DEFAULT_PRESENTATION_LATENCY) {
                 // this picture needs to be displayed
-                ATX_LOG_FINEST_2("rendering pic %d, num in bank: %d", self->cur_picture, self->num_pictures );
-
-                // do the rendering outside the critical section (may wait for screen refresh) 
-                LeaveCriticalSection(&self->render_crit_section);
+                ATX_LOG_FINER_2("rendering pic %d, num in bank: %d", self->cur_picture, self->num_pictures );
                 result = Dx9VideoOutput_RenderPicture(self, picture);
                 if (BLT_SUCCEEDED(result)) {
                     IDirect3DDevice9_Present(self->d3d_device, NULL, NULL, NULL, NULL);
@@ -1047,6 +1047,7 @@ Dx9VideoOutput_RenderingThread(Dx9VideoOutput* self)
                 EnterCriticalSection(&self->render_crit_section);
                 self->cur_picture = (self->cur_picture + 1) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE;
                 self->num_pictures--;
+                LeaveCriticalSection(&self->render_crit_section);
 
                 sleep_time = 0;
             } else {
@@ -1059,12 +1060,20 @@ Dx9VideoOutput_RenderingThread(Dx9VideoOutput* self)
                 }
             }
         }
-        LeaveCriticalSection(&self->render_crit_section);
 
         // sleep before looping 
         if (sleep_time) {
+#if defined(ATX_CONFIG_ENABLE_LOGGING)
+            BLT_UInt64 before = Dx9VideoOutput_GetHostTime(self);
+            BLT_UInt64 after;
+#endif
             ATX_LOG_FINEST_1("sleeping for %ldms", (DWORD)(sleep_time/1000000));
             Sleep((DWORD)(sleep_time/1000000));
+
+#if defined(ATX_CONFIG_ENABLE_LOGGING)
+            after = Dx9VideoOutput_GetHostTime(self);
+            ATX_LOG_FINEST_1("slept for %lld nanos", after-before);
+#endif
         }
     }
 
@@ -1217,7 +1226,7 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
     const BLT_RawVideoMediaType* media_type;
     Dx9VideoOutput_Picture*      picture;
 
-    ATX_LOG_FINEST("Dx9VideoOutput::PutPacket");
+    ATX_LOG_FINER("Dx9VideoOutput::PutPacket");
 
     //if (self->fullscreen_window != NULL)
     //BringWindowToTop(self->fullscreen_window);
@@ -1346,12 +1355,21 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
                 if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
                     delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
 
+                    ATX_LOG_FINER_3("video is early (%lld) master_ts=%lld, packet_ts=%lld", 
+                                    delay, 
+                                    BLT_TimeStamp_ToNanos(master_ts),
+                                    BLT_TimeStamp_ToNanos(packet_ts)); 
+
                     /* clamp the delay to a safe maximum */
                     if (delay > BLT_DX9_VIDEO_OUTPUT_MAX_DELAY) {
                         delay = BLT_DX9_VIDEO_OUTPUT_MAX_DELAY;
+                        ATX_LOG_FINER("video delay clamped to max");
                     }
                 } else {
-                    ATX_LOG_FINER_1("video is late (%lld)", BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts)); 
+                    ATX_LOG_FINER_3("video is late (%lld) master_ts=%lld, packet_ts=%lld", 
+                                    BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts),
+                                    BLT_TimeStamp_ToNanos(master_ts),
+                                    BLT_TimeStamp_ToNanos(packet_ts));  
                 }
             }
             picture->display_time = Dx9VideoOutput_GetHostTime(self)+delay;
@@ -1617,14 +1635,14 @@ Dx9VideoOutput_OnPropertyChanged(ATX_PropertyListener*    _self,
     Dx9VideoOutput* self = ATX_SELF(Dx9VideoOutput, ATX_PropertyListener);
     //BLT_Result result;
 
-    ATX_LOG_FINEST_1("prop changed: %s", name);
+    ATX_LOG_FINE_1("prop changed: %s", name);
 
     if (name && 
         (value == NULL || value->type == ATX_PROPERTY_VALUE_TYPE_INTEGER)) {
         if (ATX_StringsEqual(name, BLT_OUTPUT_NODE_FULLSCREEN)) {
             int going_full = 0;
             if (value != NULL) going_full = value->data.integer;
-            ATX_LOG_FINEST_1("fullscreen prop set to: %d", going_full);
+            ATX_LOG_FINE_1("fullscreen prop set to: %d", going_full);
             if (going_full) {
                 if (self->in_fullscreen == BLT_TRUE) {
                     ATX_LOG_WARNING("cannot enter full screen mode: already in it");

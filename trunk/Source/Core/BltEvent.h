@@ -31,7 +31,8 @@ typedef enum {
     BLT_EVENT_TYPE_INFO,
     BLT_EVENT_TYPE_DEBUG,
     BLT_EVENT_TYPE_STREAM_TOPOLOGY,
-    BLT_EVENT_TYPE_STREAM_INFO
+    BLT_EVENT_TYPE_STREAM_INFO,
+    BLT_EVENT_TYPE_DECODING_ERROR
 } BLT_EventType;
 
 typedef struct BLT_Event BLT_Event;
@@ -68,5 +69,10 @@ typedef struct {
     BLT_Mask       update_mask;
     BLT_StreamInfo info;
 } BLT_StreamInfoEvent;
+
+typedef struct {
+    BLT_Result  result;
+    BLT_CString message;
+} BLT_DecodingErrorEvent;
 
 #endif /* _BLT_EVENT_H_ */

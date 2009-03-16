@@ -561,13 +561,13 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
         BLT_UInt64 packet_duration = (packet_samples*1000000000)/media_type->sample_rate;
         BLT_UInt64 packet_ts       = BLT_TimeStamp_ToNanos(BLT_MediaPacket_GetTimeStamp(packet));
         self->nb_samples_written += packet_samples;
-        if (packet_ts == 0) {
-            /* handle the case where we receive packets with timestamps all set to 0 */
-            self->timestamp_after_buffer += packet_duration;
-        } else {
-            /* use the packet timestamp as our timestamp reference */
-            self->timestamp_after_buffer = packet_ts+packet_duration;
-        }
+        self->timestamp_after_buffer = packet_ts+packet_duration;
+        ATX_LOG_FINE_5("packet_ts=%lld, packet_samples=%lld, packet_duration=%lld, total_written=%lld, ts after buffer=%lld",
+                       packet_ts,
+                       packet_samples, 
+                       packet_duration,
+                       self->nb_samples_written,
+                       self->timestamp_after_buffer);
     }
 
     /* queue the packet */
@@ -756,9 +756,15 @@ Win32AudioOutput_GetStatus(BLT_OutputNode*       _self,
         /* position.u.sample only has 32-bit of presision              */
         BLT_UInt64 delay_samples = ((BLT_UInt64)(self->nb_samples_written - position.u.sample))%0x100000000;
         BLT_UInt64 delay_nanos = (delay_samples * 1000000000) / self->media_type.sample_rate;
+        ATX_LOG_FINER_2("audio buffer delay=%lld nanoseconds, %lld samples", delay_nanos, delay_samples);
         if (self->timestamp_after_buffer >= delay_nanos) {
+            ATX_LOG_FINER_2("timestamp after buffer=%lld - media_time=%lld", 
+                            self->timestamp_after_buffer, 
+                            self->timestamp_after_buffer-delay_nanos);
             status->media_time = BLT_TimeStamp_FromNanos(self->timestamp_after_buffer-delay_nanos);
         } else {
+            ATX_LOG_FINER_1("timestamp after buffer=%lld -> less than delay!", 
+                            self->timestamp_after_buffer);
             status->media_time.seconds = status->media_time.nanoseconds = 0;
         }
     } else {
@@ -777,6 +783,8 @@ Win32AudioOutput_Stop(BLT_MediaNode* _self)
 {
     Win32AudioOutput* self = ATX_SELF_EX(Win32AudioOutput, BLT_BaseMediaNode, BLT_MediaNode);
     waveOutReset(self->device_handle);
+    self->nb_samples_written = 0;
+    self->timestamp_after_buffer = 0;
 
     return BLT_SUCCESS;
 }

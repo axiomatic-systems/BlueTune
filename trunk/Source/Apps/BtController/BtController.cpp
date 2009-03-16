@@ -34,6 +34,7 @@ public:
     void OnNackNotification(BLT_DecoderServer_Message::CommandId id,
                             BLT_Result                           result);
     void OnDecoderStateNotification(BLT_DecoderServer::State state);
+    void OnDecoderEventNotification(BLT_DecoderServer::DecoderEvent& event);
     void OnStreamTimeCodeNotification(BLT_TimeCode time_code);
     void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
     void OnPropertyNotification(BLT_PropertyScope        scope,
@@ -125,6 +126,30 @@ BtController::OnDecoderStateNotification(BLT_DecoderServer::State state)
       default:
         ATX_ConsoleOutput("[UNKNOWN]\n");
         break;
+    }
+}
+
+/*----------------------------------------------------------------------
+|    BtController::OnDecoderEventNotification
++---------------------------------------------------------------------*/
+void 
+BtController::OnDecoderEventNotification(BLT_DecoderServer::DecoderEvent& event)
+{
+    ATX_ConsoleOutput("INFO: Decoder Event - ");
+    switch (event.m_Type) {
+        case BLT_DecoderServer::DecoderEvent::EVENT_TYPE_DECODING_ERROR: {
+            BLT_DecoderServer::DecoderEvent::DecodingErrorDetails* details = 
+                static_cast<BLT_DecoderServer::DecoderEvent::DecodingErrorDetails*>(event.m_Details);
+            ATX_ConsoleOutputF("[DECODING ERROR] result=%d (%s) message=%s\n",
+                               details->m_ResultCode,
+                               BLT_ResultText(details->m_ResultCode),
+                               details->m_Message.GetChars());
+            break;
+        }
+        
+        default:
+            ATX_ConsoleOutputF("[UNKNOWN] type=%d\n", (int)event.m_Type);
+            break;
     }
 }
 

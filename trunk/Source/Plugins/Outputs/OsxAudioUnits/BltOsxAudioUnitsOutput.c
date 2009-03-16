@@ -25,6 +25,7 @@
 #include "BltCore.h"
 #include "BltPacketConsumer.h"
 #include "BltMediaPacket.h"
+#include "BltVolumeControl.h"
 
 #if !defined(TARGET_OS_IPHONE)
 
@@ -56,6 +57,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
     ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
+    ATX_IMPLEMENTS(BLT_VolumeControl);
 
     /* members */
     AudioDeviceID     audio_device_id;
@@ -83,6 +85,7 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, ATX_Referenceable)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_OutputNode)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_PacketConsumer)
+ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_VolumeControl)
 
 BLT_METHOD OsxAudioUnitsOutput_Resume(BLT_MediaNode* self);
 BLT_METHOD OsxAudioUnitsOutput_Stop(BLT_MediaNode* self);
@@ -95,7 +98,7 @@ OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
 {
     unsigned int watchdog = 20000000/BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL;
     
-    ATX_LOG_FINEST("start"); 
+    ATX_LOG_FINER("draining packets"); 
 
     /* lock the queue */
     pthread_mutex_lock(&self->lock);
@@ -103,12 +106,12 @@ OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
     /* wait until there are no more packets in the queue */
     while (ATX_List_GetItemCount(self->packet_queue)) {
         pthread_mutex_unlock(&self->lock);
-        ATX_LOG_FINEST("waiting..."); 
+        ATX_LOG_FINER("waiting..."); 
         usleep(BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL);
         pthread_mutex_lock(&self->lock);
         
         if (--watchdog == 0) {
-            ATX_LOG_WARNING("MaxOSXOutput::Drain - *** the watchdog bit us ***");
+            ATX_LOG_WARNING("*** the watchdog bit us ***");
             break;
         }
     }
@@ -116,7 +119,7 @@ OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
     /* unlock the queue */
     pthread_mutex_unlock(&self->lock);
     
-    ATX_LOG_FINEST("end"); 
+    ATX_LOG_FINER("end"); 
 
     return BLT_SUCCESS;
 }
@@ -157,14 +160,13 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         return 0;
     }
     
-    ATX_LOG_FINEST_2("request for %d bytes, %d frames", 
-                     requested, inNumberFrames);
+    ATX_LOG_FINEST_2("request for %d bytes, %d frames", requested, inNumberFrames);
     
     /* lock the packet queue */
     pthread_mutex_lock(&self->lock);
     
     /* return now if we're paused */
-    if (self->paused) goto end;
+    //if (self->paused) goto end;
     
     /* abort early if we have no packets */
     if (ATX_List_GetItemCount(self->packet_queue) == 0) goto end;
@@ -194,8 +196,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
             BLT_TimeStamp_Set(self->media_time_snapshot.rendered_duration, 0, 0);
             timestamp_measured = ATX_TRUE;
             
-            ATX_LOG_FINEST_2("rendered TS: packet ts=%" ATX_INT64_PRINTF_FORMAT
-                             " host ts=%" ATX_INT64_PRINTF_FORMAT,
+            ATX_LOG_FINEST_2("rendered TS: packet ts=%lld, host ts=%lld",
                              BLT_TimeStamp_ToNanos(packet_ts),
                              self->media_time_snapshot.rendered_host_time);
         }
@@ -209,8 +210,8 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
             ATX_List_RemoveItem(self->packet_queue, item);
             packet = NULL;
             media_type = NULL;
-            packet = NULL;
-            media_type = NULL;
+            ATX_LOG_FINER_1("media packet fully consumed, %d left in queue",
+                            ATX_List_GetItemCount(self->packet_queue));
         } else {
             /* only copy a portion of the payload */
             chunk_size = requested;
@@ -271,8 +272,10 @@ OsxAudioUnitsOutput_QueueItemDestructor(ATX_ListDataDestructor* self,
 static BLT_Result
 OsxAudioUnitsOutput_QueuePacket(OsxAudioUnitsOutput* self, BLT_MediaPacket* packet)
 {
-    BLT_Result   result = BLT_SUCCESS;
+    BLT_Result   result   = BLT_SUCCESS;
     unsigned int watchdog = BLT_OSX_AUDIO_UNITS_OUTPUT_MAX_QUEUE_WAIT_COUNT;
+    
+    ATX_LOG_FINER("queuing packet");
     
     /* lock the queue */
     pthread_mutex_lock(&self->lock);
@@ -284,13 +287,14 @@ OsxAudioUnitsOutput_QueuePacket(OsxAudioUnitsOutput* self, BLT_MediaPacket* pack
         pthread_mutex_lock(&self->lock);
         
         if (--watchdog == 0) {
-            ATX_LOG_WARNING("MaxOSXOutput::QueuePacket - *** the watchdog bit us ***");
+            ATX_LOG_WARNING("*** the watchdog bit us ***");
             goto end;
         }
     }
     
     /* add the packet to the queue */
     ATX_List_AddData(self->packet_queue, packet);
+    ATX_LOG_FINER_1("packet queued, %d in queue", ATX_List_GetItemCount(self->packet_queue));
     
     /* keep a reference to the packet */
     BLT_MediaPacket_AddReference(packet);
@@ -359,16 +363,14 @@ OsxAudioUnitsOutput_SetStreamFormat(OsxAudioUnitsOutput*    self,
     if (BLT_FAILED(result)) return result;
 
     /* set the audio unit property */
-    pthread_mutex_lock(&self->lock);
     result = AudioUnitSetProperty(self->audio_unit,
                                   kAudioUnitProperty_StreamFormat,
                                   kAudioUnitScope_Input,
                                   0,
                                   &audio_desc,
                                   sizeof(audio_desc));
-    pthread_mutex_unlock(&self->lock);
     if (result != noErr) {
-        ATX_LOG_WARNING("OsxAudioUnitsOutput::SetStreamFormat - AudioUnitSetProperty failed");
+        ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", result);
         return BLT_FAILURE;
     }
     
@@ -487,14 +489,14 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     component_desc.componentFlagsMask    = 0;
     component = FindNextComponent(NULL, &component_desc);
     if (component == NULL) {
-        ATX_LOG_WARNING("OsxAudioUnitsOutput::Create - FindNextComponent failed");
+        ATX_LOG_WARNING("FindNextComponent failed");
         return BLT_FAILURE;
     }
     
     /* open the audio unit (we will initialize it later) */
     result = OpenAComponent(component, &audio_unit);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Create - OpenAComponent failed (%d)", result);
+        ATX_LOG_WARNING_1("OpenAComponent failed (%d)", result);
         return BLT_FAILURE;
     }
 
@@ -535,6 +537,7 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     ATX_SET_INTERFACE   (self, OsxAudioUnitsOutput, BLT_PacketConsumer);
     ATX_SET_INTERFACE   (self, OsxAudioUnitsOutput, BLT_OutputNode);
     ATX_SET_INTERFACE   (self, OsxAudioUnitsOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (self, OsxAudioUnitsOutput, BLT_VolumeControl);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
@@ -556,11 +559,9 @@ OsxAudioUnitsOutput_Destroy(OsxAudioUnitsOutput* self)
     if (self->audio_unit) {
         ComponentResult result;
         
-        pthread_mutex_lock(&self->lock);
         result = CloseComponent(self->audio_unit);
-        pthread_mutex_unlock(&self->lock);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Destroy - CloseComponent failed (%d)", result);
+            ATX_LOG_WARNING_1("CloseComponent failed (%d)", result);
         }
     }
     
@@ -612,18 +613,17 @@ OsxAudioUnitsOutput_Seek(BLT_MediaNode* _self,
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
-    pthread_mutex_lock(&self->lock);
 
     /* flush the queue */
+    pthread_mutex_lock(&self->lock);
     ATX_List_Clear(self->packet_queue);
+    pthread_mutex_unlock(&self->lock);
     
     /* reset the device */
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Stop - AudioUnitReset failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", result);
     }
-
-    pthread_mutex_unlock(&self->lock);
 
     return BLT_SUCCESS;
 }
@@ -644,6 +644,7 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
     
     /* check if the queue is full */
     if (ATX_List_GetItemCount(self->packet_queue) >= self->max_packets_in_queue) {
+        ATX_LOG_FINER("packet queue is full");
         status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
     }
 
@@ -652,15 +653,24 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
     if (self->media_time_snapshot.rendered_host_time) {
         UInt64 host_time  = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
         UInt64 media_time = BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_packet_ts); 
-        UInt64 max_media_time;
+        ATX_LOG_FINER_3("host time = %lld, last rendered packet = %lld, rendered ts = %lld", 
+                        host_time, 
+                        self->media_time_snapshot.rendered_host_time,
+                        media_time);
         if (host_time > self->media_time_snapshot.rendered_host_time) {
             media_time += host_time-self->media_time_snapshot.rendered_host_time;
         } 
+        UInt64 max_media_time;
         max_media_time = BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_packet_ts) +
                          BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_duration);
-        if (media_time > max_media_time) media_time = max_media_time;
+        ATX_LOG_FINER_2("computed media time = %lld, max media time = %lld",
+                        media_time, max_media_time);
+        if (media_time > max_media_time) {
+            ATX_LOG_FINER("media time clamped to max");
+            media_time = max_media_time;
+        }
         status->media_time = BLT_TimeStamp_FromNanos(media_time);
-        ATX_LOG_FINEST_1("media time = %" ATX_INT64_PRINTF_FORMAT, media_time);
+        ATX_LOG_FINER_1("media time = %lld", media_time);
     }
     
     pthread_mutex_unlock(&self->lock);
@@ -678,11 +688,9 @@ OsxAudioUnitsOutput_Start(BLT_MediaNode* _self)
     ComponentResult      result;
     
     /* start the audio unit */
-    pthread_mutex_lock(&self->lock);
     result = AudioOutputUnitStart(self->audio_unit);
-    pthread_mutex_unlock(&self->lock);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Start - AudioUnitOutputStart failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", result);
     }
     
     return BLT_SUCCESS;
@@ -697,23 +705,22 @@ OsxAudioUnitsOutput_Stop(BLT_MediaNode* _self)
     OsxAudioUnitsOutput* self = ATX_SELF_EX(OsxAudioUnitsOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ComponentResult      result;
     
-    pthread_mutex_lock(&self->lock);
 
     /* flush the queue */
+    pthread_mutex_lock(&self->lock);
     ATX_List_Clear(self->packet_queue);
+    pthread_mutex_unlock(&self->lock);
 
     /* stop the and reset audio unit */
     result = AudioOutputUnitStop(self->audio_unit);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Stop - AudioUnitOutputStop failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", result);
     }
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Stop - AudioUnitReset failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", result);
     }
     
-    pthread_mutex_unlock(&self->lock);
-
     return BLT_SUCCESS;
 }
 
@@ -726,14 +733,13 @@ OsxAudioUnitsOutput_Pause(BLT_MediaNode* _self)
     OsxAudioUnitsOutput* self = ATX_SELF_EX(OsxAudioUnitsOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ComponentResult      result;
     
+    ATX_LOG_FINE("pausing output");
     if (!self->paused) {
-        pthread_mutex_lock(&self->lock);
         self->paused = BLT_TRUE;
         result = AudioOutputUnitStop(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Pause - AudioUnitOutputStop failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", result);
         }
-        pthread_mutex_unlock(&self->lock);
     }
     return BLT_SUCCESS;
 }
@@ -747,16 +753,53 @@ OsxAudioUnitsOutput_Resume(BLT_MediaNode* _self)
     OsxAudioUnitsOutput* self = ATX_SELF_EX(OsxAudioUnitsOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ComponentResult      result;
 
+    ATX_LOG_FINE("resuming output");
     if (self->paused) {
-        pthread_mutex_lock(&self->lock);
         self->paused = BLT_FALSE;
         result = AudioOutputUnitStart(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Resume - AudioUnitOutputStart failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", result);
         }
-        pthread_mutex_unlock(&self->lock);
     }
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioUnitsOutput_SetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioUnitsOutput_SetVolume(BLT_VolumeControl* _self, float volume)
+{
+    OsxAudioUnitsOutput* self = ATX_SELF(OsxAudioUnitsOutput, BLT_VolumeControl);
+    ComponentResult      result;
+    Float32              au_volume = volume;
+    
+    result = AudioUnitSetParameter(self->audio_unit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, au_volume, 0);
+    if (result == noErr) {
+        return BLT_SUCCESS;
+    } else {
+        return BLT_FAILURE;
+    }    
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioUnitsOutput_GetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioUnitsOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
+{
+    OsxAudioUnitsOutput* self = ATX_SELF(OsxAudioUnitsOutput, BLT_VolumeControl);
+    ComponentResult      result;
+    Float32              au_volume = 1.0f;
+    
+    result = AudioUnitGetParameter(self->audio_unit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, &au_volume);
+    if (result == noErr) {
+        *volume = au_volume;
+        return BLT_SUCCESS;
+    } else {
+        *volume = 1.0f;
+        return BLT_FAILURE;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -771,13 +814,13 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     
     BLT_COMPILER_UNUSED(stream);
         
-    ATX_LOG_FINER("OsxAudioUnitsOutput::Activate");
+    ATX_LOG_FINER("start");
 
     /* initialize the output */
     if (self->audio_unit) {
         result = AudioUnitInitialize(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Activate - AudioUnitInitialize failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitInitialize failed (%d)", result);
             return BLT_FAILURE;
         }
     }
@@ -804,7 +847,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                                       &audio_desc,
                                       sizeof(audio_desc));
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Activate - AudioUnitSetProperty failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", result);
             return BLT_FAILURE;
         }
     }
@@ -819,7 +862,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                                   &callback, 
                                   sizeof(callback));
     if (result != noErr) {
-        ATX_LOG_SEVERE_1("OsxAudioUnitsOutput::Activate - AudioUnitSetProperty failed when setting callback (%d)", result);
+        ATX_LOG_SEVERE_1("AudioUnitSetProperty failed when setting callback (%d)", result);
         return BLT_FAILURE;
     }
 
@@ -841,7 +884,7 @@ OsxAudioUnitsOutput_Deactivate(BLT_MediaNode* _self)
     if (self->audio_unit) {
         result = AudioUnitUninitialize(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("OsxAudioUnitsOutput::Deactivate - AudioUnitUninitialize failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitUninitialize failed (%d)", result);
             return BLT_FAILURE;
         }
     }
@@ -858,6 +901,7 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioUnitsOutput)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioUnitsOutput, BLT_OutputNode)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioUnitsOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioUnitsOutput, BLT_PacketConsumer)
+    ATX_GET_INTERFACE_ACCEPT   (OsxAudioUnitsOutput, BLT_VolumeControl)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -898,6 +942,14 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_OutputNode)
     OsxAudioUnitsOutput_GetStatus
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_VolumeControl interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_VolumeControl)
+    OsxAudioUnitsOutput_GetVolume,
+    OsxAudioUnitsOutput_SetVolume
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

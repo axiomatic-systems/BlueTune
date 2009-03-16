@@ -5,10 +5,10 @@
 |   (c) 2002-2006 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
- ****************************************************************/
+****************************************************************/
 /** @file
- * BlueTune Async Layer
- */
+* BlueTune Async Layer
+*/
 
 /*----------------------------------------------------------------------
 |    includes
@@ -124,7 +124,7 @@ BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
 +---------------------------------------------------------------------*/
 BLT_DecoderServer::~BLT_DecoderServer()
 {
-    ATX_LOG_FINE("BLT_DecoderServer::~BLT_DecoderServer");
+    ATX_LOG_FINE("enter");
 
     // send a message to our thread to make it terminate
     PostMessage(new NPT_TerminateMessage);
@@ -194,6 +194,8 @@ BLT_DecoderServer::Run()
         m_Client->PostMessage(new BLT_DecoderClient_VolumeNotificationMessage(volume));
     }
 
+    SetupIsComplete();
+
     // decoding loop
     do {
         do {
@@ -207,20 +209,23 @@ BLT_DecoderServer::Run()
         if (m_State == STATE_PLAYING) {
             result = BLT_Decoder_PumpPacket(m_Decoder);
             if (BLT_FAILED(result)) {
-                ATX_LOG_FINE_1("BLT_DecoderServer::Run - stopped on %d", result);
+                ATX_LOG_FINE_1("stopped on %d", result);
+                if (result != BLT_ERROR_EOS) {
+                    m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(result, "error from BLT_Decoder_PumpPacket"));
+                }
                 SetState(STATE_EOS);
                 result = BLT_SUCCESS;
             } else {
                 UpdateStatus();
             }
         } else {
-            ATX_LOG_FINE("BLT_DecoderServer::Run - waiting for message");
+            ATX_LOG_FINE("waiting for message");
             result = m_MessageQueue->PumpMessage(NPT_TIMEOUT_INFINITE);
-            ATX_LOG_FINE("BLT_DecoderServer::Run - got message");
+            ATX_LOG_FINE("got message");
         }
     } while (BLT_SUCCEEDED(result) || result == NPT_ERROR_TIMEOUT);
 
-    ATX_LOG_FINE("BLT_DecoderServer::Run - Received Terminate Message");
+    ATX_LOG_FINE("received Terminate Message");
 
     // unregister as an event listener
     BLT_Decoder_SetEventListener(m_Decoder, NULL);
@@ -229,6 +234,15 @@ BLT_DecoderServer::Run()
     if (m_Decoder != NULL) {
         BLT_Decoder_Destroy(m_Decoder);
     }  
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderServer::DecoderEvent::DecoderEvent
++---------------------------------------------------------------------*/
+BLT_DecoderServer::DecoderEvent::DecoderEvent(BLT_Result result_code, const char* message) :
+    m_Type(EVENT_TYPE_DECODING_ERROR)
+{
+    m_Details = new BLT_DecoderServer::DecoderEvent::DecodingErrorDetails(result_code, message);
 }
 
 /*----------------------------------------------------------------------
@@ -310,13 +324,13 @@ BLT_DecoderServer::UpdateStatus()
         ATX_UInt64 ratio = status.position.range/m_PositionUpdateRange;
         ATX_UInt64 offset;
         if (ratio == 0) {
- 	        offset = 0;
-	    } else {
-	        offset = status.position.offset/ratio;
-	    }
-	    if (offset != m_DecoderStatus.position.offset) {
-	        m_DecoderStatus.position.offset = offset;
-	        NotifyPosition();
+            offset = 0;
+        } else {
+            offset = status.position.offset/ratio;
+        }
+        if (offset != m_DecoderStatus.position.offset) {
+            m_DecoderStatus.position.offset = offset;
+            NotifyPosition();
         }
     }
 
@@ -332,7 +346,7 @@ BLT_DecoderServer::SetState(State state)
     // shortcut
     if (state == m_State) return BLT_SUCCESS;
 
-    ATX_LOG_FINE_2("BLT_DecoderServer::SetState - from %d to %d", m_State, state);
+    ATX_LOG_FINE_2("state change from %d to %d", m_State, state);
 
     m_State = state;
 
@@ -361,7 +375,7 @@ BLT_DecoderServer::OnSetInputCommand(BLT_CString name, BLT_CString type)
 {
     BLT_Result result;
 
-    ATX_LOG_FINE_2("BLT_DecoderServer::OnSetInputCommand (%s / %s)",
+    ATX_LOG_FINE_2("set input (%s / %s)",
                    BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     result = BLT_Decoder_SetInput(m_Decoder, name, type);
 
@@ -390,7 +404,8 @@ BLT_DecoderServer::OnSetOutputCommand(BLT_CString name, BLT_CString type)
 {
     BLT_Result result;
 
-    ATX_LOG_FINE("BLT_DecoderServer::OnSetOutputCommand");
+    ATX_LOG_FINE_2("set output (%s / %s",
+                   BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     result = BLT_Decoder_SetOutput(m_Decoder, name, type);
     if (BLT_SUCCEEDED(result)) {
         // notify of the new volume
@@ -419,7 +434,7 @@ BLT_DecoderServer::Play()
 void
 BLT_DecoderServer::OnPlayCommand()
 {
-    ATX_LOG_FINE("BLT_DecoderServer::OnPlayCommand");
+    ATX_LOG_FINE("enter");
 
     SetState(STATE_PLAYING);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_PLAY, BLT_SUCCESS);
@@ -439,7 +454,7 @@ BLT_Result BLT_DecoderServer::Stop()
 void
 BLT_DecoderServer::OnStopCommand()
 {
-    ATX_LOG_FINE("BLT_DecoderServer::OnStopCommand");
+    ATX_LOG_FINE("enter");
     BLT_Decoder_Stop(m_Decoder);
     SetState(STATE_STOPPED);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_STOP, BLT_SUCCESS);
@@ -460,7 +475,7 @@ BLT_DecoderServer::Pause()
 void
 BLT_DecoderServer::OnPauseCommand()
 {
-    ATX_LOG_FINE("BLT_DecoderServer::OnPauseCommand");
+    ATX_LOG_FINE("enter");
     BLT_Decoder_Pause(m_Decoder);
     SetState(STATE_PAUSED);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_PAUSE, BLT_SUCCESS);
@@ -481,7 +496,7 @@ BLT_DecoderServer::Ping(const void* cookie)
 void
 BLT_DecoderServer::OnPingCommand(const void* cookie)
 {
-    ATX_LOG_FINE("BLT_DecoderServer::OnPingCommand");
+    ATX_LOG_FINE("enter");
     BLT_DecoderClient_Message* pong;
     pong = new BLT_DecoderClient_PongNotificationMessage(cookie);
     m_Client->PostMessage(pong);
@@ -504,8 +519,7 @@ void
 BLT_DecoderServer::OnSeekToTimeCommand(BLT_UInt64 time)
 {
     BLT_Result result;
-    ATX_LOG_FINE_1("BLT_DecoderServer::OnSeekToTimeCommand "
-                   "[%02d]", (int)time);
+    ATX_LOG_FINE_1("[%d]", (int)time);
     result = BLT_Decoder_SeekToTime(m_Decoder, time);
     if (BLT_SUCCEEDED(result)) {
         UpdateStatus();
@@ -534,8 +548,7 @@ void
 BLT_DecoderServer::OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range)
 {
     BLT_Result result;
-    ATX_LOG_FINE_2("BLT_DecoderServer::OnSeekToPositionCommand "
-                   "[%d:%d]", offset, range);
+    ATX_LOG_FINE_2("[%d:%d]", (int)offset, (int)range);
     result = BLT_Decoder_SeekToPosition(m_Decoder, offset, range);
     if (BLT_SUCCEEDED(result)) {
         UpdateStatus();
@@ -564,7 +577,7 @@ void
 BLT_DecoderServer::OnRegisterModuleCommand(BLT_Module* module)
 {
     BLT_Result result;
-    ATX_LOG_FINE("BLT_DecoderServer::OnRegisterModuleCommand");
+    ATX_LOG_FINE("enter");
     result = BLT_Decoder_RegisterModule(m_Decoder, module);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_REGISTER_MODULE, result);
 }
@@ -586,7 +599,7 @@ void
 BLT_DecoderServer::OnAddNodeCommand(BLT_CString name)
 {
     BLT_Result result;
-    ATX_LOG_FINE_1("BLT_DecoderServer::OnAddNodeCommand [%s]", name);
+    ATX_LOG_FINE_1("node name = %s", name);
     result = BLT_Decoder_AddNodeByName(m_Decoder, NULL, name);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_ADD_NODE, result);
 }
@@ -644,7 +657,7 @@ BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope        scope,
                                         const ATX_PropertyValue* value)
 {
     BLT_Result result;
-    ATX_LOG_FINE_1("BLT_DecoderServer::SetProperty [%s]", name.GetChars());
+    ATX_LOG_FINE_1("[%s]", name.GetChars());
 
     ATX_Properties* properties = NULL;
     switch (scope) {
@@ -681,6 +694,16 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
               new BLT_DecoderClient_StreamInfoNotificationMessage(
                   e->update_mask,
                   e->info));
+          break;
+      }
+
+      case BLT_EVENT_TYPE_DECODING_ERROR: {
+          BLT_DecodingErrorEvent* e = (BLT_DecodingErrorEvent*)event;
+          m_Client->PostMessage(
+              new BLT_DecoderClient_DecoderEventNotificationMessage(
+                e->result,
+                e->message));
+          break;
       }
 
       default:

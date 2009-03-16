@@ -448,7 +448,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     // setup the tracks
     result = Mp4Parser_SetupAudioOutput(self, movie);
     if (BLT_FAILED(result)) goto fail;
-    Mp4Parser_SetupVideoOutput(self, movie);
+    result = Mp4Parser_SetupVideoOutput(self, movie);
     if (BLT_FAILED(result)) goto fail;
     
     // check that we have at least one media track

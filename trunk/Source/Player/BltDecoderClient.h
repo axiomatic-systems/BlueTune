@@ -33,6 +33,7 @@ public:
                                     BLT_Result                     /*result*/) {}
     virtual void OnPongNotification(const void* /*cookie*/) {}
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State /*state*/) {}
+    virtual void OnDecoderEventNotification(BLT_DecoderServer::DecoderEvent& /*event*/) {}
     virtual void OnVolumeNotification(float /*volume*/) {}
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode /*timecode*/) {}
     virtual void OnStreamPositionNotification(BLT_StreamPosition& /*position*/) {}
@@ -151,6 +152,27 @@ public:
 private:
     // members
     BLT_DecoderServer::State m_State;
+};
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderClient_DecoderEventNotificationMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderClient_DecoderEventNotificationMessage :
+    public BLT_DecoderClient_Message
+{
+public:
+    // constructor for decoder events of type DECODER_EVENT_TYPE_DECODING_ERROR
+    BLT_DecoderClient_DecoderEventNotificationMessage(BLT_Result  result_code,
+                                                      const char* message):
+        m_Event(result_code, message) {}
+    NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
+        handler->OnDecoderEventNotification(m_Event);
+        return NPT_SUCCESS;
+    }
+
+private:
+    // members
+    BLT_DecoderServer::DecoderEvent m_Event;
 };
 
 /*----------------------------------------------------------------------

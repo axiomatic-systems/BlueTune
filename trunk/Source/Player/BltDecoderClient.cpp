@@ -26,7 +26,7 @@
 |   BLT_DecoderClient_Message::MessageType
 +---------------------------------------------------------------------*/
 NPT_Message::Type 
-BLT_DecoderClient_Message::MessageType = "BLT_DecoderClient Message";
+BLT_DecoderClient_Message::MessageType = "bluetune.messages.decoder.client";
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderClient::BLT_DecoderClient

@@ -251,6 +251,9 @@ protected:
     virtual void OnDecoderStateNotification(BLT_DecoderServer::State state) {
         if (m_Listener) m_Listener->OnDecoderStateNotification(state);
     }
+    virtual void OnDecoderEventNotification(BLT_DecoderServer::DecoderEvent& event) {
+        if (m_Listener) m_Listener->OnDecoderEventNotification(event);
+    }
     virtual void OnStreamTimeCodeNotification(BLT_TimeCode timecode) {
         if (m_Listener) m_Listener->OnStreamTimeCodeNotification(timecode);
     }
@@ -296,6 +299,7 @@ typedef enum {
     BLT_PLAYER_EVENT_TYPE_NACK,
     BLT_PLAYER_EVENT_TYPE_PONG_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_DECODER_STATE_NOTIFICATION,
+    BLT_PLAYER_EVENT_TYPE_DECODING_ERROR_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_STREAM_TIMECODE_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_STREAM_POSITION_NOTIFICATION,
     BLT_PLAYER_EVENT_TYPE_STREAM_INFO_NOTIFICATION,
@@ -325,6 +329,11 @@ typedef enum {
 } BLT_Player_DecoderState;
 
 typedef struct {
+    BLT_Result  result_code;
+    const char* message;
+} BLT_Player_DecodingError;
+
+typedef struct {
     BLT_Player_EventType type;
 } BLT_Player_Event;
 
@@ -343,6 +352,11 @@ typedef struct {
     BLT_Player_Event base;
     const void*      cookie;
 } BLT_Player_PongNotificationEvent;
+
+typedef struct {
+    BLT_Player_Event         base;
+    BLT_Player_DecodingError error;
+} BLT_Player_DecodingErrorNotificationEvent;
 
 typedef struct {
     BLT_Player_Event        base;

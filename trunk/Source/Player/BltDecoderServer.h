@@ -386,7 +386,35 @@ class BLT_DecoderServer : public NPT_Thread,
         STATE_PAUSED,
         STATE_EOS
     } State;
+        
+    struct DecoderEvent {
+        // types
+        typedef enum {
+            EVENT_TYPE_DECODING_ERROR // details point to a DecodingErrorDetails
+        } Type;
 
+        struct Details {
+            virtual ~Details() {}
+        };
+        
+        struct DecodingErrorDetails : public Details {
+            DecodingErrorDetails(BLT_Result result_code, const char* message) :
+                m_ResultCode(result_code), m_Message(message) {}
+            BLT_Result m_ResultCode;
+            NPT_String m_Message;
+        };
+        
+        // constructor for events of type DECODER_EVENT_TYPE_DECODING_ERROR
+        DecoderEvent(BLT_Result result_code, const char* message);
+    
+        // destructor
+        ~DecoderEvent() { delete m_Details; }
+        
+        // public members
+        Type     m_Type;
+        Details* m_Details;
+    };
+    
     // methods
     BLT_DecoderServer(NPT_MessageReceiver* client);
     virtual ~BLT_DecoderServer();
@@ -437,7 +465,7 @@ class BLT_DecoderServer : public NPT_Thread,
                                    const char*              name,
                                    const ATX_PropertyValue* value);
 
- private:
+ protected:
     // methods
     BLT_Result SendReply(BLT_DecoderServer_Message::CommandId id, 
                          BLT_Result                           result);
@@ -445,6 +473,7 @@ class BLT_DecoderServer : public NPT_Thread,
     BLT_Result UpdateStatus();
     BLT_Result NotifyPosition();
     BLT_Result NotifyTimeCode();
+    virtual void SetupIsComplete() {} // called when Run method of thread has finished setup but not yet entered loop
 
     // members
     BLT_Decoder*         m_Decoder;

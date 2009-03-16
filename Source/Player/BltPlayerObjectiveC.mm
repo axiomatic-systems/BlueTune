@@ -14,18 +14,6 @@
 #import "NptCocoaMessageQueue.h"
 
 /*----------------------------------------------------------------------
-|   constants
-+---------------------------------------------------------------------*/
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_ACK_WAS_RECEIVED               0x0001
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_NACK_WAS_RECEIVED              0x0002
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_PONG_WAS_RECEIVED              0x0004
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_DECODER_STATE_DID_CHANGE       0x0008
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_STREAM_TIMECODE_DID_CHANGE     0x0010
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_STREAM_POSITION_DID_CHANGE     0x0020
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_STREAM_INFO_DID_CHANGE         0x0040
-#define BLT_PLAYER_DELEGATE_RESPONDS_TO_PROPERTY_DID_CHANGE            0x0080
-
-/*----------------------------------------------------------------------
 |   BLT_PlayerObjectiveC_Listener
 +---------------------------------------------------------------------*/
 class BLT_PlayerObjectiveC_Listener : public BLT_Player::EventListener {

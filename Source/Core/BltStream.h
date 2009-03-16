@@ -31,7 +31,7 @@
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_STREAM_INFO_MASK_ALL             0xFFFFFFFF
+#define BLT_STREAM_INFO_MASK_ALL             0x1FFF
 
 #define BLT_STREAM_INFO_MASK_TYPE            0x0001
 #define BLT_STREAM_INFO_MASK_ID              0x0002

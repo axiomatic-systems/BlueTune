@@ -474,7 +474,15 @@ FfmpegDecoder_Destroy(FfmpegDecoder* self)
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
-    /* TODO: destroy avcodec resources */
+    /* release avcodec resources */
+    if (self->codec_context) {
+        avcodec_close(self->codec_context);
+        av_free(self->codec_context);
+    }
+    if (self->frame) av_free(self->frame);
+    
+    /* free any buffered packet */
+    if (self->output.picture) BLT_MediaPacket_Release(self->output.picture);
 
     /* free the object memory */
     ATX_FreeMemory(self);
@@ -505,6 +513,33 @@ FfmpegDecoder_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
+|    FfmpegDecoder_Seek
++---------------------------------------------------------------------*/
+BLT_METHOD
+FfmpegDecoder_Seek(BLT_MediaNode* _self,
+                   BLT_SeekMode*  mode,
+                   BLT_SeekPoint* point)
+{
+    FfmpegDecoder* self = ATX_SELF_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+
+    BLT_COMPILER_UNUSED(mode);
+    BLT_COMPILER_UNUSED(point);
+
+    /* clear the eos flags */
+    self->input.eos   = BLT_FALSE;
+    self->output.eos  = BLT_FALSE;
+
+    /* flush anything that may be pending */
+    avcodec_flush_buffers(self->codec_context);
+    if (self->output.picture) {
+        BLT_MediaPacket_Release(self->output.picture);
+        self->output.picture = NULL;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FfmpegDecoder)
@@ -524,7 +559,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    FfmpegDecoder_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------

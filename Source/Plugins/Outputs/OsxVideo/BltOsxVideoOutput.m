@@ -42,7 +42,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.video")
 #define BLT_OSX_VIDEO_MIN_PICTURE_WIDTH  8
 #define BLT_OSX_VIDEO_MIN_PICTURE_HEIGHT 8
 
-#define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY   2000000000 /* 2 seconds */
+#define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY    2000000000 /* 2 seconds   */
+#define BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS 500000000  /* 0.5 seconds */
 
 /*----------------------------------------------------------------------
 |    types
@@ -125,7 +126,6 @@ typedef struct {
     BLT_MediaType media_type;
     
     NSWindow*       window;
-    NSView*         host_view;
     OsxVideoView*   video_view;
     BLT_TimeSource* time_source;
     BLT_SyncMode    sync_mode;
@@ -379,6 +379,8 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 +---------------------------------------------------------------------*/
 - (void) render
 {
+    ATX_LOG_FINER("rendering picture");
+    
     // serialize access
     [lock lock];
     
@@ -628,7 +630,7 @@ end:
 {   
     // do nothing if we don't have a picture
     if (pictures_in_queue == 0) {
-        ATX_LOG_FINEST("no picture");
+        ATX_LOG_FINER("no picture");
         return;
     }
     
@@ -643,7 +645,7 @@ end:
 
     // swap the active picture and the queue tail
     OsxVideoPicture* picture = pictures[picture_tail];
-    ATX_LOG_FINEST_3("selecting picture %d pts=%lld (%d in queue)", picture_tail, [picture displayTime], pictures_in_queue);
+    ATX_LOG_FINER_3("selecting picture %d pts=%lld (%d in queue)", picture_tail, [picture displayTime], pictures_in_queue);
     pictures[picture_tail] = picture_active;
     picture_active = picture;
     picture_tail = (picture_tail+1)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE;
@@ -733,12 +735,31 @@ OsxVideoOutput_PutPacket(BLT_PacketConsumer* _self,
             BLT_TimeStamp master_ts;
             BLT_TimeSource_GetTime(self->time_source, &master_ts);
             BLT_TimeStamp packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
+            
+            ATX_LOG_FINER_2("time_source_ts=%lld, packet_ts=%lld", 
+                            BLT_TimeStamp_ToNanos(master_ts), 
+                            BLT_TimeStamp_ToNanos(packet_ts));
+                          
             if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
+                // the packet is early, compute how long we need to wait
                 delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
                 
+                ATX_LOG_FINER_1("video packet is early (%lld)", delay); 
+
                 // clamp the delay to a safe maximum
                 if (delay > BLT_OSX_VIDEO_OUTPUT_MAX_DELAY) {
                     delay = BLT_OSX_VIDEO_OUTPUT_MAX_DELAY;
+                    ATX_LOG_FINER("clamping video delay to max");
+                }
+            } else {
+                // the packet is late
+                UInt64 late = BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts);
+                ATX_LOG_FINER_1("video packet is late (%lld)", late);
+
+                // discard packets that are too late
+                if (late > BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS) {
+                    ATX_LOG_FINER("packet is too late, discarding");
+                    return BLT_SUCCESS;
                 }
             }
         }
@@ -772,30 +793,17 @@ OsxVideoOutput_QueryMediaType(BLT_MediaPort*        _self,
 |    OsxVideoOutput_CreateView
 +---------------------------------------------------------------------*/
 static BLT_Result
-OsxVideoOutput_CreateView(OsxVideoOutput* self)
+OsxVideoOutput_CreateView(OsxVideoOutput* self, id host_view)
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
     /* in case we're called from a non-cocoa app, this will set things up */
     NSApplicationLoad();
      
-    /* read the properties to see if a host view has been set */
-    {
-        ATX_Properties* properties;
-        ATX_Result      result;
-        if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).core, &properties))) {
-            ATX_PropertyValue property;
-            result = ATX_Properties_GetProperty(properties, "Output.Video.HostView", &property);
-            if (ATX_SUCCEEDED(result) && property.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
-                self->host_view = (NSView*)property.data.pointer;
-            }
-        }
-    }
-    
     /* use the host view's bounds or choose a default */
     NSRect frame;
-    if (self->host_view) {
-        frame = [self->host_view bounds];
+    if (host_view) {
+        frame = [host_view bounds];
     } else {
         frame = NSMakeRect(0,0,640,400); // FIXME: default value
     }
@@ -809,8 +817,14 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self)
     }
 
     /* attach the video view */
-    if (self->host_view) {
-        [self->host_view addSubview: self->video_view];
+    if (host_view) {
+        [host_view addSubview: self->video_view];
+        [self->video_view setAutoresizingMask: NSViewWidthSizable  |
+                                               NSViewHeightSizable |
+                                               NSViewMinXMargin    |
+                                               NSViewMaxYMargin    |
+                                               NSViewMinYMargin    |
+                                               NSViewMaxYMargin];
     } else {
         // create a standlone window
         self->window = [[NSWindow alloc] initWithContentRect: frame 
@@ -874,7 +888,9 @@ OsxVideoOutput_Create(BLT_Module*              module,
                       BLT_CString              parameters, 
                       BLT_MediaNode**          object)
 {
-    OsxVideoOutput*        self;
+    OsxVideoOutput*           self;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
+    id                        host_view = nil;
     
     /* check parameters */
     if (parameters == NULL || 
@@ -882,6 +898,19 @@ OsxVideoOutput_Create(BLT_Module*              module,
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
+    /* check that we support pointers as integers */
+    if (sizeof(intptr_t) > sizeof(ATX_UInt64)) {
+        return ATX_ERROR_NOT_SUPPORTED;
+    }
+
+    /* parse the name */
+    if (ATX_StringsEqualN(constructor->name, "osxv:view=", 10)) {
+        ATX_UInt64 host_view_64 = 0;
+        ATX_Result result = ATX_ParseInteger64U(constructor->name+10, &host_view_64, ATX_FALSE);
+        if (ATX_FAILED(result)) return result;
+        host_view = (id)((intptr_t)host_view_64);
+    }
+    
     /* allocate memory for the object */
     self = ATX_AllocateZeroMemory(sizeof(OsxVideoOutput));
     if (self == NULL) {
@@ -892,13 +921,11 @@ OsxVideoOutput_Create(BLT_Module*              module,
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
-    /* construct the object */
-
     /* setup the expected media type */
     BLT_MediaType_Init(&self->expected_media_type, BLT_MEDIA_TYPE_ID_VIDEO_RAW);
     
     /* create a view to display the video */
-    OsxVideoOutput_CreateView(self);
+    OsxVideoOutput_CreateView(self, host_view);
     
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, OsxVideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
@@ -1118,7 +1145,7 @@ OsxVideoOutputModule_Probe(BLT_Module*              self,
 
         /* the name should be 'macosxv:<n>' */
         if (constructor->name == NULL || 
-            !ATX_StringsEqualN(constructor->name, "osxv:", 5)) {
+            !ATX_StringsEqualN(constructor->name, "osxv:[view=<view-addr>]", 5)) {
             return BLT_FAILURE;
         }
 

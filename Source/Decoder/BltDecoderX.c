@@ -18,6 +18,7 @@
 #include "BltByteStreamUser.h"
 #include "BltByteStreamProvider.h"
 #include "BltSynchronization.h"
+#include "BltVolumeControl.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -307,8 +308,11 @@ end:
 static void
 BLT_DecoderX_AudioOutputChanged(BLT_DecoderX* decoder, BLT_MediaNode* node)
 {
+    ATX_RELEASE_OBJECT(decoder->audio_output);
+
     if (node) {
         decoder->audio_output = ATX_CAST(node, BLT_OutputNode);
+        ATX_REFERENCE_OBJECT(decoder->audio_output);
     } else {
         decoder->audio_output = NULL;
     }
@@ -328,6 +332,7 @@ BLT_DecoderX_SetAudioOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
 
     if (name == NULL) {
         /* if the name is NULL or empty, it means reset */
+        ATX_RELEASE_OBJECT(decoder->audio_output);
         decoder->audio_output = NULL;
         return BLT_Stream_ResetOutput(decoder->audio_stream);
     } else {
@@ -382,6 +387,7 @@ BLT_DecoderX_GetAudioOutputNode(BLT_DecoderX*   decoder,
 {
     if (decoder->audio_output) {
         *output = ATX_CAST(decoder->audio_output, BLT_MediaNode);
+        ATX_REFERENCE_OBJECT(*output);
     } else {
         *output = NULL;
     }
@@ -394,9 +400,12 @@ BLT_DecoderX_GetAudioOutputNode(BLT_DecoderX*   decoder,
 static void
 BLT_DecoderX_VideoOutputChanged(BLT_DecoderX* decoder, BLT_MediaNode* node)
 {
+    ATX_RELEASE_OBJECT(decoder->video_output);
+
     if (node) {
         BLT_SyncSlave* video_output_as_slave;
         decoder->video_output = ATX_CAST(node, BLT_OutputNode);
+        ATX_REFERENCE_OBJECT(decoder->video_output);
         
         /* setup the synchronization */
         video_output_as_slave = ATX_CAST(node, BLT_SyncSlave);
@@ -423,6 +432,7 @@ BLT_DecoderX_SetVideoOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
 
     if (name == NULL) {
         /* if the name is NULL or empty, it means reset */
+        ATX_RELEASE_OBJECT(decoder->video_output);
         decoder->video_output = NULL;
         return BLT_Stream_ResetOutput(decoder->video_stream);
     } else {
@@ -477,10 +487,69 @@ BLT_DecoderX_GetVideoOutputNode(BLT_DecoderX*   decoder,
 {
     if (decoder->video_output) {
         *output = ATX_CAST(decoder->video_output, BLT_MediaNode);
+        ATX_REFERENCE_OBJECT(*output);
     } else {
         *output = NULL;
     }
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_GetVolume
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderX_GetVolume(BLT_DecoderX* decoder, float* volume)
+{
+    BLT_MediaNode* output_node;
+    BLT_Result     result;
+    
+    /* check parameters */
+    if (volume == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+    
+    /* default value */
+    *volume = 0.0f;
+    
+    /* get the volume from the output node */
+    result = BLT_Stream_GetOutputNode(decoder->audio_stream, &output_node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
+        if (volume_control) {
+            result = BLT_VolumeControl_GetVolume(volume_control, volume);
+        } else {
+            result = BLT_ERROR_NOT_SUPPORTED;
+        }
+        ATX_RELEASE_OBJECT(output_node);
+    } else {
+        result = BLT_ERROR_INVALID_STATE;
+    }
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_SetVolume
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderX_SetVolume(BLT_DecoderX* decoder, float volume)
+{
+    BLT_MediaNode* output_node;
+    BLT_Result     result;
+    
+    /* get the volume from the output node */
+    result = BLT_Stream_GetOutputNode(decoder->audio_stream, &output_node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
+        if (volume_control) {
+            result = BLT_VolumeControl_SetVolume(volume_control, volume);
+        } else {
+            result = BLT_ERROR_NOT_SUPPORTED;
+        }
+        ATX_RELEASE_OBJECT(output_node);
+    } else {
+        result = BLT_ERROR_INVALID_STATE;
+    }
+    
+    return result;
 }
 
 /*----------------------------------------------------------------------

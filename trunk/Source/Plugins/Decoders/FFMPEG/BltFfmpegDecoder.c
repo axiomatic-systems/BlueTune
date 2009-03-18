@@ -141,7 +141,8 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         
         /* check the packet type */
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-        if (media_type->base.base.id != self->module->iso_base_video_es_type_id ||
+        if ((media_type->base.base.id != self->module->iso_base_video_es_type_id &&
+             media_type->base.base.id != self->module->mp4_video_es_type_id) ||
             media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
             ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - invalid media type");
             return BLT_ERROR_INVALID_MEDIA_TYPE;

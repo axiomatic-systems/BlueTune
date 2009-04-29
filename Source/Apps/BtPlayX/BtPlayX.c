@@ -78,7 +78,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "usage: btplayx [options] <input-spec> [<input-spec>..]\n"
         "  each <input-spec> is either an input name (file or URL), or an input type\n"
         "  (--input-type=<type>) followed by an input name\n"
-        "\n"
+        "\n");
+    ATX_ConsoleOutput(
         "options:\n"
         "  -h\n"
         "  --help\n" 
@@ -135,7 +136,7 @@ BLTP_ParseKey(const char* name_and_value)
     BLTP_Key*    key;
     unsigned int length = ATX_StringLength(name_and_value);
     
-    // we need at least a ':' followed by 32 hex chars
+    /* we need at least a ':' followed by 32 hex chars */
     if (length < 33) {
         fprintf(stderr, "ERROR: invalid syntax for --key argument\n");
         return;
@@ -250,7 +251,9 @@ BLTP_GetKeyByName(BLT_KeyManager* self,
                   unsigned int*   key_size)
 {
     ATX_ListItem* item = ATX_List_GetFirstItem(Options.keys);
-    
+
+    ATX_COMPILER_UNUSED(self);
+
     /* check the key size */
     if (*key_size < 16) {
         *key_size = 16;
@@ -487,6 +490,9 @@ BLTP_CheckElapsedTime(BLT_DecoderX* decoder, unsigned int duration)
 #if defined(BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT)
 #include "BltDx9VideoOutput.h"
 #endif
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_SDL_VIDEO_OUTPUT)
+#include "BltSdlVideoOutput.h"
+#endif
 
 /*----------------------------------------------------------------------
 |    BLTP_RegisterPlugins
@@ -507,6 +513,11 @@ BLTP_RegisterPlugins(BLT_DecoderX* decoder)
 
 #if defined(BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT)
     result = BLT_Dx9VideoOutputModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
+#endif
+
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_SDL_VIDEO_OUTPUT)
+    result = BLT_SdlVideoOutputModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
 #endif
 }

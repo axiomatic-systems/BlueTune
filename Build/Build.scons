@@ -276,12 +276,14 @@ PluginsSettings = {
     'OsxVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_VIDEO_OUTPUT',       'src_dir':'Outputs/OsxVideo'         },
     'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
     'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },
+    'SdlVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_SDL_VIDEO_OUTPUT',       'src_dir':'Outputs/SdlVideo'         },
     'DebugOutput'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',           'src_dir':'Outputs/Debug'            },
     'NullOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',            'src_dir':'Outputs/Null'             },
     'MpegAudioDecoder'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER',     'src_dir':'Decoders/MpegAudio'       },
     'FlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER',           'src_dir':'Decoders/FLAC'            },
     'AlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',           'src_dir':'Decoders/ALAC'            },
     'VorbisDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',         'src_dir':'Decoders/Vorbis'          },
+    'FfmpegDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_FFMPEG_DECODER',         'src_dir':'Decoders/FFMPEG'          },
     'AacDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',            'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
     'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',            'src_dir':BLT_WMA_DECODER_PLUGIN_DIR },
     'WaveParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',            'src_dir':'Parsers/Wave'             },
@@ -304,7 +306,9 @@ PluginsExtras = {
                          'dep_mods':['FLAC']},
     'AlsaOutput':       {'libs':['asound']},   
     'AlsaInput':        {'libs':['asound']},
-    'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS
+    'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS,
+    'FfmpegDecoder':    {'inc_dirs':['/usr/include/ffmpeg'],'libs':['avcodec'],'env':env['BLT_RELAXED_ENV']},
+    'SdlVideoOutput':   {'libs':['SDL'],'env':env['BLT_RELAXED_ENV']}
 }
 if 'CddaInput' in PluginsMap:
     PluginsExtras['CddaInput'] = {'src_dirs':['Inputs/CDDA/'+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']]}
@@ -398,6 +402,12 @@ StaticLibraryModule(name                          = 'BlueTune',
 ############################# BtPlay
 ExecutableModule(name                  = 'BtPlay',
                  source_root           = 'Source/Apps/BtPlay',
+                 link_and_include_deps = ['BlueTune'])
+
+############################# BtPlayX
+ExecutableModule(name                  = 'BtPlayX',
+                 source_root           = 'Source/Apps/BtPlayX',
+                 extra_cpp_defines     = ['BLT_CONFIG_BTPLAYX_ENABLE_SDL_VIDEO_OUTPUT'],
                  link_and_include_deps = ['BlueTune'])
 
 ############################# BtController

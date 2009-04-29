@@ -30,7 +30,7 @@ options.AddVariables(
     EnumVariable('target', 'Build Target', DefaultTarget(), allowed_values=PLATFORM_TO_TARGET_MAP.values()+CROSS_PLATFORMS),
     BoolVariable('stop_on_warning', 'Stop the build on warnings', False),
     ListVariable('build_config', 'Build Configuration(s)', 'Debug', names=['Debug', 'Release']),
-    ListVariable('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder'])
+    ListVariable('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder','FfmpegDecoder','SdlVideoOutput'])
 )
 
 env = Environment(variables=options)

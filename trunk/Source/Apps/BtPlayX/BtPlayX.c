@@ -483,7 +483,12 @@ BLTP_CheckElapsedTime(BLT_DecoderX* decoder, unsigned int duration)
 }
 
 /* optional plugins */
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER)
 #include "BltFfmpegDecoder.h"
+#endif
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER)
+#include "BltIppDecoder.h"
+#endif
 #if defined(BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT)
 #include "BltOsxVideoOutput.h"
 #endif
@@ -503,8 +508,15 @@ BLTP_RegisterPlugins(BLT_DecoderX* decoder)
     BLT_Module* module = NULL;
     BLT_Result  result;
     
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER)
     result = BLT_FfmpegDecoderModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
+#endif
+    
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER)
+    result = BLT_IppDecoderModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_DecoderX_RegisterModule(decoder, module);
+#endif
 
 #if defined(BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT)
     result = BLT_OsxVideoOutputModule_GetModuleObject(&module);

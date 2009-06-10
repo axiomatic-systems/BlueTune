@@ -1204,13 +1204,13 @@ Dx9VideoOutput_Destroy(Dx9VideoOutput* self)
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
-    /* free the object memory */
-    ATX_FreeMemory(self);
-
     /* unload the DLL */
     if (self->d3d_library) {
         FreeLibrary(self->d3d_library);
     }
+
+    /* free the object memory */
+    ATX_FreeMemory(self);
 
     return BLT_SUCCESS;
 }

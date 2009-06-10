@@ -55,9 +55,11 @@ struct Mp4ParserInput {
     ATX_IMPLEMENTS(BLT_InputStreamUser);
 
     /* members */
-    BLT_MediaType audio_media_type;
-    BLT_MediaType video_media_type;
-    AP4_File*     mp4_file;
+    BLT_MediaType     audio_media_type;
+    BLT_MediaType     video_media_type;
+    AP4_File*         mp4_file;
+    bool              slow_seek;
+    AP4_LinearReader* reader;
 };
 
 struct Mp4Parser; // forward declaration
@@ -110,7 +112,9 @@ Mp4ParserInput_Construct(Mp4ParserInput* self, BLT_Module* module)
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
     BLT_MediaType_Init(&self->audio_media_type, mp4_parser_module->mp4_audio_type_id);
     BLT_MediaType_Init(&self->video_media_type, mp4_parser_module->mp4_video_type_id);
-    self->mp4_file = NULL;
+    self->mp4_file  = NULL;
+    self->reader    = NULL;
+    self->slow_seek = false;
 }
 
 /*----------------------------------------------------------------------
@@ -119,6 +123,7 @@ Mp4ParserInput_Construct(Mp4ParserInput* self, BLT_Module* module)
 static void
 Mp4ParserInput_Destruct(Mp4ParserInput* self)
 {
+    delete self->reader;
     delete self->mp4_file;
 }
 
@@ -287,6 +292,11 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
         }
     }
 
+    // enable the track in the linear reader if we have one
+    if (self->input.reader) {
+        self->input.reader->EnableTrack(track->GetId());
+    }
+    
     media_type->base.stream_type = BLT_MP4_STREAM_TYPE_AUDIO;
     self->audio_output.media_type = (BLT_MediaType*)media_type;
 
@@ -394,6 +404,11 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
     
     BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
 
+    // enable the track in the linear reader if we have one
+    if (self->input.reader) {
+        self->input.reader->EnableTrack(track->GetId());
+    }
+
     return BLT_SUCCESS;
 }
 
@@ -418,11 +433,33 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     /* if we had a file before, release it now */
     delete self->input.mp4_file;
     self->input.mp4_file = NULL;
+    self->input.slow_seek = false;
+    
+    /* create an adapter for the stream */
+    AP4_ByteStream* stream_adapter = new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
+
+    /* check if the source can seek quickly or not */
+    {
+        ATX_Properties* stream_properties = ATX_CAST(stream, ATX_Properties);
+        if (stream_properties) {
+            ATX_PropertyValue property_value;
+            result = ATX_Properties_GetProperty(stream_properties, 
+                                                ATX_INPUT_STREAM_PROPERTY_SEEK_SPEED,
+                                                &property_value);
+            if (ATX_SUCCEEDED(result) && 
+                property_value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER &&
+                property_value.data.integer <= ATX_INPUT_STREAM_SEEK_SPEED_SLOW) {
+                AP4_ByteStream* buffered = new AP4_BufferedInputStream(*stream_adapter);
+                ATX_LOG_FINE("using no-seek mode, source is slow");
+                stream_adapter->Release();
+                stream_adapter = buffered;
+                self->input.slow_seek = true;
+            }
+        }
+    }
 
     /* parse the MP4 file */
     ATX_LOG_FINE("parsing MP4 file");
-    ATX_InputStream_To_AP4_ByteStream_Adapter* stream_adapter = 
-        new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
     self->input.mp4_file = new AP4_File(*stream_adapter, 
                                         AP4_DefaultAtomFactory::Instance,
                                         true); /* parse until moov only */
@@ -444,6 +481,11 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                        BLT_STREAM_INFO_MASK_ID   |
                        BLT_STREAM_INFO_MASK_DURATION;    
     BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
+    
+    // create a linear reader if the source is slow-seeking
+    if (self->input.slow_seek) {
+        self->input.reader = new AP4_LinearReader(*movie);
+    }
     
     // setup the tracks
     result = Mp4Parser_SetupAudioOutput(self, movie);
@@ -591,10 +633,18 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         // read one sample
         AP4_Sample sample;
         AP4_DataBuffer* sample_buffer = self->sample_buffer;
-        AP4_Result result = self->track->ReadSample(self->sample++, sample, *sample_buffer);
+        AP4_Result result;
+        if (self->parser->input.reader) {
+            // linear reader mode
+            result = self->parser->input.reader->ReadNextSample(self->track->GetId(), sample, *sample_buffer);
+            if (AP4_SUCCEEDED(result)) self->sample++;
+        } else {
+            // normal mode
+            result = self->track->ReadSample(self->sample++, sample, *sample_buffer);
+        }
         if (AP4_FAILED(result)) {
             ATX_LOG_WARNING_1("ReadSample failed (%d)", result);
-            if (result == AP4_ERROR_EOS) {
+            if (result == AP4_ERROR_EOS || result == ATX_ERROR_OUT_OF_RANGE) {
                 ATX_LOG_WARNING("incomplete media");
                 return BLT_ERROR_INCOMPLETE_MEDIA;
             } else {
@@ -735,6 +785,34 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
     /* seek to the estimated offset on all tracks */
     AP4_Ordinal sample_index = 0;
     AP4_UI32    ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
+    if (self->video_output.track) {
+        AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+        if (AP4_FAILED(result)) {
+            ATX_LOG_WARNING_1("video GetSampleIndexForTimeStampMs failed (%d)", result);
+            return BLT_FAILURE;
+        }
+        ATX_LOG_FINE_1("seeking to video time %d ms", ts_ms);
+        
+        // go to the nearest sync sample
+        self->video_output.sample = self->video_output.track->GetNearestSyncSampleIndex(sample_index);
+        if (self->input.reader) {
+            self->input.reader->SetSampleIndex(self->video_output.track->GetId(), self->video_output.sample);
+        }
+        ATX_LOG_FINE_1("seeking to video sync sample %d", self->video_output.sample);
+        
+        // compute the timestamp of the video sample we're seeking to, so we can pick an audio
+        // sample that is close in time (there are many more audio sync points than video)
+        AP4_Sample sample;
+        if (AP4_SUCCEEDED(self->video_output.track->GetSample(self->video_output.sample, sample))) {
+            AP4_UI32 media_timescale = self->video_output.track->GetMediaTimeScale();
+            if (media_timescale) {
+                ts_ms = (AP4_UI32)((((AP4_UI64)sample.GetCts())*1000)/media_timescale);
+                ATX_LOG_FINE_1("sync sample time is %d ms", ts_ms);
+            }
+        } else {
+            ATX_LOG_FINE_1("unable to get sample info for sample %d", self->video_output.sample);
+        }
+    }
     if (self->audio_output.track) {
         AP4_Result result = self->audio_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
         if (AP4_FAILED(result)) {
@@ -742,14 +820,9 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
             return BLT_FAILURE;
         }
         self->audio_output.sample = sample_index;
-    }
-    if (self->video_output.track) {
-        AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
-        if (AP4_FAILED(result)) {
-            ATX_LOG_WARNING_1("video GetSampleIndexForTimeStampMs failed (%d)", result);
-            return BLT_FAILURE;
+        if (self->input.reader) {
+            self->input.reader->SetSampleIndex(self->audio_output.track->GetId(), sample_index);
         }
-        self->video_output.sample = sample_index;
     }
     
     /* set the mode so that the nodes down the chain know the seek has */

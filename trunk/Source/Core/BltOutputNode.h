@@ -26,6 +26,7 @@
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_OUTPUT_NODE_STATUS_QUEUE_FULL  1
+#define BLT_OUTPUT_NODE_STATUS_UNDERFLOW   2
 
 #define BLT_OUTPUT_NODE_WIDTH      "OutputNode.Width"
 #define BLT_OUTPUT_NODE_HEIGHT     "OutputNode.Height"

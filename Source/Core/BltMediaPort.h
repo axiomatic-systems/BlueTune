@@ -110,9 +110,17 @@ BLT_METHOD port##_GetDirection(BLT_MediaPort*          self,            \
 /*----------------------------------------------------------------------
 |   functions
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+    
 BLT_Result 
 BLT_MediaPort_DefaultQueryMediaType(BLT_MediaPort*         self,
                                     BLT_Ordinal            index,
                                     const BLT_MediaType**  media_type);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_MEDIA_PORT_H_ */

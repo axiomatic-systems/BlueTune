@@ -44,6 +44,7 @@ struct BLT_DecoderX {
 |    forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(BLT_DecoderX, BLT_TimeSource)
+ATX_METHOD BLT_DecoderX_GetMediaTime(BLT_TimeSource* _self, BLT_TimeStamp* media_time);
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderX_Create
@@ -164,13 +165,16 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
 
     /* return a composite status */
     status->stream_info = input_info;
-    /*status->time_stamp  = input_status.time_stamp;*/
     BLT_TimeStamp_Set(status->time_stamp, 0, 0);
+    BLT_DecoderX_GetMediaTime(&ATX_BASE(decoder, BLT_TimeSource), &status->time_stamp);
     if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
         status->time_stamp = audio_status.time_stamp;
     }
     if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
         status->time_stamp = video_status.time_stamp;
+    }
+    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
+        status->time_stamp = input_status.time_stamp;
     }
     if (input_info.duration) {
         /* estimate the position from the time stamp and duration */
@@ -354,6 +358,7 @@ BLT_DecoderX_SetAudioOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
             BLT_MediaNode* node = NULL;
             BLT_Stream_GetOutputNode(decoder->audio_stream, &node);
             BLT_DecoderX_AudioOutputChanged(decoder, node);
+            ATX_RELEASE_OBJECT(node);
         }
     }
 
@@ -454,6 +459,7 @@ BLT_DecoderX_SetVideoOutput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString
             BLT_MediaNode* node = NULL;
             BLT_Stream_GetOutputNode(decoder->video_stream, &node);
             BLT_DecoderX_VideoOutputChanged(decoder, node);
+            ATX_RELEASE_OBJECT(node);
         }
     }
 
@@ -598,7 +604,9 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
 				} else {
 					return result;
 				}
-			}
+			}/* else {
+                return result;
+            }*/
 		}
     }
     

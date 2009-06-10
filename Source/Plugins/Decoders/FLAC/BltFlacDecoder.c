@@ -262,35 +262,61 @@ ATX_END_INTERFACE_MAP
 +---------------------------------------------------------------------*/
 static FLAC__StreamDecoderReadStatus 
 FlacDecoder_ReadCallback(const FLAC__StreamDecoder* flac, 
-                         FLAC__byte                 buffer[], 
+                         FLAC__byte*                buffer, 
                          size_t*                    bytes, 
                          void*                      client_data)
 {
     FlacDecoder*  self = (FlacDecoder*)client_data;
-    BLT_Size      bytes_read;
+    BLT_Size      bytes_to_read = *bytes;
+    BLT_Size      total_read    = 0;
     BLT_Result    result;
 
     /* unused parameters */
     BLT_COMPILER_UNUSED(flac);
 
-    /* compute how many bytes we need to read */
-    bytes_read = 0;
-
-    /* read from the input stream */
-    result = ATX_InputStream_Read(self->input.stream,
-                                  buffer,
-                                  (ATX_Size)*bytes,
-                                  &bytes_read);
-    if (BLT_FAILED(result)) {
-        if (result == BLT_ERROR_EOS) {
-            *bytes = 0;
-            self->input.eos = BLT_TRUE;
-            return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
-        }
-        return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
+    /* default value */
+    *bytes = 0;
+    
+    /* check for EOS */
+    if (self->input.eos) {
+        return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
     }
-
-    *bytes = bytes_read;
+    
+    /* read from the input stream until we've filled the buffer */
+    /* or reached the end.                                      */
+    while (bytes_to_read) {
+        BLT_Size bytes_read = 0;
+        ATX_LOG_FINEST_1("requesting %d bytes", bytes_to_read);
+        result = ATX_InputStream_Read(self->input.stream,
+                                      buffer,
+                                      bytes_to_read,
+                                      &bytes_read);
+        if (BLT_FAILED(result)) {
+            if (result == BLT_ERROR_EOS) {
+                self->input.eos = BLT_TRUE;
+                if (total_read == 0) {
+                    /* nothing was read at all */
+                    ATX_LOG_FINEST("nothing was read, EOF");
+                    return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
+                } else {
+                    break;
+                }
+            }
+            return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
+        }
+        
+        if (bytes_read <= bytes_to_read) {
+            bytes_to_read -= bytes_read;
+            total_read    += bytes_read;
+            buffer        += bytes_read;
+        } else {
+            /* something's wrong */
+            return BLT_ERROR_INTERNAL;
+        }
+    }
+    
+    ATX_LOG_FINER_1("total read = %d", total_read);
+    *bytes = total_read;
     return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 }
 

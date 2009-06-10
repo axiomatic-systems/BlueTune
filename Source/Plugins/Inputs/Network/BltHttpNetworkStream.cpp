@@ -218,6 +218,10 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
             result = BLT_SUCCESS;
             break;
 
+        case 403:
+            result = ATX_ERROR_ACCESS_DENIED;
+            break;
+            
         case 404:
             result = BLT_ERROR_STREAM_INPUT_NOT_FOUND;
             break;

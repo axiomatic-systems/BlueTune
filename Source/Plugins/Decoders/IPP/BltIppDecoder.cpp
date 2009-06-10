@@ -1,8 +1,8 @@
 /*****************************************************************
 |
-|   BlueTune - FFMPEG Wrapper Decoder Module
+|   BlueTune - Intel IPP Wrapper Decoder Module
 |
-|   (c) 2008 Gilles Boccon-Gibod
+|   (c) 2008-2009 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -13,7 +13,7 @@
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltCore.h"
-#include "BltFfmpegDecoder.h"
+#include "BltIppDecoder.h"
 #include "BltMediaNode.h"
 #include "BltMedia.h"
 #include "BltMediaPacket.h"
@@ -24,17 +24,27 @@
 #include "BltCommonMediaTypes.h"
 #include "BltPixels.h"
 
-#include "avcodec.h"
+// IPP includes
+#include "ippcore.h"
+#define VM_MALLOC_GLOBAL
+#include "umc_malloc.h"
+#include "umc_video_decoder.h"
+#include "umc_video_data.h"
+#include "umc_video_processing.h"
+#include "umc_data_pointers_copy.h"
+#include "umc_h264_dec.h"
+#include "umc_h264_timing.h"
+
+using namespace UMC;
 
 /*----------------------------------------------------------------------
 |   logging
 +---------------------------------------------------------------------*/
-ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.ffmpeg")
+ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.ipp")
 
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_FFMPEG_INPUT_PADDING_SIZE  256
 
 /*----------------------------------------------------------------------
 |    types
@@ -46,7 +56,7 @@ typedef struct {
     /* members */
     BLT_UInt32 mp4_video_es_type_id;
     BLT_UInt32 iso_base_video_es_type_id;
-} FfmpegDecoderModule;
+} IppDecoderModule;
 
 typedef struct {
     /* interfaces */
@@ -54,8 +64,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
 
     /* members */
-    BLT_Boolean eos;
-} FfmpegDecoderInput;
+    BLT_Boolean       eos;
+} IppDecoderInput;
 
 typedef struct {
     /* interfaces */
@@ -66,69 +76,66 @@ typedef struct {
     BLT_Boolean           eos;
     BLT_RawVideoMediaType media_type;
     BLT_MediaPacket*      picture;
-} FfmpegDecoderOutput;
+} IppDecoderOutput;
 
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    FfmpegDecoderModule* module;
-    FfmpegDecoderInput   input;
-    FfmpegDecoderOutput  output;
-    AVCodecContext*      codec_context;
-    AVFrame*             frame;
-} FfmpegDecoder;
-
-/*----------------------------------------------------------------------
-|   constants
-+---------------------------------------------------------------------*/
-#define BLT_FFMPEG_FORMAT_TAG_AVC1 0x61766331    /* 'avc1' */
+    IppDecoderModule* module;
+    IppDecoderInput   input;
+    IppDecoderOutput  output;
+    H264VideoDecoder* decoder;
+} IppDecoder;
 
 /*----------------------------------------------------------------------
 |   forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_INTERFACE_MAP(FfmpegDecoderModule, BLT_Module)
-ATX_DECLARE_INTERFACE_MAP(FfmpegDecoder, BLT_MediaNode)
-ATX_DECLARE_INTERFACE_MAP(FfmpegDecoder, ATX_Referenceable)
-
+    
 /*----------------------------------------------------------------------
-|   FfmpegDecoder_GetBufferCallback
-+---------------------------------------------------------------------*/
-static int 
-FfmpegDecoder_GetBufferCallback(struct AVCodecContext* context, 
-                                AVFrame*               pic) 
-{
-    int ret = avcodec_default_get_buffer(context, pic);
-    if (context->opaque) {
-        BLT_TimeStamp *pts = av_malloc(sizeof(BLT_TimeStamp));
-        *pts = BLT_MediaPacket_GetTimeStamp((BLT_MediaPacket*)context->opaque);
-        pic->opaque = pts;
-    }
-    return ret;
-}
-
-/*----------------------------------------------------------------------
-|   FfmpegDecoder_ReleaseBufferCallback
-+---------------------------------------------------------------------*/
-static void 
-FfmpegDecoder_ReleaseBufferCallback(struct AVCodecContext* context, 
-                                    AVFrame*               pic) 
-{
-    if (pic && pic->opaque) av_freep(&pic->opaque);
-    avcodec_default_release_buffer(context, pic);
-}
-
-/*----------------------------------------------------------------------
-|   FfmpegDecoderInput_PutPacket
+|   IppDecoderInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
-                             BLT_MediaPacket*    packet)
+IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
+                          BLT_MediaPacket*    packet)
 {
-    FfmpegDecoder* self   = ATX_SELF_M(input, FfmpegDecoder, BLT_PacketConsumer);
-    BLT_Result     result = BLT_SUCCESS;
-    int            av_result;
+    IppDecoder* self   = ATX_SELF_M(input, IppDecoder, BLT_PacketConsumer);
+    BLT_Result  result = BLT_SUCCESS;
+
+    
+    
+
+    if (self->decoder == NULL) {
+        ATX_LOG_FINE("instantiating new H.264 decoder");
+        self->decoder = new H264VideoDecoder();
+        VideoDecoderParams    dec_params;
+        VideoProcessing       video_proc;
+        VideoProcessingParams post_proc_params;
+        post_proc_params.m_DeinterlacingMethod = NO_DEINTERLACING;
+        post_proc_params.InterpolationMethod = 0;
+        video_proc.SetParams(&post_proc_params);
+
+        dec_params.pPostProcessing  = &video_proc;
+        dec_params.info.stream_type = H264_VIDEO;
+        dec_params.numThreads = 1;
+        dec_params.lFlags = 0;
+    }
+#if 0
+        //dec_params->m_pData = in.get();
+
+            if (UMC_OK != (h264Decoder->Init(params.get())))
+            {
+                vm_string_printf(__VM_STRING("Video Decoder creation failed\n"));
+                return -1;
+            }
+
+            H264VideoDecoderParams params;
+            if (UMC_OK != h264Decoder->GetInfo(&params))
+            {
+                vm_string_printf(__VM_STRING("Video Decoder creation failed\n"));
+                return -1;
+            }
     
     /* allocate a codec if we don't already have one */
     if (self->codec_context == NULL) {
@@ -144,11 +151,11 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         if ((media_type->base.base.id != self->module->iso_base_video_es_type_id &&
              media_type->base.base.id != self->module->mp4_video_es_type_id) ||
             media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
-            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - invalid media type");
+            ATX_LOG_FINE("IppDecoderInput::PutPacket - invalid media type");
             return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
         if (media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC1) {
-            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - content type is AVC");
+            ATX_LOG_FINE("IppDecoderInput::PutPacket - content type is AVC");
             codec_id            = CODEC_ID_H264;
             decoder_config      = media_type->decoder_info;
             decoder_config_size = media_type->decoder_info_length;
@@ -156,21 +163,21 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         
         if (codec_id == CODEC_ID_NONE) {
             /* no compatible codec found */
-            ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - no compatible codec found");
+            ATX_LOG_WARNING("IppDecoderInput::PutPacket - no compatible codec found");
             return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* find the codec handle */
         codec = avcodec_find_decoder(codec_id);
         if (codec == NULL) {
-            ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_find_decoder failed");
+            ATX_LOG_WARNING("IppDecoderInput::PutPacket - avcodec_find_decoder failed");
             return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* allocate the codec context */
         self->codec_context = avcodec_alloc_context();
         if (self->codec_context == NULL) {
-            ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
+            ATX_LOG_WARNING("IppDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
             return BLT_ERROR_OUT_OF_MEMORY;
         }
         
@@ -193,8 +200,8 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->codec_context->bits_per_sample = media_type->depth;
         
         /* setup the callbacks */
-        self->codec_context->get_buffer     = FfmpegDecoder_GetBufferCallback;
-        self->codec_context->release_buffer = FfmpegDecoder_ReleaseBufferCallback;
+        self->codec_context->get_buffer     = IppDecoder_GetBufferCallback;
+        self->codec_context->release_buffer = IppDecoder_ReleaseBufferCallback;
         
         /* set the H.264 decoder config */
         self->codec_context->extradata_size = decoder_config_size;
@@ -208,7 +215,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         /* open the codec */
         av_result = avcodec_open(self->codec_context, codec);
         if (av_result < 0) {
-            ATX_LOG_WARNING_1("FfmpegDecoderInput::PutPacket - avcodec_open returned %d", av_result);
+            ATX_LOG_WARNING_1("IppDecoderInput::PutPacket - avcodec_open returned %d", av_result);
             return BLT_ERROR_INTERNAL;
         }
         
@@ -313,6 +320,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             self->output.picture = picture;
         } 
     }
+#endif
     
     return result;
 }
@@ -320,40 +328,40 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FfmpegDecoderInput)
-    ATX_GET_INTERFACE_ACCEPT(FfmpegDecoderInput, BLT_MediaPort)
-    ATX_GET_INTERFACE_ACCEPT(FfmpegDecoderInput, BLT_PacketConsumer)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(IppDecoderInput)
+    ATX_GET_INTERFACE_ACCEPT(IppDecoderInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(IppDecoderInput, BLT_PacketConsumer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP(FfmpegDecoderInput, BLT_PacketConsumer)
-    FfmpegDecoderInput_PutPacket
+ATX_BEGIN_INTERFACE_MAP(IppDecoderInput, BLT_PacketConsumer)
+    IppDecoderInput_PutPacket
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FfmpegDecoderInput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(IppDecoderInput, 
                                          "input",
                                          PACKET,
                                          IN)
-ATX_BEGIN_INTERFACE_MAP(FfmpegDecoderInput, BLT_MediaPort)
-    FfmpegDecoderInput_GetName,
-    FfmpegDecoderInput_GetProtocol,
-    FfmpegDecoderInput_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(IppDecoderInput, BLT_MediaPort)
+    IppDecoderInput_GetName,
+    IppDecoderInput_GetProtocol,
+    IppDecoderInput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|   FfmpegDecoderOutput_GetPacket
+|   IppDecoderOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoderOutput_GetPacket(BLT_PacketProducer* _self,
+IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                               BLT_MediaPacket**   packet)
 {
-    FfmpegDecoder* self = ATX_SELF_M(output, FfmpegDecoder, BLT_PacketProducer);
+    IppDecoder* self = ATX_SELF_M(output, IppDecoder, BLT_PacketProducer);
     
     if (self->output.picture == NULL) return BLT_ERROR_PORT_HAS_NO_DATA;
     *packet = self->output.picture;
@@ -364,37 +372,37 @@ FfmpegDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FfmpegDecoderOutput)
-    ATX_GET_INTERFACE_ACCEPT(FfmpegDecoderOutput, BLT_MediaPort)
-    ATX_GET_INTERFACE_ACCEPT(FfmpegDecoderOutput, BLT_PacketProducer)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(IppDecoderOutput)
+    ATX_GET_INTERFACE_ACCEPT(IppDecoderOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(IppDecoderOutput, BLT_PacketProducer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(FfmpegDecoderOutput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(IppDecoderOutput, 
                                          "output",
                                          PACKET,
                                          OUT)
-ATX_BEGIN_INTERFACE_MAP(FfmpegDecoderOutput, BLT_MediaPort)
-    FfmpegDecoderOutput_GetName,
-    FfmpegDecoderOutput_GetProtocol,
-    FfmpegDecoderOutput_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(IppDecoderOutput, BLT_MediaPort)
+    IppDecoderOutput_GetName,
+    IppDecoderOutput_GetProtocol,
+    IppDecoderOutput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP(FfmpegDecoderOutput, BLT_PacketProducer)
-    FfmpegDecoderOutput_GetPacket
+ATX_BEGIN_INTERFACE_MAP(IppDecoderOutput, BLT_PacketProducer)
+    IppDecoderOutput_GetPacket
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|   FfmpegDecoder_SetupPorts
+|   IppDecoder_SetupPorts
 +---------------------------------------------------------------------*/
 static BLT_Result
-FfmpegDecoder_SetupPorts(FfmpegDecoder* self)
+IppDecoder_SetupPorts(IppDecoder* self)
 {
     /*ATX_Result result;*/
 
@@ -410,77 +418,16 @@ FfmpegDecoder_SetupPorts(FfmpegDecoder* self)
 }
 
 /*----------------------------------------------------------------------
-|    FfmpegDecoder_Create
+|    IppDecoder_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-FfmpegDecoder_Create(BLT_Module*              module,
-                     BLT_Core*                core, 
-                     BLT_ModuleParametersType parameters_type,
-                     BLT_CString              parameters, 
-                     BLT_MediaNode**          object)
-{
-    FfmpegDecoder* self;
-    BLT_Result     result;
-
-    ATX_LOG_FINE("FfmpegDecoder::Create");
-
-    /* check parameters */
-    if (parameters == NULL || 
-        parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
-        return BLT_ERROR_INVALID_PARAMETERS;
-    }
-
-    /* allocate memory for the object */
-    self = ATX_AllocateZeroMemory(sizeof(FfmpegDecoder));
-    if (self == NULL) {
-        *object = NULL;
-        return BLT_ERROR_OUT_OF_MEMORY;
-    }
-
-    /* construct the inherited object */
-    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
-
-    /* construct the object */
-    self->module = (FfmpegDecoderModule*)module;
-    
-    /* setup the input and output ports */
-    result = FfmpegDecoder_SetupPorts(self);
-    if (BLT_FAILED(result)) {
-        ATX_FreeMemory(self);
-        *object = NULL;
-        return result;
-    }
-
-    /* setup interfaces */
-    ATX_SET_INTERFACE_EX(self, FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
-    ATX_SET_INTERFACE_EX(self, FfmpegDecoder, BLT_BaseMediaNode, ATX_Referenceable);
-    ATX_SET_INTERFACE(&self->input,  FfmpegDecoderInput,  BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->input,  FfmpegDecoderInput,  BLT_PacketConsumer);
-    ATX_SET_INTERFACE(&self->output, FfmpegDecoderOutput, BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->output, FfmpegDecoderOutput, BLT_PacketProducer);
-    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    FfmpegDecoder_Destroy
-+---------------------------------------------------------------------*/
-static BLT_Result
-FfmpegDecoder_Destroy(FfmpegDecoder* self)
+IppDecoder_Destroy(IppDecoder* self)
 { 
 
-    ATX_LOG_FINE("FfmpegDecoder::Destroy");
+    ATX_LOG_FINE("enter");
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
-
-    /* release avcodec resources */
-    if (self->codec_context) {
-        avcodec_close(self->codec_context);
-        av_free(self->codec_context);
-    }
-    if (self->frame) av_free(self->frame);
     
     /* free any buffered packet */
     if (self->output.picture) BLT_MediaPacket_Release(self->output.picture);
@@ -492,14 +439,14 @@ FfmpegDecoder_Destroy(FfmpegDecoder* self)
 }
                     
 /*----------------------------------------------------------------------
-|   FfmpegDecoder_GetPortByName
+|   IppDecoder_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoder_GetPortByName(BLT_MediaNode*  _self,
-                            BLT_CString     name,
-                            BLT_MediaPort** port)
+IppDecoder_GetPortByName(BLT_MediaNode*  _self,
+                         BLT_CString     name,
+                         BLT_MediaPort** port)
 {
-    FfmpegDecoder* self = ATX_SELF_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    IppDecoder* self = ATX_SELF_EX(IppDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
         *port = &ATX_BASE(&self->input, BLT_MediaPort);
@@ -514,14 +461,14 @@ FfmpegDecoder_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
-|    FfmpegDecoder_Seek
+|    IppDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoder_Seek(BLT_MediaNode* _self,
-                   BLT_SeekMode*  mode,
-                   BLT_SeekPoint* point)
+IppDecoder_Seek(BLT_MediaNode* _self,
+                BLT_SeekMode*  mode,
+                BLT_SeekPoint* point)
 {
-    FfmpegDecoder* self = ATX_SELF_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    IppDecoder* self = ATX_SELF_EX(IppDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
@@ -531,7 +478,6 @@ FfmpegDecoder_Seek(BLT_MediaNode* _self,
     self->output.eos  = BLT_FALSE;
 
     /* flush anything that may be pending */
-    avcodec_flush_buffers(self->codec_context);
     if (self->output.picture) {
         BLT_MediaPacket_Release(self->output.picture);
         self->output.picture = NULL;
@@ -543,42 +489,96 @@ FfmpegDecoder_Seek(BLT_MediaNode* _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FfmpegDecoder)
-    ATX_GET_INTERFACE_ACCEPT_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode)
-    ATX_GET_INTERFACE_ACCEPT_EX(FfmpegDecoder, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(IppDecoder)
+    ATX_GET_INTERFACE_ACCEPT_EX(IppDecoder, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(IppDecoder, BLT_BaseMediaNode, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode)
+ATX_BEGIN_INTERFACE_MAP_EX(IppDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
-    FfmpegDecoder_GetPortByName,
+    IppDecoder_GetPortByName,
     BLT_BaseMediaNode_Activate,
     BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    FfmpegDecoder_Seek
+    IppDecoder_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FfmpegDecoder, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(IppDecoder, 
                                          BLT_BaseMediaNode, 
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   FfmpegDecoderModule_Attach
+ |    IppDecoder_Create
+ +---------------------------------------------------------------------*/
+static BLT_Result
+IppDecoder_Create(BLT_Module*              module,
+                  BLT_Core*                core, 
+                  BLT_ModuleParametersType parameters_type,
+                  const void*              parameters, 
+                  BLT_MediaNode**          object)
+{
+    IppDecoder* self;
+    BLT_Result  result;
+    
+    ATX_LOG_FINE("enter");
+    
+    /* check parameters */
+    if (parameters == NULL || 
+        parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+    
+    /* allocate memory for the object */
+    self = (IppDecoder*)ATX_AllocateZeroMemory(sizeof(IppDecoder));
+    if (self == NULL) {
+        *object = NULL;
+        return BLT_ERROR_OUT_OF_MEMORY;
+    }
+    
+    /* construct the inherited object */
+    BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
+    
+    /* construct the object */
+    self->module = (IppDecoderModule*)module;
+    
+    /* setup the input and output ports */
+    result = IppDecoder_SetupPorts(self);
+    if (BLT_FAILED(result)) {
+        ATX_FreeMemory(self);
+        *object = NULL;
+        return result;
+    }
+    
+    /* setup interfaces */
+    ATX_SET_INTERFACE_EX(self, IppDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, IppDecoder, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  IppDecoderInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  IppDecoderInput,  BLT_PacketConsumer);
+    ATX_SET_INTERFACE(&self->output, IppDecoderOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, IppDecoderOutput, BLT_PacketProducer);
+    *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
+    
+    return BLT_SUCCESS;
+}    
+    
+/*----------------------------------------------------------------------
+|   IppDecoderModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
+IppDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    FfmpegDecoderModule* self = ATX_SELF_EX(FfmpegDecoderModule, BLT_BaseModule, BLT_Module);
-    BLT_Registry*        registry;
-    BLT_Result           result;
+    IppDecoderModule* self = ATX_SELF_EX(IppDecoderModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*     registry;
+    BLT_Result        result;
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
@@ -591,7 +591,7 @@ FfmpegDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         BLT_MP4_VIDEO_ES_MIME_TYPE,
         &self->mp4_video_es_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("FfmpegDecoderModule::Attach (" BLT_MP4_VIDEO_ES_MIME_TYPE " type = %d)", self->mp4_video_es_type_id);
+    ATX_LOG_FINE_1(BLT_MP4_VIDEO_ES_MIME_TYPE " type = %d)", self->mp4_video_es_type_id);
 
     /* register the type id for BLT_ISO_BASE_VIDEO_ES_MIME_TYPE */
     result = BLT_Registry_RegisterName(
@@ -600,26 +600,22 @@ FfmpegDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         BLT_ISO_BASE_VIDEO_ES_MIME_TYPE,
         &self->iso_base_video_es_type_id);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("FfmpegDecoderModule::Attach (" BLT_ISO_BASE_VIDEO_ES_MIME_TYPE " type = %d)", self->iso_base_video_es_type_id);
+    ATX_LOG_FINE_1(BLT_ISO_BASE_VIDEO_ES_MIME_TYPE " type = %d)", self->iso_base_video_es_type_id);
     
-    /* initialize libavcodec */
-    avcodec_init();
-    avcodec_register_all();
-
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|   FfmpegDecoderModule_Probe
+|   IppDecoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FfmpegDecoderModule_Probe(BLT_Module*              _self, 
-                          BLT_Core*                core,
-                          BLT_ModuleParametersType parameters_type,
-                          BLT_AnyConst             parameters,
-                          BLT_Cardinal*            match)
+IppDecoderModule_Probe(BLT_Module*              _self, 
+                       BLT_Core*                core,
+                       BLT_ModuleParametersType parameters_type,
+                       BLT_AnyConst             parameters,
+                       BLT_Cardinal*            match)
 {
-    FfmpegDecoderModule* self = ATX_SELF_EX(FfmpegDecoderModule, BLT_BaseModule, BLT_Module);
+    IppDecoderModule* self = ATX_SELF_EX(IppDecoderModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
     
     switch (parameters_type) {
@@ -650,7 +646,7 @@ FfmpegDecoderModule_Probe(BLT_Module*              _self,
             /* compute the match level */
             if (constructor->name != NULL) {
                 /* we're being probed by name */
-                if (ATX_StringsEqual(constructor->name, "com.bluetune.decoders.ffmpeg")) {
+                if (ATX_StringsEqual(constructor->name, "com.bluetune.decoders.ipp")) {
                     /* our name */
                     *match = BLT_MODULE_PROBE_MATCH_EXACT;
                 } else {
@@ -662,7 +658,7 @@ FfmpegDecoderModule_Probe(BLT_Module*              _self,
                 *match = BLT_MODULE_PROBE_MATCH_MAX - 10;
             }
 
-            ATX_LOG_FINE_1("FfmpegDecoderModule::Probe - Ok [%d]", *match);
+            ATX_LOG_FINE_1("probe Ok [%d]", *match);
             return BLT_SUCCESS;
         }    
         break;
@@ -677,48 +673,48 @@ FfmpegDecoderModule_Probe(BLT_Module*              _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(FfmpegDecoderModule)
-    ATX_GET_INTERFACE_ACCEPT_EX(FfmpegDecoderModule, BLT_BaseModule, BLT_Module)
-    ATX_GET_INTERFACE_ACCEPT_EX(FfmpegDecoderModule, BLT_BaseModule, ATX_Referenceable)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(IppDecoderModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(IppDecoderModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(IppDecoderModule, BLT_BaseModule, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   node factory
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(FfmpegDecoderModule, FfmpegDecoder)
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(IppDecoderModule, IppDecoder)
 
 /*----------------------------------------------------------------------
 |   BLT_Module interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP_EX(FfmpegDecoderModule, BLT_BaseModule, BLT_Module)
+ATX_BEGIN_INTERFACE_MAP_EX(IppDecoderModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
-    FfmpegDecoderModule_Attach,
-    FfmpegDecoderModule_CreateInstance,
-    FfmpegDecoderModule_Probe
+    IppDecoderModule_Attach,
+    IppDecoderModule_CreateInstance,
+    IppDecoderModule_Probe
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-#define FfmpegDecoderModule_Destroy(x) \
+#define IppDecoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FfmpegDecoderModule, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(IppDecoderModule, 
                                          BLT_BaseModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
 |   node constructor
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(FfmpegDecoderModule, "FFMPEG Decoder", 0)
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(IppDecoderModule, "Intel IPP Decoder", 0)
 
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_FfmpegDecoderModule_GetModuleObject(BLT_Module** object)
+BLT_IppDecoderModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return FfmpegDecoderModule_Create(object);
+    return IppDecoderModule_Create(object);
 }

@@ -42,8 +42,9 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.video")
 #define BLT_OSX_VIDEO_MIN_PICTURE_WIDTH  8
 #define BLT_OSX_VIDEO_MIN_PICTURE_HEIGHT 8
 
-#define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY    2000000000 /* 2 seconds   */
-#define BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS 500000000  /* 0.5 seconds */
+#define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY           2000000000 /* 2 seconds   */
+#define BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS        1000000000 /* 1 second    */
+#define BLT_OSX_VIDEO_OUTPUT_UNDERFLOW_THRESHOLD  500000000 /* 0.5 seconds */
 
 /*----------------------------------------------------------------------
 |    types
@@ -100,6 +101,9 @@ typedef struct {
 - (void) setupDisplayLink;
 - (void) processEvents;
 - (void) selectNextPicture;
+- (void) flush;
+- (void) lock;
+- (void) unlock;
 - (BLT_Boolean) queueIsFull;
 - (BLT_Result) queuePicture: (const unsigned char*)pixels 
                      format: (const BLT_RawVideoMediaType*)format
@@ -129,6 +133,7 @@ typedef struct {
     OsxVideoView*   video_view;
     BLT_TimeSource* time_source;
     BLT_SyncMode    sync_mode;
+    BLT_Boolean     underflow;
 } OsxVideoOutput;
 
 /*----------------------------------------------------------------------
@@ -572,6 +577,16 @@ end:
         [lock lock];
     }
     
+    /* if we have pictures in the queue that have timestamps later than this one */
+    /* we re-stamp them.                                                         */
+    unsigned int i;
+    for (i=0; i<pictures_in_queue; i++) {
+        OsxVideoPicture* picture = pictures[(picture_tail+i)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE];
+        if (picture && [picture displayTime] > displayTime) {
+            [picture setDisplayTime: displayTime];
+        }
+    }
+    
     unsigned int picture_in = (pictures_in_queue+picture_tail)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE;
     if (pictures[picture_in] == NULL) {
         pictures[picture_in] = [OsxVideoPicture alloc];
@@ -670,6 +685,30 @@ end:
 }
 
 /*----------------------------------------------------------------------
+|    OsxVideoView::flush
++---------------------------------------------------------------------*/
+- (void) flush
+{   
+    pictures_in_queue = 0;
+}
+
+/*----------------------------------------------------------------------
+|    OsxVideoView::lock
++---------------------------------------------------------------------*/
+- (void) lock
+{   
+    [lock lock];
+}
+
+/*----------------------------------------------------------------------
+|    OsxVideoView::unlock
++---------------------------------------------------------------------*/
+- (void) unlock
+{   
+    [lock unlock];
+}
+
+/*----------------------------------------------------------------------
 |    OsxVideoView::displayLinkCallback
 +---------------------------------------------------------------------*/
 - (CVReturn) displayLinkCallback: (CVDisplayLinkRef)this_display_link
@@ -740,9 +779,12 @@ OsxVideoOutput_PutPacket(BLT_PacketConsumer* _self,
                             BLT_TimeStamp_ToNanos(master_ts), 
                             BLT_TimeStamp_ToNanos(packet_ts));
                           
-            if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
+            if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {                
                 // the packet is early, compute how long we need to wait
                 delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
+
+                // clear the underflow status if set
+                self->underflow = BLT_FALSE;
                 
                 ATX_LOG_FINER_1("video packet is early (%lld)", delay); 
 
@@ -755,6 +797,12 @@ OsxVideoOutput_PutPacket(BLT_PacketConsumer* _self,
                 // the packet is late
                 UInt64 late = BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts);
                 ATX_LOG_FINER_1("video packet is late (%lld)", late);
+
+                // set the underflow status
+                if (late > BLT_OSX_VIDEO_OUTPUT_UNDERFLOW_THRESHOLD) {
+                    ATX_LOG_FINER("underflow threshold reached");
+                    self->underflow = BLT_TRUE;
+                }
 
                 // discard packets that are too late
                 if (late > BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS) {
@@ -797,6 +845,8 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self, id host_view)
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
+    ATX_LOG_FINE("creating view");
+    
     /* in case we're called from a non-cocoa app, this will set things up */
     NSApplicationLoad();
      
@@ -870,7 +920,9 @@ OsxVideoOutput_DestroyView(OsxVideoOutput* self)
         [self->window close];
         [self->video_view release];
     } else {
-        [self->video_view removeFromSuperview];
+        [self->video_view performSelectorOnMainThread: @selector(removeFromSuperview)
+                                           withObject: nil 
+                                        waitUntilDone: NO];
     }
         
     [pool release];
@@ -892,6 +944,8 @@ OsxVideoOutput_Create(BLT_Module*              module,
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     id                        host_view = nil;
     
+    ATX_LOG_FINE("start");
+    
     /* check parameters */
     if (parameters == NULL || 
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
@@ -905,9 +959,13 @@ OsxVideoOutput_Create(BLT_Module*              module,
 
     /* parse the name */
     if (ATX_StringsEqualN(constructor->name, "osxv:view=", 10)) {
-        ATX_UInt64 host_view_64 = 0;
-        ATX_Result result = ATX_ParseInteger64U(constructor->name+10, &host_view_64, ATX_FALSE);
-        if (ATX_FAILED(result)) return result;
+        ATX_LOG_FINE_1("parsing view addr %s", constructor->name+10);
+        ATX_Int64 host_view_64 = 0;
+        ATX_Result result = ATX_ParseInteger64(constructor->name+10, &host_view_64, ATX_FALSE);
+        if (ATX_FAILED(result)) {
+            ATX_LOG_FINE_1("invalid view addr (%d)", result);
+            return result;
+        }
         host_view = (id)((intptr_t)host_view_64);
     }
     
@@ -999,6 +1057,28 @@ OsxVideoOutput_Stop(BLT_MediaNode*  _self)
 }
 
 /*----------------------------------------------------------------------
+|    OsxAudioUnitsOutput_Seek
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxVideoOutput_Seek(BLT_MediaNode* _self,
+                    BLT_SeekMode*  mode,
+                    BLT_SeekPoint* point)
+{
+    OsxVideoOutput* self = ATX_SELF_EX(OsxVideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    
+    BLT_COMPILER_UNUSED(mode);
+    BLT_COMPILER_UNUSED(point);
+
+    /* flush the queue */
+    ATX_LOG_FINE("seeking, flushing picture queue");
+    [self->video_view lock];
+    [self->video_view flush];
+    [self->video_view unlock];
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    OsxVideoOutput_GetStatus
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -1014,6 +1094,9 @@ OsxVideoOutput_GetStatus(BLT_OutputNode*       _self,
     status->flags = 0;
     if ([self->video_view queueIsFull]) {
         status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
+    }
+    if (self->underflow) {
+        status->flags |= BLT_OUTPUT_NODE_STATUS_UNDERFLOW;
     }
     return BLT_SUCCESS;
 }
@@ -1086,7 +1169,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(OsxVideoOutput, BLT_BaseMediaNode, BLT_MediaNode)
     OsxVideoOutput_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    OsxVideoOutput_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------

@@ -101,7 +101,7 @@ BLT_NetworkStream_Create(BLT_Size          buffer_size,
     self->source_properties = ATX_CAST(source, ATX_Properties);
     
     /* determine when we should read data instead issuing a seek when */
-    /* the target position is clos enough                             */
+    /* the target position is close enough                            */
     self->seek_as_read_threshold = BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD;
     
     /* setup the interfaces */
@@ -187,6 +187,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     if (bytes_to_read == 0) return ATX_SUCCESS;
 
     /* use all we can from the buffer */
+    ATX_LOG_FINER_1("buffer available=%d", buffered);
     chunk = buffered > bytes_to_read ? bytes_to_read : buffered;
     if (chunk) {
         ATX_RingBuffer_Read(self->buffer, buffer, chunk);
@@ -219,6 +220,8 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
                                       should_read, 
                                       &read_from_source);
         if (ATX_SUCCEEDED(result)) {
+            ATX_LOG_FINER_1("read %d bytes from source", read_from_source);
+            
             /* adjust the ring buffer */
             ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
 
@@ -242,6 +245,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
 
         } else if (result == ATX_ERROR_EOS) {
             /* we can't continue further */
+            ATX_LOG_FINE("reached EOS");
             self->eos = ATX_TRUE;
             break;
         } else {

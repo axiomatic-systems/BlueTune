@@ -175,6 +175,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* setup the codec options */
+        avcodec_get_context_defaults(self->codec_context);
         self->codec_context->debug_mv          = 0;
         self->codec_context->debug             = 0;
         self->codec_context->workaround_bugs   = 1;
@@ -531,7 +532,9 @@ FfmpegDecoder_Seek(BLT_MediaNode* _self,
     self->output.eos  = BLT_FALSE;
 
     /* flush anything that may be pending */
-    avcodec_flush_buffers(self->codec_context);
+    if (self->codec_context) {
+        avcodec_flush_buffers(self->codec_context);
+    }
     if (self->output.picture) {
         BLT_MediaPacket_Release(self->output.picture);
         self->output.picture = NULL;

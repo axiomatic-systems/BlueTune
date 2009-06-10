@@ -753,8 +753,8 @@ OsxAudioUnitsOutput_Resume(BLT_MediaNode* _self)
     OsxAudioUnitsOutput* self = ATX_SELF_EX(OsxAudioUnitsOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ComponentResult      result;
 
-    ATX_LOG_FINE("resuming output");
     if (self->paused) {
+        ATX_LOG_FINE("resuming output");
         self->paused = BLT_FALSE;
         result = AudioOutputUnitStart(self->audio_unit);
         if (result != noErr) {

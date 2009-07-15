@@ -44,7 +44,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.video")
 
 #define BLT_OSX_VIDEO_OUTPUT_MAX_DELAY           2000000000 /* 2 seconds   */
 #define BLT_OSX_VIDEO_OUTPUT_MAX_LATENESS        1000000000 /* 1 second    */
-#define BLT_OSX_VIDEO_OUTPUT_UNDERFLOW_THRESHOLD  500000000 /* 0.5 seconds */
+#define BLT_OSX_VIDEO_OUTPUT_UNDERFLOW_THRESHOLD  200000000 /* 0.2 seconds */
 
 /*----------------------------------------------------------------------
 |    types

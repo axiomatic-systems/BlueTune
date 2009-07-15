@@ -48,6 +48,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.dx9")
 #define BLT_DX9_VIDEO_DEFAULT_SLEEP_TIME           10000000 /* 10 ms     */
 #define BLT_DX9_VIDEO_MIN_SLEEP_TIME                5000000 /* 5 ms      */
 #define BLT_DX9_VIDEO_MAX_SLEEP_TIME               10000000 /* 10 ms     */
+#define BLT_DX9_VIDEO_UNDERFLOW_THRESHOLD         200000000 /* 200 ms    */
 
 /*----------------------------------------------------------------------
 |    types
@@ -107,6 +108,7 @@ typedef struct {
     BLT_TimeSource*             time_source;
     BLT_SyncMode                sync_mode;
     double                      timer_frequency;
+    BLT_Boolean                 underflow;
 
     // video output thread vars
     HANDLE                      render_thread;
@@ -1354,7 +1356,7 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
                 packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
                 if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
                     delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
-
+                    self->underflow = BLT_FALSE;
                     ATX_LOG_FINER_3("video is early (%lld) master_ts=%lld, packet_ts=%lld", 
                                     delay, 
                                     BLT_TimeStamp_ToNanos(master_ts),
@@ -1366,10 +1368,13 @@ Dx9VideoOutput_PutPacket(BLT_PacketConsumer* _self,
                         ATX_LOG_FINER("video delay clamped to max");
                     }
                 } else {
+                    BLT_UInt64 late = BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts);
+                    self->underflow =  late>BLT_DX9_VIDEO_UNDERFLOW_THRESHOLD ? BLT_TRUE:BLT_FALSE;
                     ATX_LOG_FINER_3("video is late (%lld) master_ts=%lld, packet_ts=%lld", 
-                                    BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts),
+                                    late,
                                     BLT_TimeStamp_ToNanos(master_ts),
                                     BLT_TimeStamp_ToNanos(packet_ts));  
+
                 }
             }
             picture->display_time = Dx9VideoOutput_GetHostTime(self)+delay;
@@ -1507,10 +1512,32 @@ Dx9VideoOutput_Start(BLT_MediaNode* _self)
 |   Dx9VideoOutput_Stop
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Dx9VideoOutput_Stop(BLT_MediaNode*  _self)
+Dx9VideoOutput_Stop(BLT_MediaNode* _self)
 {
     Dx9VideoOutput* self = ATX_SELF_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
     (void)self;
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Dx9VideoOutput_Seek
++---------------------------------------------------------------------*/
+BLT_METHOD
+Dx9VideoOutput_Seek(BLT_MediaNode* _self, BLT_SeekMode* mode, BLT_SeekPoint* point)
+{
+    Dx9VideoOutput* self = ATX_SELF_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    BLT_COMPILER_UNUSED(mode);
+    BLT_COMPILER_UNUSED(point);
+
+    // flush the picture queue
+    //EnterCriticalSection(&self->render_crit_section);
+    //self->cur_picture = 0;
+    //self->num_pictures = 0;
+    //LeaveCriticalSection(&self->render_crit_section);
+
+    // reset some status fields
+    self->underflow = BLT_FALSE;
+
     return BLT_SUCCESS;
 }
 
@@ -1535,6 +1562,11 @@ Dx9VideoOutput_GetStatus(BLT_OutputNode*       _self,
         status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
     }
     LeaveCriticalSection(&self->render_crit_section);
+
+    // check for underflow conditions
+    if (self->underflow) {
+        status->flags |= BLT_OUTPUT_NODE_STATUS_UNDERFLOW;
+    }
 
 	return BLT_SUCCESS;
 }
@@ -1719,7 +1751,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(Dx9VideoOutput, BLT_BaseMediaNode, BLT_MediaNode)
     Dx9VideoOutput_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    Dx9VideoOutput_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------

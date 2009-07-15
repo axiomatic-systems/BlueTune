@@ -23,6 +23,7 @@
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
 #include "BltPixels.h"
+#include "BltOutputNode.h"
 
 #include "avcodec.h"
 
@@ -105,6 +106,17 @@ FfmpegDecoder_GetBufferCallback(struct AVCodecContext* context,
         *pts = BLT_MediaPacket_GetTimeStamp((BLT_MediaPacket*)context->opaque);
         pic->opaque = pts;
     }
+    return ret;
+}
+
+/*----------------------------------------------------------------------
+|   FfmpegDecoder_ReGetBufferCallback
++---------------------------------------------------------------------*/
+static int 
+FfmpegDecoder_ReGetBufferCallback(struct AVCodecContext* context, 
+                                  AVFrame*               pic) 
+{
+    int ret = avcodec_default_reget_buffer(context, pic);
     return ret;
 }
 
@@ -195,6 +207,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         
         /* setup the callbacks */
         self->codec_context->get_buffer     = FfmpegDecoder_GetBufferCallback;
+        self->codec_context->reget_buffer   = FfmpegDecoder_ReGetBufferCallback;
         self->codec_context->release_buffer = FfmpegDecoder_ReleaseBufferCallback;
         
         /* set the H.264 decoder config */
@@ -223,6 +236,23 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->input.eos = BLT_TRUE;
     }
 
+    /* frame skipping logic */
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        BLT_StreamStatus status;
+        BLT_Stream_GetStatus(ATX_BASE(self, BLT_BaseMediaNode).context, &status);
+        if (status.output_status.flags & BLT_OUTPUT_NODE_STATUS_UNDERFLOW) {
+            if (self->codec_context->skip_frame != AVDISCARD_NONREF) {
+                ATX_LOG_FINE("output underflow, entering skip-non-ref decoding mode");
+                self->codec_context->skip_frame = AVDISCARD_NONREF;
+            }
+        } else {
+            if (self->codec_context->skip_frame != AVDISCARD_DEFAULT) {
+                ATX_LOG_FINE("returning to normal decoding mode (no-skip)");
+                self->codec_context->skip_frame = AVDISCARD_DEFAULT;
+            }
+        }
+    }
+    
     /* decode a picture */
     {
         int got_picture = 0;
@@ -534,6 +564,7 @@ FfmpegDecoder_Seek(BLT_MediaNode* _self,
     /* flush anything that may be pending */
     if (self->codec_context) {
         avcodec_flush_buffers(self->codec_context);
+        self->codec_context->skip_frame = AVDISCARD_DEFAULT;        
     }
     if (self->output.picture) {
         BLT_MediaPacket_Release(self->output.picture);

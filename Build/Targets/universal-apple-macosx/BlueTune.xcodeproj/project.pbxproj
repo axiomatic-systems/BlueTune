@@ -432,6 +432,13 @@
 			remoteGlobalIDString = CA07A32D0D40229E00DC3E33;
 			remoteInfo = Tests;
 		};
+		CA093D9610077DA3004FE377 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAFC31B90FEB3DDD00EF80A0 /* FragmentParserTest */;
+			remoteInfo = FragmentParserTest;
+		};
 		CA0C9A7F0D15D1EC00E23496 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
@@ -1687,8 +1694,8 @@
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
-				CA44C47F0D4522DA00173F5F /* cryptotest */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
+				CA44C47F0D4522DA00173F5F /* cryptotest */,
 				CA9ED1E90EACFA6A003CE43C /* AvcTrackWriterTest */,
 				CA9A17AF0ED50F6D00C60FDF /* PassthroughWriterTest */,
 				CAF478A50F07640C004073ED /* TracksTest */,
@@ -1697,6 +1704,7 @@
 				CA5264B80F78B50C009D7E0D /* CompareFilesTest */,
 				CAD66A560FCEF922006238F0 /* LinearReaderTest */,
 				CAD66A580FCEF922006238F0 /* BufferedStreamTest */,
+				CA093D9710077DA3004FE377 /* FragmentParserTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3111,6 +3119,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CA093D9710077DA3004FE377 /* FragmentParserTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = FragmentParserTest;
+			remoteRef = CA093D9610077DA3004FE377 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA0C9A800D15D1EC00E23496 /* PropertiesTest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";

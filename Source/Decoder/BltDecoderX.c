@@ -41,6 +41,11 @@ struct BLT_DecoderX {
 };
 
 /*----------------------------------------------------------------------
+|    constant
++---------------------------------------------------------------------*/
+const unsigned int BLT_DECODERX_AUDIO_PRIO_THRESHOLD = 300; /* ms */
+
+/*----------------------------------------------------------------------
 |    forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(BLT_DecoderX, BLT_TimeSource)
@@ -581,9 +586,9 @@ BLT_Result
 BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
 {
     BLT_Boolean audio_would_block = BLT_FALSE;
-	BLT_Boolean audio_eos         = BLT_FALSE;
+    BLT_Boolean audio_eos         = BLT_FALSE;
     BLT_Boolean video_would_block = BLT_FALSE;
-	BLT_Boolean video_eos         = BLT_FALSE;
+    BLT_Boolean video_eos         = BLT_FALSE;
     BLT_Result  result;
     
     /* ensure that the input is started */
@@ -594,20 +599,36 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->audio_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
+            // ensure that the stream is not paused
+            BLT_Stream_Start(decoder->audio_stream);
+            
+            // mark that we can't push a packet yet
             audio_would_block = BLT_TRUE;
         }
-		if (!audio_would_block) {
-			result = BLT_Stream_PumpPacket(decoder->audio_stream);
-			if (BLT_FAILED(result)) {
-				if (result == BLT_ERROR_EOS) {
-					audio_eos = BLT_TRUE;
-				} else {
-					return result;
-				}
-			}/* else {
-                return result;
-            }*/
-		}
+        if (!audio_would_block) {
+            result = BLT_Stream_PumpPacket(decoder->audio_stream);
+            if (BLT_FAILED(result)) {
+                if (result == BLT_ERROR_EOS) {
+                    audio_eos = BLT_TRUE;
+                } else {
+                    return result;
+                }
+            } else {
+                BLT_StreamStatus stream_status;
+                ATX_UInt64       audio_decode_ts;
+                ATX_UInt64       audio_output_ts;
+                ATX_Int64        buffered;
+                BLT_Stream_GetStatus(decoder->audio_stream, &stream_status);
+                audio_decode_ts = BLT_TimeStamp_ToMillis(stream_status.time_stamp);
+                audio_output_ts = BLT_TimeStamp_ToMillis(stream_status.output_status.media_time);
+                buffered = audio_decode_ts-audio_output_ts;
+                ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
+                if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
+                    // skip the video decoding, we don't have enough time
+                    return BLT_SUCCESS;
+                }
+            }    
+        }
     }
     
     /* pump a video packet */
@@ -615,23 +636,27 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->video_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
+            // ensure that the stream is not paused
+            BLT_Stream_Start(decoder->video_stream);
+            
+            // mark that we can't push a packet yet
             video_would_block = BLT_TRUE;
         }
 
-		if (!video_would_block) {
-			result = BLT_Stream_PumpPacket(decoder->video_stream);
-			if (BLT_FAILED(result)) {
-				if (result == BLT_ERROR_EOS) {
-					video_eos = BLT_TRUE;
-				} else {
-					return result;
-				}
-			}
-		}
+        if (!video_would_block) {
+            result = BLT_Stream_PumpPacket(decoder->video_stream);
+            if (BLT_FAILED(result)) {
+                if (result == BLT_ERROR_EOS) {
+                    video_eos = BLT_TRUE;
+                } else {
+                    return result;
+                }
+            }
+        }
     }
     
-	/* check for the end of both streams */
-	if (audio_eos && video_eos) return BLT_ERROR_EOS;
+    /* check for the end of both streams */
+    if (audio_eos && video_eos) return BLT_ERROR_EOS;
 
     /* if both would block, sleep a bit */
     if (audio_would_block && video_would_block) {
@@ -639,8 +664,7 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         ATX_System_Sleep(&sleep_duration);
     }
     
-    return BLT_SUCCESS;
-}
+    return BLT_SUCCESS;}
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderX_Stop

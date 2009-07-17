@@ -436,7 +436,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CAFC31B90FEB3DDD00EF80A0 /* FragmentParserTest */;
+			remoteGlobalIDString = CAFC31B90FEB3DDD00EF80A0;
 			remoteInfo = FragmentParserTest;
 		};
 		CA0C9A7F0D15D1EC00E23496 /* PBXContainerItemProxy */ = {

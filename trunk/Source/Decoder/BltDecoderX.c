@@ -599,10 +599,10 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->audio_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
-            // ensure that the stream is not paused
+            /* ensure that the stream is not paused */
             BLT_Stream_Start(decoder->audio_stream);
             
-            // mark that we can't push a packet yet
+            /* mark that we can't push a packet yet */
             audio_would_block = BLT_TRUE;
         }
         if (!audio_would_block) {
@@ -624,7 +624,7 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
                 buffered = audio_decode_ts-audio_output_ts;
                 ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
                 if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
-                    // skip the video decoding, we don't have enough time
+                    /* skip the video decoding, we don't have enough time */
                     return BLT_SUCCESS;
                 }
             }    
@@ -636,10 +636,10 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->video_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
-            // ensure that the stream is not paused
+            /* ensure that the stream is not paused */
             BLT_Stream_Start(decoder->video_stream);
             
-            // mark that we can't push a packet yet
+            /* mark that we can't push a packet yet */
             video_would_block = BLT_TRUE;
         }
 

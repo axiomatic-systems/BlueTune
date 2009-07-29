@@ -103,7 +103,7 @@ MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
 CompiledModule(name                          = 'Bento4Objects',
                source_root                   = AP4_SOURCE_ROOT,
                build_source_dirs             = ['Core', 'MetaData', 'Crypto', 'Adapters'],
-               chained_link_and_include_deps = ['Atomix'],
+               chained_link_and_include_deps = ['Atomix', 'Neptune'],
                extra_cpp_defines             = AP4_EXTRA_CPP_DEFINES)
 StaticLibraryModule(name                          = 'Bento4',
                     chained_link_and_include_deps = ['Bento4Objects'])

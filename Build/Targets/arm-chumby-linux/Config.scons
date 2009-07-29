@@ -1,5 +1,5 @@
 env['BLT_RELAXED_ENV'] = env.Clone()
-GCC_ARM_OPTIONS='-mcpu=arm9e -fdollars-in-identifiers'
+GCC_ARM_OPTIONS='-mcpu=arm9e -fdollars-in-identifiers -I/usr/arm-linux/include -L/usr/arm-linux/lib'
 LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix='arm-linux', gcc_strict=False, gcc_stop_on_warning=False, gcc_extra_options=GCC_ARM_OPTIONS)
 LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
 

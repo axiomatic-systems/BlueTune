@@ -105,6 +105,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltAdtsParser.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER)
+#include "BltDolbyDigitalPlusParser.h"
+#endif
+
 /* formatters */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
 #include "BltWaveFormatter.h"
@@ -137,6 +141,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_FFMPEG_DECODER)
 #include "BltFfmpegDecoder.h"
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER)
+#include "BltDolbyDigitalPlusDecoder.h"
 #endif
 
 /* outputs */
@@ -330,6 +338,13 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
 #endif
 
+    /* ddplus parser */
+#if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER)
+    ATX_LOG_FINE("registering BLT_DolbyDigitalPlusParserModule");
+    result = BLT_DolbyDigitalPlusParserModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
+#endif
+
     /* wave formatter */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
     ATX_LOG_FINE("registering BLT_WaveFormatterModule");
@@ -404,6 +419,13 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_FFMPEG_DECODER)
     ATX_LOG_FINE("registering BLT_FfmpegDecoderModule");
     result = BLT_FfmpegDecoderModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
+#endif
+
+    /* ddplus decoder */
+#if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER)
+    ATX_LOG_FINE("registering BLT_DolbyDigitalPlusDecoderModule");
+    result = BLT_DolbyDigitalPlusDecoderModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
 #endif
 

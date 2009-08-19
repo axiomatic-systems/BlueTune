@@ -60,6 +60,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_VolumeControl);
 
     /* members */
+    unsigned int      audio_device_index;
     AudioDeviceID     audio_device_id;
     AudioUnit         audio_unit;
     pthread_mutex_t   lock;
@@ -459,20 +460,170 @@ OsxAudioUnitsOutput_QueryMediaType(BLT_MediaPort*        _self,
 }
 
 /*----------------------------------------------------------------------
+|   OsxAudioUnitsOutput_MapDeviceIndex
++---------------------------------------------------------------------*/
+static BLT_Result
+OsxAudioUnitsOutput_MapDeviceName(const char* name, AudioDeviceID* device_id)
+{
+    OSStatus       err;
+    BLT_Result     result = BLT_ERROR_NO_SUCH_DEVICE;
+    UInt32         prop_size = 0;
+    AudioDeviceID* devices = NULL;
+    unsigned int   device_count = 0;
+    ATX_UInt32     device_index = 0;
+    unsigned int   device_selector = 1;
+    char*          device_name = NULL;
+    unsigned int   i;
+    
+    /* setup a default value */
+    *device_id = 0;
+    
+    /* check the parameters */
+    if (name[0] == '\0') return BLT_ERROR_NO_SUCH_DEVICE;
+    
+    /* parse the name */
+    if (name[0] == '#') {
+        ++name;
+        ATX_LOG_FINE_1("device name = %s", name);
+    } else {
+        if (BLT_FAILED(ATX_ParseInteger32U(name, &device_index, ATX_FALSE))) {
+            return BLT_ERROR_NO_SUCH_DEVICE;
+        }
+        ATX_LOG_FINE_1("device index = %d", device_index);
+        name = NULL;
+        
+        /* 0 means default */
+        if (device_index == 0) return BLT_SUCCESS;
+    }
+    
+    /* ask how many devices exist */
+    err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices, &prop_size, NULL);
+    if (err != noErr) {
+        ATX_LOG_FINE_1("AudioHardwareGetPropertyInfo failed (%d)", err);
+        return 0;
+    }
+    device_count = prop_size/sizeof(AudioDeviceID);
+    ATX_LOG_FINE_1("found %d devices", device_count);
+    
+    /* allocate memory for the array */
+    devices = (AudioDeviceID*)ATX_AllocateZeroMemory(sizeof(AudioDeviceID) * device_count);
+    if (devices == NULL) return 0;
+    
+    /* retrieve the list of device IDs */
+    err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices, &prop_size, devices);
+    if (err != noErr) {
+        ATX_LOG_FINE_1("AudioHardwareGetProperty(kAudioHardwarePropertyDevices) failed (%d)", err);
+        return 0;
+    }
+    
+    /* find the device ID we want */
+    for (i=0; i<device_count; i++) {
+        /* get the device name */
+        err = AudioDeviceGetPropertyInfo(devices[i], 0, false,
+                                         kAudioDevicePropertyDeviceName,
+                                         &prop_size, NULL);
+        if (err == noErr) {
+            if (device_name) ATX_FreeMemory(device_name);
+            device_name = (char*)ATX_AllocateZeroMemory(prop_size+1);
+            err = AudioDeviceGetProperty(devices[i], 0, false,
+                                         kAudioDevicePropertyDeviceName,
+                                         &prop_size, device_name);
+            if (err == noErr) {
+                ATX_LOG_FINE_2("device name [%d] = %s", i, device_name);
+            }
+            /* cleanup the string */
+            device_name[prop_size] = '\0'; /* NULL-terminate the string */
+            if (prop_size > 0) {
+                unsigned int x;
+                for (x=prop_size-1; x; x--) {
+                    if (device_name[x] == ' ') {
+                        device_name[x] = '\0';
+                    } else if (device_name[x]) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            continue;
+        }
+        
+        /* look at the device's streams */
+        prop_size = 0;
+        err = AudioDeviceGetPropertyInfo(devices[i], 0, FALSE, kAudioDevicePropertyStreams, &prop_size, NULL);
+        if (err != noErr || prop_size == 0) {
+            ATX_LOG_FINE("skipping device (not an output)");
+            continue;
+        }
+
+        if (name) {
+            /* look for a match by name */
+            if (ATX_StringsEqual(device_name, name)) {
+                *device_id = devices[i];
+                ATX_LOG_FINE("device selected as output");
+                result = BLT_SUCCESS;
+                break;
+            }
+        } else {
+            /* look for a match by index */
+            if (device_selector++ == device_index) {
+                *device_id = devices[i];
+                ATX_LOG_FINE("device selected as output");
+                result = BLT_SUCCESS;
+                break;
+            }
+        }
+    }
+    
+    if (device_name) ATX_FreeMemory(device_name);
+    if (devices)     ATX_FreeMemory(devices);
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioUnitsOutput_CheckDownmix
++---------------------------------------------------------------------*/
+static void
+OsxAudioUnitsOutput_CheckDownmix(OsxAudioUnitsOutput* self)
+{
+    OSStatus err;
+    UInt32   prop_size;
+    
+    err = AudioDeviceGetPropertyInfo(self->audio_device_id, 0, FALSE, kAudioDevicePropertyStreamConfiguration, &prop_size, NULL);
+    if (err != noErr) return;
+
+    AudioBufferList* buffers = (AudioBufferList *)ATX_AllocateZeroMemory(prop_size);
+    err = AudioDeviceGetProperty(self->audio_device_id, 0, FALSE, kAudioDevicePropertyStreamConfiguration, &prop_size, buffers);
+    if (err == noErr) {
+        unsigned int i;
+        unsigned int channel_count = 0;
+        for (i = 0; i < buffers->mNumberBuffers; ++i) {
+            channel_count += buffers->mBuffers[i].mNumberChannels;
+        }
+        ATX_LOG_FINE_1("device has %d channels", channel_count);
+    }
+    
+    ATX_FreeMemory(buffers);
+}
+
+/*----------------------------------------------------------------------
 |    OsxAudioUnitsOutput_Create
 +---------------------------------------------------------------------*/
 static BLT_Result
 OsxAudioUnitsOutput_Create(BLT_Module*              module,
                            BLT_Core*                core, 
                            BLT_ModuleParametersType parameters_type,
-                           BLT_CString              parameters, 
+                           const void*              parameters, 
                            BLT_MediaNode**          object)
 {
-    OsxAudioUnitsOutput* self;
-    AudioUnit            audio_unit = NULL;
-    Component            component;
-    ComponentDescription component_desc;
-    ComponentResult      result;
+    OsxAudioUnitsOutput*      self;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
+    AudioDeviceID             audio_device_id = 0;
+    AudioUnit                 audio_unit = NULL;
+    Component                 component;
+    ComponentDescription      component_desc;
+    ComponentResult           result;
+    BLT_Result                blt_result;
     
     /* check parameters */
     if (parameters == NULL || 
@@ -480,10 +631,19 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
+    /* parse the name */
+    if (!ATX_StringsEqualN(constructor->name, "osxau:", 6)) {
+        return BLT_ERROR_INTERNAL;
+    }
+
+    /* map the name into a device ID */
+    blt_result = OsxAudioUnitsOutput_MapDeviceName(constructor->name+6, &audio_device_id);
+    if (BLT_FAILED(blt_result)) return blt_result;
+    
     /* get the default output audio unit */
     ATX_SetMemory(&component_desc, 0, sizeof(component_desc));
     component_desc.componentType         = kAudioUnitType_Output;
-    component_desc.componentSubType      = kAudioUnitSubType_DefaultOutput;
+    component_desc.componentSubType      = kAudioUnitSubType_HALOutput;
     component_desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     component_desc.componentFlags        = 0;
     component_desc.componentFlagsMask    = 0;
@@ -511,7 +671,7 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    self->audio_device_id            = 0; /* default */
+    self->audio_device_id            = audio_device_id;
     self->audio_unit                 = audio_unit;
     self->media_type.sample_rate     = 0;
     self->media_type.channel_count   = 0;
@@ -803,7 +963,7 @@ OsxAudioUnitsOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
 }
 
 /*----------------------------------------------------------------------
-|       OsxAudioUnitsOutput_Activate
+|   OsxAudioUnitsOutput_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
 OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
@@ -815,6 +975,19 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     BLT_COMPILER_UNUSED(stream);
         
     ATX_LOG_FINER("start");
+
+    /* select the device */
+    if (self->audio_device_id) {
+        result = AudioUnitSetProperty(self->audio_unit,
+                                      kAudioOutputUnitProperty_CurrentDevice,
+                                      kAudioUnitScope_Global,
+                                      0,
+                                      &self->audio_device_id,
+                                      sizeof(self->audio_device_id));
+        if (result != noErr) {
+            ATX_LOG_WARNING_1("AudioUnitSetProperty (kAudioOutputUnitProperty_CurrentDevice) failed (%d)", result);
+        }
+    }
 
     /* initialize the output */
     if (self->audio_unit) {
@@ -852,6 +1025,9 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
         }
     }
 
+    /* check for downmix based on the number of supported channels */
+    OsxAudioUnitsOutput_CheckDownmix(self);
+    
     /* setup the callback */
     callback.inputProc = OsxAudioUnitsOutput_RenderCallback;
     callback.inputProcRefCon = _self;

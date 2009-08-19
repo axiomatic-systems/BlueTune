@@ -48,6 +48,15 @@ BLT_TimeStamp_Sub(BLT_TimeStamp t0, BLT_TimeStamp t1)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_TimeStamp_ToSeconds
++---------------------------------------------------------------------*/
+double
+BLT_TimeStamp_ToSeconds(BLT_TimeStamp t)
+{
+    return (double)t.seconds+(double)t.nanoseconds/1000000000.0f;
+}
+
+/*----------------------------------------------------------------------
 |   BLT_TimeStamp_ToNanos
 +---------------------------------------------------------------------*/
 ATX_UInt64
@@ -72,6 +81,15 @@ ATX_UInt64
 BLT_TimeStamp_ToMillis(BLT_TimeStamp t)
 {
     return 1000*(ATX_UInt64)t.seconds+(t.nanoseconds/1000000);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_TimeStamp_FromSeconds
++---------------------------------------------------------------------*/
+BLT_TimeStamp 
+BLT_TimeStamp_FromSeconds(double seconds)
+{
+    return BLT_TimeStamp_FromNanos((ATX_UInt64)(1000000000.0*seconds));
 }
 
 /*----------------------------------------------------------------------

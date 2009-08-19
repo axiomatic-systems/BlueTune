@@ -77,9 +77,11 @@ extern "C" {
 
 BLT_TimeStamp BLT_TimeStamp_Add(BLT_TimeStamp t0, BLT_TimeStamp t1);
 BLT_TimeStamp BLT_TimeStamp_Sub(BLT_TimeStamp t1, BLT_TimeStamp t2);
+BLT_TimeStamp BLT_TimeStamp_FromSeconds(double seconds);
 BLT_TimeStamp BLT_TimeStamp_FromNanos(ATX_UInt64 nanos);
 BLT_TimeStamp BLT_TimeStamp_FromMicros(ATX_UInt64 micros);
 BLT_TimeStamp BLT_TimeStamp_FromMillis(ATX_UInt64 millis);
+double        BLT_TimeStamp_ToSeconds(BLT_TimeStamp ts);
 ATX_UInt64    BLT_TimeStamp_ToNanos(BLT_TimeStamp ts);
 ATX_UInt64    BLT_TimeStamp_ToMicros(BLT_TimeStamp ts);
 ATX_UInt64    BLT_TimeStamp_ToMillis(BLT_TimeStamp ts);

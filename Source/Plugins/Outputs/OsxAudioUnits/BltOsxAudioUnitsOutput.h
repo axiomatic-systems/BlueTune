@@ -18,10 +18,11 @@
  * to a sound card on MacOSX.
  * These media nodes expect media pakcets with PCM audio.
  * This module responds to probe with the name:
- * 'osxau:<n>'
- * (In this version, <n> is ignored, and the default sound card will
- * be used).
- * @{ 
+ * 'osxau:<n>' or 'osxau:#<name>'
+ * <n> is an integer, to selects the device by index, 
+ * where 0 means the default output, 1 the first output, etc...
+ * <name> is the name of an output device (ex: 'Built-in Output')
+ * @{
  */
 
 /*----------------------------------------------------------------------

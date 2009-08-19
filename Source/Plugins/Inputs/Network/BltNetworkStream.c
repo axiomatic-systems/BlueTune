@@ -20,6 +20,7 @@
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltNetworkStream.h"
+#include "BltErrors.h"
 
 /*----------------------------------------------------------------------
 |   types
@@ -39,6 +40,7 @@ typedef struct {
     ATX_Size         back_store;
     ATX_Position     position;
     ATX_Boolean      eos;
+    ATX_Result       eos_cause;
     ATX_Size         seek_as_read_threshold;
 } BLT_NetworkStream;
 
@@ -94,6 +96,7 @@ BLT_NetworkStream_Create(BLT_Size          buffer_size,
         return result;
     }
     self->buffer_size = buffer_size;
+    self->eos_cause = ATX_ERROR_EOS;
     self->source = source;
     ATX_REFERENCE_OBJECT(source);
     
@@ -247,8 +250,10 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
             /* we can't continue further */
             ATX_LOG_FINE("reached EOS");
             self->eos = ATX_TRUE;
+            self->eos_cause = ATX_ERROR_EOS;
             break;
         } else {
+            ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
             return (*bytes_read == 0) ? result : ATX_SUCCESS;
         }
 
@@ -257,7 +262,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     }
 
     if (self->eos && *bytes_read == 0) {
-        return ATX_ERROR_EOS;
+        return self->eos_cause;
     } else {
         return ATX_SUCCESS;
     }
@@ -304,6 +309,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
 
     /* we're seeking outside the buffered zone */
     self->eos = ATX_FALSE;
+    self->eos_cause = ATX_ERROR_EOS;
     if (move > 0 && (unsigned int)move <= self->seek_as_read_threshold) {
         /* simulate a seek by reading data up to the position */
         char buffer[256];

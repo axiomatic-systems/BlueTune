@@ -45,6 +45,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.ipp")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
+#define BLT_IPP_DECODER_FORMAT_TAG_AVC1 0x61766331    /* 'avc1' */
 
 /*----------------------------------------------------------------------
 |    types
@@ -64,7 +65,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
 
     /* members */
-    BLT_Boolean       eos;
+    MediaData*  buffer;
+    BLT_Boolean eos;
 } IppDecoderInput;
 
 typedef struct {
@@ -75,7 +77,7 @@ typedef struct {
     /* members */
     BLT_Boolean           eos;
     BLT_RawVideoMediaType media_type;
-    BLT_MediaPacket*      picture;
+    VideoData*            buffer;       
 } IppDecoderOutput;
 
 typedef struct {
@@ -103,224 +105,98 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     IppDecoder* self   = ATX_SELF_M(input, IppDecoder, BLT_PacketConsumer);
     BLT_Result  result = BLT_SUCCESS;
 
-    
-    
-
     if (self->decoder == NULL) {
         ATX_LOG_FINE("instantiating new H.264 decoder");
-        self->decoder = new H264VideoDecoder();
-        VideoDecoderParams    dec_params;
-        VideoProcessing       video_proc;
-        VideoProcessingParams post_proc_params;
-        post_proc_params.m_DeinterlacingMethod = NO_DEINTERLACING;
-        post_proc_params.InterpolationMethod = 0;
-        video_proc.SetParams(&post_proc_params);
 
-        dec_params.pPostProcessing  = &video_proc;
-        dec_params.info.stream_type = H264_VIDEO;
-        dec_params.numThreads = 1;
-        dec_params.lFlags = 0;
-    }
-#if 0
-        //dec_params->m_pData = in.get();
-
-            if (UMC_OK != (h264Decoder->Init(params.get())))
-            {
-                vm_string_printf(__VM_STRING("Video Decoder creation failed\n"));
-                return -1;
-            }
-
-            H264VideoDecoderParams params;
-            if (UMC_OK != h264Decoder->GetInfo(&params))
-            {
-                vm_string_printf(__VM_STRING("Video Decoder creation failed\n"));
-                return -1;
-            }
-    
-    /* allocate a codec if we don't already have one */
-    if (self->codec_context == NULL) {
-        /* check the media type and find the right codec */
+        // check the media type and find the right codec
         const BLT_Mp4VideoMediaType* media_type;
         const unsigned char*         decoder_config = NULL;
         unsigned int                 decoder_config_size = 0;
-        enum CodecID                 codec_id = CODEC_ID_NONE;
-        AVCodec*                     codec = NULL;
         
-        /* check the packet type */
+        // check the packet type
         BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
         if ((media_type->base.base.id != self->module->iso_base_video_es_type_id &&
              media_type->base.base.id != self->module->mp4_video_es_type_id) ||
             media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
-            ATX_LOG_FINE("IppDecoderInput::PutPacket - invalid media type");
+            ATX_LOG_FINE("invalid media type");
             return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-        if (media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC1) {
-            ATX_LOG_FINE("IppDecoderInput::PutPacket - content type is AVC");
-            codec_id            = CODEC_ID_H264;
+        if (media_type->base.format_or_object_type_id == BLT_IPP_DECODER_FORMAT_TAG_AVC1) {
+            ATX_LOG_FINE("content type is AVC");
             decoder_config      = media_type->decoder_info;
             decoder_config_size = media_type->decoder_info_length;
-        }
-        
-        if (codec_id == CODEC_ID_NONE) {
-            /* no compatible codec found */
-            ATX_LOG_WARNING("IppDecoderInput::PutPacket - no compatible codec found");
-            return BLT_ERROR_UNSUPPORTED_CODEC;
-        }
-        
-        /* find the codec handle */
-        codec = avcodec_find_decoder(codec_id);
-        if (codec == NULL) {
-            ATX_LOG_WARNING("IppDecoderInput::PutPacket - avcodec_find_decoder failed");
-            return BLT_ERROR_UNSUPPORTED_CODEC;
-        }
-        
-        /* allocate the codec context */
-        self->codec_context = avcodec_alloc_context();
-        if (self->codec_context == NULL) {
-            ATX_LOG_WARNING("IppDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
-            return BLT_ERROR_OUT_OF_MEMORY;
-        }
-        
-        /* setup the codec options */
-        self->codec_context->debug_mv          = 0;
-        self->codec_context->debug             = 0;
-        self->codec_context->workaround_bugs   = 1;
-        self->codec_context->lowres            = 0;
-        self->codec_context->idct_algo         = FF_IDCT_AUTO;
-        self->codec_context->skip_frame        = AVDISCARD_DEFAULT;
-        self->codec_context->skip_idct         = AVDISCARD_DEFAULT;
-        self->codec_context->skip_loop_filter  = AVDISCARD_DEFAULT;
-        self->codec_context->error_resilience  = FF_ER_CAREFUL;
-        self->codec_context->error_concealment = 3;
-        self->codec_context->thread_count      = 1;
-        
-        /* set the generic video config */
-        self->codec_context->width           = media_type->width;
-        self->codec_context->height          = media_type->height;
-        self->codec_context->bits_per_sample = media_type->depth;
-        
-        /* setup the callbacks */
-        self->codec_context->get_buffer     = IppDecoder_GetBufferCallback;
-        self->codec_context->release_buffer = IppDecoder_ReleaseBufferCallback;
-        
-        /* set the H.264 decoder config */
-        self->codec_context->extradata_size = decoder_config_size;
-        if (decoder_config_size) {
-            self->codec_context->extradata = av_malloc(decoder_config_size);
-            ATX_CopyMemory(self->codec_context->extradata, decoder_config, decoder_config_size);        
         } else {
-            self->codec_context->extradata = NULL;
+            ATX_LOG_FINE("unsupported codec");
+            return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
-        /* open the codec */
-        av_result = avcodec_open(self->codec_context, codec);
-        if (av_result < 0) {
-            ATX_LOG_WARNING_1("IppDecoderInput::PutPacket - avcodec_open returned %d", av_result);
-            return BLT_ERROR_INTERNAL;
+        // codec init data
+        MediaData codec_init_data(decoder_config_size);
+        codec_init_data.SetDataSize(decoder_config_size);
+        ATX_CopyMemory(codec_init_data.GetDataPointer(), decoder_config, decoder_config_size);
+        
+        // setup video processing params
+        DataPointersCopy*       video_proc = new DataPointersCopy();
+        //VideoProcessing       video_proc;
+        //VideoProcessingParams video_proc_params;
+        //video_proc_params.m_DeinterlacingMethod = NO_DEINTERLACING;
+        //video_proc_params.InterpolationMethod = 0;
+        //video_proc.SetParams(&video_proc_params);
+
+        // setup video decoder params
+        VideoDecoderParams dec_params;
+        dec_params.pPostProcessing     = video_proc;
+        dec_params.info.stream_type    = H264_VIDEO;
+        dec_params.info.stream_subtype = AVC1_VIDEO;
+        //dec_params.numThreads          = 1;
+        dec_params.lFlags              = 0;
+        dec_params.m_pData             = &codec_init_data;
+        
+        // create and init the decoder
+        self->decoder = new H264VideoDecoder();
+        UMC::Status status = self->decoder->Init(&dec_params);
+        if (status != UMC_OK) {
+            ATX_LOG_WARNING_1("H264 decoder Init() failed (%d)", status);
+            return BLT_FAILURE;
+        }
+
+        // get decoder params
+        H264VideoDecoderParams h264_params;
+        status = self->decoder->GetInfo(&h264_params);
+        if (status != UMC_OK) {
+            ATX_LOG_WARNING_1("H264 decoder GetInfo() failed (%d)", status);
+            return BLT_FAILURE;
         }
         
-        /* allocate a frame */
-        self->frame = avcodec_alloc_frame();
+        // allocate the input buffer
+        delete self->input.buffer;
+        self->input.buffer = new MediaData();
+        
+        // allocate the output buffer
+        delete self->output.buffer;
+        self->output.buffer = new VideoData();
+        self->output.buffer->SetAlignment(16);
+        self->output.buffer->Init(h264_params.info.clip_info.width, 
+                                  h264_params.info.clip_info.height, 
+                                  UMC::YV12, 
+                                  8);
+        self->output.buffer->Alloc();        
     }
-    
-    /* check to see if this is the end of a stream */
-    if (BLT_MediaPacket_GetFlags(packet) & 
-        BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
+
+    // check to see if this is the end of a stream
+    if (BLT_MediaPacket_GetFlags(packet) & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
         self->input.eos = BLT_TRUE;
     }
-
-    /* decode a picture */
-    {
-        int got_picture = 0;
-
-        /* libavcodec wants the input buffers to be padded */
-        unsigned int   packet_size   = BLT_MediaPacket_GetPayloadSize(packet);
-        unsigned char* packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-        BLT_Size buffer_size_needed  = BLT_MediaPacket_GetPayloadOffset(packet)+packet_size+BLT_FFMPEG_INPUT_PADDING_SIZE;
-        if (buffer_size_needed > BLT_MediaPacket_GetAllocatedSize(packet)) {
-            BLT_MediaPacket_SetAllocatedSize(packet, buffer_size_needed);
-            packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-        }
-        ATX_SetMemory(packet_buffer+packet_size, 0, BLT_FFMPEG_INPUT_PADDING_SIZE);
-        
-        /* set the context opaque pointer for callbacks */
-        self->codec_context->opaque = packet;
-        
-        /* feed the codec */
-        ATX_LOG_FINEST_2("decoding frame size=%ld, pts=%f", 
-                         packet_size, 
-                         (float)BLT_MediaPacket_GetTimeStamp(packet).seconds +
-                         (float)BLT_MediaPacket_GetTimeStamp(packet).nanoseconds/1000000000.0f);
-        av_result = avcodec_decode_video(self->codec_context, 
-                                         self->frame, 
-                                         &got_picture, 
-                                         packet_buffer, 
-                                         packet_size);
-        if (av_result < 0) {
-            ATX_LOG_FINE_1("avcodec_decode_video returned %d", av_result);
-            return BLT_SUCCESS;
-        }
-        if (got_picture) {
-            BLT_MediaPacket* picture = NULL;
-            unsigned int   plane_size[3];
-            unsigned int   padding_size[3] = {0,0,0};
-            unsigned int   picture_size = 0;
-            unsigned char* picture_buffer;
-            unsigned int   i;
-            
-            ATX_LOG_FINEST_2("decoded frame width=%d, height=%d",
-                              self->codec_context->width, 
-                              self->codec_context->height);
-            self->output.media_type.width  = self->codec_context->width;
-            self->output.media_type.height = self->codec_context->height;
-            self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
-            self->output.media_type.flags  = 0;
-            for (i=0; i<3; i++) {
-                if (i==0) {
-                    /* Y' plane */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height;
-                } else {
-                    /* Cb and Cr planes */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height/2;
-                }
-                if (plane_size[i]%16) {
-                    padding_size[i] = 16-(plane_size[i]%16);
-                }
-                self->output.media_type.planes[i].offset = picture_size;
-                self->output.media_type.planes[i].bytes_per_line = self->frame->linesize[i];
-                picture_size += plane_size[i]+padding_size[i];
-            }
-            
-            result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
-                                                picture_size, 
-                                                &self->output.media_type.base, 
-                                                &picture);
-            if (BLT_FAILED(result)) {
-                ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
-                return result;
-            }
-            
-            /* retrieve the timestamp from the frame */
-            if (self->frame->opaque) {
-                BLT_TimeStamp* pts = (BLT_TimeStamp*)self->frame->opaque;
-                if (pts) BLT_MediaPacket_SetTimeStamp(picture, *pts);
-            }
-
-            /* setup the picture buffer */
-            BLT_MediaPacket_SetPayloadSize(picture, picture_size);
-            picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
-            for (i=0; i<3; i++) {
-                ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset, 
-                               self->frame->data[i], 
-                               plane_size[i]);
-            }
-            if (self->output.picture) {
-                BLT_MediaPacket_Release(self->output.picture);
-            }
-            self->output.picture = picture;
-        } 
-    }
-#endif
+    
+    // copy the data to the input buffer
+    self->input.buffer->Alloc(BLT_MediaPacket_GetPayloadSize(packet));
+    self->input.buffer->SetDataSize(BLT_MediaPacket_GetPayloadSize(packet));
+    ATX_CopyMemory(self->input.buffer->GetDataPointer(),
+                   BLT_MediaPacket_GetPayloadBuffer(packet),
+                   BLT_MediaPacket_GetPayloadSize(packet));
+    
+    // set the buffer's timestamp
+    self->input.buffer->SetTime(BLT_TimeStamp_ToSeconds(BLT_MediaPacket_GetTimeStamp(packet)));
     
     return result;
 }
@@ -359,13 +235,95 @@ ATX_END_INTERFACE_MAP
 +---------------------------------------------------------------------*/
 BLT_METHOD
 IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
-                              BLT_MediaPacket**   packet)
+                           BLT_MediaPacket**   packet)
 {
     IppDecoder* self = ATX_SELF_M(output, IppDecoder, BLT_PacketProducer);
     
-    if (self->output.picture == NULL) return BLT_ERROR_PORT_HAS_NO_DATA;
-    *packet = self->output.picture;
-    self->output.picture = NULL;
+    // default return value
+    *packet = NULL;
+
+    // check that we have a decoder
+    if (self->decoder == NULL) return BLT_ERROR_PORT_HAS_NO_DATA;
+
+    // try to decode a frame
+    UMC::Status status;
+    status = self->decoder->GetFrame(self->input.eos?NULL:self->input.buffer, 
+                                     self->output.buffer);
+    if (status == UMC_ERR_NOT_ENOUGH_DATA) {
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    } else if (status != UMC_OK) {
+        ATX_LOG_WARNING_1("GetFrame failed (%d)", status);
+    } 
+    
+    // check the format
+    if (self->output.buffer->GetColorFormat() != UMC::YUV420) {
+        ATX_LOG_FINE("color format is not YUV420");
+        return BLT_ERROR_UNSUPPORTED_FORMAT;
+    }
+    if (self->output.buffer->GetNumPlanes() != 3) {
+        ATX_LOG_FINE("number of planes is not 3");
+        return BLT_ERROR_UNSUPPORTED_FORMAT;
+    }
+    for (unsigned int i=0; i<3; i++) {
+        VideoData::PlaneInfo plane_info;
+        self->output.buffer->GetPlaneInfo(&plane_info, i);
+        if (plane_info.m_iSamples != 1) {
+            ATX_LOG_FINE("plane sample size is not 1");
+            return BLT_ERROR_UNSUPPORTED_FORMAT;
+        }
+    }
+    
+    // create a media packet for the frame
+    unsigned int   plane_size[3];
+    unsigned int   padding_size[3] = {0,0,0};
+    unsigned int   picture_size = 0;
+    unsigned int   picture_width  = self->output.buffer->GetWidth();
+    unsigned int   picture_height = self->output.buffer->GetHeight();
+    unsigned int   i;
+    
+    ATX_LOG_FINEST_2("decoded frame width=%d, height=%d", picture_width, picture_height);
+    self->output.media_type.width  = picture_width;
+    self->output.media_type.height = picture_height;
+    self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
+    self->output.media_type.flags  = 0;
+
+    for (i=0; i<3; i++) {
+        VideoData::PlaneInfo plane_info;
+        self->output.buffer->GetPlaneInfo(&plane_info, i);
+        
+        plane_size[i] = plane_info.m_nPitch*plane_info.m_ippSize.height;
+        if (plane_size[i]%16) {
+            padding_size[i] = 16-(plane_size[i]%16);
+        }
+        self->output.media_type.planes[i].offset = picture_size;
+        self->output.media_type.planes[i].bytes_per_line = plane_info.m_nPitch;
+        picture_size += plane_size[i]+padding_size[i];
+    }
+    
+    BLT_Result result;
+    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
+                                        picture_size, 
+                                        &self->output.media_type.base, 
+                                        packet);
+    if (BLT_FAILED(result)) {
+        ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
+        return result;
+    }
+
+    // copy pixels
+    BLT_MediaPacket_SetPayloadSize(*packet, picture_size);
+    unsigned char* picture_buffer = (unsigned char*)BLT_MediaPacket_GetPayloadBuffer(*packet);
+    for (i=0; i<3; i++) {
+        VideoData::PlaneInfo plane_info;
+        self->output.buffer->GetPlaneInfo(&plane_info, i);
+        ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset, 
+                       plane_info.m_pPlane, 
+                       plane_size[i]);
+    }
+
+    // set the timestamp
+    BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_FromSeconds(self->output.buffer->GetTime()));
+    
     return BLT_SUCCESS;
 }
 
@@ -429,8 +387,9 @@ IppDecoder_Destroy(IppDecoder* self)
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
     
-    /* free any buffered packet */
-    if (self->output.picture) BLT_MediaPacket_Release(self->output.picture);
+    /* free resources */
+    delete self->input.buffer;
+    delete self->output.buffer;
 
     /* free the object memory */
     ATX_FreeMemory(self);
@@ -478,10 +437,10 @@ IppDecoder_Seek(BLT_MediaNode* _self,
     self->output.eos  = BLT_FALSE;
 
     /* flush anything that may be pending */
-    if (self->output.picture) {
+    /*if (self->output.picture) {
         BLT_MediaPacket_Release(self->output.picture);
         self->output.picture = NULL;
-    }
+    }*/
 
     return BLT_SUCCESS;
 }
@@ -517,8 +476,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(IppDecoder,
                                          reference_count)
 
 /*----------------------------------------------------------------------
- |    IppDecoder_Create
- +---------------------------------------------------------------------*/
+|    IppDecoder_Create
++---------------------------------------------------------------------*/
 static BLT_Result
 IppDecoder_Create(BLT_Module*              module,
                   BLT_Core*                core, 
@@ -530,6 +489,9 @@ IppDecoder_Create(BLT_Module*              module,
     BLT_Result  result;
     
     ATX_LOG_FINE("enter");
+
+    // initialize the IPP library
+    ippStaticInit();
     
     /* check parameters */
     if (parameters == NULL || 

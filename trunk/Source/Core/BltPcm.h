@@ -2,7 +2,7 @@
 |
 |   BlueTune - PCM Utilities
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2009 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -75,6 +75,27 @@ do {                                            \
 #define BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_NE  BLT_PCM_SAMPLE_FORMAT_UNSIGNED_INT_LE
 #define BLT_PCM_SAMPLE_FORMAT_FLOAT_NE         BLT_PCM_SAMPLE_FORMAT_FLOAT_LE
 #endif
+
+/* NOTE: the PCM channel order (interleaving in the buffer) is as follows:
+1.  Front Left - FL
+2.  Front Right - FR
+3.  Front Center - FC
+4.  Low Frequency - LF
+5.  Back Left - BL
+6.  Back Right - BR
+7.  Front Left of Center - FLC
+8.  Front Right of Center - FRC
+9.  Back Center - BC
+10. Side Left - SL
+11. Side Right - SR
+12. Top Center - TC
+13. Top Front Left - TFL
+14. Top Front Center - TFC
+15. Top Front Right - TFR
+16. Top Back Left - TBL
+17. Top Back Center - TBC
+18. Top Back Right - TBR
+*/
 
 /* channel mask bits */
 #define BLT_PCM_SPEAKER_FRONT_LEFT 	          (1    )

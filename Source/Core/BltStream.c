@@ -1716,7 +1716,7 @@ Stream_Start(BLT_Stream* _self)
     Stream*     self = ATX_SELF(Stream, BLT_Stream);
     StreamNode* node = self->nodes.head;
 
-    /* stop all the nodes */
+    /* start all the nodes */
     while (node) {
         StreamNode_Start(node);
         node = node->next;

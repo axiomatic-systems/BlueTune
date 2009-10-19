@@ -30,7 +30,9 @@ typedef struct {
 
 typedef struct {
     BLT_CString  audio_output_name;
+    BLT_CString  audio_output_type;
     BLT_CString  video_output_name;
+    BLT_CString  video_output_type;
     unsigned int duration;
     unsigned int verbosity;
     ATX_List*    keys;
@@ -84,7 +86,9 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  -h\n"
         "  --help\n" 
         "  --audio-output=<name>\n"
+        "  --audio-output-type=<type>\n"
         "  --video-output=<name>\n"
+        "  --video-output-type=<type>\n"
         "  --duration=<n> (seconds)\n"
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', or 'all'\n"
@@ -170,7 +174,9 @@ BLTP_ParseCommandLine(char** args)
 
     /* setup default values for options */
     Options.audio_output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
+    Options.audio_output_type = NULL;
     Options.video_output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
+    Options.video_output_type = NULL;
     Options.duration    = 0;
     Options.verbosity   = 0;
     ATX_List_Create(&Options.keys);
@@ -181,8 +187,12 @@ BLTP_ParseCommandLine(char** args)
             BLTP_PrintUsageAndExit(0);
         } else if (ATX_StringsEqualN(arg, "--audio-output=", 15)) {
             Options.audio_output_name = arg+15;
+        } else if (ATX_StringsEqualN(arg, "--audio-output-type=",20)) {
+            Options.audio_output_type = arg+20;
         } else if (ATX_StringsEqualN(arg, "--video-output=", 15)) {
             Options.video_output_name = arg+15;
+        } else if (ATX_StringsEqualN(arg, "--video-output-type=", 20)) {
+            Options.video_output_type = arg+20;
         } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
             int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
@@ -606,13 +616,13 @@ main(int argc, char** argv)
     BLTP_RegisterPlugins(decoder);
     
     /* set the audio output */
-    result = BLT_DecoderX_SetAudioOutput(decoder, Options.audio_output_name, NULL);
+    result = BLT_DecoderX_SetAudioOutput(decoder, Options.audio_output_name, Options.audio_output_type);
     if (BLT_FAILED(result)) {
         fprintf(stderr, "SetAudioOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);
     }
     /* set the video output */
-    result = BLT_DecoderX_SetVideoOutput(decoder, Options.video_output_name, NULL);
+    result = BLT_DecoderX_SetVideoOutput(decoder, Options.video_output_name, Options.video_output_type);
     if (BLT_FAILED(result)) {
         fprintf(stderr, "SetVideoOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);

@@ -20,6 +20,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Externals.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -40,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Decoders\IPP;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT;BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER;_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -63,7 +64,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="avcodec-51.lib avutil-49.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\lib&quot;;&quot;$(IPPROOT)\lib&quot;"
 				IgnoreDefaultLibraryNames="LIBC.lib;LIBCD.lib;LIBCMT.lib;MSVCRT.lib;MSVCRTD.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -99,6 +100,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Externals.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -119,8 +121,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Decoders\IPP;..\..\..\..\Source\Plugins\Outputs\Win32;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec&quot;;&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil&quot;;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT;_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER;BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -140,7 +142,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="avcodec-51.lib avutil-49.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\lib&quot;;&quot;$(IPPROOT)\lib&quot;"
 				IgnoreDefaultLibraryNames="LIBC.lib;LIBCD.lib;LIBCMTD.lib;MSVCRT.lib;MSVCRTD.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -189,6 +191,28 @@
 			<File
 				RelativePath="..\..\..\..\Source\Plugins\Decoders\FFMPEG\BltFfmpegDecoder.c"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Source\Plugins\Decoders\IPP\BltIppDecoder.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="&quot;$(IPPROOT)/include&quot;;&quot;$(IPP_UMC_ROOT)/core/vm/include&quot;;&quot;$(IPP_UMC_ROOT)/core/vm_plus/include&quot;;&quot;$(IPP_UMC_ROOT)/core/umc/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/common/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/h264_dec/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/color_space_converter/include&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="&quot;$(IPPROOT)/include&quot;;&quot;$(IPP_UMC_ROOT)/core/vm/include&quot;;&quot;$(IPP_UMC_ROOT)/core/vm_plus/include&quot;;&quot;$(IPP_UMC_ROOT)/core/umc/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/common/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/h264_dec/include&quot;;&quot;$(IPP_UMC_ROOT)/codec/color_space_converter/include&quot;"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\Source\Apps\BtPlayX\BtPlayX.c"

@@ -589,10 +589,10 @@ main(int argc, char** argv)
     }
     
     /* enable the gain control filter */
-    BLT_Decoder_AddNodeByName(decoder, NULL, "GainControlFilter");
+    /*BLT_Decoder_AddNodeByName(decoder, NULL, "GainControlFilter");*/
 
     /* by default, add a filter host module */
-    BLT_Decoder_AddNodeByName(decoder, NULL, "FilterHost");
+    /*BLT_Decoder_AddNodeByName(decoder, NULL, "FilterHost");*/
 
     /* process each input in turn */
     while ((input_name = *argv++)) {

@@ -623,14 +623,6 @@ BLT_DecoderServer::OnSetVolumeCommand(float volume)
     ATX_LOG_FINE_1("volume=%f", volume);
 
     result = BLT_Decoder_SetVolume(m_Decoder, volume);
-    if (BLT_SUCCEEDED(result)) {
-        result = BLT_Decoder_GetVolume(m_Decoder, &volume);
-        if (BLT_SUCCEEDED(result)) {
-            m_Client->PostMessage(new BLT_DecoderClient_VolumeNotificationMessage(volume));
-        }
-        result = BLT_SUCCESS; // ignore any error from the previous call
-    }
-
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_SET_VOLUME, result);
 }
 

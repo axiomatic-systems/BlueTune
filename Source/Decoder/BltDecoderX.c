@@ -415,7 +415,7 @@ BLT_DecoderX_VideoOutputChanged(BLT_DecoderX* decoder, BLT_MediaNode* node)
     if (node) {
         BLT_SyncSlave* video_output_as_slave;
         decoder->video_output = ATX_CAST(node, BLT_OutputNode);
-        ATX_REFERENCE_OBJECT(decoder->video_output);
+        if (decoder->video_output) ATX_REFERENCE_OBJECT(decoder->video_output);
         
         /* setup the synchronization */
         video_output_as_slave = ATX_CAST(node, BLT_SyncSlave);
@@ -605,30 +605,30 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
             /* mark that we can't push a packet yet */
             audio_would_block = BLT_TRUE;
         }
-        if (!audio_would_block) {
-            result = BLT_Stream_PumpPacket(decoder->audio_stream);
-            if (BLT_FAILED(result)) {
-                if (result == BLT_ERROR_EOS) {
-                    audio_eos = BLT_TRUE;
-                } else {
-                    return result;
-                }
+    }
+    if (!audio_would_block) {
+        result = BLT_Stream_PumpPacket(decoder->audio_stream);
+        if (BLT_FAILED(result)) {
+            if (result == BLT_ERROR_EOS) {
+                audio_eos = BLT_TRUE;
             } else {
-                BLT_StreamStatus stream_status;
-                ATX_UInt64       audio_decode_ts;
-                ATX_UInt64       audio_output_ts;
-                ATX_Int64        buffered;
-                BLT_Stream_GetStatus(decoder->audio_stream, &stream_status);
-                audio_decode_ts = BLT_TimeStamp_ToMillis(stream_status.time_stamp);
-                audio_output_ts = BLT_TimeStamp_ToMillis(stream_status.output_status.media_time);
-                buffered = audio_decode_ts-audio_output_ts;
-                ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
-                if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
-                    /* skip the video decoding, we don't have enough time */
-                    return BLT_SUCCESS;
-                }
-            }    
-        }
+                return result;
+            }
+        } else {
+            BLT_StreamStatus stream_status;
+            ATX_UInt64       audio_decode_ts;
+            ATX_UInt64       audio_output_ts;
+            ATX_Int64        buffered;
+            BLT_Stream_GetStatus(decoder->audio_stream, &stream_status);
+            audio_decode_ts = BLT_TimeStamp_ToMillis(stream_status.time_stamp);
+            audio_output_ts = BLT_TimeStamp_ToMillis(stream_status.output_status.media_time);
+            buffered = audio_decode_ts-audio_output_ts;
+            ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
+            if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
+                /* skip the video decoding, we don't have enough time */
+                return BLT_SUCCESS;
+            }
+        }    
     }
     
     /* pump a video packet */
@@ -642,15 +642,14 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
             /* mark that we can't push a packet yet */
             video_would_block = BLT_TRUE;
         }
-
-        if (!video_would_block) {
-            result = BLT_Stream_PumpPacket(decoder->video_stream);
-            if (BLT_FAILED(result)) {
-                if (result == BLT_ERROR_EOS) {
-                    video_eos = BLT_TRUE;
-                } else {
-                    return result;
-                }
+    }
+    if (!video_would_block) {
+        result = BLT_Stream_PumpPacket(decoder->video_stream);
+        if (BLT_FAILED(result)) {
+            if (result == BLT_ERROR_EOS) {
+                video_eos = BLT_TRUE;
+            } else {
+                return result;
             }
         }
     }
@@ -664,7 +663,8 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
         ATX_System_Sleep(&sleep_duration);
     }
     
-    return BLT_SUCCESS;}
+    return BLT_SUCCESS;
+}
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderX_Stop

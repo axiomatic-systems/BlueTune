@@ -43,6 +43,7 @@ public:
 
     virtual void OnSetInputCommand(BLT_CString name, BLT_CString type) = 0;
     virtual void OnSetOutputCommand(BLT_CString name, BLT_CString type) = 0;
+    virtual void OnSetVolumeCommand(float volume) = 0;
     virtual void OnPlayCommand() = 0;
     virtual void OnStopCommand() = 0;
     virtual void OnPauseCommand() = 0;
@@ -51,7 +52,6 @@ public:
     virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range) = 0;
     virtual void OnRegisterModuleCommand(BLT_Module* module) = 0;
     virtual void OnAddNodeCommand(BLT_CString name) = 0;
-    virtual void OnSetVolumeCommand(float volume) = 0;
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
                                       const NPT_String&        target,
                                       const NPT_String&        name,
@@ -68,6 +68,7 @@ public:
     typedef enum {
         COMMAND_ID_SET_INPUT,
         COMMAND_ID_SET_OUTPUT,
+        COMMAND_ID_SET_VOLUME,
         COMMAND_ID_PLAY,
         COMMAND_ID_STOP,
         COMMAND_ID_PAUSE,
@@ -76,7 +77,6 @@ public:
         COMMAND_ID_SEEK_TO_POSITION,
         COMMAND_ID_REGISTER_MODULE,
         COMMAND_ID_ADD_NODE,
-        COMMAND_ID_SET_VOLUME,
         COMMAND_ID_SET_PROPERTY
     } CommandId;
 
@@ -420,6 +420,7 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual ~BLT_DecoderServer();
     virtual BLT_Result SetInput(BLT_CString name, BLT_CString type = NULL);
     virtual BLT_Result SetOutput(BLT_CString name, BLT_CString type = NULL);
+    virtual BLT_Result SetVolume(float volume);
     virtual BLT_Result Play();
     virtual BLT_Result Stop();
     virtual BLT_Result Pause();
@@ -428,7 +429,6 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual BLT_Result SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range);
     virtual BLT_Result RegisterModule(BLT_Module* module);
     virtual BLT_Result AddNode(BLT_CString name);
-    virtual BLT_Result SetVolume(float volume);
     virtual BLT_Result SetProperty(BLT_PropertyScope        scope,
                                    const char*              target,
                                    const char*              name,

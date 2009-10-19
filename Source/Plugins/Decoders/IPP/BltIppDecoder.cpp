@@ -89,6 +89,11 @@ typedef struct {
     IppDecoderInput   input;
     IppDecoderOutput  output;
     H264VideoDecoder* decoder;
+    struct {
+        vm_tick decode_time;
+        vm_tick alloc_time;
+        vm_tick convert_time;
+    } stats;
 } IppDecoder;
 
 /*----------------------------------------------------------------------
@@ -148,8 +153,8 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         dec_params.pPostProcessing     = video_proc;
         dec_params.info.stream_type    = H264_VIDEO;
         dec_params.info.stream_subtype = AVC1_VIDEO;
-        //dec_params.numThreads          = 1;
-        dec_params.lFlags              = 0;
+        dec_params.numThreads          = 0; // default
+        dec_params.lFlags              = UMC::FLAG_VDEC_REORDER;
         dec_params.m_pData             = &codec_init_data;
         
         // create and init the decoder
@@ -189,8 +194,12 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     }
     
     // copy the data to the input buffer
-    self->input.buffer->Alloc(BLT_MediaPacket_GetPayloadSize(packet));
-    self->input.buffer->SetDataSize(BLT_MediaPacket_GetPayloadSize(packet));
+    unsigned int payload_size = BLT_MediaPacket_GetPayloadSize(packet);
+    if (self->input.buffer->SetDataSize(payload_size) != UMC_OK) {
+        // the buffer was too small, realloc
+        self->input.buffer->Alloc(payload_size);
+        self->input.buffer->SetDataSize(payload_size);
+    }
     ATX_CopyMemory(self->input.buffer->GetDataPointer(),
                    BLT_MediaPacket_GetPayloadBuffer(packet),
                    BLT_MediaPacket_GetPayloadSize(packet));
@@ -247,8 +256,15 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 
     // try to decode a frame
     UMC::Status status;
+    vm_tick start_time = vm_time_get_tick();
     status = self->decoder->GetFrame(self->input.eos?NULL:self->input.buffer, 
                                      self->output.buffer);
+    vm_tick after_decode_time = vm_time_get_tick();
+    vm_tick decode_time = after_decode_time-start_time;
+    self->stats.decode_time += decode_time;
+    ATX_LOG_FINER_3("status = %d, decode: frame = %.4fms, total = %.4f", status, 
+                    1000.0f*(float)decode_time/(float)vm_time_get_frequency(),
+                    1000.0f*(float)self->stats.decode_time/(float)vm_time_get_frequency());
     if (status == UMC_ERR_NOT_ENOUGH_DATA) {
         return BLT_ERROR_PORT_HAS_NO_DATA;
     } else if (status != UMC_OK) {
@@ -291,12 +307,12 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         VideoData::PlaneInfo plane_info;
         self->output.buffer->GetPlaneInfo(&plane_info, i);
         
-        plane_size[i] = plane_info.m_nPitch*plane_info.m_ippSize.height;
+        plane_size[i] = (unsigned int)plane_info.m_nPitch*plane_info.m_ippSize.height;
         if (plane_size[i]%16) {
             padding_size[i] = 16-(plane_size[i]%16);
         }
         self->output.media_type.planes[i].offset = picture_size;
-        self->output.media_type.planes[i].bytes_per_line = plane_info.m_nPitch;
+        self->output.media_type.planes[i].bytes_per_line = (BLT_UInt16)plane_info.m_nPitch;
         picture_size += plane_size[i]+padding_size[i];
     }
     
@@ -309,6 +325,12 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
         return result;
     }
+    vm_tick after_alloc_time = vm_time_get_tick();
+    vm_tick alloc_time = after_alloc_time-after_decode_time;
+    self->stats.alloc_time += alloc_time;
+    ATX_LOG_FINER_2("alloc: frame = %.4fms, total = %.4f", 
+                    1000.0f*(float)alloc_time/(float)vm_time_get_frequency(),
+                    1000.0f*(float)self->stats.alloc_time/(float)vm_time_get_frequency());
 
     // copy pixels
     BLT_MediaPacket_SetPayloadSize(*packet, picture_size);
@@ -324,6 +346,14 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     // set the timestamp
     BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_FromSeconds(self->output.buffer->GetTime()));
     
+    // update timing stats
+    vm_tick after_convert_time = vm_time_get_tick();
+    vm_tick convert_time = after_convert_time-after_alloc_time;
+    self->stats.convert_time += convert_time;
+    ATX_LOG_FINER_2("convert: frame = %.4fms, total = %.4f", 
+                    1000.0f*(float)convert_time/(float)vm_time_get_frequency(),
+                    1000.0f*(float)self->stats.convert_time/(float)vm_time_get_frequency());
+
     return BLT_SUCCESS;
 }
 
@@ -491,8 +521,11 @@ IppDecoder_Create(BLT_Module*              module,
     ATX_LOG_FINE("enter");
 
     // initialize the IPP library
-    ippStaticInit();
-    
+    IppStatus status = ippStaticInit();
+    if (status != ippStsNoErr) {
+        ATX_LOG_WARNING_1("ippStaticInit() returned %d", status);
+    }
+
     /* check parameters */
     if (parameters == NULL || 
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {

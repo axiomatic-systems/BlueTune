@@ -115,11 +115,6 @@ GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
     result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
     if (BLT_FAILED(result)) return result;
 
-    /* check the media type */
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_TYPE;
-    }
-    
     /* keep the packet */
     self->output.packet = packet;
     BLT_MediaPacket_AddReference(packet);
@@ -127,6 +122,11 @@ GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
     /* exit now if we're inactive */
     if (self->mode == BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE ||
         self->factor == 0) {
+        return BLT_SUCCESS;
+    }
+
+    /* check the media type */
+    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         return BLT_SUCCESS;
     }
 

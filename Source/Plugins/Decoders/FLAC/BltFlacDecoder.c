@@ -267,7 +267,7 @@ FlacDecoder_ReadCallback(const FLAC__StreamDecoder* flac,
                          void*                      client_data)
 {
     FlacDecoder*  self = (FlacDecoder*)client_data;
-    BLT_Size      bytes_to_read = *bytes;
+    BLT_Size      bytes_to_read = (BLT_Size)*bytes;
     BLT_Size      total_read    = 0;
     BLT_Result    result;
 

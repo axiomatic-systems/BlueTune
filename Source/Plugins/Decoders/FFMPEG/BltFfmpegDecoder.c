@@ -55,7 +55,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
 
     /* members */
-    BLT_Boolean eos;
+    BLT_Mp4VideoMediaType* media_type;
 } FfmpegDecoderInput;
 
 typedef struct {
@@ -64,9 +64,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
-    BLT_Boolean           eos;
     BLT_RawVideoMediaType media_type;
-    BLT_MediaPacket*      picture;
+    ATX_List*             pictures;
 } FfmpegDecoderOutput;
 
 typedef struct {
@@ -132,48 +131,168 @@ FfmpegDecoder_ReleaseBufferCallback(struct AVCodecContext* context,
 }
 
 /*----------------------------------------------------------------------
+|   FfmpegDecoder_ListItem_Destroy
++---------------------------------------------------------------------*/
+static void
+FfmpegDecoder_ListItemDestruct(ATX_ListDataDestructor* self, ATX_Any data, ATX_UInt32 type)
+{
+    ATX_COMPILER_UNUSED(self);
+    ATX_COMPILER_UNUSED(type);
+    BLT_MediaPacket_Release((BLT_MediaPacket*)data);
+}
+
+/*----------------------------------------------------------------------
+|   FfmpegDecoder_DecodePicture
++---------------------------------------------------------------------*/
+static BLT_Result
+FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
+{
+    int            got_picture   = 0;
+    int            av_result     = 0;
+    unsigned int   packet_size   = 0;
+    unsigned char* packet_buffer = NULL;
+
+    /* libavcodec wants the input buffers to be padded */
+    if (packet) {
+        packet_size   = BLT_MediaPacket_GetPayloadSize(packet);
+        packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
+        BLT_Size buffer_size_needed  = BLT_MediaPacket_GetPayloadOffset(packet)+packet_size+BLT_FFMPEG_INPUT_PADDING_SIZE;
+        if (buffer_size_needed > BLT_MediaPacket_GetAllocatedSize(packet)) {
+            BLT_MediaPacket_SetAllocatedSize(packet, buffer_size_needed);
+            packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
+        }
+        ATX_SetMemory(packet_buffer+packet_size, 0, BLT_FFMPEG_INPUT_PADDING_SIZE);
+
+        ATX_LOG_FINEST_2("decoding frame size=%ld, pts=%f", 
+                         packet_size, 
+                         (float)BLT_MediaPacket_GetTimeStamp(packet).seconds +
+                         (float)BLT_MediaPacket_GetTimeStamp(packet).nanoseconds/1000000000.0f);
+    } else {
+        ATX_LOG_FINEST("flushing delayed frames");
+    }
+    
+    /* set the context opaque pointer for callbacks */
+    self->codec_context->opaque = packet;
+    
+    /* feed the codec */
+    av_result = avcodec_decode_video(self->codec_context, 
+                                     self->frame, 
+                                     &got_picture, 
+                                     packet_buffer, 
+                                     packet_size);
+    if (av_result < 0) {
+        ATX_LOG_FINE_1("avcodec_decode_video returned %d", av_result);
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
+    if (got_picture) {
+        BLT_MediaPacket* picture = NULL;
+        BLT_Result       result;
+        unsigned int     plane_size[3];
+        unsigned int     padding_size[3] = {0,0,0};
+        unsigned int     picture_size = 0;
+        unsigned char*   picture_buffer;
+        unsigned int     i;
+        
+        ATX_LOG_FINEST_2("decoded frame width=%d, height=%d",
+                          self->codec_context->width, 
+                          self->codec_context->height);
+        self->output.media_type.width  = self->codec_context->width;
+        self->output.media_type.height = self->codec_context->height;
+        self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
+        self->output.media_type.flags  = 0;
+        for (i=0; i<3; i++) {
+            if (i==0) {
+                /* Y' plane */
+                plane_size[i] = self->frame->linesize[i]*self->codec_context->height;
+            } else {
+                /* Cb and Cr planes */
+                plane_size[i] = self->frame->linesize[i]*self->codec_context->height/2;
+            }
+            if (plane_size[i]%16) {
+                padding_size[i] = 16-(plane_size[i]%16);
+            }
+            self->output.media_type.planes[i].offset = picture_size;
+            self->output.media_type.planes[i].bytes_per_line = self->frame->linesize[i];
+            picture_size += plane_size[i]+padding_size[i];
+        }
+        
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
+                                            picture_size, 
+                                            &self->output.media_type.base, 
+                                            &picture);
+        if (BLT_FAILED(result)) {
+            ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
+            return result;
+        }
+        
+        /* retrieve the timestamp from the frame */
+        if (self->frame->opaque) {
+            BLT_TimeStamp* pts = (BLT_TimeStamp*)self->frame->opaque;
+            if (pts) BLT_MediaPacket_SetTimeStamp(picture, *pts);
+        }
+
+        /* setup the picture buffer */
+        BLT_MediaPacket_SetPayloadSize(picture, picture_size);
+        picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
+        for (i=0; i<3; i++) {
+            ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset, 
+                           self->frame->data[i], 
+                           plane_size[i]);
+        }
+        ATX_List_AddData(self->output.pictures, picture);
+        return BLT_SUCCESS;
+    } 
+    
+    return BLT_ERROR_PORT_HAS_NO_DATA;
+}
+
+/*----------------------------------------------------------------------
 |   FfmpegDecoderInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
 FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                              BLT_MediaPacket*    packet)
 {
-    FfmpegDecoder* self   = ATX_SELF_M(input, FfmpegDecoder, BLT_PacketConsumer);
-    BLT_Result     result = BLT_SUCCESS;
-    int            av_result;
+    FfmpegDecoder*               self   = ATX_SELF_M(input, FfmpegDecoder, BLT_PacketConsumer);
+    const BLT_Mp4VideoMediaType* media_type;
+    BLT_Result                   result = BLT_SUCCESS;
+    
+    /* check the media type */
+    BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+    if ((media_type->base.base.id != self->module->iso_base_video_es_type_id &&
+         media_type->base.base.id != self->module->mp4_video_es_type_id) ||
+         media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
+        ATX_LOG_FINE("invalid media type");
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    }
+    if (media_type->base.format_or_object_type_id != BLT_FFMPEG_FORMAT_TAG_AVC1) {
+        ATX_LOG_FINE_1("unsupported codec (%x)", media_type->base.format_or_object_type_id);
+        return BLT_ERROR_UNSUPPORTED_CODEC;
+    }
     
     /* allocate a codec if we don't already have one */
-    if (self->codec_context == NULL) {
-        /* check the media type and find the right codec */
-        const BLT_Mp4VideoMediaType* media_type;
-        const unsigned char*         decoder_config = NULL;
-        unsigned int                 decoder_config_size = 0;
-        enum CodecID                 codec_id = CODEC_ID_NONE;
-        AVCodec*                     codec = NULL;
-        
-        /* check the packet type */
-        BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-        if ((media_type->base.base.id != self->module->iso_base_video_es_type_id &&
-             media_type->base.base.id != self->module->mp4_video_es_type_id) ||
-            media_type->base.stream_type != BLT_MP4_STREAM_TYPE_VIDEO) {
-            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - invalid media type");
-            return BLT_ERROR_INVALID_MEDIA_TYPE;
+    if (self->input.media_type == NULL ||
+        !BLT_MediaType_Equals((const BLT_MediaType*)self->input.media_type, 
+                              (const BLT_MediaType*)media_type)) {
+        AVCodec* codec = NULL;
+        int      av_result;
+            
+        /* release any previous delayed pictures, codec and frame */
+        if (self->codec_context) {
+            do {
+                result = FfmpegDecoder_DecodePicture(self, NULL);
+            } while (BLT_SUCCEEDED(result));
+            avcodec_close(self->codec_context);
+            av_free(self->codec_context);
+            self->codec_context = NULL;
         }
-        if (media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC1) {
-            ATX_LOG_FINE("FfmpegDecoderInput::PutPacket - content type is AVC");
-            codec_id            = CODEC_ID_H264;
-            decoder_config      = media_type->decoder_info;
-            decoder_config_size = media_type->decoder_info_length;
-        }
-        
-        if (codec_id == CODEC_ID_NONE) {
-            /* no compatible codec found */
-            ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - no compatible codec found");
-            return BLT_ERROR_UNSUPPORTED_CODEC;
+        if (self->frame) {
+            av_free(self->frame);
+            self->frame = NULL;
         }
         
         /* find the codec handle */
-        codec = avcodec_find_decoder(codec_id);
+        codec = avcodec_find_decoder(CODEC_ID_H264);
         if (codec == NULL) {
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_find_decoder failed");
             return BLT_ERROR_UNSUPPORTED_CODEC;
@@ -211,10 +330,10 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->codec_context->release_buffer = FfmpegDecoder_ReleaseBufferCallback;
         
         /* set the H.264 decoder config */
-        self->codec_context->extradata_size = decoder_config_size;
-        if (decoder_config_size) {
-            self->codec_context->extradata = av_malloc(decoder_config_size);
-            ATX_CopyMemory(self->codec_context->extradata, decoder_config, decoder_config_size);        
+        self->codec_context->extradata_size = media_type->decoder_info_length;
+        if (media_type->decoder_info_length) {
+            self->codec_context->extradata = av_malloc(media_type->decoder_info_length);
+            ATX_CopyMemory(self->codec_context->extradata, media_type->decoder_info, media_type->decoder_info_length);        
         } else {
             self->codec_context->extradata = NULL;
         }
@@ -228,14 +347,14 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         
         /* allocate a frame */
         self->frame = avcodec_alloc_frame();
+            
+        /* remember the media type */
+        if (self->input.media_type) {
+            BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
+        }
+        BLT_MediaType_Clone((const BLT_MediaType*)media_type, (BLT_MediaType**)&self->input.media_type);                
     }
     
-    /* check to see if this is the end of a stream */
-    if (BLT_MediaPacket_GetFlags(packet) & 
-        BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
-        self->input.eos = BLT_TRUE;
-    }
-
     /* frame skipping logic */
     if (ATX_BASE(self, BLT_BaseMediaNode).context) {
         BLT_StreamStatus status;
@@ -254,98 +373,9 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     }
     
     /* decode a picture */
-    {
-        int got_picture = 0;
-
-        /* libavcodec wants the input buffers to be padded */
-        unsigned int   packet_size   = BLT_MediaPacket_GetPayloadSize(packet);
-        unsigned char* packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-        BLT_Size buffer_size_needed  = BLT_MediaPacket_GetPayloadOffset(packet)+packet_size+BLT_FFMPEG_INPUT_PADDING_SIZE;
-        if (buffer_size_needed > BLT_MediaPacket_GetAllocatedSize(packet)) {
-            BLT_MediaPacket_SetAllocatedSize(packet, buffer_size_needed);
-            packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-        }
-        ATX_SetMemory(packet_buffer+packet_size, 0, BLT_FFMPEG_INPUT_PADDING_SIZE);
-        
-        /* set the context opaque pointer for callbacks */
-        self->codec_context->opaque = packet;
-        
-        /* feed the codec */
-        ATX_LOG_FINEST_2("decoding frame size=%ld, pts=%f", 
-                         packet_size, 
-                         (float)BLT_MediaPacket_GetTimeStamp(packet).seconds +
-                         (float)BLT_MediaPacket_GetTimeStamp(packet).nanoseconds/1000000000.0f);
-        av_result = avcodec_decode_video(self->codec_context, 
-                                         self->frame, 
-                                         &got_picture, 
-                                         packet_buffer, 
-                                         packet_size);
-        if (av_result < 0) {
-            ATX_LOG_FINE_1("avcodec_decode_video returned %d", av_result);
-            return BLT_SUCCESS;
-        }
-        if (got_picture) {
-            BLT_MediaPacket* picture = NULL;
-            unsigned int   plane_size[3];
-            unsigned int   padding_size[3] = {0,0,0};
-            unsigned int   picture_size = 0;
-            unsigned char* picture_buffer;
-            unsigned int   i;
-            
-            ATX_LOG_FINEST_2("decoded frame width=%d, height=%d",
-                              self->codec_context->width, 
-                              self->codec_context->height);
-            self->output.media_type.width  = self->codec_context->width;
-            self->output.media_type.height = self->codec_context->height;
-            self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
-            self->output.media_type.flags  = 0;
-            for (i=0; i<3; i++) {
-                if (i==0) {
-                    /* Y' plane */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height;
-                } else {
-                    /* Cb and Cr planes */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height/2;
-                }
-                if (plane_size[i]%16) {
-                    padding_size[i] = 16-(plane_size[i]%16);
-                }
-                self->output.media_type.planes[i].offset = picture_size;
-                self->output.media_type.planes[i].bytes_per_line = self->frame->linesize[i];
-                picture_size += plane_size[i]+padding_size[i];
-            }
-            
-            result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
-                                                picture_size, 
-                                                &self->output.media_type.base, 
-                                                &picture);
-            if (BLT_FAILED(result)) {
-                ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
-                return result;
-            }
-            
-            /* retrieve the timestamp from the frame */
-            if (self->frame->opaque) {
-                BLT_TimeStamp* pts = (BLT_TimeStamp*)self->frame->opaque;
-                if (pts) BLT_MediaPacket_SetTimeStamp(picture, *pts);
-            }
-
-            /* setup the picture buffer */
-            BLT_MediaPacket_SetPayloadSize(picture, picture_size);
-            picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
-            for (i=0; i<3; i++) {
-                ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset, 
-                               self->frame->data[i], 
-                               plane_size[i]);
-            }
-            if (self->output.picture) {
-                BLT_MediaPacket_Release(self->output.picture);
-            }
-            self->output.picture = picture;
-        } 
-    }
-    
-    return result;
+    FfmpegDecoder_DecodePicture(self, packet);
+                     
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -386,9 +416,15 @@ FfmpegDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 {
     FfmpegDecoder* self = ATX_SELF_M(output, FfmpegDecoder, BLT_PacketProducer);
     
-    if (self->output.picture == NULL) return BLT_ERROR_PORT_HAS_NO_DATA;
-    *packet = self->output.picture;
-    self->output.picture = NULL;
+    /* check if the queue is empty */
+    ATX_ListItem* head = ATX_List_GetFirstItem(self->output.pictures);
+    if (head == NULL) return BLT_ERROR_PORT_HAS_NO_DATA;
+
+    /* return the next queued picture */
+    *packet = ATX_ListItem_GetData(head);
+    BLT_MediaPacket_AddReference(*packet);
+    ATX_List_RemoveItem(self->output.pictures, head);
+    
     return BLT_SUCCESS;
 }
 
@@ -427,15 +463,15 @@ ATX_END_INTERFACE_MAP
 static BLT_Result
 FfmpegDecoder_SetupPorts(FfmpegDecoder* self)
 {
-    /*ATX_Result result;*/
-
-    /* init the input port */
-    self->input.eos = BLT_FALSE;
-    
     /* setup the output port */
-    self->output.eos = BLT_FALSE;
     BLT_RawVideoMediaType_Init(&self->output.media_type);
     self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
+    
+    /* setup the list of decoded pictures */
+    {
+        ATX_ListDataDestructor destructor = { NULL, FfmpegDecoder_ListItemDestruct };
+        ATX_List_CreateEx(&destructor, &self->output.pictures);
+    }
     
     return BLT_SUCCESS;
 }
@@ -503,9 +539,11 @@ FfmpegDecoder_Destroy(FfmpegDecoder* self)
 
     ATX_LOG_FINE("FfmpegDecoder::Destroy");
 
-    /* destruct the inherited object */
-    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
-
+    /* release input resources */
+    if (self->input.media_type) {
+        BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
+    }
+    
     /* release avcodec resources */
     if (self->codec_context) {
         avcodec_close(self->codec_context);
@@ -513,9 +551,12 @@ FfmpegDecoder_Destroy(FfmpegDecoder* self)
     }
     if (self->frame) av_free(self->frame);
     
-    /* free any buffered packet */
-    if (self->output.picture) BLT_MediaPacket_Release(self->output.picture);
+    /* free buffered pictures */
+    ATX_List_Destroy(self->output.pictures);
 
+    /* destruct the inherited object */
+    BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
+    
     /* free the object memory */
     ATX_FreeMemory(self);
 
@@ -553,24 +594,17 @@ FfmpegDecoder_Seek(BLT_MediaNode* _self,
                    BLT_SeekPoint* point)
 {
     FfmpegDecoder* self = ATX_SELF_EX(FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
-
+    
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
-
-    /* clear the eos flags */
-    self->input.eos   = BLT_FALSE;
-    self->output.eos  = BLT_FALSE;
 
     /* flush anything that may be pending */
     if (self->codec_context) {
         avcodec_flush_buffers(self->codec_context);
         self->codec_context->skip_frame = AVDISCARD_DEFAULT;        
     }
-    if (self->output.picture) {
-        BLT_MediaPacket_Release(self->output.picture);
-        self->output.picture = NULL;
-    }
-
+    ATX_List_Clear(self->output.pictures);
+    
     return BLT_SUCCESS;
 }
 

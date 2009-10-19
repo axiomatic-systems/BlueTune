@@ -559,8 +559,15 @@ main(int argc, char** argv)
             BLT_Decoder_LoadPlugin(decoder, ATX_String_GetChars(plugin), BLT_PLUGIN_LOADER_FLAGS_SEARCH_ALL);
         }
         for (item = ATX_List_GetFirstItem(Options.plugin_directories); item; item = ATX_ListItem_GetNext(item)) {
-            ATX_String* directory = (ATX_String*)ATX_ListItem_GetData(item);
-            BLT_Decoder_LoadPlugins(decoder, ATX_String_GetChars(directory), "plugin");
+            ATX_String* spec      = (ATX_String*)ATX_ListItem_GetData(item);
+            const char* directory = ATX_String_GetChars(spec);
+            const char* extension = ".plugin";
+            int         separator = ATX_String_ReverseFindChar(spec, ',');
+            if (separator > 0) {
+                ATX_String_UseChars(spec)[separator] = '\0';
+                extension = directory+separator+1;
+            }
+            BLT_Decoder_LoadPlugins(decoder, directory, extension);
         }
     }
     

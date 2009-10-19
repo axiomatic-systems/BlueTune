@@ -118,7 +118,7 @@ FileOutput_GetStream(BLT_OutputStreamProvider* _self,
 |    FileOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
-FileOutput_QueryMediaType(BLT_MediaPort*       _self,
+FileOutput_QueryMediaType(BLT_MediaPort*        _self,
                           BLT_Ordinal           index,
                           const BLT_MediaType** media_type)
 {

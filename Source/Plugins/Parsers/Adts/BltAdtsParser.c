@@ -63,7 +63,6 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketProducer);
 
     /* members */
-    BLT_UInt32             media_type_id;
     BLT_Mp4AudioMediaType* media_type;
 } AdtsParserOutput;
 
@@ -275,6 +274,7 @@ AdtsParser_FindHeader(AdtsParser* self, AdtsHeader* header)
         if (self->buffer[i] == 0xFF && (self->buffer[i+1]&0xF0) == 0xF0) {
             /* sync pattern found, get a full header */
             if (i != 0) {
+                /* refill the header to a full 7 bytes */
                 unsigned int j;
                 for (j=i; j<7; j++) {
                     self->buffer[j-i] = self->buffer[j];
@@ -283,23 +283,24 @@ AdtsParser_FindHeader(AdtsParser* self, AdtsHeader* header)
                                                    &self->buffer[7-i], 
                                                    i);
                 if (BLT_FAILED(result)) return result;
-                
-                result = AdtsHeader_Parse(header, self->buffer);
-                if (BLT_FAILED(result)) {
-                    /* it looked like a header, but wasn't one */
-                    /* skip two bytes and try again            */
-                    for (j=2; j<7; j++) {
-                        self->buffer[j-2] = self->buffer[j];
-                    }
-                    self->buffer_fullness = 5;
-                    return BLT_ERROR_PORT_HAS_NO_DATA;
-                }
-                
-                self->buffer_fullness = 7;
-
-                /* found a valid header */
-                return BLT_SUCCESS;
             }
+            
+            result = AdtsHeader_Parse(header, self->buffer);
+            if (BLT_FAILED(result)) {
+                /* it looked like a header, but wasn't one */
+                /* skip two bytes and try again            */
+                unsigned int j;
+                for (j=2; j<7; j++) {
+                    self->buffer[j-2] = self->buffer[j];
+                }
+                self->buffer_fullness = 5;
+                return BLT_ERROR_PORT_HAS_NO_DATA;
+            }
+            
+            self->buffer_fullness = 7;
+
+            /* found a valid header */
+            return BLT_SUCCESS;
         }
     }
 
@@ -546,7 +547,7 @@ AdtsParser_Create(BLT_Module*              module,
                        ((AdtsParserModule*)module)->adts_type_id);
     self->input.stream = NULL;
     self->output.media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+1);
-    BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4MediaType)+1);
+    BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4AudioMediaType)+1);
     self->output.media_type->base.stream_type              = BLT_MP4_STREAM_TYPE_AUDIO;
     self->output.media_type->base.format_or_object_type_id = 0; 
     self->output.media_type->decoder_info_length           = 2;

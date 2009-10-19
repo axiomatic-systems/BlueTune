@@ -347,3 +347,58 @@ BLT_Pcm_ConvertMediaPacket(BLT_Core*         core,
 
     return BLT_SUCCESS;
 }
+
+/*----------------------------------------------------------------------
+|   BLT_Pcm_ParseMimeType
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Pcm_ParseMimeType(const char* mime_type, BLT_PcmMediaType** media_type)
+{
+    ATX_String main_type = ATX_EMPTY_STRING;
+    ATX_List*  parameters = NULL;
+    ATX_Result result;
+    
+    /* default */
+    *media_type = NULL;
+    
+    /* parse the type and params */
+    result = BLT_ParseMimeType(mime_type, &main_type, &parameters);
+    if (BLT_FAILED(result)) goto end;
+    
+    /* check that this is a supported type */
+    if (!ATX_String_Equals(&main_type, "audio/L16", ATX_TRUE)) {
+        result = ATX_ERROR_INVALID_PARAMETERS;
+        goto end;
+    }
+    
+    /* allocate the type */
+    *media_type = ATX_AllocateZeroMemory(sizeof(BLT_PcmMediaType));
+    BLT_PcmMediaType_Init(*media_type);
+    (*media_type)->bits_per_sample = 16;
+    (*media_type)->sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_BE;
+    
+    /* parse the parameters */
+    if (parameters) {
+        ATX_ListItem* item = ATX_List_GetFirstItem(parameters);
+        while (item) {
+            unsigned int value = 0;
+            BLT_MimeTypeParameter* parameter = (BLT_MimeTypeParameter*)ATX_ListItem_GetData(item);
+            if (ATX_String_Equals(&parameter->name, "channels", ATX_TRUE)) {
+                if (ATX_SUCCEEDED(ATX_ParseIntegerU(ATX_CSTR(parameter->value), &value, ATX_FALSE))) {
+                    (*media_type)->channel_count = value;
+                }
+            } else if (ATX_String_Equals(&parameter->name, "rate", ATX_TRUE)) {
+                if (ATX_SUCCEEDED(ATX_ParseIntegerU(ATX_CSTR(parameter->value), &value, ATX_FALSE))) {
+                    (*media_type)->sample_rate = value;
+                }
+            }
+            item = ATX_ListItem_GetNext(item);
+        }
+    }
+    
+end:
+    ATX_String_Destruct(&main_type);
+    if (parameters) ATX_List_Destroy(parameters);
+    
+    return result;
+}

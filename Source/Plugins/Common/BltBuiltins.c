@@ -321,14 +321,14 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_MP4_PARSER)
     ATX_LOG_FINE("registering BLT_Mp4ParserModule");
     result = BLT_Mp4ParserModule_GetModuleObject(&module);
-    if (BLT_SUCCEEDED(result)) result = BLT_Core_RegisterModule(core, module);
+    if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
 #endif
 
     /* dcf parser */
 #if defined(BLT_CONFIG_MODULES_ENABLE_DCF_PARSER)
     ATX_LOG_FINE("registering BLT_DcfParserModule");
     result = BLT_DcfParserModule_GetModuleObject(&module);
-    if (BLT_SUCCEEDED(result)) result = BLT_Core_RegisterModule(core, module);
+    if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
 #endif
 
     /* adts parser */

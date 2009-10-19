@@ -85,6 +85,18 @@ BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_MediaType_Equals
++---------------------------------------------------------------------*/
+BLT_Boolean
+BLT_MediaType_Equals(const BLT_MediaType* self, const BLT_MediaType* other)
+{
+    if (self == NULL || other == NULL) return BLT_FALSE;
+    if (self->extension_size != other->extension_size) return BLT_FALSE;
+    if (ATX_CompareMemory(self, other, sizeof(BLT_MediaType)+self->extension_size)) return BLT_FALSE;
+    return BLT_TRUE;
+}
+
+/*----------------------------------------------------------------------
 |   BLT_MediaType_Free
 +---------------------------------------------------------------------*/
 BLT_Result 
@@ -93,3 +105,142 @@ BLT_MediaType_Free(BLT_MediaType* type)
     if (type) ATX_FreeMemory(type);
     return BLT_SUCCESS;
 }
+
+/*----------------------------------------------------------------------
+|   BLT_MimeParser_ListItemDestructor
++---------------------------------------------------------------------*/
+static void
+BLT_MimeParser_ListItemDestructor(ATX_ListDataDestructor* self, ATX_Any data, ATX_UInt32 type)
+{
+    BLT_MimeTypeParameter* parameter = (BLT_MimeTypeParameter*)data;
+    ATX_String_Destruct(&parameter->name);
+    ATX_String_Destruct(&parameter->value);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_ParseMimeType
++---------------------------------------------------------------------*/
+/*
+Content-Type := type "/" subtype *[";" parameter] 
+
+type :=          "application"     / "audio" 
+          / "image"           / "message" 
+          / "multipart"  / "text" 
+          / "video"           / x-token 
+
+x-token := <The two characters "X-" followed, with no 
+           intervening white space, by any token> 
+
+subtype := token 
+
+parameter := attribute "=" value 
+
+attribute := token 
+
+value := token / quoted-string 
+
+token := 1*<any CHAR except SPACE, CTLs, or tspecials> 
+
+tspecials :=  "(" / ")" / "<" / ">" / "@"  ; Must be in 
+           /  "," / ";" / ":" / "\" / <">  ; quoted-string, 
+           /  "/" / "[" / "]" / "?" / "."  ; to use within 
+           /  "="                        ; parameter values
+*/
+#define BLT_MIME_CHAR_IS_TOKEN(c)            \
+    (c>0x20 && c<0x7F &&                     \
+     c!='(' && c!=')' && c!='<' && c!='>' && \
+     c!='@' && c!=',' && c!=';' && c!=':' && \
+     c!='\\'&& c!='"'&& c!='/' && c!='[' &&  \
+     c!=']' && c!='?' && c!='.' && c!='=')
+     
+BLT_Result 
+BLT_ParseMimeType(const char* mime_type, ATX_String* main_type, ATX_List** parameters)
+{
+    int         sem_sep;
+    const char* cursor;
+    ATX_Result  result = ATX_SUCCESS;
+    
+    /* parse the main type */
+    *parameters = NULL;
+    ATX_String_Assign(main_type, mime_type);
+    sem_sep = ATX_String_FindChar(main_type, ';');
+    if (sem_sep >= 0) {
+        ATX_String_SetLength(main_type, sem_sep);
+    } else {
+        /* no parameters */
+        goto end;
+    }
+        
+    /* create a list for the parameters */
+    {
+        ATX_ListDataDestructor destructor = { NULL, BLT_MimeParser_ListItemDestructor };
+        ATX_List_CreateEx(&destructor, parameters);
+    }
+    
+    /* parse all parameters */
+    cursor = mime_type+sem_sep;
+    while (*cursor) {
+        BLT_MimeTypeParameter* parameter = NULL;
+        const char* name;
+        const char* value = NULL;
+        
+        /* skip whitespace */
+        while (*cursor == ' ' || *cursor == '\t') ++cursor;
+        
+        /* next is the ';' separator */
+        if (*cursor++ != ';') break;
+        while (*cursor == ' ' || *cursor == '\t') ++cursor;
+        name = cursor;
+        
+        /* parse until '=' */
+        while (*cursor != '\0' && *cursor != '=') ++cursor;
+        if (*cursor++ != '=') break;
+        
+        /* create a new parameter and add it to the list */
+        parameter = ATX_AllocateZeroMemory(sizeof(BLT_MimeTypeParameter));
+        ATX_String_AssignN(&parameter->name, name, (ATX_Size)(cursor-name-1));
+        ATX_String_TrimWhitespace(&parameter->name);
+        ATX_List_AddData(*parameters, parameter);
+        
+        /* check if this is a quoted string or a token */
+        if (*cursor == '"') {
+            /* quoted string */
+            ATX_Boolean in_escape = ATX_FALSE;
+            ++cursor;
+            while (*cursor) {
+                if (in_escape) {
+                    in_escape = ATX_FALSE;
+                    ++cursor;
+                    continue;
+                } else if (*cursor == '\\') {
+                    in_escape = ATX_TRUE;
+                    ++cursor;
+                    continue;
+                } else if (*cursor == '"') {
+                    ++cursor;
+                    break;
+                }
+                ATX_String_AppendChar(&parameter->value, *cursor++);
+            }
+        } else {
+            /* token */
+            value = cursor;
+            while (BLT_MIME_CHAR_IS_TOKEN(*cursor)) {
+                ++cursor;
+            } 
+            ATX_String_AssignN(&parameter->value, value, (ATX_Size)(cursor-value));
+        }
+    }
+    
+end:
+    if (ATX_FAILED(result)) {
+        if (*parameters) {
+            ATX_List_Destroy(*parameters);
+            *parameters = NULL;
+        }
+    }
+    ATX_String_TrimWhitespace(main_type);
+    
+    return result;
+}
+

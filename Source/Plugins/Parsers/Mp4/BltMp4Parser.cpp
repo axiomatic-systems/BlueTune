@@ -82,6 +82,7 @@ struct Mp4ParserOutput {
     AP4_DataBuffer*      sample_buffer;
     AP4_SampleDecrypter* sample_decrypter;
     AP4_DataBuffer*      sample_decrypted_buffer;
+    AP4_Ordinal          sample_description_index;
 };
 
 // it is important to keep this structure a POD (no methods)
@@ -128,7 +129,7 @@ Mp4ParserInput_Destruct(Mp4ParserInput* self)
 }
 
 /*----------------------------------------------------------------------
-|   Mp4Parser_ProcessCryptoInfo
+|   Mp4ParserOutput_ProcessCryptoInfo
 +---------------------------------------------------------------------*/
 static BLT_Result
 Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self, 
@@ -189,51 +190,61 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
 }
 
 /*----------------------------------------------------------------------
-|   Mp4Parser_SetupAudioOutput
+|   Mp4ParserOutput_SetSampleDescription
 +---------------------------------------------------------------------*/
 static BLT_Result
-Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
+Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self, 
+                                     unsigned int     indx)
 {
     // if we had a decrypter before, release it now
-    delete self->audio_output.sample_decrypter;
-    self->audio_output.sample_decrypter = NULL;
-
-    // get the media tracks
-    AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
-    self->audio_output.track = track;
-    if (track == NULL) return BLT_SUCCESS;
-
-    ATX_LOG_FINE("found audio track");
+    delete self->sample_decrypter;
+    self->sample_decrypter = NULL;
     
     // check that the audio track is of the right type
-    AP4_SampleDescription* sample_desc = track->GetSampleDescription(0);
+    AP4_SampleDescription* sample_desc = self->track->GetSampleDescription(indx);
     if (sample_desc == NULL) {
-        ATX_LOG_FINE("no sample description for audio track");
+        ATX_LOG_FINE("no sample description for track");
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
     // handle encrypted tracks
-    BLT_Result result = Mp4ParserOutput_ProcessCryptoInfo(&self->audio_output, sample_desc);
+    BLT_Result result = Mp4ParserOutput_ProcessCryptoInfo(self, sample_desc);
     if (BLT_FAILED(result)) return result;
-
-    // analyze the details of the media format
+    
+    // update the generic part of the stream info
+    BLT_StreamInfo stream_info;
+    stream_info.id            = self->track->GetId();
+    stream_info.duration      = self->track->GetDurationMs();
+    stream_info.mask = BLT_STREAM_INFO_MASK_ID |
+                       BLT_STREAM_INFO_MASK_DURATION;
+    
+    // deal with audio details, if this is an audi track
     AP4_AudioSampleDescription* audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
-    if (audio_desc == NULL) {
-        ATX_LOG_FINE("audio track sample description is not audio");
+    if (audio_desc) {
+        ATX_LOG_FINE("sample description is audio");
+        stream_info.type          = BLT_STREAM_TYPE_AUDIO;
+        stream_info.channel_count = audio_desc->GetChannelCount();
+        stream_info.sample_rate   = audio_desc->GetSampleRate();
+        stream_info.mask |= BLT_STREAM_INFO_MASK_TYPE          |
+                            BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
+                            BLT_STREAM_INFO_MASK_SAMPLE_RATE;
+    } else if (self == &self->parser->audio_output) {
+        ATX_LOG_FINE("expected audio sample descriton, but did not get one");
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
-
-    // update the stream info
-    BLT_StreamInfo stream_info;
-    stream_info.type          = BLT_STREAM_TYPE_AUDIO;
-    stream_info.id            = track->GetId();
-    stream_info.duration      = track->GetDurationMs();
-    stream_info.channel_count = audio_desc->GetChannelCount();
-    stream_info.sample_rate   = audio_desc->GetSampleRate();
-    stream_info.mask = BLT_STREAM_INFO_MASK_TYPE            |
-                       BLT_STREAM_INFO_MASK_ID              |
-                       BLT_STREAM_INFO_MASK_DURATION        |
-                       BLT_STREAM_INFO_MASK_CHANNEL_COUNT   |
-                       BLT_STREAM_INFO_MASK_SAMPLE_RATE;
+    
+    AP4_VideoSampleDescription* video_desc = dynamic_cast<AP4_VideoSampleDescription*>(sample_desc);
+    if (video_desc) {
+        ATX_LOG_FINE("sample description is video");
+        stream_info.type     = BLT_STREAM_TYPE_VIDEO;
+        stream_info.width    = video_desc->GetWidth();
+        stream_info.height   = video_desc->GetHeight();
+        stream_info.mask |= BLT_STREAM_INFO_MASK_TYPE     |
+                            BLT_STREAM_INFO_MASK_WIDTH    |
+                            BLT_STREAM_INFO_MASK_HEIGHT;
+    } else if (self == &self->parser->video_output) {
+        ATX_LOG_FINE("expected video sample descriton, but did not get one");
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
     
     AP4_MpegSampleDescription* mpeg_desc = NULL;
     if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
@@ -248,23 +259,30 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
                             BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
                             BLT_STREAM_INFO_MASK_DATA_TYPE;
     }
-    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     
     // setup the output media type
-    BLT_Mp4AudioMediaType* media_type;
+    AP4_DataBuffer  decoder_info;
+    BLT_MediaTypeId media_type_id = BLT_MEDIA_TYPE_ID_NONE;
+    AP4_UI32        format_or_object_type_id = 0;
     if (mpeg_desc) {
-        // standard mpeg-style sample description
-        unsigned int decoder_info_length = mpeg_desc->GetDecoderInfo().GetDataSize();
-        media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1);
-        BLT_MediaType_Init(&media_type->base.base, self->audio_output.mp4_es_type_id);
-        media_type->base.base.extension_size      = sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType);
-        media_type->base.format_or_object_type_id = mpeg_desc->GetObjectTypeId();
-        media_type->decoder_info_length           =  decoder_info_length;
-        if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], mpeg_desc->GetDecoderInfo().GetData(), decoder_info_length);
+        decoder_info.SetData(mpeg_desc->GetDecoderInfo().GetData(),
+                             mpeg_desc->GetDecoderInfo().GetDataSize());
+        media_type_id = self->mp4_es_type_id;
+        format_or_object_type_id = mpeg_desc->GetObjectTypeId();
     } else {
         // here we have to be format-specific for the decoder info
-        AP4_MemoryByteStream* mbs = NULL;
-        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_ALAC) {
+        stream_info.data_type = AP4_GetFormatName(sample_desc->GetFormat());
+        stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
+        format_or_object_type_id = sample_desc->GetFormat();
+        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_AVC1) {
+            // look for an 'avcC' atom
+            AP4_AvccAtom* avcc = static_cast<AP4_AvccAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_AVCC));
+            if (avcc) {
+                // pass the avcc payload as the decoder info
+                decoder_info.SetData(avcc->GetRawBytes().GetData(),
+                                     avcc->GetRawBytes().GetDataSize());
+            } 
+        } else if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_ALAC) {
             // look for an 'alac' atom (either top-level or inside a 'wave') 
             AP4_Atom* alac = sample_desc->GetDetails().GetChild(AP4_SAMPLE_FORMAT_ALAC);
             if (alac == NULL) {
@@ -275,32 +293,72 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
             }
             if (alac) {
                 // pass the alac payload as the decoder info
-                mbs = new AP4_MemoryByteStream((AP4_Size)alac->GetSize());
+                AP4_MemoryByteStream* mbs = new AP4_MemoryByteStream((AP4_Size)alac->GetSize());
                 alac->WriteFields(*mbs);
+                decoder_info.SetData(mbs->GetData(), mbs->GetDataSize());                
+                mbs->Release();
             } 
         }
         
-        AP4_LargeSize decoder_info_length = mbs?mbs->GetDataSize():0;
-        media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory((ATX_UInt32)(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1));
-        BLT_MediaType_Init(&media_type->base.base, self->audio_output.iso_base_es_type_id);
-        media_type->base.format_or_object_type_id = sample_desc->GetFormat();
-        media_type->base.base.extension_size      = (BLT_Size)(sizeof(BLT_Mp4AudioMediaType)+decoder_info_length-1-sizeof(BLT_MediaType));
-        media_type->decoder_info_length           = (BLT_Size)decoder_info_length;
-        if (mbs) {
-            ATX_CopyMemory(&media_type->decoder_info[0], mbs->GetData(), mbs->GetDataSize());
-            mbs->Release();
-        }
+        media_type_id = self->iso_base_es_type_id;
     }
-
+    BLT_Mp4MediaType* media_type = NULL;
+    unsigned int struct_size = decoder_info.GetDataSize()?decoder_info.GetDataSize()-1:0;
+    if (audio_desc) {
+        struct_size += sizeof(BLT_Mp4AudioMediaType);
+        BLT_Mp4AudioMediaType* audio_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(struct_size);;
+        audio_type->base.stream_type    = BLT_MP4_STREAM_TYPE_AUDIO;
+        audio_type->channel_count       = audio_desc->GetChannelCount();
+        audio_type->sample_rate         = audio_desc->GetSampleRate();
+        audio_type->decoder_info_length = decoder_info.GetDataSize();
+        if (decoder_info.GetDataSize()) {
+            ATX_CopyMemory(&audio_type->decoder_info[0], decoder_info.GetData(), decoder_info.GetDataSize());
+        }
+        media_type = &audio_type->base;
+    } else {
+        struct_size += sizeof(BLT_Mp4VideoMediaType);
+        BLT_Mp4VideoMediaType* video_type = (BLT_Mp4VideoMediaType*)ATX_AllocateZeroMemory(struct_size);
+        video_type->base.stream_type    = BLT_MP4_STREAM_TYPE_VIDEO;
+        video_type->width               = video_desc->GetWidth();
+        video_type->height              = video_desc->GetHeight();
+        video_type->decoder_info_length = decoder_info.GetDataSize();
+        if (decoder_info.GetDataSize()) {
+            ATX_CopyMemory(&video_type->decoder_info[0], decoder_info.GetData(), decoder_info.GetDataSize());
+        }
+        media_type = &video_type->base;
+    }
+    media_type->base.id                  = media_type_id;
+    media_type->base.extension_size      = struct_size-sizeof(BLT_MediaType); 
+    media_type->format_or_object_type_id = format_or_object_type_id;
+    self->media_type = &media_type->base;
+    self->sample_description_index = indx;
+    
+    // final update to the stream info
+    BLT_Stream_SetInfo(ATX_BASE(self->parser, BLT_BaseMediaNode).context, &stream_info);
+    
     // enable the track in the linear reader if we have one
-    if (self->input.reader) {
-        self->input.reader->EnableTrack(track->GetId());
+    if (self->parser->input.reader) {
+        self->parser->input.reader->EnableTrack(self->track->GetId());
     }
     
-    media_type->base.stream_type = BLT_MP4_STREAM_TYPE_AUDIO;
-    self->audio_output.media_type = (BLT_MediaType*)media_type;
+    return BLT_SUCCESS;    
+}
 
-    return BLT_SUCCESS;
+/*----------------------------------------------------------------------
+|   Mp4Parser_SetupAudioOutput
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
+{
+    // get the audio track
+    AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
+    self->audio_output.track = track;
+    if (track == NULL) return BLT_SUCCESS;
+
+    ATX_LOG_FINE("found audio track");
+    
+    // use the first sample description by default
+    return Mp4ParserOutput_SetSampleDescription(&self->audio_output, 0);
 }
 
 /*----------------------------------------------------------------------
@@ -309,10 +367,6 @@ Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
 static BLT_Result
 Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
 {
-    // if we had a decrypter before, release it now
-    delete self->video_output.sample_decrypter;
-    self->video_output.sample_decrypter = NULL;
-
     // get the video track
     AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_VIDEO);
     self->video_output.track = track;
@@ -320,96 +374,8 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
 
     ATX_LOG_FINE("found video track");
 
-    // check that the video track is of the right type
-    AP4_SampleDescription* sample_desc = track->GetSampleDescription(0);
-    if (sample_desc == NULL) {
-        ATX_LOG_FINE("no sample description for video track");
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    }
-    
-    // handle encrypted tracks
-    BLT_Result result = Mp4ParserOutput_ProcessCryptoInfo(&self->video_output, sample_desc);
-    if (BLT_FAILED(result)) return result;
-
-    // analyze the details of the media format
-    AP4_VideoSampleDescription* video_desc = dynamic_cast<AP4_VideoSampleDescription*>(sample_desc);
-    if (video_desc == NULL) {
-        ATX_LOG_FINE("video track sample description is not video");
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    }
-
-    // update the stream info
-    BLT_StreamInfo stream_info;
-    stream_info.type     = BLT_STREAM_TYPE_VIDEO;
-    stream_info.id       = track->GetId();
-    stream_info.duration = track->GetDurationMs();
-    stream_info.width    = video_desc->GetWidth();
-    stream_info.height   = video_desc->GetHeight();
-    stream_info.mask = BLT_STREAM_INFO_MASK_TYPE     |
-                       BLT_STREAM_INFO_MASK_ID       |
-                       BLT_STREAM_INFO_MASK_DURATION |
-                       BLT_STREAM_INFO_MASK_WIDTH    |
-                       BLT_STREAM_INFO_MASK_HEIGHT;
-    
-    AP4_MpegSampleDescription* mpeg_desc = NULL;
-    if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
-        ATX_LOG_FINE("sample description is of type MPEG");
-        mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
-    }
-    if (mpeg_desc) {
-        stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
-        stream_info.average_bitrate = mpeg_desc->GetAvgBitrate();
-        stream_info.nominal_bitrate = mpeg_desc->GetAvgBitrate();
-        stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE |
-                            BLT_STREAM_INFO_MASK_NOMINAL_BITRATE |
-                            BLT_STREAM_INFO_MASK_DATA_TYPE;
-    }
-
-    // setup the output media type
-    const void*     decoder_info = NULL;
-    unsigned int    decoder_info_length = 0;
-    AP4_UI32        media_stream_format = 0;
-    BLT_MediaTypeId media_type_id = BLT_MEDIA_TYPE_ID_NONE;
-    if (mpeg_desc) {
-        decoder_info        = mpeg_desc->GetDecoderInfo().GetData();
-        decoder_info_length = mpeg_desc->GetDecoderInfo().GetDataSize();
-        media_type_id       = self->video_output.mp4_es_type_id;
-        media_stream_format = mpeg_desc->GetObjectTypeId();
-    } else {
-        // here we have to be format-specific for the decoder info
-        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_AVC1) {
-            // look for an 'avcC' atom
-            AP4_AvccAtom* avcc = static_cast<AP4_AvccAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_AVCC));
-            if (avcc) {
-                // pass the avcc payload as the decoder info
-                decoder_info        = avcc->GetRawBytes().GetData();
-                decoder_info_length = avcc->GetRawBytes().GetDataSize();
-            } 
-        }
-        media_type_id       = self->video_output.iso_base_es_type_id;
-        media_stream_format = sample_desc->GetFormat();
-        
-        stream_info.data_type = "H.264";
-        stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
-    }
-    unsigned int struct_size = sizeof(BLT_Mp4VideoMediaType)+(decoder_info_length?decoder_info_length-1:0);
-    BLT_Mp4VideoMediaType* media_type = (BLT_Mp4VideoMediaType*)ATX_AllocateZeroMemory(struct_size);
-    BLT_MediaType_Init(&media_type->base.base, media_type_id);
-    media_type->base.base.extension_size = struct_size-sizeof(BLT_MediaType); 
-    media_type->base.stream_type = BLT_MP4_STREAM_TYPE_VIDEO;
-    media_type->base.format_or_object_type_id = media_stream_format;
-    media_type->decoder_info_length = decoder_info_length;
-    if (decoder_info_length) ATX_CopyMemory(&media_type->decoder_info[0], decoder_info, decoder_info_length);
-    self->video_output.media_type = (BLT_MediaType*)media_type;
-    
-    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
-
-    // enable the track in the linear reader if we have one
-    if (self->input.reader) {
-        self->input.reader->EnableTrack(track->GetId());
-    }
-
-    return BLT_SUCCESS;
+    // use the first sample description by default
+    return Mp4ParserOutput_SetSampleDescription(&self->video_output, 0);
 }
 
 /*----------------------------------------------------------------------
@@ -606,6 +572,7 @@ Mp4ParserOutput_QueryMediaType(BLT_MediaPort*        _self,
     }
 }
 
+                                     
 /*----------------------------------------------------------------------
 |   Mp4ParserOutput_GetPacket
 +---------------------------------------------------------------------*/
@@ -652,6 +619,12 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
             }
         }
 
+        // update the sample description if it has changed
+        if (sample.GetDescriptionIndex() != self->sample_description_index) {
+            result = Mp4ParserOutput_SetSampleDescription(self, sample.GetDescriptionIndex());
+            if (BLT_FAILED(result)) return result;
+        }
+        
         // decrypt the sample if needed
         if (self->sample_decrypter) {
             self->sample_decrypter->DecryptSampleData(*sample_buffer, *self->sample_decrypted_buffer);

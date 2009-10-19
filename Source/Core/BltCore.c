@@ -25,6 +25,7 @@
 #include "BltRegistryPriv.h"
 #include "BltMediaPacketPriv.h"
 #include "BltCorePriv.h"
+#include "BltPcm.h"
 
 /*----------------------------------------------------------------------
 |    logging
@@ -281,6 +282,60 @@ Core_CreateMediaPacket(BLT_Core*            self,
 }
 
 /*----------------------------------------------------------------------
+|    Core_ParseMimeType
+|
+|    NOTE: this function has built-in knowlege of some data types, 
+|    but it shouldn't. This should be pluggable. It will be in 
+|    a future version of the library.
++---------------------------------------------------------------------*/
+BLT_METHOD 
+Core_ParseMimeType(BLT_Core*       _self, 
+                   const char*     mime_type, 
+                   BLT_MediaType** media_type)
+{
+    Core*           self = ATX_SELF(Core, BLT_Core);
+    BLT_Result      result = ATX_SUCCESS;
+    BLT_MediaTypeId media_type_id = 0;
+    ATX_String      workspace = ATX_EMPTY_STRING;
+    
+    /* default */
+    *media_type = NULL;
+    
+    /* see if the mime type has parameters */
+    ATX_String_Assign(&workspace, mime_type);
+    {
+        int sep = ATX_String_FindChar(&workspace, ';');
+        if (sep >= 0) {
+            ATX_String_SetLength(&workspace, sep);
+            ATX_String_TrimWhitespaceRight(&workspace);
+        }
+    }
+    
+    /* look for known types */
+    if (ATX_String_Equals(&workspace, "audio/L16", ATX_TRUE)) {
+        result = BLT_Pcm_ParseMimeType(mime_type, (BLT_PcmMediaType**)media_type);
+    } else {
+        result = BLT_Registry_GetIdForName(self->registry,
+                                           BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS, 
+                                           ATX_CSTR(workspace), 
+                                           &media_type_id);
+        if (ATX_SUCCEEDED(result)) {
+            if (media_type_id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+                BLT_PcmMediaType* pcm_media_type = ATX_AllocateZeroMemory(sizeof(BLT_PcmMediaType));
+                BLT_PcmMediaType_Init(pcm_media_type);
+                *media_type = (BLT_MediaType*)pcm_media_type;
+            } else {
+                *media_type = ATX_AllocateZeroMemory(sizeof(BLT_MediaType));
+                (*media_type)->id = media_type_id;
+            }
+        }
+    }
+    
+    ATX_String_Destruct(&workspace);
+    return result;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(Core)
@@ -299,7 +354,8 @@ ATX_BEGIN_INTERFACE_MAP(Core, BLT_Core)
     Core_GetRegistry,
     Core_GetProperties,
     Core_CreateCompatibleNode,
-    Core_CreateMediaPacket
+    Core_CreateMediaPacket,
+    Core_ParseMimeType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

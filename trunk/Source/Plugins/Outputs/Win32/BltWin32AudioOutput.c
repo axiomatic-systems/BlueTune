@@ -34,10 +34,14 @@
 ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.audio")
 
 /*----------------------------------------------------------------------
-|   options
+|   constants
 +---------------------------------------------------------------------*/
 #if !defined(_WIN32_WCE)
 #define BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE 
+#endif
+
+#if !defined(WAVE_FORMAT_DOLBY_AC3_SPDIF)
+#define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092
 #endif
 
 #if defined(BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
@@ -45,8 +49,12 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.win32.audio")
 #include <ks.h>
 #include <ksmedia.h>
 static const GUID  BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM = 
-    {0x00000001,0x0000,0x0010,{0x80,0x00,0x00,0xaa,0x00,0x38,0x9b,0x71}};
+    {0x00000001,                  0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+static const GUID BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_DOLBY_AC3_SPDIF = 
+    {WAVE_FORMAT_DOLBY_AC3_SPDIF, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
 #endif
+
+#define BLT_WIN32_AUDIO_OUTPUT_AC3_SPDIF_FRAME_SIZE 6144
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -73,6 +81,9 @@ typedef struct {
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseModule);
+
+    /* members */
+    BLT_MediaTypeId ac3_type_id;
 } Win32AudioOutputModule;
 
 typedef struct {
@@ -88,8 +99,10 @@ typedef struct {
     /* members */
     UINT              device_id;
     HWAVEOUT          device_handle;
-    BLT_PcmMediaType  expected_media_type;
+    BLT_PcmMediaType  expected_media_types[2];
     BLT_PcmMediaType  media_type;
+    BLT_MediaTypeId   ac3_type_id;
+    BLT_Boolean       use_passthrough;
     BLT_Boolean       paused;
     BLT_UInt64        nb_samples_written;
     BLT_UInt64        timestamp_after_buffer;
@@ -302,44 +315,40 @@ Win32AudioOutput_Drain(Win32AudioOutput* self)
 }
 
 /*----------------------------------------------------------------------
-|    Win32AudioOutput_Open
+|    Win32AudioOutput_OpenDevice
 +---------------------------------------------------------------------*/
 static BLT_Result
-Win32AudioOutput_Open(Win32AudioOutput* self)
+Win32AudioOutput_OpenDevice(UINT                    device_id, 
+                            const BLT_PcmMediaType* media_type,
+                            HWAVEOUT*               device_handle)
+
 {
     MMRESULT     mm_result;
     BLT_Cardinal retry;
 
 #if defined(BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
-    /* used for 24 and 32 bits per sample */
+    /* used for 24 and 32 bits per sample as well as multichannel */
     WAVEFORMATEXTENSIBLE format;
 #else
     WAVEFORMATEX format;
 #endif
 
-    /* check current state */
-    if (self->device_handle) {
-        /* the device is already open */
-        return BLT_SUCCESS;
-    }
-
-    /* reset some fields */
-    self->nb_samples_written = 0;
-
     /* fill in format structure */
+    ATX_SetMemory(&format, 0, sizeof(format));
 #if defined(BLT_WIN32_AUDIO_OUTPUT_USE_WAVEFORMATEXTENSIBLE)
-    format.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-    format.Format.nChannels = self->media_type.channel_count;
-    format.Format.nSamplesPerSec = self->media_type.sample_rate;
-    format.Format.nBlockAlign = self->media_type.channel_count * self->media_type.bits_per_sample/8;
-    format.Format.nAvgBytesPerSec = format.Format.nBlockAlign * format.Format.nSamplesPerSec;
-    format.Format.wBitsPerSample = self->media_type.bits_per_sample;
-    format.Format.cbSize = 22;
-    format.Samples.wValidBitsPerSample = self->media_type.bits_per_sample;
-    if (self->media_type.channel_mask && self->media_type.channel_count > 2) {
-        format.dwChannelMask = self->media_type.channel_mask;
-    } else {
-        switch (self->media_type.channel_count) {
+    if (media_type->base.id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+        format.Format.wFormatTag           = WAVE_FORMAT_EXTENSIBLE;
+        format.Format.nChannels            = media_type->channel_count;
+        format.Format.nSamplesPerSec       = media_type->sample_rate;
+        format.Format.nBlockAlign          = media_type->channel_count * media_type->bits_per_sample/8;
+        format.Format.nAvgBytesPerSec      = format.Format.nBlockAlign * format.Format.nSamplesPerSec;
+        format.Format.wBitsPerSample       = media_type->bits_per_sample;
+        format.Format.cbSize               = 22;
+        format.Samples.wValidBitsPerSample = media_type->bits_per_sample;
+        if (media_type->channel_mask && media_type->channel_count > 2) {
+            format.dwChannelMask = media_type->channel_mask;
+        } else {
+            switch (media_type->channel_count) {
             case 1:
                 format.dwChannelMask = KSAUDIO_SPEAKER_MONO;
                 break;
@@ -350,7 +359,7 @@ Win32AudioOutput_Open(Win32AudioOutput* self)
 
             case 3:
                 format.dwChannelMask = KSAUDIO_SPEAKER_STEREO |
-                                       SPEAKER_FRONT_CENTER;
+                    SPEAKER_FRONT_CENTER;
                 break;
 
             case 4:
@@ -367,49 +376,107 @@ Win32AudioOutput_Open(Win32AudioOutput* self)
 
             default:
                 format.dwChannelMask = SPEAKER_ALL;
+            }
         }
+        format.SubFormat = BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM; 
+    } else {
+        format.Format.wFormatTag           = WAVE_FORMAT_DOLBY_AC3_SPDIF;
+        format.Format.nChannels            = 2;
+        format.Format.nSamplesPerSec       = 48000;
+        format.Format.nBlockAlign          = 4;
+        format.Format.nAvgBytesPerSec      = 4*48000;
+        format.Format.wBitsPerSample       = 16;
+        format.Format.cbSize               = 22;
+        format.Samples.wValidBitsPerSample = 16;
+        format.SubFormat = BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_DOLBY_AC3_SPDIF;
+        format.dwChannelMask = KSAUDIO_SPEAKER_STEREO;
     }
-    format.SubFormat = BLT_WIN32_OUTPUT_KSDATAFORMAT_SUBTYPE_PCM; 
 #else
     format.wFormatTag      = WAVE_FORMAT_PCM;
-    format.nChannels       = self->media_type.channel_count; 
-    format.nSamplesPerSec  = self->media_type.sample_rate;
-    format.nBlockAlign     = self->media_type.channel_count *
-                             self->media_type.bits_per_sample/8;
+    format.nChannels       = media_type->channel_count; 
+    format.nSamplesPerSec  = media_type->sample_rate;
+    format.nBlockAlign     = media_type->channel_count *
+                             media_type->bits_per_sample/8;
     format.nAvgBytesPerSec = format.nBlockAlign*format.nSamplesPerSec;
-    format.wBitsPerSample  = self->media_type.bits_per_sample;
+    format.wBitsPerSample  = media_type->bits_per_sample;
     format.cbSize          = 0;
 #endif
 
     /* try to open the device */
+    if (device_handle) *device_handle = NULL;
     for (retry = 0; retry < BLT_WIN32_OUTPUT_MAX_OPEN_RETRIES; retry++) {
-        mm_result = waveOutOpen(&self->device_handle, 
-                                self->device_id, 
+        mm_result = waveOutOpen(device_handle, 
+                                device_id, 
                                 (const struct tWAVEFORMATEX*)&format,
-                                0, 0, WAVE_ALLOWSYNC);
+                                0, 0, WAVE_ALLOWSYNC | (device_handle?0:WAVE_FORMAT_QUERY));
         if (mm_result != MMSYSERR_ALLOCATED) break;
         Sleep(BLT_WIN32_OUTPUT_OPEN_RETRY_SLEEP);
     }
 
     if (mm_result == MMSYSERR_ALLOCATED) {
-        self->device_handle = NULL;
         return BLT_ERROR_DEVICE_BUSY;
     }
     if (mm_result == MMSYSERR_BADDEVICEID || 
         mm_result == MMSYSERR_NODRIVER) {
-        self->device_handle = NULL;
         return BLT_ERROR_NO_SUCH_DEVICE;
     }
     if (mm_result == WAVERR_BADFORMAT) {
-        self->device_handle = NULL;
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     if (mm_result != MMSYSERR_NOERROR) {
-        self->device_handle = NULL;
         return BLT_ERROR_OPEN_FAILED;
     }
 
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Win32AudioOutput_CheckDeviceCapabilities
++---------------------------------------------------------------------*/
+static BLT_Result
+Win32AudioOutput_CheckDeviceCapabilities(Win32AudioOutput* self)
+{
+    BLT_Result       result;
+    BLT_PcmMediaType ac3_type;
+
+    /* check AC-3 over SPDIF */
+    BLT_MediaType_Init(&ac3_type.base, self->ac3_type_id);
+    ac3_type.bits_per_sample = 16;
+    ac3_type.channel_count   = 2;
+    ac3_type.channel_mask    = 0;
+    ac3_type.sample_format   = 0;
+    ac3_type.sample_rate     = 48000;
+    result = Win32AudioOutput_OpenDevice(self->device_id, 
+                                         &ac3_type,
+                                         NULL);
+    if (result == BLT_ERROR_INVALID_MEDIA_TYPE) {
+        self->use_passthrough = ATX_FALSE;
+    }
+    if (result == BLT_ERROR_NO_SUCH_DEVICE) {
+        return result;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    Win32AudioOutput_Open
++---------------------------------------------------------------------*/
+static BLT_Result
+Win32AudioOutput_Open(Win32AudioOutput* self)
+{
+    /* check current state */
+    if (self->device_handle) {
+        /* the device is already open */
+        return BLT_SUCCESS;
+    }
+
+    /* reset some fields */
+    self->nb_samples_written = 0;
+
+    return Win32AudioOutput_OpenDevice(self->device_id,
+                                       &self->media_type,
+                                       &self->device_handle);
 }
 
 /*----------------------------------------------------------------------
@@ -458,7 +525,7 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
                            BLT_MediaPacket*    packet)
 {
     Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_PacketConsumer);
-    BLT_PcmMediaType* media_type;
+    BLT_MediaType*    media_type;
     QueueBuffer*      queue_buffer = NULL;
     ATX_ListItem*     queue_item = NULL;
     BLT_Result        result;
@@ -474,48 +541,106 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
     if (BLT_FAILED(result)) goto failed;
 
     /* check the media type */
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+    if (media_type->id == self->ac3_type_id) {
+        if (!self->use_passthrough) {
+            ATX_LOG_FINE("refusing AC-3 media, because we have not selected the mode or it is not supported");
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
+        }
+    } else if (media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         result = BLT_ERROR_INVALID_MEDIA_TYPE;
         goto failed;
     }
 
-    /* compare the media format with the current format */
-    if (media_type->sample_rate     != self->media_type.sample_rate   ||
-        media_type->channel_count   != self->media_type.channel_count ||
-        media_type->bits_per_sample != self->media_type.bits_per_sample) {
-        /* new format */
+    /* for PCM, compare the media format with the current format */
+    if (media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+        BLT_PcmMediaType* pcm_type = (BLT_PcmMediaType*)media_type;
+        if (pcm_type->sample_rate     != self->media_type.sample_rate   ||
+            pcm_type->channel_count   != self->media_type.channel_count ||
+            pcm_type->bits_per_sample != self->media_type.bits_per_sample) {
+            /* new format */
 
-        /* check the format */
-        if (media_type->sample_rate     == 0 ||
-            media_type->channel_count   == 0 ||
-            media_type->bits_per_sample == 0) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            /* check the format */
+            if (pcm_type->sample_rate     == 0 ||
+                pcm_type->channel_count   == 0 ||
+                pcm_type->bits_per_sample == 0) {
+                return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            }
+            
+            /* perform basic validity checks of the format */
+            if (pcm_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
+                return BLT_ERROR_INVALID_MEDIA_TYPE;
+            }
+            if (pcm_type->bits_per_sample !=  8 &&
+                pcm_type->bits_per_sample != 16 &&
+                pcm_type->bits_per_sample != 24 &&
+                pcm_type->bits_per_sample != 32) {
+                return BLT_ERROR_INVALID_MEDIA_TYPE;
+            }
+
+            /* copy the format */
+            self->media_type = *pcm_type;
+
+            /* recompute the max queue buffer size */
+            self->pending_queue.max_buffered = 
+                BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION *
+                pcm_type->sample_rate *
+                pcm_type->channel_count *
+                (pcm_type->bits_per_sample/8);
+
+            /* close the device */
+            result = Win32AudioOutput_Close(self);
+            if (BLT_FAILED(result)) goto failed;
         }
-        
-        /* perform basic validity checks of the format */
-        if (media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
-            return BLT_ERROR_INVALID_MEDIA_TYPE;
+    } else if (media_type->id != self->media_type.base.id) {
+        self->media_type.base = *media_type;
+        if (media_type->id == self->ac3_type_id) {
+            self->pending_queue.max_buffered = 
+                BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION*48000*4;
+            self->media_type.bits_per_sample = 16;
+            self->media_type.channel_count   = 2;
+            self->media_type.sample_rate     = 48000;
         }
-        if (media_type->bits_per_sample !=  8 &&
-            media_type->bits_per_sample != 16 &&
-            media_type->bits_per_sample != 24 &&
-            media_type->bits_per_sample != 32) {
-            return BLT_ERROR_INVALID_MEDIA_TYPE;
-        }
+    }
 
-        /* copy the format */
-        self->media_type = *media_type;
-
-        /* recompute the max queue buffer size */
-        self->pending_queue.max_buffered = 
-            BLT_WIN32_OUTPUT_MAX_QUEUE_DURATION *
-            media_type->sample_rate *
-            media_type->channel_count *
-            (media_type->bits_per_sample/8);
-
-        /* close the device */
-        result = Win32AudioOutput_Close(self);
+    /* for AC-3/SPDIF we need to create an SPDIF buffer */
+    if (media_type->id == self->ac3_type_id) {
+        unsigned char*   ac3_payload      = BLT_MediaPacket_GetPayloadBuffer(packet);
+        unsigned int     ac3_payload_size = BLT_MediaPacket_GetPayloadSize(packet);
+        unsigned char*   spdif_payload    = NULL;
+        BLT_MediaPacket* spdif_packet     = NULL;
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
+                                            BLT_WIN32_AUDIO_OUTPUT_AC3_SPDIF_FRAME_SIZE,
+                                            media_type,
+                                            &spdif_packet);
         if (BLT_FAILED(result)) goto failed;
+        BLT_MediaPacket_SetPayloadSize(spdif_packet, BLT_WIN32_AUDIO_OUTPUT_AC3_SPDIF_FRAME_SIZE);
+        spdif_payload = BLT_MediaPacket_GetPayloadBuffer(spdif_packet);
+        
+        /* setup the SPDIF header */
+        spdif_payload[0] = 0x72;
+        spdif_payload[1] = 0xF8;
+        spdif_payload[2] = 0x1F;
+        spdif_payload[3] = 0x4E;
+        spdif_payload[4] = 0x01;
+        spdif_payload[5] = ac3_payload[5] & 0x07; /* bsmod */
+        spdif_payload[6] = (unsigned char)((ac3_payload_size*8)     ); /* frame size in bits, LSB */
+        spdif_payload[7] = (unsigned char)((ac3_payload_size*8) >> 8); /* frame size in bits, MSB */
+
+        if (ac3_payload_size <= BLT_WIN32_AUDIO_OUTPUT_AC3_SPDIF_FRAME_SIZE-8) {
+            ATX_CopyMemory(&spdif_payload[8], ac3_payload, ac3_payload_size);
+            ATX_SetMemory(&spdif_payload[8+ac3_payload_size], 0, BLT_WIN32_AUDIO_OUTPUT_AC3_SPDIF_FRAME_SIZE-8-ac3_payload_size);
+
+            /* swap bytes if needed (to make the byte order little endian) */
+            if (ac3_payload[0] == 0x0B) {
+                unsigned int i;
+                for (i=0; i<ac3_payload_size/2; i++) {
+                    unsigned short word = spdif_payload[8+i];
+                    spdif_payload[8+i] = (word>>8)|(word<<8);
+                }
+            }
+        }
+
+        packet = spdif_packet;
     }
 
     /* ensure that the device is open */
@@ -531,10 +656,8 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
     queue_buffer = ATX_ListItem_GetData(queue_item);
 
     /* setup the queue element */
-    queue_buffer->wave_header.lpData = 
-        BLT_MediaPacket_GetPayloadBuffer(packet);
-    queue_buffer->wave_header.dwBufferLength = 
-        BLT_MediaPacket_GetPayloadSize(packet);
+    queue_buffer->wave_header.lpData         = BLT_MediaPacket_GetPayloadBuffer(packet);
+    queue_buffer->wave_header.dwBufferLength = BLT_MediaPacket_GetPayloadSize(packet);
     assert((queue_buffer->wave_header.dwFlags & WHDR_PREPARED) == 0);
     mm_result = waveOutPrepareHeader(self->device_handle, 
                                      &queue_buffer->wave_header, 
@@ -557,8 +680,8 @@ Win32AudioOutput_PutPacket(BLT_PacketConsumer* _self,
     /* keep a count of the number of samples written               */
     /* keep track of the timestamp after the *last* sample written */
     {
-        BLT_UInt64 packet_samples  = BLT_MediaPacket_GetPayloadSize(packet)/(media_type->channel_count*(media_type->bits_per_sample/8));
-        BLT_UInt64 packet_duration = (packet_samples*1000000000)/media_type->sample_rate;
+        BLT_UInt64 packet_samples  = BLT_MediaPacket_GetPayloadSize(packet)/(self->media_type.channel_count*(self->media_type.bits_per_sample/8));
+        BLT_UInt64 packet_duration = (packet_samples*1000000000)/self->media_type.sample_rate;
         BLT_UInt64 packet_ts       = BLT_TimeStamp_ToNanos(BLT_MediaPacket_GetTimeStamp(packet));
         self->nb_samples_written += packet_samples;
         self->timestamp_after_buffer = packet_ts+packet_duration;
@@ -597,12 +720,19 @@ Win32AudioOutput_QueryMediaType(BLT_MediaPort*        _self,
     Win32AudioOutput* self = ATX_SELF(Win32AudioOutput, BLT_MediaPort);
 
     if (index == 0) {
-        *media_type = (const BLT_MediaType*)&self->expected_media_type;
-        return BLT_SUCCESS;
+        if (self->use_passthrough) {
+            /* prefer AC-3 by default */
+            *media_type = (const BLT_MediaType*)&self->expected_media_types[1];
+        } else {
+            *media_type = (const BLT_MediaType*)&self->expected_media_types[0];
+        }
+    } else if (index == 1 && self->use_passthrough) {
+        *media_type = (const BLT_MediaType*)&self->expected_media_types[0];
     } else {
         *media_type = NULL;
-        return BLT_FAILURE;
+        return ATX_ERROR_NO_SUCH_ITEM;
     }
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -615,10 +745,10 @@ Win32AudioOutput_Create(BLT_Module*              module,
                         BLT_CString              parameters, 
                         BLT_MediaNode**          object)
 {
-    Win32AudioOutput* self;
-    /*
-    BLT_MediaNodeConstructor* constructor = 
-    (BLT_MediaNodeConstructor*)parameters; */
+    Win32AudioOutput*         self;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
+    const char*               device_name;
+    BLT_Result                result;
 
     /* check parameters */
     if (parameters == NULL || 
@@ -636,29 +766,55 @@ Win32AudioOutput_Create(BLT_Module*              module,
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
+    /* parse the device name */
+    self->device_id = WAVE_MAPPER;
+    device_name = constructor->name+5;
+    if (device_name[0] == '+') {
+        self->use_passthrough = ATX_TRUE;
+        ++device_name;
+    }
+    if (ATX_SUCCEEDED(ATX_ParseIntegerU(device_name, &self->device_id, ATX_FALSE))) {
+        if (self->device_id > 0) --self->device_id;
+    } else {
+        ATX_FreeMemory(self);
+        return BLT_ERROR_NO_SUCH_DEVICE;
+    }
+    ATX_LOG_FINE_1("selected device id %d", self->device_id);
+
     /* construct the object */
-    self->device_id                  = WAVE_MAPPER;
     self->device_handle              = NULL;
     self->media_type.sample_rate     = 0;
     self->media_type.channel_count   = 0;
     self->media_type.bits_per_sample = 0;
+    self->ac3_type_id                = ((Win32AudioOutputModule*)module)->ac3_type_id;
     self->pending_queue.buffered     = 0;
     self->pending_queue.max_buffered = 0;
     self->nb_samples_written         = 0;
+
+    /* check if the device exists and if it supports passthrough */
+    result = Win32AudioOutput_CheckDeviceCapabilities(self);
+    if (BLT_FAILED(result)) {
+        ATX_FreeMemory(self);
+        return result;
+    }
+
+    /* create the packet queues */
     ATX_List_CreateEx(&Win32AudioOutputListItemDestructor, &self->free_queue.packets);
     ATX_List_CreateEx(&Win32AudioOutputListItemDestructor, &self->pending_queue.packets);
 
     /* setup the expected media type */
-    BLT_PcmMediaType_Init(&self->expected_media_type);
-    self->expected_media_type.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    BLT_PcmMediaType_Init(&self->expected_media_types[0]);
+    self->expected_media_types[0].sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    BLT_PcmMediaType_Init(&self->expected_media_types[1]);
+    self->expected_media_types[1].base.id = self->ac3_type_id;
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, Win32AudioOutput, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, Win32AudioOutput, BLT_BaseMediaNode, ATX_Referenceable);
-    ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_PacketConsumer);
-    ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_OutputNode);
-    ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_MediaPort);
-    ATX_SET_INTERFACE(self, Win32AudioOutput, BLT_VolumeControl);
+    ATX_SET_INTERFACE   (self, Win32AudioOutput, BLT_PacketConsumer);
+    ATX_SET_INTERFACE   (self, Win32AudioOutput, BLT_OutputNode);
+    ATX_SET_INTERFACE   (self, Win32AudioOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE   (self, Win32AudioOutput, BLT_VolumeControl);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
@@ -929,16 +1085,43 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Win32AudioOutput,
                                          reference_count)
 
 /*----------------------------------------------------------------------
+|   Win32AudioOutputModule_Attach
++---------------------------------------------------------------------*/
+BLT_METHOD
+Win32AudioOutputModule_Attach(BLT_Module* _self, BLT_Core* core)
+{
+    Win32AudioOutputModule* self = ATX_SELF_EX(Win32AudioOutputModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*           registry;
+    BLT_Result              result;
+
+    /* get the registry */
+    result = BLT_Core_GetRegistry(core, &registry);
+    if (BLT_FAILED(result)) return result;
+
+    /* get the type id for "audio/ac3" */
+    result = BLT_Registry_GetIdForName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        "audio/ac3",
+        &self->ac3_type_id);
+    if (BLT_FAILED(result)) return result;
+     
+    ATX_LOG_FINE_1("(audio/ac3 type = %d)", self->ac3_type_id);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   Win32AudioOutputModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Win32AudioOutputModule_Probe(BLT_Module*              self, 
+Win32AudioOutputModule_Probe(BLT_Module*              _self, 
                              BLT_Core*                core,
                              BLT_ModuleParametersType parameters_type,
                              BLT_AnyConst             parameters,
                              BLT_Cardinal*            match)
 {
-    BLT_COMPILER_UNUSED(self);
+    Win32AudioOutputModule* self = ATX_SELF_EX(Win32AudioOutputModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
 
     switch (parameters_type) {
@@ -949,29 +1132,27 @@ Win32AudioOutputModule_Probe(BLT_Module*              self,
 
             /* the input protocol should be PACKET and the */
             /* output protocol should be NONE              */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_NONE)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_NONE)) {
                 return BLT_FAILURE;
             }
 
-            /* the input type should be unknown, or audio/pcm */
-            if (!(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            /* the input type should be unknown, audio/pcm or audio/ac3 */
+            if (constructor->spec.input.media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM &&
+                constructor->spec.input.media_type->id != self->ac3_type_id &&
+                constructor->spec.input.media_type->id != BLT_MEDIA_TYPE_ID_UNKNOWN) {
                 return BLT_FAILURE;
             }
 
-            /* the name should be 'wave:<n>' */
-            if (constructor->name == NULL ||
-                !ATX_StringsEqualN(constructor->name, "wave:", 5)) {
-                return BLT_FAILURE;
+            /* the name should be 'wave:<n>' or 'wave:+<n>' (+ for spdif/hdmi passthrough) */
+            if (constructor->name == NULL) return BLT_FAILURE;
+            if (!ATX_StringsEqualN(constructor->name, "wave:", 5)) return BLT_FAILURE;
+            if (ATX_StringLength(constructor->name) < 6) return BLT_FAILURE;
+            if (constructor->name[5] != '+') {
+                /* we cannot do AC-3 over plain wave */
+                if (constructor->spec.input.media_type->id == self->ac3_type_id) return BLT_FAILURE;
             }
 
             /* always an exact match, since we only respond to our name */
@@ -1006,7 +1187,7 @@ BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(Win32AudioOutputModule, Win32Audi
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP_EX(Win32AudioOutputModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
-    BLT_BaseModule_Attach,
+    Win32AudioOutputModule_Attach,
     Win32AudioOutputModule_CreateInstance,
     Win32AudioOutputModule_Probe
 ATX_END_INTERFACE_MAP
@@ -1022,6 +1203,11 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Win32AudioOutputModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
+|   node constructor
++---------------------------------------------------------------------*/
+BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(Win32AudioOutputModule, "Win32 Audio Output", 0)
+
+/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
 BLT_Result 
@@ -1029,8 +1215,5 @@ BLT_Win32AudioOutputModule_GetModuleObject(BLT_Module** object)
 {
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("Win32 Audio Output", NULL, 0, 
-                                 &Win32AudioOutputModule_BLT_ModuleInterface,
-                                 &Win32AudioOutputModule_ATX_ReferenceableInterface,
-                                 object);
+    return Win32AudioOutputModule_Create(object);
 }

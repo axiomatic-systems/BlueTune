@@ -151,12 +151,13 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
     int            av_result     = 0;
     unsigned int   packet_size   = 0;
     unsigned char* packet_buffer = NULL;
-
+    
     /* libavcodec wants the input buffers to be padded */
     if (packet) {
+        BLT_Size buffer_size_needed;
         packet_size   = BLT_MediaPacket_GetPayloadSize(packet);
         packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);
-        BLT_Size buffer_size_needed  = BLT_MediaPacket_GetPayloadOffset(packet)+packet_size+BLT_FFMPEG_INPUT_PADDING_SIZE;
+        buffer_size_needed  = BLT_MediaPacket_GetPayloadOffset(packet)+packet_size+BLT_FFMPEG_INPUT_PADDING_SIZE;
         if (buffer_size_needed > BLT_MediaPacket_GetAllocatedSize(packet)) {
             BLT_MediaPacket_SetAllocatedSize(packet, buffer_size_needed);
             packet_buffer = BLT_MediaPacket_GetPayloadBuffer(packet);

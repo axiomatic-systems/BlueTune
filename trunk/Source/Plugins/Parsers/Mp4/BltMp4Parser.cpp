@@ -217,7 +217,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
     stream_info.mask = BLT_STREAM_INFO_MASK_ID |
                        BLT_STREAM_INFO_MASK_DURATION;
     
-    // deal with audio details, if this is an audi track
+    // deal with audio details, if this is an audio track
     AP4_AudioSampleDescription* audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
     if (audio_desc) {
         ATX_LOG_FINE("sample description is audio");
@@ -231,7 +231,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
         ATX_LOG_FINE("expected audio sample descriton, but did not get one");
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
-    
+
     AP4_VideoSampleDescription* video_desc = dynamic_cast<AP4_VideoSampleDescription*>(sample_desc);
     if (video_desc) {
         ATX_LOG_FINE("sample description is video");

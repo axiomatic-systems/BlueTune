@@ -27,7 +27,7 @@ BLT_WmaDecoderModule_GetModuleObject(BLT_Module** object)
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
     *object = NULL;
 
-    ATX_LOG_WARNING("BLT_WmaDecoderModule_GetModuleObject - this is a stub module");
+    ATX_LOG_FINE("this is a stub module");
 
     return BLT_ERROR_NOT_IMPLEMENTED;
 }

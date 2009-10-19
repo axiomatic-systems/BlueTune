@@ -872,25 +872,19 @@ Stream_SetInput(BLT_Stream* _self,
     constructor.spec.output.media_type = &output_media_type;
     constructor.spec.input.media_type  = &input_media_type;
     if (type != NULL) {
-        BLT_Registry* registry;
-        BLT_UInt32    id;
-
-        result = BLT_Core_GetRegistry(self->core, &registry);
+        BLT_MediaType* media_type;
+        result = BLT_Core_ParseMimeType(self->core, type, &media_type);
+        constructor.spec.output.media_type = media_type;
         if (BLT_FAILED(result)) return result;
-        
-        result = BLT_Registry_GetIdForName(
-           registry, 
-           BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS, 
-           type, 
-            &id);
-        if (BLT_FAILED(result)) return result;
-        output_media_type.id = id;
     }
 
     /* create the input media node */
     result = BLT_Core_CreateCompatibleMediaNode(self->core, 
                                                 &constructor, 
                                                 &media_node);
+    if (constructor.spec.output.media_type != &output_media_type) {
+        BLT_MediaType_Free((BLT_MediaType*)constructor.spec.output.media_type);
+    }
     if (BLT_FAILED(result)) return result;
 
     /* set the media node as the new input */
@@ -1013,23 +1007,17 @@ Stream_SetOutput(BLT_Stream* _self,
     constructor.spec.output.media_type = &output_media_type;
     constructor.spec.input.media_type  = &input_media_type;
     if (type != NULL) {
-        BLT_Registry* registry;
-        BLT_UInt32    id;
-
-        result = BLT_Core_GetRegistry(self->core, &registry);
+        BLT_MediaType* media_type;
+        result = BLT_Core_ParseMimeType(self->core, type, &media_type);
+        constructor.spec.input.media_type = media_type;
         if (BLT_FAILED(result)) return result;
-        
-        result = BLT_Registry_GetIdForName(
-           registry, 
-           BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS, 
-           type, 
-            &id);
-        if (BLT_FAILED(result)) return result;
-        input_media_type.id = id;
     }
     result = BLT_Core_CreateCompatibleMediaNode(self->core, 
                                                 &constructor, 
                                                 &media_node);
+    if (constructor.spec.input.media_type != &input_media_type) {
+        BLT_MediaType_Free((BLT_MediaType*)constructor.spec.input.media_type);
+    }
     if (BLT_FAILED(result)) return result;
 
     /* set the media node as the new output node */
@@ -1288,7 +1276,7 @@ Stream_CreateCompatibleMediaNode(Stream*              self,
     constructor.spec.input.media_type = from_type;
     constructor.name                  = NULL;
 
-    ATX_LOG_FINE("Stream::CreateCompatibleMediaNode trying to create compatible node:");
+    ATX_LOG_FINE("trying to create compatible node:");
 
     /* first, try to join the to_node */
     if (to_node) {
@@ -1395,54 +1383,55 @@ Stream_DeliverPacket(Stream*          self,
     StreamNode*          new_node;
     StreamNode*          to_node;
     const BLT_MediaType* media_type;
+    unsigned int         watchdog;
     BLT_Result           result;
 
     if (BLT_MediaPacket_GetFlags(packet)) {
         ATX_LOG_FINE_1("Stream::DeliverPacket - flags = %x --------------------", 
-                      BLT_MediaPacket_GetFlags(packet));
+                       BLT_MediaPacket_GetFlags(packet));
     }
     
     /* set the recipient node */
     to_node = from_node->next;
 
-    /* if we're connected, we can only try once */
-    if (from_node->output.connected == BLT_TRUE) {
-        result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
-        goto done;
-    } 
-    
-    /* check if the recipient uses the PACKET protocol */
-    if (to_node->input.protocol == BLT_MEDIA_PORT_PROTOCOL_PACKET) {
-        /* try to deliver the packet to the recipient */
-        result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
-        if (BLT_SUCCEEDED(result) || result != BLT_ERROR_INVALID_MEDIA_TYPE) {
-            /* success, or fatal error */
-            goto done;
+    for (watchdog=0; watchdog<16; watchdog++) {
+        /* if we're connected, we can only try once */
+        if (from_node->output.connected == BLT_TRUE) {
+            result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
+            break;
+        } 
+        
+        /* check if the recipient uses the PACKET protocol */
+        if (to_node->input.protocol == BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+            /* try to deliver the packet to the recipient */
+            result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
+            if (BLT_SUCCEEDED(result) || result != BLT_ERROR_INVALID_MEDIA_TYPE) {
+                /* success, or fatal error */
+                break;
+            }
+        } 
+
+        /* get the media type of the packet */
+        BLT_MediaPacket_GetMediaType(packet, &media_type);
+
+        /* try to create a compatible node to receive the packet */
+        result = Stream_InterpolateChain(self, 
+                                         from_node, 
+                                         media_type, 
+                                         to_node, 
+                                         &new_node);
+        if (BLT_FAILED(result)) break;
+
+        /* check that the new node has the right interface */
+        if (new_node->input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) {
+            result = BLT_ERROR_INTERNAL;
+            break;
         }
-    } 
 
-    /* get the media type of the packet */
-    BLT_MediaPacket_GetMediaType(packet, &media_type);
-
-    /* try to create a compatible node to receive the packet */
-    result = Stream_InterpolateChain(self, 
-                                     from_node, 
-                                     media_type, 
-                                     to_node, 
-                                     &new_node);
-    if (BLT_FAILED(result)) goto done;
-
-    /* check that the new node has the right interface */
-    if (new_node->input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) {
-        result = BLT_ERROR_INTERNAL;
-        goto done;
+        /* use the interpolated node */
+        to_node = new_node;
     }
-
-    /* try to deliver the packet */
-    to_node = new_node;
-    result = BLT_PacketConsumer_PutPacket(to_node->input.iface.packet_consumer, packet);
-
-done:
+    
     if (BLT_SUCCEEDED(result)) {
         if (to_node == self->output.node) {
             /* if the packet has been delivered to the output, keep its timestamp */

@@ -18,6 +18,7 @@
 #include "BltMedia.h"
 #include "BltPacketConsumer.h"
 #include "BltByteStreamUser.h"
+#include "BltPcm.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -47,8 +48,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_OutputStreamUser);
 
     /* members */
-    ATX_OutputStream*  stream;
-    BLT_MediaType*     media_type;
+    ATX_OutputStream* stream;
 } PacketStreamerOutput;
 
 typedef struct {
@@ -58,6 +58,7 @@ typedef struct {
     /* members */
     PacketStreamerInput  input;
     PacketStreamerOutput output;
+    BLT_MediaType*       media_type;
 } PacketStreamer;
 
 /*----------------------------------------------------------------------
@@ -81,12 +82,24 @@ PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
 
     /* check the media type */
     BLT_MediaPacket_GetMediaType(packet, &media_type);
-    if (self->output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
-        BLT_MediaType_Free(self->output.media_type);
-        BLT_MediaType_Clone(media_type, &self->output.media_type);
+    if (self->media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
+        BLT_MediaType_Free(self->media_type);
+        BLT_MediaType_Clone(media_type, &self->media_type);
     } else {
-        if (self->output.media_type->id != media_type->id) {
+        if (self->media_type->id != media_type->id) {
             return BLT_ERROR_INVALID_MEDIA_TYPE;
+        } else {
+            if (self->media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM &&
+                self->media_type->extension_size == media_type->extension_size &&
+                self->media_type->extension_size == sizeof(BLT_PcmMediaType)-sizeof(BLT_MediaType)) {
+                const BLT_PcmMediaType* pcm_in  = (const BLT_PcmMediaType*)media_type;
+                const BLT_PcmMediaType* pcm_out = (const BLT_PcmMediaType*)self->media_type;
+                if (pcm_in->channel_count   != pcm_out->channel_count ||
+                    pcm_in->sample_format   != pcm_out->sample_format ||
+                    pcm_in->bits_per_sample != pcm_out->bits_per_sample) {
+                    return BLT_ERROR_INVALID_MEDIA_TYPE;
+                }
+            } 
         }
     }
 
@@ -131,6 +144,24 @@ PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
 }
 
 /*----------------------------------------------------------------------
+|    PacketStreamerInput_QueryMediaType
++---------------------------------------------------------------------*/
+BLT_METHOD
+PacketStreamerInput_QueryMediaType(BLT_MediaPort*        _self,
+                                   BLT_Ordinal           index,
+                                   const BLT_MediaType** media_type)
+{
+    PacketStreamer* self = ATX_SELF_M(input, PacketStreamer, BLT_MediaPort);
+    if (index == 0) {
+        *media_type = self->media_type;
+        return BLT_SUCCESS;
+    } else {
+        *media_type = NULL;
+        return BLT_FAILURE;
+    }
+}
+
+/*----------------------------------------------------------------------
 |   standard GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(PacketStreamerInput)
@@ -149,7 +180,7 @@ ATX_BEGIN_INTERFACE_MAP(PacketStreamerInput, BLT_MediaPort)
     PacketStreamerInput_GetName,
     PacketStreamerInput_GetProtocol,
     PacketStreamerInput_GetDirection,
-    BLT_MediaPort_DefaultQueryMediaType
+    PacketStreamerInput_QueryMediaType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -185,7 +216,7 @@ PacketStreamerOutput_QueryMediaType(BLT_MediaPort*        _self,
 {
     PacketStreamer* self = ATX_SELF_M(output, PacketStreamer, BLT_MediaPort);
     if (index == 0) {
-        *media_type = self->output.media_type;
+        *media_type = self->media_type;
         return BLT_SUCCESS;
     } else {
         *media_type = NULL;
@@ -260,8 +291,7 @@ PacketStreamer_Create(BLT_Module*              module,
     if (ATX_FAILED(result)) return result;
 
     /* keep the media type info */
-    BLT_MediaType_Clone(constructor->spec.input.media_type,
-                        &self->output.media_type);
+    BLT_MediaType_Clone(constructor->spec.output.media_type, &self->media_type);
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, PacketStreamer, BLT_BaseMediaNode, BLT_MediaNode);
@@ -301,7 +331,7 @@ PacketStreamer_Destroy(PacketStreamer* self)
     ATX_List_Destroy(self->input.packets);
 
     /* free the media type extensions */
-    BLT_MediaType_Free(self->output.media_type);
+    BLT_MediaType_Free(self->media_type);
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));

@@ -201,7 +201,6 @@ FLO_Vbr_ParseXing(FLO_FrameInfo*     frame_info,
     /* stream size */
     if (header_flags & FLO_XING_VBR_HEADER_HAS_BYTE_COUNT) {
         decoder_status->stream_info.size = ATX_BytesToInt32Be(current);
-        current += 4;
     } else {
         decoder_status->stream_info.size = 0;
     }

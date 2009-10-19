@@ -416,7 +416,7 @@ OsxAudioUnitsOutput_PutPacket(BLT_PacketConsumer* _self,
         if (media_type->sample_rate     == 0 ||
             media_type->channel_count   == 0 ||
             media_type->bits_per_sample == 0) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
 
         /* check for the supported sample widths */
@@ -493,7 +493,20 @@ OsxAudioUnitsOutput_MapDeviceName(const char* name, AudioDeviceID* device_id)
         name = NULL;
         
         /* 0 means default */
-        if (device_index == 0) return BLT_SUCCESS;
+        if (device_index == 0) {
+            /* look at the device's streams */
+            AudioDeviceID default_device_id = 0;
+            prop_size = sizeof(AudioDeviceID);
+            err = AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice, &prop_size, &default_device_id);
+            if (err == noErr) {
+                prop_size = 0;
+                err = AudioDeviceGetPropertyInfo(default_device_id, 0, FALSE, kAudioDevicePropertyStreams, &prop_size, NULL);
+                if (err == noErr) {
+                    ATX_LOG_FINE_1("device has %d streams", prop_size/4);
+                }
+            }
+            return BLT_SUCCESS;
+        }
     }
     
     /* ask how many devices exist */

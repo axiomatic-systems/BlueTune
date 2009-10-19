@@ -150,6 +150,7 @@ WaveFormatter_UpdateWavHeader(WaveFormatter* self)
     ATX_LOG_FINER_1("WaveFormatter::UpdateWavHeader - size = %d", self->input.size);
 
     result = ATX_OutputStream_Seek(self->output.stream, 4);
+    if (BLT_FAILED(result)) return result;
     ATX_BytesFromInt32Le(buffer, (ATX_Size)self->input.size + 8+16+12);
     ATX_OutputStream_Write(self->output.stream, buffer, 4, NULL);
 

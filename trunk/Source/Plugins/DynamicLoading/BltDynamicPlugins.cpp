@@ -43,7 +43,7 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
     
     // call the function for each module in the library
     union {
-	BLT_Plugin_GetModule_Function function;
+        BLT_Plugin_GetModule_Function function;
         void*                         symbol;
     } function_symbol;
     function_symbol.symbol = symbol;
@@ -52,7 +52,9 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
         BLT_Module* module = NULL;
         result = function(BLT_PLUGIN_ABI_VERSION, i, &module);
         if (BLT_FAILED(result)) {
-            ATX_LOG_FINE_1("BLT_Plugin_GetModule function returned %d", result);
+            if (result != BLT_ERROR_NO_MATCHING_MODULE) {
+                ATX_LOG_FINE_1("BLT_Plugin_GetModule function returned %d", result);
+            }
             return result;
         }
         BLT_Core_RegisterModule(core, module);
@@ -88,6 +90,10 @@ BLT_Plugins_LoadModulesFromFile(BLT_Core* core, const char* name, BLT_Flags sear
         } else {
             ATX_LOG_FINE("cannot get working directory, ignoring");
         }
+    }
+    if (search_flags & BLT_PLUGIN_LOADER_FLAGS_SEARCH_OS_LOADER_PATH) {
+        ATX_LOG_FINE("searching os loader path");
+        return BLT_Plugins_LoadModulesFromLibrary(core, name);
     }
     
     return BLT_ERROR_NO_MATCHING_MODULE;

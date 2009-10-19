@@ -66,6 +66,9 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Core)
                                     BLT_Size             size, 
                                     const BLT_MediaType* type,
                                     BLT_MediaPacket**    packet);
+    BLT_Result (*ParseMimeType)(BLT_Core*       self, 
+                                const char*     mime_type, 
+                                BLT_MediaType** media_type);
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
@@ -94,6 +97,9 @@ ATX_INTERFACE(object)->CreateCompatibleMediaNode(object, constructor, node)
 
 #define BLT_Core_CreateMediaPacket(object, size, type, packet)\
 ATX_INTERFACE(object)->CreateMediaPacket(object, size, type, packet)
+
+#define BLT_Core_ParseMimeType(object, mime_type, media_type)\
+ATX_INTERFACE(object)->ParseMimeType(object, mime_type, media_type)
 
 #define BLT_Core_Destroy(object) ATX_DESTROY_OBJECT(object)
 

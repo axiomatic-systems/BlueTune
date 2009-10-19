@@ -34,6 +34,11 @@ typedef struct {
     /* bytes following this                                        */
 } BLT_MediaType;
 
+typedef struct {
+    ATX_String name;
+    ATX_String value;
+} BLT_MimeTypeParameter;
+
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
@@ -65,11 +70,13 @@ extern const BLT_MediaType BLT_MediaType_Unknown;
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
-BLT_Result BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id);
-BLT_Result BLT_MediaType_InitEx(BLT_MediaType* type, BLT_MediaTypeId id, BLT_Size type_struct_size);
-BLT_Result BLT_MediaType_Free(BLT_MediaType* type);
-BLT_Result BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to);
-
+BLT_Result  BLT_MediaType_Init(BLT_MediaType* type, BLT_MediaTypeId id);
+BLT_Result  BLT_MediaType_InitEx(BLT_MediaType* type, BLT_MediaTypeId id, BLT_Size type_struct_size);
+BLT_Result  BLT_MediaType_Free(BLT_MediaType* type);
+BLT_Result  BLT_MediaType_Clone(const BLT_MediaType* from, BLT_MediaType** to);
+BLT_Boolean BLT_MediaType_Equals(const BLT_MediaType* self, const BLT_MediaType* other);
+                               
+BLT_Result BLT_ParseMimeType(const char* mime_type, ATX_String* main_type, ATX_List** parameters);
 
 #if defined(__cplusplus)
 }

@@ -1199,10 +1199,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxVideoOutput,
 +---------------------------------------------------------------------*/
 BLT_METHOD
 OsxVideoOutputModule_Probe(BLT_Module*              self, 
-                              BLT_Core*                core,
-                              BLT_ModuleParametersType parameters_type,
-                              BLT_AnyConst             parameters,
-                              BLT_Cardinal*            match)
+                           BLT_Core*                core,
+                           BLT_ModuleParametersType parameters_type,
+                           BLT_AnyConst             parameters,
+                           BLT_Cardinal*            match)
 {
     BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);

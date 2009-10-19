@@ -290,6 +290,12 @@
 		CA5827DB0E68CED7006CC501 /* BltDynamicPlugins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA5827DA0E68CED7006CC501 /* BltDynamicPlugins.cpp */; };
 		CA5827E00E68CF15006CC501 /* BltDynamicPlugins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5827DF0E68CF15006CC501 /* BltDynamicPlugins.h */; };
 		CA5827E50E68CFD4006CC501 /* BltUnixDynamicPlugins.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5827E40E68CFD4006CC501 /* BltUnixDynamicPlugins.c */; };
+		CA615D4F104498D8007E9E7B /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
+		CA615D7710449AD8007E9E7B /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA615D7B10449B2C007E9E7B /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA615D8810449B80007E9E7B /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA615D8910449B93007E9E7B /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA615D8B10449C5E007E9E7B /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
 		CA64346E0C97197C00F67CD5 /* aacdec.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434350C97197C00F67CD5 /* aacdec.c */; };
 		CA64346F0C97197C00F67CD5 /* aactabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434360C97197C00F67CD5 /* aactabs.c */; };
 		CA6434700C97197C00F67CD5 /* aaccommon.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434380C97197C00F67CD5 /* aaccommon.h */; };
@@ -329,7 +335,6 @@
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
 		CA7F2F9C0FA81789006A1B2D /* BltIppDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */; };
 		CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */; };
-		CA96749310110C4200862A6B /* libBltIppDecoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */; };
 		CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED2920EAD3A8D003CE43C /* BltPixels.c */; };
 		CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED2930EAD3A8D003CE43C /* BltPixels.h */; };
 		CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */; };
@@ -580,12 +585,26 @@
 			remoteGlobalIDString = CA30B76B0F0DCE990085B46E;
 			remoteInfo = LoggingTest2;
 		};
+		CA3186321087F596002B38A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA2E6A3B1087E09200F837E2 /* mp42avc */;
+			remoteInfo = Mp42Avc;
+		};
 		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = CA3EDA7E0D7E0B81007AE943;
 			remoteInfo = AvcInfo;
+		};
+		CA3A46A8106843C5000F961D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE3A9281064D1F900EBAD97;
+			remoteInfo = JsonTest;
 		};
 		CA40CAA50F40C4DE0008649B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -691,6 +710,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Bento4;
+		};
+		CA4DD9A3104DB7800024BC0C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA9958A01046FFC70073F34A;
+			remoteInfo = HttpClientTest2;
 		};
 		CA50437E0C5AE61E0060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -804,19 +830,40 @@
 			remoteGlobalIDString = CA5827B80E68C7B1006CC501;
 			remoteInfo = DynamicPlugins;
 		};
+		CA615D7510449AC0007E9E7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CA615D7910449B0B007E9E7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
+		CA615D8410449B6B007E9E7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CA615D8610449B74007E9E7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
 		CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = CA44C52A0D46375F00173F5F;
 			remoteInfo = Mp4DcfPackager;
-		};
-		CA9674D010112BEB00862A6B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CA7F2F7B0FA813FB006A1B2D;
-			remoteInfo = BltIppDecoder;
 		};
 		CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1273,13 +1320,15 @@
 		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
 		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA5827130E68B39D006CC501 /* libBltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoderStub.c; sourceTree = "<group>"; };
 		CA58276D0E68C14F006CC501 /* BltVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVersion.h; sourceTree = "<group>"; };
 		CA5827730E68C2EC006CC501 /* BltSvnVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSvnVersion.h; sourceTree = "<group>"; };
 		CA5827DA0E68CED7006CC501 /* BltDynamicPlugins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPlugins.cpp; sourceTree = "<group>"; };
 		CA5827DF0E68CF15006CC501 /* BltDynamicPlugins.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDynamicPlugins.h; sourceTree = "<group>"; };
 		CA5827E40E68CFD4006CC501 /* BltUnixDynamicPlugins.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltUnixDynamicPlugins.c; sourceTree = "<group>"; };
+		CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltDolbyDigitalPlusParserPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltDolbyDigitalPlusDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA6434350C97197C00F67CD5 /* aacdec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aacdec.c; sourceTree = "<group>"; };
 		CA6434360C97197C00F67CD5 /* aactabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aactabs.c; sourceTree = "<group>"; };
 		CA6434380C97197C00F67CD5 /* aaccommon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = aaccommon.h; sourceTree = "<group>"; };
@@ -1471,6 +1520,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA615D481044984E007E9E7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA615D7710449AD8007E9E7B /* libBlueTune.a in Frameworks */,
+				CA615D7B10449B2C007E9E7B /* libAtomix.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA615D7F10449B66007E9E7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA615D8810449B80007E9E7B /* libBlueTune.a in Frameworks */,
+				CA615D8910449B93007E9E7B /* libAtomix.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA6B38700C965CE9000D7A0A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1499,7 +1566,6 @@
 				CA9ED84E0EAFABAA003CE43C /* libNeptune.a in Frameworks */,
 				CA9ED84F0EAFABAA003CE43C /* libBento4.a in Frameworks */,
 				CA9ED8500EAFABAA003CE43C /* libBento4Atomix.a in Frameworks */,
-				CA96749310110C4200862A6B /* libBltIppDecoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1559,10 +1625,12 @@
 				CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */,
 				CA44DE6E0DEDEAE50020CB81 /* pcmdiff */,
 				CAF2EE270E60C38D00948C04 /* AsyncPlayerC */,
-				CA5827130E68B39D006CC501 /* libBltWmaDecoderPlugin.dylib */,
+				CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */,
 				CA9ED8340EAFAAFC003CE43C /* btplayx */,
 				CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */,
 				CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */,
+				CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */,
+				CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1709,6 +1777,7 @@
 				CA44C4770D4522DA00173F5F /* mp4tag */,
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
+				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
@@ -2234,6 +2303,7 @@
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
 				CA40CAA60F40C4DE0008649B /* minihttpserver */,
+				CA4DD9A4104DB7800024BC0C /* HttpClientTest2 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2250,6 +2320,7 @@
 				CA0C9A8A0D15D1EC00E23496 /* MiscTest */,
 				CA0C9A8C0D15D1EC00E23496 /* LoggingTest */,
 				CAB401510F99278A00B91F51 /* FilesTest */,
+				CA3A46A9106843C5000F961D /* JsonTest */,
 				CA0C9A8E0D15D1EC00E23496 /* NetPump */,
 			);
 			name = Products;
@@ -2716,6 +2787,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA615D461044984E007E9E7B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA615D7D10449B66007E9E7B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA6B386E0C965CE9000D7A0A /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -2989,7 +3074,45 @@
 			);
 			name = BltWmaDecoderPlugin;
 			productName = BltWmaDecoderInputPlugin;
-			productReference = CA5827130E68B39D006CC501 /* libBltWmaDecoderPlugin.dylib */;
+			productReference = CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA615D4E104498AE007E9E7B /* Build configuration list for PBXNativeTarget "BltDolbyDigitalPlusParserPlugin" */;
+			buildPhases = (
+				CA615D461044984E007E9E7B /* Headers */,
+				CA615D471044984E007E9E7B /* Sources */,
+				CA615D481044984E007E9E7B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA615D7610449AC0007E9E7B /* PBXTargetDependency */,
+				CA615D7A10449B0B007E9E7B /* PBXTargetDependency */,
+			);
+			name = BltDolbyDigitalPlusParserPlugin;
+			productName = BltDolbyDigitalPlusParserPlugin;
+			productReference = CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		CA615D8010449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA615D8A10449BD7007E9E7B /* Build configuration list for PBXNativeTarget "BltDolbyDigitalPlusDecoderPlugin" */;
+			buildPhases = (
+				CA615D7D10449B66007E9E7B /* Headers */,
+				CA615D7E10449B66007E9E7B /* Sources */,
+				CA615D7F10449B66007E9E7B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA615D8510449B6B007E9E7B /* PBXTargetDependency */,
+				CA615D8710449B74007E9E7B /* PBXTargetDependency */,
+			);
+			name = BltDolbyDigitalPlusDecoderPlugin;
+			productName = BltDolbyDigitalPlusDecoderPlugin;
+			productReference = CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		CA6B38710C965CE9000D7A0A /* HelixAAC */ = {
@@ -3036,7 +3159,6 @@
 			);
 			dependencies = (
 				CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */,
-				CA9674D110112BEB00862A6B /* PBXTargetDependency */,
 			);
 			name = BtPlayX;
 			productName = BtPlayV;
@@ -3122,6 +3244,8 @@
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
 				CA6B38710C965CE9000D7A0A /* HelixAAC */,
+				CA615D8010449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */,
+				CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */,
 				CA5827120E68B39D006CC501 /* BltWmaDecoderPlugin */,
 				CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */,
 				CA0C9AF40D15D27D00E23496 /* BtPlay */,
@@ -3221,11 +3345,25 @@
 			remoteRef = CA30B7740F0DCEB80085B46E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA3186331087F596002B38A8 /* mp42avc */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp42avc;
+			remoteRef = CA3186321087F596002B38A8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = avcinfo;
 			remoteRef = CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA3A46A9106843C5000F961D /* JsonTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = JsonTest;
+			remoteRef = CA3A46A8106843C5000F961D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA40CAA60F40C4DE0008649B /* minihttpserver */ = {
@@ -3324,6 +3462,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = cryptotest;
 			remoteRef = CA44C47E0D4522DA00173F5F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA4DD9A4104DB7800024BC0C /* HttpClientTest2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HttpClientTest2;
+			remoteRef = CA4DD9A3104DB7800024BC0C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA50437F0C5AE61E0060E6FE /* libNeptune.a */ = {
@@ -3717,6 +3862,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA615D471044984E007E9E7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA615D4F104498D8007E9E7B /* BltDynamicPluginTemplate.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA615D7E10449B66007E9E7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA615D8B10449C5E007E9E7B /* BltDynamicPluginTemplate.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA6B386F0C965CE9000D7A0A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3989,10 +4150,25 @@
 			target = CA5827B80E68C7B1006CC501 /* DynamicPlugins */;
 			targetProxy = CA5827C30E68C825006CC501 /* PBXContainerItemProxy */;
 		};
-		CA9674D110112BEB00862A6B /* PBXTargetDependency */ = {
+		CA615D7610449AC0007E9E7B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */;
-			targetProxy = CA9674D010112BEB00862A6B /* PBXContainerItemProxy */;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA615D7510449AC0007E9E7B /* PBXContainerItemProxy */;
+		};
+		CA615D7A10449B0B007E9E7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA615D7910449B0B007E9E7B /* PBXContainerItemProxy */;
+		};
+		CA615D8510449B6B007E9E7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA615D8410449B6B007E9E7B /* PBXContainerItemProxy */;
+		};
+		CA615D8710449B74007E9E7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA615D8610449B74007E9E7B /* PBXContainerItemProxy */;
 		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4137,8 +4313,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
+				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
@@ -4166,8 +4344,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
+				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
@@ -4526,7 +4706,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_PREFIX = "";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -4545,7 +4725,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_PREFIX = "";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_WmaDecoderModule_GetModuleObject";
@@ -4573,6 +4753,82 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = DynamicPlugins;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA615D4B1044984F007E9E7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_DolbyDigitalPlusParserModule_GetModuleObject";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = "$(DOLBY_DIGITAL_PLUS_PLUGIN_HOME)/Build/Targets/universal-apple-macosx/build/Debug";
+				OTHER_LDFLAGS = "-lDolbyDigitalPlusModules";
+				PREBINDING = NO;
+				PRODUCT_NAME = BltDolbyDigitalPlusParserPlugin;
+			};
+			name = Debug;
+		};
+		CA615D4C1044984F007E9E7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = "";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_DolbyDigitalPlusParserModule_GetModuleObject";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = "$(DOLBY_DIGITAL_PLUS_PLUGIN_HOME)/Build/Targets/universal-apple-macosx/build/Release";
+				OTHER_LDFLAGS = "-lDolbyDigitalPlusModules";
+				PREBINDING = NO;
+				PRODUCT_NAME = BltDolbyDigitalPlusParserPlugin;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		CA615D8210449B66007E9E7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_DolbyDigitalPlusDecoderModule_GetModuleObject";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = "$(DOLBY_DIGITAL_PLUS_PLUGIN_HOME)/Build/Targets/universal-apple-macosx/build/Debug";
+				OTHER_LDFLAGS = "-lDolbyDigitalPlusModules";
+				PREBINDING = NO;
+				PRODUCT_NAME = BltDolbyDigitalPlusDecoderPlugin;
+			};
+			name = Debug;
+		};
+		CA615D8310449B66007E9E7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = "";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_DolbyDigitalPlusDecoderModule_GetModuleObject";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = "$(DOLBY_DIGITAL_PLUS_PLUGIN_HOME)/Build/Targets/universal-apple-macosx/build/Release";
+				OTHER_LDFLAGS = "-lDolbyDigitalPlusModules";
+				PREBINDING = NO;
+				PRODUCT_NAME = BltDolbyDigitalPlusDecoderPlugin;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4698,8 +4954,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
-					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
-					BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
+					BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
+					_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				INSTALL_PATH = /usr/local/bin;
@@ -4714,66 +4970,11 @@
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
-					"-lumc_pipeline",
-					"-laac_dec",
-					"-lmp3_dec",
-					"-lac3_dec",
-					"-lavs_dec",
-					"-lavs_spl",
-					"-lavs_common",
-					"-ljpeg",
-					"-lh264_dec",
-					"-lvc1_dec",
-					"-lumc_pipeline",
-					"-lavi_spl",
-					"-lmpeg4_spl",
-					"-ldemuxer",
-					"-laac_dec_int",
-					"-lmp3_dec_int",
-					"-laudio_renders",
-					"-lvideo_renders",
-					"-ldv100_dec",
-					"-ldv50_dec",
-					"-ldv_dec",
-					"-lmpeg2_dec",
-					"-lmpeg4_dec",
-					"-lh261_dec",
-					"-lh263_dec",
-					"-lcolor_space_converter",
-					"-lmedia_buffers",
-					"-lspl_common",
-					"-lcommon",
-					"-lvc1_spl",
-					"-lvc1_common",
-					"-lumc_io",
-					"-lvm_plus",
-					"-lumc",
-					"-lvm",
-					"-lippdcemerged",
-					"-lippdcmerged",
-					"-lippccemerged",
-					"-lippccmerged",
-					"-lippacemerged",
-					"-lippacmerged",
-					"-lippsremerged",
-					"-lippsrmerged",
-					"-lippvcemerged",
-					"-lippvcmerged",
-					"-lippjemerged",
-					"-lippjmerged",
-					"-lippiemerged",
-					"-lippimerged",
-					"-lippsemerged",
-					"-lippsmerged",
-					"-lippscemerged",
-					"-lippscmerged",
-					"-lippcvemerged",
-					"-lippcvmerged",
-					"-lippcore",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = btplayx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -4787,8 +4988,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
-					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
-					BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
+					BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
+					_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				INSTALL_PATH = /usr/local/bin;
@@ -4803,66 +5004,11 @@
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
-					"-lumc_pipeline",
-					"-laac_dec",
-					"-lmp3_dec",
-					"-lac3_dec",
-					"-lavs_dec",
-					"-lavs_spl",
-					"-lavs_common",
-					"-ljpeg",
-					"-lh264_dec",
-					"-lvc1_dec",
-					"-lumc_pipeline",
-					"-lavi_spl",
-					"-lmpeg4_spl",
-					"-ldemuxer",
-					"-laac_dec_int",
-					"-lmp3_dec_int",
-					"-laudio_renders",
-					"-lvideo_renders",
-					"-ldv100_dec",
-					"-ldv50_dec",
-					"-ldv_dec",
-					"-lmpeg2_dec",
-					"-lmpeg4_dec",
-					"-lh261_dec",
-					"-lh263_dec",
-					"-lcolor_space_converter",
-					"-lmedia_buffers",
-					"-lspl_common",
-					"-lcommon",
-					"-lvc1_spl",
-					"-lvc1_common",
-					"-lumc_io",
-					"-lvm_plus",
-					"-lumc",
-					"-lvm",
-					"-lippdcemerged",
-					"-lippdcmerged",
-					"-lippccemerged",
-					"-lippccmerged",
-					"-lippacemerged",
-					"-lippacmerged",
-					"-lippsremerged",
-					"-lippsrmerged",
-					"-lippvcemerged",
-					"-lippvcmerged",
-					"-lippjemerged",
-					"-lippjmerged",
-					"-lippiemerged",
-					"-lippimerged",
-					"-lippsemerged",
-					"-lippsmerged",
-					"-lippscemerged",
-					"-lippscmerged",
-					"-lippcvemerged",
-					"-lippcvmerged",
-					"-lippcore",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = btplayx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
+				VALID_ARCHS = "i386 x86_64";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5031,6 +5177,24 @@
 			buildConfigurations = (
 				CA5827B90E68C7B1006CC501 /* Debug */,
 				CA5827BA0E68C7B1006CC501 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA615D4E104498AE007E9E7B /* Build configuration list for PBXNativeTarget "BltDolbyDigitalPlusParserPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA615D4B1044984F007E9E7B /* Debug */,
+				CA615D4C1044984F007E9E7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA615D8A10449BD7007E9E7B /* Build configuration list for PBXNativeTarget "BltDolbyDigitalPlusDecoderPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA615D8210449B66007E9E7B /* Debug */,
+				CA615D8310449B66007E9E7B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

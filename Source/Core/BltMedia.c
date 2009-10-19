@@ -113,6 +113,8 @@ static void
 BLT_MimeParser_ListItemDestructor(ATX_ListDataDestructor* self, ATX_Any data, ATX_UInt32 type)
 {
     BLT_MimeTypeParameter* parameter = (BLT_MimeTypeParameter*)data;
+    ATX_COMPILER_UNUSED(self);
+    ATX_COMPILER_UNUSED(type);
     ATX_String_Destruct(&parameter->name);
     ATX_String_Destruct(&parameter->value);
 }

@@ -6,18 +6,18 @@
 	>
 	<UserMacro
 		Name="BLT_DDPLUS_PLUGIN_HOME"
-		Value="$(SolutionDir)\..\..\..\..\DolbyDigitalPlusPlugin"
+		Value=""
 	/>
 	<UserMacro
 		Name="BLT_DDPLUS_PLUGIN_LIB"
-		Value="$(BLT_DDPLUS_PLUGIN_HOME)\Build\Targets\x86-microsoft-win32-vs2005\$(ConfigurationName)\DolbyDigitalPlusPlugin.lib"
+		Value=""
 	/>
 	<UserMacro
 		Name="IPP_UMC_ROOT"
-		Value="C:\Program Files\Intel\IPP\6.1.1.044\ipp-samples\audio-video-codecs"
+		Value=""
 	/>
 	<UserMacro
 		Name="IPP_UMC_LIB"
-		Value="&quot;C:\Program Files\Intel\IPP\6.1.1.044\ipp-samples\audio-video-codecs\application\IppUmcLib\$(ConfigurationName)\IppUmcLib.lib&quot;"
+		Value=""
 	/>
 </VisualStudioPropertySheet>

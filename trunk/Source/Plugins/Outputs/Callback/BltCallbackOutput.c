@@ -99,7 +99,7 @@ CallbackOutput_Create(BLT_Module*              module,
                       BLT_MediaNode**          object)
 {
     CallbackOutput*           self;
-    ATX_UInt64                target_addr = 0;
+    ATX_Int64                 target_addr = 0;
     BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
     BLT_Result                result;
     
@@ -119,7 +119,7 @@ CallbackOutput_Create(BLT_Module*              module,
     }
 
     /* parse the name */
-    result = ATX_ParseInteger64U(constructor->name+16, &target_addr, ATX_FALSE);
+    result = ATX_ParseInteger64(constructor->name+16, &target_addr, ATX_FALSE);
     if (ATX_FAILED(result)) return result;
 
     /* allocate memory for the object */
@@ -133,7 +133,7 @@ CallbackOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* keep a reference to the callback target */
-    self->callback_target = (BLT_PacketConsumer*)target_addr;
+    self->callback_target = (BLT_PacketConsumer*)(ATX_IntPtr)target_addr;
     ATX_REFERENCE_OBJECT(self->callback_target);
 
     /* keep the media type info */

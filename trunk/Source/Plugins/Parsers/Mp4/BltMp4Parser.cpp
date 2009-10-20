@@ -471,6 +471,9 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 fail:
     delete self->input.mp4_file;
     self->input.mp4_file = NULL;
+    self->audio_output.track = NULL;
+    self->video_output.track = NULL;
+    
     return result;
 }
 
@@ -572,7 +575,6 @@ Mp4ParserOutput_QueryMediaType(BLT_MediaPort*        _self,
     }
 }
 
-                                     
 /*----------------------------------------------------------------------
 |   Mp4ParserOutput_GetPacket
 +---------------------------------------------------------------------*/

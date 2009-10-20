@@ -158,16 +158,6 @@ BLT_Result BLT_DecoderX_GetStatus(BLT_DecoderX*      decoder,
                                   BLT_DecoderStatus* status);
 
 /**
- * Get the audio volume of the output.
- */
-BLT_Result BLT_DecoderX_GetVolume(BLT_DecoderX* decoder, float* volume);
-
-/**
- * Set the audio volume of the output.
- */
-BLT_Result BLT_DecoderX_SetVolume(BLT_DecoderX* decoder, float volume);
-
-/**
  * Get the ATX_Properties object representing the properties of a
  * BLT_DecoderX object's stream.
  * @param properties Pointer to a pointer where a pointer to an 

@@ -107,7 +107,7 @@ DcfParserInput_Construct(DcfParserInput* self, BLT_Module* module)
 |   DcfParserInput_Destruct
 +---------------------------------------------------------------------*/
 static void
-DcfParserInput_Destruct(DcfParserInput* self)
+DcfParserInput_Destruct(DcfParserInput* /*self*/)
 {
 }
 
@@ -520,7 +520,7 @@ ATX_END_INTERFACE_MAP
 |   DcfParserOutput_Construct
 +---------------------------------------------------------------------*/
 static void
-DcfParserOutput_Construct(DcfParserOutput* self)
+DcfParserOutput_Construct(DcfParserOutput* /*self*/)
 {
 }
 
@@ -528,7 +528,7 @@ DcfParserOutput_Construct(DcfParserOutput* self)
 |   DcfParserOutput_Destruct
 +---------------------------------------------------------------------*/
 static void
-DcfParserOutput_Destruct(DcfParserOutput* self)
+DcfParserOutput_Destruct(DcfParserOutput* /*self*/)
 {
 }
 

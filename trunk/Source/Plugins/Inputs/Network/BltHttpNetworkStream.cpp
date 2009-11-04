@@ -153,7 +153,7 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
 /*----------------------------------------------------------------------
 |   HttpInputStream_Destroy
 +---------------------------------------------------------------------*/
-void
+static void
 HttpInputStream_Destroy(HttpInputStream* self)
 {
     delete self->m_HttpClient;
@@ -504,7 +504,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(HttpInputStream, m_ReferenceCount)
 /*----------------------------------------------------------------------
 |   HttpInputStream_Create
 +---------------------------------------------------------------------*/
-HttpInputStream*
+static HttpInputStream*
 HttpInputStream_Create(const char* url)
 {
     // create and initialize

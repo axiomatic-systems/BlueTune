@@ -456,7 +456,7 @@ end:
 /*----------------------------------------------------------------------
 |    OsxVideoView::drawRect
 +---------------------------------------------------------------------*/
-- (void) drawRect: (NSRect *) bounds
+- (void) drawRect: (NSRect) bounds
 {
 	[self render];
 }

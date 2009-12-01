@@ -359,7 +359,7 @@ Win32AudioOutput_OpenDevice(UINT                    device_id,
 
             case 3:
                 format.dwChannelMask = KSAUDIO_SPEAKER_STEREO |
-                    SPEAKER_FRONT_CENTER;
+                                       SPEAKER_FRONT_CENTER;
                 break;
 
             case 4:

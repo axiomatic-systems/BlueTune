@@ -454,7 +454,11 @@ public:
 +---------------------------------------------------------------------*/
 #if defined(__OBJC__)
 
+#if TARGET_OS_IPHONE
+#include <UIKit/UIKit.h>
+#else
 #import <Cocoa/Cocoa.h>
+#endif
 
 @interface BLT_PlayerObject : NSObject
 {

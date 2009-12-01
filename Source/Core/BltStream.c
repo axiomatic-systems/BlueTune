@@ -1006,7 +1006,7 @@ Stream_SetOutput(BLT_Stream* _self,
     BLT_MediaType_Init(&output_media_type, BLT_MEDIA_TYPE_ID_NONE);
     constructor.spec.output.media_type = &output_media_type;
     constructor.spec.input.media_type  = &input_media_type;
-    if (type != NULL) {
+    if (type && type[0]) {
         BLT_MediaType* media_type;
         result = BLT_Core_ParseMimeType(self->core, type, &media_type);
         constructor.spec.input.media_type = media_type;
@@ -1770,6 +1770,7 @@ Stream_SetInfo(BLT_Stream* _self, const BLT_StreamInfo* info)
     Stream*  self = ATX_SELF(Stream, BLT_Stream);
     BLT_Mask update_mask = 0;
 
+    self->info.mask |= info->mask;
     if ((info->mask & BLT_STREAM_INFO_MASK_TYPE) &&
         self->info.type != info->type) {
         self->info.type  = info->type;

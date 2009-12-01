@@ -16,69 +16,23 @@
 #include "Atomix.h"
 #include "Neptune.h"
 #include "BlueTune.h"
+#include "BtPlayerServer.h"
+
+/*----------------------------------------------------------------------
+|    logging
++---------------------------------------------------------------------*/
+NPT_SET_LOCAL_LOGGER("bluetune.player.web")
 
 /*----------------------------------------------------------------------
 |    constants
 +---------------------------------------------------------------------*/
-const unsigned int BT_HTTP_SERVER_DEFAULT_PORT = 8927;
-
 const char* BT_CONTROL_FORM = 
+"<form action='/control/form' method='get'><input type='submit' value='Refresh Status'/></form>"
 "<form action='/player/set-input' method='get'><input type='text' name='name'/><input type='submit' value='Set Input'/></form>"
 "<form action='/player/seek' method='get'><input type='text' name='timecode'/><input type='submit' value='Seek To Timecode'/></form>"
 "<form action='/player/play' method='get'><input type='submit' value='Play'/></form>"
 "<form action='/player/stop' method='get'><input type='submit' value='Stop'/></form>"
 "<form action='/player/pause' method='get'><input type='submit' value='Pause'/></form>";
-
-/*----------------------------------------------------------------------
-|    types
-+---------------------------------------------------------------------*/
-class BtPlayerServer : public NPT_HttpRequestHandler,
-                       public BLT_Player::EventListener,
-                       public NPT_Runnable
-{
-public:
-    // methods
-    BtPlayerServer();
-    virtual ~BtPlayerServer();
-
-    // methods
-    NPT_Result Loop();
-     
-    // NPT_HttpResponseHandler methods
-    virtual NPT_Result SetupResponse(NPT_HttpRequest&              request,
-                                     const NPT_HttpRequestContext& context,
-                                     NPT_HttpResponse&             response);
-
-    // BLT_DecoderClient_MessageHandler methods
-    void OnDecoderStateNotification(BLT_DecoderServer::State state);
-    void OnStreamTimeCodeNotification(BLT_TimeCode time_code);
-    void OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info);
-    void OnPropertyNotification(BLT_PropertyScope        scope,
-                                const char*              source,
-                                const char*              name,
-                                const ATX_PropertyValue* value);
-    
-    // NPT_Runnable methods
-    void Run();
-    
-    // members
-    NPT_Mutex m_Lock;
-
-private:
-    // methods
-    NPT_Result ConstructResponse(NPT_HttpResponse& response, const char* content);
-    NPT_Result SendControlForm(NPT_HttpResponse& response);
-    void       DoSeekToTimecode(const char* time);
-    
-    // members
-    BLT_Player               m_Player;
-    NPT_HttpServer*          m_HttpServer;
-    BLT_StreamInfo           m_StreamInfo;
-    ATX_Properties*          m_CoreProperties;
-    ATX_Properties*          m_StreamProperties;
-    BLT_DecoderServer::State m_DecoderState;
-    BLT_TimeCode             m_DecoderTimecode;
-};
 
 /*----------------------------------------------------------------------
 |    BtPlayerServer::BtPlayerServer
@@ -177,13 +131,119 @@ BtPlayerServer::DoSeekToTimecode(const char* time)
 }
 
 /*----------------------------------------------------------------------
+|    BtPlayerServer::SendStatus
++---------------------------------------------------------------------*/
+NPT_Result
+BtPlayerServer::SendStatus(NPT_HttpResponse& response, NPT_UrlQuery& query)
+{
+    NPT_String json;
+    
+    // json start
+    const char* json_callback = query.GetField("callback");
+    if (json_callback) {
+        json += NPT_UrlQuery::UrlDecode(json_callback)+'(';
+    }
+    json += '{';
+    
+    // state
+    json += "\"state\": ";
+    switch (m_DecoderState) {
+      case BLT_DecoderServer::STATE_STOPPED:
+        json += "\"STOPPED\"";
+        break;
+
+      case BLT_DecoderServer::STATE_PLAYING:
+        json += "\"PLAYING\"";
+        break;
+
+      case BLT_DecoderServer::STATE_PAUSED:
+        json += "\"PAUSED\"";
+        break;
+
+      case BLT_DecoderServer::STATE_EOS:
+        json += "\"END OF STREAM\"";
+        break;
+
+      default:
+        json += "\"UNKNOWN\"";
+        break;
+    }
+    json += ',';
+    
+    // timecode
+    json += NPT_String::Format("\"timecode\": \"%02d:%02d:%02d\", ",
+                               m_DecoderTimecode.h,
+                               m_DecoderTimecode.m,
+                               m_DecoderTimecode.s);
+    
+    // position
+    json += NPT_String::Format("\"position\": %f, ", m_DecoderPosition);
+
+    // stream info
+    json += "\"streamInfo\": {";
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
+        json += NPT_String::Format("\"nominalBitrate\": %d, ", m_StreamInfo.nominal_bitrate);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
+        json += NPT_String::Format("\"averageBitrate\": %d, ", m_StreamInfo.average_bitrate);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
+        json += NPT_String::Format("\"instantBitrate\": %d, ", m_StreamInfo.instant_bitrate);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_SIZE) {
+        json += NPT_String::Format("\"size\": %d, ", m_StreamInfo.size);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_DURATION) {
+        unsigned int seconds = m_StreamInfo.duration/1000;
+        json += NPT_String::Format("\"duration\": \"%02d:%02d:%02d\", ", 
+                                   (seconds)/36000,
+                                   (seconds%3600)/60,
+                                   (seconds%60));
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
+        json += NPT_String::Format("\"sampleRate\": %d, ", m_StreamInfo.sample_rate);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
+        json += NPT_String::Format("\"channelCount\": %d, ", m_StreamInfo.channel_count);
+    }
+    if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
+        json += NPT_String::Format("\"dataType\": \"%s\", ", m_StreamInfo.data_type);
+    }
+    json += "},";
+    
+    // stream properties
+    
+    // json end
+    json += '}';
+    if (json_callback) {
+        json += ')';
+    }
+    
+    // send the html document
+    NPT_HttpEntity* entity = response.GetEntity();
+    entity->SetContentType("application/json");
+    entity->SetInputStream(json);        
+    
+    NPT_LOG_FINE_1("status: %s", json.GetChars());
+    
+    return NPT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    BtPlayerServer::SendControlForm
 +---------------------------------------------------------------------*/
 NPT_Result
-BtPlayerServer::SendControlForm(NPT_HttpResponse& response)
+BtPlayerServer::SendControlForm(NPT_HttpResponse& response, const char* msg)
 {
     // create the html document
     NPT_String html = "<html>";
+    
+    // optional message
+    if (msg && msg[0]) {
+        html += "<";
+        html += msg;
+        html += "><p>";
+    }
     
     // status
     html += "<p><b>State: </b>";
@@ -210,13 +270,10 @@ BtPlayerServer::SendControlForm(NPT_HttpResponse& response)
     }
     html += "</p><p><b>Time Code: </b>";
 
-    char time[32];
-    ATX_FormatStringN(time, 32,
-                      "%02d:%02d:%02d",
-                      m_DecoderTimecode.h,
-                      m_DecoderTimecode.m,
-                      m_DecoderTimecode.s);
-    html += time;
+    html += NPT_String::Format("\"%02d:%02d:%02d\"",
+                               m_DecoderTimecode.h,
+                               m_DecoderTimecode.m,
+                               m_DecoderTimecode.s);
     html += "</p>";
     
     html += "<p>";
@@ -240,23 +297,6 @@ BtPlayerServer::SendControlForm(NPT_HttpResponse& response)
 }
 
 /*----------------------------------------------------------------------
-|    BtPlayerServer::ConstructResponse
-+---------------------------------------------------------------------*/
-NPT_Result
-BtPlayerServer::ConstructResponse(NPT_HttpResponse& response,
-                                  const char*       content)
-{
-    response.SetStatus(200, "Ok");
-    if (content) {
-        NPT_HttpEntity* entity = response.GetEntity();
-        entity->SetContentType("text/html");
-        entity->SetInputStream(content);        
-    }
-    
-    return NPT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
 |    BtPlayerServer::SetupResponse
 +---------------------------------------------------------------------*/
 NPT_Result 
@@ -267,7 +307,6 @@ BtPlayerServer::SetupResponse(NPT_HttpRequest&              request,
     const NPT_Url&    url  = request.GetUrl();
     const NPT_String& path = url.GetPath();
     NPT_UrlQuery      query;
-    NPT_Result        result;
     
     // parse the query part, if any
     if (url.HasQuery()) {
@@ -279,40 +318,71 @@ BtPlayerServer::SetupResponse(NPT_HttpRequest&              request,
     
     // handle form requests
     if (path == "/control/form") {
-        return SendControlForm(response);
+        return SendControlForm(response, NULL);
+    }
+    
+    // handle status requests
+    if (path == "/player/status") {
+        return SendStatus(response, query);
     }
     
     // handle commands
+    const char* mode_field = query.GetField("mode");
+    const char* form_msg = "OK";
+    bool use_form = false;
+    if (mode_field && NPT_StringsEqual(mode_field, "form")) {
+        use_form = true;
+    }
     if (path == "/player/set-input") {
         const char* name_field = query.GetField("name");
         if (name_field) {
             NPT_String name = NPT_UrlQuery::UrlDecode(name_field);
             printf("BtPlayerServer::SetupResponse - set-input %s\n", name.GetChars());
-            result = m_Player.SetInput(name);
-            return ConstructResponse(response, "OK");
+            m_Player.SetInput(name);
         } else {
-            return ConstructResponse(response, "NO NAME?");
+            form_msg = "INVALID PARAMETERS";
         }
     } else if (path == "/player/play") {
-        result = m_Player.Play();
-        return ConstructResponse(response, "OK");
+        m_Player.Play();
     } else if (path == "/player/pause") {
-        result = m_Player.Pause();
-        return ConstructResponse(response, "OK");
+        m_Player.Pause();
     } else if (path == "/player/stop") {
-        result = m_Player.Stop();
-        return ConstructResponse(response, "OK");
+        m_Player.Stop();
     } else if (path == "/player/seek") {
         const char* timecode_field = query.GetField("timecode");
+        const char* position_field = query.GetField("position");
         if (timecode_field) {
             NPT_String timecode = NPT_UrlQuery::UrlDecode(timecode_field);
             DoSeekToTimecode(timecode);
-            return ConstructResponse(response, "OK");
+        } else if (position_field) {
+            unsigned int position;
+            if (NPT_SUCCEEDED(NPT_ParseInteger(position_field, position))) {
+                m_Player.SeekToPosition(position, 100);
+            }
         } else {
-            return ConstructResponse(response, "NO NAME?");
+            form_msg = "INVALID PARAMETER";
+        }
+    } else if (path == "/player/set-volume") {
+        const char* volume_field = query.GetField("volume");
+        if (volume_field) {
+            unsigned int volume;
+            if (NPT_SUCCEEDED(NPT_ParseInteger(volume_field, volume))) {
+                m_Player.SetVolume((float)volume/100.0f);
+            }
+        } else {
+            form_msg = "INVALID PARAMETER";
         }
     }
     
+    if (use_form) {
+        return SendControlForm(response, form_msg);
+    } else {
+        NPT_HttpEntity* entity = response.GetEntity();
+        entity->SetContentType("application/json");
+        entity->SetInputStream("{}");
+        return NPT_SUCCESS;
+    }
+
     printf("BtPlayerServer::SetupResponse - command not found\n");
     
     response.SetStatus(404, "Command Not Found");
@@ -340,13 +410,31 @@ BtPlayerServer::OnStreamTimeCodeNotification(BLT_TimeCode time_code)
 }
 
 /*----------------------------------------------------------------------
+|    BtPlayerServer::OnStreamPositionNotification
++---------------------------------------------------------------------*/
+void 
+BtPlayerServer::OnStreamPositionNotification(BLT_StreamPosition& position)
+{
+    NPT_AutoLock lock(m_Lock);
+    if (position.range) {
+        m_DecoderPosition = (float)position.offset/(float)position.range;
+    } else {
+        m_DecoderPosition = 0.0f;
+    }
+}
+
+/*----------------------------------------------------------------------
 |    BtPlayerServer::OnStreamInfoNotification
 +---------------------------------------------------------------------*/
 void 
 BtPlayerServer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {       
     NPT_AutoLock lock(m_Lock);
+    unsigned int mask = m_StreamInfo.mask|update_mask;
+    ATX_DESTROY_CSTRING(m_StreamInfo.data_type);
     m_StreamInfo = info;
+    m_StreamInfo.mask = mask;
+    m_StreamInfo.data_type = NULL;
     ATX_SET_CSTRING(m_StreamInfo.data_type, info.data_type);
 }
 
@@ -374,29 +462,4 @@ BtPlayerServer::OnPropertyNotification(BLT_PropertyScope        scope,
     }
     
     ATX_Properties_SetProperty(properties, name, value);
-}
-
-/*----------------------------------------------------------------------
-|    main
-+---------------------------------------------------------------------*/
-int
-main(int /*argc*/, char** /*argv*/)
-{
-    // create the controller a
-    BtPlayerServer* server = new BtPlayerServer();
-
-    // create a thread to handle notifications
-    NPT_Thread notification_thread(*server);
-    notification_thread.Start();
-    
-    // loop until a termination request arrives
-    server->Loop();
-    
-    // wait for the notification thread to end
-    notification_thread.Wait();
-    
-    // delete the controller
-    delete server;
-
-    return 0;
 }

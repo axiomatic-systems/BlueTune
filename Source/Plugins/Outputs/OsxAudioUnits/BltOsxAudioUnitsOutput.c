@@ -10,7 +10,8 @@
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
-#if !defined(TARGET_OS_IPHONE)
+#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+#include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -27,7 +28,7 @@
 #include "BltMediaPacket.h"
 #include "BltVolumeControl.h"
 
-#if !defined(TARGET_OS_IPHONE)
+#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
 
 /*----------------------------------------------------------------------
 |   logging
@@ -314,7 +315,7 @@ static BLT_Result
 OsxAudioUnitsOutput_SetStreamFormat(OsxAudioUnitsOutput*    self, 
                                     const BLT_PcmMediaType* media_type)
 {
-    ComponentResult             result;
+    OSStatus                    result;
     AudioStreamBasicDescription audio_desc;
     
     /* setup the audio description */

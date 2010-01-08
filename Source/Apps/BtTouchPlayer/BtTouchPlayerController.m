@@ -70,19 +70,33 @@
 
 -(IBAction) play: (id) sender;
 {
-    [player setInput: @"http://www.bok.net/tmp/test.mp3"];
     [player play];
+}
+
+-(IBAction) pause: (id) sender;
+{
+    [player pause];
+}
+
+-(IBAction) stop: (id) sender;
+{
+    [player stop];
 }
 
 -(IBAction) setInput: (id) sender;
 {
-    //[player setInput: [playerInput stringValue]];
-    [player setInput: @"http://www.bok.net/tmp/test.mp3"];
+    //[player setInput: @"http://www.bok.net/tmp/test.mp3"];
+    [player setInput: [playerInput text]];
 }
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
 {
     printf("ACK %d\n", command_id);
+    
+    if (command_id == BLT_PLAYER_COMMAND_ID_SET_INPUT) {
+        // autoplay
+        [player play];
+    }
 }
 
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result

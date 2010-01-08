@@ -13,31 +13,31 @@
 class PlayerServerThread : public NPT_Thread
 {
 public:
-    PlayerServerThread() : NPT_Thread(true) {}
+    PlayerServerThread(unsigned int port) : NPT_Thread(true), m_Port(port) {}
     
     // NPT_Runnable methods
     virtual void Run() {
-        // create the controller
-        BtPlayerServer* server = new BtPlayerServer();
+        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    
+        // create the server
+        NPT_String bundle_root = [[[NSBundle mainBundle] bundlePath] UTF8String];
+        BtPlayerServer* server = new BtPlayerServer(bundle_root+"/WebRoot");
 
-        // create a thread to handle notifications
-        NPT_Thread notification_thread(*server);
-        notification_thread.Start();
-        
         // loop until a termination request arrives
         server->Loop();
         
-        // wait for the notification thread to end
-        notification_thread.Wait();
-        
         // delete the controller
         delete server;
+        
+        [pool release];
     }
+    
+    unsigned int m_Port;
 };
 
 int main(int argc, char *argv[])
 {
-    (new PlayerServerThread())->Start();
+    (new PlayerServerThread(9080))->Start();
     
     return UIApplicationMain(argc, argv, nil, nil);
 }

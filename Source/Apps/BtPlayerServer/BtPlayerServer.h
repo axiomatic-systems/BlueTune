@@ -28,7 +28,7 @@ class BtPlayerServer : public NPT_HttpRequestHandler,
 {
 public:
     // methods
-    BtPlayerServer();
+    BtPlayerServer(const char* web_root, unsigned int port = BT_HTTP_SERVER_DEFAULT_PORT);
     virtual ~BtPlayerServer();
 
     // methods
@@ -62,6 +62,7 @@ private:
     void       DoSeekToTimecode(const char* time);
     
     // members
+    NPT_String               m_WebRoot;
     BLT_Player               m_Player;
     NPT_HttpServer*          m_HttpServer;
     BLT_StreamInfo           m_StreamInfo;

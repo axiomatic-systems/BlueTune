@@ -76,6 +76,7 @@
 		CA1859CB0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
 		CA1ACF010D30C62700C350CD /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA1ACF020D30C63100C350CD /* NetworkStreamTest.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */; };
+		CA1C6A9210F6C49B00D50ABE /* WebRoot in Resources */ = {isa = PBXBuildFile; fileRef = CA1C6A7810F6C49B00D50ABE /* WebRoot */; };
 		CA1EC1010ED299BD0033F894 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA1EC1020ED299CD0033F894 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9ED8E30EB02413003CE43C /* Cocoa.framework */; };
 		CA1EC1820ED29B080033F894 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CA1EC1800ED29B080033F894 /* MainMenu.xib */; };
@@ -542,6 +543,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
+		};
+		CA1C69DE10F69CD800D50ABE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA289DB710E31600001BC817 /* SocketsTest1 */;
+			remoteInfo = SocketsTest1;
 		};
 		CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1179,6 +1187,27 @@
 		CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPluginTemplate.cpp; sourceTree = "<group>"; };
 		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA1C6A4C10F6BCBF00D50ABE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		CA1C6A4D10F6BCBF00D50ABE /* jquery-ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "jquery-ui.js"; sourceTree = "<group>"; };
+		CA1C6A4E10F6BCBF00D50ABE /* jquery.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jquery.js; sourceTree = "<group>"; };
+		CA1C6A4F10F6BCBF00D50ABE /* MediaPlayer.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = MediaPlayer.css; sourceTree = "<group>"; };
+		CA1C6A5010F6BCBF00D50ABE /* MediaPlayer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MediaPlayer.js; sourceTree = "<group>"; };
+		CA1C6A5310F6BCBF00D50ABE /* ui-bg_diagonals-thick_18_b81900_40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_diagonals-thick_18_b81900_40x40.png"; sourceTree = "<group>"; };
+		CA1C6A5410F6BCBF00D50ABE /* ui-bg_diagonals-thick_20_666666_40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_diagonals-thick_20_666666_40x40.png"; sourceTree = "<group>"; };
+		CA1C6A5510F6BCBF00D50ABE /* ui-bg_flat_10_000000_40x100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_flat_10_000000_40x100.png"; sourceTree = "<group>"; };
+		CA1C6A5610F6BCBF00D50ABE /* ui-bg_glass_100_f6f6f6_1x400.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_glass_100_f6f6f6_1x400.png"; sourceTree = "<group>"; };
+		CA1C6A5710F6BCBF00D50ABE /* ui-bg_glass_100_fdf5ce_1x400.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_glass_100_fdf5ce_1x400.png"; sourceTree = "<group>"; };
+		CA1C6A5810F6BCBF00D50ABE /* ui-bg_glass_65_ffffff_1x400.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_glass_65_ffffff_1x400.png"; sourceTree = "<group>"; };
+		CA1C6A5910F6BCBF00D50ABE /* ui-bg_gloss-wave_35_f6a828_500x100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_gloss-wave_35_f6a828_500x100.png"; sourceTree = "<group>"; };
+		CA1C6A5A10F6BCBF00D50ABE /* ui-bg_highlight-soft_100_eeeeee_1x100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_highlight-soft_100_eeeeee_1x100.png"; sourceTree = "<group>"; };
+		CA1C6A5B10F6BCBF00D50ABE /* ui-bg_highlight-soft_75_ffe45c_1x100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-bg_highlight-soft_75_ffe45c_1x100.png"; sourceTree = "<group>"; };
+		CA1C6A5C10F6BCBF00D50ABE /* ui-icons_222222_256x240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-icons_222222_256x240.png"; sourceTree = "<group>"; };
+		CA1C6A5D10F6BCBF00D50ABE /* ui-icons_228ef1_256x240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-icons_228ef1_256x240.png"; sourceTree = "<group>"; };
+		CA1C6A5E10F6BCBF00D50ABE /* ui-icons_ef8c08_256x240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-icons_ef8c08_256x240.png"; sourceTree = "<group>"; };
+		CA1C6A5F10F6BCBF00D50ABE /* ui-icons_ffd27a_256x240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-icons_ffd27a_256x240.png"; sourceTree = "<group>"; };
+		CA1C6A6010F6BCBF00D50ABE /* ui-icons_ffffff_256x240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ui-icons_ffffff_256x240.png"; sourceTree = "<group>"; };
+		CA1C6A6110F6BCBF00D50ABE /* jquery-ui-1.7.2.custom.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = "jquery-ui-1.7.2.custom.css"; sourceTree = "<group>"; };
+		CA1C6A7810F6C49B00D50ABE /* WebRoot */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WebRoot; path = ../../../Source/Apps/BtPlayerServer/WebRoot; sourceTree = SOURCE_ROOT; };
 		CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BtCocoaPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA1EC0FB0ED299AE0033F894 /* BtCocoaPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "BtCocoaPlayer-Info.plist"; path = "BtCocoaPlayer/BtCocoaPlayer-Info.plist"; sourceTree = "<group>"; };
 		CA1EC1810ED29B080033F894 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = BtCocoaPlayer/English.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -1669,6 +1698,7 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
+				CA1C6A4B10F6BCBF00D50ABE /* WebRoot */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
@@ -1804,6 +1834,50 @@
 				CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */,
 			);
 			path = NetworkStream;
+			sourceTree = "<group>";
+		};
+		CA1C6A4B10F6BCBF00D50ABE /* WebRoot */ = {
+			isa = PBXGroup;
+			children = (
+				CA1C6A4C10F6BCBF00D50ABE /* index.html */,
+				CA1C6A4D10F6BCBF00D50ABE /* jquery-ui.js */,
+				CA1C6A4E10F6BCBF00D50ABE /* jquery.js */,
+				CA1C6A4F10F6BCBF00D50ABE /* MediaPlayer.css */,
+				CA1C6A5010F6BCBF00D50ABE /* MediaPlayer.js */,
+				CA1C6A5110F6BCBF00D50ABE /* ui-lightness */,
+			);
+			name = WebRoot;
+			path = ../../../Source/Apps/BtPlayerServer/WebRoot;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA1C6A5110F6BCBF00D50ABE /* ui-lightness */ = {
+			isa = PBXGroup;
+			children = (
+				CA1C6A5210F6BCBF00D50ABE /* images */,
+				CA1C6A6110F6BCBF00D50ABE /* jquery-ui-1.7.2.custom.css */,
+			);
+			path = "ui-lightness";
+			sourceTree = "<group>";
+		};
+		CA1C6A5210F6BCBF00D50ABE /* images */ = {
+			isa = PBXGroup;
+			children = (
+				CA1C6A5310F6BCBF00D50ABE /* ui-bg_diagonals-thick_18_b81900_40x40.png */,
+				CA1C6A5410F6BCBF00D50ABE /* ui-bg_diagonals-thick_20_666666_40x40.png */,
+				CA1C6A5510F6BCBF00D50ABE /* ui-bg_flat_10_000000_40x100.png */,
+				CA1C6A5610F6BCBF00D50ABE /* ui-bg_glass_100_f6f6f6_1x400.png */,
+				CA1C6A5710F6BCBF00D50ABE /* ui-bg_glass_100_fdf5ce_1x400.png */,
+				CA1C6A5810F6BCBF00D50ABE /* ui-bg_glass_65_ffffff_1x400.png */,
+				CA1C6A5910F6BCBF00D50ABE /* ui-bg_gloss-wave_35_f6a828_500x100.png */,
+				CA1C6A5A10F6BCBF00D50ABE /* ui-bg_highlight-soft_100_eeeeee_1x100.png */,
+				CA1C6A5B10F6BCBF00D50ABE /* ui-bg_highlight-soft_75_ffe45c_1x100.png */,
+				CA1C6A5C10F6BCBF00D50ABE /* ui-icons_222222_256x240.png */,
+				CA1C6A5D10F6BCBF00D50ABE /* ui-icons_228ef1_256x240.png */,
+				CA1C6A5E10F6BCBF00D50ABE /* ui-icons_ef8c08_256x240.png */,
+				CA1C6A5F10F6BCBF00D50ABE /* ui-icons_ffd27a_256x240.png */,
+				CA1C6A6010F6BCBF00D50ABE /* ui-icons_ffffff_256x240.png */,
+			);
+			path = images;
 			sourceTree = "<group>";
 		};
 		CA1EC10E0ED29A1C0033F894 /* Resources */ = {
@@ -2380,6 +2454,7 @@
 				CA4DD9A4104DB7800024BC0C /* HttpClientTest2 */,
 				CA9DDC0A10AE1C1C008B871E /* TimeTest1 */,
 				CA8CA7BF10B236C500344627 /* FileTest2 */,
+				CA1C69DF10F69CD800D50ABE /* SocketsTest1 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2584,6 +2659,7 @@
 		CA53C0C710A628E000950FAF /* BtTouchPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				CA1C6A7810F6C49B00D50ABE /* WebRoot */,
 				CA53C0BB10A6277800950FAF /* BtTouchPlayer-Info.plist */,
 				CA53C0C510A628B900950FAF /* BtTouchPlayer.xib */,
 			);
@@ -3448,6 +3524,13 @@
 			remoteRef = CA0D92160E2732E5005667F1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA1C69DF10F69CD800D50ABE /* SocketsTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = SocketsTest1;
+			remoteRef = CA1C69DE10F69CD800D50ABE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA2F53A70EC0F48900AEBC12 /* libaxTLS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -3898,6 +3981,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA53C0C610A628B900950FAF /* BtTouchPlayer.xib in Resources */,
+				CA1C6A9210F6C49B00D50ABE /* WebRoot in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

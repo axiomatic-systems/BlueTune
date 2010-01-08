@@ -19,20 +19,26 @@
 |    main
 +---------------------------------------------------------------------*/
 int
-main(int /*argc*/, char** /*argv*/)
+main(int argc, char** argv)
 {
-    // create the controller a
-    BtPlayerServer* server = new BtPlayerServer();
-
-    // create a thread to handle notifications
-    NPT_Thread notification_thread(*server);
-    notification_thread.Start();
+    if (argc < 3) {
+        fprintf(stderr, "usage: btplayerserver <port> <web-root> [<media-root>]\n");
+        return 1;
+    }
+    const char* web_root = argv[2];
     
+    // parse the port
+    int port = 0;
+    if (NPT_FAILED(NPT_ParseInteger(argv[1], port, true))) {
+        fprintf(stderr, "ERROR: invalid port\n");
+        return 1;
+    }
+    
+    // create the server
+    BtPlayerServer* server = new BtPlayerServer(web_root, port);
+
     // loop until a termination request arrives
     server->Loop();
-    
-    // wait for the notification thread to end
-    notification_thread.Wait();
     
     // delete the controller
     delete server;

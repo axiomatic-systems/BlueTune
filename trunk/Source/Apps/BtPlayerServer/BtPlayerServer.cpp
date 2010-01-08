@@ -37,7 +37,8 @@ const char* BT_CONTROL_FORM =
 /*----------------------------------------------------------------------
 |    BtPlayerServer::BtPlayerServer
 +---------------------------------------------------------------------*/
-BtPlayerServer::BtPlayerServer() :
+BtPlayerServer::BtPlayerServer(const char* web_root, unsigned int port) :
+    m_WebRoot(web_root),
     m_DecoderState(BLT_DecoderServer::STATE_STOPPED)
 {
     // initialize status fields
@@ -49,7 +50,10 @@ BtPlayerServer::BtPlayerServer() :
     m_Player.SetEventListener(this);
     
     // create the http server
-    m_HttpServer = new NPT_HttpServer(BT_HTTP_SERVER_DEFAULT_PORT);
+    m_HttpServer = new NPT_HttpServer(port);
+    
+    // attach a file handler for the ajax player
+    m_HttpServer->AddRequestHandler(new NPT_HttpFileRequestHandler("/control/ajax", web_root, true, "index.html"), "/control/ajax", true);
     
     // attach ourselves as a dynamic handler for the form control
     m_HttpServer->AddRequestHandler(this, "/control/form", false);
@@ -86,7 +90,16 @@ BtPlayerServer::Run()
 NPT_Result
 BtPlayerServer::Loop()
 {
-    return m_HttpServer->Loop();
+    // create a thread to handle notifications
+    NPT_Thread notification_thread(*this);
+    notification_thread.Start();
+
+    NPT_Result result = m_HttpServer->Loop();
+
+    // wait for the notification thread to end
+    notification_thread.Wait();
+    
+    return result;
 }
 
 /*----------------------------------------------------------------------

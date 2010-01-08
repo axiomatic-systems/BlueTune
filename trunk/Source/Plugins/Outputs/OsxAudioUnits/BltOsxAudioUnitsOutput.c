@@ -10,6 +10,9 @@
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
+
+#include <TargetConditionals.h>
+#include <AvailabilityMacros.h>
 #if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>

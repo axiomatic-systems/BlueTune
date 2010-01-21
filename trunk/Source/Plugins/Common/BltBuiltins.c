@@ -109,6 +109,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 #include "BltDolbyDigitalPlusParser.h"
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER)
+#include "BltOsxAudioFileStreamParser.h"
+#endif
+
 /* formatters */
 #if defined(BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER)
 #include "BltWaveFormatter.h"
@@ -342,6 +346,13 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 #if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER)
     ATX_LOG_FINE("registering BLT_DolbyDigitalPlusParserModule");
     result = BLT_DolbyDigitalPlusParserModule_GetModuleObject(&module);
+    if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
+#endif
+
+    /* AudioFileStream parser */
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER)
+    ATX_LOG_FINE("registering BLT_OsxAudioFileStreamParserModule");
+    result = BLT_OsxAudioFileStreamParserModule_GetModuleObject(&module);
     if (BLT_SUCCEEDED(result)) BLT_Core_RegisterModule(core, module);
 #endif
 

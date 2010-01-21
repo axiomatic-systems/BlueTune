@@ -919,7 +919,7 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     /* register the ".mp4" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".mp4",
-                                            "audio/mp4");
+                                            "video/mp4");
     if (BLT_FAILED(result)) return result;
 
     /* register the ".m4a" file extension */
@@ -943,13 +943,13 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     /* register the ".3gp" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".3gp",
-                                            "audio/mp4");
+                                            "video/mp4");
     if (BLT_FAILED(result)) return result;
 
     /* register the ".3gp" file extension */
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".mov",
-                                            "audio/mp4");
+                                            "video/mp4");
     if (BLT_FAILED(result)) return result;
 
     /* get the type id for "audio/mp4" */

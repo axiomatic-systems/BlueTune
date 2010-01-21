@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -311,6 +311,7 @@
 		CA615D8810449B80007E9E7B /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA615D8910449B93007E9E7B /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
 		CA615D8B10449C5E007E9E7B /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
+		CA62B97F1102665F00BCACD7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA64346E0C97197C00F67CD5 /* aacdec.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434350C97197C00F67CD5 /* aacdec.c */; };
 		CA64346F0C97197C00F67CD5 /* aactabs.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434360C97197C00F67CD5 /* aactabs.c */; };
 		CA6434700C97197C00F67CD5 /* aaccommon.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434380C97197C00F67CD5 /* aaccommon.h */; };
@@ -348,6 +349,10 @@
 		CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */; };
 		CA64368B0C988E3500F67CD5 /* sbrhfgen.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434630C97197C00F67CD5 /* sbrhfgen.c */; };
 		CA6436960C988E7300F67CD5 /* sbrqmf.c in Sources */ = {isa = PBXBuildFile; fileRef = CA6434670C97197C00F67CD5 /* sbrqmf.c */; };
+		CA649D171107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA649D151107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c */; };
+		CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */; };
+		CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
+		CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA7F2F9C0FA81789006A1B2D /* BltIppDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */; };
 		CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */; };
 		CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED2920EAD3A8D003CE43C /* BltPixels.c */; };
@@ -371,8 +376,6 @@
 		CA9EDAB00EB0FC1F003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA9EDAB20EB0FC33003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
-		CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
-		CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
 		CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; };
@@ -389,6 +392,7 @@
 		CAF2EE500E60CC4300948C04 /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
 		CAF2EE530E60CCA200948C04 /* BtPlayForceCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */; };
 		CAF2EE550E60CCE600948C04 /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
+		CAF4BFC31106FD530092CFBF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CAF901360FE047CC0066101F /* bitmath.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901270FE047CC0066101F /* bitmath.c */; };
 		CAF901370FE047CC0066101F /* bitreader.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901280FE047CC0066101F /* bitreader.c */; };
 		CAF901380FE047CC0066101F /* bitwriter.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901290FE047CC0066101F /* bitwriter.c */; };
@@ -548,7 +552,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = CA289DB710E31600001BC817 /* SocketsTest1 */;
+			remoteGlobalIDString = CA289DB710E31600001BC817;
 			remoteInfo = SocketsTest1;
 		};
 		CA1EC0FF0ED299B50033F894 /* PBXContainerItemProxy */ = {
@@ -641,6 +645,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CA40CB290F40DC100008649B;
 			remoteInfo = BasicTest;
+		};
+		CA448C211106FAF000A64E7A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
 		};
 		CA44C4680D4522DA00173F5F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -754,13 +765,6 @@
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = Atomix;
 		};
-		CA5043CC0C5AE93C0060E6FE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = Atomix;
-		};
 		CA5043CE0C5AE9470060E6FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -802,13 +806,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAA88EA910A2064500178BE3;
 			remoteInfo = Bento4Neptune;
-		};
-		CA53C0BF10A6278000950FAF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = BlueTune;
 		};
 		CA550BA00D1F373500B22D72 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -888,6 +885,13 @@
 			remoteInfo = BlueTune;
 		};
 		CA615D8610449B74007E9E7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
+		CA649C5511077CCF005B52E9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
 			proxyType = 1;
@@ -1185,7 +1189,7 @@
 		CA1859B80F22D0E500CF3552 /* BltOsxVideoOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxVideoOutput.h; sourceTree = "<group>"; };
 		CA1859B90F22D0E500CF3552 /* BltOsxVideoOutput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BltOsxVideoOutput.m; sourceTree = "<group>"; };
 		CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPluginTemplate.cpp; sourceTree = "<group>"; };
-		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NetworkStreamTest.c; sourceTree = "<group>"; };
+		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = NetworkStreamTest.c; sourceTree = "<group>"; };
 		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA1C6A4C10F6BCBF00D50ABE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		CA1C6A4D10F6BCBF00D50ABE /* jquery-ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "jquery-ui.js"; sourceTree = "<group>"; };
@@ -1400,7 +1404,7 @@
 		CA53C27D10A7876F00950FAF /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		CA53C28610A787D100950FAF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
+		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
 		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoderStub.c; sourceTree = "<group>"; };
@@ -1448,6 +1452,8 @@
 		CA64346C0C97197C00F67CD5 /* trigtabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = trigtabs.c; sourceTree = "<group>"; };
 		CA6434AD0C971B5500F67CD5 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
 		CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
+		CA649D151107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioFileStreamParser.c; sourceTree = "<group>"; };
+		CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioFileStreamParser.h; sourceTree = "<group>"; };
 		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltIppDecoder.cpp; sourceTree = "<group>"; };
 		CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltIppDecoder.h; sourceTree = "<group>"; };
@@ -1537,6 +1543,7 @@
 				CA1EC1020ED299CD0033F894 /* Cocoa.framework in Frameworks */,
 				CA1EC2190ED29FCD0033F894 /* AudioUnit.framework in Frameworks */,
 				CA1EC2360ED2A0400033F894 /* CoreAudio.framework in Frameworks */,
+				CAF4BFC31106FD530092CFBF /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1656,6 +1663,7 @@
 				CA9ED8CE0EAFCB26003CE43C /* CoreVideo.framework in Frameworks */,
 				CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */,
 				CA9ED84B0EAFABAA003CE43C /* AudioUnit.framework in Frameworks */,
+				CA62B97F1102665F00BCACD7 /* AudioToolbox.framework in Frameworks */,
 				CA9ED8EA0EB02441003CE43C /* OpenGL.framework in Frameworks */,
 				CA9ED84C0EAFABAA003CE43C /* libAtomix.a in Frameworks */,
 				CA9ED84D0EAFABAA003CE43C /* libBlueTune.a in Frameworks */,
@@ -2369,6 +2377,7 @@
 		CA5042A70C5AE52B0060E6FE /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				CA649D141107D0E1005B52E9 /* OsxAudioFileStream */,
 				CA0487860C99E13800638991 /* Adts */,
 				CA5042A80C5AE52B0060E6FE /* Aiff */,
 				CAE415080E0AFD8800A530D1 /* Dcf */,
@@ -2845,6 +2854,15 @@
 			path = HelixAAC;
 			sourceTree = "<group>";
 		};
+		CA649D141107D0E1005B52E9 /* OsxAudioFileStream */ = {
+			isa = PBXGroup;
+			children = (
+				CA649D151107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c */,
+				CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */,
+			);
+			path = OsxAudioFileStream;
+			sourceTree = "<group>";
+		};
 		CA7F2F750FA81381006A1B2D /* IPP */ = {
 			isa = PBXGroup;
 			children = (
@@ -3076,7 +3094,6 @@
 				CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */,
 				CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */,
 				CAE4150C0E0AFD8800A530D1 /* BltDcfParser.h in Headers */,
-				CAAA4D940E3D5BEC00783AE4 /* BltAacDecoder.h in Headers */,
 				CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */,
 				CA58276E0E68C14F006CC501 /* BltVersion.h in Headers */,
 				CA5827740E68C2EC006CC501 /* BltSvnVersion.h in Headers */,
@@ -3086,6 +3103,8 @@
 				CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */,
 				CA1859BB0F22D0F900CF3552 /* BltOsxAudioUnitsOutput.h in Headers */,
 				CA53C27110A7865100950FAF /* BltOsxAudioQueueOutput.h in Headers */,
+				CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */,
+				CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3210,7 +3229,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CA53C0C010A6278000950FAF /* PBXTargetDependency */,
+				CA448C221106FAF000A64E7A /* PBXTargetDependency */,
 			);
 			name = BtTouchPlayer;
 			productName = BtTouchPlayer;
@@ -3385,13 +3404,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */,
+				CA649C5611077CCF005B52E9 /* PBXTargetDependency */,
 				CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */,
-				CA504F8D0C5EC79A0060E6FE /* PBXTargetDependency */,
-				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
-				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
 				CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */,
+				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
+				CA504F8D0C5EC79A0060E6FE /* PBXTargetDependency */,
+				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
 			);
 			name = BlueTune;
 			productName = BlueTune;
@@ -3404,7 +3423,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTune */;
 			projectDirPath = "";
@@ -3436,10 +3455,10 @@
 				CA504E6E0C5EA3960060E6FE /* Tremor */,
 				CA504EB60C5EABCC0060E6FE /* FLAC */,
 				CA6B38710C965CE9000D7A0A /* HelixAAC */,
+				CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */,
 				CA615D8010449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */,
 				CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */,
 				CA5827120E68B39D006CC501 /* BltWmaDecoderPlugin */,
-				CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */,
 				CA0C9AF40D15D27D00E23496 /* BtPlay */,
 				CA9ED8330EAFAAFB003CE43C /* BtPlayX */,
 				CA550B9B0D1F372C00B22D72 /* BtController */,
@@ -4248,7 +4267,6 @@
 				CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */,
 				CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */,
 				CAE4150B0E0AFD8800A530D1 /* BltDcfParser.cpp in Sources */,
-				CAAA4D930E3D5BCC00783AE4 /* BltAacDecoder.c in Sources */,
 				CA5827DB0E68CED7006CC501 /* BltDynamicPlugins.cpp in Sources */,
 				CA5827E50E68CFD4006CC501 /* BltUnixDynamicPlugins.c in Sources */,
 				CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */,
@@ -4256,6 +4274,8 @@
 				CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */,
 				CA1859BA0F22D0F700CF3552 /* BltOsxAudioUnitsOutput.c in Sources */,
 				CA53C27010A7865000950FAF /* BltOsxAudioQueueOutput.c in Sources */,
+				CA649D171107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c in Sources */,
+				CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4337,15 +4357,15 @@
 			name = Neptune;
 			targetProxy = CA1EC1DC0ED29EAC0033F894 /* PBXContainerItemProxy */;
 		};
+		CA448C221106FAF000A64E7A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA448C211106FAF000A64E7A /* PBXContainerItemProxy */;
+		};
 		CA44C4AB0D45231100173F5F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Bento4;
 			targetProxy = CA44C4AA0D45231100173F5F /* PBXContainerItemProxy */;
-		};
-		CA5043CD0C5AE93C0060E6FE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Atomix;
-			targetProxy = CA5043CC0C5AE93C0060E6FE /* PBXContainerItemProxy */;
 		};
 		CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4361,11 +4381,6 @@
 			isa = PBXTargetDependency;
 			target = CA504EB60C5EABCC0060E6FE /* FLAC */;
 			targetProxy = CA504F8E0C5EC79A0060E6FE /* PBXContainerItemProxy */;
-		};
-		CA53C0C010A6278000950FAF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* BlueTune */;
-			targetProxy = CA53C0BF10A6278000950FAF /* PBXContainerItemProxy */;
 		};
 		CA550BA10D1F373500B22D72 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4417,6 +4432,11 @@
 			name = Atomix;
 			targetProxy = CA615D8610449B74007E9E7B /* PBXContainerItemProxy */;
 		};
+		CA649C5611077CCF005B52E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA649C5511077CCF005B52E9 /* PBXContainerItemProxy */;
+		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
@@ -4450,13 +4470,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BLT_CONFIG_DEFAULT_AUDIO_OUTPUT = "osxau:0";
+				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphoneos*][arch=*]" = "osxaq:0";
+				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphonesimulator*][arch=*]" = "osxaq:0";
+				BLT_CONFIG_DEFAULT_VIDEO_OUTPUT = "";
 				BLT_DDPLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					ATX_CONFIG_ENABLE_LOGGING,
-					NPT_CONFIG_ENABLE_LOGGING,
+					"$(inherited)",
 					BLT_CONFIG_VORBIS_USE_TREMOR,
-					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=osxau:0",
-					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=osxv:0",
+					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_AUDIO_OUTPUT)",
+					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_VIDEO_OUTPUT)",
 					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
@@ -4467,7 +4490,7 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					_BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
@@ -4477,39 +4500,9 @@
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
-					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
-				);
-				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphonesimulator*][arch=*]" = (
-					ATX_CONFIG_ENABLE_LOGGING,
-					NPT_CONFIG_ENABLE_LOGGING,
-					BLT_CONFIG_VORBIS_USE_TREMOR,
-					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=osxaq:0",
-					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=osxv:0",
-					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
-					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
-					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
-					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
-					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
-					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
-					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
-					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
-					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
@@ -4517,6 +4510,7 @@
 				);
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** $(BLT_DDPLUS_PLUGIN_HOME)/BlueTuneModule";
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -4524,13 +4518,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BLT_CONFIG_DEFAULT_AUDIO_OUTPUT = "osxau:0";
+				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphoneos*][arch=*]" = "osxaq:0";
+				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphonesimulator*][arch=*]" = "osxaq:0";
+				BLT_CONFIG_DEFAULT_VIDEO_OUTPUT = "";
 				BLT_DDPLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					ATX_CONFIG_ENABLE_LOGGING,
-					NPT_CONFIG_ENABLE_LOGGING,
+					"$(inherited)",
 					BLT_CONFIG_VORBIS_USE_TREMOR,
-					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=osxau:0",
-					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=osxv:0",
+					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_AUDIO_OUTPUT)",
+					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_VIDEO_OUTPUT)",
 					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
@@ -4541,7 +4538,7 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					_BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
@@ -4551,39 +4548,9 @@
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
-					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
-				);
-				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphonesimulator*][arch=*]" = (
-					ATX_CONFIG_ENABLE_LOGGING,
-					NPT_CONFIG_ENABLE_LOGGING,
-					BLT_CONFIG_VORBIS_USE_TREMOR,
-					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=osxaq:0",
-					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=osxv:0",
-					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
-					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
-					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
-					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
-					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
-					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
-					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
-					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
-					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
-					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
@@ -4591,18 +4558,24 @@
 				);
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** $(BLT_DDPLUS_PLUGIN_HOME)/BlueTuneModule";
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Release;
 		};
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				COPY_PHASE_STRIP = NO;
 				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4619,9 +4592,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx10.5;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
+				VALID_ARCHS = "i386 x86_64 ppc";
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
@@ -4629,10 +4603,15 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4649,8 +4628,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx10.5;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
+				VALID_ARCHS = "i386 x86_64 ppc";
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
@@ -4760,6 +4741,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = BtCocoaPlayer;
+				VALID_ARCHS = "i386 x86_64 ppc";
 			};
 			name = Debug;
 		};
@@ -4777,6 +4759,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = BtCocoaPlayer;
+				VALID_ARCHS = "i386 x86_64 ppc";
 			};
 			name = Release;
 		};
@@ -4798,6 +4781,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = Tremor;
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -4805,6 +4789,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = Tremor;
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Release;
 		};
@@ -4819,6 +4804,7 @@
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 				WARNING_CFLAGS = "";
 			};
 			name = Debug;
@@ -4834,6 +4820,7 @@
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 				WARNING_CFLAGS = "";
 			};
 			name = Release;
@@ -4842,7 +4829,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -4850,6 +4838,7 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -4858,7 +4847,9 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BtTouchPlayer;
+				PROVISIONING_PROFILE = "6B030446-49DB-4C37-9E95-C0EFF4E3EF3A";
 				SDKROOT = iphoneos3.1.2;
+				VALID_ARCHS = "armv6 armv7 i386";
 			};
 			name = Debug;
 		};
@@ -4866,7 +4857,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -4874,6 +4866,7 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -4882,7 +4875,9 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = BtTouchPlayer;
+				PROVISIONING_PROFILE = "6B030446-49DB-4C37-9E95-C0EFF4E3EF3A";
 				SDKROOT = iphoneos3.1.2;
+				VALID_ARCHS = "armv6 armv7 i386";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5004,13 +4999,15 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					USE_DEFAULT_STDLIB,
 					AAC_ENABLE_SBR,
+					BLT_CONFIG_HELIX_AAC_NO_ASM,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(ATOMIX_HOME)/Source/Core",
 					"$(NEPTUNE_HOME)/Source/Core",
-					"$(SRCROOT)/../../../**",
+					"$(SRCROOT)/../../..",
 				);
 				PRODUCT_NAME = HelixAAC;
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -5020,13 +5017,15 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					USE_DEFAULT_STDLIB,
 					AAC_ENABLE_SBR,
+					BLT_CONFIG_HELIX_AAC_NO_ASM,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(ATOMIX_HOME)/Source/Core",
 					"$(NEPTUNE_HOME)/Source/Core",
-					"$(SRCROOT)/../../../**",
+					"$(SRCROOT)/../../..",
 				);
 				PRODUCT_NAME = HelixAAC;
+				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Release;
 		};

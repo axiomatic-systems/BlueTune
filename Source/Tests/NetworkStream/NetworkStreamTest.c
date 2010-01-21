@@ -80,7 +80,7 @@ Test(int buffer_size, int source_size)
                 result = ATX_InputStream_Seek(stream, offset);
                 CHECK(result == ATX_SUCCESS);
                 ATX_InputStream_Tell(stream, &new_position);
-                CHECK(new_position == offset);
+                CHECK(new_position == (ATX_Position)offset);
             }
             offset = new_position;
         }

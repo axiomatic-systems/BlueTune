@@ -77,13 +77,12 @@ DebugOutput_PutPacket(BLT_PacketConsumer* _self,
     /* print type info extensions if they are known to us */
     if (media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         BLT_PcmMediaType* pcm_type = (BLT_PcmMediaType*)media_type;
-        ATX_LOG_INFO_4("DebugOutput::PutPacket - type=%d, sr=%ld, ch=%d, bps=%d",
-                       media_type->id,
+        ATX_LOG_INFO_3("PCM packet - sr=%ld, ch=%d, bps=%d",
                        pcm_type->sample_rate,
                        pcm_type->channel_count,
                        pcm_type->bits_per_sample);
     } else {
-        ATX_LOG_INFO_1("DebugOutput::PutPacket - type=%d", media_type->id);
+        ATX_LOG_INFO_1("packet - type=%d", media_type->id);
     }
 #endif
 
@@ -262,23 +261,18 @@ DebugOutputModule_Probe(BLT_Module*              self,
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:
         {
-            BLT_MediaNodeConstructor* constructor = 
-                (BLT_MediaNodeConstructor*)parameters;
+            BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
 
             /* the input protocol should be PACKET and the */
             /* output protocol should be NONE              */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_NONE)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_NONE)) {
                 return BLT_FAILURE;
             }
 
-            /* the name should be 'debug:<level>' */
+            /* the name should be 'debug' */
             if (constructor->name == NULL ||
                 !ATX_StringsEqual(constructor->name, "debug")) {
                 return BLT_FAILURE;

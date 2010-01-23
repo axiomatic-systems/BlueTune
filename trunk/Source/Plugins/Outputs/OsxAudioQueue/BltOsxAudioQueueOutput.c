@@ -38,10 +38,11 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.audio-queue")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT             3
+#define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT             8
+#define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION   2000 /* milliseconds */
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT 512
-#define BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE      65536
-#define BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_BUFFER_WAIT          5 /* seconds */
+#define BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE      32768
+#define BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_WAIT                 3 /* seconds */
 
 /*----------------------------------------------------------------------
 |    types
@@ -75,17 +76,20 @@ typedef struct {
     pthread_mutex_t              lock;
     AudioQueueRef                audio_queue;
     BLT_Boolean                  audio_queue_started;
+    BLT_Boolean                  audio_queue_paused;
+    pthread_cond_t               audio_queue_stopped_cond;
+    BLT_Boolean                  waiting_for_stop;
     AudioStreamBasicDescription  audio_format;
     AudioQueueBufferRef          buffers[BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT];
     BLT_Ordinal                  buffer_index;
-    pthread_cond_t               buffer_released;
+    pthread_cond_t               buffer_released_cond;
     AudioStreamPacketDescription packet_descriptions[BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT];
     BLT_Ordinal                  packet_count;
+    BLT_Cardinal                 packet_count_max;
     struct {
         BLT_PcmMediaType pcm;
         AsbdMediaType    asbd;
-    }                           expected_media_types;
-    BLT_Boolean                 paused;
+    }                            expected_media_types;
 } OsxAudioQueueOutput;
 
 /*----------------------------------------------------------------------
@@ -101,24 +105,15 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_PacketConsumer)
 
 BLT_METHOD OsxAudioQueueOutput_Resume(BLT_MediaNode* self);
 BLT_METHOD OsxAudioQueueOutput_Stop(BLT_MediaNode* self);
+BLT_METHOD OsxAudioQueueOutput_Drain(BLT_OutputNode* self);
 
 /*----------------------------------------------------------------------
-|    OsxAudioQueueOutput_Drain
-+---------------------------------------------------------------------*/
-static BLT_Result
-OsxAudioQueueOutput_Drain(OsxAudioQueueOutput* self)
-{
-    BLT_COMPILER_UNUSED(self);
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    OsxAudioQueueOutput_Callback
+|    OsxAudioQueueOutput_BufferCallback
 +---------------------------------------------------------------------*/
 static void
-OsxAudioQueueOutput_Callback(void*               _self, 
-                             AudioQueueRef       queue, 
-                             AudioQueueBufferRef buffer)
+OsxAudioQueueOutput_BufferCallback(void*               _self, 
+                                   AudioQueueRef       queue, 
+                                   AudioQueueBufferRef buffer)
 {
     OsxAudioQueueOutput* self = (OsxAudioQueueOutput*)_self;
     BLT_COMPILER_UNUSED(queue);
@@ -127,10 +122,40 @@ OsxAudioQueueOutput_Callback(void*               _self,
     pthread_mutex_lock(&self->lock);
     buffer->mUserData = NULL;
     buffer->mAudioDataByteSize = 0;
-    pthread_cond_signal(&self->buffer_released);
+    pthread_cond_signal(&self->buffer_released_cond);
     pthread_mutex_unlock(&self->lock);
     
     ATX_LOG_FINER_1("callback for buffer %p", buffer);
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioQueueOutput_PropertyCallback
++---------------------------------------------------------------------*/
+static void 
+OsxAudioQueueOutput_PropertyCallback(void*                _self, 
+                                     AudioQueueRef        queue, 
+                                     AudioQueuePropertyID property_id)
+{
+    OsxAudioQueueOutput* self = (OsxAudioQueueOutput*)_self;
+    UInt32               is_running = false;
+    UInt32               property_size = sizeof(UInt32);
+    OSStatus             status;
+    
+    status = AudioQueueGetProperty(queue, kAudioQueueProperty_IsRunning, &is_running, &property_size);
+    if (status != noErr) {
+        ATX_LOG_WARNING_1("AudioQueueGetProperty failed (%x)", status);
+        return;
+    }
+    ATX_LOG_FINE_1("is_running property = %d", is_running);
+    
+    if (!is_running) {
+        pthread_mutex_lock(&self->lock);
+        if (self->waiting_for_stop) {
+            self->waiting_for_stop = BLT_FALSE;
+            pthread_cond_signal(&self->audio_queue_stopped_cond);
+        }
+        pthread_mutex_unlock(&self->lock);
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -223,12 +248,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
     /* reset any existing queue before we create a new one */
     if (self->audio_queue) {
         /* drain any pending packets before we switch */
-        result = OsxAudioQueueOutput_Drain(self);
-        if (BLT_FAILED(result)) return result;
-        
-        /* stop the queue */
-        AudioQueueStop(self->audio_queue, true);
-        self->audio_queue_started = BLT_FALSE;
+        OsxAudioQueueOutput_Drain(&ATX_BASE(self, BLT_OutputNode));
         
         /* destroy the queue (this will also free the buffers) */
         AudioQueueDispose(self->audio_queue, true);
@@ -237,18 +257,29 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
 
     /* create an audio queue */
     status = AudioQueueNewOutput(&audio_format, 
-                                 OsxAudioQueueOutput_Callback,
+                                 OsxAudioQueueOutput_BufferCallback,
                                  self,
                                  NULL,
                                  kCFRunLoopCommonModes,
                                  0,
                                  &self->audio_queue);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueNewOutput returned %d", status);
+        ATX_LOG_WARNING_1("AudioQueueNewOutput returned %x", status);
         return BLT_FAILURE;
     }
     
-    /* if this is an ASBD type, set the magic cookie */
+    /* listen for property changes */
+    status = AudioQueueAddPropertyListener(self->audio_queue, 
+                                           kAudioQueueProperty_IsRunning, 
+                                           OsxAudioQueueOutput_PropertyCallback, 
+                                           self);
+    if (status != noErr) {
+        ATX_LOG_WARNING_1("AudioQueueAddPropertyListener returned %x", status);
+        AudioQueueDispose(self->audio_queue, true);
+        return BLT_FAILURE;
+    }
+    
+    /* if this is an ASBD type, set the magic cookie and look at the buffer sizes */
     if (media_type->id == self->expected_media_types.asbd.base.id) {
         AsbdMediaType* asbd_media_type = (AsbdMediaType*)(media_type);
         if (asbd_media_type->magic_cookie_size) {
@@ -258,28 +289,60 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
                                            asbd_media_type->magic_cookie_size);
             if (status != noErr) return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
+        if (audio_format.mFramesPerPacket) {
+            self->packet_count_max = 
+                (((((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
+                    (UInt64)audio_format.mSampleRate)/audio_format.mFramesPerPacket)/1000) +
+                    BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT/2)/
+                    BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
+        } else {
+            self->packet_count_max = 0;
+        }
+    } else {
+        self->packet_count_max = 0;
     }
+    self->packet_count = 0;
+    ATX_LOG_FINE_1("max packets per buffer = %d", self->packet_count_max);
     
     /* create the buffers */
     {
         unsigned int i;
         unsigned int buffer_size;
-        if (audio_format.mBytesPerFrame && audio_format.mSampleRate) {
-            buffer_size = (audio_format.mBytesPerFrame*audio_format.mSampleRate)/BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
+        if (audio_format.mBytesPerFrame && ((UInt32)audio_format.mSampleRate != 0)) {
+            buffer_size = (((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
+                            (UInt64)audio_format.mBytesPerFrame*(UInt64)audio_format.mSampleRate)/1000)/
+                            BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
         } else {
             buffer_size = BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE;
         }
+        ATX_LOG_FINE_1("buffer size = %d", buffer_size);
         for (i=0; i<BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT; i++) {
             AudioQueueAllocateBuffer(self->audio_queue, buffer_size, &self->buffers[i]);                
             self->buffers[i]->mUserData = NULL;
             self->buffers[i]->mAudioDataByteSize = 0;
         }
     }
-    
+        
     /* copy the format */
     self->audio_format = audio_format;
     
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioQueueOutput_WaitForCondition
++---------------------------------------------------------------------*/
+static BLT_Result
+OsxAudioQueueOutput_WaitForCondition(OsxAudioQueueOutput* self, pthread_cond_t* condition)
+{
+    struct timespec timeout;
+    struct timeval  now;
+    gettimeofday(&now, NULL);
+    timeout.tv_sec  = now.tv_sec+BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_WAIT;
+    timeout.tv_nsec = now.tv_usec*1000;
+    ATX_LOG_FINE("waiting for buffer...");
+    int result = pthread_cond_timedwait(condition, &self->lock, &timeout);
+    return result==0?BLT_SUCCESS:ATX_ERROR_TIMEOUT;
 }
 
 /*----------------------------------------------------------------------
@@ -293,18 +356,11 @@ OsxAudioQueueOutput_WaitForBuffer(OsxAudioQueueOutput* self)
     pthread_mutex_lock(&self->lock);
     while (buffer->mUserData) {
         /* the buffer is locked, wait for it to be released */
-        struct timespec timeout;
-        struct timeval  now;
-        gettimeofday(&now, NULL);
-        timeout.tv_sec += now.tv_sec+BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_BUFFER_WAIT;
-        timeout.tv_nsec = now.tv_usec/1000;
-        ATX_LOG_FINE("waiting for buffer...");
-        int result = pthread_cond_timedwait(&self->buffer_released,
-                                            &self->lock,
-                                            &timeout);
-        if (result != 0) {
+        BLT_Result result = OsxAudioQueueOutput_WaitForCondition(self, &self->buffer_released_cond);
+        if (BLT_FAILED(result)) {
             ATX_LOG_WARNING("timeout while waiting for buffer");
             buffer = NULL;
+            break;
         }
     }
     pthread_mutex_unlock(&self->lock);
@@ -321,11 +377,14 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     OSStatus            status;
     AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
 
+    /* check that the buffer has data */
+    if (buffer->mAudioDataByteSize == 0) return BLT_SUCCESS;
+    
     /* mark the buffer as in-queue */
     buffer->mUserData = self;
 
     /* queue the buffer */
-    ATX_LOG_FINER_1("enqueuing buffer %d", self->buffer_index);
+    ATX_LOG_FINE_1("enqueuing buffer %d", self->buffer_index);
     status = AudioQueueEnqueueBuffer(self->audio_queue, buffer,
                                      self->packet_count, 
                                      self->packet_count?self->packet_descriptions:NULL);
@@ -347,7 +406,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
             return BLT_ERROR_INTERNAL;
-        }
+        } 
         self->audio_queue_started = BLT_TRUE;
     }
     
@@ -386,7 +445,8 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
     {
         const unsigned char* payload = (const unsigned char*)BLT_MediaPacket_GetPayloadBuffer(packet);
         BLT_Size             payload_size = BLT_MediaPacket_GetPayloadSize(packet);
-    
+        unsigned int         buffer_fullness = 0;
+        
         /* wait for a buffer */
         AudioQueueBufferRef buffer = OsxAudioQueueOutput_WaitForBuffer(self);
         if (buffer == NULL) return BLT_ERROR_INTERNAL;
@@ -407,25 +467,26 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* copy the data into the buffer */
-        ATX_CopyMemory(((char*)buffer->mAudioData)+buffer->mAudioDataByteSize,
+        buffer_fullness = buffer->mAudioDataByteSize;
+        ATX_CopyMemory((unsigned char*)buffer->mAudioData+buffer->mAudioDataByteSize,
                        payload,
                        payload_size);
+        buffer->mAudioDataByteSize += payload_size;
         
         /* for ASBD types, update the packet descriptions */
         if (media_type->id == self->expected_media_types.asbd.base.id) {
             AudioStreamPacketDescription* packet_description = &self->packet_descriptions[self->packet_count++];
             packet_description->mDataByteSize           = payload_size;
-            packet_description->mStartOffset            = buffer->mAudioDataByteSize;
+            packet_description->mStartOffset            = buffer_fullness;
             packet_description->mVariableFramesInPacket = self->audio_format.mFramesPerPacket;
             
-            /* enqueue now if we're used all the packet descriptions */
-            if (self->packet_count == BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT) {
+            /* enqueue now if we're used all the packet descriptions or there's enough in the buffer */
+            if (self->packet_count == BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT ||
+                (self->packet_count_max && self->packet_count >= self->packet_count_max)) {
+                ATX_LOG_FINE_1("reached max packets in buffer (%d), enqueuing", self->packet_count);
                 OsxAudioQueueOutput_EnqueueBuffer(self);
             }
         }
-
-        /* update the buffer payload size */
-        buffer->mAudioDataByteSize += payload_size;
     }
     
     return BLT_SUCCESS;
@@ -482,9 +543,10 @@ OsxAudioQueueOutput_Create(BLT_Module*              _module,
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), _module, core);
 
-    /* create a lock and condition */
+    /* create a lock and conditions */
     pthread_mutex_init(&self->lock, NULL);
-    pthread_cond_init(&self->buffer_released, NULL);
+    pthread_cond_init(&self->buffer_released_cond, NULL);
+    pthread_cond_init(&self->audio_queue_stopped_cond, NULL);
     
     /* setup the expected media types */
     BLT_PcmMediaType_Init(&self->expected_media_types.pcm);
@@ -509,7 +571,7 @@ static BLT_Result
 OsxAudioQueueOutput_Destroy(OsxAudioQueueOutput* self)
 {
     /* drain the queue */
-    OsxAudioQueueOutput_Drain(self);
+    OsxAudioQueueOutput_Drain(&ATX_BASE(self, BLT_OutputNode));
 
     /* stop the audio pump */
     OsxAudioQueueOutput_Stop(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
@@ -519,8 +581,9 @@ OsxAudioQueueOutput_Destroy(OsxAudioQueueOutput* self)
         AudioQueueDispose(self->audio_queue, true);
     }
         
-    /* destroy the lock and condition */
-    pthread_cond_destroy(&self->buffer_released);
+    /* destroy the lock and conditions */
+    pthread_cond_destroy(&self->buffer_released_cond);
+    pthread_cond_destroy(&self->audio_queue_stopped_cond);
     pthread_mutex_destroy(&self->lock);
 
     /* destruct the inherited object */
@@ -597,20 +660,55 @@ OsxAudioQueueOutput_GetStatus(BLT_OutputNode*       _self,
 }
 
 /*----------------------------------------------------------------------
+|    OsxAudioQueueOutput_Drain
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioQueueOutput_Drain(BLT_OutputNode* _self)
+{
+    OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_OutputNode);
+    OSStatus             status;
+    
+    /* if we're paused, there's nothing to drain */
+    if (self->audio_queue_paused) return BLT_SUCCESS;
+    
+    /* in case we have a pending buffer, enqueue it now */
+    AudioQueueBufferRef buffer = OsxAudioQueueOutput_WaitForBuffer(self);
+    if (buffer && buffer->mAudioDataByteSize) OsxAudioQueueOutput_EnqueueBuffer(self);
+    
+    /* flush anything that may be in the queue */
+    ATX_LOG_FINE("flusing queued buffers");
+    status = AudioQueueFlush(self->audio_queue);
+    if (status != noErr) {
+        ATX_LOG_WARNING_1("AudioQueueFlush failed (%x)", status);
+    }
+    
+    /* if the queue is not started, we're done */
+    if (!self->audio_queue_started) return BLT_SUCCESS;
+    
+    /* wait for the queue to be stopped */
+    pthread_mutex_lock(&self->lock);
+    status = AudioQueueStop(self->audio_queue, false);
+    if (status != noErr) {
+        ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", status);
+    }
+    self->waiting_for_stop = BLT_TRUE;
+    OsxAudioQueueOutput_WaitForCondition(self, &self->audio_queue_stopped_cond);
+    pthread_mutex_unlock(&self->lock);
+
+    /* we're really stopped now */
+    self->audio_queue_started = BLT_FALSE;
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    OsxAudioQueueOutput_Start
 +---------------------------------------------------------------------*/
 BLT_METHOD
 OsxAudioQueueOutput_Start(BLT_MediaNode* _self)
 {
-    OsxAudioQueueOutput* self = ATX_SELF_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode);
-
-    if (self->audio_queue) {
-        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
-        if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
-        }
-        self->audio_queue_started = BLT_TRUE;
-    }
+    /* do nothing here, because the queue is auto-started when packets arrive */
+    BLT_COMPILER_UNUSED(_self);
     return BLT_SUCCESS;
 }
 
@@ -640,12 +738,12 @@ OsxAudioQueueOutput_Pause(BLT_MediaNode* _self)
 {
     OsxAudioQueueOutput* self = ATX_SELF_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode);
     
-    if (self->audio_queue && !self->paused) {
+    if (self->audio_queue && !self->audio_queue_paused) {
         OSStatus status = AudioQueuePause(self->audio_queue);
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioQueuePause failed (%x)", status);
         }
-        self->paused = BLT_TRUE;
+        self->audio_queue_paused = BLT_TRUE;
     }
     return BLT_SUCCESS;
 }
@@ -658,12 +756,12 @@ OsxAudioQueueOutput_Resume(BLT_MediaNode* _self)
 {
     OsxAudioQueueOutput* self = ATX_SELF_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
-    if (self->audio_queue && self->paused) {
+    if (self->audio_queue && self->audio_queue_paused) {
         OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
         }
-        self->paused = BLT_FALSE;
+        self->audio_queue_paused = BLT_FALSE;
         self->audio_queue_started = BLT_TRUE;
     }
     return BLT_SUCCESS;
@@ -717,7 +815,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxAudioQueueOutput, BLT_OutputNode)
-    OsxAudioQueueOutput_GetStatus
+    OsxAudioQueueOutput_GetStatus,
+    OsxAudioQueueOutput_Drain
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

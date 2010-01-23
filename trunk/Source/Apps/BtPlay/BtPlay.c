@@ -625,6 +625,9 @@ main(int argc, char** argv)
         input_type = NULL;
     }
 
+    /* drain any buffered audio */
+    BLT_Decoder_Drain(decoder);
+    
     /* destroy the decoder */
     BLT_Decoder_Destroy(decoder);
 

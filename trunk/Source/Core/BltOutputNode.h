@@ -47,6 +47,7 @@ ATX_DECLARE_INTERFACE(BLT_OutputNode)
 ATX_BEGIN_INTERFACE_DEFINITION(BLT_OutputNode)
     BLT_Result (*GetStatus)(BLT_OutputNode*       self, 
                             BLT_OutputNodeStatus* status);
+    BLT_Result (*Drain)(BLT_OutputNode* self);
 ATX_END_INTERFACE_DEFINITION
 
 /*----------------------------------------------------------------------
@@ -54,5 +55,8 @@ ATX_END_INTERFACE_DEFINITION
 +---------------------------------------------------------------------*/
 #define BLT_OutputNode_GetStatus(object, status) \
 ATX_INTERFACE(object)->GetStatus(object, status)
+
+#define BLT_OutputNode_Drain(object) \
+    (ATX_INTERFACE(object)->Drain?ATX_INTERFACE(object)->Drain(object):BLT_SUCCESS)
 
 #endif /* _BLT_OUTPUT_NODE_H_ */

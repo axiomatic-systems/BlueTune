@@ -1176,7 +1176,7 @@
 		CA0C9AEE0D15D24500E23496 /* BtPlay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BtPlay.c; sourceTree = "<group>"; };
 		CA0C9AEF0D15D24500E23496 /* BtPlayForceCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayForceCpp.cpp; sourceTree = "<group>"; };
 		CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PcmDiff.cpp; sourceTree = "<group>"; };
-		CA0C9AF50D15D27D00E23496 /* btplay */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = btplay; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA0C9AF50D15D27D00E23496 /* btplay */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplay; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		CA0C9C150D16047100E23496 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
@@ -1190,7 +1190,7 @@
 		CA1859B90F22D0E500CF3552 /* BltOsxVideoOutput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BltOsxVideoOutput.m; sourceTree = "<group>"; };
 		CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPluginTemplate.cpp; sourceTree = "<group>"; };
 		CA1ACEF60D30C5D600C350CD /* NetworkStreamTest.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = NetworkStreamTest.c; sourceTree = "<group>"; };
-		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NetworkStreamTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA1C6A4C10F6BCBF00D50ABE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		CA1C6A4D10F6BCBF00D50ABE /* jquery-ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "jquery-ui.js"; sourceTree = "<group>"; };
 		CA1C6A4E10F6BCBF00D50ABE /* jquery.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jquery.js; sourceTree = "<group>"; };
@@ -1219,7 +1219,7 @@
 		CA1EC1850ED29B8C0033F894 /* BtCocoaPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BtCocoaPlayerController.m; sourceTree = "<group>"; };
 		CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BtCocoaPlayerMain.mm; sourceTree = "<group>"; };
 		CA44C4480D4522D900173F5F /* Bento4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Bento4.xcodeproj; path = "../../../../Bento4/Build/Targets/universal-apple-macosx/Bento4.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		CA44DE6E0DEDEAE50020CB81 /* pcmdiff */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = pcmdiff; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA44DE6E0DEDEAE50020CB81 /* pcmdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pcmdiff; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
 		CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltBuiltins.h; sourceTree = "<group>"; };
 		CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltByteStreamProvider.h; sourceTree = "<group>"; };
@@ -1403,18 +1403,18 @@
 		CA53C27B10A7876300950FAF /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		CA53C27D10A7876F00950FAF /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		CA53C28610A787D100950FAF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
-		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.dylib"; path = BltWmaDecoderPlugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoderStub.c; sourceTree = "<group>"; };
 		CA58276D0E68C14F006CC501 /* BltVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVersion.h; sourceTree = "<group>"; };
 		CA5827730E68C2EC006CC501 /* BltSvnVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSvnVersion.h; sourceTree = "<group>"; };
 		CA5827DA0E68CED7006CC501 /* BltDynamicPlugins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltDynamicPlugins.cpp; sourceTree = "<group>"; };
 		CA5827DF0E68CF15006CC501 /* BltDynamicPlugins.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDynamicPlugins.h; sourceTree = "<group>"; };
 		CA5827E40E68CFD4006CC501 /* BltUnixDynamicPlugins.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltUnixDynamicPlugins.c; sourceTree = "<group>"; };
-		CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.dylib"; path = BltDolbyDigitalPlusParserPlugin; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.dylib"; path = BltDolbyDigitalPlusDecoderPlugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltDolbyDigitalPlusParserPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltDolbyDigitalPlusDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA6434350C97197C00F67CD5 /* aacdec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aacdec.c; sourceTree = "<group>"; };
 		CA6434360C97197C00F67CD5 /* aactabs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aactabs.c; sourceTree = "<group>"; };
 		CA6434380C97197C00F67CD5 /* aaccommon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = aaccommon.h; sourceTree = "<group>"; };
@@ -1463,7 +1463,7 @@
 		CA9ED2930EAD3A8D003CE43C /* BltPixels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltPixels.h; sourceTree = "<group>"; };
 		CA9ED81C0EAF9F18003CE43C /* BltDecoderX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltDecoderX.c; sourceTree = "<group>"; };
 		CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDecoderX.h; sourceTree = "<group>"; };
-		CA9ED8340EAFAAFC003CE43C /* btplayx */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = btplayx; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA9ED8340EAFAAFC003CE43C /* btplayx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayx; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA9ED8420EAFAB56003CE43C /* BtPlayX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BtPlayX.c; sourceTree = "<group>"; };
 		CA9ED8430EAFAB56003CE43C /* BtPlayXForceCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayXForceCpp.cpp; sourceTree = "<group>"; };
 		CA9ED8CD0EAFCB26003CE43C /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -1480,7 +1480,7 @@
 		CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltDcfParser.h; sourceTree = "<group>"; };
 		CAF2EE170E5FDE0500948C04 /* SyncPlayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SyncPlayer.c; sourceTree = "<group>"; };
 		CAF2EE180E5FDE1700948C04 /* AsyncPlayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = AsyncPlayer.c; path = C/AsyncPlayer.c; sourceTree = "<group>"; };
-		CAF2EE270E60C38D00948C04 /* AsyncPlayerC */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = AsyncPlayerC; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAF2EE270E60C38D00948C04 /* AsyncPlayerC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = AsyncPlayerC; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF901270FE047CC0066101F /* bitmath.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bitmath.c; path = "Distributions/flac-1.2.1/src/libFLAC/bitmath.c"; sourceTree = "<group>"; };
 		CAF901280FE047CC0066101F /* bitreader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bitreader.c; path = "Distributions/flac-1.2.1/src/libFLAC/bitreader.c"; sourceTree = "<group>"; };
 		CAF901290FE047CC0066101F /* bitwriter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bitwriter.c; path = "Distributions/flac-1.2.1/src/libFLAC/bitwriter.c"; sourceTree = "<group>"; };
@@ -1733,12 +1733,12 @@
 				CA1ACEFA0D30C5FA00C350CD /* NetworkStreamTest */,
 				CA44DE6E0DEDEAE50020CB81 /* pcmdiff */,
 				CAF2EE270E60C38D00948C04 /* AsyncPlayerC */,
-				CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin */,
+				CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */,
 				CA9ED8340EAFAAFC003CE43C /* btplayx */,
 				CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */,
 				CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */,
-				CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */,
-				CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */,
+				CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */,
+				CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */,
 				CA53C0B910A6277800950FAF /* BtTouchPlayer.app */,
 			);
 			name = Products;
@@ -3285,7 +3285,7 @@
 			);
 			name = BltWmaDecoderPlugin;
 			productName = BltWmaDecoderInputPlugin;
-			productReference = CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin */;
+			productReference = CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */ = {
@@ -3304,7 +3304,7 @@
 			);
 			name = BltDolbyDigitalPlusParserPlugin;
 			productName = BltDolbyDigitalPlusParserPlugin;
-			productReference = CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */;
+			productReference = CA615D4A1044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		CA615D8010449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */ = {
@@ -3323,7 +3323,7 @@
 			);
 			name = BltDolbyDigitalPlusDecoderPlugin;
 			productName = BltDolbyDigitalPlusDecoderPlugin;
-			productReference = CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */;
+			productReference = CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		CA6B38710C965CE9000D7A0A /* HelixAAC */ = {
@@ -4470,7 +4470,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				BLT_CONFIG_DEFAULT_AUDIO_OUTPUT = "osxau:0";
 				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphoneos*][arch=*]" = "osxaq:0";
 				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphonesimulator*][arch=*]" = "osxaq:0";
@@ -4519,7 +4518,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				BLT_CONFIG_DEFAULT_AUDIO_OUTPUT = "osxau:0";
 				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphoneos*][arch=*]" = "osxaq:0";
 				"BLT_CONFIG_DEFAULT_AUDIO_OUTPUT[sdk=iphonesimulator*][arch=*]" = "osxaq:0";
@@ -4568,6 +4566,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				"ARCHS[sdk=iphonesimulator*]" = i386;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				COPY_PHASE_STRIP = NO;
@@ -4606,6 +4605,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				"ARCHS[sdk=iphonesimulator*]" = i386;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
@@ -4840,6 +4840,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				"ARCHS[sdk=iphonesimulator*]" = i386;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -4869,6 +4870,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				"ARCHS[sdk=iphonesimulator*]" = i386;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

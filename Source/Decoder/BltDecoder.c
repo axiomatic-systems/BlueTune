@@ -368,6 +368,32 @@ BLT_Decoder_SetVolume(BLT_Decoder* decoder, float volume)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Decoder_Drain
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_Drain(BLT_Decoder* decoder)
+{
+    BLT_MediaNode* output_node;
+    BLT_Result     result;
+    
+    /* drain the output node */
+    result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_OutputNode* output_node_interface = ATX_CAST(output_node, BLT_OutputNode);
+        if (output_node_interface) {
+            result = BLT_OutputNode_Drain(output_node_interface);
+        } else {
+            result = BLT_SUCCESS;
+        }
+        ATX_RELEASE_OBJECT(output_node);
+    } else {
+        result = BLT_ERROR_INVALID_STATE;
+    }
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Decoder_PumpPacket
 +---------------------------------------------------------------------*/
 BLT_Result

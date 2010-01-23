@@ -262,13 +262,16 @@ BtController::OnPropertyNotification(BLT_PropertyScope        scope,
 int
 main(int /*argc*/, char** /*argv*/)
 {
+    BLT_Result result;
+    
     // create the controller
     BtController* controller = new BtController();
 
     // pump notification messages
-    while (controller->PumpMessage() == NPT_SUCCESS) {/* */}
-
-    ATX_Debug("INFO: Received Terminate Message\n");
+    do {
+        result =  controller->PumpMessage();
+    } while (result == BLT_SUCCESS);
+    ATX_ConsoleOutputF("INFO: message loop ended with status %d (%s)\n", result, BLT_ResultText(result));
 
     // delete the controller
     delete controller;

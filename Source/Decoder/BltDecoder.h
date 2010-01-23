@@ -248,6 +248,11 @@ BLT_Result BLT_Decoder_Pause(BLT_Decoder* decoder);
  */
 BLT_Result BLT_Decoder_SeekToTime(BLT_Decoder* decoder, BLT_UInt64 time);
 
+/**
+ * Drain the output: wait until all buffered audio has been played.
+ */
+BLT_Result BLT_Decoder_Drain(BLT_Decoder* decoder);
+
 /** Seek to a specific position.
  * @param offset Offset between 0 and range
  * @param range Maximum value of offset. The range is an arbitrary

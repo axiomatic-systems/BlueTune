@@ -350,7 +350,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(SdlOutput, BLT_OutputNode)
-    SdlOutput_GetStatus
+    SdlOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

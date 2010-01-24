@@ -1176,7 +1176,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxVideoOutput, BLT_OutputNode)
-    OsxVideoOutput_GetStatus
+    OsxVideoOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

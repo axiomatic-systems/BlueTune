@@ -341,7 +341,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(SdlVideoOutput, BLT_OutputNode)
-    SdlVideoOutput_GetStatus
+    SdlVideoOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

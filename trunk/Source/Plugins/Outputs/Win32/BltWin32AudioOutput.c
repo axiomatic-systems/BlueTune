@@ -1066,7 +1066,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(Win32AudioOutput, BLT_OutputNode)
-    Win32AudioOutput_GetStatus
+    Win32AudioOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

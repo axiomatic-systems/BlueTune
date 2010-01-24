@@ -753,7 +753,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OssOutput, BLT_OutputNode)
-    OssOutput_GetStatus
+    OssOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

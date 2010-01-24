@@ -1758,7 +1758,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(Dx9VideoOutput, BLT_OutputNode)
-    Dx9VideoOutput_GetStatus
+    Dx9VideoOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

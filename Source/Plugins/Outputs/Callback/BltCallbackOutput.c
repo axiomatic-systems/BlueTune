@@ -257,7 +257,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(CallbackOutput, BLT_OutputNode)
-    CallbackOutput_GetStatus
+    CallbackOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

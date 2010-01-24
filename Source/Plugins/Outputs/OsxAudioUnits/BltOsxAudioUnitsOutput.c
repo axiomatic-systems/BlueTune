@@ -1134,7 +1134,8 @@ ATX_END_INTERFACE_MAP_EX
 |    BLT_OutputNode interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_OutputNode)
-    OsxAudioUnitsOutput_GetStatus
+    OsxAudioUnitsOutput_GetStatus,
+    NULL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

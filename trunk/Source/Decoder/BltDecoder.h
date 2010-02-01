@@ -94,6 +94,11 @@ BLT_Result BLT_Decoder_RegisterModule(BLT_Decoder* decoder,
                                       BLT_Module*  module);
 
 /**
+ * Get a list of all registered modules
+ */
+BLT_Result BLT_Decoder_EnumerateModules(BLT_Decoder* decoder, ATX_List** modules);
+
+/**
  * Load and Register a plugin.
  * @param name Name of a plugin (filename of the plugin or special name)
  * @param search_flags Flags that select how the actual plugin file will

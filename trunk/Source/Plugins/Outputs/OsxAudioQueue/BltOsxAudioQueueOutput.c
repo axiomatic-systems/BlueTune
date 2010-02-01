@@ -13,6 +13,7 @@
 #include <AvailabilityMacros.h>
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5) || (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_2_0)
 #include <AudioToolbox/AudioQueue.h>
+#include <AudioToolbox/AudioFormat.h>
 #endif
 #include <pthread.h>
 #include <unistd.h>
@@ -265,7 +266,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
                                  &self->audio_queue);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueNewOutput returned %x", status);
-        return BLT_FAILURE;
+        return BLT_ERROR_UNSUPPORTED_FORMAT;
     }
     
     /* listen for property changes */
@@ -353,6 +354,10 @@ OsxAudioQueueOutput_WaitForBuffer(OsxAudioQueueOutput* self)
 {
     AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
     
+    /* check that we have buffers */
+    if (self->audio_queue == NULL) return NULL;
+    
+    /* wait for the next buffer to be released */
     pthread_mutex_lock(&self->lock);
     while (buffer->mUserData) {
         /* the buffer is locked, wait for it to be released */

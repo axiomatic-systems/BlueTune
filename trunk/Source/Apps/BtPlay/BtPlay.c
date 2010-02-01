@@ -33,6 +33,7 @@ typedef struct {
     float        output_volume;
     unsigned int duration;
     unsigned int verbosity;
+    BLT_Boolean  list_modules;
     ATX_List*    plugin_directories;
     ATX_List*    plugin_files;
     ATX_List*    keys;
@@ -89,6 +90,7 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --output-type=<type>\n"
         "  --output-volume=<volume> (between 0.0 and 1.0)\n"
         "  --duration=<n> (seconds)\n"
+        "  --list-modules\n"
         "  --load-plugins=<directory>[,<file-extension>]\n"
         "  --load-plugin=<plugin-filename>\n");
     ATX_ConsoleOutput(
@@ -180,6 +182,7 @@ BLTP_ParseCommandLine(char** args)
     Options.output_volume = -1.0f;
     Options.duration      = 0;
     Options.verbosity     = 0;
+    Options.list_modules  = BLT_FALSE;
     ATX_List_Create(&Options.keys);
     ATX_List_Create(&Options.plugin_directories);
     ATX_List_Create(&Options.plugin_files);
@@ -207,6 +210,8 @@ BLTP_ParseCommandLine(char** args)
             int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
             Options.duration = duration;
+        } else if (ATX_StringsEqual(arg, "--list-modules")) {
+            Options.list_modules = BLT_TRUE;
         } else if (ATX_StringsEqualN(arg, "--load-plugins=", 15)) {
             ATX_String* directory = (ATX_String*)ATX_AllocateMemory(sizeof(ATX_String));
             *directory = ATX_String_Create(arg+15);
@@ -232,6 +237,31 @@ BLTP_ParseCommandLine(char** args)
     }
 
     return args;
+}
+
+/*----------------------------------------------------------------------
+|    BLTP_ListModules
++---------------------------------------------------------------------*/
+static void
+BLTP_ListModules(BLT_Decoder* decoder)
+{
+    ATX_List*     modules = NULL;
+    ATX_ListItem* item = NULL;
+    BLT_Result    result;
+    
+    /* get the list of modules from the decoder */
+    result = BLT_Decoder_EnumerateModules(decoder, &modules);
+    if (BLT_FAILED(result)) return;
+    
+    /* print info about each module */
+    for (item = ATX_List_GetFirstItem(modules);
+         item;
+         item = ATX_ListItem_GetNext(item)) {
+        /*BLT_Module* module = (BLT_Module*)ATX_ListItem_GetData(item);*/
+    }
+    
+    /* cleanup */
+    ATX_List_Destroy(modules);
 }
 
 /*----------------------------------------------------------------------
@@ -570,6 +600,9 @@ main(int argc, char** argv)
             BLT_Decoder_LoadPlugins(decoder, directory, extension);
         }
     }
+    
+    /* list the modules if required */
+    if (Options.list_modules) BLTP_ListModules(decoder);
     
     /* set the output */
     result = BLT_Decoder_SetOutput(decoder,

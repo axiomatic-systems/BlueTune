@@ -54,9 +54,7 @@ ATX_BEGIN_INTERFACE_DEFINITION(BLT_Core)
     BLT_Result (*CreateStream)(BLT_Core* self, BLT_Stream** stream);
     BLT_Result (*RegisterModule)(BLT_Core* self, BLT_Module* module);
     BLT_Result (*UnRegisterModule)(BLT_Core* self, BLT_Module* module);
-    BLT_Result (*EnumerateModules)(BLT_Core*      self,
-                                   BLT_Mask       categories,
-                                   ATX_Iterator** iterator);
+    BLT_Result (*EnumerateModules)(BLT_Core* self, ATX_List** modules);
     BLT_Result (*GetRegistry)(BLT_Core* self, BLT_Registry** registry);
     BLT_Result (*GetProperties)(BLT_Core* self, ATX_Properties** properties);
     BLT_Result (*CreateCompatibleMediaNode)(BLT_Core*                 self,
@@ -83,8 +81,8 @@ ATX_INTERFACE(object)->RegisterModule(object, module)
 #define BLT_Core_UnRegisterModule(object, module) \
 ATX_INTERFACE(object)->UnRegisterModule(object, module)
 
-#define BLT_Core_EnumerateModules(object, categories, iterator) \
-ATX_INTERFACE(object)->EnumerateModules(object, categories, iterator)
+#define BLT_Core_EnumerateModules(object, modules) \
+ATX_INTERFACE(object)->EnumerateModules(object, modules)
 
 #define BLT_Core_GetRegistry(object, registry) \
 ATX_INTERFACE(object)->GetRegistry(object, registry)

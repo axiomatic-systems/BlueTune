@@ -99,6 +99,15 @@ BLT_Decoder_RegisterModule(BLT_Decoder* decoder, BLT_Module* module)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Decoder_EnumerateModules
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Decoder_EnumerateModules(BLT_Decoder* decoder, ATX_List** modules)
+{
+    return BLT_Core_EnumerateModules(decoder->core, modules);
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Decoder_LoadPlugin
 +---------------------------------------------------------------------*/
 BLT_Result 

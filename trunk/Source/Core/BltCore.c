@@ -177,15 +177,25 @@ Core_UnRegisterModule(BLT_Core* _self, BLT_Module* module)
 |    Core_EnumerateModules
 +---------------------------------------------------------------------*/
 BLT_METHOD
-Core_EnumerateModules(BLT_Core*      self, 
-                      BLT_Mask       categories,
-                      ATX_Iterator** iterator)
+Core_EnumerateModules(BLT_Core* _self, ATX_List** modules)
 {
-    /* NOT IMPLEMENTED YET */
-    BLT_COMPILER_UNUSED(self);
-    BLT_COMPILER_UNUSED(categories);
-    *iterator = NULL;
-    return BLT_FAILURE;
+    Core*         self = ATX_SELF(Core, BLT_Core);
+    ATX_ListItem* item;
+    BLT_Result    result;
+    
+    /* create the list */
+    *modules = NULL;
+    result = ATX_List_Create(modules);
+    if (BLT_FAILED(result)) return result;
+    
+    /* populate the list */
+    for (item = ATX_List_GetFirstItem(self->modules);
+         item;
+         item = ATX_ListItem_GetNext(item)) {
+        ATX_List_AddData(*modules, ATX_ListItem_GetData(item));
+    }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------

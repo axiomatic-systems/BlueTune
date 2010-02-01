@@ -82,6 +82,8 @@ typedef struct {
     AudioFileStreamParserOutput       output;
     AudioFileStreamID                 stream_parser;
     AudioFileStreamParserMediaTypeIds media_type_ids;
+    UInt32*                           supported_formats;
+    unsigned int                      supported_format_count;
 } AudioFileStreamParser;
 
 /*----------------------------------------------------------------------
@@ -90,6 +92,21 @@ typedef struct {
 ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParserModule, BLT_Module)
 ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParser,       BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParser,       ATX_Referenceable)
+
+/*----------------------------------------------------------------------
+|    AudioFileStreamParser_FormatIsSupported
++---------------------------------------------------------------------*/
+static BLT_Boolean
+AudioFileStreamParser_FormatIsSupported(AudioFileStreamParser* self, 
+                                        UInt32                 format)
+{
+    unsigned int i;
+    if (self->supported_formats == NULL) return BLT_TRUE; /* assume */
+    for (i=0; i<self->supported_format_count; i++) {
+        if (self->supported_formats[i] == format) return BLT_TRUE;
+    }
+    return BLT_FALSE;
+}
 
 /*----------------------------------------------------------------------
 |    AudioFileStreamParser_OnProperty
@@ -116,6 +133,7 @@ AudioFileStreamParser_OnProperty(void*                     _self,
         }
 
         case kAudioFileStreamProperty_DataFormat: 
+        case kAudioFileStreamProperty_FormatList:
         case kAudioFileStreamProperty_MagicCookieData:
             /* ask the parser to cache the property */
             *flags |= kAudioFileStreamPropertyFlag_CacheProperty;
@@ -153,19 +171,57 @@ AudioFileStreamParser_OnProperty(void*                     _self,
                 }
             }
             
-            /* get the audio description */
-            property_size = sizeof(AudioStreamBasicDescription);
-            result = AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_DataFormat, &property_size, &self->output.media_type->asbd);
-            if (result != noErr) {
-                ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", result);
-                ATX_FreeMemory(self->output.media_type);
-                self->output.media_type = NULL;
-                return;
+            /* iterate the format list if one is available */
+            result = AudioFileStreamGetPropertyInfo(stream, kAudioFileStreamProperty_FormatList, &property_size, NULL);
+            if (result == noErr && property_size) {
+                AudioFormatListItem* items = (AudioFormatListItem*)malloc(property_size);
+                result = AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_FormatList, &property_size, items);
+                int item_count = property_size/sizeof(items[0]);
+                int i;
+                for (i=0; i<item_count; i++) {
+                    ATX_LOG_FINE_7("format %d: %c%c%c%c, %d %d", 
+                                   i,
+                                   (items[i].mASBD.mFormatID>>24)&0xFF,
+                                   (items[i].mASBD.mFormatID>>16)&0xFF,
+                                   (items[i].mASBD.mFormatID>> 8)&0xFF,
+                                   (items[i].mASBD.mFormatID    )&0xFF,
+                                   (int)items[i].mASBD.mSampleRate,
+                                   items[i].mASBD.mChannelsPerFrame);
+                    if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE && 
+                        AudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE");
+                        self->output.media_type->asbd = items[i].mASBD;
+                        break;
+                    }
+                    if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE_V2 &&
+                        AudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE_V2");
+                        self->output.media_type->asbd = items[i].mASBD;
+                        break;
+                    }
+                }
+                ATX_FreeMemory(items);
             }
-            ATX_LOG_FINE_3("kAudioFileStreamProperty_DataFormat: %x, %d %d", 
-                           self->output.media_type->asbd.mFormatID,
-                           (int)self->output.media_type->asbd.mSampleRate,
-                           self->output.media_type->asbd.mChannelsPerFrame);
+            
+            /* get the audio description if none was selected from the list previously */
+            if (self->output.media_type->asbd.mFormatID == 0) {
+                property_size = sizeof(AudioStreamBasicDescription);
+                result = AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_DataFormat, &property_size, &self->output.media_type->asbd);
+                if (result != noErr) {
+                    ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", result);
+                    ATX_FreeMemory(self->output.media_type);
+                    self->output.media_type = NULL;
+                    return;
+                }
+                ATX_LOG_FINE_6("kAudioFileStreamProperty_DataFormat: %c%c%c%c, %d %d", 
+                               (self->output.media_type->asbd.mFormatID>>24)&0xFF,
+                               (self->output.media_type->asbd.mFormatID>>16)&0xFF,
+                               (self->output.media_type->asbd.mFormatID>> 8)&0xFF,
+                               (self->output.media_type->asbd.mFormatID    )&0xFF,
+                               (int)self->output.media_type->asbd.mSampleRate,
+                               self->output.media_type->asbd.mChannelsPerFrame);
+            }
+            
             break;
         }
         
@@ -430,6 +486,34 @@ AudioFileStreamParser_Create(BLT_Module*              module,
         return result;
     }
     
+    /* get a list of supported formats */
+    {
+        UInt32 property_size = 0;
+        OSErr  status = AudioFormatGetPropertyInfo(kAudioFormatProperty_DecodeFormatIDs, 0, NULL, &property_size);
+        if (status == noErr && property_size && (property_size%sizeof(UInt32)) == 0) {
+            unsigned int i;
+            self->supported_formats = (UInt32*)malloc(property_size);
+            self->supported_format_count = property_size/sizeof(UInt32);
+            status = AudioFormatGetProperty(kAudioFormatProperty_DecodeFormatIDs, 
+                                            0, 
+                                            NULL,
+                                            &property_size, 
+                                            self->supported_formats);
+            if (status != noErr) {
+                ATX_FreeMemory(self->supported_formats);
+                self->supported_formats = NULL;
+            }
+            for (i=0; i<self->supported_format_count; i++) {
+                ATX_LOG_FINE_5("supported format %d: %c%c%c%c", 
+                               i, 
+                               (self->supported_formats[i]>>24)&0xFF,
+                               (self->supported_formats[i]>>16)&0xFF,
+                               (self->supported_formats[i]>> 8)&0xFF,
+                               (self->supported_formats[i]    )&0xFF);
+            }
+        }
+    }
+    
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, AudioFileStreamParser, BLT_BaseMediaNode, ATX_Referenceable);
@@ -458,7 +542,10 @@ AudioFileStreamParser_Destroy(AudioFileStreamParser* self)
     
     /* close the stream parser */
     if (self->stream_parser) AudioFileStreamClose(self->stream_parser);
-    
+
+    /* free allocated memory */
+    if (self->supported_formats) ATX_FreeMemory(self->supported_formats);
+        
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 

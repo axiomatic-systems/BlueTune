@@ -86,7 +86,13 @@
 -(IBAction) setInput: (id) sender;
 {
     //[player setInput: @"http://www.bok.net/tmp/test.mp3"];
+    [player stop];
     [player setInput: [playerInput text]];
+}
+
+-(IBAction) seek: (id) sender;
+{
+    //[player seekToPosition: (unsigned int)(playerPosition.value*1000.0f)  range: (unsigned int)(playerPosition.maximumValue*1000.0f)];
 }
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
@@ -106,28 +112,28 @@
 
 -(void) decoderStateDidChange: (BLT_Player_DecoderState) state
 {
-    /*switch (state) {
+    switch (state) {
         case BLT_PLAYER_DECODER_STATE_EOS:
-            [playerState setStringValue: @"[EOS]"]; break;
+            playerState.text = @"[EOS]"; break;
         case BLT_PLAYER_DECODER_STATE_STOPPED:
-            [playerState setStringValue: @"[STOPPED]"]; break;
+            playerState.text = @"[STOPPED]"; break;
         case BLT_PLAYER_DECODER_STATE_PLAYING:
-            [playerState setStringValue: @"[PLAYING]"]; break;
+            playerState.text = @"[PLAYING]"; break;
         case BLT_PLAYER_DECODER_STATE_PAUSED:
-            [playerState setStringValue: @"[PAUSED]"]; break;
-    }*/
+            playerState.text = @"[PAUSED]"; break;
+    }
 }
 
 -(void) streamTimecodeDidChange: (BLT_TimeCode) timecode
 {
-    //NSString* timecode_string = [NSString stringWithFormat:@"%02d:%02d:%02d", timecode.h, timecode.m, timecode.s];
-    //[playerTimecode setStringValue: timecode_string];
+    NSString* timecode_string = [NSString stringWithFormat:@"%02d:%02d:%02d", timecode.h, timecode.m, timecode.s];
+    playerTimecode.text = timecode_string;
 }
 
 -(void) streamPositionDidChange: (BLT_StreamPosition) position
 {
-    //float where = (float)position.offset*100.0f/(float)position.range;
-    //[playerPosition setFloatValue: where];
+    float where = (float)position.offset*100.0f/(float)position.range;
+    playerPosition.value = where;
 }
 
 -(void) streamInfoDidChange: (const BLT_StreamInfo*) info updateMask: (BLT_Mask) mask

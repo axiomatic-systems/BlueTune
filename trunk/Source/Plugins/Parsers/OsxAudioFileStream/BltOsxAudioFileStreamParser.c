@@ -43,15 +43,15 @@ typedef struct {
     BLT_MediaTypeId asbd;
     BLT_MediaTypeId audio_mp4;
     BLT_MediaTypeId audio_mp3;
-} AudioFileStreamParserMediaTypeIds;
+} OsxAudioFileStreamParserMediaTypeIds;
 
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseModule);
 
     /* members */
-    AudioFileStreamParserMediaTypeIds media_type_ids;
-} AudioFileStreamParserModule;
+    OsxAudioFileStreamParserMediaTypeIds media_type_ids;
+} OsxAudioFileStreamParserModule;
 
 typedef struct {
     /* interfaces */
@@ -61,7 +61,7 @@ typedef struct {
     /* members */
     ATX_InputStream* stream;
     BLT_Boolean      eos;
-} AudioFileStreamParserInput;
+} OsxAudioFileStreamParserInput;
 
 typedef struct {
     /* interfaces */
@@ -71,34 +71,34 @@ typedef struct {
     /* members */
     AsbdMediaType* media_type;
     ATX_List*      packets;
-} AudioFileStreamParserOutput;
+} OsxAudioFileStreamParserOutput;
 
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    AudioFileStreamParserInput        input;
-    AudioFileStreamParserOutput       output;
-    AudioFileStreamID                 stream_parser;
-    AudioFileStreamParserMediaTypeIds media_type_ids;
-    UInt32*                           supported_formats;
-    unsigned int                      supported_format_count;
-} AudioFileStreamParser;
+    OsxAudioFileStreamParserInput        input;
+    OsxAudioFileStreamParserOutput       output;
+    AudioFileStreamID                    stream_parser;
+    OsxAudioFileStreamParserMediaTypeIds media_type_ids;
+    UInt32*                              supported_formats;
+    unsigned int                         supported_format_count;
+} OsxAudioFileStreamParser;
 
 /*----------------------------------------------------------------------
 |   forward declarations
 +---------------------------------------------------------------------*/
-ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParserModule, BLT_Module)
-ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParser,       BLT_MediaNode)
-ATX_DECLARE_INTERFACE_MAP(AudioFileStreamParser,       ATX_Referenceable)
+ATX_DECLARE_INTERFACE_MAP(OsxAudioFileStreamParserModule, BLT_Module)
+ATX_DECLARE_INTERFACE_MAP(OsxAudioFileStreamParser,       BLT_MediaNode)
+ATX_DECLARE_INTERFACE_MAP(OsxAudioFileStreamParser,       ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_FormatIsSupported
+|    OsxAudioFileStreamParser_FormatIsSupported
 +---------------------------------------------------------------------*/
 static BLT_Boolean
-AudioFileStreamParser_FormatIsSupported(AudioFileStreamParser* self, 
-                                        UInt32                 format)
+OsxAudioFileStreamParser_FormatIsSupported(OsxAudioFileStreamParser* self, 
+                                           UInt32                 format)
 {
     unsigned int i;
     if (self->supported_formats == NULL) return BLT_TRUE; /* assume */
@@ -109,17 +109,17 @@ AudioFileStreamParser_FormatIsSupported(AudioFileStreamParser* self,
 }
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_OnProperty
+|    OsxAudioFileStreamParser_OnProperty
 +---------------------------------------------------------------------*/
 static void 
-AudioFileStreamParser_OnProperty(void*                     _self, 
-                                 AudioFileStreamID         stream,
-                                 AudioFileStreamPropertyID property_id,
-                                 UInt32*                   flags)
+OsxAudioFileStreamParser_OnProperty(void*                     _self, 
+                                    AudioFileStreamID         stream,
+                                    AudioFileStreamPropertyID property_id,
+                                    UInt32*                   flags)
 {
-    AudioFileStreamParser* self = (AudioFileStreamParser*)_self;
-    UInt32                 property_size = 0;
-    OSStatus               result;
+    OsxAudioFileStreamParser* self = (OsxAudioFileStreamParser*)_self;
+    UInt32                    property_size = 0;
+    OSStatus                  result;
     ATX_COMPILER_UNUSED(flags);
     
     switch (property_id) {
@@ -188,13 +188,13 @@ AudioFileStreamParser_OnProperty(void*                     _self,
                                    (int)items[i].mASBD.mSampleRate,
                                    items[i].mASBD.mChannelsPerFrame);
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE && 
-                        AudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        OsxAudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
                         ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE");
                         self->output.media_type->asbd = items[i].mASBD;
                         break;
                     }
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE_V2 &&
-                        AudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        OsxAudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
                         ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE_V2");
                         self->output.media_type->asbd = items[i].mASBD;
                         break;
@@ -231,16 +231,16 @@ AudioFileStreamParser_OnProperty(void*                     _self,
 }
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_OnPacket
+|    OsxAudioFileStreamParser_OnPacket
 +---------------------------------------------------------------------*/
 static void 
-AudioFileStreamParser_OnPacket(void*                         _self,
-                               UInt32                        number_of_bytes,
-                               UInt32                        number_of_packets,
-                               const void*                   data,
-                               AudioStreamPacketDescription* packet_descriptions)
+OsxAudioFileStreamParser_OnPacket(void*                         _self,
+                                  UInt32                        number_of_bytes,
+                                  UInt32                        number_of_packets,
+                                  const void*                   data,
+                                  AudioStreamPacketDescription* packet_descriptions)
 {
-    AudioFileStreamParser* self = (AudioFileStreamParser*)_self;
+    OsxAudioFileStreamParser* self = (OsxAudioFileStreamParser*)_self;
     
     ATX_LOG_FINER_2("new packet data, size=%d, count=%d", number_of_bytes, number_of_packets);
     if (self->output.media_type == NULL) return; 
@@ -264,11 +264,11 @@ AudioFileStreamParser_OnPacket(void*                         _self,
 }
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserInput_Setup
+|   OsxAudioFileStreamParserInput_Setup
 +---------------------------------------------------------------------*/
 static BLT_Result
-AudioFileStreamParserInput_Setup(AudioFileStreamParser* self, 
-                                 BLT_MediaTypeId        media_type_id)
+OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self, 
+                                    BLT_MediaTypeId        media_type_id)
 {
     OSStatus status;
     
@@ -286,8 +286,8 @@ AudioFileStreamParserInput_Setup(AudioFileStreamParser* self,
     
     /* create the stream parser */
     status = AudioFileStreamOpen(self,
-                                 AudioFileStreamParser_OnProperty,
-                                 AudioFileStreamParser_OnPacket,
+                                 OsxAudioFileStreamParser_OnProperty,
+                                 OsxAudioFileStreamParser_OnPacket,
                                  type_hint,
                                  &self->stream_parser);
     if (status != noErr) {
@@ -299,14 +299,14 @@ AudioFileStreamParserInput_Setup(AudioFileStreamParser* self,
 }
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserInput_SetStream
+|   OsxAudioFileStreamParserInput_SetStream
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
-                                     ATX_InputStream*     stream,
-                                     const BLT_MediaType* media_type)
+OsxAudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
+                                        ATX_InputStream*     stream,
+                                        const BLT_MediaType* media_type)
 {
-    AudioFileStreamParser* self = ATX_SELF_M(input, AudioFileStreamParser, BLT_InputStreamUser);
+    OsxAudioFileStreamParser* self = ATX_SELF_M(input, OsxAudioFileStreamParser, BLT_InputStreamUser);
 
     /* check the media type */
     if (media_type == NULL || 
@@ -327,43 +327,43 @@ AudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
     }
     
     /* create the stream parser */
-    return AudioFileStreamParserInput_Setup(self, media_type->id);
+    return OsxAudioFileStreamParserInput_Setup(self, media_type->id);
 }
 
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AudioFileStreamParserInput)
-    ATX_GET_INTERFACE_ACCEPT(AudioFileStreamParserInput, BLT_MediaPort)
-    ATX_GET_INTERFACE_ACCEPT(AudioFileStreamParserInput, BLT_InputStreamUser)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioFileStreamParserInput)
+    ATX_GET_INTERFACE_ACCEPT(OsxAudioFileStreamParserInput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(OsxAudioFileStreamParserInput, BLT_InputStreamUser)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_InputStreamUser interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP(AudioFileStreamParserInput, BLT_InputStreamUser)
-    AudioFileStreamParserInput_SetStream
+ATX_BEGIN_INTERFACE_MAP(OsxAudioFileStreamParserInput, BLT_InputStreamUser)
+    OsxAudioFileStreamParserInput_SetStream
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AudioFileStreamParserInput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(OsxAudioFileStreamParserInput, 
                                          "input",
                                          STREAM_PULL,
                                          IN)
-ATX_BEGIN_INTERFACE_MAP(AudioFileStreamParserInput, BLT_MediaPort)
-    AudioFileStreamParserInput_GetName,
-    AudioFileStreamParserInput_GetProtocol,
-    AudioFileStreamParserInput_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(OsxAudioFileStreamParserInput, BLT_MediaPort)
+    OsxAudioFileStreamParserInput_GetName,
+    OsxAudioFileStreamParserInput_GetProtocol,
+    OsxAudioFileStreamParserInput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserOutput_Flush
+|   OsxAudioFileStreamParserOutput_Flush
 +---------------------------------------------------------------------*/
 static BLT_Result
-AudioFileStreamParserOutput_Flush(AudioFileStreamParser* self)
+OsxAudioFileStreamParserOutput_Flush(OsxAudioFileStreamParser* self)
 {
     ATX_ListItem* item;
     while ((item = ATX_List_GetFirstItem(self->output.packets))) {
@@ -376,13 +376,13 @@ AudioFileStreamParserOutput_Flush(AudioFileStreamParser* self)
 }
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserOutput_GetPacket
+|   OsxAudioFileStreamParserOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
-                                      BLT_MediaPacket**   packet)
+OsxAudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
+                                         BLT_MediaPacket**   packet)
 {
-    AudioFileStreamParser* self = ATX_SELF_M(output, AudioFileStreamParser, BLT_PacketProducer);
+    OsxAudioFileStreamParser* self = ATX_SELF_M(output, OsxAudioFileStreamParser, BLT_PacketProducer);
     ATX_ListItem*          packet_item;
     OSStatus               status;
 
@@ -417,45 +417,45 @@ AudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AudioFileStreamParserOutput)
-    ATX_GET_INTERFACE_ACCEPT(AudioFileStreamParserOutput, BLT_MediaPort)
-    ATX_GET_INTERFACE_ACCEPT(AudioFileStreamParserOutput, BLT_PacketProducer)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioFileStreamParserOutput)
+    ATX_GET_INTERFACE_ACCEPT(OsxAudioFileStreamParserOutput, BLT_MediaPort)
+    ATX_GET_INTERFACE_ACCEPT(OsxAudioFileStreamParserOutput, BLT_PacketProducer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AudioFileStreamParserOutput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(OsxAudioFileStreamParserOutput, 
                                          "output",
                                          PACKET,
                                          OUT)
-ATX_BEGIN_INTERFACE_MAP(AudioFileStreamParserOutput, BLT_MediaPort)
-    AudioFileStreamParserOutput_GetName,
-    AudioFileStreamParserOutput_GetProtocol,
-    AudioFileStreamParserOutput_GetDirection,
+ATX_BEGIN_INTERFACE_MAP(OsxAudioFileStreamParserOutput, BLT_MediaPort)
+    OsxAudioFileStreamParserOutput_GetName,
+    OsxAudioFileStreamParserOutput_GetProtocol,
+    OsxAudioFileStreamParserOutput_GetDirection,
     BLT_MediaPort_DefaultQueryMediaType
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   BLT_PacketProducer interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP(AudioFileStreamParserOutput, BLT_PacketProducer)
-    AudioFileStreamParserOutput_GetPacket
+ATX_BEGIN_INTERFACE_MAP(OsxAudioFileStreamParserOutput, BLT_PacketProducer)
+    OsxAudioFileStreamParserOutput_GetPacket
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_Create
+|    OsxAudioFileStreamParser_Create
 +---------------------------------------------------------------------*/
 static BLT_Result
-AudioFileStreamParser_Create(BLT_Module*              module,
-                             BLT_Core*                core, 
-                             BLT_ModuleParametersType parameters_type,
-                             BLT_CString              parameters, 
-                             BLT_MediaNode**          object)
+OsxAudioFileStreamParser_Create(BLT_Module*              module,
+                                BLT_Core*                core, 
+                                BLT_ModuleParametersType parameters_type,
+                                BLT_CString              parameters, 
+                                BLT_MediaNode**          object)
 {
-    AudioFileStreamParser*       self;
-    AudioFileStreamParserModule* parser_module = (AudioFileStreamParserModule*)module;
-    BLT_Result                   result;
+    OsxAudioFileStreamParser*       self;
+    OsxAudioFileStreamParserModule* parser_module = (OsxAudioFileStreamParserModule*)module;
+    BLT_Result                      result;
     
     /* check parameters */
     if (parameters == NULL || 
@@ -464,7 +464,7 @@ AudioFileStreamParser_Create(BLT_Module*              module,
     }
 
     /* allocate memory for the object */
-    self = ATX_AllocateZeroMemory(sizeof(AudioFileStreamParser));
+    self = ATX_AllocateZeroMemory(sizeof(OsxAudioFileStreamParser));
     if (self == NULL) {
         *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
@@ -515,25 +515,25 @@ AudioFileStreamParser_Create(BLT_Module*              module,
     }
     
     /* setup interfaces */
-    ATX_SET_INTERFACE_EX(self, AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
-    ATX_SET_INTERFACE_EX(self, AudioFileStreamParser, BLT_BaseMediaNode, ATX_Referenceable);
-    ATX_SET_INTERFACE(&self->input,  AudioFileStreamParserInput,  BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->input,  AudioFileStreamParserInput,  BLT_InputStreamUser);
-    ATX_SET_INTERFACE(&self->output, AudioFileStreamParserOutput, BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->output, AudioFileStreamParserOutput, BLT_PacketProducer);
+    ATX_SET_INTERFACE_EX(self, OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_SET_INTERFACE_EX(self, OsxAudioFileStreamParser, BLT_BaseMediaNode, ATX_Referenceable);
+    ATX_SET_INTERFACE(&self->input,  OsxAudioFileStreamParserInput,  BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->input,  OsxAudioFileStreamParserInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&self->output, OsxAudioFileStreamParserOutput, BLT_MediaPort);
+    ATX_SET_INTERFACE(&self->output, OsxAudioFileStreamParserOutput, BLT_PacketProducer);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_Destroy
+|    OsxAudioFileStreamParser_Destroy
 +---------------------------------------------------------------------*/
 static BLT_Result
-AudioFileStreamParser_Destroy(AudioFileStreamParser* self)
+OsxAudioFileStreamParser_Destroy(OsxAudioFileStreamParser* self)
 { 
     /* release any packet we may hold */
-    AudioFileStreamParserOutput_Flush(self);
+    OsxAudioFileStreamParserOutput_Flush(self);
     ATX_List_Destroy(self->output.packets);
     BLT_MediaType_Free((BLT_MediaType*)self->output.media_type);
     
@@ -556,14 +556,14 @@ AudioFileStreamParser_Destroy(AudioFileStreamParser* self)
 }
                     
 /*----------------------------------------------------------------------
-|   AudioFileStreamParser_GetPortByName
+|   OsxAudioFileStreamParser_GetPortByName
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParser_GetPortByName(BLT_MediaNode*  _self,
-                                    BLT_CString     name,
-                                    BLT_MediaPort** port)
+OsxAudioFileStreamParser_GetPortByName(BLT_MediaNode*  _self,
+                                       BLT_CString     name,
+                                       BLT_MediaPort** port)
 {
-    AudioFileStreamParser* self = ATX_SELF_EX(AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
+    OsxAudioFileStreamParser* self = ATX_SELF_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (ATX_StringsEqual(name, "input")) {
         *port = &ATX_BASE(&self->input, BLT_MediaPort);
@@ -578,14 +578,14 @@ AudioFileStreamParser_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
-|    AudioFileStreamParser_Seek
+|    OsxAudioFileStreamParser_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParser_Seek(BLT_MediaNode* _self,
-                           BLT_SeekMode*  mode,
-                           BLT_SeekPoint* point)
+OsxAudioFileStreamParser_Seek(BLT_MediaNode* _self,
+                              BLT_SeekMode*  mode,
+                              BLT_SeekPoint* point)
 {
-    AudioFileStreamParser* self = ATX_SELF_EX(AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
+    OsxAudioFileStreamParser* self = ATX_SELF_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
 
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
@@ -594,7 +594,7 @@ AudioFileStreamParser_Seek(BLT_MediaNode* _self,
     self->input.eos = BLT_FALSE;
 
     /* remove any packets in the output list */
-    AudioFileStreamParserOutput_Flush(self);
+    OsxAudioFileStreamParserOutput_Flush(self);
 
     return BLT_SUCCESS;
 }
@@ -602,42 +602,42 @@ AudioFileStreamParser_Seek(BLT_MediaNode* _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AudioFileStreamParser)
-    ATX_GET_INTERFACE_ACCEPT_EX(AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode)
-    ATX_GET_INTERFACE_ACCEPT_EX(AudioFileStreamParser, BLT_BaseMediaNode, ATX_Referenceable)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioFileStreamParser)
+    ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode)
+    ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   BLT_MediaNode interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP_EX(AudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode)
+ATX_BEGIN_INTERFACE_MAP_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
-    AudioFileStreamParser_GetPortByName,
+    OsxAudioFileStreamParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
     BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    AudioFileStreamParser_Seek
+    OsxAudioFileStreamParser_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AudioFileStreamParser, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioFileStreamParser, 
                                          BLT_BaseMediaNode, 
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserModule_Attach
+|   OsxAudioFileStreamParserModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
+OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
-    AudioFileStreamParserModule* self = ATX_SELF_EX(AudioFileStreamParserModule, BLT_BaseModule, BLT_Module);
-    BLT_Registry*                registry;
-    BLT_Result                   result;
+    OsxAudioFileStreamParserModule* self = ATX_SELF_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, BLT_Module);
+    BLT_Registry*                   registry;
+    BLT_Result                      result;
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
@@ -724,16 +724,16 @@ AudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
 }
 
 /*----------------------------------------------------------------------
-|   AudioFileStreamParserModule_Probe
+|   OsxAudioFileStreamParserModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AudioFileStreamParserModule_Probe(BLT_Module*              _self, 
-                                  BLT_Core*                core,
-                                  BLT_ModuleParametersType parameters_type,
-                                  BLT_AnyConst             parameters,
-                                  BLT_Cardinal*            match)
+OsxAudioFileStreamParserModule_Probe(BLT_Module*              _self, 
+                                     BLT_Core*                core,
+                                     BLT_ModuleParametersType parameters_type,
+                                     BLT_AnyConst             parameters,
+                                     BLT_Cardinal*            match)
 {
-    AudioFileStreamParserModule* self = ATX_SELF_EX(AudioFileStreamParserModule, BLT_BaseModule, BLT_Module);
+    OsxAudioFileStreamParserModule* self = ATX_SELF_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
     
     switch (parameters_type) {
@@ -765,7 +765,7 @@ AudioFileStreamParserModule_Probe(BLT_Module*              _self,
             /* compute the match level */
             if (constructor->name != NULL) {
                 /* we're being probed by name */
-                if (ATX_StringsEqual(constructor->name, "AudioFileStreamParser")) {
+                if (ATX_StringsEqual(constructor->name, "OsxAudioFileStreamParser")) {
                     /* our name */
                     *match = BLT_MODULE_PROBE_MATCH_EXACT;
                 } else {
@@ -792,48 +792,41 @@ AudioFileStreamParserModule_Probe(BLT_Module*              _self,
 /*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
-ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AudioFileStreamParserModule)
-    ATX_GET_INTERFACE_ACCEPT_EX(AudioFileStreamParserModule, BLT_BaseModule, BLT_Module)
-    ATX_GET_INTERFACE_ACCEPT_EX(AudioFileStreamParserModule, BLT_BaseModule, ATX_Referenceable)
+ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioFileStreamParserModule)
+    ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, BLT_Module)
+    ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
 |   node factory
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(AudioFileStreamParserModule, AudioFileStreamParser)
+BLT_MODULE_IMPLEMENT_SIMPLE_MEDIA_NODE_FACTORY(OsxAudioFileStreamParserModule, OsxAudioFileStreamParser)
 
 /*----------------------------------------------------------------------
 |   BLT_Module interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP_EX(AudioFileStreamParserModule, BLT_BaseModule, BLT_Module)
+ATX_BEGIN_INTERFACE_MAP_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, BLT_Module)
     BLT_BaseModule_GetInfo,
-    AudioFileStreamParserModule_Attach,
-    AudioFileStreamParserModule_CreateInstance,
-    AudioFileStreamParserModule_Probe
+    OsxAudioFileStreamParserModule_Attach,
+    OsxAudioFileStreamParserModule_CreateInstance,
+    OsxAudioFileStreamParserModule_Probe
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-#define AudioFileStreamParserModule_Destroy(x) \
+#define OsxAudioFileStreamParserModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AudioFileStreamParserModule, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioFileStreamParserModule, 
                                          BLT_BaseModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AudioFileStreamParserModule, "OSX AudioFileStream Parser", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_OsxAudioFileStreamParserModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return AudioFileStreamParserModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(OsxAudioFileStreamParserModule,
+                                         "OSX AudioFileStream Parser",
+                                         "com.axiosys.parsers.osx-audio-file-stream",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

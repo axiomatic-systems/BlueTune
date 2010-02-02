@@ -4,20 +4,23 @@
 @interface TouchPlayerController : NSObject 
 {
     BLT_PlayerObject*          player;
+    IBOutlet UIButton*         openButton;
     IBOutlet UIButton*         playButton;
-    IBOutlet UITextField*      playerState;
+    IBOutlet UIButton*         pauseButton;
+    IBOutlet UIButton*         stopButton;
+    IBOutlet UILabel*          playerState;
+    IBOutlet UILabel*          playerTimecode;
     IBOutlet UITextField*      playerInput;
-    IBOutlet UITextField*      playerTimecode;
     IBOutlet UISlider*         playerPosition;
-/*    IBOutlet NSTableView*      playerStreamInfoView;
-    IBOutlet NSTableView*      playerPropertiesView;
-*/
+    IBOutlet UITableView*      playerStreamInfoView;
+    IBOutlet UITableView*      playerPropertiesView;
 }
 
 -(IBAction) play:     (id) sender;
 -(IBAction) stop:     (id) sender;
 -(IBAction) pause:    (id) sender;
 -(IBAction) setInput: (id) sender;
+-(IBAction) seek:     (id) sender;
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id;
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result;

@@ -58,6 +58,7 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
             return result;
         }
         BLT_Core_RegisterModule(core, module);
+        ATX_RELEASE_OBJECT(module);
     }
     
     return BLT_SUCCESS;

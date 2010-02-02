@@ -429,10 +429,19 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FileInputModule,
 BLT_Result 
 BLT_FileInputModule_GetModuleObject(BLT_Module** object)
 {
+    ATX_Property properties[2] = {
+        {"version",   {ATX_PROPERTY_VALUE_TYPE_STRING, {"1.0.0"}}},
+        {"copyright", {ATX_PROPERTY_VALUE_TYPE_STRING, {"(c) 2001-2010 Axiomatic Systems, LLC"}}}
+    };
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("File Input", NULL, 0,
-                                 &FileInputModule_BLT_ModuleInterface,
-                                 &FileInputModule_ATX_ReferenceableInterface,
-                                 object);
+    return BLT_BaseModule_CreateEx("File Input", 
+                                   "com.axiosys.input.file",
+                                   0,
+                                   ATX_ARRAY_SIZE(properties),
+                                   properties,
+                                   &FileInputModule_BLT_ModuleInterface,
+                                   &FileInputModule_ATX_ReferenceableInterface,
+                                   0,
+                                   object);
 }

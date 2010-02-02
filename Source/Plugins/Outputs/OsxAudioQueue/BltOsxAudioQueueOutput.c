@@ -951,12 +951,17 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioQueueOutputModule,
 BLT_Result 
 BLT_OsxAudioQueueOutputModule_GetModuleObject(BLT_Module** object)
 {
+    BLT_MODULE_DECLARE_STANDARD_PROPERTIES("1.1.0", BLT_MODULE_AXIOMATIC_COPYRIGHT);
     if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
 
-    return BLT_BaseModule_Create("OSX Audio Queue Output", NULL, 0, 
-                                 &OsxAudioQueueOutputModule_BLT_ModuleInterface,
-                                 &OsxAudioQueueOutputModule_ATX_ReferenceableInterface,
-                                 object);
+    return BLT_BaseModule_CreateEx("OSX Audio Queue Output", 
+                                   "com.axiosys.output.osx-audio-queue", 
+                                   0, 
+                                   BLT_MODULE_ARGS_STANDARD_PROPERTIES,
+                                   &OsxAudioQueueOutputModule_BLT_ModuleInterface,
+                                   &OsxAudioQueueOutputModule_ATX_ReferenceableInterface,
+                                   sizeof(OsxAudioQueueOutputModule),
+                                   object);
 }
 #else 
 /*----------------------------------------------------------------------

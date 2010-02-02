@@ -49,17 +49,14 @@ typedef enum {
 } BLT_ModuleParametersType;
 
 /**
- * Module identifier.
- */
-typedef unsigned char BLT_ModuleId[16];
-
-/**
  * Information about a module.
  */
 typedef struct {
-    BLT_CString  name;
-    BLT_ModuleId id;
-    BLT_Flags    flags;
+    BLT_CString   name;
+    BLT_CString   uid;
+    BLT_Flags     flags;
+    BLT_Cardinal  property_count;
+    ATX_Property* properties;
 } BLT_ModuleInfo;
 
 /**
@@ -186,19 +183,38 @@ extern "C" {
 BLT_Result
 BLT_BaseModule_Construct(BLT_BaseModule* self, 
                          BLT_CString     name, 
-                         BLT_ModuleId    id,
+                         BLT_CString     uid,
                          BLT_Flags       flags);
+
+BLT_Result
+BLT_BaseModule_ConstructEx(BLT_BaseModule* self, 
+                           BLT_CString     name, 
+                           BLT_CString     uid,
+                           BLT_Flags       flags,
+                           BLT_Cardinal    property_count,
+                           ATX_Property*   properties);
 
 BLT_Result
 BLT_BaseModule_Destruct(BLT_BaseModule* self);
 
 BLT_Result
 BLT_BaseModule_Create(BLT_CString                name, 
-                      BLT_ModuleId               id,
+                      BLT_CString                uid,
                       BLT_Flags                  flags,
                       const BLT_ModuleInterface* module_interface,
                       const ATX_ReferenceableInterface* referenceable_interface,
                       BLT_Module**               object);
+
+BLT_Result
+BLT_BaseModule_CreateEx(BLT_CString                name, 
+                        BLT_CString                uid,
+                        BLT_Flags                  flags,
+                        BLT_Cardinal               property_count,
+                        ATX_Property*              properties,
+                        const BLT_ModuleInterface* module_interface,
+                        const ATX_ReferenceableInterface* referenceable_interface,
+                        BLT_Size                   intance_size,
+                        BLT_Module**               object);
 
 BLT_Result
 BLT_BaseModule_Destroy(BLT_BaseModule* self);
@@ -241,6 +257,30 @@ _module_class##_Create(BLT_Module** object)                         \
                          BLT_BaseModule, ATX_Referenceable);        \
     *object = &ATX_BASE_EX(module, BLT_BaseModule, BLT_Module);     \
     return BLT_SUCCESS;                                             \
+}
+
+#define BLT_MODULE_AXIOMATIC_COPYRIGHT "(c) 2001-2010 Axiomatic Systems, LLC"
+#define BLT_MODULE_DECLARE_STANDARD_PROPERTIES(_version, _copyright) \
+ATX_Property properties[2] = {                                       \
+    {"version",   {ATX_PROPERTY_VALUE_TYPE_STRING, {_version}}},     \
+    {"copyright", {ATX_PROPERTY_VALUE_TYPE_STRING, {_copyright}}}    \
+}
+#define BLT_MODULE_ARGS_STANDARD_PROPERTIES ATX_ARRAY_SIZE(properties), properties
+
+#define BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(_class, _name, _uid, _version, _copyright) \
+BLT_Result BLT_##_class##_GetModuleObject(BLT_Module** object)                  \
+{                                                                               \
+    BLT_MODULE_DECLARE_STANDARD_PROPERTIES(_version, _copyright);               \
+    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;                    \
+                                                                                \
+    return BLT_BaseModule_CreateEx(_name,                                       \
+                                   _uid,                                        \
+                                   0,                                           \
+                                   BLT_MODULE_ARGS_STANDARD_PROPERTIES,         \
+                                   &_class##_BLT_ModuleInterface,               \
+                                   &_class##_ATX_ReferenceableInterface,        \
+                                   sizeof(_class),                              \
+                                   object);                                     \
 }
 
 /** @} */

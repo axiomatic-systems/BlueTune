@@ -128,4 +128,19 @@ private:
     return player->Stop();
 }
 
+-(BLT_Result) seekToTime: (UInt64) time
+{
+    return player->SeekToTime(time);
+}
+
+-(BLT_Result) seekToTimeStampHours: (UInt8) hours minutes: (UInt8)minutes seconds: (UInt8) seconds frames: (UInt8) frames
+{
+    return player->SeekToTimeStamp(hours, minutes, seconds, frames);
+}
+
+-(BLT_Result) seekToPosition: (UInt64) position range: (UInt64) range
+{
+    return player->SeekToPosition(position, range);
+}
+
 @end

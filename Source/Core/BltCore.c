@@ -154,6 +154,9 @@ Core_RegisterModule(BLT_Core* _self, BLT_Module* module)
     result = ATX_List_AddData(self->modules, (ATX_Object*)module);
     if (BLT_FAILED(result)) return result;
 
+    /* keep a reference to the object */
+    ATX_REFERENCE_OBJECT(module);
+    
     /* attach the module to the core */
     result = BLT_Module_Attach(module, _self);
     if (BLT_FAILED(result)) return result;
@@ -169,6 +172,9 @@ Core_UnRegisterModule(BLT_Core* _self, BLT_Module* module)
 {
     Core* self = ATX_SELF(Core, BLT_Core);
 
+    /* release the reference */
+    ATX_RELEASE_OBJECT(module);
+    
     /* remove the module object from the list */
     return ATX_List_RemoveData(self->modules, (ATX_Object*)module);
 }

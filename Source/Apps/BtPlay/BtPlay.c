@@ -240,6 +240,26 @@ BLTP_ParseCommandLine(char** args)
 }
 
 /*----------------------------------------------------------------------
+|    BLTP_PrintPropertyValue
++---------------------------------------------------------------------*/
+static void
+BLTP_PrintPropertyValue(const ATX_PropertyValue* value)
+{
+    switch (value->type) {
+      case ATX_PROPERTY_VALUE_TYPE_STRING:
+        ATX_ConsoleOutputF("%s", value->data.string);
+        break;
+
+      case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+        ATX_ConsoleOutputF("%d", value->data.integer);
+        break;
+
+      default:
+        break;
+    }
+}
+
+/*----------------------------------------------------------------------
 |    BLTP_ListModules
 +---------------------------------------------------------------------*/
 static void
@@ -247,6 +267,7 @@ BLTP_ListModules(BLT_Decoder* decoder)
 {
     ATX_List*     modules = NULL;
     ATX_ListItem* item = NULL;
+    int           i = 0;
     BLT_Result    result;
     
     /* get the list of modules from the decoder */
@@ -257,7 +278,21 @@ BLTP_ListModules(BLT_Decoder* decoder)
     for (item = ATX_List_GetFirstItem(modules);
          item;
          item = ATX_ListItem_GetNext(item)) {
-        /*BLT_Module* module = (BLT_Module*)ATX_ListItem_GetData(item);*/
+        BLT_Module*    module = (BLT_Module*)ATX_ListItem_GetData(item);
+        BLT_ModuleInfo info;
+        if (BLT_SUCCEEDED(BLT_Module_GetInfo(module, &info))) {
+            unsigned int j;
+            ATX_ConsoleOutputF("Module %02d: %s\n", i, info.name?info.name:"");
+            if (info.uid) {
+                ATX_ConsoleOutputF("  uid = %s\n", info.uid);
+            }
+            for (j=0; j<info.property_count; j++) {
+                ATX_ConsoleOutputF("  %s = ", info.properties[j].name);
+                BLTP_PrintPropertyValue(&info.properties[j].value);
+                ATX_ConsoleOutput("\n");
+            }
+            i++;
+        }
     }
     
     /* cleanup */
@@ -300,18 +335,8 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
             ATX_ConsoleOutputF("BLTP::OnStreamPropertyChanged - Property %s cleared\n", name);
         } else {
             ATX_ConsoleOutputF("BLTP::OnStreamPropretyChanged - %s = ", name);
-            switch (value->type) {
-              case ATX_PROPERTY_VALUE_TYPE_STRING:
-                ATX_ConsoleOutputF("%s\n", value->data.string);
-                break;
-
-              case ATX_PROPERTY_VALUE_TYPE_INTEGER:
-                ATX_ConsoleOutputF("%d\n", value->data.integer);
-                break;
-
-              default:
-                ATX_ConsoleOutput("\n");
-            }
+            BLTP_PrintPropertyValue(value);
+            ATX_ConsoleOutput("\n");
         }
     }
 }

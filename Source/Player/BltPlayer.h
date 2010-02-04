@@ -182,10 +182,14 @@ class BLT_Player : public BLT_DecoderClient
 
     /**
      * Register a module with the decoder.
+     * This method transfers ownership of the reference held by the caller:
+     * the module's reference count is not incremented, so the caller
+     * should not call ATX_RELEASE() on the module object after this method
+     * returns.
      * NOTE: the module's methods will be called in the context of
      * the decoding thread. The caller of this method should not
      * make any call to the module's methods after this method 
-     * call returns.
+     * call returns unless the module's implementation is thread-safe.
      * @param module Pointer to a module object.
      */
     virtual BLT_Result RegisterModule(BLT_Module* module);
@@ -474,9 +478,15 @@ public:
 -(BLT_Player*)        player;
 -(BLT_Result)         setInput: (NSString*) name;
 -(BLT_Result)         setInput: (NSString*) name withType: (NSString*) mime_type;
+-(BLT_Result)         setOutput: (NSString*) name;
+-(BLT_Result)         setOutput: (NSString*) name withType: (NSString*) mime_type;
 -(BLT_Result)         play;
 -(BLT_Result)         pause;
 -(BLT_Result)         stop;
+-(BLT_Result)         seekToTime: (UInt64) time;
+-(BLT_Result)         seekToTimeStampHours: (UInt8) hours minutes: (UInt8)minutes seconds: (UInt8) seconds frames: (UInt8) frames;
+-(BLT_Result)         seekToPosition: (UInt64) position range: (UInt64) range;
+-(BLT_Result)         setVolume: (float) volume;
 @end
 
 @interface BLT_PlayerObjectDelegate : NSObject

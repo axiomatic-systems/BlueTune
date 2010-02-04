@@ -579,6 +579,7 @@ BLT_DecoderServer::OnRegisterModuleCommand(BLT_Module* module)
     BLT_Result result;
     ATX_LOG_FINE("enter");
     result = BLT_Decoder_RegisterModule(m_Decoder, module);
+    ATX_RELEASE_OBJECT(module);
     SendReply(BLT_DecoderServer_Message::COMMAND_ID_REGISTER_MODULE, result);
 }
 

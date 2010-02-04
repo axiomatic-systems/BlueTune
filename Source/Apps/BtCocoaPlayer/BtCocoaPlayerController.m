@@ -63,6 +63,8 @@
     if ((self = [super init])) {
         player = [[BLT_PlayerObject alloc] init];
         [player setDelegate: self];
+        // TEMP
+        [player setOutput: @"osxaq:0"];
     }
     return self;
 }
@@ -79,9 +81,37 @@
     [player play];
 }
 
+-(IBAction) stop: (id) sender;
+{
+    [player stop];
+}
+
+-(IBAction) pause: (id) sender;
+{
+    [player pause];
+}
+
 -(IBAction) setInput: (id) sender;
 {
+    [player stop];
     [player setInput: [playerInput stringValue]];
+}
+
+-(IBAction) seek: (id) sender;
+{
+    UInt64 position = [playerPosition floatValue] * 1000.0;
+    UInt64 range    = [playerPosition maxValue] * 1000.0;
+    [player seekToPosition: position range: range];
+}
+
+-(IBAction) setVolume: (id) sender;
+{
+    float volume = [playerVolume floatValue]/[playerVolume maxValue];
+    [player setVolume: volume];
+}
+
+-(IBAction) chooseFile: (id) sender;
+{
 }
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id

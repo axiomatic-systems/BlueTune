@@ -80,8 +80,9 @@ private:
 -(void) dealloc
 {
     [delegate release];
+    BLT_Player::EventListener* listener = player->GetEventListener();
     player->SetEventListener(NULL);
-    delete player->GetEventListener();
+    delete listener;
     delete player;
     delete ((NPT_CocoaMessageQueue*)messageQueue);
     [super dealloc];
@@ -113,6 +114,16 @@ private:
     return player->SetInput([name UTF8String], [mime_type UTF8String]);
 }
 
+-(BLT_Result) setOutput: (NSString*) name
+{
+    return [self setOutput: name withType: NULL];
+}
+
+-(BLT_Result) setOutput: (NSString*) name withType: (NSString*) mime_type
+{
+    return player->SetOutput([name UTF8String], [mime_type UTF8String]);
+}
+
 -(BLT_Result) play
 {
     return player->Play();
@@ -142,5 +153,11 @@ private:
 {
     return player->SeekToPosition(position, range);
 }
+
+-(BLT_Result) setVolume: (float) volume
+{
+    return player->SetVolume(volume);
+}
+
 
 @end

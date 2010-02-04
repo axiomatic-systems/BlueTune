@@ -49,8 +49,9 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.common")
 {                                                                             \
     extern BLT_Result BLT_##x##Module_GetModuleObject(BLT_Module** module);   \
     BLT_Module* module = NULL;                                                \
+    BLT_Result result;                                                        \
     ATX_LOG_FINE("registering BLT_" #x "Module");                             \
-    BLT_Result result = BLT_##x##Module_GetModuleObject(&module);             \
+    result = BLT_##x##Module_GetModuleObject(&module);                        \
     if (BLT_SUCCEEDED(result)) {                                              \
         BLT_Core_RegisterModule(core, module);                                \
         ATX_RELEASE_OBJECT(module);                                           \

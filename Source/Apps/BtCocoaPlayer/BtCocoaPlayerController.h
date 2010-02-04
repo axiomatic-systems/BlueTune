@@ -13,16 +13,25 @@
 {
     BLT_PlayerObject*          player;
     IBOutlet NSButton*         playButton;
+    IBOutlet NSButton*         stopButton;
+    IBOutlet NSButton*         pauseButton;
+    IBOutlet NSButton*         fileButton;
     IBOutlet NSTextField*      playerState;
     IBOutlet NSTextField*      playerInput;
     IBOutlet NSTextField*      playerTimecode;
     IBOutlet NSSlider*         playerPosition;
+    IBOutlet NSSlider*         playerVolume;
     IBOutlet NSTableView*      playerStreamInfoView;
     IBOutlet NSTableView*      playerPropertiesView;
 }
 
--(IBAction) play:     (id) sender;
--(IBAction) setInput: (id) sender;
+-(IBAction) play:       (id) sender;
+-(IBAction) stop:       (id) sender;
+-(IBAction) pause:      (id) sender;
+-(IBAction) seek:       (id) sender;
+-(IBAction) setInput:   (id) sender;
+-(IBAction) setVolume:  (id) sender;
+-(IBAction) chooseFile: (id) sender;
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id;
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result;

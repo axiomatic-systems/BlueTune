@@ -265,15 +265,15 @@ public:
     // methods
     BLT_DecoderServer_RegisterModuleCommandMessage(BLT_Module* module) :
         BLT_DecoderServer_Message(COMMAND_ID_REGISTER_MODULE),
-        m_Module(*module) {}
+        m_Module(module) {}
     NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
-        handler->OnRegisterModuleCommand(&m_Module);
+        handler->OnRegisterModuleCommand(m_Module);
         return NPT_SUCCESS;
     }
 
  private:
     // members
-    BLT_Module m_Module;
+    BLT_Module* m_Module;
 };
 
 /*----------------------------------------------------------------------
@@ -450,9 +450,9 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual void OnAddNodeCommand(BLT_CString name);
     virtual void OnSetVolumeCommand(float volume);
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
-                              const NPT_String&        target,
-                              const NPT_String&        name,
-                              const ATX_PropertyValue* value);
+                                      const NPT_String&        target,
+                                      const NPT_String&        name,
+                                      const ATX_PropertyValue* value);
 
     // BLT_EventListener methods
     virtual void OnEvent(const ATX_Object* source,

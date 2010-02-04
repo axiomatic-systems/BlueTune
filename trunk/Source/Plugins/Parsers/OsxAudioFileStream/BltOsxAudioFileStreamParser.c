@@ -50,6 +50,8 @@ typedef struct {
     ATX_EXTENDS(BLT_BaseModule);
 
     /* members */
+    UInt32*                              supported_formats;
+    unsigned int                         supported_format_count;
     OsxAudioFileStreamParserMediaTypeIds media_type_ids;
 } OsxAudioFileStreamParserModule;
 
@@ -78,12 +80,11 @@ typedef struct {
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    OsxAudioFileStreamParserInput        input;
-    OsxAudioFileStreamParserOutput       output;
-    AudioFileStreamID                    stream_parser;
-    OsxAudioFileStreamParserMediaTypeIds media_type_ids;
-    UInt32*                              supported_formats;
-    unsigned int                         supported_format_count;
+    OsxAudioFileStreamParserModule* module;
+    OsxAudioFileStreamParserInput   input;
+    OsxAudioFileStreamParserOutput  output;
+    AudioFileStreamID               stream_parser;
+    BLT_StreamInfo                  stream_info;
 } OsxAudioFileStreamParser;
 
 /*----------------------------------------------------------------------
@@ -94,11 +95,11 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioFileStreamParser,       BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioFileStreamParser,       ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|    OsxAudioFileStreamParser_FormatIsSupported
+|    OsxAudioFileStreamParserModule_FormatIsSupported
 +---------------------------------------------------------------------*/
 static BLT_Boolean
-OsxAudioFileStreamParser_FormatIsSupported(OsxAudioFileStreamParser* self, 
-                                           UInt32                 format)
+OsxAudioFileStreamParserModule_FormatIsSupported(OsxAudioFileStreamParserModule* self, 
+                                                 UInt32                          format)
 {
     unsigned int i;
     if (self->supported_formats == NULL) return BLT_TRUE; /* assume */
@@ -135,6 +136,9 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
         case kAudioFileStreamProperty_DataFormat: 
         case kAudioFileStreamProperty_FormatList:
         case kAudioFileStreamProperty_MagicCookieData:
+        case kAudioFileStreamProperty_AudioDataByteCount:
+        case kAudioFileStreamProperty_AudioDataPacketCount:
+        case kAudioFileStreamProperty_BitRate:
             /* ask the parser to cache the property */
             *flags |= kAudioFileStreamPropertyFlag_CacheProperty;
             break;
@@ -157,7 +161,7 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                 media_type_size += property_size-1;
             }
             self->output.media_type = (AsbdMediaType*)ATX_AllocateZeroMemory(media_type_size);
-            BLT_MediaType_InitEx(&self->output.media_type->base, self->media_type_ids.asbd, media_type_size);
+            BLT_MediaType_InitEx(&self->output.media_type->base, self->module->media_type_ids.asbd, media_type_size);
             self->output.media_type->magic_cookie_size = property_size;
             
             /* copy the magic cookie if there is one */
@@ -188,13 +192,13 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                                    (int)items[i].mASBD.mSampleRate,
                                    items[i].mASBD.mChannelsPerFrame);
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE && 
-                        OsxAudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        OsxAudioFileStreamParserModule_FormatIsSupported(self->module, items[i].mASBD.mFormatID)) {
                         ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE");
                         self->output.media_type->asbd = items[i].mASBD;
                         break;
                     }
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE_V2 &&
-                        OsxAudioFileStreamParser_FormatIsSupported(self, items[i].mASBD.mFormatID)) {
+                        OsxAudioFileStreamParserModule_FormatIsSupported(self->module, items[i].mASBD.mFormatID)) {
                         ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE_V2");
                         self->output.media_type->asbd = items[i].mASBD;
                         break;
@@ -222,6 +226,77 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                                self->output.media_type->asbd.mChannelsPerFrame);
             }
             
+            /* get some info about the format */
+            {
+                CFStringRef name = NULL;
+                char        buffer[1024];
+                UInt64      property_64;
+                UInt32      property_32;
+                
+                self->stream_info.type          = BLT_STREAM_TYPE_AUDIO;
+                self->stream_info.channel_count = self->output.media_type->asbd.mChannelsPerFrame;
+                self->stream_info.sample_rate   = (ATX_UInt32)self->output.media_type->asbd.mSampleRate;
+                self->stream_info.data_type     = "";
+                self->stream_info.mask          = BLT_STREAM_INFO_MASK_TYPE          |
+                                                  BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
+                                                  BLT_STREAM_INFO_MASK_SAMPLE_RATE   |
+                                                  BLT_STREAM_INFO_MASK_DATA_TYPE;
+                
+                switch (self->output.media_type->asbd.mFormatID) {
+                    case kAudioFormatAppleLossless:  self->stream_info.data_type = "Apple Lossless";       break;
+                    case kAudioFormatAC3:            self->stream_info.data_type = "Dolby AC-3";           break;
+                    case kAudioFormatMPEG4AAC:       self->stream_info.data_type = "AAC";                  break;
+                    case kAudioFormatMPEG4AAC_HE:    self->stream_info.data_type = "He-AAC";               break;
+                    case kAudioFormatMPEG4AAC_HE_V2: self->stream_info.data_type = "He-AAC v2";            break;
+                    case kAudioFormatMPEG4AAC_LD:    self->stream_info.data_type = "AAC Low Delay";        break;
+                    case kAudioFormatMPEGLayer1:     self->stream_info.data_type = "MPEG-1 Audio Layer 1"; break;
+                    case kAudioFormatMPEGLayer2:     self->stream_info.data_type = "MPEG-1 Audio Layer 2"; break;
+                    case kAudioFormatMPEGLayer3:     self->stream_info.data_type = "MPEG-1 Audio Layer 3"; break;
+                    default:
+                        property_size = sizeof(CFStringRef);
+                        result = AudioFormatGetProperty(kAudioFormatProperty_FormatName, 
+                                                        sizeof(self->output.media_type->asbd), 
+                                                        &self->output.media_type->asbd, 
+                                                        &property_size,
+                                                        &name);
+                        if (result == noErr) {
+                            if (CFStringGetCString(name, buffer, sizeof(buffer), kCFStringEncodingUTF8)) {
+                                self->stream_info.data_type = buffer;
+                            }
+                        }
+                        break;
+                }
+                
+                property_size = sizeof(UInt64);
+                if (AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_AudioDataByteCount, &property_size, &property_64) == noErr) {
+                    self->stream_info.size = property_64;
+                    self->stream_info.mask |= BLT_STREAM_INFO_MASK_SIZE;
+                }
+                
+                property_size = sizeof(UInt64);
+                if (AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_AudioDataPacketCount, &property_size, &property_64) == noErr) {
+                    UInt64 frame_count = property_64*(UInt64)self->output.media_type->asbd.mFramesPerPacket;
+                    if ((UInt64)self->output.media_type->asbd.mSampleRate) {
+                        self->stream_info.duration = ((UInt64)1000*frame_count)/(UInt64)self->output.media_type->asbd.mSampleRate;
+                        self->stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+                    }
+                }
+                
+                property_size = sizeof(UInt32);
+                if (AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_BitRate, &property_size, &property_32) == noErr) {
+                    self->stream_info.nominal_bitrate = property_32;
+                    self->stream_info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
+                }
+
+                if ((self->stream_info.mask & BLT_STREAM_INFO_MASK_SIZE)     &&
+                    (self->stream_info.mask & BLT_STREAM_INFO_MASK_DURATION) &&
+                     self->stream_info.duration != 0) {
+                    self->stream_info.average_bitrate = 8000.0*(double)self->stream_info.size/(double)self->stream_info.duration;
+                    self->stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
+                }
+                
+                BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &self->stream_info);
+            }
             break;
         }
         
@@ -255,10 +330,23 @@ OsxAudioFileStreamParser_OnPacket(void*                         _self,
                                             &self->output.media_type->base,
                                             &packet);
         if (BLT_FAILED(result)) return;
+        
+        /* copy the packet payload */
         ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(packet), 
                        packet_data+packet_descriptions[i].mStartOffset,
                        packet_descriptions[i].mDataByteSize);
         BLT_MediaPacket_SetPayloadSize(packet, packet_descriptions[i].mDataByteSize);
+        
+        /* compute the packet duration */
+        if (self->output.media_type->asbd.mFramesPerPacket &&
+            self->output.media_type->asbd.mSampleRate != 0.0) {
+            BLT_Time packet_duration = BLT_TimeStamp_FromSeconds(
+                (double)self->output.media_type->asbd.mFramesPerPacket/
+                        self->output.media_type->asbd.mSampleRate);
+            BLT_MediaPacket_SetDuration(packet, packet_duration);
+        }
+                
+        /* add the packet to the queue */
         ATX_List_AddData(self->output.packets, packet);
     }
 }
@@ -274,10 +362,10 @@ OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self,
     
     /* decide what the media format is */
     UInt32 type_hint = 0;
-    if (media_type_id == self->media_type_ids.audio_mp4) {
+    if (media_type_id == self->module->media_type_ids.audio_mp4) {
         ATX_LOG_FINE("packet type is audio/mp4");
         type_hint = kAudioFileM4AType;
-    } else if (media_type_id == self->media_type_ids.audio_mp3) {
+    } else if (media_type_id == self->module->media_type_ids.audio_mp3) {
         ATX_LOG_FINE("packet type is audio/mp3");
         type_hint = kAudioFileMP3Type;
     } else {
@@ -310,8 +398,8 @@ OsxAudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* check the media type */
     if (media_type == NULL || 
-        (media_type->id != self->media_type_ids.audio_mp4 &&
-         media_type->id != self->media_type_ids.audio_mp3)) {
+        (media_type->id != self->module->media_type_ids.audio_mp4 &&
+         media_type->id != self->module->media_type_ids.audio_mp3)) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     
@@ -473,8 +561,8 @@ OsxAudioFileStreamParser_Create(BLT_Module*              module,
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
-    /* make a copy of the type ids registered by the module */
-    self->media_type_ids = parser_module->media_type_ids;
+    /* keep a pointer to our module class */
+    self->module = parser_module;
     
     /* setup the input and output ports */
     self->input.eos = BLT_FALSE;
@@ -484,34 +572,6 @@ OsxAudioFileStreamParser_Create(BLT_Module*              module,
     if (ATX_FAILED(result)) {
         ATX_FreeMemory(self);
         return result;
-    }
-    
-    /* get a list of supported formats */
-    {
-        UInt32 property_size = 0;
-        OSErr  status = AudioFormatGetPropertyInfo(kAudioFormatProperty_DecodeFormatIDs, 0, NULL, &property_size);
-        if (status == noErr && property_size && (property_size%sizeof(UInt32)) == 0) {
-            unsigned int i;
-            self->supported_formats = (UInt32*)malloc(property_size);
-            self->supported_format_count = property_size/sizeof(UInt32);
-            status = AudioFormatGetProperty(kAudioFormatProperty_DecodeFormatIDs, 
-                                            0, 
-                                            NULL,
-                                            &property_size, 
-                                            self->supported_formats);
-            if (status != noErr) {
-                ATX_FreeMemory(self->supported_formats);
-                self->supported_formats = NULL;
-            }
-            for (i=0; i<self->supported_format_count; i++) {
-                ATX_LOG_FINE_5("supported format %d: %c%c%c%c", 
-                               i, 
-                               (self->supported_formats[i]>>24)&0xFF,
-                               (self->supported_formats[i]>>16)&0xFF,
-                               (self->supported_formats[i]>> 8)&0xFF,
-                               (self->supported_formats[i]    )&0xFF);
-            }
-        }
     }
     
     /* setup interfaces */
@@ -543,9 +603,6 @@ OsxAudioFileStreamParser_Destroy(OsxAudioFileStreamParser* self)
     /* close the stream parser */
     if (self->stream_parser) AudioFileStreamClose(self->stream_parser);
 
-    /* free allocated memory */
-    if (self->supported_formats) ATX_FreeMemory(self->supported_formats);
-        
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
@@ -586,9 +643,13 @@ OsxAudioFileStreamParser_Seek(BLT_MediaNode* _self,
                               BLT_SeekPoint* point)
 {
     OsxAudioFileStreamParser* self = ATX_SELF_EX(OsxAudioFileStreamParser, BLT_BaseMediaNode, BLT_MediaNode);
-
-    BLT_COMPILER_UNUSED(mode);
-    BLT_COMPILER_UNUSED(point);
+    OSStatus                  status;
+    BLT_Result                result;
+    SInt64                    byte_offset = 0;
+    SInt64                    audio_offset = 0;
+    SInt64                    packet_offset;
+    UInt32                    io_flags = 0;
+    UInt32                    property_size;
     
     /* clear the eos flag */
     self->input.eos = BLT_FALSE;
@@ -596,6 +657,47 @@ OsxAudioFileStreamParser_Seek(BLT_MediaNode* _self,
     /* remove any packets in the output list */
     OsxAudioFileStreamParserOutput_Flush(self);
 
+    /* estimate the seek point in sample mode */
+    if (ATX_BASE(self, BLT_BaseMediaNode).context == NULL) return BLT_FAILURE;
+    BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+    if (!(point->mask & BLT_SEEK_POINT_MASK_SAMPLE)) {
+        return BLT_ERROR_NOT_SUPPORTED;
+    }
+    
+    /* if we don't know the duration or the frames per packet, seek based on position */
+    if (self->output.media_type->asbd.mFramesPerPacket == 0 ||
+        (self->stream_info.mask & BLT_STREAM_INFO_MASK_DURATION) == 0) {
+        /* perform the seek */
+        result = ATX_InputStream_Seek(self->input.stream, point->offset);
+        if (BLT_FAILED(result)) return result;
+        
+        /* set the mode so that the nodes down the chain know the seek has */
+        /* already been done on the stream                                 */
+        *mode = BLT_SEEK_MODE_IGNORE;        
+        return BLT_SUCCESS;
+    }
+    
+    /* compute the packet offset for the seek point */
+    packet_offset = point->sample/self->output.media_type->asbd.mFramesPerPacket;
+    
+    /* compute the byte offset for the seek point */
+    status = AudioFileStreamSeek(self->stream_parser, packet_offset, &byte_offset, &io_flags);
+    if (status != noErr) return BLT_ERROR_NOT_SUPPORTED;
+    
+    /* the byte offset returned by the previous call is from the audio data origin */
+    /* so we need to get that value from the stream                                */
+    property_size = sizeof(audio_offset);
+    status = AudioFileStreamGetProperty(self->stream_parser, kAudioFileStreamProperty_DataOffset, &property_size, &audio_offset);
+    if (status != noErr) return BLT_ERROR_NOT_SUPPORTED;
+    
+    /* perform the seek */
+    result = ATX_InputStream_Seek(self->input.stream, audio_offset+byte_offset);
+    if (BLT_FAILED(result)) return result;
+    
+    /* set the mode so that the nodes down the chain know the seek has */
+    /* already been done on the stream                                 */
+    *mode = BLT_SEEK_MODE_IGNORE;
+    
     return BLT_SUCCESS;
 }
 
@@ -630,6 +732,16 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioFileStreamParser,
                                          reference_count)
 
 /*----------------------------------------------------------------------
+|   OsxAudioFileStreamParserModule_Destroy
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioFileStreamParserModule_Destroy(OsxAudioFileStreamParserModule* self)
+{
+    if (self->supported_formats) ATX_FreeMemory(self->supported_formats);
+    return BLT_BaseModule_Destroy(&ATX_BASE(self, BLT_BaseModule));
+}
+
+/*----------------------------------------------------------------------
 |   OsxAudioFileStreamParserModule_Attach
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -638,7 +750,35 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     OsxAudioFileStreamParserModule* self = ATX_SELF_EX(OsxAudioFileStreamParserModule, BLT_BaseModule, BLT_Module);
     BLT_Registry*                   registry;
     BLT_Result                      result;
-
+    
+    /* get a list of supported formats */
+    {
+        UInt32 property_size = 0;
+        OSErr  status = AudioFormatGetPropertyInfo(kAudioFormatProperty_DecodeFormatIDs, 0, NULL, &property_size);
+        if (status == noErr && property_size && (property_size%sizeof(UInt32)) == 0) {
+            unsigned int i;
+            self->supported_formats = (UInt32*)malloc(property_size);
+            self->supported_format_count = property_size/sizeof(UInt32);
+            status = AudioFormatGetProperty(kAudioFormatProperty_DecodeFormatIDs, 
+                                            0, 
+                                            NULL,
+                                            &property_size, 
+                                            self->supported_formats);
+            if (status != noErr) {
+                ATX_FreeMemory(self->supported_formats);
+                self->supported_formats = NULL;
+            }
+            for (i=0; i<self->supported_format_count; i++) {
+                ATX_LOG_FINE_5("supported format %d: %c%c%c%c", 
+                               i, 
+                               (self->supported_formats[i]>>24)&0xFF,
+                               (self->supported_formats[i]>>16)&0xFF,
+                               (self->supported_formats[i]>> 8)&0xFF,
+                               (self->supported_formats[i]    )&0xFF);
+            }
+        }
+    }
+    
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);
     if (BLT_FAILED(result)) return result;
@@ -815,9 +955,6 @@ ATX_END_INTERFACE_MAP
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-#define OsxAudioFileStreamParserModule_Destroy(x) \
-    BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
-
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioFileStreamParserModule, 
                                          BLT_BaseModule,
                                          reference_count)

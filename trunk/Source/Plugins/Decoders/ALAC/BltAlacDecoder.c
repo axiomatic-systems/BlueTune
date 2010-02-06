@@ -1157,17 +1157,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AlacDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(AlacDecoderModule, "ALAC Audio Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_AlacDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return AlacDecoderModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(AlacDecoderModule,
+                                         "Apple Lossless Audio Decoder",
+                                         "com.axiosys.decoder.alac",
+                                         "1.2.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

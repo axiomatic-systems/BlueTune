@@ -312,13 +312,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(NullOutputModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_NullOutputModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Null Output", NULL, 0, 
-                                 &NullOutputModule_BLT_ModuleInterface,
-                                 &NullOutputModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(NullOutputModule,
+                                         "Null Output",
+                                         "com.axiosys.output.null",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

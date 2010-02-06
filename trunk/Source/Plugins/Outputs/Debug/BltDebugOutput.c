@@ -329,13 +329,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(DebugOutputModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_DebugOutputModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Debug Output", NULL, 0, 
-                                 &DebugOutputModule_BLT_ModuleInterface,
-                                 &DebugOutputModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(DebugOutputModule,
+                                         "Debug Output",
+                                         "com.axiosys.output.debug",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

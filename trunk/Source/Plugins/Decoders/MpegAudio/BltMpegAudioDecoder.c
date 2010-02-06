@@ -1030,17 +1030,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(MpegAudioDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(MpegAudioDecoderModule, "MPEG Audio Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_MpegAudioDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return MpegAudioDecoderModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(MpegAudioDecoderModule,
+                                         "MPEG Audio Decoder",
+                                         "com.axiosys.decoder.mpeg-audio",
+                                         "1.4.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

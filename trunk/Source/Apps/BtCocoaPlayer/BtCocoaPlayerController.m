@@ -57,6 +57,49 @@
 
 @end
 
+@implementation CocoaPlayerSliderCell
+
+-(BOOL) startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView
+{
+	[super startTrackingAt:startPoint inView:controlView];
+	userIsDraggingSlider = YES;
+	return (YES);
+}
+
+-(void) stopTracking:(NSPoint)lastPoint at:(NSPoint)stopPoint inView:(NSView *)controlView mouseIsUp:(BOOL)flag
+{
+	[super stopTracking:lastPoint at:stopPoint inView:controlView mouseIsUp:flag];
+	userIsDraggingSlider = NO;
+}
+
+-(BOOL) isUserDraggingSlider
+{
+	return userIsDraggingSlider;
+}
+
+@end
+
+@implementation CocoaPlayerSlider
+
++(Class)cellClass
+{
+    return [CocoaPlayerSliderCell class];
+}
+
+-(BOOL) isUserDraggingSlider
+{
+    return([[self cell] isUserDraggingSlider]);
+}
+
+-(void) setDoubleValue:(double)aDouble
+{
+    if ([[self cell] isUserDraggingSlider] == NO) {
+        [super setDoubleValue:aDouble];
+    }
+}
+
+@end
+
 @implementation CocoaPlayerController
 -(id) init 
 {
@@ -95,6 +138,7 @@
 {
     [player stop];
     [player setInput: [playerInput stringValue]];
+    [player play];
 }
 
 -(IBAction) seek: (id) sender;
@@ -112,6 +156,25 @@
 
 -(IBAction) chooseFile: (id) sender;
 {
+    NSOpenPanel* op = [NSOpenPanel openPanel];
+    
+    [op setCanChooseDirectories:NO];
+    [op setCanChooseFiles:YES];
+    [op setAllowsMultipleSelection:NO];
+
+    [op setTitle:@"Select audio file"];
+    [op setPrompt:@"Open"];
+    
+    if ([op runModalForTypes:nil] == NSOKButton) {
+        NSURL* url = [[op URLs] objectAtIndex: 0];
+        if ([url isFileURL]) {
+            NSString* path = [url path];
+            [player stop];
+            [playerInput setStringValue: path];
+            [player setInput: path];
+            [player play];
+        }
+    }
 }
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
@@ -146,8 +209,8 @@
 
 -(void) streamPositionDidChange: (BLT_StreamPosition) position
 {
-    float where = (float)position.offset*100.0f/(float)position.range;
-    [playerPosition setFloatValue: where];
+    double where = (double)position.offset*100.0f/(double)position.range;
+    [playerPosition setDoubleValue: where];
 }
 
 -(void) streamInfoDidChange: (const BLT_StreamInfo*) info updateMask: (BLT_Mask) mask

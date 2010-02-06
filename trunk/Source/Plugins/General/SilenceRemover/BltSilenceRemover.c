@@ -708,13 +708,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(SilenceRemoverModule, reference_count)
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_SilenceRemoverModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Silence Remover", NULL, 0, 
-                                 &SilenceRemoverModule_BLT_ModuleInterface, 
-                                 &SilenceRemoverModule_ATX_ReferenceableInterface, 
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(SilenceRemoverModule,
+                                         "Silence Remover",
+                                         "com.axiosys.general.silence-remover",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

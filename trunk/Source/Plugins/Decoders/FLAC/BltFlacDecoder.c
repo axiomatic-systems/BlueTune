@@ -1058,17 +1058,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FlacDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(FlacDecoderModule, "FLAC Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_FlacDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return FlacDecoderModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(FlacDecoderModule,
+                                         "FLAC Audio Decoder",
+                                         "com.axiosys.decoder.flac",
+                                         "1.1.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

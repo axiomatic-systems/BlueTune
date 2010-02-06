@@ -523,13 +523,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(PacketStreamerModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_PacketStreamerModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Packet Streamer", NULL, 0,
-                                 &PacketStreamerModule_BLT_ModuleInterface,
-                                 &PacketStreamerModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(PacketStreamerModule,
+                                         "Packet Streamer",
+                                         "com.axiosys.general.packet-streamer",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

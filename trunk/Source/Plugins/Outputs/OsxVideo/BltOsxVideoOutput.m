@@ -1283,13 +1283,9 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxVideoOutputModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_OsxVideoOutputModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("OSX Video Output", NULL, 0, 
-                                 &OsxVideoOutputModule_BLT_ModuleInterface,
-                                 &OsxVideoOutputModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(OsxVideoOutputModule,
+                                         "OSX Video Output",
+                                         "com.axiosys.output.osx-video",
+                                         "1.3.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)
+                                         

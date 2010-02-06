@@ -56,7 +56,8 @@ BLTP_Options Options;
 +---------------------------------------------------------------------*/
 #define BLTP_VERBOSITY_STREAM_TOPOLOGY      1
 #define BLTP_VERBOSITY_STREAM_INFO          2
-#define BLTP_VERBOSITY_MISC                 4
+#define BLTP_VERBOSITY_MODULE_INFO          4
+#define BLTP_VERBOSITY_MISC                 8
 
 /*----------------------------------------------------------------------
 |    macros
@@ -95,7 +96,7 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --load-plugin=<plugin-filename>\n");
     ATX_ConsoleOutput(
         "  --verbose=<name> : print messages related to <name>, where name is\n"
-        "                     'stream-topology', 'stream-info', or 'all'\n"
+        "                     'stream-topology', 'stream-info', 'module-info' or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n"
         "  --key=<name>:<value> : content decryption key for content ID <name>.\n"
         "                         The key value is in hexadecimal\n");
@@ -225,6 +226,8 @@ BLTP_ParseCommandLine(char** args)
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;
             } else if (ATX_StringsEqual(arg+10, "stream-info")) {
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_INFO;
+            } else if (ATX_StringsEqual(arg+10, "module-info")) {
+                Options.verbosity |= BLTP_VERBOSITY_MODULE_INFO;
             } else if (ATX_StringsEqual(arg+10, "all")) {
                 Options.verbosity = 0xFFFFFFFF;
             }
@@ -283,13 +286,15 @@ BLTP_ListModules(BLT_Decoder* decoder)
         if (BLT_SUCCEEDED(BLT_Module_GetInfo(module, &info))) {
             unsigned int j;
             ATX_ConsoleOutputF("Module %02d: %s\n", i, info.name?info.name:"");
-            if (info.uid) {
-                ATX_ConsoleOutputF("  uid = %s\n", info.uid);
-            }
-            for (j=0; j<info.property_count; j++) {
-                ATX_ConsoleOutputF("  %s = ", info.properties[j].name);
-                BLTP_PrintPropertyValue(&info.properties[j].value);
-                ATX_ConsoleOutput("\n");
+            if (Options.verbosity & BLTP_VERBOSITY_STREAM_INFO) {
+                if (info.uid) {
+                    ATX_ConsoleOutputF("  uid = %s\n", info.uid);
+                }
+                for (j=0; j<info.property_count; j++) {
+                    ATX_ConsoleOutputF("  %s = ", info.properties[j].name);
+                    BLTP_PrintPropertyValue(&info.properties[j].value);
+                    ATX_ConsoleOutput("\n");
+                }
             }
             i++;
         }

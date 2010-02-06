@@ -1243,16 +1243,11 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioUnitsOutputModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_OsxAudioUnitsOutputModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("OSX Audio Units Output", NULL, 0, 
-                                 &OsxAudioUnitsOutputModule_BLT_ModuleInterface,
-                                 &OsxAudioUnitsOutputModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(OsxAudioUnitsOutputModule,
+                                         "OSX Audio Units Output",
+                                         "com.axiosys.output.osx-audio-units",
+                                         "1.2.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)
 #else /* TARGET_OS_IPHONE */
 /*----------------------------------------------------------------------
 |   module object

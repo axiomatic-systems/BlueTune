@@ -609,17 +609,11 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(TagParserModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(TagParserModule, "Tag Parser", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_TagParserModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(TagParserModule,
+                                         "Tag Parser",
+                                         "com.axiosys.parser.tags",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)
 
-    return TagParserModule_Create(object);
-}

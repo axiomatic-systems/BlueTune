@@ -41,12 +41,12 @@ BLT_BaseModule_Construct(BLT_BaseModule* self,
 |   BLT_BaseModule_ConstructEx
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_BaseModule_ConstructEx(BLT_BaseModule* self, 
-                           BLT_CString     name, 
-                           BLT_CString     uid,
-                           BLT_Flags       flags,
-                           BLT_Cardinal    property_count,
-                           ATX_Property*   properties)
+BLT_BaseModule_ConstructEx(BLT_BaseModule*     self, 
+                           BLT_CString         name, 
+                           BLT_CString         uid,
+                           BLT_Flags           flags,
+                           BLT_Cardinal        property_count,
+                           const ATX_Property* properties)
 {
     unsigned int i;
     if (name) {
@@ -125,7 +125,7 @@ BLT_BaseModule_CreateEx(BLT_CString                name,
                         BLT_CString                uid,
                         BLT_Flags                  flags,
                         BLT_Cardinal               property_count,
-                        ATX_Property*              properties,
+                        const ATX_Property*        properties,
                         const BLT_ModuleInterface* module_interface,
                         const ATX_ReferenceableInterface* referenceable_interface,
                         BLT_Size                   instance_size,

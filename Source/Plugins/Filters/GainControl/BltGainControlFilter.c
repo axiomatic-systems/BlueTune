@@ -707,17 +707,11 @@ ATX_END_INTERFACE_MAP
 
 ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(GainControlFilterModule, reference_count)
 
-
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_GainControlFilterModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Gain Control Filter", NULL, 0,
-                                 &GainControlFilterModule_BLT_ModuleInterface, 
-                                 &GainControlFilterModule_ATX_ReferenceableInterface, 
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(GainControlFilterModule,
+                                         "Gain Control Filter",
+                                         "com.axiosys.filter.gain-control",
+                                         "1.3.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

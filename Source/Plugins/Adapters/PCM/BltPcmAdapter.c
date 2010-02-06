@@ -440,13 +440,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(PcmAdapterModule, reference_count)
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_PcmAdapterModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("PCM Adapter", NULL, 0, 
-                                 &PcmAdapterModule_BLT_ModuleInterface, 
-                                 &PcmAdapterModule_ATX_ReferenceableInterface, 
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(PcmAdapterModule,
+                                         "PCM Adapter",
+                                         "com.axiosys.adapter.pcm",
+                                         "1.1.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

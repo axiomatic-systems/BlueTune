@@ -720,17 +720,11 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WmaDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(WmaDecoderModule, "WMA Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_WmaDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(WmaDecoderModule,
+                                         "WMA Audio Decoder",
+                                         "com.axiosys.decoder.wma",
+                                         "1.2.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)
 
-    return WmaDecoderModule_Create(object);
-}

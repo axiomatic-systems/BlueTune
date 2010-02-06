@@ -187,34 +187,34 @@ BLT_BaseModule_Construct(BLT_BaseModule* self,
                          BLT_Flags       flags);
 
 BLT_Result
-BLT_BaseModule_ConstructEx(BLT_BaseModule* self, 
-                           BLT_CString     name, 
-                           BLT_CString     uid,
-                           BLT_Flags       flags,
-                           BLT_Cardinal    property_count,
-                           ATX_Property*   properties);
+BLT_BaseModule_ConstructEx(BLT_BaseModule*     self, 
+                           BLT_CString         name, 
+                           BLT_CString         uid,
+                           BLT_Flags           flags,
+                           BLT_Cardinal        property_count,
+                           const ATX_Property* properties);
 
 BLT_Result
 BLT_BaseModule_Destruct(BLT_BaseModule* self);
 
 BLT_Result
-BLT_BaseModule_Create(BLT_CString                name, 
-                      BLT_CString                uid,
-                      BLT_Flags                  flags,
-                      const BLT_ModuleInterface* module_interface,
+BLT_BaseModule_Create(BLT_CString                       name, 
+                      BLT_CString                       uid,
+                      BLT_Flags                         flags,
+                      const BLT_ModuleInterface*        module_interface,
                       const ATX_ReferenceableInterface* referenceable_interface,
-                      BLT_Module**               object);
+                      BLT_Module**                      object);
 
 BLT_Result
-BLT_BaseModule_CreateEx(BLT_CString                name, 
-                        BLT_CString                uid,
-                        BLT_Flags                  flags,
-                        BLT_Cardinal               property_count,
-                        ATX_Property*              properties,
-                        const BLT_ModuleInterface* module_interface,
+BLT_BaseModule_CreateEx(BLT_CString                       name, 
+                        BLT_CString                       uid,
+                        BLT_Flags                         flags,
+                        BLT_Cardinal                      property_count,
+                        const ATX_Property*               properties,
+                        const BLT_ModuleInterface*        module_interface,
                         const ATX_ReferenceableInterface* referenceable_interface,
-                        BLT_Size                   intance_size,
-                        BLT_Module**               object);
+                        BLT_Size                          intance_size,
+                        BLT_Module**                      object);
 
 BLT_Result
 BLT_BaseModule_Destroy(BLT_BaseModule* self);

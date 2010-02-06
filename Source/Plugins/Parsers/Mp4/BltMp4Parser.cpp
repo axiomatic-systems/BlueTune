@@ -1118,17 +1118,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(Mp4ParserModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(Mp4ParserModule, "MP4 Parser", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_Mp4ParserModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return Mp4ParserModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(Mp4ParserModule,
+                                         "MP4 Parser",
+                                         "com.axiosys.parser.mp4",
+                                         "1.2.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

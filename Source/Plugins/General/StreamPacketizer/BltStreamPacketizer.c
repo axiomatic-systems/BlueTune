@@ -593,13 +593,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(StreamPacketizerModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_StreamPacketizerModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Stream Packetizer", NULL, 0,
-                                 &StreamPacketizerModule_BLT_ModuleInterface,
-                                 &StreamPacketizerModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(StreamPacketizerModule,
+                                         "Stream Packetizer",
+                                         "com.axiosys.general.stream-packetizer",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

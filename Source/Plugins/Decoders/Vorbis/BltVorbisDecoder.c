@@ -859,17 +859,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(VorbisDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(VorbisDecoderModule, "Vorbis Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_VorbisDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return VorbisDecoderModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(VorbisDecoderModule,
+                                         "Vorbis Audio Decoder",
+                                         "com.axiosys.decoder.vorbis",
+                                         "1.1.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

@@ -374,14 +374,10 @@ NetworkInputModule_Probe(BLT_Module*              self,
 
             /* the input protocol should be NONE, and the output */
             /* protocol should be STREAM_PULL                    */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_NONE) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_NONE) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY && 
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL)) {
                 return BLT_FAILURE;
             }
 
@@ -446,13 +442,8 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(NetworkInputModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_NetworkInputModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return BLT_BaseModule_Create("Network Input", NULL, 0,
-                                 &NetworkInputModule_BLT_ModuleInterface,
-                                 &NetworkInputModule_ATX_ReferenceableInterface,
-                                 object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(NetworkInputModule,
+                                         "Network Input",
+                                         "com.axiosys.input.network",
+                                         "1.0.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

@@ -777,17 +777,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FfmpegDecoderModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(FfmpegDecoderModule, "FFMPEG Decoder", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_FfmpegDecoderModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return FfmpegDecoderModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(FfmpegDecoder,
+                                         "FFMPEG Decoder",
+                                         "com.axiosys.decoder.ffmpeg",
+                                         "1.2.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

@@ -42,3 +42,23 @@
 -(void) propertyDidChange: (BLT_PropertyScope) scope source: (const char*) source name: (const char*) name value: (const ATX_PropertyValue*) value;
 
 @end
+
+/* custom slider that can detect when the user is dragging */
+@interface CocoaPlayerSliderCell : NSSliderCell 
+{
+    BOOL userIsDraggingSlider;
+}
+
+-(BOOL) isUserDraggingSlider;
+-(BOOL) startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView;
+-(void) stopTracking:(NSPoint)lastPoint at:(NSPoint)stopPoint inView:(NSView *)controlView mouseIsUp:(BOOL)flag;
+
+@end
+
+@interface CocoaPlayerSlider : NSSlider
+{
+}
+-(void)setDoubleValue:(double)aDouble;
+-(BOOL)isUserDraggingSlider;
+
+@end

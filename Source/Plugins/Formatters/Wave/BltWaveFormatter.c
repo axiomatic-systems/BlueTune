@@ -610,17 +610,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(WaveFormatterModule,
                                          reference_count)
 
 /*----------------------------------------------------------------------
-|   node constructor
-+---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_SIMPLE_CONSTRUCTOR(WaveFormatterModule, "Wave Formatter", 0)
-
-/*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_Result 
-BLT_WaveFormatterModule_GetModuleObject(BLT_Module** object)
-{
-    if (object == NULL) return BLT_ERROR_INVALID_PARAMETERS;
-
-    return WaveFormatterModule_Create(object);
-}
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(WaveFormatterModule,
+                                         "WAVE Formatter",
+                                         "com.axiosys.formatter.wave",
+                                         "1.1.0",
+                                         BLT_MODULE_AXIOMATIC_COPYRIGHT)

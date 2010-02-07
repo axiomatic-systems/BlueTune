@@ -2,7 +2,7 @@
 |
 |   BlueTune - Version Information
 |
-|   (c) 2002-2008 Gilles Boccon-Gibod
+|   (c) 2002-2010 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -16,8 +16,8 @@
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_BLUETUNE_SDK_VERSION            0x01030400
-#define BLT_BLUETUNE_SDK_VERSION_STRING     "1.3.4.0"
+#define BLT_BLUETUNE_SDK_VERSION            0x01040100
+#define BLT_BLUETUNE_SDK_VERSION_STRING     "1.4.1.0"
 
 #define BLT_PLUGIN_ABI_VERSION 0x0100
 

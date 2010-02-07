@@ -223,6 +223,24 @@ class BLT_Player : public BLT_DecoderClient
                                    const ATX_PropertyValue* value);
 
     /**
+     * Load and Register a plugin.
+     * @param name Name of a plugin (filename of the plugin or special name)
+     * @param search_flags Flags that select how the actual plugin file will
+     * be located. It is an OR'ed combination or the BLT_PLUGIN_LOADER_FLAGS_XXX
+     * constants defined in BltDynamicPlugins.h
+     */
+    BLT_Result LoadPlugin(const char* name, BLT_Flags search_flags);
+
+    /**
+     * Load and Register all plugins located in a directory.
+     * @param directory Path of the directory that contains the plugins
+     * @param file_extension File extension of the plugin files, or NULL to load
+     * all files regardless of extension. The file extension includes the '.' 
+     * characters (ex: ".plugin")
+     */
+    BLT_Result LoadPlugins(const char* directory, const char* file_extension);
+    
+    /**
      * Shutdown the player. 
      * Use this method before deleting the player if you need to ensure that
      * no more asynchronous event callbacks will be made. 
@@ -322,7 +340,9 @@ typedef enum {
     BLT_PLAYER_COMMAND_ID_REGISTER_MODULE,
     BLT_PLAYER_COMMAND_ID_ADD_NODE,
     BLT_PLAYER_COMMAND_ID_SET_VOLUME,
-    BLT_PLAYER_COMMAND_ID_SET_PROPERTY
+    BLT_PLAYER_COMMAND_ID_SET_PROPERTY,
+    BLT_PLAYER_COMMAND_ID_LOAD_PLUGIN,
+    BLT_PLAYER_COMMAND_ID_LOAD_PLUGINS
 } BLT_Player_CommandId;
 
 typedef enum {
@@ -404,6 +424,8 @@ BLT_Result BLT_Player_SetInput(BLT_Player* player,
                                BLT_CString name, 
                                BLT_CString mime_type);
 BLT_Result BLT_Player_Play(BLT_Player* player);
+BLT_Result BLT_Player_Stop(BLT_Player* player);
+BLT_Result BLT_Player_Pause(BLT_Player* player);
 
 #if defined(__cplusplus)
 }
@@ -436,6 +458,10 @@ public:
             return BLT_PLAYER_COMMAND_ID_SET_VOLUME;
           case BLT_DecoderServer_Message::COMMAND_ID_SET_PROPERTY:
             return BLT_PLAYER_COMMAND_ID_SET_PROPERTY;
+          case BLT_DecoderServer_Message::COMMAND_ID_LOAD_PLUGIN:
+            return BLT_PLAYER_COMMAND_ID_LOAD_PLUGIN;
+          case BLT_DecoderServer_Message::COMMAND_ID_LOAD_PLUGINS:
+            return BLT_PLAYER_COMMAND_ID_LOAD_PLUGINS;
         }
         return (BLT_Player_CommandId)(-1);
     }

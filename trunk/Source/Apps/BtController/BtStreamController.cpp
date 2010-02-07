@@ -125,6 +125,55 @@ BtStreamController::DoSetProperty(const char* property_spec)
 }
 
 /*----------------------------------------------------------------------
+|   BtStreamController::DoLoadPlugin
+|
+|   The command syntax is:
+|   <name>[,<search-flags>]
+|
++---------------------------------------------------------------------*/
+void
+BtStreamController::DoLoadPlugin(const char* property_spec)
+{
+    NPT_String spec(property_spec);
+    
+    BLT_Flags search_flags = 0;
+    int sc = spec.Find(',');
+    if (sc > 0) {
+        // flags
+        NPT_UInt32 value = 0;
+        NPT_ParseInteger32(spec.GetChars()+sc+1, value);
+        search_flags = (BLT_Flags)value;
+        spec.SetLength(sc);
+    }
+    
+    m_Player.LoadPlugin(spec.GetChars(), search_flags);
+}
+
+/*----------------------------------------------------------------------
+|   BtStreamController::DoLoadPlugins
+|
+|   The command syntax is:
+|   <directory>[,<file-extension>]
+|
++---------------------------------------------------------------------*/
+void
+BtStreamController::DoLoadPlugins(const char* property_spec)
+{
+    NPT_String spec(property_spec);
+    NPT_String directory  = spec;
+    NPT_String file_extension;
+
+    int sc = spec.Find(',');
+    if (sc > 0) {
+        // file extension
+        directory.SetLength(sc);
+        file_extension = spec.SubString(sc+1);
+    }
+    
+    m_Player.LoadPlugins(directory.GetChars(), file_extension.GetChars());
+}
+
+/*----------------------------------------------------------------------
 |    BtStreamController::Run
 +---------------------------------------------------------------------*/
 void
@@ -159,6 +208,10 @@ BtStreamController::Run()
                 DoSeekToTimeStamp(buffer+5);
             } else if (NPT_StringsEqualN(buffer, "set-property ", 13)) {
                 DoSetProperty(buffer+13);
+            } else if (NPT_StringsEqualN(buffer, "load-plugin ", 12)) {
+                DoLoadPlugin(buffer+12);
+            } else if (NPT_StringsEqualN(buffer, "load-plugins ", 13)) {
+                DoLoadPlugins(buffer+13);
             } else if (NPT_StringsEqualN(buffer, "exit", 4)) {
                 done = BLT_TRUE;
             } else {

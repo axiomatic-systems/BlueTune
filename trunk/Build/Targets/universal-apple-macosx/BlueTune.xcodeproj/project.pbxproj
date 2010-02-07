@@ -51,7 +51,6 @@
 			buildPhases = (
 			);
 			dependencies = (
-				CA5827BC0E68C7B8006CC501 /* PBXTargetDependency */,
 			);
 			name = DynamicPlugins;
 			productName = DynamicPlugins;
@@ -285,7 +284,6 @@
 		CA550CCA0D20985600B22D72 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA550CCB0D20985600B22D72 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA58271A0E68B3F8006CC501 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
-		CA5827570E68BE2D006CC501 /* BltWmaDecoderStub.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */; };
 		CA58276E0E68C14F006CC501 /* BltVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA58276D0E68C14F006CC501 /* BltVersion.h */; };
 		CA5827740E68C2EC006CC501 /* BltSvnVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5827730E68C2EC006CC501 /* BltSvnVersion.h */; };
 		CA58277B0E68C5E8006CC501 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
@@ -848,13 +846,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = CAF2EE260E60C38D00948C04;
 			remoteInfo = AsyncPlayerC;
-		};
-		CA5827BB0E68C7B8006CC501 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CA5827120E68B39D006CC501;
-			remoteInfo = BltWmaDecoderPlugin;
 		};
 		CA5827C30E68C825006CC501 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -4117,7 +4108,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA5827570E68BE2D006CC501 /* BltWmaDecoderStub.c in Sources */,
 				CA1859CB0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4401,11 +4391,6 @@
 			isa = PBXTargetDependency;
 			target = CAF2EE260E60C38D00948C04 /* AsyncPlayerC */;
 			targetProxy = CA5827B60E68C78C006CC501 /* PBXContainerItemProxy */;
-		};
-		CA5827BC0E68C7B8006CC501 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CA5827120E68B39D006CC501 /* BltWmaDecoderPlugin */;
-			targetProxy = CA5827BB0E68C7B8006CC501 /* PBXContainerItemProxy */;
 		};
 		CA5827C40E68C825006CC501 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

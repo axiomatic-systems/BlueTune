@@ -2,7 +2,7 @@
 |
 |   WMA Decoder Module
 |
-|   (c) 2006 Gilles Boccon-Gibod
+|   (c) 2006-2010 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/

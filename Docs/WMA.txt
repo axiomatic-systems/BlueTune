@@ -21,7 +21,7 @@ Define the preprocessor symbol BLT_CONFIG_MODULES_ENABLE_WMA_DECODER by editing 
 
 1.1.1.2 Using scons
 You can either edit the Config.scons for your target and add the string 'WmaDecoder' to the list env['BLT_PLUGINS'], or you can add the plugin on the scons command line by adding the option 'extra_plugins=WmaDecoder' to the normal scons build options. (ex: scons -u target=x86-unknown-linux build_config=Release extra_plugins=WmaDecoder).
-In order for scons to find the location of the precompiled plugin binary, you must set the environment variable BLT_WMA_PLUGIN_HOME to the directory where you have saved the WMA Plugin binary distribution (this directory should contain a 'Targets' subdirectory with one or more target subdirectory, each with an 'include' and 'lib' subdirectory).
+In order for scons to find the location of the precompiled plugin binary, you must set the environment variable BLT_WMA_PLUGIN_HOME to the directory where you have saved the WMA Plugin binary distribution (this directory should be called WmaPlugin and contain a 'Targets' subdirectory with one or more target subdirectories, each with an 'include', 'lib' and 'bin' subdirectory).
 
 
 1.1.2 = By registering the module from the application code

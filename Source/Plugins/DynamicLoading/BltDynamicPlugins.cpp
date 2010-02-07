@@ -87,14 +87,16 @@ BLT_Plugins_LoadModulesFromFile(BLT_Core* core, const char* name, BLT_Flags sear
         result = NPT_File::GetWorkingDir(working_directory);
         if (NPT_SUCCEEDED(result)) {
             NPT_String path = working_directory + NPT_FilePath::Separator + name;
-            return BLT_Plugins_LoadModulesFromLibrary(core, path);
+            result = BLT_Plugins_LoadModulesFromLibrary(core, path);
+            if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
         } else {
             ATX_LOG_FINE("cannot get working directory, ignoring");
         }
     }
     if (search_flags & BLT_PLUGIN_LOADER_FLAGS_SEARCH_OS_LOADER_PATH) {
         ATX_LOG_FINE("searching os loader path");
-        return BLT_Plugins_LoadModulesFromLibrary(core, name);
+        result = BLT_Plugins_LoadModulesFromLibrary(core, name);
+        if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
     }
     
     return BLT_ERROR_NO_MATCHING_MODULE;

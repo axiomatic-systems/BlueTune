@@ -56,6 +56,8 @@ public:
                                       const NPT_String&        target,
                                       const NPT_String&        name,
                                       const ATX_PropertyValue* value) = 0;
+    virtual void OnLoadPluginCommand(const NPT_String& name, BLT_Flags search_flags) = 0;
+    virtual void OnLoadPluginsCommand(const NPT_String& directory, const NPT_String& file_extension) = 0;
 };
 
 /*----------------------------------------------------------------------
@@ -77,7 +79,9 @@ public:
         COMMAND_ID_SEEK_TO_POSITION,
         COMMAND_ID_REGISTER_MODULE,
         COMMAND_ID_ADD_NODE,
-        COMMAND_ID_SET_PROPERTY
+        COMMAND_ID_SET_PROPERTY,
+        COMMAND_ID_LOAD_PLUGIN,
+        COMMAND_ID_LOAD_PLUGINS
     } CommandId;
 
     // functions
@@ -346,6 +350,50 @@ public:
 };
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer_LoadPluginCommandMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderServer_LoadPluginCommandMessage : public BLT_DecoderServer_Message
+{
+public:
+    // methods
+    BLT_DecoderServer_LoadPluginCommandMessage(const char* name, BLT_Flags search_flags) :
+      BLT_DecoderServer_Message(COMMAND_ID_LOAD_PLUGIN),
+      m_Name(name),
+      m_SearchFlags(search_flags) {}
+    NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
+        handler->OnLoadPluginCommand(m_Name, m_SearchFlags);
+        return NPT_SUCCESS;
+    }
+
+ private:
+    // members
+    NPT_String m_Name;
+    NPT_Flags  m_SearchFlags;
+};
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer_LoadPluginsCommandMessage
++---------------------------------------------------------------------*/
+class BLT_DecoderServer_LoadPluginsCommandMessage : public BLT_DecoderServer_Message
+{
+public:
+    // methods
+    BLT_DecoderServer_LoadPluginsCommandMessage(const char* directory, const char* file_extension) :
+      BLT_DecoderServer_Message(COMMAND_ID_LOAD_PLUGINS),
+      m_Directory(directory),
+      m_FileExtension(file_extension) {}
+    NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) {
+        handler->OnLoadPluginsCommand(m_Directory, m_FileExtension);
+        return NPT_SUCCESS;
+    }
+
+ private:
+    // members
+    NPT_String m_Directory;
+    NPT_String m_FileExtension;
+};
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer_EventListenerWrapper
 +---------------------------------------------------------------------*/
 class BLT_DecoderServer;
@@ -433,6 +481,8 @@ class BLT_DecoderServer : public NPT_Thread,
                                    const char*              target,
                                    const char*              name,
                                    const ATX_PropertyValue* value);
+    virtual BLT_Result LoadPlugin(const char* name, BLT_Flags search_flags);
+    virtual BLT_Result LoadPlugins(const char* directory, const char* file_extension);
 
     // NPT_Runnable methods
     void Run();
@@ -453,6 +503,9 @@ class BLT_DecoderServer : public NPT_Thread,
                                       const NPT_String&        target,
                                       const NPT_String&        name,
                                       const ATX_PropertyValue* value);
+    virtual void OnLoadPluginCommand(const NPT_String& name, BLT_Flags search_flags);
+    virtual void OnLoadPluginsCommand(const NPT_String& directory, 
+                                      const NPT_String& file_extension);
 
     // BLT_EventListener methods
     virtual void OnEvent(const ATX_Object* source,

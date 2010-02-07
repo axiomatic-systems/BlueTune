@@ -94,8 +94,8 @@ void
 BtController::OnNackNotification(BLT_DecoderServer_Message::CommandId id,
                              BLT_Result                           result)
 {
-    ATX_Debug("BLT_Player::OnNackNotification (id=%d, result=%d)\n", 
-              id, result);    
+    ATX_Debug("BLT_Player::OnNackNotification (id=%d, result=%d:%s)\n", 
+              id, result, BLT_ResultText(result));    
 }
 
 /*----------------------------------------------------------------------

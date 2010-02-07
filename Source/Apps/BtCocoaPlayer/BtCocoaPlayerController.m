@@ -47,11 +47,26 @@
     return value;
 }
 
+-(void) clear
+{
+    [records removeAllObjects];
+}
+
 -(void) setProperty: (NSString*) name value: (NSString*) value
 {
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     [dict setValue: name forKey: @"Name"];
     [dict setValue: value forKey: @"Value"];
+    
+    unsigned int record_count = [records count];
+    unsigned int i;
+    for (i=0; i<record_count; i++) {
+        NSString* record_name = [[records objectAtIndex: i] valueForKey: @"Name"];
+        if ([record_name compare: name] == NSOrderedSame) {
+            [records replaceObjectAtIndex: i withObject: dict];
+            return;
+        }
+    }
     [records addObject: dict];
 }
 
@@ -180,6 +195,13 @@
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
 {
     printf("ACK %d\n", command_id);
+    if (command_id == BLT_PLAYER_COMMAND_ID_SET_INPUT) {
+        [[playerStreamInfoView dataSource] clear];
+        [playerStreamInfoView reloadData];
+
+        [[playerPropertiesView dataSource] clear];
+        [playerPropertiesView reloadData];
+    }
 }
 
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result
@@ -250,7 +272,11 @@
                      name: (const char*)              name 
                     value: (const ATX_PropertyValue*) value
 {
-    if (name == NULL || value == NULL) return;
+    if (name == NULL || name[0] == '\0') {
+        // all properties cleared
+        [[playerPropertiesView dataSource] clear];
+    }
+    if (value == NULL) return; // TODO: should remove entry from list
     
     NSString* value_string = nil;
     switch (value->type) {

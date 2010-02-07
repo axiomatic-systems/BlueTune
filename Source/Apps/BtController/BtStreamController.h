@@ -35,6 +35,8 @@ protected:
     // methods
     void DoSeekToTimeStamp(const char* time);
     void DoSetProperty(const char* property);
+    void DoLoadPlugin(const char* cmd);
+    void DoLoadPlugins(const char* cmd);
     
     // members
     NPT_InputStreamReference m_InputStream;

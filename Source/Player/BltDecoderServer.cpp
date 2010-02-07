@@ -673,6 +673,47 @@ BLT_DecoderServer::OnSetPropertyCommand(BLT_PropertyScope        scope,
 }
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer::LoadPlugin
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderServer::LoadPlugin(const char* name, BLT_Flags search_flags)
+{
+    return PostMessage(
+        new BLT_DecoderServer_LoadPluginCommandMessage(name, search_flags));
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer::OnLoadPluginCommand
++---------------------------------------------------------------------*/
+void 
+BLT_DecoderServer::OnLoadPluginCommand(const NPT_String& name, BLT_Flags search_flags)
+{
+    BLT_Result result = BLT_Decoder_LoadPlugin(m_Decoder, name, search_flags);
+    SendReply(BLT_DecoderServer_Message::COMMAND_ID_LOAD_PLUGIN, result);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer::LoadPlugins
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderServer::LoadPlugins(const char* directory, const char* file_extension)
+{
+    return PostMessage(
+        new BLT_DecoderServer_LoadPluginsCommandMessage(directory, file_extension));
+}
+
+/*----------------------------------------------------------------------
+|   BLT_DecoderServer::OnLoadPluginsCommand
++---------------------------------------------------------------------*/
+void 
+BLT_DecoderServer::OnLoadPluginsCommand(const NPT_String& directory, 
+                                        const NPT_String& file_extension)
+{
+    BLT_Result result = BLT_Decoder_LoadPlugins(m_Decoder, directory, file_extension);
+    SendReply(BLT_DecoderServer_Message::COMMAND_ID_LOAD_PLUGINS, result);
+}
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer::OnEvent
 +---------------------------------------------------------------------*/
 void

@@ -195,7 +195,7 @@ BLT_Player::SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_Player::RegisterModule
+|    BLT_Player::Ping
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Player::Ping(const void* cookie)
@@ -250,6 +250,29 @@ BLT_Player::SetProperty(BLT_PropertyScope        scope,
     ATX_LOG_FINE_1("BLT_Player::SetProperty - name=%s", BLT_SAFE_STRING(name));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SetProperty(scope, target, name, value);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player::LoadPlugin
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Player::LoadPlugin(const char* name, BLT_Flags search_flags)
+{
+    ATX_LOG_FINE_2("BLT_Player::LoadPlugin - name=%s, flags=%x", BLT_SAFE_STRING(name), search_flags);
+    if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
+    return m_Server->LoadPlugin(name, search_flags);
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Player::LoadPlugins
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_Player::LoadPlugins(const char* directory, const char* file_extension)
+{
+    ATX_LOG_FINE_2("BLT_Player::LoadPlugins - directory=%s, file_extension=%s", 
+                   BLT_SAFE_STRING(directory), BLT_SAFE_STRING(file_extension));
+    if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
+    return m_Server->LoadPlugins(directory, file_extension);
 }
 
 /*----------------------------------------------------------------------

@@ -55,7 +55,6 @@ if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):
     env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
 ############################ select VORBIS library
-BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
 if 'VorbisDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):  
     env['BLT_PLUGINS_VORBIS_LIBRARY'] = 'Vorbis'
 

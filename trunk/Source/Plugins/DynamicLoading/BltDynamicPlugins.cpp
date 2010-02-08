@@ -39,7 +39,10 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
     // find the entry point symbol
     void* symbol = NULL;
     result = library->FindSymbol(BLT_PLUGIN_GET_MODULE_FUNCTION_NAME_STRING, symbol);
-    if (NPT_FAILED(result)) return result;
+    if (NPT_FAILED(result)) {
+        ATX_LOG_FINE("symbol not found");
+        return result;
+    }
     
     // call the function for each module in the library
     union {
@@ -52,11 +55,10 @@ BLT_Plugins_LoadModulesFromLibrary(BLT_Core* core, const char* path)
         BLT_Module* module = NULL;
         result = function(BLT_PLUGIN_ABI_VERSION, i, &module);
         if (BLT_FAILED(result)) {
-            if (result != BLT_ERROR_NO_MATCHING_MODULE) {
-                ATX_LOG_FINE_1("BLT_Plugin_GetModule function returned %d", result);
-            }
-            return result;
+            ATX_LOG_FINE_1("BLT_Plugin_GetModule function returned %d", result);
+            break;
         }
+        ATX_LOG_FINE("registering module");
         BLT_Core_RegisterModule(core, module);
         ATX_RELEASE_OBJECT(module);
     }
@@ -99,6 +101,7 @@ BLT_Plugins_LoadModulesFromFile(BLT_Core* core, const char* name, BLT_Flags sear
         if (BLT_SUCCEEDED(result)) return BLT_SUCCESS;
     }
     
+    ATX_LOG_FINE("no matching module");
     return BLT_ERROR_NO_MATCHING_MODULE;
 }
 

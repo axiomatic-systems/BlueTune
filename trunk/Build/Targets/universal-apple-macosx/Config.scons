@@ -1,4 +1,5 @@
 env.AppendUnique(FRAMEWORKS=['AudioUnit', 'CoreServices', 'CoreAudio'])
+env.MergeFlags('-arch i386 -arch x86_64')
 env['BLT_RELAXED_ENV'] = env.Clone()
 LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_strict=False, gcc_stop_on_warning=False)
 LoadTool('gcc-generic', env)

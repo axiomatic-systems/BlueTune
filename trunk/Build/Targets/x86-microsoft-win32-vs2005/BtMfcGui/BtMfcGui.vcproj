@@ -62,6 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				ShowProgress="0"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames="LIBC.lib;LIBCD.lib;LIBCMT.lib;MSVCRT.lib;MSVCRTD.lib"

@@ -779,7 +779,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FfmpegDecoderModule,
 /*----------------------------------------------------------------------
 |   module object
 +---------------------------------------------------------------------*/
-BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(FfmpegDecoder,
+BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(FfmpegDecoderModule,
                                          "FFMPEG Decoder",
                                          "com.axiosys.decoder.ffmpeg",
                                          "1.2.0",

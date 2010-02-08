@@ -10,7 +10,7 @@
 	/>
 	<UserMacro
 		Name="BLT_DDPLUS_PLUGIN_LIB"
-		Value="$(BLT_DDPLUS_PLUGIN_HOME)\Build\Targets\x86-microsoft-win32-vs2005\$(ConfigurationName)\DolbyDigitalPlusPlugin.lib"
+		Value=""
 	/>
 	<UserMacro
 		Name="IPP_UMC_ROOT"

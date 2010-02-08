@@ -62,6 +62,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				LinkLibraryDependencies="true"
+				OutputFile="$(OutDir)\BltWmaDecoder.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -124,6 +125,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				LinkLibraryDependencies="true"
+				OutputFile="$(OutDir)\BltWmaDecoder.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

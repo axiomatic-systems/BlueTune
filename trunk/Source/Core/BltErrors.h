@@ -45,6 +45,7 @@
 #define BLT_ERROR_EOS                   ATX_ERROR_EOS
 #define BLT_ERROR_INVALID_INTERFACE     ATX_ERROR_INVALID_INTERFACE
 #define BLT_ERROR_NO_MEDIUM             ATX_ERROR_NO_MEDIUM
+#define BLT_ERROR_WOULD_BLOCK           ATX_ERROR_WOULD_BLOCK
 
 /* Error base */
 #ifndef BLT_ERROR_BASE               

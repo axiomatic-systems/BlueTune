@@ -29,6 +29,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.decoder")
 struct BLT_Decoder {
     BLT_Core*         core;
     BLT_Stream*       stream;
+    BLT_OutputNode*   output;    
     BLT_DecoderStatus status;
 };
 
@@ -252,17 +253,38 @@ BLT_Decoder_GetInputNode(BLT_Decoder*    decoder,
 }
 
 /*----------------------------------------------------------------------
+|    BLT_Decoder_OutputChanged
++---------------------------------------------------------------------*/
+static void
+BLT_Decoder_OutputChanged(BLT_Decoder* decoder, BLT_MediaNode* node)
+{
+    ATX_RELEASE_OBJECT(decoder->output);
+
+    if (node) {
+        decoder->output = ATX_CAST(node, BLT_OutputNode);
+        if (decoder->output) {
+            ATX_REFERENCE_OBJECT(decoder->output);
+        }
+    } else {
+        decoder->output = NULL;
+    }
+}
+
+/*----------------------------------------------------------------------
 |    BLT_Decoder_SetOutput
 +---------------------------------------------------------------------*/
 BLT_Result
 BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
 {
+    BLT_Result result;
+
     /* normalize the name and type */
     if (name && name[0] == '\0') name = NULL;
     if (type && type[0] == '\0') type = NULL;
 
     if (name == NULL) {
         /* if the name is NULL or empty, it means reset */
+        BLT_Decoder_OutputChanged(decoder, NULL);
         return BLT_Stream_ResetOutput(decoder->stream);
     } else {
         if (ATX_StringsEqual(name, BLT_DECODER_DEFAULT_OUTPUT_NAME)) {
@@ -273,12 +295,21 @@ BLT_Decoder_SetOutput(BLT_Decoder* decoder, BLT_CString name, BLT_CString type)
             name = default_name;
             if (type == NULL) type = default_type;
 
-  	        return BLT_Stream_SetOutput(decoder->stream, name, type);
+  	        result = BLT_Stream_SetOutput(decoder->stream, name, type);
 	    } else {
             /* set the output of the stream by name */
-            return BLT_Stream_SetOutput(decoder->stream, name, type);
+            result = BLT_Stream_SetOutput(decoder->stream, name, type);
 	    }
     }
+    
+    if (BLT_SUCCEEDED(result)) {
+        BLT_MediaNode* node = NULL;
+        BLT_Stream_GetOutputNode(decoder->stream, &node);
+        BLT_Decoder_OutputChanged(decoder, node);
+        ATX_RELEASE_OBJECT(node);
+    }
+
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -289,11 +320,18 @@ BLT_Decoder_SetOutputNode(BLT_Decoder*   decoder,
                           BLT_CString    name,
                           BLT_MediaNode* node)
 {
+    BLT_Result result;
+    
     /* clear the status */
     BLT_Decoder_ClearStatus(decoder);
 
     /* set the input of the stream */
-    return BLT_Stream_SetOutputNode(decoder->stream, name, node);
+    result = BLT_Stream_SetOutputNode(decoder->stream, name, node);
+    if (BLT_SUCCEEDED(result)) {
+        BLT_Decoder_OutputChanged(decoder, node);
+    }
+
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -303,8 +341,13 @@ BLT_Result
 BLT_Decoder_GetOutputNode(BLT_Decoder*    decoder, 
                           BLT_MediaNode** node)
 {
-    /* return the output node of the stream */
-    return BLT_Stream_GetOutputNode(decoder->stream, node);
+    if (decoder->output) {
+        *node = ATX_CAST(decoder->output, BLT_MediaNode);
+        if (*node) ATX_REFERENCE_OBJECT(*node);
+    } else {
+        *node = NULL;
+    }
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -403,18 +446,43 @@ BLT_Decoder_Drain(BLT_Decoder* decoder)
 }
 
 /*----------------------------------------------------------------------
-|    BLT_Decoder_PumpPacket
+|    BLT_Decoder_PumpPacketWithOptions
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_Decoder_PumpPacket(BLT_Decoder* decoder)
+BLT_Decoder_PumpPacketWithOptions(BLT_Decoder* decoder, BLT_Flags options)
 {
     BLT_Result result;
+
+    /* check if we're in non-blocking mode */
+    if (options & BLT_DECODER_PUMP_OPTION_NON_BLOCKING) {
+        if (decoder->output) {
+            BLT_OutputNodeStatus status;
+            result = BLT_OutputNode_GetStatus(decoder->output, &status);
+            if (BLT_SUCCEEDED(result) && (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL)) {
+                ATX_LOG_FINE("output queue full, would block");
+                
+                /* ensure that the stream is not paused */
+                BLT_Stream_Start(decoder->stream);
+                
+                return BLT_ERROR_WOULD_BLOCK;
+            }
+        }
+    }
 
     /* pump a packet */
     result = BLT_Stream_PumpPacket(decoder->stream);
     if (BLT_FAILED(result)) return result;
 
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_Decoder_PumpPacket
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_Decoder_PumpPacket(BLT_Decoder* decoder)
+{
+    return BLT_Decoder_PumpPacketWithOptions(decoder, 0);
 }
 
 /*----------------------------------------------------------------------

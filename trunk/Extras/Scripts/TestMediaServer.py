@@ -1,4 +1,4 @@
-### Based on SimpleHTTPServer.py
+### Simple test media server
 
 __version__ = "0.1"
 
@@ -56,14 +56,6 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return f
 
     def translate_path(self, path):
-        """Translate a /-separated PATH to the local filename syntax.
-
-        Components that mean special things to the local file system
-        (e.g. drive or directory names) are ignored.  (XXX They should
-        probably be diagnosed.)
-
-        """
-        # abandon query parameters
         path = urlparse.urlparse(path)[2]
         path = posixpath.normpath(urllib.unquote(path))
         words = path.split('/')
@@ -121,7 +113,8 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         '.py': 'text/plain',
         '.c': 'text/plain',
         '.h': 'text/plain',
-        ".mp4": 'video/mp4'
+        '.mp4': 'video/mp4',
+        '.mp3': 'audio/mpeg'
         })
 
 

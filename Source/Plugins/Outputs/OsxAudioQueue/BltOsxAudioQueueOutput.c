@@ -28,6 +28,7 @@
 #include "BltCore.h"
 #include "BltPacketConsumer.h"
 #include "BltMediaPacket.h"
+#include "BltVolumeControl.h"
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5) || (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_2_0)
 
@@ -71,6 +72,7 @@ typedef struct {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_PacketConsumer);
     ATX_IMPLEMENTS(BLT_OutputNode);
+    ATX_IMPLEMENTS(BLT_VolumeControl);
     ATX_IMPLEMENTS(BLT_MediaPort);
 
     /* members */
@@ -101,6 +103,7 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutputModule, BLT_Module)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, ATX_Referenceable)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_OutputNode)
+ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_VolumeControl)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_MediaPort)
 ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_PacketConsumer)
 
@@ -324,7 +327,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
             self->buffers[i]->mAudioDataByteSize = 0;
         }
     }
-        
+            
     /* copy the format */
     self->audio_format = audio_format;
     
@@ -405,7 +408,9 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
 {
     OSStatus            status;
     AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
-
+    AudioTimeStamp      start_time;
+    AudioTimeStamp      current_time;
+     
     /* check that the buffer has data */
     if (buffer->mAudioDataByteSize == 0) return BLT_SUCCESS;
     
@@ -414,13 +419,39 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
 
     /* queue the buffer */
     ATX_LOG_FINE_1("enqueuing buffer %d", self->buffer_index);
-    status = AudioQueueEnqueueBuffer(self->audio_queue, buffer,
+    /*status = AudioQueueEnqueueBuffer(self->audio_queue, buffer,
                                      self->packet_count, 
-                                     self->packet_count?self->packet_descriptions:NULL);
+                                     self->packet_count?self->packet_descriptions:NULL);*/
+    status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
+                                                   buffer, 
+                                                   self->packet_count, 
+                                                   self->packet_count?self->packet_descriptions:NULL, 
+                                                   0, 
+                                                   0, 
+                                                   0, 
+                                                   NULL, 
+                                                   NULL, 
+                                                   &start_time);
+    printf("start = %lf\n",start_time.mSampleTime);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueEnqueueBuffer returned %x", status);
     }
-    
+    status = AudioQueueGetCurrentTime(self->audio_queue, NULL, &current_time, NULL);
+    if (status == noErr) {
+        ATX_LOG_FINER_1("current time = %lf", current_time.mSampleTime);
+        if ((current_time.mFlags & kAudioTimeStampSampleTimeValid) && 
+            (start_time.mFlags & kAudioTimeStampSampleTimeValid)   &&
+            (start_time.mSampleTime != 0)) {
+            if (current_time.mSampleTime > start_time.mSampleTime) {
+                ATX_LOG_FINE_1("audio queue underflow (%f)", (float)(current_time.mSampleTime - start_time.mSampleTime));
+                AudioQueueStop(self->audio_queue, TRUE);
+                AudioQueueStart(self->audio_queue, NULL /*&start_time*/);
+            }
+        }
+    } else {
+        ATX_LOG_FINER("no timestamp available");
+    }
+
     /* move on to the next buffer */
     self->buffer_index++;
     if (self->buffer_index == BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT) {
@@ -587,6 +618,7 @@ OsxAudioQueueOutput_Create(BLT_Module*              _module,
     ATX_SET_INTERFACE_EX(self, OsxAudioQueueOutput, BLT_BaseMediaNode, ATX_Referenceable);
     ATX_SET_INTERFACE   (self, OsxAudioQueueOutput, BLT_PacketConsumer);
     ATX_SET_INTERFACE   (self, OsxAudioQueueOutput, BLT_OutputNode);
+    ATX_SET_INTERFACE   (self, OsxAudioQueueOutput, BLT_VolumeControl);
     ATX_SET_INTERFACE   (self, OsxAudioQueueOutput, BLT_MediaPort);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -809,12 +841,46 @@ OsxAudioQueueOutput_Resume(BLT_MediaNode* _self)
 }
 
 /*----------------------------------------------------------------------
+|    OsxAudioQueueOutput_SetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioQueueOutput_SetVolume(BLT_VolumeControl* _self, float volume)
+{
+    OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_VolumeControl);
+    OSStatus             status;
+    
+    status = AudioQueueSetParameter(self->audio_queue, kAudioQueueParam_Volume, volume);
+    return (status == noErr?BLT_SUCCESS:BLT_FAILURE);
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioQueueOutput_GetVolume
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioQueueOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
+{
+    OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_VolumeControl);
+    OSStatus             status;
+    Float32              aq_volume = 1.0f;
+    
+    status = AudioQueueGetParameter(self->audio_queue, kAudioQueueParam_Volume, &aq_volume);
+    if (status == noErr) {
+        *volume = aq_volume;
+        return BLT_SUCCESS;
+    } else {
+        *volume = 1.0f;
+        return BLT_FAILURE;
+    }
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(OsxAudioQueueOutput)
     ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode)
     ATX_GET_INTERFACE_ACCEPT_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, ATX_Referenceable)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioQueueOutput, BLT_OutputNode)
+    ATX_GET_INTERFACE_ACCEPT   (OsxAudioQueueOutput, BLT_VolumeControl)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioQueueOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT   (OsxAudioQueueOutput, BLT_PacketConsumer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
@@ -858,6 +924,14 @@ ATX_END_INTERFACE_MAP_EX
 ATX_BEGIN_INTERFACE_MAP(OsxAudioQueueOutput, BLT_OutputNode)
     OsxAudioQueueOutput_GetStatus,
     OsxAudioQueueOutput_Drain
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    BLT_VolumeControl interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(OsxAudioQueueOutput, BLT_VolumeControl)
+    OsxAudioQueueOutput_GetVolume,
+    OsxAudioQueueOutput_SetVolume
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

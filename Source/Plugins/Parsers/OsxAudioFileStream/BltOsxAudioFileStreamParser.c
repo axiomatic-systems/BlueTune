@@ -110,6 +110,51 @@ OsxAudioFileStreamParserModule_FormatIsSupported(OsxAudioFileStreamParserModule*
 }
 
 /*----------------------------------------------------------------------
+|    OsxAudioFileStreamParser_UpdateStreamInfo
++---------------------------------------------------------------------*/
+static void
+OsxAudioFileStreamParser_UpdateStreamInfo(OsxAudioFileStreamParser* self)
+{
+    UInt32 property_32 = 0;
+    UInt64 property_64 = 0;
+    UInt32 property_size = sizeof(property_32);
+    if (!(self->stream_info.mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE)) {
+        if (AudioFileStreamGetProperty(self->stream_parser, 
+                                       kAudioFileStreamProperty_BitRate, 
+                                       &property_size, 
+                                       &property_32) == noErr) {
+            self->stream_info.nominal_bitrate = property_32;
+            self->stream_info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
+        }
+    }
+    
+    /* update the duration */
+    property_size = sizeof(property_64);
+    if (AudioFileStreamGetProperty(self->stream_parser, 
+                                   kAudioFileStreamProperty_AudioDataPacketCount, 
+                                   &property_size, 
+                                   &property_64) == noErr) {
+        UInt64 frame_count = property_64*(UInt64)self->output.media_type->asbd.mFramesPerPacket;
+        if ((UInt64)self->output.media_type->asbd.mSampleRate) {
+            self->stream_info.duration = ((UInt64)1000*frame_count)/(UInt64)self->output.media_type->asbd.mSampleRate;
+            self->stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+        }
+    } else if ((self->stream_info.mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) &&
+               (self->stream_info.mask & BLT_STREAM_INFO_MASK_SIZE)            &&
+               self->stream_info.nominal_bitrate) {
+        self->stream_info.duration = ((UInt64)8000*(UInt64)self->stream_info.size) /
+                                      (UInt64)self->stream_info.nominal_bitrate;
+        self->stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
+    }
+    if ((self->stream_info.mask & BLT_STREAM_INFO_MASK_SIZE)     &&
+        (self->stream_info.mask & BLT_STREAM_INFO_MASK_DURATION) &&
+         self->stream_info.duration != 0) {
+        self->stream_info.average_bitrate = 8000.0*(double)self->stream_info.size/(double)self->stream_info.duration;
+        self->stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
+    }
+}
+
+/*----------------------------------------------------------------------
 |    OsxAudioFileStreamParser_OnProperty
 +---------------------------------------------------------------------*/
 static void 
@@ -231,13 +276,12 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                 CFStringRef name = NULL;
                 char        buffer[1024];
                 UInt64      property_64;
-                UInt32      property_32;
                 
                 self->stream_info.type          = BLT_STREAM_TYPE_AUDIO;
                 self->stream_info.channel_count = self->output.media_type->asbd.mChannelsPerFrame;
                 self->stream_info.sample_rate   = (ATX_UInt32)self->output.media_type->asbd.mSampleRate;
                 self->stream_info.data_type     = "";
-                self->stream_info.mask          = BLT_STREAM_INFO_MASK_TYPE          |
+                self->stream_info.mask         |= BLT_STREAM_INFO_MASK_TYPE          |
                                                   BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
                                                   BLT_STREAM_INFO_MASK_SAMPLE_RATE   |
                                                   BLT_STREAM_INFO_MASK_DATA_TYPE;
@@ -272,29 +316,8 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                     self->stream_info.size = property_64;
                     self->stream_info.mask |= BLT_STREAM_INFO_MASK_SIZE;
                 }
-                
-                property_size = sizeof(UInt64);
-                if (AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_AudioDataPacketCount, &property_size, &property_64) == noErr) {
-                    UInt64 frame_count = property_64*(UInt64)self->output.media_type->asbd.mFramesPerPacket;
-                    if ((UInt64)self->output.media_type->asbd.mSampleRate) {
-                        self->stream_info.duration = ((UInt64)1000*frame_count)/(UInt64)self->output.media_type->asbd.mSampleRate;
-                        self->stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
-                    }
-                }
-                
-                property_size = sizeof(UInt32);
-                if (AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_BitRate, &property_size, &property_32) == noErr) {
-                    self->stream_info.nominal_bitrate = property_32;
-                    self->stream_info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
-                }
-
-                if ((self->stream_info.mask & BLT_STREAM_INFO_MASK_SIZE)     &&
-                    (self->stream_info.mask & BLT_STREAM_INFO_MASK_DURATION) &&
-                     self->stream_info.duration != 0) {
-                    self->stream_info.average_bitrate = 8000.0*(double)self->stream_info.size/(double)self->stream_info.duration;
-                    self->stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
-                }
-                
+                                
+                OsxAudioFileStreamParser_UpdateStreamInfo(self);
                 BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &self->stream_info);
             }
             break;
@@ -349,6 +372,10 @@ OsxAudioFileStreamParser_OnPacket(void*                         _self,
         /* add the packet to the queue */
         ATX_List_AddData(self->output.packets, packet);
     }
+    
+    /* update the stream info */
+    OsxAudioFileStreamParser_UpdateStreamInfo(self);
+    BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &self->stream_info);
 }
 
 /*----------------------------------------------------------------------
@@ -414,6 +441,18 @@ OsxAudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
         self->output.media_type = NULL;
     }
     
+    /* clear the stream info */
+    ATX_SetMemory(&self->stream_info, 0, sizeof(self->stream_info));
+    
+    /* record the size */
+    {
+        ATX_LargeSize size = 0;
+        if (ATX_SUCCEEDED(ATX_InputStream_GetSize(stream, &size))) {
+            self->stream_info.size = size;
+            self->stream_info.mask |= BLT_STREAM_INFO_MASK_SIZE;
+        }
+    }
+    
     /* create the stream parser */
     return OsxAudioFileStreamParserInput_Setup(self, media_type->id);
 }
@@ -471,8 +510,8 @@ OsxAudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
                                          BLT_MediaPacket**   packet)
 {
     OsxAudioFileStreamParser* self = ATX_SELF_M(output, OsxAudioFileStreamParser, BLT_PacketProducer);
-    ATX_ListItem*          packet_item;
-    OSStatus               status;
+    ATX_ListItem*             packet_item;
+    OSStatus                  status;
 
     /* default return */
     *packet = NULL;

@@ -27,6 +27,11 @@
 ATX_SET_LOCAL_LOGGER("bluetune.player.decoder-server")
 
 /*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+const unsigned int BLT_PLAYER_LOOP_WAIT_DURATION = 50; // milliseconds
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderServer_Message::MessageType
 +---------------------------------------------------------------------*/
 NPT_Message::Type 
@@ -207,14 +212,20 @@ BLT_DecoderServer::Run()
         }
 
         if (m_State == STATE_PLAYING) {
-            result = BLT_Decoder_PumpPacket(m_Decoder);
+            result = BLT_Decoder_PumpPacketWithOptions(m_Decoder, BLT_DECODER_PUMP_OPTION_NON_BLOCKING);
             if (BLT_FAILED(result)) {
-                ATX_LOG_FINE_1("stopped on %d", result);
-                if (result != BLT_ERROR_EOS) {
-                    m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(result, "error from BLT_Decoder_PumpPacket"));
+                if (result == BLT_ERROR_WOULD_BLOCK || result == BLT_ERROR_PORT_HAS_NO_DATA) {
+                    /* not fatal, just wait and try again later */
+                    ATX_LOG_FINER("pump would block, waiting a short time");
+                    result = m_MessageQueue->PumpMessage(BLT_PLAYER_LOOP_WAIT_DURATION);
+                } else {
+                    ATX_LOG_FINE_1("stopped on %d", result);
+                    if (result != BLT_ERROR_EOS) {
+                        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(result, "error from BLT_Decoder_PumpPacket"));
+                    }
+                    SetState(STATE_EOS);
+                    result = BLT_SUCCESS;
                 }
-                SetState(STATE_EOS);
-                result = BLT_SUCCESS;
             } else {
                 UpdateStatus();
             }

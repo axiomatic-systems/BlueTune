@@ -31,6 +31,8 @@
 +---------------------------------------------------------------------*/
 #define BLT_DECODER_DEFAULT_OUTPUT_NAME "!default"
 
+#define BLT_DECODER_PUMP_OPTION_NON_BLOCKING 1
+
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
@@ -224,6 +226,15 @@ BLT_Result BLT_Decoder_GetStreamProperties(BLT_Decoder*     decoder,
  * Process on media packet through a BLT_Decoder object's stream.
  */
 BLT_Result BLT_Decoder_PumpPacket(BLT_Decoder* decoder);
+
+/**
+ * Process on media packet through a BLT_Decoder object's stream, 
+ * with options. 
+ * @param options Boolean options flags (combination of 0 or more
+ * BLT_DECODER_PUMP_OPTION_XXX flags). If this value is 0, the behaviour
+ * is the same as BLT_Decoder_PumpPacket()
+ */
+BLT_Result BLT_Decoder_PumpPacketWithOptions(BLT_Decoder* decoder, BLT_Flags options);
 
 /**
  * Tell a BLT_Decoder object that decoding is stopped. This allows the

@@ -178,7 +178,7 @@ WmaDecoder_OpenStream(WmaDecoder* self)
                                  1            /* wTargetAudioStream*/);
     if (status != cWMA_NoErr) {
         ATX_LOG_WARNING_1("WmaDecoder_OpenStream - WMAFileDecodeInitEx failed (%d)", status);
-        return BLT_FAILURE;
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
     /* get the file info */
@@ -205,7 +205,8 @@ WmaDecoder_OpenStream(WmaDecoder* self)
     /* update the stream info */
     if (ATX_BASE(self, BLT_BaseMediaNode).context) {
         BLT_StreamInfo stream_info;
-
+        tWMAFileContDesc* content_desc = NULL;
+        
         /* start with no info */
         stream_info.mask = 0;
 
@@ -238,6 +239,25 @@ WmaDecoder_OpenStream(WmaDecoder* self)
         stream_info.mask |= BLT_STREAM_INFO_MASK_DURATION;
 
         BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
+        
+        /* metadata */
+        status = WMAFileContentDesc(self->wma_handle, &content_desc);
+        if (status == cWMA_NoErr && content_desc) {
+            ATX_Properties* properties = NULL;
+            BLT_Result result = BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties);
+#if 0
+            if (BLT_SUCCEEDED(result)) {
+                ATX_PropertyValue property;
+                
+                if (content_desc->
+                property.data.string = buffer;
+                property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                ATX_Properties_SetProperty(properties,
+                                           "Tags/Title",
+                                           &property);
+            }
+#endif
+        }
     }
 
     return BLT_SUCCESS;

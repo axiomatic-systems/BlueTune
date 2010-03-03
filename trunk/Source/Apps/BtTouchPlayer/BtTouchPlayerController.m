@@ -58,6 +58,8 @@
         player = [[BLT_PlayerObject alloc] init];
         [player setDelegate: self];
     }
+    volume = 1.0f;
+    pendingVolume = 1.0f;
     return self;
 }
 
@@ -95,6 +97,14 @@
     //[player seekToPosition: (unsigned int)(playerPosition.value*1000.0f)  range: (unsigned int)(playerPosition.maximumValue*1000.0f)];
 }
 
+-(IBAction) setVolume: (id) sender;
+{
+    if (pendingVolume == volume) {
+        [player setVolume: [playerVolume value]];
+    }
+    pendingVolume = [playerVolume value];
+}
+
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
 {
     printf("ACK %d\n", command_id);
@@ -102,6 +112,9 @@
     if (command_id == BLT_PLAYER_COMMAND_ID_SET_INPUT) {
         // autoplay
         [player play];
+    } else if (command_id == BLT_PLAYER_COMMAND_ID_SET_VOLUME) {
+        // update the actual volume value
+        volume = pendingVolume;
     }
 }
 
@@ -132,7 +145,7 @@
 
 -(void) streamPositionDidChange: (BLT_StreamPosition) position
 {
-    float where = (float)position.offset*100.0f/(float)position.range;
+    float where = (float)position.offset/(float)position.range;
     playerPosition.value = where;
 }
 

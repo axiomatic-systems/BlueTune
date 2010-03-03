@@ -12,15 +12,20 @@
     IBOutlet UILabel*          playerTimecode;
     IBOutlet UITextField*      playerInput;
     IBOutlet UISlider*         playerPosition;
+    IBOutlet UISlider*         playerVolume;
     IBOutlet UITableView*      playerStreamInfoView;
     IBOutlet UITableView*      playerPropertiesView;
+    
+    float volume;
+    float pendingVolume;
 }
 
--(IBAction) play:     (id) sender;
--(IBAction) stop:     (id) sender;
--(IBAction) pause:    (id) sender;
--(IBAction) setInput: (id) sender;
--(IBAction) seek:     (id) sender;
+-(IBAction) play:      (id) sender;
+-(IBAction) stop:      (id) sender;
+-(IBAction) pause:     (id) sender;
+-(IBAction) setInput:  (id) sender;
+-(IBAction) seek:      (id) sender;
+-(IBAction) setVolume: (id) sender;
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id;
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result;

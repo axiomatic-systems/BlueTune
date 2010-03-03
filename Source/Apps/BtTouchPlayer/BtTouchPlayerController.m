@@ -60,6 +60,7 @@
     }
     volume = 1.0f;
     pendingVolume = 1.0f;
+    positionSliderPressed = FALSE;
     return self;
 }
 
@@ -94,7 +95,8 @@
 
 -(IBAction) seek: (id) sender;
 {
-    //[player seekToPosition: (unsigned int)(playerPosition.value*1000.0f)  range: (unsigned int)(playerPosition.maximumValue*1000.0f)];
+    positionSliderPressed = FALSE;
+    [player seekToPosition: (unsigned int)(playerPosition.value*1000.0f)  range: (unsigned int)(playerPosition.maximumValue*1000.0f)];
 }
 
 -(IBAction) setVolume: (id) sender;
@@ -103,6 +105,11 @@
         [player setVolume: [playerVolume value]];
     }
     pendingVolume = [playerVolume value];
+}
+
+-(IBAction) positionSliderWasPressed: (id) sender;
+{
+    positionSliderPressed = TRUE;
 }
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id
@@ -145,8 +152,10 @@
 
 -(void) streamPositionDidChange: (BLT_StreamPosition) position
 {
-    float where = (float)position.offset/(float)position.range;
-    playerPosition.value = where;
+    if (!positionSliderPressed) {
+        float where = (float)position.offset/(float)position.range;
+        playerPosition.value = where;
+    }
 }
 
 -(void) streamInfoDidChange: (const BLT_StreamInfo*) info updateMask: (BLT_Mask) mask

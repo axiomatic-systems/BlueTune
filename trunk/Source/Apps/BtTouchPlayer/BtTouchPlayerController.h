@@ -18,6 +18,7 @@
     
     float volume;
     float pendingVolume;
+    BOOL  positionSliderPressed;
 }
 
 -(IBAction) play:      (id) sender;
@@ -26,6 +27,7 @@
 -(IBAction) setInput:  (id) sender;
 -(IBAction) seek:      (id) sender;
 -(IBAction) setVolume: (id) sender;
+-(IBAction) positionSliderWasPressed: (id) sender;
 
 -(void) ackWasReceived: (BLT_Player_CommandId) command_id;
 -(void) nackWasReceived: (BLT_Player_CommandId) command_id result: (BLT_Result) result;

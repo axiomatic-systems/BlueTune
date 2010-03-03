@@ -41,7 +41,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.audio-queue")
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT             8
-#define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION   2000 /* milliseconds */
+#define BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION   1000 /* milliseconds */
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT 512
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE      32768
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_WAIT                 3 /* seconds */

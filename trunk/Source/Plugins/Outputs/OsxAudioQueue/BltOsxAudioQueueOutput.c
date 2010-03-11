@@ -2,7 +2,7 @@
 |
 |   OSX Audio Queue Output Module
 |
-|   (c) 2002-2008 Gilles Boccon-Gibod
+|   (c) 2002-2010 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -83,6 +83,7 @@ typedef struct {
     pthread_cond_t               audio_queue_stopped_cond;
     BLT_Boolean                  waiting_for_stop;
     AudioStreamBasicDescription  audio_format;
+    Float32                      volume;
     AudioQueueBufferRef          buffers[BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT];
     BLT_Ordinal                  buffer_index;
     pthread_cond_t               buffer_released_cond;
@@ -407,34 +408,59 @@ static BLT_Result
 OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
 {
     OSStatus            status;
+    unsigned int        buffer_index = self->buffer_index;
     AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
     AudioTimeStamp      start_time;
     AudioTimeStamp      current_time;
+    unsigned int        packet_count = self->packet_count;
      
+    /* reset the packet count */
+    self->packet_count = 0;
+
     /* check that the buffer has data */
     if (buffer->mAudioDataByteSize == 0) return BLT_SUCCESS;
     
-    /* mark the buffer as in-queue */
+    /* mark this buffer as 'in queue' and move on to the next buffer */
     buffer->mUserData = self;
-
+    self->buffer_index++;
+    if (self->buffer_index == BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT) {
+        self->buffer_index = 0;
+    }
+    
+    /* automatically start the queue if it is not already running */
+    if (!self->audio_queue_started) {
+        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
+        ATX_LOG_FINE("auto-starting the queue");
+        if (status != noErr) {
+            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
+            return BLT_ERROR_INTERNAL;
+        } 
+        self->audio_queue_started = BLT_TRUE;
+    }
+    
     /* queue the buffer */
-    ATX_LOG_FINE_1("enqueuing buffer %d", self->buffer_index);
-    /*status = AudioQueueEnqueueBuffer(self->audio_queue, buffer,
-                                     self->packet_count, 
-                                     self->packet_count?self->packet_descriptions:NULL);*/
+    ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
     status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
                                                    buffer, 
-                                                   self->packet_count, 
-                                                   self->packet_count?self->packet_descriptions:NULL, 
+                                                   packet_count, 
+                                                   packet_count?self->packet_descriptions:NULL, 
                                                    0, 
                                                    0, 
                                                    0, 
                                                    NULL, 
                                                    NULL, 
                                                    &start_time);
-    printf("start = %lf\n",start_time.mSampleTime);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueEnqueueBuffer returned %x", status);
+        buffer->mUserData = NULL;
+        buffer->mAudioDataByteSize = 0;
+        return BLT_FAILURE;
+    }
+    if (start_time.mFlags & kAudioTimeStampSampleTimeValid) {
+        ATX_LOG_FINER_1("start_time = %lf", start_time.mSampleTime);
+    } else {
+        ATX_LOG_FINER("start_time not available");
+        start_time.mSampleTime = 0;
     }
     status = AudioQueueGetCurrentTime(self->audio_queue, NULL, &current_time, NULL);
     if (status == noErr) {
@@ -450,24 +476,6 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
         }
     } else {
         ATX_LOG_FINER("no timestamp available");
-    }
-
-    /* move on to the next buffer */
-    self->buffer_index++;
-    if (self->buffer_index == BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT) {
-        self->buffer_index = 0;
-    }
-    self->packet_count = 0;
-    
-    /* automatically start the queue if it is not already running */
-    if (!self->audio_queue_started) {
-        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
-        ATX_LOG_FINE("auto-starting the queue");
-        if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
-            return BLT_ERROR_INTERNAL;
-        } 
-        self->audio_queue_started = BLT_TRUE;
     }
     
     return BLT_SUCCESS;
@@ -612,6 +620,9 @@ OsxAudioQueueOutput_Create(BLT_Module*              _module,
     BLT_PcmMediaType_Init(&self->expected_media_types.pcm);
     self->expected_media_types.pcm.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
     BLT_MediaType_Init(&self->expected_media_types.asbd.base, module->asbd_media_type_id);
+    
+    /* initialize fields */
+    self->volume = 1.0;
     
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode);
@@ -847,10 +858,14 @@ BLT_METHOD
 OsxAudioQueueOutput_SetVolume(BLT_VolumeControl* _self, float volume)
 {
     OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_VolumeControl);
-    OSStatus             status;
     
-    status = AudioQueueSetParameter(self->audio_queue, kAudioQueueParam_Volume, volume);
-    return (status == noErr?BLT_SUCCESS:BLT_FAILURE);
+    self->volume = volume;
+    if (self->audio_queue) {
+        OSStatus status = AudioQueueSetParameter(self->audio_queue, kAudioQueueParam_Volume, volume);
+        if (status != noErr) return BLT_FAILURE;
+    }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -860,16 +875,19 @@ BLT_METHOD
 OsxAudioQueueOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
 {
     OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_VolumeControl);
-    OSStatus             status;
-    Float32              aq_volume = 1.0f;
-    
-    status = AudioQueueGetParameter(self->audio_queue, kAudioQueueParam_Volume, &aq_volume);
-    if (status == noErr) {
-        *volume = aq_volume;
-        return BLT_SUCCESS;
+
+    if (self->audio_queue) {
+        OSStatus status = AudioQueueGetParameter(self->audio_queue, kAudioQueueParam_Volume, &self->volume);
+        if (status == noErr) {
+            *volume = self->volume;
+            return BLT_SUCCESS;
+        } else {
+            *volume = 1.0f;
+            return BLT_FAILURE;
+        }
     } else {
-        *volume = 1.0f;
-        return BLT_FAILURE;
+        *volume = self->volume;
+        return BLT_SUCCESS;
     }
 }
 

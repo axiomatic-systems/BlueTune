@@ -161,10 +161,13 @@ class BLT_DecoderClient_DecoderEventNotificationMessage :
     public BLT_DecoderClient_Message
 {
 public:
-    // constructor for decoder events of type DECODER_EVENT_TYPE_DECODING_ERROR
-    BLT_DecoderClient_DecoderEventNotificationMessage(BLT_Result  result_code,
-                                                      const char* message):
-        m_Event(result_code, message) {}
+    // constructor for decoder events of type
+    // DECODER_EVENT_TYPE_INIT_ERROR
+    // DECODER_EVENT_TYPE_DECODING_ERROR
+    BLT_DecoderClient_DecoderEventNotificationMessage(BLT_DecoderServer::DecoderEvent::Type type,
+                                                      BLT_Result                            result_code,
+                                                      const char*                           message):
+        m_Event(type, result_code, message) {}
     NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) {
         handler->OnDecoderEventNotification(m_Event);
         return NPT_SUCCESS;

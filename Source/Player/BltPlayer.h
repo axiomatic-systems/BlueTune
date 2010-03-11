@@ -441,7 +441,7 @@ public:
           case BLT_DecoderServer_Message::COMMAND_ID_PLAY:
             return BLT_PLAYER_COMMAND_ID_PLAY;
           case BLT_DecoderServer_Message::COMMAND_ID_STOP:
-            return BLT_PLAYER_COMMAND_ID_PLAY;
+            return BLT_PLAYER_COMMAND_ID_STOP;
           case BLT_DecoderServer_Message::COMMAND_ID_PAUSE:
             return BLT_PLAYER_COMMAND_ID_PAUSE;
           case BLT_DecoderServer_Message::COMMAND_ID_PING:

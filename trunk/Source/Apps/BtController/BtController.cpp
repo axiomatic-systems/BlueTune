@@ -138,8 +138,8 @@ BtController::OnDecoderEventNotification(BLT_DecoderServer::DecoderEvent& event)
     ATX_ConsoleOutput("INFO: Decoder Event - ");
     switch (event.m_Type) {
         case BLT_DecoderServer::DecoderEvent::EVENT_TYPE_DECODING_ERROR: {
-            BLT_DecoderServer::DecoderEvent::DecodingErrorDetails* details = 
-                static_cast<BLT_DecoderServer::DecoderEvent::DecodingErrorDetails*>(event.m_Details);
+            BLT_DecoderServer::DecoderEvent::ErrorDetails* details = 
+                static_cast<BLT_DecoderServer::DecoderEvent::ErrorDetails*>(event.m_Details);
             ATX_ConsoleOutputF("[DECODING ERROR] result=%d (%s) message=%s\n",
                                details->m_ResultCode,
                                BLT_ResultText(details->m_ResultCode),

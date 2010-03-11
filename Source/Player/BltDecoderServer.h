@@ -432,28 +432,32 @@ class BLT_DecoderServer : public NPT_Thread,
         STATE_STOPPED,
         STATE_PLAYING,
         STATE_PAUSED,
-        STATE_EOS
+        STATE_EOS,
+        STATE_TERMINATED
     } State;
         
     struct DecoderEvent {
         // types
         typedef enum {
-            EVENT_TYPE_DECODING_ERROR // details point to a DecodingErrorDetails
+            EVENT_TYPE_INIT_ERROR,    // details point to an ErrorDetails
+            EVENT_TYPE_DECODING_ERROR // details point to an ErrorDetails
         } Type;
 
         struct Details {
             virtual ~Details() {}
         };
         
-        struct DecodingErrorDetails : public Details {
-            DecodingErrorDetails(BLT_Result result_code, const char* message) :
+        struct ErrorDetails : public Details {
+            ErrorDetails(BLT_Result result_code, const char* message) :
                 m_ResultCode(result_code), m_Message(message) {}
             BLT_Result m_ResultCode;
             NPT_String m_Message;
         };
         
-        // constructor for events of type DECODER_EVENT_TYPE_DECODING_ERROR
-        DecoderEvent(BLT_Result result_code, const char* message);
+        // constructor for events of types:
+        // EVENT_TYPE_INIT_ERROR
+        // DECODER_EVENT_TYPE_DECODING_ERROR
+        DecoderEvent(Type type, BLT_Result result_code, const char* message);
     
         // destructor
         ~DecoderEvent() { delete m_Details; }
@@ -483,7 +487,8 @@ class BLT_DecoderServer : public NPT_Thread,
                                    const ATX_PropertyValue* value);
     virtual BLT_Result LoadPlugin(const char* name, BLT_Flags search_flags);
     virtual BLT_Result LoadPlugins(const char* directory, const char* file_extension);
-
+    virtual void       WaitForTerminateMessage();
+    
     // NPT_Runnable methods
     void Run();
 

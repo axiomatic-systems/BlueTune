@@ -168,6 +168,12 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
     OSStatus                  result;
     ATX_COMPILER_UNUSED(flags);
     
+    ATX_LOG_FINE_4("stream property %c%c%c%c", 
+                   (property_id>>24)&0xFF, 
+                   (property_id>>16)&0xFF,
+                   (property_id>> 8)&0xFF, 
+                   (property_id    )&0xFF);
+                   
     switch (property_id) {
         case kAudioFileStreamProperty_FileFormat: {
             UInt32 property_value = 0;
@@ -322,9 +328,6 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
             }
             break;
         }
-        
-        default:
-            ATX_LOG_FINER_1("property %x", property_id);
     }
 }
 

@@ -142,6 +142,20 @@ BLT_DecoderServer::~BLT_DecoderServer()
 }
 
 /*----------------------------------------------------------------------
+|    BLT_DecoderServer::WaitForTerminateMessage
++---------------------------------------------------------------------*/
+void
+BLT_DecoderServer::WaitForTerminateMessage()
+{
+    BLT_Result result;
+    do {
+        result = m_MessageQueue->PumpMessage(NPT_TIMEOUT_INFINITE);
+    } while (BLT_SUCCEEDED(result));
+
+    SetState(STATE_TERMINATED);
+}
+
+/*----------------------------------------------------------------------
 |    BLT_DecoderServer::Run
 +---------------------------------------------------------------------*/
 void
@@ -151,7 +165,14 @@ BLT_DecoderServer::Run()
 
     // create the decoder
     result = BLT_Decoder_Create(&m_Decoder);
-    if (BLT_FAILED(result)) return;
+    if (BLT_FAILED(result)) {
+        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(
+            BLT_DecoderServer::DecoderEvent::EVENT_TYPE_INIT_ERROR,
+            result, 
+            "error from BLT_Decoder_Create"));
+        WaitForTerminateMessage();
+        return;
+    }
         
     // register as the event handler
     BLT_Decoder_SetEventListener(m_Decoder, 
@@ -174,13 +195,27 @@ BLT_DecoderServer::Run()
 
     // register builtins 
     result = BLT_Decoder_RegisterBuiltins(m_Decoder);
-    if (BLT_FAILED(result)) return;
+    if (BLT_FAILED(result)) {
+        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(
+            BLT_DecoderServer::DecoderEvent::EVENT_TYPE_INIT_ERROR,
+            result, 
+            "error from BLT_Decoder_RegisterBuiltins"));
+        WaitForTerminateMessage();
+        return;
+    }
 
     // set default output, default type
     result = BLT_Decoder_SetOutput(m_Decoder, 
                                    BLT_DECODER_DEFAULT_OUTPUT_NAME, 
                                    NULL);
-    if (BLT_FAILED(result)) return;
+    if (BLT_FAILED(result)) {
+        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(
+            BLT_DecoderServer::DecoderEvent::EVENT_TYPE_INIT_ERROR,
+            result, 
+            "error from BLT_Decoder_SetOutput"));
+        WaitForTerminateMessage();
+        return;
+    }
     
     // notify the client of the initial state
     m_Client->PostMessage(
@@ -188,7 +223,7 @@ BLT_DecoderServer::Run()
 
     // initial status
     BLT_Decoder_GetStatus(m_Decoder, &m_DecoderStatus);
-    m_DecoderStatus.position.range  = m_PositionUpdateRange;
+    m_DecoderStatus.position.range = m_PositionUpdateRange;
     NotifyTimeCode();
     NotifyPosition();
 
@@ -221,7 +256,10 @@ BLT_DecoderServer::Run()
                 } else {
                     ATX_LOG_FINE_1("stopped on %d", result);
                     if (result != BLT_ERROR_EOS) {
-                        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(result, "error from BLT_Decoder_PumpPacket"));
+                        m_Client->PostMessage(new BLT_DecoderClient_DecoderEventNotificationMessage(
+                            BLT_DecoderServer::DecoderEvent::EVENT_TYPE_DECODING_ERROR,
+                            result, 
+                            "error from BLT_Decoder_PumpPacketWithOptions"));
                     }
                     SetState(STATE_EOS);
                     result = BLT_SUCCESS;
@@ -245,15 +283,18 @@ BLT_DecoderServer::Run()
     if (m_Decoder != NULL) {
         BLT_Decoder_Destroy(m_Decoder);
     }  
+    
+    // we're done
+    SetState(STATE_TERMINATED);
 }
 
 /*----------------------------------------------------------------------
 |    BLT_DecoderServer::DecoderEvent::DecoderEvent
 +---------------------------------------------------------------------*/
-BLT_DecoderServer::DecoderEvent::DecoderEvent(BLT_Result result_code, const char* message) :
-    m_Type(EVENT_TYPE_DECODING_ERROR)
+BLT_DecoderServer::DecoderEvent::DecoderEvent(BLT_DecoderServer::DecoderEvent::Type type, BLT_Result result_code, const char* message) :
+    m_Type(type)
 {
-    m_Details = new BLT_DecoderServer::DecoderEvent::DecodingErrorDetails(result_code, message);
+    m_Details = new BLT_DecoderServer::DecoderEvent::ErrorDetails(result_code, message);
 }
 
 /*----------------------------------------------------------------------
@@ -746,6 +787,7 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
           BLT_DecodingErrorEvent* e = (BLT_DecodingErrorEvent*)event;
           m_Client->PostMessage(
               new BLT_DecoderClient_DecoderEventNotificationMessage(
+                BLT_DecoderServer::DecoderEvent::EVENT_TYPE_DECODING_ERROR,
                 e->result,
                 e->message));
           break;

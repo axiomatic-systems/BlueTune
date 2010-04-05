@@ -127,7 +127,9 @@ BLT_Plugins_LoadModulesFromDirectory(BLT_Core*   core,
         if (file_extension && !(i->EndsWith(file_extension))) continue;
         
         // load the library
-        NPT_String path = directory + NPT_FilePath::Separator + *i;
+        NPT_String path = directory;
+        path += NPT_FilePath::Separator;
+        path += *i;
         BLT_Plugins_LoadModulesFromFile(core, path, 0);
     }
 

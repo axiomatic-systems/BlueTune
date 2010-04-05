@@ -106,6 +106,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "    <type> is I (Integer), S (String) or B (Boolean),\n"
         "    and <value> is an integer, string or boolean ('true' or 'false')\n"
         "    as appropriate\n"
+        );
+    ATX_ConsoleOutput(
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', 'module-info' or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n"

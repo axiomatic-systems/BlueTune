@@ -148,6 +148,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(GainControlFilter)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_FINGERPRINT_FILTER)
+    BLT_REGISTER_BUILTIN(FingerprintFilter)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILTER_HOST)
     BLT_REGISTER_BUILTIN(FilterHost)
 #endif

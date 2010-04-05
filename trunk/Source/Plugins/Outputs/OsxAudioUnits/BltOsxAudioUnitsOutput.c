@@ -94,40 +94,7 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_VolumeControl)
 
 BLT_METHOD OsxAudioUnitsOutput_Resume(BLT_MediaNode* self);
 BLT_METHOD OsxAudioUnitsOutput_Stop(BLT_MediaNode* self);
-
-/*----------------------------------------------------------------------
-|    OsxAudioUnitsOutput_Drain
-+---------------------------------------------------------------------*/
-static BLT_Result
-OsxAudioUnitsOutput_Drain(OsxAudioUnitsOutput* self)
-{
-    unsigned int watchdog = 20000000/BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL;
-    
-    ATX_LOG_FINER("draining packets"); 
-
-    /* lock the queue */
-    pthread_mutex_lock(&self->lock);
-    
-    /* wait until there are no more packets in the queue */
-    while (ATX_List_GetItemCount(self->packet_queue)) {
-        pthread_mutex_unlock(&self->lock);
-        ATX_LOG_FINER("waiting..."); 
-        usleep(BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL);
-        pthread_mutex_lock(&self->lock);
-        
-        if (--watchdog == 0) {
-            ATX_LOG_WARNING("*** the watchdog bit us ***");
-            break;
-        }
-    }
-
-    /* unlock the queue */
-    pthread_mutex_unlock(&self->lock);
-    
-    ATX_LOG_FINER("end"); 
-
-    return BLT_SUCCESS;
-}
+BLT_METHOD OsxAudioUnitsOutput_Drain(BLT_OutputNode* self);
 
 /*----------------------------------------------------------------------
 |    OsxAudioUnitsOutput_RenderCallback
@@ -364,7 +331,7 @@ OsxAudioUnitsOutput_SetStreamFormat(OsxAudioUnitsOutput*    self,
     }
 
     /* drain any pending packets before we switch */
-    result = OsxAudioUnitsOutput_Drain(self);
+    result = OsxAudioUnitsOutput_Drain(&ATX_BASE(self, BLT_OutputNode));
     if (BLT_FAILED(result)) return result;
 
     /* set the audio unit property */
@@ -727,7 +694,7 @@ static BLT_Result
 OsxAudioUnitsOutput_Destroy(OsxAudioUnitsOutput* self)
 {
     /* drain the queue */
-    OsxAudioUnitsOutput_Drain(self);
+    OsxAudioUnitsOutput_Drain(&ATX_BASE(self, BLT_OutputNode));
 
     /* stop the audio pump */
     OsxAudioUnitsOutput_Stop(&ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode));
@@ -851,6 +818,41 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
     }
     
     pthread_mutex_unlock(&self->lock);
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    OsxAudioUnitsOutput_Drain
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioUnitsOutput_Drain(BLT_OutputNode* _self)
+{
+    OsxAudioUnitsOutput* self = ATX_SELF(OsxAudioUnitsOutput, BLT_OutputNode);
+    unsigned int watchdog = 20000000/BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL;
+    
+    ATX_LOG_FINER("draining packets"); 
+
+    /* lock the queue */
+    pthread_mutex_lock(&self->lock);
+    
+    /* wait until there are no more packets in the queue */
+    while (ATX_List_GetItemCount(self->packet_queue)) {
+        pthread_mutex_unlock(&self->lock);
+        ATX_LOG_FINER("waiting..."); 
+        usleep(BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL);
+        pthread_mutex_lock(&self->lock);
+        
+        if (--watchdog == 0) {
+            ATX_LOG_WARNING("*** the watchdog bit us ***");
+            break;
+        }
+    }
+
+    /* unlock the queue */
+    pthread_mutex_unlock(&self->lock);
+    
+    ATX_LOG_FINER("end"); 
 
     return BLT_SUCCESS;
 }
@@ -1135,7 +1137,7 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(OsxAudioUnitsOutput, BLT_OutputNode)
     OsxAudioUnitsOutput_GetStatus,
-    NULL
+    OsxAudioUnitsOutput_Drain
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

@@ -32,6 +32,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.filters.gain-control")
 /*----------------------------------------------------------------------
 |    constants
 +---------------------------------------------------------------------*/
+#define BLT_GAIN_CONTROL_FILTER_MODULE_NAME "com.axiosys.filter.gain-control"
+
 #define BLT_GAIN_CONTROL_FILTER_FACTOR_RANGE 1024
 #define BLT_GAIN_CONTROL_FILTER_MAX_FACTOR   16*1024
 
@@ -109,11 +111,14 @@ GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
     short*             pcm;
     BLT_Result         result;
 
-    /*BLT_Debug("GainControlFilterInput_PutPacket\n");*/
-
     /* get the media type */
     result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
     if (BLT_FAILED(result)) return result;
+
+    /* check the media type */
+    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    }
 
     /* keep the packet */
     self->output.packet = packet;
@@ -122,11 +127,6 @@ GainControlFilterInput_PutPacket(BLT_PacketConsumer* _self,
     /* exit now if we're inactive */
     if (self->mode == BLT_GAIN_CONTROL_FILTER_MODE_INACTIVE ||
         self->factor == 0) {
-        return BLT_SUCCESS;
-    }
-
-    /* check the media type */
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         return BLT_SUCCESS;
     }
 
@@ -629,35 +629,27 @@ GainControlFilterModule_Probe(BLT_Module*              self,
 
             /* we need a name */
             if (constructor->name == NULL ||
-                !ATX_StringsEqual(constructor->name, "GainControlFilter")) {
+                !ATX_StringsEqual(constructor->name, BLT_GAIN_CONTROL_FILTER_MODULE_NAME)) {
                 return BLT_FAILURE;
             }
 
             /* the input and output protocols should be PACKET */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
                 return BLT_FAILURE;
             }
 
             /* the input type should be unspecified, or audio/pcm */
-            if (!(constructor->spec.input.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.input.media_type->id ==
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            if (!(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
+                !(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
                 return BLT_FAILURE;
             }
 
             /* the output type should be unspecified, or audio/pcm */
-            if (!(constructor->spec.output.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.output.media_type->id ==
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            if (!(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
+                !(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
                 return BLT_FAILURE;
             }
 
@@ -712,6 +704,6 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(GainControlFilterModule, reference_count)
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(GainControlFilterModule,
                                          "Gain Control Filter",
-                                         "com.axiosys.filter.gain-control",
+                                         BLT_GAIN_CONTROL_FILTER_MODULE_NAME,
                                          "1.3.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)

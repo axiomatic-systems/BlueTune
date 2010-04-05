@@ -352,6 +352,8 @@
 		CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA7F2F9C0FA81789006A1B2D /* BltIppDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */; };
+		CA87F410114AC6CA0082AAFC /* BltFingerprintFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */; };
+		CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */; };
 		CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */; };
 		CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED2920EAD3A8D003CE43C /* BltPixels.c */; };
 		CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED2930EAD3A8D003CE43C /* BltPixels.h */; };
@@ -1449,6 +1451,8 @@
 		CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltIppDecoder.cpp; sourceTree = "<group>"; };
 		CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltIppDecoder.h; sourceTree = "<group>"; };
 		CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBltIppDecoder.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltFingerprintFilter.c; sourceTree = "<group>"; };
+		CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltFingerprintFilter.h; sourceTree = "<group>"; };
 		CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BltPlayerObjectiveC.mm; sourceTree = "<group>"; };
 		CA9ED2920EAD3A8D003CE43C /* BltPixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltPixels.c; sourceTree = "<group>"; };
 		CA9ED2930EAD3A8D003CE43C /* BltPixels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltPixels.h; sourceTree = "<group>"; };
@@ -2214,6 +2218,7 @@
 		CA5042600C5AE52B0060E6FE /* Filters */ = {
 			isa = PBXGroup;
 			children = (
+				CA87F40D114AC6CA0082AAFC /* Fingerprint */,
 				CA5042610C5AE52B0060E6FE /* GainControl */,
 			);
 			path = Filters;
@@ -2864,6 +2869,15 @@
 			path = Decoders/IPP;
 			sourceTree = "<group>";
 		};
+		CA87F40D114AC6CA0082AAFC /* Fingerprint */ = {
+			isa = PBXGroup;
+			children = (
+				CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */,
+				CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */,
+			);
+			path = Fingerprint;
+			sourceTree = "<group>";
+		};
 		CA9ED8410EAFAB56003CE43C /* BtPlayX */ = {
 			isa = PBXGroup;
 			children = (
@@ -3096,6 +3110,7 @@
 				CA53C27110A7865100950FAF /* BltOsxAudioQueueOutput.h in Headers */,
 				CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */,
 				CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */,
+				CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4266,6 +4281,7 @@
 				CA53C27010A7865000950FAF /* BltOsxAudioQueueOutput.c in Sources */,
 				CA649D171107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c in Sources */,
 				CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */,
+				CA87F410114AC6CA0082AAFC /* BltFingerprintFilter.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4471,11 +4487,12 @@
 					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
 					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
 					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
+					BLT_CONFIG_MODULES_ENABLE_FINGERPRINT_FILTER,
 					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					_BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
@@ -4519,11 +4536,12 @@
 					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
 					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
 					BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER,
+					BLT_CONFIG_MODULES_ENABLE_FINGERPRINT_FILTER,
 					BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER,
-					_BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_MP4_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_DCF_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_TAG_PARSER,
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,

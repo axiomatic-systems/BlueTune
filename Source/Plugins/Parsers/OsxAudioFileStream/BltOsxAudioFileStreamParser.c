@@ -24,12 +24,17 @@
 #include <AudioToolbox/AudioToolbox.h>
 
 /*----------------------------------------------------------------------
-|   logging
+|  logging
 +---------------------------------------------------------------------*/
 ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.audio-file-stream")
 
 /*----------------------------------------------------------------------
-|    types
+|   constants
++---------------------------------------------------------------------*/
+#define BLT_OSX_AUDIO_FILE_STREAM_PARSER_FTYP_M4A 0x4d344120
+
+/*----------------------------------------------------------------------
+|   types
 +---------------------------------------------------------------------*/
 typedef struct {
     BLT_MediaType               base;
@@ -63,6 +68,9 @@ typedef struct {
     /* members */
     ATX_InputStream* stream;
     BLT_Boolean      eos;
+    UInt32           type_hint;
+    ATX_DataBuffer*  ftyp;
+    BLT_Boolean      ftyp_loaded;
 } OsxAudioFileStreamParserInput;
 
 typedef struct {
@@ -386,18 +394,20 @@ OsxAudioFileStreamParser_OnPacket(void*                         _self,
 +---------------------------------------------------------------------*/
 static BLT_Result
 OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self, 
-                                    BLT_MediaTypeId        media_type_id)
+                                    BLT_MediaTypeId           media_type_id)
 {
     OSStatus status;
     
+    /* reset the ftyp buffer */
+    ATX_DataBuffer_SetDataSize(self->input.ftyp, 0);
+    
     /* decide what the media format is */
-    UInt32 type_hint = 0;
     if (media_type_id == self->module->media_type_ids.audio_mp4) {
         ATX_LOG_FINE("packet type is audio/mp4");
-        type_hint = kAudioFileM4AType;
+        self->input.type_hint = kAudioFileM4AType;
     } else if (media_type_id == self->module->media_type_ids.audio_mp3) {
         ATX_LOG_FINE("packet type is audio/mp3");
-        type_hint = kAudioFileMP3Type;
+        self->input.type_hint = kAudioFileMP3Type;
     } else {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
@@ -406,7 +416,7 @@ OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self,
     status = AudioFileStreamOpen(self,
                                  OsxAudioFileStreamParser_OnProperty,
                                  OsxAudioFileStreamParser_OnPacket,
-                                 type_hint,
+                                 self->input.type_hint,
                                  &self->stream_parser);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioFileStreamOpen failed (%d)", status);
@@ -524,14 +534,70 @@ OsxAudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
         
     /* pump data from the source until packets start showing up */
     while ((packet_item = ATX_List_GetFirstItem(self->output.packets)) == NULL) {
-        unsigned char buffer[4096];
-        ATX_Size      bytes_read = 0;
+        ATX_UInt8  buffer[4096];
+        ATX_Size   bytes_read = 0;
+        ATX_UInt8* payload = buffer; 
+        ATX_Size   payload_size = 0;
         BLT_Result result = ATX_InputStream_Read(self->input.stream, buffer, sizeof(buffer), &bytes_read);
         if (BLT_FAILED(result)) return result;
         
+        if (self->input.type_hint == kAudioFileM4AType && !self->input.ftyp_loaded) {
+            /* we're still buffering the ftyp atom */
+            payload_size = ATX_DataBuffer_GetDataSize(self->input.ftyp);
+            ATX_DataBuffer_SetDataSize(self->input.ftyp, payload_size+bytes_read);
+            payload = (ATX_UInt8*)ATX_DataBuffer_UseData(self->input.ftyp);
+            ATX_CopyMemory(payload+payload_size, buffer, bytes_read);
+            payload_size += bytes_read;
+            if (payload_size >= 8) {
+                if (payload[4] == 'f' && payload[5] == 't' && payload[6] == 'y' && payload[7] == 'p') {
+                    ATX_UInt32 ftyp_size = ATX_BytesToInt32Be(payload);
+                    if (ftyp_size < 8) {
+                        /* 64-bit atom, just ignore it */
+                        self->input.ftyp_loaded = BLT_TRUE;
+                    } else if (payload_size >= ftyp_size) {
+                        /* the entire atom has been buffered, we can parse an patch the 'ftyp' atom      */
+                        /* this is a horrible hack that's designed to work around a problem with the     */
+                        /* Apple parser that refuses to expose the packet count property when  the major */
+                        /* brand is not 'M4A ' and when there is a compatible brand that's '3gXX' where  */
+                        /* XX is not 'p2' or 'p3'... go figure!                                          */
+                        ATX_UInt32 major_brand = ATX_BytesToInt32Be(payload+8);
+                        if (major_brand != BLT_OSX_AUDIO_FILE_STREAM_PARSER_FTYP_M4A) {
+                            ATX_LOG_FINE("major brand is not M4A");
+                            payload[ 8] = 'M';
+                            payload[ 9] = '4';
+                            payload[10] = 'A';
+                            payload[11] = ' ';
+                            payload[12] = 0;
+                            payload[13] = 0;
+                            payload[14] = 0;
+                            payload[15] = 0;
+                        }
+                        if (20 <= ftyp_size) {
+                            ATX_UInt8* brands = payload+16;
+                            ftyp_size -= 16;
+                            for (; ftyp_size >= 4; ftyp_size -= 4, brands += 4) {
+                                /* patch all '3gXX' compatible brands */
+                                if (brands[0] == '3' && brands[1] == 'g') {
+                                    ATX_LOG_FINE_2("patching 3g%c%c -> 'M4A '", brands[2], brands[3]);
+                                    brands[0] = 'M';
+                                    brands[1] = '4';
+                                    brands[2] = 'A';
+                                    brands[3] = ' ';
+                                }
+                            }
+                        }
+                        self->input.ftyp_loaded = BLT_TRUE;
+                    }
+                }
+            } else {
+                continue;
+            }
+        } else {
+            payload_size = bytes_read;
+        }
         status = AudioFileStreamParseBytes(self->stream_parser,
-                                           bytes_read,
-                                           buffer,
+                                           payload_size,
+                                           payload,
                                            0);
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioFileStreamParseBytes failed (%x)", status);
@@ -608,6 +674,9 @@ OsxAudioFileStreamParser_Create(BLT_Module*              module,
     
     /* setup the input and output ports */
     self->input.eos = BLT_FALSE;
+
+    /* create a buffer for the ftyp atom */
+    ATX_DataBuffer_Create(0, &self->input.ftyp);
 
     /* create a list of input packets */
     result = ATX_List_Create(&self->output.packets);

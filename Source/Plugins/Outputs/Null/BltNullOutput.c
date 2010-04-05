@@ -40,7 +40,7 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_MediaPort);
 
     /* members */
-    BLT_MediaType*    expected_media_type;
+    BLT_MediaType* expected_media_type;
 } NullOutput;
 
 /*----------------------------------------------------------------------
@@ -103,8 +103,7 @@ NullOutput_Create(BLT_Module*              module,
                   BLT_MediaNode**          object)
 {
     NullOutput*               self;
-    BLT_MediaNodeConstructor* constructor = 
-        (BLT_MediaNodeConstructor*)parameters;
+    BLT_MediaNodeConstructor* constructor = (BLT_MediaNodeConstructor*)parameters;
 
     /* check parameters */
     if (parameters == NULL || 
@@ -123,8 +122,7 @@ NullOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* construct the object */
-    BLT_MediaType_Clone(constructor->spec.input.media_type, 
-                        &self->expected_media_type);
+    BLT_MediaType_Clone(constructor->spec.input.media_type, &self->expected_media_type);
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, NullOutput, BLT_BaseMediaNode, BLT_MediaNode);
@@ -244,14 +242,10 @@ NullOutputModule_Probe(BLT_Module*              self,
 
             /* the input protocol should be PACKET and the */
             /* output protocol should be NONE              */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_NONE)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_NONE)) {
                 return BLT_FAILURE;
             }
 
@@ -264,7 +258,7 @@ NullOutputModule_Probe(BLT_Module*              self,
             /* always an exact match, since we only respond to our name */
             *match = BLT_MODULE_PROBE_MATCH_EXACT;
 
-            ATX_LOG_FINE_1("NullOutputModule::Probe - Ok [%d]", *match);
+            ATX_LOG_FINE_1("match score = %d", *match);
             return BLT_SUCCESS;
         }    
         break;

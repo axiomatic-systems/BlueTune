@@ -28,15 +28,18 @@ typedef struct {
 } BLTP_Key;
 
 typedef struct {
-    BLT_CString  output_name;
-    BLT_CString  output_type;
-    float        output_volume;
-    unsigned int duration;
-    unsigned int verbosity;
-    BLT_Boolean  list_modules;
-    ATX_List*    plugin_directories;
-    ATX_List*    plugin_files;
-    ATX_List*    keys;
+    BLT_CString     output_name;
+    BLT_CString     output_type;
+    float           output_volume;
+    unsigned int    duration;
+    unsigned int    verbosity;
+    BLT_Boolean     list_modules;
+    ATX_List*       plugin_directories;
+    ATX_List*       plugin_files;
+    ATX_List*       extra_nodes;
+    ATX_Properties* core_properties;
+    ATX_Properties* stream_properties;
+    ATX_List*       keys;
 } BLTP_Options;
 
 typedef struct  {
@@ -91,10 +94,16 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --output-type=<type>\n"
         "  --output-volume=<volume> (between 0.0 and 1.0)\n"
         "  --duration=<n> (seconds)\n"
-        "  --list-modules\n"
-        "  --load-plugins=<directory>[,<file-extension>]\n"
-        "  --load-plugin=<plugin-filename>\n");
+        "  --list-modules\n");
     ATX_ConsoleOutput(
+        "  --load-plugins=<directory>[,<file-extension>]\n"
+        "  --load-plugin=<plugin-filename>\n"
+        "  --add-node=<node-name>\n"
+        "  --property=<scope>:<type>:<name>:<value>\n"
+        "    where <scope> is C (Core) or S (Stream),\n"
+        "    <type> is I (Integer), S (String) or B (Boolean),\n"
+        "    and <value> is an integer, string or boolean ('true' or 'false')\n"
+        "    as appropriate\n"
         "  --verbose=<name> : print messages related to <name>, where name is\n"
         "                     'stream-topology', 'stream-info', 'module-info' or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n"
@@ -187,6 +196,9 @@ BLTP_ParseCommandLine(char** args)
     ATX_List_Create(&Options.keys);
     ATX_List_Create(&Options.plugin_directories);
     ATX_List_Create(&Options.plugin_files);
+    ATX_List_Create(&Options.extra_nodes);
+    ATX_Properties_Create(&Options.core_properties);
+    ATX_Properties_Create(&Options.stream_properties);
     
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
@@ -203,9 +215,11 @@ BLTP_ParseCommandLine(char** args)
                     Options.output_volume = volume;
                 } else {
                     fprintf(stderr, "ERROR: output volume value out of range\n");
+                    return NULL;
                 }
             } else {
                 fprintf(stderr, "ERROR: invalid output volume value\n");
+                return NULL;
             }
         } else if (ATX_StringsEqualN(arg, "--duration=", 11)) {
             int duration = 0;
@@ -221,6 +235,65 @@ BLTP_ParseCommandLine(char** args)
             ATX_String* plugin = (ATX_String*)ATX_AllocateMemory(sizeof(ATX_String));
             *plugin = ATX_String_Create(arg+14);
             ATX_List_AddData(Options.plugin_files, plugin);
+        } else if (ATX_StringsEqualN(arg, "--add-node=", 11)) {
+            ATX_String* node = (ATX_String*)ATX_AllocateMemory(sizeof(ATX_String));
+            *node = ATX_String_Create(arg+11);
+            ATX_List_AddData(Options.extra_nodes, node);
+        } else if (ATX_StringsEqualN(arg, "--property=", 11)) {
+            char*             property = arg+11;
+            ATX_Properties*   properties = NULL;
+            char*             name = property+4;
+            char*             value_string;
+            ATX_PropertyValue value;
+            if (ATX_StringLength(property) < 7 || property[1] != ':' || property[3] != ':') {
+                fprintf(stderr, "ERROR: invalid property syntax\n");
+                return NULL;
+            }
+            switch (property[0]) {
+                case 'C': properties = Options.core_properties; break;
+                case 'S': properties = Options.stream_properties; break;
+                default: fprintf(stderr, "ERROR: invalid property scope\n"); return NULL;
+            }
+            value_string = &property[4];
+            while (*value_string != '\0' && *value_string != ':') {
+                value_string++;
+            }
+            if (*value_string != ':') {
+                fprintf(stderr, "ERROR: invalid property syntax\n");
+                return NULL;
+            } 
+            *value_string++ = '\0';
+            switch (property[2]) {
+                case 'I': 
+                    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                    if (ATX_FAILED(ATX_ParseInteger(value_string, &value.data.integer, ATX_FALSE))) {
+                        fprintf(stderr, "ERROR: invalid integer property syntax\n");
+                        return NULL;
+                    }
+                    break;
+                    
+                case 'S':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                    value.data.string = value_string;
+                    break;
+                    
+                case 'B':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                    if (ATX_StringsEqual(value_string, "true")) {
+                        value.data.boolean = ATX_TRUE;
+                    } else if (ATX_StringsEqual(value_string, "false")) {
+                        value.data.boolean = ATX_FALSE;
+                    } else {
+                        fprintf(stderr, "ERROR: invalid boolean property syntax\n");
+                        return NULL;
+                    }
+                    break;
+                    
+                default:
+                    fprintf(stderr, "ERROR: invalid property type\n");
+                    return NULL;
+            }
+            ATX_Properties_SetProperty(properties, name, &value);
         } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {
             if (ATX_StringsEqual(arg+10, "stream-topology")) {
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;
@@ -584,7 +657,8 @@ main(int argc, char** argv)
     /* parse command line */
     if (argc < 2) BLTP_PrintUsageAndExit(0);
     argv = BLTP_ParseCommandLine(argv+1);
-
+    if (argv == NULL) goto end;
+    
     /* create a decoder */
     result = BLT_Decoder_Create(&decoder);
     BLTP_CHECK(result);
@@ -651,12 +725,29 @@ main(int argc, char** argv)
         }
     }
     
-    /* enable the gain control filter */
-    /*BLT_Decoder_AddNodeByName(decoder, NULL, "GainControlFilter");*/
+    /* add optional extra nodes */
+    {
+        ATX_ListItem* item;
+        for (item = ATX_List_GetFirstItem(Options.extra_nodes); item; item = ATX_ListItem_GetNext(item)) {
+            ATX_String* node = (ATX_String*)ATX_ListItem_GetData(item);
+            BLT_Decoder_AddNodeByName(decoder, NULL, ATX_String_GetChars(node));
+        }
+    }
 
-    /* by default, add a filter host module */
-    /*BLT_Decoder_AddNodeByName(decoder, NULL, "FilterHost");*/
-
+    /* set core properties */
+    {
+        ATX_Properties* properties;
+        ATX_Iterator*   it;
+        void*           next;
+        BLT_Decoder_GetProperties(decoder, &properties);
+        ATX_Properties_GetIterator(Options.core_properties, &it);
+        while (ATX_SUCCEEDED(ATX_Iterator_GetNext(it, &next))) {
+            ATX_Property* property = (ATX_Property*)next;
+            ATX_Properties_SetProperty(properties, property->name, &property->value); 
+        }
+        ATX_DESTROY_OBJECT(it);
+    }
+    
     /* process each input in turn */
     while ((input_name = *argv++)) {
         if (ATX_StringsEqualN(input_name, "--input-type=", 13)) {
@@ -670,6 +761,20 @@ main(int argc, char** argv)
             ATX_ConsoleOutputF("SetInput failed: %d (%s)\n", result, BLT_ResultText(result));
             input_type = NULL;
             continue;
+        }
+
+        /* set stream properties */
+        {
+            ATX_Properties* properties;
+            ATX_Iterator*   it;
+            void*           next;
+            BLT_Decoder_GetStreamProperties(decoder, &properties);
+            ATX_Properties_GetIterator(Options.stream_properties, &it);
+            while (ATX_SUCCEEDED(ATX_Iterator_GetNext(it, &next))) {
+                ATX_Property* property = (ATX_Property*)next;
+                ATX_Properties_SetProperty(properties, property->name, &property->value); 
+            }
+            ATX_DESTROY_OBJECT(it);
         }
 
         /* pump the packets */
@@ -694,6 +799,7 @@ main(int argc, char** argv)
     /* destroy the decoder */
     BLT_Decoder_Destroy(decoder);
 
+end:
     /* cleanup */
     {
         ATX_ListItem* item;
@@ -709,6 +815,15 @@ main(int argc, char** argv)
             ATX_FreeMemory(s);
         }
         ATX_List_Destroy(Options.plugin_directories);
+        for (item = ATX_List_GetFirstItem(Options.extra_nodes); item; item = ATX_ListItem_GetNext(item)) {
+            ATX_String* s = (ATX_String*)ATX_ListItem_GetData(item);
+            ATX_String_Destruct(s);
+            ATX_FreeMemory(s);
+        }
+        ATX_List_Destroy(Options.extra_nodes);
+        
+        ATX_DESTROY_OBJECT(Options.core_properties);
+        ATX_DESTROY_OBJECT(Options.stream_properties);
     }
     
     return 0;

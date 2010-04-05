@@ -85,7 +85,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "usage: btplay [options] <input-spec> [<input-spec>..]\n"
         "  each <input-spec> is either an input name (file or URL), or an input type\n"
         "  (--input-type=<type>) followed by an input name\n"
-        "\n");
+        "\n"
+        );
     ATX_ConsoleOutput(
         "options:\n"
         "  -h\n"
@@ -94,10 +95,11 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --output-type=<type>\n"
         "  --output-volume=<volume> (between 0.0 and 1.0)\n"
         "  --duration=<n> (seconds)\n"
-        "  --list-modules\n");
-    ATX_ConsoleOutput(
+        "  --list-modules\n"
         "  --load-plugins=<directory>[,<file-extension>]\n"
         "  --load-plugin=<plugin-filename>\n"
+        );
+    ATX_ConsoleOutput(
         "  --add-node=<node-name>\n"
         "  --property=<scope>:<type>:<name>:<value>\n"
         "    where <scope> is C (Core) or S (Stream),\n"
@@ -108,7 +110,8 @@ BLTP_PrintUsageAndExit(int exit_code)
         "                     'stream-topology', 'stream-info', 'module-info' or 'all'\n"
         "                     (multiple --verbose= options can be specified)\n"
         "  --key=<name>:<value> : content decryption key for content ID <name>.\n"
-        "                         The key value is in hexadecimal\n");
+        "                         The key value is in hexadecimal\n"
+        );
     exit(exit_code);
 }
 

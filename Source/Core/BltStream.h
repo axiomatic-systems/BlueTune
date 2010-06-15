@@ -60,6 +60,14 @@
 
 #define BLT_STREAM_NODE_FLAG_TRANSIENT 1
 
+#define BLT_STREAM_AUDIO_TRACK_SELECTOR_INDEX_PROPERTY  "Audio.TrackSelector.Index"
+#define BLT_STREAM_AUDIO_TRACK_SELECTOR_ID_PROPERTY     "Audio.TrackSelector.ID"
+#define BLT_STREAM_AUDIO_TRACK_SELECTOR_STRICT_PROPERTY "Audio.TrackSelector.Strict"
+
+#define BLT_STREAM_VIDEO_TRACK_SELECTOR_INDEX_PROPERTY  "Video.TrackSelector.Index"
+#define BLT_STREAM_VIDEO_TRACK_SELECTOR_ID_PROPERTY     "Video.TrackSelector.ID"
+#define BLT_STREAM_VIDEO_TRACK_SELECTOR_STRICT_PROPERTY "Video.TrackSelector.Strict"
+
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/

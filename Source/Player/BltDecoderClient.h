@@ -59,15 +59,7 @@ public:
 
     // methods
     virtual NPT_Result Deliver(BLT_DecoderClient_MessageHandler* handler) = 0;
-    virtual NPT_Result Dispatch(NPT_MessageHandler* handler) {
-        BLT_DecoderClient_MessageHandler* specific =
-            dynamic_cast<BLT_DecoderClient_MessageHandler*>(handler);
-        if (specific) {
-            return Deliver(specific);
-        } else {
-            return DefaultDeliver(handler);
-        }
-    }
+    virtual NPT_Result Dispatch(NPT_MessageHandler* handler);
 };
 
 /*----------------------------------------------------------------------

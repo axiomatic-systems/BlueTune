@@ -350,12 +350,57 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
 static BLT_Result
 Mp4Parser_SetupAudioOutput(Mp4Parser* self, AP4_Movie* movie)
 {
-    // get the audio track
-    AP4_Track* track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
-    self->audio_output.track = track;
-    if (track == NULL) return BLT_SUCCESS;
+    ATX_Properties* properties = NULL;
+    
+    // select the audio track
+    if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
+        ATX_PropertyValue value;
+        bool selector_is_strict = false;
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                     BLT_STREAM_AUDIO_TRACK_SELECTOR_STRICT_PROPERTY, 
+                                                     &value))) {
+            if (value.type == ATX_PROPERTY_VALUE_TYPE_BOOLEAN) {
+                selector_is_strict = value.data.boolean == ATX_TRUE;
+            }
+        }
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                     BLT_STREAM_AUDIO_TRACK_SELECTOR_INDEX_PROPERTY, 
+                                                     &value))) {
+            if (value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                ATX_LOG_INFO_1("selecting audio track by index (%d)", value.data.integer);
+                self->audio_output.track = movie->GetTrack(AP4_Track::TYPE_AUDIO, value.data.integer);
+                if (self->audio_output.track == NULL) {
+                    ATX_LOG_INFO("track not found");
+                    if (selector_is_strict) return BLT_SUCCESS;
+                }
+            }
+        } else if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                            BLT_STREAM_AUDIO_TRACK_SELECTOR_ID_PROPERTY, 
+                                                            &value))) {
+            if (value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                ATX_LOG_INFO_1("selecting audio track by ID (%d)", value.data.integer);
+                self->audio_output.track = movie->GetTrack((AP4_UI32)value.data.integer);
+                if (self->audio_output.track == NULL) {
+                    ATX_LOG_INFO("track not found");
+                    if (selector_is_strict) return BLT_SUCCESS;
+                } else if (self->audio_output.track->GetType() != AP4_Track::TYPE_AUDIO) {
+                    ATX_LOG_INFO("track is not audio");
+                    if (selector_is_strict) return BLT_SUCCESS;
+                } 
+            }
+        }
+    }
+    
+    // select the first audio track if no specific track was selected
+    if (self->audio_output.track == NULL) {
+        ATX_LOG_INFO("selecting first audio track");
+        self->audio_output.track = movie->GetTrack(AP4_Track::TYPE_AUDIO);
+    }
+    
+    // exit now if the track does not exist
+    if (self->audio_output.track == NULL) return BLT_SUCCESS;
 
-    ATX_LOG_FINE("found audio track");
+    ATX_LOG_INFO_1("found audio track (id=%d)", self->audio_output.track->GetId());
     
     // use the first sample description by default
     return Mp4ParserOutput_SetSampleDescription(&self->audio_output, 0);

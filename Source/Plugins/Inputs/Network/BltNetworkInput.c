@@ -144,8 +144,10 @@ NetworkInput_Create(BLT_Module*              module,
 
     /* figure out the media type */
     if (input->media_type == NULL) {
-        if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
-            /* unknown type, try to figure it out from the network extension */
+        if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN ||
+            constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO   ||
+            constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_VIDEO) {
+            /* unknown type, try to figure it out from the name extension */
             BLT_MediaType_Clone(&BLT_MediaType_Unknown, &input->media_type);
             NetworkInput_DecideMediaType(input, constructor->name);
         } else {

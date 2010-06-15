@@ -42,10 +42,12 @@ typedef struct {
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_MEDIA_TYPE_ID_NONE             0
-#define BLT_MEDIA_TYPE_ID_UNKNOWN          1
-#define BLT_MEDIA_TYPE_ID_AUDIO_PCM        2 /** see BltPcm.h    */
-#define BLT_MEDIA_TYPE_ID_VIDEO_RAW        3 /** see BltPixels.h */
+#define BLT_MEDIA_TYPE_ID_NONE             0 /** no type           */
+#define BLT_MEDIA_TYPE_ID_UNKNOWN          1 /** unknown type      */
+#define BLT_MEDIA_TYPE_ID_AUDIO_PCM        2 /** see BltPcm.h      */
+#define BLT_MEDIA_TYPE_ID_VIDEO_RAW        3 /** see BltPixels.h   */
+#define BLT_MEDIA_TYPE_ID_AUDIO            4 /** unspecified audio */
+#define BLT_MEDIA_TYPE_ID_VIDEO            5 /** unspecified video */
 
 /*----------------------------------------------------------------------
 |   error codes

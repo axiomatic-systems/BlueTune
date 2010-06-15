@@ -38,6 +38,7 @@ struct BLT_DecoderX {
     BLT_OutputNode*   video_output;
     BLT_Stream*       video_stream;
     BLT_DecoderStatus status;
+    BLT_Boolean       audio_only;
 };
 
 /*----------------------------------------------------------------------
@@ -170,6 +171,8 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
 
     /* return a composite status */
     status->stream_info = input_info;
+    status->position.offset = 0;
+    status->position.range  = 0;
     BLT_TimeStamp_Set(status->time_stamp, 0, 0);
     BLT_DecoderX_GetMediaTime(&ATX_BASE(decoder, BLT_TimeSource), &status->time_stamp);
     if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
@@ -181,13 +184,25 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
     if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
         status->time_stamp = input_status.time_stamp;
     }
-    if (input_info.duration) {
+    if (input_status.position.offset) {
+        status->position = input_status.position;
+    } else if (audio_status.position.offset) {
+        status->position = audio_status.position;
+    } else if (video_status.position.offset) {
+        status->position = video_status.position;
+    } else if (input_info.duration) {
         /* estimate the position from the time stamp and duration */
         status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
-        status->position.range  = status->stream_info.duration;
-    } else {
-        status->position.offset = 0;
-        status->position.range  = 0;
+        status->position.range  = input_info.duration;
+    } else if (audio_info.duration) {
+        status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
+        status->position.range  = audio_info.duration;
+    } else if (video_info.duration) {
+        status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
+        status->position.range  = video_info.duration;
+    } 
+    if (status->position.offset > status->position.range) {
+        status->position.offset = status->position.range;
     }
 
     return BLT_SUCCESS;
@@ -251,16 +266,33 @@ BLT_DecoderX_CreateInputNode(BLT_DecoderX*   self,
     /* default return value */
     *input_node = NULL;
     
+    /* check if this is audio-only */
+    if (type) {
+        if (ATX_StringsEqual(type, "audio") ||
+            ATX_StringsEqualN(type, "audio/", 6)) {
+            /* this is audio-only */
+            self->audio_only = BLT_TRUE;
+        }
+    }
+    
     /* set the input of the input stream */
     result = BLT_Stream_SetInput(self->input_stream, name, type);
     if (BLT_FAILED(result)) return result;
     
-    /* set the output of the input stream */
-    result = BLT_Stream_SetOutput(self->input_stream, "com.bluetune.parsers.mp4", NULL);
-    if (BLT_FAILED(result)) return result;
+    /* FIXME: for now, we will decide which modules to instantiate based on the name */
+    if (self->audio_only) {
+        /* this is audio-only */
+        BLT_Stream_SetOutput(self->input_stream, "null", NULL);
+        return BLT_Stream_GetInputNode(self->input_stream, input_node);
+    } else {
+        /* this is a file or HTTP URL */
+        /* set the output of the input stream */
+        result = BLT_Stream_SetOutput(self->input_stream, "com.bluetune.parsers.mp4", type);
+        if (BLT_FAILED(result)) return result;
    
-    /* the input stream's output is what we need to return here */
-    return BLT_Stream_GetOutputNode(self->input_stream, input_node); 
+        /* the input stream's output is what we need to return here */
+        return BLT_Stream_GetOutputNode(self->input_stream, input_node);
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -274,6 +306,7 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
     
     /* clear the status */
     BLT_DecoderX_ClearStatus(decoder);
+    decoder->audio_only = BLT_FALSE;
 
     if (name == NULL || name[0] == '\0') {
         /* if the name is NULL or empty, it means reset */
@@ -286,24 +319,31 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
         result = BLT_DecoderX_CreateInputNode(decoder, name, type, &node);
         if (BLT_FAILED(result)) return result;
         
-        /* activate the input stream */
-        /* NOTE: this is a temporary hacky solution: we pump a few packets to ensure  */
-        /* that all intermediate nodes get created and connected.                     */
-        /* This works here, because we're not really pumping any packets, just making */
-        /* connections from media node to media node.                                 */
-        result = BLT_Stream_PumpPacket(decoder->input_stream);
-        if (BLT_FAILED(result)) goto end;
-        result = BLT_Stream_PumpPacket(decoder->input_stream);
-        if (BLT_FAILED(result)) goto end;
-        result = BLT_Stream_PumpPacket(decoder->input_stream);
-        if (BLT_FAILED(result)) goto end;
+        if (!decoder->audio_only) {
+            /* activate the input stream */
+            /* NOTE: this is a temporary hacky solution: we pump a few packets to ensure  */
+            /* that all intermediate nodes get created and connected.                     */
+            /* This works here, because we're not really pumping any packets, just making */
+            /* connections from media node to media node.                                 */
+            result = BLT_Stream_PumpPacket(decoder->input_stream);
+            if (BLT_FAILED(result)) goto end;
+            result = BLT_Stream_PumpPacket(decoder->input_stream);
+            if (BLT_FAILED(result)) goto end;
+            result = BLT_Stream_PumpPacket(decoder->input_stream);
+            if (BLT_FAILED(result)) goto end;
+        }
         
         /* set the input of the streams */
-        result = BLT_Stream_SetInputNode(decoder->audio_stream, name, "audio", node);
-        if (BLT_FAILED(result)) goto end;
+        if (decoder->audio_only) {
+            result = BLT_Stream_SetInputNode(decoder->audio_stream, name, "output", node);
+            if (BLT_FAILED(result)) goto end;
+        } else {
+            result = BLT_Stream_SetInputNode(decoder->audio_stream, name, "audio", node);
+            if (BLT_FAILED(result)) goto end;
         
-        result = BLT_Stream_SetInputNode(decoder->video_stream, name, "video", node);
-        if (BLT_FAILED(result)) goto end;
+            result = BLT_Stream_SetInputNode(decoder->video_stream, name, "video", node);
+            if (BLT_FAILED(result)) goto end;
+        }
     }
     
 end:
@@ -632,7 +672,8 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
     }
     
     /* pump a video packet */
-    if (decoder->video_output) {
+    if (decoder->audio_only) video_eos = BLT_TRUE;
+    if (decoder->video_output && !video_eos) {
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->video_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
@@ -643,7 +684,7 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
             video_would_block = BLT_TRUE;
         }
     }
-    if (!video_would_block) {
+    if (!video_would_block && !video_eos) {
         result = BLT_Stream_PumpPacket(decoder->video_stream);
         if (BLT_FAILED(result)) {
             if (result == BLT_ERROR_EOS) {
@@ -658,7 +699,7 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
     if (audio_eos && video_eos) return BLT_ERROR_EOS;
 
     /* if both would block, sleep a bit */
-    if (audio_would_block && video_would_block) {
+    if ((audio_would_block || audio_eos) && (video_would_block || video_eos)) {
         ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
         ATX_System_Sleep(&sleep_duration);
     }

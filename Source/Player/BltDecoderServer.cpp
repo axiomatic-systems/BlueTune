@@ -76,6 +76,21 @@ ATX_BEGIN_INTERFACE_MAP(BLT_DecoderServer_PropertyListenerWrapper, ATX_PropertyL
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderServer_Message::Dispatch
++---------------------------------------------------------------------*/
+NPT_Result
+BLT_DecoderServer_Message::Dispatch(NPT_MessageHandler* handler) 
+{
+    BLT_DecoderServer_MessageHandler* specific =
+        dynamic_cast<BLT_DecoderServer_MessageHandler*>(handler);
+    if (specific) {
+        return Deliver(specific);
+    } else {
+        return DefaultDeliver(handler);
+    }
+}
+
+/*----------------------------------------------------------------------
 |    BLT_DecoderServer::BLT_DecoderServer
 +---------------------------------------------------------------------*/
 BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
@@ -794,7 +809,7 @@ BLT_DecoderServer::OnEvent(const ATX_Object* /*source*/,
       }
 
       default:
-        break;
+          break;
     }
 }
 

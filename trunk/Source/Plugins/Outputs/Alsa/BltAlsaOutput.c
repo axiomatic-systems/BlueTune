@@ -569,7 +569,7 @@ AlsaOutput_Write(AlsaOutput* self, void* buffer, BLT_Size size)
                            
     /* write samples to the device and handle underruns */       
     do {
-	while (sample_count) {
+        while (sample_count) {
             io_result = snd_pcm_writei(self->device_handle, 
                                        buffer, sample_count);
             if (io_result > 0) {

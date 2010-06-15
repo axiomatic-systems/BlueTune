@@ -278,7 +278,13 @@ Registry_Initialize(Registry* registry)
                                "unknown", BLT_MEDIA_TYPE_ID_UNKNOWN, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                               "audio", BLT_MEDIA_TYPE_ID_AUDIO, BLT_TRUE);
+    Registry_RegisterNameAndId(registry, 
+                               BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                "audio/pcm", BLT_MEDIA_TYPE_ID_AUDIO_PCM, BLT_TRUE);
+    Registry_RegisterNameAndId(registry, 
+                               BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                               "video", BLT_MEDIA_TYPE_ID_VIDEO, BLT_TRUE);
     Registry_RegisterNameAndId(registry, 
                                BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                "video/raw", BLT_MEDIA_TYPE_ID_VIDEO_RAW, BLT_TRUE);

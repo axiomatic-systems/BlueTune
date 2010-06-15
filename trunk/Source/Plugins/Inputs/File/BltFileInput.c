@@ -145,7 +145,9 @@ FileInput_Create(BLT_Module*              module,
     }
 
     /* figure out the media type */
-    if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN) {
+    if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN ||
+        constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO   ||
+        constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_VIDEO) {
         /* unknown type, try to figure it out from the file extension */
         BLT_MediaType_Clone(&BLT_MediaType_Unknown, &input->media_type);
         FileInput_DecideMediaType(input, constructor->name);

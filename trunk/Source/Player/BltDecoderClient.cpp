@@ -29,6 +29,21 @@ NPT_Message::Type
 BLT_DecoderClient_Message::MessageType = "bluetune.messages.decoder.client";
 
 /*----------------------------------------------------------------------
+|   BLT_DecoderClient_Message::Dispatch
++---------------------------------------------------------------------*/
+NPT_Result
+BLT_DecoderClient_Message::Dispatch(NPT_MessageHandler* handler)
+{
+    BLT_DecoderClient_MessageHandler* specific =
+        NPT_DYNAMIC_CAST(BLT_DecoderClient_MessageHandler, handler);
+    if (specific) {
+        return Deliver(specific);
+    } else {
+        return DefaultDeliver(handler);
+    }
+}
+
+/*----------------------------------------------------------------------
 |    BLT_DecoderClient::BLT_DecoderClient
 +---------------------------------------------------------------------*/
 BLT_DecoderClient::BLT_DecoderClient(NPT_MessageQueue*   queue,

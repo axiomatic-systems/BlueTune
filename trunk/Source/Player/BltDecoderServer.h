@@ -93,16 +93,8 @@ public:
     // methods
     BLT_DecoderServer_Message(CommandId id) : m_Id(id) {}
     virtual NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) = 0;
-    virtual NPT_Result Dispatch(NPT_MessageHandler* handler) {
-        BLT_DecoderServer_MessageHandler* specific =
-            dynamic_cast<BLT_DecoderServer_MessageHandler*>(handler);
-        if (specific) {
-            return Deliver(specific);
-        } else {
-            return DefaultDeliver(handler);
-        }
-    }
-
+    virtual NPT_Result Dispatch(NPT_MessageHandler* handler);
+    
  private:
     // members
     CommandId m_Id;
@@ -495,6 +487,7 @@ class BLT_DecoderServer : public NPT_Thread,
     // BLT_DecoderServer_MessageHandler methods
     virtual void OnSetInputCommand(BLT_CString name, BLT_CString type);
     virtual void OnSetOutputCommand(BLT_CString name, BLT_CString type);
+    virtual void OnSetVolumeCommand(float volume);
     virtual void OnPlayCommand();
     virtual void OnStopCommand();
     virtual void OnPauseCommand();
@@ -503,7 +496,6 @@ class BLT_DecoderServer : public NPT_Thread,
     virtual void OnSeekToPositionCommand(BLT_UInt64 offset, BLT_UInt64 range);
     virtual void OnRegisterModuleCommand(BLT_Module* module);
     virtual void OnAddNodeCommand(BLT_CString name);
-    virtual void OnSetVolumeCommand(float volume);
     virtual void OnSetPropertyCommand(BLT_PropertyScope        scope,
                                       const NPT_String&        target,
                                       const NPT_String&        name,

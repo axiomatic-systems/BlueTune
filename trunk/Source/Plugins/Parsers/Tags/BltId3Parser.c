@@ -298,8 +298,8 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
         header[2] == '3') {
         unsigned int footer_size = 0;
         /* look at the tag version */
-        if (header[3] == 3) {
-            /* version 3.x */
+        if (header[3] == 2 || header[3] == 3) {
+            /* version 2.x or 3.x */
         } else if (header[3] == 4) {
             /* version 4.x */
             if (header[5] & BLT_ID3V2_TAG_HEADER_FLAG_HAS_FOOTER) {

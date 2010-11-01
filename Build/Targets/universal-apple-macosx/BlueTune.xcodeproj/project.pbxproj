@@ -351,10 +351,14 @@
 		CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */; };
 		CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
+		CA7513D11256D8F30022D1A8 /* BltBento4Adapters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7513CF1256D8F30022D1A8 /* BltBento4Adapters.cpp */; };
+		CA7513D21256D8F30022D1A8 /* BltBento4Adapters.h in Headers */ = {isa = PBXBuildFile; fileRef = CA7513D01256D8F30022D1A8 /* BltBento4Adapters.h */; };
 		CA7F2F9C0FA81789006A1B2D /* BltIppDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */; };
 		CA87F410114AC6CA0082AAFC /* BltFingerprintFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */; };
 		CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */; };
 		CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */; };
+		CA92075D125AAC0C001F2456 /* BltWmsProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA92075B125AAC0C001F2456 /* BltWmsProtocol.cpp */; };
+		CA92075E125AAC0C001F2456 /* BltWmsProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */; };
 		CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED2920EAD3A8D003CE43C /* BltPixels.c */; };
 		CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED2930EAD3A8D003CE43C /* BltPixels.h */; };
 		CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */; };
@@ -1003,6 +1007,13 @@
 			remoteGlobalIDString = CAB3CB710FCB35B8007C4260;
 			remoteInfo = BufferedStreamTest;
 		};
+		CADF6048124199FE007C78F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA790DA91233BDC100875081;
+			remoteInfo = NetGet;
+		};
 		CAE418930E0DD91C00A530D1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -1413,6 +1424,7 @@
 		CA550B9C0D1F372C00B22D72 /* btcontroller */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btcontroller; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = BtPlayerServer.cpp; sourceTree = "<group>"; };
 		CA550C950D2093D800B22D72 /* btplayerserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = btplayerserver; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA5694E212618D8300693455 /* untitled.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = untitled.c; path = ../../../../../Temp/untitled.c; sourceTree = SOURCE_ROOT; };
 		CA5827130E68B39D006CC501 /* BltWmaDecoderPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = BltWmaDecoderPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5827560E68BE26006CC501 /* BltWmaDecoderStub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltWmaDecoderStub.c; sourceTree = "<group>"; };
 		CA58276D0E68C14F006CC501 /* BltVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVersion.h; sourceTree = "<group>"; };
@@ -1462,12 +1474,16 @@
 		CA649D151107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioFileStreamParser.c; sourceTree = "<group>"; };
 		CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioFileStreamParser.h; sourceTree = "<group>"; };
 		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA7513CF1256D8F30022D1A8 /* BltBento4Adapters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltBento4Adapters.cpp; sourceTree = "<group>"; };
+		CA7513D01256D8F30022D1A8 /* BltBento4Adapters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltBento4Adapters.h; sourceTree = "<group>"; };
 		CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltIppDecoder.cpp; sourceTree = "<group>"; };
 		CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltIppDecoder.h; sourceTree = "<group>"; };
 		CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBltIppDecoder.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltFingerprintFilter.c; sourceTree = "<group>"; };
 		CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltFingerprintFilter.h; sourceTree = "<group>"; };
 		CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BltPlayerObjectiveC.mm; sourceTree = "<group>"; };
+		CA92075B125AAC0C001F2456 /* BltWmsProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltWmsProtocol.cpp; sourceTree = "<group>"; };
+		CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltWmsProtocol.h; sourceTree = "<group>"; };
 		CA9ED2920EAD3A8D003CE43C /* BltPixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltPixels.c; sourceTree = "<group>"; };
 		CA9ED2930EAD3A8D003CE43C /* BltPixels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltPixels.h; sourceTree = "<group>"; };
 		CA9ED81C0EAF9F18003CE43C /* BltDecoderX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltDecoderX.c; sourceTree = "<group>"; };
@@ -1715,6 +1731,7 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
+				CA5694E212618D8300693455 /* untitled.c */,
 				CA1C6A4B10F6BCBF00D50ABE /* WebRoot */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
@@ -1963,6 +1980,7 @@
 		CA5041D50C5AE52B0060E6FE /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				CA7513CE1256D8F30022D1A8 /* Adapters */,
 				CAF2EE110E5FDD8D00948C04 /* Examples */,
 				CA5041EF0C5AE52B0060E6FE /* BlueTune */,
 				CA5041F10C5AE52B0060E6FE /* Core */,
@@ -2106,6 +2124,7 @@
 		CA5042430C5AE52B0060E6FE /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				CA920759125AAC0C001F2456 /* Protocols */,
 				CA7F2F750FA81381006A1B2D /* IPP */,
 				CA5827540E68BE26006CC501 /* Stubs */,
 				CA5827050E68B32D006CC501 /* DynamicLoading */,
@@ -2466,6 +2485,7 @@
 				CAE418B20E0DD91C00A530D1 /* NetEcho */,
 				CAE418B40E0DD91C00A530D1 /* NetConfig */,
 				CAE418B60E0DD91C00A530D1 /* NetPing */,
+				CADF6049124199FE007C78F9 /* NetGet */,
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
@@ -2875,6 +2895,15 @@
 			path = OsxAudioFileStream;
 			sourceTree = "<group>";
 		};
+		CA7513CE1256D8F30022D1A8 /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				CA7513CF1256D8F30022D1A8 /* BltBento4Adapters.cpp */,
+				CA7513D01256D8F30022D1A8 /* BltBento4Adapters.h */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
 		CA7F2F750FA81381006A1B2D /* IPP */ = {
 			isa = PBXGroup;
 			children = (
@@ -2892,6 +2921,23 @@
 				CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */,
 			);
 			path = Fingerprint;
+			sourceTree = "<group>";
+		};
+		CA920759125AAC0C001F2456 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				CA92075A125AAC0C001F2456 /* WMS */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		CA92075A125AAC0C001F2456 /* WMS */ = {
+			isa = PBXGroup;
+			children = (
+				CA92075B125AAC0C001F2456 /* BltWmsProtocol.cpp */,
+				CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */,
+			);
+			path = WMS;
 			sourceTree = "<group>";
 		};
 		CA9ED8410EAFAB56003CE43C /* BtPlayX */ = {
@@ -3127,6 +3173,8 @@
 				CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */,
 				CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */,
 				CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */,
+				CA7513D21256D8F30022D1A8 /* BltBento4Adapters.h in Headers */,
+				CA92075E125AAC0C001F2456 /* BltWmsProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3446,7 +3494,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTune */;
 			projectDirPath = "";
 			projectReferences = (
@@ -3864,6 +3919,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = BufferedStreamTest;
 			remoteRef = CAD66A570FCEF922006238F0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CADF6049124199FE007C78F9 /* NetGet */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetGet;
+			remoteRef = CADF6048124199FE007C78F9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CAE418940E0DD91C00A530D1 /* ArraysTest1 */ = {
@@ -4312,6 +4374,8 @@
 				CA649D171107D0E1005B52E9 /* BltOsxAudioFileStreamParser.c in Sources */,
 				CA649DD511081416005B52E9 /* BltAacDecoder.c in Sources */,
 				CA87F410114AC6CA0082AAFC /* BltFingerprintFilter.c in Sources */,
+				CA7513D11256D8F30022D1A8 /* BltBento4Adapters.cpp in Sources */,
+				CA92075D125AAC0C001F2456 /* BltWmsProtocol.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4539,6 +4603,7 @@
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL,
 				);
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** $(BLT_DDPLUS_PLUGIN_HOME)/BlueTuneModule";
@@ -4588,6 +4653,7 @@
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL,
 				);
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** $(BLT_DDPLUS_PLUGIN_HOME)/BlueTuneModule";

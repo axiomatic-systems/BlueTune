@@ -102,6 +102,9 @@ MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
 CompiledModule(name                          = 'Bento4Objects',
                source_root                   = AP4_SOURCE_ROOT,
                build_source_dirs             = ['Core', 'MetaData', 'Crypto', 'Adapters'],
+               build_source_files            = {'/Source/Adapters':'BltBento4Adapters.cpp'},
+               build_include_dirs            = ['Source/Core', 'Source/Plugins/Common'],
+               exported_include_dirs         = ['Source/Adapters'],
                chained_link_and_include_deps = ['Atomix', 'Neptune'],
                extra_cpp_defines             = AP4_EXTRA_CPP_DEFINES)
 StaticLibraryModule(name                          = 'Bento4',
@@ -269,6 +272,7 @@ PluginsSettings = {
     'CddaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',             'src_dir':'Inputs/CDDA'              },
     'AlsaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',             'src_dir':'Inputs/Alsa'              },
     'NetworkInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',          'src_dir':'Inputs/Network'           },
+    'WmsProtocol'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL',           'src_dir':'Protocols/WMS'            },
     'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
     'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },
     'AlsaOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',            'src_dir':'Outputs/Alsa'             },

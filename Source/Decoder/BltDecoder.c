@@ -378,7 +378,7 @@ BLT_Decoder_GetVolume(BLT_Decoder* decoder, float* volume)
     
     /* get the volume from the output node */
     result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
-    if (BLT_SUCCEEDED(result)) {
+    if (BLT_SUCCEEDED(result) && output_node) {
         BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
         if (volume_control) {
             result = BLT_VolumeControl_GetVolume(volume_control, volume);
@@ -404,7 +404,7 @@ BLT_Decoder_SetVolume(BLT_Decoder* decoder, float volume)
     
     /* get the volume from the output node */
     result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
-    if (BLT_SUCCEEDED(result)) {
+    if (BLT_SUCCEEDED(result) && output_node) {
         BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
         if (volume_control) {
             result = BLT_VolumeControl_SetVolume(volume_control, volume);
@@ -430,7 +430,7 @@ BLT_Decoder_Drain(BLT_Decoder* decoder)
     
     /* drain the output node */
     result = BLT_Stream_GetOutputNode(decoder->stream, &output_node);
-    if (BLT_SUCCEEDED(result)) {
+    if (BLT_SUCCEEDED(result) && output_node) {
         BLT_OutputNode* output_node_interface = ATX_CAST(output_node, BLT_OutputNode);
         if (output_node_interface) {
             result = BLT_OutputNode_Drain(output_node_interface);

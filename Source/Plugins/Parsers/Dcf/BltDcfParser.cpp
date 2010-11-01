@@ -23,6 +23,7 @@
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
 #include "BltKeyManager.h"
+#include "BltBento4Adapters.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -86,9 +87,10 @@ typedef struct {
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    DcfParserInput  input;
-    DcfParserOutput output;
-    BLT_KeyManager* key_manager;
+    DcfParserInput          input;
+    DcfParserOutput         output;
+    BLT_KeyManager*         key_manager;
+    AP4_BlockCipherFactory* cipher_factory;
 } DcfParser;
 
 /*----------------------------------------------------------------------
@@ -139,19 +141,31 @@ DcfParser_ReadUintvar(ATX_InputStream* stream,
 |   DcfParser_GetContentKey
 +---------------------------------------------------------------------*/
 static BLT_Result
-DcfParser_GetContentKey(DcfParser*     self, 
-                        const char*    content_id,
-                        unsigned char* key, 
-                        unsigned int*  key_size)
+DcfParser_GetContentKey(DcfParser*      self, 
+                        const char*     content_id,
+                        NPT_DataBuffer& key)
 {
-    // check parameters
-    if (key == NULL || key_size == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+    // default
+    key.SetDataSize(0);
 
     // check that we have a key manager
     if (self->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
 
     // ask the key manager to resolve the key
-    return BLT_KeyManager_GetKeyByName(self->key_manager, content_id, key, key_size);
+    key.Reserve(1024);
+    BLT_Size key_size = 1024;
+    BLT_Result result = BLT_KeyManager_GetKeyByName(self->key_manager, content_id, key.UseData(), &key_size);
+    if (BLT_FAILED(result)) {
+        if (result == ATX_ERROR_NOT_ENOUGH_SPACE) {
+            key.Reserve(key_size);
+            result = BLT_KeyManager_GetKeyByName(self->key_manager, content_id, key.UseData(), &key_size);
+        } else {
+            return result;
+        }
+    }
+    key.SetDataSize(key_size);
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -204,9 +218,8 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
     self->input.encrypted_size = data_length;
     
     /* get the content key */
-    unsigned char key[16];
-    unsigned int  key_size = 16;
-    result = DcfParser_GetContentKey(self, self->input.content_uri, key, &key_size);
+    NPT_DataBuffer key;
+    result = DcfParser_GetContentKey(self, self->input.content_uri, key);
     if (BLT_FAILED(result)) {
         ATX_LOG_FINE_2("GetKeyForContent(%s) returned %d", 
             self->input.content_uri, 
@@ -306,13 +319,15 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
         new ATX_InputStream_To_AP4_ByteStream_Adapter(data_stream);
     ATX_RELEASE_OBJECT(data_stream);
     
-    /* create a decrypting stream for the content */ // FIXME: temporary hack
+    /* create a decrypting stream for the content */ // FIXME: temporary
     AP4_ByteStream* decrypting_stream = NULL;
-    result = AP4_DecryptingStream::Create(AP4_DecryptingStream::CIPHER_MODE_CBC,
+    result = AP4_DecryptingStream::Create(AP4_BlockCipher::CBC,
                                           *encrypted_stream,
                                           self->output.size,
-                                          iv, 16, key, key_size,
-                                          &AP4_DefaultBlockCipherFactory::Instance,
+                                          iv, 16, 
+                                          key.GetData(),
+                                          key.GetDataSize(),
+                                          self->cipher_factory,
                                           decrypting_stream);
     encrypted_stream->Release();
     if (AP4_FAILED(result)) return result;
@@ -354,9 +369,8 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
             }
 
             /* get the content key */
-            unsigned char key[16];
-            unsigned int  key_size = 16;
-            result = DcfParser_GetContentKey(self, content_id, key, &key_size);
+            NPT_DataBuffer key;
+            result = DcfParser_GetContentKey(self, content_id, key);
             if (BLT_FAILED(result)) {
                 ATX_LOG_FINE_2("GetKeyForContent(%s) returned %d", 
                                content_id, 
@@ -366,9 +380,9 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
 
             /* create the decrypting stream */
             result = AP4_OmaDcfAtomDecrypter::CreateDecryptingStream(*odrm,
-                                                                     key,
-                                                                     key_size,
-                                                                     &AP4_DefaultBlockCipherFactory::Instance,
+                                                                     key.GetData(),
+                                                                     key.GetDataSize(),
+                                                                     self->cipher_factory,
                                                                      decrypting_stream);
             if (AP4_SUCCEEDED(result)) {
                 /* update the content type */
@@ -452,10 +466,9 @@ DcfParserInput_SetStream(BLT_InputStreamUser* _self,
         
     /* update the stream info */
     BLT_StreamInfo stream_info;
-    stream_info.mask |= BLT_STREAM_INFO_MASK_SIZE;
-    stream_info.size = self->output.size;
+    stream_info.size      = self->output.size;
     stream_info.data_type = self->input.content_type;
-    stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
+    stream_info.mask      = BLT_STREAM_INFO_MASK_SIZE | BLT_STREAM_INFO_MASK_DATA_TYPE;
     
     /* update the stream info */
     if (stream_info.mask && ATX_BASE(self, BLT_BaseMediaNode).context) {
@@ -610,6 +623,7 @@ DcfParser_Destroy(DcfParser* self)
     /* destruct the members */
     DcfParserInput_Destruct(&self->input);
     DcfParserOutput_Destruct(&self->output);
+    delete self->cipher_factory;
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
@@ -743,6 +757,17 @@ DcfParser_Construct(DcfParser* self, BLT_Module* module, BLT_Core* core)
             }
         } else {
             ATX_LOG_FINE("no key manager");
+        }
+
+        /* check if we need to use a cipher factory */
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                     BLT_CIPHER_FACTORY_PROPERTY, 
+                                                     &value))) {
+            if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                self->cipher_factory = new BLT_Ap4CipherFactoryAdapter((BLT_CipherFactory*)value.data.pointer);
+            }
+        } else {
+            ATX_LOG_FINE("no cipher factory");
         }
     }
 

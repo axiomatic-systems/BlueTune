@@ -75,6 +75,7 @@ typedef struct {
     snd_pcm_t*       device_handle;
     BLT_PcmMediaType expected_media_type;
     BLT_PcmMediaType media_type;
+    ATX_UInt64       media_time;
 } AlsaOutput;
 
 /*----------------------------------------------------------------------
@@ -656,6 +657,23 @@ AlsaOutput_PutPacket(BLT_PacketConsumer* _self,
     result = AlsaOutput_Configure(self, media_type);
 	if (BLT_FAILED(result)) return result;
 	
+    /* update the media time */
+    {
+        BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
+        ATX_UInt64    ts_nanos = BLT_TimeStamp_ToNanos(ts);
+        if (ts_nanos == 0 && 
+            media_type->channel_count && 
+            media_type->bits_per_sample) {
+            BLT_TimeStamp duration;
+            unsigned int sample_count = BLT_MediaPacket_GetPayloadSize(packet)/
+                                        (media_type->channel_count*media_type->bits_per_sample/8);
+            duration = BLT_TimeStamp_FromSamples(sample_count, media_type->sample_rate);            
+            self->media_time += BLT_TimeStamp_ToNanos(duration);
+        } else {
+            self->media_time = ts_nanos;
+        }
+    }
+    
     /* write the audio samples */
     return AlsaOutput_Write(self, buffer, size);
 }
@@ -898,6 +916,13 @@ AlsaOutput_Seek(BLT_MediaNode* _self,
     /* reset the device */
     AlsaOutput_Reset(self);
 
+    /* update the media time */
+    if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
+        self->media_time = BLT_TimeStamp_ToNanos(point->time_stamp);
+    } else {
+        self->media_time = 0;
+    }
+    
     return BLT_SUCCESS;
 }
 
@@ -905,16 +930,45 @@ AlsaOutput_Seek(BLT_MediaNode* _self,
 |    AlsaOutput_GetStatus
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AlsaOutput_GetStatus(BLT_OutputNode*       self,
+AlsaOutput_GetStatus(BLT_OutputNode*       _self,
                      BLT_OutputNodeStatus* status)
 {
-    /*AlsaOutput* self = (AlsaOutput*)instance;*/
-    BLT_COMPILER_UNUSED(self);
+    AlsaOutput*       self = ATX_SELF(AlsaOutput, BLT_OutputNode);
+    snd_pcm_status_t* pcm_status;
+    snd_pcm_sframes_t delay = 0;
+    ATX_UInt64        delay_ns = 0;
+    ATX_UInt64        media_time = self->media_time;
+    int               io_result;
 
+    /* default values */
     status->media_time.seconds = 0;
     status->media_time.nanoseconds = 0;
     status->flags = 0;
 
+    /* get the driver status */
+    snd_pcm_status_alloca_no_assert(&pcm_status);
+    io_result = snd_pcm_status(self->device_handle, pcm_status);
+    if (io_result != 0) {
+        return BLT_FAILURE;
+    }
+    if (delay == 0) {
+        /* workaround buggy alsa drivers */
+        io_result = snd_pcm_delay(self->device_handle, &delay);
+        if (io_result != 0) {
+            return BLT_FAILURE;
+        }
+    }
+    if (delay > 0 && 
+        self->media_type.sample_rate &&
+        self->media_type.channel_count) {
+        delay_ns = (delay * (ATX_UInt64)self->media_type.channel_count * (ATX_UInt64)1000000000)/self->media_type.sample_rate;
+        if (delay_ns <= media_time) media_time -= delay_ns;
+    }
+    
+    /* return the computed media time */
+    status->media_time = BLT_TimeStamp_FromNanos(media_time);
+    ATX_LOG_FINEST_2("delay = %lld, media time = %lld", delay_ns, media_time);
+    
     return BLT_SUCCESS;
 }
 

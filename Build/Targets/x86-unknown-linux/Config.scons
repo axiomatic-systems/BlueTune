@@ -9,6 +9,7 @@ env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 #env['AP4_CPP_DEFINES']=['AP4_CONFIG_MINI_BUILD']
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
+                      'WmsProtocol',
                       'MpegAudioDecoder', 
                       'StreamPacketizer', 
                       'NullOutput',

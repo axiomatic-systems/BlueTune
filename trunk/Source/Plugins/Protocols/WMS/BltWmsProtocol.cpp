@@ -237,10 +237,28 @@ WmsAsxPlaylist::ParseAsXml(const char*      asx_data,
     if (NPT_FAILED(result) || asx_root == NULL) {
         if (result == NPT_ERROR_XML_TAG_MISMATCH) {
             // try converting all known tags to lowercase and parse again
-            
+            NPT_String asx_data_string(asx_data, asx_data_size);
+            bool in_tag = false;
+            for (char* cursor = asx_data_string.UseChars(); *cursor; cursor++) {
+                char c = *cursor;
+                if (in_tag) {
+                    if (c == '/' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                        if (c >= 'a' && c <= 'z') *cursor = c-0x20;
+                    } else {
+                        in_tag = false;
+                    }
+                } else {
+                    if (c == '<') {
+                        in_tag = true;
+                    }
+                }
+            }
+            result = parser.Parse(asx_data_string.GetChars(), asx_data_string.GetLength(), asx_root);
         }
-        ATX_LOG_WARNING_1("cannot parse ASX playlist (%d)", result);
-        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        if (NPT_FAILED(result) || asx_root == NULL) {
+            ATX_LOG_WARNING_1("cannot parse ASX playlist (%d)", result);
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        }
     }
     NPT_XmlElementNode* asx_root_element = asx_root->AsElementNode();
     if (asx_root_element == NULL) {
@@ -302,7 +320,8 @@ WmsAsxPlaylist::ParseAsText(const char*      asx_data,
                             ATX_Size         asx_data_size, 
                             WmsAsxPlaylist*& playlist)
 {
-    const char* line_start = asx_data;
+    NPT_String asx_data_string(asx_data, asx_data_size);
+    const char* line_start = asx_data_string.GetChars();
 
     // instantiate a new object
     playlist = new WmsAsxPlaylist();
@@ -310,7 +329,7 @@ WmsAsxPlaylist::ParseAsText(const char*      asx_data,
     WmsAsxPlaylist::Entry& asx_entry = *(playlist->m_Entries.GetLastItem());
     ATX_LOG_FINER("new ASX ENTRY");
 
-    for (const char* cursor = asx_data;; ++cursor) {
+    for (const char* cursor = asx_data_string.GetChars();; ++cursor) {
         if (*cursor == '\r' || *cursor == '\n' || *cursor == '\0') {
             /* process the line */
             if (cursor != line_start) {
@@ -321,7 +340,7 @@ WmsAsxPlaylist::ParseAsText(const char*      asx_data,
                         ++sep;
                         while (line.GetChars()[sep] == ' ') sep++; // skip whitespace
                         if (line.GetChars()[sep]) {
-                            ATX_LOG_FINER("new ASX ENTRY REF");
+                            ATX_LOG_FINER_1("new ASX ENTRY REF: %s", line.GetChars()+sep);
                             asx_entry.m_Refs.Add(WmsAsxPlaylist::Ref());
                             WmsAsxPlaylist::Ref& asx_ref = *(asx_entry.m_Refs.GetLastItem());
                             asx_ref.m_Url = line.GetChars()+sep;

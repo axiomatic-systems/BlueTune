@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Inputs\Callback;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Outputs\Callback;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Dcf;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;&quot;$(BLT_DDPLUS_PLUGIN_HOME)\Source\BlueTuneModule&quot;"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Adapters;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Inputs\Callback;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Outputs\Callback;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Dcf;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;&quot;$(BLT_DDPLUS_PLUGIN_HOME)\Source\BlueTuneModule&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=dx9:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER;BLT_CONFIG_MODULES_ENABLE_DCF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;_BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_AUDIO_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;BLT_CONFIG_MODULES_ENABLE_GAIN_CONTROL_FILTER;BLT_CONFIG_MODULES_ENABLE_PCM_ADAPTER;_BLT_CONFIG_MODULES_ENABLE_FILTER_HOST;_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER;_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Inputs\Callback;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Outputs\Callback;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Dcf;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;&quot;$(BLT_DDPLUS_PLUGIN_HOME)\Source\BlueTuneModule&quot;"
+				AdditionalIncludeDirectories="..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Adapters;..\..\..\..\Source\Fluo;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Adapters\PCM;..\..\..\..\Source\Plugins\Decoders\AAC;..\..\..\..\Source\Plugins\Decoders\ALAC;..\..\..\..\Source\Plugins\Decoders\FLAC;..\..\..\..\Source\Plugins\Decoders\MpegAudio;..\..\..\..\Source\Plugins\Decoders\Vorbis;..\..\..\..\Source\Plugins\Decoders\WMA;..\..\..\..\Source\Plugins\Filters\GainControl;..\..\..\..\Source\Plugins\Formatters\Wave;..\..\..\..\Source\Plugins\General\PacketStreamer;..\..\..\..\Source\Plugins\General\StreamPacketizer;..\..\..\..\Source\Plugins\General\SilenceRemover;..\..\..\..\Source\Plugins\Inputs\File;..\..\..\..\Source\Plugins\Inputs\Network;..\..\..\..\Source\Plugins\Inputs\Callback;..\..\..\..\Source\Plugins\Outputs\File;..\..\..\..\Source\Plugins\Outputs\Debug;..\..\..\..\Source\Plugins\Outputs\Null;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\Source\Plugins\Outputs\Callback;..\..\..\..\Source\Plugins\Parsers\Aiff;..\..\..\..\Source\Plugins\Parsers\Mp4;..\..\..\..\Source\Plugins\Parsers\Adts;..\..\..\..\Source\Plugins\Parsers\Tags;..\..\..\..\Source\Plugins\Parsers\Wave;..\..\..\..\Source\Plugins\Parsers\Dcf;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;&quot;$(BLT_DDPLUS_PLUGIN_HOME)\Source\BlueTuneModule&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=wave:0;BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=dx9:0;BLT_CONFIG_MODULES_ENABLE_FILE_INPUT;BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT;BLT_CONFIG_MODULES_ENABLE_TAG_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER;BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER;BLT_CONFIG_MODULES_ENABLE_MP4_PARSER;BLT_CONFIG_MODULES_ENABLE_ADTS_PARSER;BLT_CONFIG_MODULES_ENABLE_DCF_PARSER;BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER;BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER;BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER;BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER;BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER;BLT_CONFIG_MODULES_ENABLE_AAC_DECODER;_BLT_CONFIG_MODULES_ENABLE_WMA_DECODER;BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER;BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER;BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT;BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT;BLT_CONFIG_MODULES_ENABLE_WIN32_AUDIO_OUTPUT;BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT;_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER;_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -157,6 +157,26 @@
 			<Filter
 				Name="Core"
 				>
+				<File
+					RelativePath="..\..\..\..\Source\Adapters\BltBento4Adapters.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Metadata&quot;"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;..\..\..\..\..\Bento4\Source\C++\Core&quot;;&quot;..\..\..\..\..\Bento4\Source\C++\Metadata&quot;"
+						/>
+					</FileConfiguration>
+				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Core\BltBitStream.c"
 					>
@@ -495,6 +515,10 @@
 					RelativePath="..\..\..\..\Source\Plugins\Outputs\Win32\BltWin32AudioOutput.c"
 					>
 				</File>
+				<File
+					RelativePath="..\..\..\..\Source\Plugins\Protocols\WMS\BltWmsProtocol.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -505,6 +529,10 @@
 			<Filter
 				Name="Core"
 				>
+				<File
+					RelativePath="..\..\..\..\Source\Adapters\BltBento4Adapters.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\..\..\Source\Core\BltBuiltins.h"
 					>

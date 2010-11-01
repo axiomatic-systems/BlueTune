@@ -333,7 +333,7 @@ WmsAsxPlaylist::ParseAsText(const char*      asx_data,
         if (*cursor == '\r' || *cursor == '\n' || *cursor == '\0') {
             /* process the line */
             if (cursor != line_start) {
-                NPT_String line(line_start, cursor-line_start);
+                NPT_String line(line_start, (NPT_Size)(cursor-line_start));
                 if (line.StartsWith("Ref", true)) {
                     int sep = line.Find('=', 3);
                     if (sep > 3) {
@@ -648,7 +648,7 @@ WmsClient::ParseAsfExtendedStreamProperties(const unsigned char* asf_data, NPT_U
     stream.m_LanguageIdIndex = language_id_index;
     
     asf_data_size -= (2*8+8*4+2*2+8+2*2);
-    for (unsigned int i=0; i<stream_name_count+payload_extension_count && asf_data_size >= 16+8; i++) {
+    for (unsigned int i=0; i<(unsigned int)(stream_name_count+payload_extension_count) && asf_data_size >= 16+8; i++) {
         NPT_UInt64 object_size = NPT_BytesToInt64Le(asf_data+16);
         if (object_size > asf_data_size-(16+8)) return BLT_SUCCESS; // ignore
         asf_data      += (object_size+16+8);

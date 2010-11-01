@@ -618,7 +618,7 @@ WmaDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         /* first try to see if there are buffered samples available */
         pcm_samples = WMAFileGetPCM(self->wma_handle, 
                                     BLT_MediaPacket_GetPayloadBuffer(*packet), NULL, 
-                                    buffer_size, decoded_samples, &timestamp);
+                                    buffer_size, BLT_WMA_DECODER_DEFAULT_PCM_BUFFER_SIZE, &timestamp);
         if (pcm_samples) {
             buffer_size = pcm_samples*
                           (self->output.media_type.bits_per_sample/8)*

@@ -237,7 +237,7 @@ WmsAsxPlaylist::ParseAsXml(const char*      asx_data,
     if (NPT_FAILED(result) || asx_root == NULL) {
         if (result == NPT_ERROR_XML_TAG_MISMATCH) {
             // try converting all known tags to lowercase and parse again
-            // FIXME: TODO
+            
         }
         ATX_LOG_WARNING_1("cannot parse ASX playlist (%d)", result);
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
@@ -702,13 +702,16 @@ WmsClient::Describe()
     }
 
     // analyze the response type
-    if (response->GetEntity()->GetContentType() != "application/vnd.ms.wms-­hdr.asfv1") {
+    if (response->GetEntity()->GetContentType() != "application/vnd.ms.wms-hdr.asfv1") {
         ATX_LOG_WARNING_1("unexpected Describe response type: %s", 
                           response->GetEntity()->GetContentType().GetChars());
+        delete response;
+        return BLT_ERROR_PROTOCOL_FAILURE;
     }
     
     // get the body stream and size
-    if (response->GetEntity()->GetContentLength() > BLT_WMS_PROTOCOL_MAX_DESCRIBE_PAYLOAD_SIZE) {
+    if (response->GetEntity()->GetContentLength() == 0 ||
+        response->GetEntity()->GetContentLength() > BLT_WMS_PROTOCOL_MAX_DESCRIBE_PAYLOAD_SIZE) {
         delete response;
         return BLT_ERROR_PROTOCOL_FAILURE;
     }

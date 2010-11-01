@@ -1652,16 +1652,24 @@ Stream_PumpPacket(BLT_Stream* _self)
     /* check that we have an input and an output */
     if (self->input.node  == NULL ||
         self->output.node == NULL) {
-        ATX_LOG_WARNING("Stream_PumpPacket - no input node");
+        ATX_LOG_WARNING("no input or output node");
         return BLT_FAILURE;
     }
 
     /* get the next available packet */
     node = self->nodes.tail;
     while (node) {
-        /* ensure that the node is started */
-        result = StreamNode_Start(node);
-        if (BLT_FAILED(result)) return result;
+        /* ensure that the node and its sources (if any) are started */
+        StreamNode* target = node;
+        while (target) {
+            result = StreamNode_Start(target);
+            if (BLT_FAILED(result)) return result;
+            if (!target->input.connected || 
+                target->input.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) {
+                break;
+            }
+            target = target->prev;
+        }
 
         switch (node->output.protocol) {
           case BLT_MEDIA_PORT_PROTOCOL_NONE:

@@ -33,3 +33,5 @@ const ATX_InterfaceId ATX_INTERFACE_ID(BLT_KeyManager)           = {0x010F, 0x00
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_TimeSource)           = {0x0110, 0x0001};
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_SyncSlave)            = {0x0111, 0x0001};
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_VolumeControl)        = {0x0112, 0x0001};
+const ATX_InterfaceId ATX_INTERFACE_ID(BLT_CipherFactory)        = {0x0113, 0x0001};
+const ATX_InterfaceId ATX_INTERFACE_ID(BLT_Cipher)               = {0x0114, 0x0001};

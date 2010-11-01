@@ -192,6 +192,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(DolbyDigitalPlusDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL)
+    BLT_REGISTER_BUILTIN(WmsProtocol)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_WIN32_AUDIO_OUTPUT)
     BLT_REGISTER_BUILTIN(Win32AudioOutput)
 #endif

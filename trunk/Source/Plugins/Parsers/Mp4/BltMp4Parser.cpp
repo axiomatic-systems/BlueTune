@@ -24,6 +24,7 @@
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
 #include "BltKeyManager.h"
+#include "BltBento4Adapters.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -93,16 +94,12 @@ struct Mp4Parser {
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    Mp4ParserInput  input;
-    Mp4ParserOutput audio_output;
-    Mp4ParserOutput video_output;
-    BLT_KeyManager* key_manager;
+    Mp4ParserInput          input;
+    Mp4ParserOutput         audio_output;
+    Mp4ParserOutput         video_output;
+    BLT_KeyManager*         key_manager;
+    AP4_BlockCipherFactory* cipher_factory;
 };
-
-/*----------------------------------------------------------------------
-|   constants
-+---------------------------------------------------------------------*/
-const unsigned int BLT_MP4_PARSER_MAX_KEY_SIZE = 32;
 
 /*----------------------------------------------------------------------
 |   Mp4ParserInput_Construct
@@ -163,6 +160,22 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
         }
         if (self->parser->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
         
+        // check if we need to use a cipher factory
+        if (self->parser->cipher_factory == NULL) {
+            ATX_Properties* properties = NULL;
+            if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
+                                                              &properties))) {
+                ATX_PropertyValue value;
+                if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                             BLT_CIPHER_FACTORY_PROPERTY, 
+                                                             &value))) {
+                    if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                        self->parser->cipher_factory = new BLT_Ap4CipherFactoryAdapter((BLT_CipherFactory*)value.data.pointer);
+                    }
+                }
+            }
+        }
+        
         // figure out the content ID for this track
         // TODO: support different content ID schemes
         // for now, we just make up a content ID based on the track ID
@@ -170,13 +183,18 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
         NPT_FormatString(content_id, sizeof(content_id), "@track.%d", self->track->GetId());
         
         // get the key for this content
-        unsigned char key[BLT_MP4_PARSER_MAX_KEY_SIZE];
-        unsigned int  key_size = BLT_MP4_PARSER_MAX_KEY_SIZE;
-        BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key, &key_size);
+        unsigned int   key_size = 256;
+        NPT_DataBuffer key(key_size);
+        BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
+        if (result == ATX_ERROR_NOT_ENOUGH_SPACE) {
+            key.SetDataSize(key_size);
+            result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
+        }
         if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
+        key.SetDataSize(key_size);
         
         delete self->sample_decrypter;
-        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, key, key_size);
+        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, key.GetData(), key_size, self->parser->cipher_factory);
         if (self->sample_decrypter == NULL) {
             ATX_LOG_FINE("unable to create decrypter");
             return BLT_ERROR_CRYPTO_FAILURE;
@@ -228,7 +246,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
                             BLT_STREAM_INFO_MASK_CHANNEL_COUNT |
                             BLT_STREAM_INFO_MASK_SAMPLE_RATE;
     } else if (self == &self->parser->audio_output) {
-        ATX_LOG_FINE("expected audio sample descriton, but did not get one");
+        ATX_LOG_FINE("expected audio sample description, but did not get one");
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
@@ -750,6 +768,7 @@ Mp4Parser_Destroy(Mp4Parser* self)
     Mp4ParserInput_Destruct(&self->input);
     Mp4ParserOutput_Destruct(&self->audio_output);
     Mp4ParserOutput_Destruct(&self->video_output);
+    delete self->cipher_factory;
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));

@@ -175,15 +175,6 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
     status->position.range  = 0;
     BLT_TimeStamp_Set(status->time_stamp, 0, 0);
     BLT_DecoderX_GetMediaTime(&ATX_BASE(decoder, BLT_TimeSource), &status->time_stamp);
-    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
-        status->time_stamp = audio_status.time_stamp;
-    }
-    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
-        status->time_stamp = video_status.time_stamp;
-    }
-    if (status->time_stamp.seconds == 0 && status->time_stamp.nanoseconds == 0) {
-        status->time_stamp = input_status.time_stamp;
-    }
     if (input_status.position.offset) {
         status->position = input_status.position;
     } else if (audio_status.position.offset) {
@@ -308,14 +299,19 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
     BLT_DecoderX_ClearStatus(decoder);
     decoder->audio_only = BLT_FALSE;
 
+    /* update the streams */
     if (name == NULL || name[0] == '\0') {
         /* if the name is NULL or empty, it means reset */
+        result = BLT_Stream_ResetInput(decoder->input_stream);
+        if (BLT_FAILED(result)) return result;
+        result = BLT_Stream_ResetOutput(decoder->input_stream);
+        if (BLT_FAILED(result)) return result;
         result = BLT_Stream_ResetInput(decoder->audio_stream);
         if (BLT_FAILED(result)) return result;
         result = BLT_Stream_ResetInput(decoder->video_stream);
         if (BLT_FAILED(result)) return result;
     } else {
-        /* create the node */
+        /* create the input node */
         result = BLT_DecoderX_CreateInputNode(decoder, name, type, &node);
         if (BLT_FAILED(result)) return result;
         
@@ -562,7 +558,7 @@ BLT_DecoderX_GetVolume(BLT_DecoderX* decoder, float* volume)
     
     /* get the volume from the output node */
     result = BLT_Stream_GetOutputNode(decoder->audio_stream, &output_node);
-    if (BLT_SUCCEEDED(result)) {
+    if (BLT_SUCCEEDED(result) && output_node) {
         BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
         if (volume_control) {
             result = BLT_VolumeControl_GetVolume(volume_control, volume);
@@ -588,7 +584,7 @@ BLT_DecoderX_SetVolume(BLT_DecoderX* decoder, float volume)
     
     /* get the volume from the output node */
     result = BLT_Stream_GetOutputNode(decoder->audio_stream, &output_node);
-    if (BLT_SUCCEEDED(result)) {
+    if (BLT_SUCCEEDED(result) && output_node) {
         BLT_VolumeControl* volume_control = ATX_CAST(output_node, BLT_VolumeControl);
         if (volume_control) {
             result = BLT_VolumeControl_SetVolume(volume_control, volume);
@@ -607,16 +603,24 @@ BLT_DecoderX_SetVolume(BLT_DecoderX* decoder, float volume)
 |    BLT_DecoderX_AddNodeByName
 +---------------------------------------------------------------------*/
 BLT_Result
-BLT_DecoderX_AddNodeByName(BLT_DecoderX*   decoder, 
+BLT_DecoderX_AddNodeByName(BLT_DecoderX*  decoder, 
+                           const char*    stream,
                            BLT_MediaNode* where, 
                            BLT_CString    name)
 {
-    /* not implemented this in this version */
-    ATX_COMPILER_UNUSED(decoder);
-    ATX_COMPILER_UNUSED(where);
-    ATX_COMPILER_UNUSED(name);
+    BLT_Stream* stream_object;
     
-    return BLT_ERROR_NOT_IMPLEMENTED;
+    if (stream == NULL) return BLT_ERROR_INVALID_PARAMETERS;
+    if (ATX_StringsEqual(stream, "input")) {
+        stream_object = decoder->input_stream;
+    } else if (ATX_StringsEqual(stream, "audio")) {
+        stream_object = decoder->audio_stream;
+    } else if (ATX_StringsEqual(stream, "video")) {
+        stream_object = decoder->video_stream;
+    } else {
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+    return BLT_Stream_AddNodeByName(stream_object, where, name);    
 }
 
 /*----------------------------------------------------------------------
@@ -645,30 +649,30 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
             /* mark that we can't push a packet yet */
             audio_would_block = BLT_TRUE;
         }
-    }
-    if (!audio_would_block) {
-        result = BLT_Stream_PumpPacket(decoder->audio_stream);
-        if (BLT_FAILED(result)) {
-            if (result == BLT_ERROR_EOS) {
-                audio_eos = BLT_TRUE;
+        if (!audio_would_block) {
+            result = BLT_Stream_PumpPacket(decoder->audio_stream);
+            if (BLT_FAILED(result)) {
+                if (result == BLT_ERROR_EOS) {
+                    audio_eos = BLT_TRUE;
+                } else {
+                    return result;
+                }
             } else {
-                return result;
-            }
-        } else {
-            BLT_StreamStatus stream_status;
-            ATX_UInt64       audio_decode_ts;
-            ATX_UInt64       audio_output_ts;
-            ATX_Int64        buffered;
-            BLT_Stream_GetStatus(decoder->audio_stream, &stream_status);
-            audio_decode_ts = BLT_TimeStamp_ToMillis(stream_status.time_stamp);
-            audio_output_ts = BLT_TimeStamp_ToMillis(stream_status.output_status.media_time);
-            buffered = audio_decode_ts-audio_output_ts;
-            ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
-            if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
-                /* skip the video decoding, we don't have enough time */
-                return BLT_SUCCESS;
-            }
-        }    
+                BLT_StreamStatus stream_status;
+                ATX_UInt64       audio_decode_ts;
+                ATX_UInt64       audio_output_ts;
+                ATX_Int64        buffered;
+                BLT_Stream_GetStatus(decoder->audio_stream, &stream_status);
+                audio_decode_ts = BLT_TimeStamp_ToMillis(stream_status.time_stamp);
+                audio_output_ts = BLT_TimeStamp_ToMillis(stream_status.output_status.media_time);
+                buffered = audio_decode_ts-audio_output_ts;
+                ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
+                if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
+                    /* skip the video decoding, we don't have enough time */
+                    return BLT_SUCCESS;
+                }
+            }    
+        }
     }
     
     /* pump a video packet */
@@ -683,14 +687,14 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
             /* mark that we can't push a packet yet */
             video_would_block = BLT_TRUE;
         }
-    }
-    if (!video_would_block && !video_eos) {
-        result = BLT_Stream_PumpPacket(decoder->video_stream);
-        if (BLT_FAILED(result)) {
-            if (result == BLT_ERROR_EOS) {
-                video_eos = BLT_TRUE;
-            } else {
-                return result;
+        if (!video_would_block) {
+            result = BLT_Stream_PumpPacket(decoder->video_stream);
+            if (BLT_FAILED(result)) {
+                if (result == BLT_ERROR_EOS) {
+                    video_eos = BLT_TRUE;
+                } else {
+                    return result;
+                }
             }
         }
     }

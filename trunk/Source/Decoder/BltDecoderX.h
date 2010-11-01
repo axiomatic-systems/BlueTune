@@ -122,12 +122,14 @@ BLT_Result BLT_DecoderX_GetVideoOutputNode(BLT_DecoderX*   decoder,
 
 /**
  * Add a node to a BLT_DecoderX object's stream node graph.
+ * @param stream 
  * @param where Pointer to the node before which the new node will
  * be added. If this parameter is NULL, the node will be added before
  * the output node.
  * @param name Name of the node to instantiate and add.
  */
 BLT_Result BLT_DecoderX_AddNodeByName(BLT_DecoderX*  decoder, 
+                                      const char*    stream,
                                       BLT_MediaNode* where,
                                       BLT_CString    name);
 

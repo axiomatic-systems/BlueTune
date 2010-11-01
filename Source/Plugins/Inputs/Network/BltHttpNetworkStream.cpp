@@ -223,6 +223,7 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
             result = BLT_SUCCESS;
             break;
 
+        case 401:
         case 403:
             result = ATX_ERROR_ACCESS_DENIED;
             break;

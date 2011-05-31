@@ -290,6 +290,7 @@ PluginsSettings = {
     'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
     'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },
     'SdlVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_SDL_VIDEO_OUTPUT',       'src_dir':'Outputs/SdlVideo'         },
+    'RaopOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_RAOP_OUTPUT',            'src_dir':'Outputs/RAOP'             },
     'DebugOutput'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT',           'src_dir':'Outputs/Debug'            },
     'NullOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT',            'src_dir':'Outputs/Null'             },
     'MpegAudioDecoder'    : {'defines':'BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER',     'src_dir':'Decoders/MpegAudio'       },

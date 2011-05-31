@@ -41,6 +41,7 @@ const unsigned int BLT_RAOP_RTP_PACKET_FLAG_MARKER_BIT      = 0x80;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TIMING_REQUEST  = 0x52;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TIMING_RESPONSE = 0x53;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_SYNC            = 0x54;
+const unsigned int BLT_RAOP_RTP_PACKET_TYPE_RESEND          = 0x55;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_AUDIO           = 0x60;
 
 /*----------------------------------------------------------------------
@@ -439,6 +440,7 @@ RaopOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
     RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
     BLT_COMPILER_UNUSED(self);
+    BLT_COMPILER_UNUSED(stream);
     
     return BLT_SUCCESS;
 }
@@ -1237,8 +1239,8 @@ RaopOutput::SendAudioBuffer()
             payload[1] = BLT_RAOP_RTP_PACKET_TYPE_SYNC | (first_sync?0x80:0);
             payload[2] = 0;
             payload[3] = 7;
-            NPT_BytesFromInt32Be(&payload[4], m_RtpTime);
-            NPT_BytesFromInt32Be(&payload[16], m_RtpTime+352);
+            NPT_BytesFromInt32Be(&payload[4], m_RtpTime-11025);
+            NPT_BytesFromInt32Be(&payload[16], m_RtpTime);
 
             NPT_TimeStamp now;
             NPT_System::GetCurrentTimeStamp(now);
@@ -1249,6 +1251,22 @@ RaopOutput::SendAudioBuffer()
             
             m_ControlSocket->Send(sync_packet);
             first_sync = false;
+        }
+
+        {
+            static NPT_TimeStamp start;
+            NPT_TimeStamp now;
+            NPT_System::GetCurrentTimeStamp(now);
+            if (m_RtpTime == 0) {
+                start = now;
+            } else {
+                double elapsed = (double)(now.ToNanos()-start.ToNanos())/1000000000.0;
+                double target = (double)m_RtpTime/44100.0;
+                double delta = target-elapsed;
+                if (delta > 0.1) {
+                    NPT_System::Sleep(delta);
+                }
+            }
         }
 
         // update RTP state
@@ -1266,16 +1284,7 @@ RaopOutput::SendAudioBuffer()
         result = m_RtpSocket->Send(payload);
         if (NPT_FAILED(result)) {
             ATX_LOG_FINER_1("Send failed (%d)", result);
-        }
-        
-        {
-            static int foo = 0;
-            foo += 352;
-            if (foo > 44100) {
-                foo = 0;
-                NPT_System::Sleep(1.0);
-            }
-        }
+        }        
     }
     
     return result;

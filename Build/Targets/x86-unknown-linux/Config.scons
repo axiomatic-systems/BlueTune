@@ -31,7 +31,8 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'AacDecoder',
                       'CddaInput',
                       'AlsaOutput',
-                      'AlsaInput']
+                      'AlsaInput',
+                      'RaopOutput']
 
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'

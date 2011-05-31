@@ -897,7 +897,8 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self, id host_view)
         [self->window setAcceptsMouseMovedEvents:YES];
         [self->window setTitle:@"Wasabi Media Player"];
         [self->window setLevel:NSNormalWindowLevel];
-        [self->window orderFront: nil];
+        [self->window makeKeyAndOrderFront:nil /*orderFront: nil*/];
+        //[self->window center];
     }
     
     [pool release];

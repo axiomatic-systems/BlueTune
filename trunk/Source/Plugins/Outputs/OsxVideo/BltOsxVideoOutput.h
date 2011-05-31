@@ -18,7 +18,7 @@
  * to onscreen using the OSX native libraries.
  * These media nodes expect media pakcets with raw video.
  * This module responds to probe with the name:
- * 'macosxv:<n>'
+ * 'osxv:<n>'
  * (In this version, <n> is ignored, and the default screen will
  * be used).
  * @{ 

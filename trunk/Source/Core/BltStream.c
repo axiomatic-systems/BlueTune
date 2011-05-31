@@ -1587,7 +1587,7 @@ Stream_ConnectPort(Stream*     self,
 
     /* check that the protocols match */
     if (from_node->output.protocol != to_node->input.protocol) {
-        StreamNode_Destroy(new_node);
+        Stream_RemoveNode(self, new_node);
         result = BLT_ERROR_INTERNAL;
         goto done;
     }
@@ -1686,9 +1686,9 @@ Stream_PumpPacket(BLT_Stream* _self)
             } else {
                 if (result != BLT_ERROR_PORT_HAS_NO_DATA) {
                     return result;
-                } else {
+                }/* else {
                     result = BLT_SUCCESS;
-                } 
+                  }*/ 
             }
             break;
 

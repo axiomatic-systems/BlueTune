@@ -18,7 +18,11 @@ lib_suffix = '.a'
 if TARGET.startswith('x86-microsoft-win32'):
     lib_prefix = ''
     lib_suffix = '.lib'
-
+    lib_name = 'BltWmaDecoder'
+    TARGET_ROOT = SCRIPT_DIR+'/../../Build/Targets/x86-microsoft-win32-vs2005/BltWmaPlugin'
+else:
+	lib_name = 'BltWmaDecoderPluginStatic'
+	
 def CopyIfChanged(frm, to):
     if not os.path.exists(frm):
         print 'ERROR: file', frm, 'does not exist'
@@ -32,7 +36,7 @@ def CopyIfChanged(frm, to):
 CopyIfChanged(SCRIPT_DIR+'/../../Source/Plugins/Decoders/WMA/BltWmaDecoder.h',
               BLUETUNE_EXTRAS_ROOT+'/WmaPlugin/Targets/'+ TARGET+ '/include/BltWmaDecoder.h')
 for config in ['Debug', 'Release']:
-    CopyIfChanged(TARGET_ROOT+'/'+ config+'/'+lib_prefix+'BltWmaDecoderPluginStatic'+lib_suffix,
+    CopyIfChanged(TARGET_ROOT+'/' + config+'/'+lib_prefix+lib_name+lib_suffix,
                   BLUETUNE_EXTRAS_ROOT+'/WmaPlugin/Targets/'+ TARGET + '/lib/' + config+'/'+lib_prefix+'BltWmaDecoder'+lib_suffix)
     CopyIfChanged(TARGET_ROOT+'/'+ config + '/BltWmaDecoder.plugin',
                   BLUETUNE_EXTRAS_ROOT+'/WmaPlugin/Targets/'+ TARGET + '/bin/' + config + '/BltWmaDecoder.plugin')

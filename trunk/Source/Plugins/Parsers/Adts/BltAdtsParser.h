@@ -16,7 +16,7 @@
  * @defgroup adts_parser_module ADTS Parser Module 
  * Plugin module that creates media nodes that parse AAC ADTS 
  * encoded streams.
- * These media nodes expect a byte stream with ADTS encoded data and produce
+ * These media nodes expect packets with ADTS encoded data and produce
  * packets with AAC frames. This module registers the mime types:
  * audio/aac and audio/aacp
  * @{ 

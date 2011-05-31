@@ -1,8 +1,6 @@
-### Simple test media server
+#!/usr/bin/env python
 
-__version__ = "0.1"
-
-__all__ = ["MediaRequestHandler"]
+__version__ = "1.0"
 
 import os
 import posixpath
@@ -15,12 +13,13 @@ import mimetypes
 import time
 import sys
 
-VERBOSE=True
-CHUNK_SIZE=4096
+VERBOSE   = True
+NEXT_TIME = -1
+BANDWIDTH = 1000000 # Bits Per Second
 
 class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     server_version = "MediaTest/" + __version__
-
+        
     def do_GET(self):
         if VERBOSE: print "GET", self.path
         f = self.send_head()
@@ -38,12 +37,8 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         f = None
         if os.path.isdir(path): return None
         ctype = self.guess_type(path)
-        if ctype.startswith('text/'):
-            mode = 'r'
-        else:
-            mode = 'rb'
         try:
-            f = open(path, mode)
+            f = open(path, 'rb')
         except IOError:
             self.send_error(404, "File not found")
             return None
@@ -69,15 +64,29 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return path
 
     def copyfile(self, source, outputfile):
+        global NEXT_TIME
         start = time.time()
-        print "START", start
+        #print "START", start
         
         total=0
         elapsed = 0
         while True:
-            chunk = source.read(CHUNK_SIZE)
+            chunk = source.read(4096)
             #print "READ", len(chunk)
             if len(chunk) == 0: break
+            now = time.time()
+            if NEXT_TIME == -1:
+                NEXT_TIME = now
+            #print 'NOW =',now, ' NEXT = ', NEXT_TIME
+            delay = 0
+            if now < NEXT_TIME:
+                delay = NEXT_TIME-now
+            
+            NEXT_TIME += float(len(chunk)*8)/BANDWIDTH
+
+            if delay:
+                time.sleep(delay)
+
             try:
                 outputfile.write(chunk)
             except:
@@ -88,12 +97,10 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             rate = total/elapsed
             
             #print "STAT", total, elapsed, rate
-            if rate > 200000:
-                time.sleep(1)
                 
-        print "END", time.time()
-        print "ELAPSED", elapsed
-        print "BPS =", total/elapsed
+        #print "END", time.time()
+        #print "ELAPSED", elapsed
+        print "BPS =", (8*total)/elapsed
         
     def guess_type(self, path):
         base, ext = posixpath.splitext(path)
@@ -118,10 +125,10 @@ class MediaRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         })
 
 
-def test(HandlerClass = MediaRequestHandler,
+def main(HandlerClass = MediaRequestHandler,
          ServerClass = BaseHTTPServer.HTTPServer):
     BaseHTTPServer.test(HandlerClass, ServerClass)
 
 
 if __name__ == '__main__':
-    test()
+    main()

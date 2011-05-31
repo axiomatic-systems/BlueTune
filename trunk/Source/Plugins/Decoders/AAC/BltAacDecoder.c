@@ -2,7 +2,7 @@
 |
 |   BlueTune - AAC Decoder Module
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2010 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -138,7 +138,8 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                                      BLT_MediaPacket_GetPayloadSize(packet),
                                      self->sample_buffer);
     if (MLO_FAILED(result)) {
-        return BLT_ERROR_PORT_HAS_NO_DATA;
+        ATX_LOG_FINE_1("MLO_Decoder_DecodeFrame failed (%d)", result);
+        return BLT_SUCCESS;
     }
 
     /* check that the sample buffer matches our current media type */

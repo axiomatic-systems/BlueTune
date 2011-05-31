@@ -83,17 +83,39 @@ BLT_METHOD Registry_GetIdForName(BLT_Registry* instance,
                                  BLT_UInt32*  id);
 
 /*----------------------------------------------------------------------
-|    ComputeHash
+|    ComputeLowercaseHash
 +---------------------------------------------------------------------*/
 static unsigned long
-ComputeHash(BLT_CString string, BLT_Size size)
+ComputeLowercaseHash(BLT_CString string, BLT_Size size)
 {
-    unsigned long hash = *string << 7;
-
+    ATX_UInt32 hash = 0x811c9dc5;
+    
     while (size--) {
-        hash = (1000003*hash) ^ *string++;
+        char c = *string++;
+        hash ^= (ATX_UInt32)((c >= 'A' && c <= 'Z') ? c^32 : c);
+        hash *= 0x01000193;
     }
-    return hash ^ size;
+    return hash;
+}
+
+/*----------------------------------------------------------------------
+|    StringsEqualNoCase
++---------------------------------------------------------------------*/
+static ATX_Boolean
+StringsEqualNoCase(const char* x, const char* y, unsigned int size)
+{
+    while (size--) {
+        char cx = *x++;
+        char cy = *y++;
+        char lx;
+        char ly;
+        if (cx == '\0' || cy == '\0') return ATX_FALSE;
+        lx = ((cx >= 'A' && cx <= 'Z') ? cx^32 : cx);
+        ly = ((cy >= 'A' && cy <= 'Z') ? cy^32 : cy);
+        if (lx != ly) return ATX_FALSE;
+    }
+    
+    return ATX_TRUE;
 }
 
 /*----------------------------------------------------------------------
@@ -141,7 +163,7 @@ Key_Create(BLT_CString name, BLT_Size size)
     }
     key->name[size] = '\0';
     ATX_CopyMemory(key->name, name, size);
-    key->hash = ComputeHash(name, size);
+    key->hash = ComputeLowercaseHash(name, size);
 
     return key;
 }
@@ -197,14 +219,14 @@ Key_Destroy(Key* key)
 static Key* 
 Key_FindSubKey(Key* key, BLT_CString name, BLT_Size size)
 {
-    unsigned long hash = ComputeHash(name, size);
+    unsigned long hash = ComputeLowercaseHash(name, size);
     Key*          subkey = key->children;
     
     /* find a key within the subkeys */
     while (subkey) {
         if (subkey->hash == hash) {
-            /* possible match */
-            if (ATX_StringsEqualN(subkey->name, name, size)) {
+            /* possible match, compare the substrings (case insensitive) */
+            if (StringsEqualNoCase(subkey->name, name, size)) {
                 return subkey;
             }
         }

@@ -47,6 +47,8 @@ struct Mp4ParserModule {
     BLT_UInt32 iso_base_video_es_type_id;
 };
 
+struct Mp4Parser; // forward declaration
+
 // it is important to keep this structure a POD (no methods)
 // because the strict compilers will not like use using
 // the offsetof() macro necessary when using ATX_SELF()
@@ -56,14 +58,16 @@ struct Mp4ParserInput {
     ATX_IMPLEMENTS(BLT_InputStreamUser);
 
     /* members */
+    Mp4Parser*        parser;
     BLT_MediaType     audio_media_type;
     BLT_MediaType     video_media_type;
     AP4_File*         mp4_file;
     bool              slow_seek;
     AP4_LinearReader* reader;
+    bool              has_fragments;
+    bool              is_encrypted;
+    bool              is_ipmp;
 };
-
-struct Mp4Parser; // forward declaration
 
 // it is important to keep this structure a POD (no methods)
 // because the strict compilers will not like use using
@@ -102,17 +106,187 @@ struct Mp4Parser {
 };
 
 /*----------------------------------------------------------------------
+|   Mp4ParserLinearReader
++---------------------------------------------------------------------*/
+class Mp4ParserLinearReader : public AP4_LinearReader
+{
+public:
+    Mp4ParserLinearReader(Mp4Parser*       parser,
+                          AP4_Movie&       movie, 
+                          AP4_ByteStream*  fragment_stream = NULL, 
+                          AP4_Size         max_buffer      = AP4_LINEAR_READER_DEFAULT_BUFFER_SIZE);
+  
+    // AP4_LinearReader methods
+    virtual AP4_Result ProcessTrack(AP4_Track* track);
+    virtual AP4_Result ProcessMoof(AP4_ContainerAtom* moof, 
+                                   AP4_Position       moof_offset, 
+                                   AP4_Position       mdat_payload_offset);
+        
+    // local methods
+    AP4_Result SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker);
+
+    // members
+    Mp4Parser* m_Parser;
+};
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::Mp4ParserLinearReader
++---------------------------------------------------------------------*/
+Mp4ParserLinearReader::Mp4ParserLinearReader(Mp4Parser*      parser,
+                                             AP4_Movie&      movie, 
+                                             AP4_ByteStream* fragment_stream, 
+                                             AP4_Size        max_buffer) :
+    AP4_LinearReader(movie, fragment_stream, max_buffer),
+    m_Parser(parser)
+{
+}
+
+/*----------------------------------------------------------------------
+|   Mp4SampleDecrypterProxy
++---------------------------------------------------------------------*/
+class Mp4SampleDecrypterProxy : public AP4_SampleDecrypter
+{
+public:
+    Mp4SampleDecrypterProxy(Mp4ParserOutput* output) : m_Output(output) {}
+    
+    // AP4_SampleDecrypter methods
+    virtual AP4_Result DecryptSampleData(AP4_DataBuffer&    data_in,
+                                         AP4_DataBuffer&    data_out,
+                                         const AP4_UI08*    iv) {
+        return m_Output->sample_decrypter->DecryptSampleData(data_in, 
+                                                             data_out,
+                                                             iv);
+    }
+    
+private:
+    // members
+    Mp4ParserOutput* m_Output;
+};
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::SetupTrackDecrypter
++---------------------------------------------------------------------*/
+AP4_Result 
+Mp4ParserLinearReader::SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker)
+{
+    // cleanup any previous reader for this tracker
+    delete tracker->m_Reader;
+    tracker->m_Reader = NULL;
+
+    Mp4ParserOutput* output = NULL;
+    if (m_Parser->audio_output.track && 
+        m_Parser->audio_output.track->GetId() == tracker->m_Track->GetId()) {
+        output = &m_Parser->audio_output;
+    }
+    if (m_Parser->video_output.track && 
+        m_Parser->video_output.track->GetId() == tracker->m_Track->GetId()) {
+        output = &m_Parser->video_output;
+    }
+    if (output && output->sample_decrypter) {
+        Mp4SampleDecrypterProxy* decrypter = new Mp4SampleDecrypterProxy(output);
+        tracker->m_Reader = new AP4_DecryptingSampleReader(decrypter, true);
+    }
+    return AP4_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::ProcessTrack
++---------------------------------------------------------------------*/
+AP4_Result
+Mp4ParserLinearReader::ProcessTrack(AP4_Track* track) 
+{
+    // call the base class implementation
+    AP4_Result result = AP4_LinearReader::ProcessTrack(track);
+    if (AP4_FAILED(result)) return result;
+
+    // setup a decypter if necessary
+    Tracker* tracker = FindTracker(track->GetId());
+    if (tracker == NULL) return AP4_SUCCESS;
+    return SetupTrackDecrypter(tracker);
+}
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::ProcessMoof
++---------------------------------------------------------------------*/
+AP4_Result 
+Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof, 
+                                   AP4_Position       moof_offset, 
+                                   AP4_Position       mdat_payload_offset)
+{
+    // call the base class implementation
+    AP4_Result result = AP4_LinearReader::ProcessMoof(moof, moof_offset, mdat_payload_offset);
+    if (AP4_FAILED(result)) return result;
+    
+    for (unsigned int i=0; i<m_Trackers.ItemCount(); i++) {
+        Tracker* tracker = m_Trackers[i];
+        
+        // cleanup any previous reader for this tracker
+        delete tracker->m_Reader;
+        tracker->m_Reader = NULL;
+        
+        // get the traf atom for this track
+        AP4_ContainerAtom* traf = NULL;
+        result = m_Fragment->GetTrafAtom(tracker->m_Track->GetId(), traf);
+        if (AP4_FAILED(result)) continue;
+        
+        // get the sample description for this track 
+        // TODO: we only support one sample description here
+        AP4_ProtectedSampleDescription* sample_description = 
+            AP4_DYNAMIC_CAST(AP4_ProtectedSampleDescription, 
+                             tracker->m_Track->GetSampleDescription(0));
+        if (sample_description &&
+            sample_description->GetSchemeType() == AP4_PROTECTION_SCHEME_TYPE_PIFF) {
+            // figure out the content ID for this track
+            // TODO: support different content ID schemes
+            // for now, we just make up a content ID based on the track ID
+            char content_id[32];
+            NPT_FormatString(content_id, sizeof(content_id), "@track.%d", tracker->m_Track->GetId());
+            
+            // get the key for this content
+            unsigned int   key_size = 256;
+            NPT_DataBuffer key(key_size);
+            BLT_Result result = BLT_KeyManager_GetKeyByName(m_Parser->key_manager, content_id, key.UseData(), &key_size);
+            if (result == ATX_ERROR_NOT_ENOUGH_SPACE) {
+                key.SetDataSize(key_size);
+                result = BLT_KeyManager_GetKeyByName(m_Parser->key_manager, content_id, key.UseData(), &key_size);
+            }
+            if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
+            key.SetDataSize(key_size);
+            
+            AP4_PiffSampleDecrypter* decrypter = NULL;
+            result = AP4_PiffSampleDecrypter::Create(sample_description,
+                                                     traf,
+                                                     key.GetData(),
+                                                     key.GetDataSize(),
+                                                     m_Parser->cipher_factory,
+                                                     decrypter);
+            if (AP4_FAILED(result)) return result;
+            tracker->m_Reader = new AP4_DecryptingSampleReader(decrypter, true);
+        } else {
+            result = SetupTrackDecrypter(tracker);
+            if (AP4_FAILED(result)) return result;
+        }
+    }
+    
+    return AP4_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   Mp4ParserInput_Construct
 +---------------------------------------------------------------------*/
 static void
-Mp4ParserInput_Construct(Mp4ParserInput* self, BLT_Module* module)
+Mp4ParserInput_Construct(Mp4ParserInput* self, Mp4Parser* parser, BLT_Module* module)
 {
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
     BLT_MediaType_Init(&self->audio_media_type, mp4_parser_module->mp4_audio_type_id);
     BLT_MediaType_Init(&self->video_media_type, mp4_parser_module->mp4_video_type_id);
-    self->mp4_file  = NULL;
-    self->reader    = NULL;
-    self->slow_seek = false;
+    self->parser        = parser;
+    self->mp4_file      = NULL;
+    self->reader        = NULL;
+    self->slow_seek     = false;
+    self->has_fragments = false;
+    self->is_encrypted  = false;
+    self->is_ipmp       = false;
 }
 
 /*----------------------------------------------------------------------
@@ -132,69 +306,102 @@ static BLT_Result
 Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self, 
                                   AP4_SampleDescription*& sample_desc)
 {
+    Mp4ParserInput& input = self->parser->input;
+    input.is_encrypted = false;
+    input.is_ipmp      = false;
+    
+    // check the file type first
+    if (self->parser->input.mp4_file) {
+        AP4_FtypAtom* ftyp = self->parser->input.mp4_file->GetFileType();
+        if (ftyp && (ftyp->GetMajorBrand() == AP4_MARLIN_BRAND_MGSV || ftyp->HasCompatibleBrand(AP4_MARLIN_BRAND_MGSV))) {
+            ATX_LOG_FINE("track is encrypted (IPMP)");
+            input.is_encrypted = true;
+            input.is_ipmp      = true;
+        }
+    }
+
     // check if the track is encrypted
     if (sample_desc->GetType() == AP4_SampleDescription::TYPE_PROTECTED) {
         ATX_LOG_FINE("track is encrypted");
+        input.is_encrypted = true;
+    }
+    
+    // stop now if the track is not encrypted
+    if (!input.is_encrypted) return BLT_SUCCESS;
+    
+    // obtain the key manager
+    if (self->parser->key_manager == NULL) {
+        ATX_Properties* properties = NULL;
+        if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
+                                                          &properties))) {
+            ATX_PropertyValue value;
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                         BLT_KEY_MANAGER_PROPERTY, 
+                                                         &value))) {
+                if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                    self->parser->key_manager = (BLT_KeyManager*)value.data.pointer;
+                }
+            } else {
+                ATX_LOG_FINE("no key manager");
+            }
+        }
+    }
+    if (self->parser->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
+    
+    // check if we need to use a cipher factory
+    if (self->parser->cipher_factory == NULL) {
+        ATX_Properties* properties = NULL;
+        if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
+                                                          &properties))) {
+            ATX_PropertyValue value;
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
+                                                         BLT_CIPHER_FACTORY_PROPERTY, 
+                                                         &value))) {
+                if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
+                    self->parser->cipher_factory = new BLT_Ap4CipherFactoryAdapter((BLT_CipherFactory*)value.data.pointer);
+                }
+            }
+        }
+    }
+    
+    // figure out the content ID for this track
+    // TODO: support different content ID schemes
+    // for now, we just make up a content ID based on the track ID
+    char content_id[32];
+    NPT_FormatString(content_id, sizeof(content_id), "@track.%d", self->track->GetId());
+    
+    // get the key for this content
+    unsigned int   key_size = 256;
+    NPT_DataBuffer key(key_size);
+    BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
+    if (result == ATX_ERROR_NOT_ENOUGH_SPACE) {
+        key.SetDataSize(key_size);
+        result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
+    }
+    if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
+    key.SetDataSize(key_size);
+    
+    delete self->sample_decrypter;
+    self->sample_decrypter = NULL;
+    if (input.is_ipmp) {
+        AP4_MarlinIpmpSampleDecrypter* sample_decrypter = NULL;
+        result = AP4_MarlinIpmpSampleDecrypter::Create(*self->parser->input.mp4_file, 
+                                                       key.GetData(), 
+                                                       key_size, 
+                                                       self->parser->cipher_factory,
+                                                       sample_decrypter);
+        if (AP4_FAILED(result)) return result;
+        self->sample_decrypter = sample_decrypter;
+    } else {
         AP4_ProtectedSampleDescription* prot_desc = dynamic_cast<AP4_ProtectedSampleDescription*>(sample_desc);
         if (prot_desc == NULL) {
             ATX_LOG_FINE("unable to obtain cipher info");
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-
-        // obtain the key manager
-        if (self->parser->key_manager == NULL) {
-            ATX_Properties* properties = NULL;
-            if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
-                                                              &properties))) {
-                ATX_PropertyValue value;
-                if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
-                                                             BLT_KEY_MANAGER_PROPERTY, 
-                                                             &value))) {
-                    if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
-                        self->parser->key_manager = (BLT_KeyManager*)value.data.pointer;
-                    }
-                } else {
-                    ATX_LOG_FINE("no key manager");
-                }
-            }
-        }
-        if (self->parser->key_manager == NULL) return BLT_ERROR_NO_MEDIA_KEY;
-        
-        // check if we need to use a cipher factory
-        if (self->parser->cipher_factory == NULL) {
-            ATX_Properties* properties = NULL;
-            if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self->parser, BLT_BaseMediaNode).core, 
-                                                              &properties))) {
-                ATX_PropertyValue value;
-                if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, 
-                                                             BLT_CIPHER_FACTORY_PROPERTY, 
-                                                             &value))) {
-                    if (value.type == ATX_PROPERTY_VALUE_TYPE_POINTER) {
-                        self->parser->cipher_factory = new BLT_Ap4CipherFactoryAdapter((BLT_CipherFactory*)value.data.pointer);
-                    }
-                }
-            }
-        }
-        
-        // figure out the content ID for this track
-        // TODO: support different content ID schemes
-        // for now, we just make up a content ID based on the track ID
-        char content_id[32];
-        NPT_FormatString(content_id, sizeof(content_id), "@track.%d", self->track->GetId());
-        
-        // get the key for this content
-        unsigned int   key_size = 256;
-        NPT_DataBuffer key(key_size);
-        BLT_Result result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
-        if (result == ATX_ERROR_NOT_ENOUGH_SPACE) {
-            key.SetDataSize(key_size);
-            result = BLT_KeyManager_GetKeyByName(self->parser->key_manager, content_id, key.UseData(), &key_size);
-        }
-        if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
-        key.SetDataSize(key_size);
-        
-        delete self->sample_decrypter;
-        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, key.GetData(), key_size, self->parser->cipher_factory);
+        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, 
+                                                             key.GetData(), 
+                                                             key_size, 
+                                                             self->parser->cipher_factory);
         if (self->sample_decrypter == NULL) {
             ATX_LOG_FINE("unable to create decrypter");
             return BLT_ERROR_CRYPTO_FAILURE;
@@ -500,6 +707,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
         ATX_LOG_FINE("no movie in file");
         goto fail;
     }
+    if (movie->HasFragments()) self->input.has_fragments = true;
     
     // update the stream info
     BLT_StreamInfo stream_info;
@@ -511,9 +719,9 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                        BLT_STREAM_INFO_MASK_DURATION;    
     BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     
-    // create a linear reader if the source is slow-seeking
-    if (self->input.slow_seek) {
-        self->input.reader = new AP4_LinearReader(*movie);
+    // create a linear reader if the source is slow-seeking or the movie is fragmented
+    if (self->input.slow_seek || self->input.has_fragments) {
+        self->input.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
     }
     
     // setup the tracks
@@ -658,7 +866,7 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         return BLT_ERROR_EOS;
     } else {
         // check for end-of-stream
-        if (self->sample >= self->track->GetSampleCount()) {
+        if (!self->parser->input.has_fragments && self->sample >= self->track->GetSampleCount()) {
             return BLT_ERROR_EOS;
         }
 
@@ -669,16 +877,26 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         if (self->parser->input.reader) {
             // linear reader mode
             result = self->parser->input.reader->ReadNextSample(self->track->GetId(), sample, *sample_buffer);
-            if (AP4_SUCCEEDED(result)) self->sample++;
+            if (AP4_SUCCEEDED(result)) ++self->sample;
         } else {
             // normal mode
             result = self->track->ReadSample(self->sample++, sample, *sample_buffer);
+
+            // decrypt the sample if needed
+            if (AP4_SUCCEEDED(result) && self->sample_decrypter) {
+                self->sample_decrypter->DecryptSampleData(*sample_buffer, *self->sample_decrypted_buffer);
+                sample_buffer = self->sample_decrypted_buffer;
+            }
         }
         if (AP4_FAILED(result)) {
             ATX_LOG_WARNING_1("ReadSample failed (%d)", result);
-            if (result == AP4_ERROR_EOS || result == ATX_ERROR_OUT_OF_RANGE) {
-                ATX_LOG_WARNING("incomplete media");
-                return BLT_ERROR_INCOMPLETE_MEDIA;
+            if (result == AP4_ERROR_EOS || result == ATX_ERROR_OUT_OF_RANGE || result == AP4_ERROR_NOT_ENOUGH_SPACE) {
+                if (self->parser->input.has_fragments) {
+                    return BLT_ERROR_EOS;
+                } else {
+                    ATX_LOG_WARNING("incomplete media");
+                    return BLT_ERROR_INCOMPLETE_MEDIA;
+                }
             } else {
                 return BLT_ERROR_PORT_HAS_NO_DATA;
             }
@@ -690,12 +908,6 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
             if (BLT_FAILED(result)) return result;
         }
         
-        // decrypt the sample if needed
-        if (self->sample_decrypter) {
-            self->sample_decrypter->DecryptSampleData(*sample_buffer, *self->sample_decrypted_buffer);
-            sample_buffer = self->sample_decrypted_buffer;
-        }
-
         AP4_Size packet_size = sample_buffer->GetDataSize();
         result = BLT_Core_CreateMediaPacket(ATX_BASE(self->parser, BLT_BaseMediaNode).core,
                                             packet_size,
@@ -914,7 +1126,7 @@ Mp4Parser_Construct(Mp4Parser* self, BLT_Module* module, BLT_Core* core)
     self->key_manager = NULL;
     
     /* construct the members */
-    Mp4ParserInput_Construct(&self->input, module);
+    Mp4ParserInput_Construct(&self->input, self, module);
     Mp4ParserOutput_Construct(&self->audio_output, self);
     Mp4ParserOutput_Construct(&self->video_output, self);
     

@@ -178,7 +178,8 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     ATX_Size           buffered = ATX_RingBuffer_GetAvailable(self->buffer);
     ATX_Size           chunk;
     ATX_Size           bytes_read_storage = 0;
-
+    ATX_LargeSize      source_available = 0;
+    
     /* default */
     if (bytes_read) {
         *bytes_read = 0;
@@ -202,8 +203,13 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
         BLT_NetworkStream_ClampBackStore(self);
     }
 
+    /* ask the source how much data is available */
+    if (ATX_FAILED(ATX_InputStream_GetAvailable(self->source, &source_available))) {
+        source_available = 0;
+    }
+    
     /* read what we can from the source */
-    while (bytes_to_read && !self->eos) {
+    if ((buffered == 0 || source_available) && !self->eos) {
         ATX_Size       read_from_source = 0;
         ATX_Size       can_write = ATX_RingBuffer_GetSpace(self->buffer);
         ATX_Size       should_read = ATX_RingBuffer_GetContiguousSpace(self->buffer);
@@ -223,7 +229,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
                                       should_read, 
                                       &read_from_source);
         if (ATX_SUCCEEDED(result)) {
-            ATX_LOG_FINER_1("read %d bytes from source", read_from_source);
+            ATX_LOG_FINER_2("read %d bytes of %d from source", read_from_source, should_read);
             
             /* adjust the ring buffer */
             ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
@@ -251,14 +257,10 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
             ATX_LOG_FINE("reached EOS");
             self->eos = ATX_TRUE;
             self->eos_cause = ATX_ERROR_EOS;
-            break;
         } else {
             ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
             return (*bytes_read == 0) ? result : ATX_SUCCESS;
         }
-
-        /* don't loop if this was a short read */
-        if (read_from_source != should_read) break;
     }
 
     if (self->eos && *bytes_read == 0) {

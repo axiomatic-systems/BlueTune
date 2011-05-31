@@ -12,6 +12,7 @@
 +---------------------------------------------------------------------*/
 #include <AvailabilityMacros.h>
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5) || (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_2_0)
+#include <mach/mach_time.h>
 #include <AudioToolbox/AudioQueue.h>
 #include <AudioToolbox/AudioFormat.h>
 #endif
@@ -29,6 +30,7 @@
 #include "BltPacketConsumer.h"
 #include "BltMediaPacket.h"
 #include "BltVolumeControl.h"
+#include "BltCommonMediaTypes.h"
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5) || (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_2_0)
 
@@ -45,6 +47,10 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.audio-queue")
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT 512
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE      32768
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_WAIT                 3 /* seconds */
+
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN 0x66
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC   0x67
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO    0x40
 
 /*----------------------------------------------------------------------
 |    types
@@ -63,7 +69,14 @@ typedef struct {
     
     /* members */
     BLT_MediaTypeId asbd_media_type_id;
+    BLT_MediaTypeId mp4_es_media_type_id;
 } OsxAudioQueueOutputModule;
+
+typedef struct {
+    AudioQueueBufferRef data;
+    BLT_UInt64          timestamp;
+    BLT_UInt64          duration;
+} OsxAudioQueueBuffer;
 
 typedef struct {
     /* base class */
@@ -84,15 +97,21 @@ typedef struct {
     BLT_Boolean                  waiting_for_stop;
     AudioStreamBasicDescription  audio_format;
     Float32                      volume;
-    AudioQueueBufferRef          buffers[BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT];
+    OsxAudioQueueBuffer          buffers[BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT];
     BLT_Ordinal                  buffer_index;
     pthread_cond_t               buffer_released_cond;
     AudioStreamPacketDescription packet_descriptions[BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT];
     BLT_Ordinal                  packet_count;
     BLT_Cardinal                 packet_count_max;
     struct {
-        BLT_PcmMediaType pcm;
-        AsbdMediaType    asbd;
+        BLT_UInt64 packet_time;
+        BLT_UInt64 max_time;
+        UInt64     host_time;
+    }                            timestamp_snapshot;
+    struct {
+        BLT_PcmMediaType      pcm;
+        AsbdMediaType         asbd;
+        BLT_Mp4AudioMediaType mp4;
     }                            expected_media_types;
 } OsxAudioQueueOutput;
 
@@ -111,6 +130,307 @@ ATX_DECLARE_INTERFACE_MAP(OsxAudioQueueOutput, BLT_PacketConsumer)
 BLT_METHOD OsxAudioQueueOutput_Resume(BLT_MediaNode* self);
 BLT_METHOD OsxAudioQueueOutput_Stop(BLT_MediaNode* self);
 BLT_METHOD OsxAudioQueueOutput_Drain(BLT_OutputNode* self);
+
+/*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+const unsigned int MP4_AAC_MAX_SAMPLING_FREQUENCY_INDEX = 12;
+static const unsigned int MP4_AacSamplingFreqTable[13] =
+{
+	96000, 88200, 64000, 48000, 
+    44100, 32000, 24000, 22050, 
+    16000, 12000, 11025, 8000, 
+    7350
+};
+
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR             5  /**< Spectral Band Replication                    */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_PS              29 /**< Parametric Stereo                            */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_MAIN        1  /**< AAC Main Profile                             */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LC          2  /**< AAC Low Complexity                           */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_SSR         3  /**< AAC Scalable Sample Rate                     */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LTP         4  /**< AAC Long Term Predictor                      */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR             5  /**< Spectral Band Replication                    */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_SCALABLE    6  /**< AAC Scalable                                 */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_TWINVQ          7  /**< Twin VQ                                      */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LC       17 /**< Error Resilient AAC Low Complexity           */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LTP      19 /**< Error Resilient AAC Long Term Prediction     */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_SCALABLE 20 /**< Error Resilient AAC Scalable                 */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_TWINVQ       21 /**< Error Resilient Twin VQ                      */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_BSAC         22 /**< Error Resilient Bit Sliced Arithmetic Coding */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LD       23 /**< Error Resilient AAC Low Delay                */
+#define MP4_MPEG4_AUDIO_OBJECT_TYPE_PS              29 /**< Parametric Stereo                            */
+
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDsiParser
++---------------------------------------------------------------------*/
+typedef struct {
+    const unsigned char* data;
+    unsigned int         data_size;
+    unsigned int         position;
+} Mp4AudioDsiParser;
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDsiParser_BitsLeft
++---------------------------------------------------------------------*/
+#define Mp4AudioDsiParser_BitsLeft(_bits) (8*(_bits)->data_size-(_bits)->position) 
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDsiParser_ReadBits
++---------------------------------------------------------------------*/
+static ATX_UInt32 
+Mp4AudioDsiParser_ReadBits(Mp4AudioDsiParser* self, unsigned int n) 
+{
+    ATX_UInt32 result = 0;
+    const unsigned char* data = self->data;
+    while (n) {
+        unsigned int bits_avail = 8-(self->position%8);
+        unsigned int chunk_size = bits_avail >= n ? n : bits_avail;
+        unsigned int chunk_bits = (((unsigned int)(data[self->position/8]))>>(bits_avail-chunk_size))&((1<<chunk_size)-1);
+        result = (result << chunk_size) | chunk_bits;
+        n -= chunk_size;
+        self->position += chunk_size;
+    }
+
+    return result;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDecoderConfig
++---------------------------------------------------------------------*/
+typedef struct {
+    // members
+    ATX_UInt8            object_type;              /**< Type identifier for the audio data */
+    unsigned int         sampling_frequency_index; /**< Index of the sampling frequency in the sampling frequency table */
+    unsigned int         sampling_frequency;       /**< Sampling frequency */
+    unsigned int         channel_count;            /**< Number of audio channels */
+    /** Extension details */
+    struct {
+        ATX_Boolean  sbr_present;              /**< SBR is present        */
+        ATX_Boolean  ps_present;               /**< PS is present         */
+        ATX_UInt8    object_type;              /**< Extension object type */
+        unsigned int sampling_frequency_index; /**< Sampling frequency index of the extension */
+        unsigned int sampling_frequency;       /**< Sampling frequency of the extension */
+    } extension;
+} Mp4AudioDecoderConfig;
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDecoderConfig_ParseAudioObjectType
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4AudioDecoderConfig_ParseAudioObjectType(Mp4AudioDecoderConfig* self,
+                                           Mp4AudioDsiParser*     parser, 
+                                           ATX_UInt8*             object_type)
+{
+    if (Mp4AudioDsiParser_BitsLeft(parser) < 5) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    *object_type = (ATX_UInt8)Mp4AudioDsiParser_ReadBits(parser, 5);
+	if (*object_type == 31) {
+        if (Mp4AudioDsiParser_BitsLeft(parser) < 6) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+		*object_type = (ATX_UInt8)(32 + Mp4AudioDsiParser_ReadBits(parser, 6));
+	}
+	return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDecoderConfig_ParseGASpecificInfo
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4AudioDecoderConfig_ParseGASpecificInfo(Mp4AudioDecoderConfig* self,
+                                          Mp4AudioDsiParser*     parser)
+{
+    ATX_Boolean frame_length_flag = ATX_FALSE;
+    ATX_Boolean depends_on_core_coder = ATX_FALSE;
+    unsigned int core_coder_delay = 0;
+    unsigned int extension_flag = 0;
+    if (Mp4AudioDsiParser_BitsLeft(parser) < 2) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+	frame_length_flag = (Mp4AudioDsiParser_ReadBits(parser, 1) == 1)?ATX_TRUE:ATX_FALSE;
+	depends_on_core_coder = (Mp4AudioDsiParser_ReadBits(parser, 1) == 1)?ATX_TRUE:ATX_FALSE;
+	if (depends_on_core_coder) {		
+        if (Mp4AudioDsiParser_BitsLeft(parser) < 14) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+		core_coder_delay = Mp4AudioDsiParser_ReadBits(parser, 14);
+    } 
+    if (Mp4AudioDsiParser_BitsLeft(parser) < 1) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+	extension_flag = Mp4AudioDsiParser_ReadBits(parser, 1);
+    if (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_SCALABLE ||
+        self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_SCALABLE) {
+        if (Mp4AudioDsiParser_BitsLeft(parser) < 3) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        Mp4AudioDsiParser_ReadBits(parser, 3);
+    }
+    if (extension_flag) {
+        if (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_BSAC) {
+            if (Mp4AudioDsiParser_BitsLeft(parser) < 16) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            Mp4AudioDsiParser_ReadBits(parser, 16); /* numOfSubFrame (5); layer_length (11) */
+        }
+        if (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LC       ||
+            self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_SCALABLE ||
+            self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LD) {
+            if (Mp4AudioDsiParser_BitsLeft(parser) < 3) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            Mp4AudioDsiParser_ReadBits(parser, 3); /* aacSectionDataResilienceFlag (1)     */
+                                                   /* aacScalefactorDataResilienceFlag (1) */
+                                                   /* aacSpectralDataResilienceFlag (1)    */
+        }
+        if (Mp4AudioDsiParser_BitsLeft(parser) < 1) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        Mp4AudioDsiParser_ReadBits(parser, 1);
+    }
+    
+    return ATX_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4AudioDecoderConfig_ParseSamplingFrequency
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4AudioDecoderConfig_ParseSamplingFrequency(Mp4AudioDecoderConfig* self,
+                                             Mp4AudioDsiParser*     parser, 
+                                             unsigned int*          sampling_frequency_index,
+                                             unsigned int*          sampling_frequency)
+{
+    if (Mp4AudioDsiParser_BitsLeft(parser) < 4) {
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    *sampling_frequency_index = Mp4AudioDsiParser_ReadBits(parser, 4);
+    if (*sampling_frequency_index == 0xF) {
+        if (Mp4AudioDsiParser_BitsLeft(parser) < 24) {
+            return BLT_ERROR_INVALID_MEDIA_FORMAT;
+        }
+        *sampling_frequency = Mp4AudioDsiParser_ReadBits(parser, 24);
+    } else if (*sampling_frequency_index <= MP4_AAC_MAX_SAMPLING_FREQUENCY_INDEX) {
+        *sampling_frequency = MP4_AacSamplingFreqTable[*sampling_frequency_index];
+    } else {
+        *sampling_frequency = 0;
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   AP4_Mp4AudioDecoderConfig::ParseExtension
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4AudioDecoderConfig_ParseExtension(Mp4AudioDecoderConfig* self,
+                                     Mp4AudioDsiParser*     parser)
+{
+    unsigned int sync_extension_type;
+    if (Mp4AudioDsiParser_BitsLeft(parser) < 16) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    sync_extension_type = Mp4AudioDsiParser_ReadBits(parser, 11);
+    if (sync_extension_type == 0x2b7) {
+        BLT_Result result = Mp4AudioDecoderConfig_ParseAudioObjectType(self, 
+                                                                       parser, 
+                                                                       &self->extension.object_type);
+        if (BLT_FAILED(result)) return result;
+        if (self->extension.object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR) {
+            self->extension.sbr_present = (Mp4AudioDsiParser_ReadBits(parser, 1) == 1);
+            if (self->extension.sbr_present) {
+                result = Mp4AudioDecoderConfig_ParseSamplingFrequency(self, 
+                                                                      parser, 
+                                                                      &self->extension.sampling_frequency_index,
+                                                                      &self->extension.sampling_frequency);
+                if (BLT_FAILED(result)) return result;
+                if (Mp4AudioDsiParser_BitsLeft(parser) >= 12) {
+                    sync_extension_type = Mp4AudioDsiParser_ReadBits(parser, 11);
+                    if (sync_extension_type == 0x548) {
+                        self->extension.ps_present = (Mp4AudioDsiParser_ReadBits(parser, 1) == 1);
+                    }
+                }
+            }
+        } else if (self->extension.object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_BSAC) {
+            self->extension.sbr_present = (Mp4AudioDsiParser_ReadBits(parser, 1) == 1);
+            if (self->extension.sbr_present) {
+                result = Mp4AudioDecoderConfig_ParseSamplingFrequency(self, 
+                                                                      parser, 
+                                                                      &self->extension.sampling_frequency_index,
+                                                                      &self->extension.sampling_frequency);
+                if (BLT_FAILED(result)) return result;
+            } 
+            Mp4AudioDsiParser_ReadBits(parser, 4); /* extensionChannelConfiguration */
+        }
+    }
+	return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   AP4_Mp4AudioDecoderConfig_Parse
++---------------------------------------------------------------------*/
+static BLT_Result
+Mp4AudioDecoderConfig_Parse(Mp4AudioDecoderConfig* self,
+                            const unsigned char*   data, 
+                            unsigned int           data_size)
+{
+    BLT_Result        result;
+    Mp4AudioDsiParser bits = {data, data_size, 0};
+
+    // default config
+    ATX_SetMemory(self, 0, sizeof(*self));
+    
+    // parse the audio object type
+	result = Mp4AudioDecoderConfig_ParseAudioObjectType(self, &bits, &self->object_type);
+    if (BLT_FAILED(result)) return result;
+
+    // parse the sampling frequency
+    result = Mp4AudioDecoderConfig_ParseSamplingFrequency(self, &bits, 
+                                                          &self->sampling_frequency_index, 
+                                                          &self->sampling_frequency);
+    if (BLT_FAILED(result)) return result;
+
+    if (Mp4AudioDsiParser_BitsLeft(&bits) < 4) {
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
+    }
+	self->channel_count = Mp4AudioDsiParser_ReadBits(&bits, 4);
+    
+	if (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR ||
+        self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_PS) {
+		self->extension.object_type = MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR;
+		self->extension.sbr_present = ATX_TRUE;
+        self->extension.ps_present  = (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_PS)?ATX_TRUE:ATX_FALSE;
+        result = Mp4AudioDecoderConfig_ParseSamplingFrequency(self, &bits, 
+                                                              &self->extension.sampling_frequency_index, 
+                                                              &self->extension.sampling_frequency);
+        if (BLT_FAILED(result)) return result;
+		result = Mp4AudioDecoderConfig_ParseAudioObjectType(self, &bits, &self->object_type);
+        if (BLT_FAILED(result)) return result;
+        if (self->object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_BSAC) {
+            if (Mp4AudioDsiParser_BitsLeft(&bits) < 4) return BLT_ERROR_INVALID_MEDIA_FORMAT;
+            Mp4AudioDsiParser_ReadBits(&bits, 4); /* extensionChannelConfiguration (4) */
+        }
+	} else {
+        self->extension.object_type              = 0;
+        self->extension.sampling_frequency       = 0;
+        self->extension.sampling_frequency_index = 0;
+        self->extension.sbr_present              = false;
+        self->extension.ps_present               = false;
+    }
+    
+	switch (self->object_type) {
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_MAIN:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LC:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_SSR:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LTP:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_SCALABLE:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_TWINVQ:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LC:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LTP:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_SCALABLE:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_AAC_LD:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_TWINVQ:
+        case MP4_MPEG4_AUDIO_OBJECT_TYPE_ER_BSAC:
+            result = Mp4AudioDecoderConfig_ParseGASpecificInfo(self, &bits);
+            if (result == BLT_SUCCESS) {
+                if (self->extension.object_type !=  MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR &&
+                    Mp4AudioDsiParser_BitsLeft(&bits) >= 16) {
+                    result = Mp4AudioDecoderConfig_ParseExtension(self, &bits);
+                }
+            }
+            if (result != BLT_SUCCESS) return result;
+            break;
+
+        default:
+            return BLT_ERROR_NOT_SUPPORTED;
+    }
+
+    return BLT_SUCCESS;
+}
 
 /*----------------------------------------------------------------------
 |    OsxAudioQueueOutput_BufferCallback
@@ -216,6 +536,63 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
     } else if (media_type->id == self->expected_media_types.asbd.base.id) {
         const AsbdMediaType* asbd_type = (const AsbdMediaType*)media_type;
         *audio_format = asbd_type->asbd;
+    } else if (media_type->id == self->expected_media_types.mp4.base.base.id) {
+        const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)media_type;
+        ATX_SetMemory(audio_format, 0, sizeof(*audio_format));
+        
+        /* check that we support this audio codec */
+        if (mp4_type->base.stream_type != BLT_MP4_STREAM_TYPE_AUDIO) {
+            return BLT_ERROR_INVALID_MEDIA_TYPE;
+        }
+        /* setup defaults */
+        audio_format->mSampleRate       = mp4_type->sample_rate;
+        audio_format->mChannelsPerFrame = mp4_type->channel_count;
+        audio_format->mFramesPerPacket  = 1024;
+        audio_format->mFormatID         = kAudioFormatMPEG4AAC;
+        switch (mp4_type->base.format_or_object_type_id) {
+            case BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO: {
+                if (mp4_type->decoder_info_length >= 2) {
+                    BLT_Result result;
+                    Mp4AudioDecoderConfig decoder_config;
+                    result = Mp4AudioDecoderConfig_Parse(&decoder_config, 
+                                                         mp4_type->decoder_info, 
+                                                         mp4_type->decoder_info_length);
+                    if (BLT_SUCCEEDED(result)) {
+                        ATX_Boolean sbr = ATX_FALSE;
+                        ATX_Boolean ps  = ATX_FALSE;
+
+                        audio_format->mSampleRate       = decoder_config.sampling_frequency;
+                        audio_format->mChannelsPerFrame = decoder_config.channel_count;
+
+                        if (decoder_config.extension.object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR ||
+                            decoder_config.extension.object_type == MP4_MPEG4_AUDIO_OBJECT_TYPE_PS) {
+                            sbr = decoder_config.extension.sbr_present;
+                            ps  = decoder_config.extension.ps_present;
+                            audio_format->mSampleRate = decoder_config.extension.sampling_frequency;
+                            if (ps && decoder_config.channel_count == 1) {
+                                audio_format->mChannelsPerFrame = 2;
+                            }
+                            if (sbr) {
+                                audio_format->mFramesPerPacket *= 2;
+                                if (ps) {
+                                    audio_format->mFormatID = kAudioFormatMPEG4AAC_HE_V2;
+                                } else {
+                                    audio_format->mFormatID = kAudioFormatMPEG4AAC_HE;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+                
+            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN:
+            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC:
+                break;
+                
+            default:
+                return BLT_ERROR_INVALID_MEDIA_TYPE;
+        }
     } else {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
@@ -295,15 +672,55 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
                                            asbd_media_type->magic_cookie_size);
             if (status != noErr) return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-        if (audio_format.mFramesPerPacket) {
-            self->packet_count_max = 
-                (((((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
-                    (UInt64)audio_format.mSampleRate)/audio_format.mFramesPerPacket)/1000) +
-                    BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT/2)/
-                    BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
-        } else {
-            self->packet_count_max = 0;
+    } else if (media_type->id == self->expected_media_types.mp4.base.base.id) {
+        const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)media_type;
+        unsigned int magic_cookie_size = mp4_type->decoder_info_length+25;
+        unsigned char* magic_cookie = ATX_AllocateZeroMemory(magic_cookie_size);
+        
+        /* construct the content of the magic cookie (the 'ES Descriptor') */
+        magic_cookie[ 0] = 0x03;                 /* ES_Descriptor tag */
+        magic_cookie[ 1] = magic_cookie_size-2;  /* ES_Descriptor payload size */
+        magic_cookie[ 2] = 0;                    /* ES ID */      
+        magic_cookie[ 3] = 0;                    /* ES ID */
+        magic_cookie[ 4] = 0;                    /* flags */
+        magic_cookie[ 5] = 0x04;                 /* DecoderConfig tag */
+        magic_cookie[ 6] = magic_cookie_size-10; /* DecoderConfig payload size */
+        magic_cookie[ 7] = mp4_type->base.format_or_object_type_id; /* object type */
+        magic_cookie[ 8] = 0x05<<2 | 1;          /* stream type | reserved */
+        magic_cookie[ 9] = 0;                    /* buffer size */
+        magic_cookie[10] = 0x18;                 /* buffer size */
+        magic_cookie[11] = 0;                    /* buffer size */
+        magic_cookie[12] = 0;                    /* max bitrate */
+        magic_cookie[13] = 0x08;                 /* max bitrate */
+        magic_cookie[14] = 0;                    /* max bitrate */
+        magic_cookie[15] = 0;                    /* max bitrate */
+        magic_cookie[16] = 0;                    /* avg bitrate */
+        magic_cookie[17] = 0x04;                 /* avg bitrate */
+        magic_cookie[18] = 0;                    /* avg bitrate */
+        magic_cookie[19] = 0;                    /* avg bitrate */
+        magic_cookie[20] = 0x05;                 /* DecoderSpecificInfo tag */
+        magic_cookie[21] = mp4_type->decoder_info_length; /* DecoderSpecificInfo payload size */
+        if (mp4_type->decoder_info_length) {
+            ATX_CopyMemory(&magic_cookie[22], mp4_type->decoder_info, mp4_type->decoder_info_length);
         }
+        magic_cookie[22+mp4_type->decoder_info_length  ] = 0x06; /* SLConfigDescriptor tag    */
+        magic_cookie[22+mp4_type->decoder_info_length+1] = 0x01; /* SLConfigDescriptor length */
+        magic_cookie[22+mp4_type->decoder_info_length+2] = 0x02; /* fixed                     */
+
+        status = AudioQueueSetProperty(self->audio_queue, 
+                                       kAudioQueueProperty_MagicCookie, 
+                                       magic_cookie, 
+                                       magic_cookie_size);
+        if (status != noErr) return BLT_ERROR_INVALID_MEDIA_TYPE;
+    } else {
+        self->packet_count_max = 0;
+    }
+    if (audio_format.mFramesPerPacket) {
+        self->packet_count_max = 
+            (((((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
+                (UInt64)audio_format.mSampleRate)/audio_format.mFramesPerPacket)/1000) +
+                BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT/2)/
+                BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
     } else {
         self->packet_count_max = 0;
     }
@@ -323,9 +740,11 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
         }
         ATX_LOG_FINE_1("buffer size = %d", buffer_size);
         for (i=0; i<BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT; i++) {
-            AudioQueueAllocateBuffer(self->audio_queue, buffer_size, &self->buffers[i]);                
-            self->buffers[i]->mUserData = NULL;
-            self->buffers[i]->mAudioDataByteSize = 0;
+            AudioQueueAllocateBuffer(self->audio_queue, buffer_size, &self->buffers[i].data);                
+            self->buffers[i].data->mUserData = NULL;
+            self->buffers[i].data->mAudioDataByteSize = 0;
+            self->buffers[i].timestamp = 0;
+            self->buffers[i].duration = 0;
         }
     }
             
@@ -354,17 +773,17 @@ OsxAudioQueueOutput_WaitForCondition(OsxAudioQueueOutput* self, pthread_cond_t* 
 /*----------------------------------------------------------------------
 |    OsxAudioQueueOutput_WaitForBuffer
 +---------------------------------------------------------------------*/
-static AudioQueueBufferRef
+static OsxAudioQueueBuffer*
 OsxAudioQueueOutput_WaitForBuffer(OsxAudioQueueOutput* self)
 {
-    AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
+    OsxAudioQueueBuffer* buffer = &self->buffers[self->buffer_index];
     
     /* check that we have a queue and buffers */
     if (self->audio_queue == NULL) return NULL;
     
     /* wait for the next buffer to be released */
     pthread_mutex_lock(&self->lock);
-    while (buffer->mUserData) {
+    while (buffer->data->mUserData) {
         /* the buffer is locked, wait for it to be released */
         BLT_Result result = OsxAudioQueueOutput_WaitForCondition(self, &self->buffer_released_cond);
         if (BLT_FAILED(result)) {
@@ -392,8 +811,8 @@ OsxAudioQueueOutput_Flush(OsxAudioQueueOutput* self)
     /* reset the buffers */
     pthread_mutex_lock(&self->lock);
     for (i=0; i<BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT; i++) {
-        self->buffers[i]->mAudioDataByteSize = 0;
-        self->buffers[i]->mUserData = NULL;
+        self->buffers[i].data->mAudioDataByteSize = 0;
+        self->buffers[i].data->mUserData = NULL;
     }
     pthread_mutex_unlock(&self->lock);
     self->packet_count = 0;
@@ -407,21 +826,21 @@ OsxAudioQueueOutput_Flush(OsxAudioQueueOutput* self)
 static BLT_Result
 OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
 {
-    OSStatus            status;
-    unsigned int        buffer_index = self->buffer_index;
-    AudioQueueBufferRef buffer = self->buffers[self->buffer_index];
-    AudioTimeStamp      start_time;
-    AudioTimeStamp      current_time;
-    unsigned int        packet_count = self->packet_count;
+    OSStatus             status;
+    unsigned int         buffer_index = self->buffer_index;
+    OsxAudioQueueBuffer* buffer = &self->buffers[self->buffer_index];
+    AudioTimeStamp       start_time;
+    AudioTimeStamp       current_time;
+    unsigned int         packet_count = self->packet_count;
      
     /* reset the packet count */
     self->packet_count = 0;
 
     /* check that the buffer has data */
-    if (buffer->mAudioDataByteSize == 0) return BLT_SUCCESS;
+    if (buffer->data->mAudioDataByteSize == 0) return BLT_SUCCESS;
     
     /* mark this buffer as 'in queue' and move on to the next buffer */
-    buffer->mUserData = self;
+    buffer->data->mUserData = self;
     self->buffer_index++;
     if (self->buffer_index == BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT) {
         self->buffer_index = 0;
@@ -441,7 +860,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     /* queue the buffer */
     ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
     status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
-                                                   buffer, 
+                                                   buffer->data, 
                                                    packet_count, 
                                                    packet_count?self->packet_descriptions:NULL, 
                                                    0, 
@@ -452,8 +871,8 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
                                                    &start_time);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueEnqueueBuffer returned %x", status);
-        buffer->mUserData = NULL;
-        buffer->mAudioDataByteSize = 0;
+        buffer->data->mUserData = NULL;
+        buffer->data->mAudioDataByteSize = 0;
         return BLT_FAILURE;
     }
     if (start_time.mFlags & kAudioTimeStampSampleTimeValid) {
@@ -461,6 +880,11 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     } else {
         ATX_LOG_FINER("start_time not available");
         start_time.mSampleTime = 0;
+    }
+    if (start_time.mFlags & kAudioTimeStampHostTimeValid) {
+        self->timestamp_snapshot.host_time = start_time.mHostTime;
+    } else {
+        self->timestamp_snapshot.host_time = 0;
     }
     status = AudioQueueGetCurrentTime(self->audio_queue, NULL, &current_time, NULL);
     if (status == noErr) {
@@ -477,6 +901,8 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     } else {
         ATX_LOG_FINER("no timestamp available");
     }
+    self->timestamp_snapshot.packet_time = buffer->timestamp;
+    self->timestamp_snapshot.max_time    = buffer->timestamp + buffer->duration;
     
     return BLT_SUCCESS;
 }
@@ -516,11 +942,11 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
         unsigned int         buffer_fullness = 0;
         
         /* wait for a buffer */
-        AudioQueueBufferRef buffer = OsxAudioQueueOutput_WaitForBuffer(self);
+        OsxAudioQueueBuffer* buffer = OsxAudioQueueOutput_WaitForBuffer(self);
         if (buffer == NULL) return BLT_ERROR_INTERNAL;
             
         /* check if there is enough space in the buffer */
-        if (buffer->mAudioDataBytesCapacity-buffer->mAudioDataByteSize < payload_size) {
+        if (buffer->data->mAudioDataBytesCapacity-buffer->data->mAudioDataByteSize < payload_size) {
             /* not enough space, enqueue this buffer and wait for the next one */
             ATX_LOG_FINER("buffer full");
             OsxAudioQueueOutput_EnqueueBuffer(self);
@@ -529,32 +955,41 @@ OsxAudioQueueOutput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* we should always have enough space at this point (unless the buffers are too small) */
-        if (buffer->mAudioDataBytesCapacity-buffer->mAudioDataByteSize < payload_size) {
+        if (buffer->data->mAudioDataBytesCapacity-buffer->data->mAudioDataByteSize < payload_size) {
             ATX_LOG_WARNING_1("buffer too small! (%d needed)", payload_size);
             return BLT_ERROR_INTERNAL;
         }
         
         /* copy the data into the buffer */
-        buffer_fullness = buffer->mAudioDataByteSize;
-        ATX_CopyMemory((unsigned char*)buffer->mAudioData+buffer->mAudioDataByteSize,
+        buffer_fullness = buffer->data->mAudioDataByteSize;
+        ATX_CopyMemory((unsigned char*)buffer->data->mAudioData+buffer->data->mAudioDataByteSize,
                        payload,
                        payload_size);
-        buffer->mAudioDataByteSize += payload_size;
+                       
+        /* set the buffer timestamp if needed */
+        if (buffer_fullness == 0) {
+            buffer->timestamp = BLT_TimeStamp_ToNanos(BLT_MediaPacket_GetTimeStamp(packet));
+            buffer->duration  = 0;
+        }
+
+        /* adjust the buffer fullness */
+        buffer->data->mAudioDataByteSize += payload_size;
         
-        /* for ASBD types, update the packet descriptions */
-        if (media_type->id == self->expected_media_types.asbd.base.id) {
+        /* for compressed types, update the packet descriptions */
+        if (media_type->id == self->expected_media_types.asbd.base.id ||
+            media_type->id == self->expected_media_types.mp4.base.base.id) {
             AudioStreamPacketDescription* packet_description = &self->packet_descriptions[self->packet_count++];
             packet_description->mDataByteSize           = payload_size;
             packet_description->mStartOffset            = buffer_fullness;
             packet_description->mVariableFramesInPacket = self->audio_format.mFramesPerPacket;
             
-            /* enqueue now if we're used all the packet descriptions or there's enough in the buffer */
+            /* enqueue now if we've used all the packet descriptions or there's enough in the buffer */
             if (self->packet_count == BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT ||
                 (self->packet_count_max && self->packet_count >= self->packet_count_max)) {
                 ATX_LOG_FINE_1("reached max packets in buffer (%d), enqueuing", self->packet_count);
                 OsxAudioQueueOutput_EnqueueBuffer(self);
             }
-        }
+        }        
     }
     
     return BLT_SUCCESS;
@@ -620,6 +1055,8 @@ OsxAudioQueueOutput_Create(BLT_Module*              _module,
     BLT_PcmMediaType_Init(&self->expected_media_types.pcm);
     self->expected_media_types.pcm.sample_format = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
     BLT_MediaType_Init(&self->expected_media_types.asbd.base, module->asbd_media_type_id);
+    BLT_MediaType_Init(&self->expected_media_types.mp4.base.base, module->mp4_es_media_type_id);
+    self->expected_media_types.mp4.base.stream_type = BLT_MP4_STREAM_TYPE_AUDIO;
     
     /* initialize fields */
     self->volume = 1.0;
@@ -719,16 +1156,44 @@ OsxAudioQueueOutput_GetStatus(BLT_OutputNode*       _self,
                               BLT_OutputNodeStatus* status)
 {
     OsxAudioQueueOutput* self = ATX_SELF(OsxAudioQueueOutput, BLT_OutputNode);
-    
+
     /* default value */
     status->media_time.seconds     = 0;
     status->media_time.nanoseconds = 0;
     status->flags = 0;
     
+    /* compute the media time */
+    if (self->timestamp_snapshot.host_time) {
+        /* Get the mach timebase info */
+        mach_timebase_info_data_t timebase;
+
+        /* convert to nanoseconds */
+        int64_t now  = (int64_t)mach_absolute_time();
+        int64_t delta = (int64_t)self->timestamp_snapshot.host_time-now;
+        mach_timebase_info(&timebase);
+        delta *= timebase.numer;
+        delta /= timebase.denom;
+        
+        if (delta < 0) {
+            delta = 0;
+        }
+        if (self->timestamp_snapshot.packet_time > delta) {
+            SInt64 ts = (SInt64)self->timestamp_snapshot.packet_time-delta;
+            //if (ts > self->timestamp_snapshot.max_time) {
+            //    ATX_LOG_FINER("clamping timestamp");
+            //    ts = self->timestamp_snapshot.max_time;
+            //}
+            status->media_time = BLT_TimeStamp_FromNanos(ts);
+            ATX_LOG_FINER_2("delta = %d, ts = %lld", (int)delta, ts);
+        } else {
+            ATX_LOG_FINER_1("delta too large (%d)", (int)delta);
+        }
+    }
+    
     /* check if we're full */
     if (self->audio_queue) {
         pthread_mutex_lock(&self->lock);
-        if (self->buffers[self->buffer_index]->mUserData) {
+        if (self->buffers[self->buffer_index].data->mUserData) {
             /* buffer is busy */
             status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
         }
@@ -751,8 +1216,8 @@ OsxAudioQueueOutput_Drain(BLT_OutputNode* _self)
     if (self->audio_queue_paused) return BLT_SUCCESS;
     
     /* in case we have a pending buffer, enqueue it now */
-    AudioQueueBufferRef buffer = OsxAudioQueueOutput_WaitForBuffer(self);
-    if (buffer && buffer->mAudioDataByteSize) OsxAudioQueueOutput_EnqueueBuffer(self);
+    OsxAudioQueueBuffer* buffer = OsxAudioQueueOutput_WaitForBuffer(self);
+    if (buffer && buffer->data->mAudioDataByteSize) OsxAudioQueueOutput_EnqueueBuffer(self);
     
     /* flush anything that may be in the queue */
     ATX_LOG_FINE("flusing queued buffers");
@@ -983,6 +1448,14 @@ OsxAudioQueueOutputModule_Attach(BLT_Module* _self, BLT_Core* core)
     
     ATX_LOG_FINE_1("audio/x-apple-asbd type = %d", self->asbd_media_type_id);
 
+    /* register the AAC elementary stream type id */
+    result = BLT_Registry_RegisterName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        BLT_MP4_AUDIO_ES_MIME_TYPE,
+        &self->mp4_es_media_type_id);
+    if (BLT_FAILED(result)) return result;
+
     return BLT_SUCCESS;
 }
 
@@ -1016,6 +1489,7 @@ OsxAudioQueueOutputModule_Probe(BLT_Module*              _self,
             /* the input type should be unknown, or audio/pcm */
             if (!(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
                 !(constructor->spec.input.media_type->id == self->asbd_media_type_id) &&
+                !(constructor->spec.input.media_type->id == self->mp4_es_media_type_id) &&
                 !(constructor->spec.input.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
                 return BLT_FAILURE;
             }
@@ -1079,7 +1553,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioQueueOutputModule,
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(OsxAudioQueueOutputModule,
                                          "OSX Audio Queue Output",
                                          "com.axiosys.output.osx-audio-queue",
-                                         "1.0.0",
+                                         "1.1.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)
 #else 
 /*----------------------------------------------------------------------

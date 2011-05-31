@@ -125,7 +125,7 @@ public:
     bool                             m_UseEncryption;
     NPT_UdpSocket*                   m_RtpSocket;
     unsigned int                     m_RtpPort;
-    NPT_UInt64                       m_RtpTime;
+    NPT_UInt32                       m_RtpTime;
     NPT_UInt32                       m_RtpSequence;
     bool                             m_RtpMarker;
     NPT_UdpSocket*                   m_ControlSocket;

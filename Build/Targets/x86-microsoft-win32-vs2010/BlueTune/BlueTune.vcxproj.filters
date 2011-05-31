@@ -188,6 +188,12 @@
     <ClCompile Include="..\..\..\..\Source\Plugins\Outputs\Win32\BltWin32AudioOutput.c">
       <Filter>Source Files\Plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\Adapters\BltBento4Adapters.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\Plugins\Outputs\RAOP\BltRaopOutput.cpp">
+      <Filter>Source Files\Plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Source\Core\BltBuiltins.h">
@@ -386,6 +392,9 @@
       <Filter>Header Files\Plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Source\Plugins\Outputs\Win32\BltWin32Output.h">
+      <Filter>Header Files\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Source\Plugins\Outputs\RAOP\BltRaopOutput.h">
       <Filter>Header Files\Plugins</Filter>
     </ClInclude>
   </ItemGroup>

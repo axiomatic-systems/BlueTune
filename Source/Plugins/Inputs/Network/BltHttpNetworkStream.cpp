@@ -27,7 +27,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.network.http")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 65536;
+const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 262144;
 
 /*----------------------------------------------------------------------
 |   HttpInputStream

@@ -91,7 +91,6 @@ typedef struct {
     H264VideoDecoder* decoder;
     struct {
         vm_tick decode_time;
-        vm_tick alloc_time;
         vm_tick convert_time;
     } stats;
 } IppDecoder;
@@ -153,7 +152,7 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         dec_params.pPostProcessing     = video_proc;
         dec_params.info.stream_type    = H264_VIDEO;
         dec_params.info.stream_subtype = AVC1_VIDEO;
-        dec_params.numThreads          = 0; // default
+        dec_params.numThreads          = 1; // FIXME: this is to workaround a bug in IPP 7.0 that spins too much when threading is enabled // 0; // default
         dec_params.lFlags              = UMC::FLAG_VDEC_REORDER;
         dec_params.m_pData             = &codec_init_data;
         
@@ -164,14 +163,6 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             ATX_LOG_WARNING_1("H264 decoder Init() failed (%d)", status);
             return BLT_FAILURE;
         }
-
-        // get decoder params
-        H264VideoDecoderParams h264_params;
-        status = self->decoder->GetInfo(&h264_params);
-        if (status != UMC_OK) {
-            ATX_LOG_WARNING_1("H264 decoder GetInfo() failed (%d)", status);
-            return BLT_FAILURE;
-        }
         
         // allocate the input buffer
         delete self->input.buffer;
@@ -180,12 +171,6 @@ IppDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         // allocate the output buffer
         delete self->output.buffer;
         self->output.buffer = new VideoData();
-        self->output.buffer->SetAlignment(16);
-        self->output.buffer->Init(h264_params.info.clip_info.width, 
-                                  h264_params.info.clip_info.height, 
-                                  UMC::YV12, 
-                                  8);
-        self->output.buffer->Alloc();        
     }
 
     // check to see if this is the end of a stream
@@ -257,6 +242,7 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     // try to decode a frame
     UMC::Status status;
     vm_tick start_time = vm_time_get_tick();
+    ATX_LOG_FINER_1("decoding buffer (%d bytes)", self->input.eos?0:(int)self->input.buffer->GetDataSize());
     status = self->decoder->GetFrame(self->input.eos?NULL:self->input.buffer, 
                                      self->output.buffer);
     vm_tick after_decode_time = vm_time_get_tick();
@@ -325,13 +311,7 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
         return result;
     }
-    vm_tick after_alloc_time = vm_time_get_tick();
-    vm_tick alloc_time = after_alloc_time-after_decode_time;
-    self->stats.alloc_time += alloc_time;
-    ATX_LOG_FINER_2("alloc: frame = %.4fms, total = %.4f", 
-                    1000.0f*(float)alloc_time/(float)vm_time_get_frequency(),
-                    1000.0f*(float)self->stats.alloc_time/(float)vm_time_get_frequency());
-
+    
     // copy pixels
     BLT_MediaPacket_SetPayloadSize(*packet, picture_size);
     unsigned char* picture_buffer = (unsigned char*)BLT_MediaPacket_GetPayloadBuffer(*packet);
@@ -348,7 +328,7 @@ IppDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     
     // update timing stats
     vm_tick after_convert_time = vm_time_get_tick();
-    vm_tick convert_time = after_convert_time-after_alloc_time;
+    vm_tick convert_time = after_convert_time-after_decode_time;
     self->stats.convert_time += convert_time;
     ATX_LOG_FINER_2("convert: frame = %.4fms, total = %.4f", 
                     1000.0f*(float)convert_time/(float)vm_time_get_frequency(),
@@ -520,12 +500,6 @@ IppDecoder_Create(BLT_Module*              module,
     
     ATX_LOG_FINE("enter");
 
-    // initialize the IPP library
-    IppStatus status = ippStaticInit();
-    if (status != ippStsNoErr) {
-        ATX_LOG_WARNING_1("ippStaticInit() returned %d", status);
-    }
-
     /* check parameters */
     if (parameters == NULL || 
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
@@ -574,6 +548,12 @@ IppDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     IppDecoderModule* self = ATX_SELF_EX(IppDecoderModule, BLT_BaseModule, BLT_Module);
     BLT_Registry*     registry;
     BLT_Result        result;
+
+    // initialize the IPP library
+    IppStatus status = ippStaticInit();
+    if (status != ippStsNoErr && status != ippStsNonIntelCpu) {
+        ATX_LOG_WARNING_1("ippStaticInit() returned %d", status);
+    }
 
     /* get the registry */
     result = BLT_Core_GetRegistry(core, &registry);

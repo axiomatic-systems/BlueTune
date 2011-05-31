@@ -18,7 +18,7 @@
 #include "BltMedia.h"
 #include "BltPcm.h"
 #include "BltPacketProducer.h"
-#include "BltByteStreamUser.h"
+#include "BltPacketConsumer.h"
 #include "BltStream.h"
 #include "BltCommonMediaTypes.h"
 
@@ -37,6 +37,12 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.parsers.adts")
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
+typedef enum {
+    BLT_ADTS_PARSER_STATE_NEED_SYNC,
+    BLT_ADTS_PARSER_STATE_NEED_BODY,
+    BLT_ADTS_PARSER_STATE_NEED_READAHEAD
+} AdtsParserState;
+
 typedef struct {
     /* base class */
     ATX_EXTENDS(BLT_BaseModule);
@@ -49,12 +55,13 @@ typedef struct {
 typedef struct {
     /* interfaces */
     ATX_IMPLEMENTS(BLT_MediaPort);
-    ATX_IMPLEMENTS(BLT_InputStreamUser);
+    ATX_IMPLEMENTS(BLT_PacketConsumer);
 
     /* members */
     BLT_MediaType    media_type;
-    ATX_InputStream* stream;
     BLT_Boolean      eos;
+    BLT_Boolean      packet_is_new;
+    BLT_MediaPacket* packet;
 } AdtsParserInput;
 
 typedef struct {
@@ -65,11 +72,6 @@ typedef struct {
     /* members */
     BLT_Mp4AudioMediaType* media_type;
 } AdtsParserOutput;
-
-typedef enum {
-    BLT_ADTS_PARSER_STATE_NEED_SYNC,
-    BLT_ADTS_PARSER_STATE_IN_FRAME
-} AdtsParserState;
 
 typedef struct {
     /* fixed part */
@@ -98,10 +100,11 @@ typedef struct {
     /* members */
     AdtsParserInput  input;
     AdtsParserOutput output;
-    AdtsParserState  state;
-    unsigned char    buffer[BLT_ADTS_PARSER_MAX_FRAME_SIZE];
+    unsigned char    buffer[BLT_ADTS_PARSER_MAX_FRAME_SIZE+7];
     unsigned int     buffer_fullness;
+    BLT_TimeStamp    time_stamp;
     AdtsHeader       frame_header;
+    AdtsParserState  state;
 } AdtsParser;
 
 /*----------------------------------------------------------------------
@@ -112,26 +115,35 @@ ATX_DECLARE_INTERFACE_MAP(AdtsParser, BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(AdtsParser, ATX_Referenceable)
 
 /*----------------------------------------------------------------------
-|   AdtsParserInput_SetStream
+|   AdtsParserInput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-AdtsParserInput_SetStream(BLT_InputStreamUser* _self,
-                          ATX_InputStream*     stream,
-                          const BLT_MediaType* media_type)
+AdtsParserInput_PutPacket(BLT_PacketConsumer* _self, BLT_MediaPacket* packet)
 {
-    AdtsParserInput* self = ATX_SELF(AdtsParserInput, BLT_InputStreamUser);
-
+    AdtsParserInput*     self = ATX_SELF(AdtsParserInput, BLT_PacketConsumer);
+    const BLT_MediaType* media_type = NULL;
+    
     /* check media type */
+    BLT_MediaPacket_GetMediaType(packet, &media_type);
     if (media_type == NULL || media_type->id != self->media_type.id) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
-
-    /* if we had a stream, release it */
-    ATX_RELEASE_OBJECT(self->stream);
     
-    /* keep a reference to the stream */
-    self->stream = stream;
-    ATX_REFERENCE_OBJECT(stream);
+    /* release the previous packet */
+    if (self->packet) BLT_MediaPacket_Release(self->packet);
+    self->packet = NULL;
+    
+    /* keep a reference to this packet */
+    if (packet) {
+        if (BLT_MediaPacket_GetFlags(packet) & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
+            self->eos = BLT_TRUE;
+        }
+        if (BLT_MediaPacket_GetPayloadSize(packet)) {
+            self->packet = packet;
+            BLT_MediaPacket_AddReference(packet);
+            self->packet_is_new = BLT_TRUE;
+        }
+    }
     
     return BLT_SUCCESS;
 }
@@ -160,14 +172,14 @@ AdtsParserInput_QueryMediaType(BLT_MediaPort*        _self,
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AdtsParserInput)
     ATX_GET_INTERFACE_ACCEPT(AdtsParserInput, BLT_MediaPort)
-    ATX_GET_INTERFACE_ACCEPT(AdtsParserInput, BLT_InputStreamUser)
+    ATX_GET_INTERFACE_ACCEPT(AdtsParserInput, BLT_PacketConsumer)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|   BLT_InputStreamUser interface
+|   BLT_PacketConsumer interface
 +---------------------------------------------------------------------*/
-ATX_BEGIN_INTERFACE_MAP(AdtsParserInput, BLT_InputStreamUser)
-    AdtsParserInput_SetStream
+ATX_BEGIN_INTERFACE_MAP(AdtsParserInput, BLT_PacketConsumer)
+    AdtsParserInput_PutPacket
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -175,7 +187,7 @@ ATX_END_INTERFACE_MAP
 +---------------------------------------------------------------------*/
 BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(AdtsParserInput, 
                                          "input",
-                                         STREAM_PULL,
+                                         PACKET,
                                          IN)
 ATX_BEGIN_INTERFACE_MAP(AdtsParserInput, BLT_MediaPort)
     AdtsParserInput_GetName,
@@ -185,28 +197,33 @@ ATX_BEGIN_INTERFACE_MAP(AdtsParserInput, BLT_MediaPort)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
-|   AdtsParser_MakeEosPacket
+|   Adts_SamplingFrequencyTable
 +---------------------------------------------------------------------*/
-static BLT_Result
-AdtsParser_MakeEosPacket(AdtsParser* self, BLT_MediaPacket** packet)
+static const unsigned int Adts_SamplingFrequencyTable[16] =
 {
-    BLT_Result result;
-    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
-                                        0,
-                                        (BLT_MediaType*)self->output.media_type,
-                                        packet);
-    if (BLT_FAILED(result)) return result;
-
-    BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_END_OF_STREAM);
-    
-    return BLT_SUCCESS;
-}
+    96000,
+    88200,
+    64000,
+    48000,
+    44100,
+    32000,
+    24000,
+    22050,
+    16000,
+    12000,
+    11025,
+    8000,
+    7350,
+    0,      /* Reserved */
+    0,      /* Reserved */
+    0       /* Escape code */
+};
 
 /*----------------------------------------------------------------------
 |   AdtsParser_ParseHeader
 +---------------------------------------------------------------------*/
 static BLT_Result
-AdtsHeader_Parse(AdtsHeader* h, unsigned char* buffer)
+AdtsHeader_Parse(AdtsHeader* h, const unsigned char* buffer)
 {
     h->id                             =  (buffer[1]>>4)&0x01;
     h->layer                          =  (buffer[1]>>1)&0x03;
@@ -251,7 +268,52 @@ AdtsHeader_Match(const AdtsHeader* h1, const AdtsHeader* h2)
            h1->channel_configuration    == h2->channel_configuration &&
            h1->original                 == h2->original &&
            h1->home                     == h2->home;
-  }
+}
+
+/*----------------------------------------------------------------------
+|   AdtsParser_FillBuffer
++---------------------------------------------------------------------*/
+static BLT_Result
+AdtsParser_FillBuffer(AdtsParser*  self, 
+                      unsigned int buffer_fullness)
+{
+    unsigned int needed;
+    unsigned int available;
+    unsigned int chunk;
+    
+    if (self->buffer_fullness >= buffer_fullness) return BLT_SUCCESS;
+    if (self->input.packet == NULL) {
+        if (self->input.eos) {
+            return BLT_ERROR_EOS;
+        } else {
+            return BLT_ERROR_PORT_HAS_NO_DATA;
+        }
+    }
+    
+    needed = buffer_fullness-self->buffer_fullness;
+    available = BLT_MediaPacket_GetPayloadSize(self->input.packet);
+    if (available >= needed) {
+        chunk = needed;
+    } else {
+        chunk = available;
+    }
+    ATX_CopyMemory(&self->buffer[self->buffer_fullness], 
+                   BLT_MediaPacket_GetPayloadBuffer(self->input.packet),
+                   chunk);
+    BLT_MediaPacket_SetPayloadOffset(self->input.packet, 
+                                     BLT_MediaPacket_GetPayloadOffset(self->input.packet)+chunk);
+    self->buffer_fullness += chunk;
+    if (available == chunk) {
+        /* we read everything */
+        BLT_MediaPacket_Release(self->input.packet);
+        self->input.packet = NULL;
+    }
+    if (chunk == needed) {
+        return BLT_SUCCESS;
+    } else {
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
+}
 
 /*----------------------------------------------------------------------
 |   AdtsParser_FindHeader
@@ -262,69 +324,67 @@ AdtsParser_FindHeader(AdtsParser* self, AdtsHeader* header)
     BLT_Result   result;
     unsigned int i;
     
-    /* refill the buffer to have 7 bytes */
-    result = ATX_InputStream_ReadFully(self->input.stream, 
-                                       &self->buffer[self->buffer_fullness], 
-                                       7-self->buffer_fullness);
-    if (BLT_FAILED(result)) return result;
-    self->buffer_fullness = 7;
-    
-    /* look for a sync pattern */
-    for (i=0; i<6; i++) {
-        if (self->buffer[i] == 0xFF && (self->buffer[i+1]&0xF0) == 0xF0) {
-            /* sync pattern found, get a full header */
-            if (i != 0) {
-                /* refill the header to a full 7 bytes */
-                unsigned int j;
-                for (j=i; j<7; j++) {
-                    self->buffer[j-i] = self->buffer[j];
+    for (;;) {
+        /* refill the buffer to have at least 7 bytes */
+        result = AdtsParser_FillBuffer(self, 7);
+        if (BLT_FAILED(result)) return result;
+        
+        /* look for a sync pattern */
+        for (i=0; i<self->buffer_fullness-1; i++) {
+            if (self->buffer[i] == 0xFF && (self->buffer[i+1]&0xF0) == 0xF0) {
+                /* sync pattern found, left-align the data and refill if needed */
+                if (i != 0) {
+                    /* refill the header to a full 7 bytes */
+                    unsigned int j;
+                    for (j=i; j<self->buffer_fullness; j++) {
+                        self->buffer[j-i] = self->buffer[j];
+                    }
+                    self->buffer_fullness -= i;
+                    result = AdtsParser_FillBuffer(self, 7);
+                    if (BLT_FAILED(result)) return result;
                 }
-                result = ATX_InputStream_ReadFully(self->input.stream, 
-                                                   &self->buffer[7-i], 
-                                                   i);
-                if (BLT_FAILED(result)) return result;
-            }
-            
-            result = AdtsHeader_Parse(header, self->buffer);
-            if (BLT_FAILED(result)) {
-                /* it looked like a header, but wasn't one */
-                /* skip two bytes and try again            */
-                unsigned int j;
-                for (j=2; j<7; j++) {
-                    self->buffer[j-2] = self->buffer[j];
+                
+                result = AdtsHeader_Parse(header, self->buffer);
+                if (BLT_FAILED(result)) {
+                    /* it looked like a header, but wasn't one */
+                    /* skip two bytes and try again            */
+                    unsigned int j;
+                    for (j=2; j<self->buffer_fullness; j++) {
+                        self->buffer[j-2] = self->buffer[j];
+                    }
+                    self->buffer_fullness -= 2;
+                    i = 0;
+                    continue;
                 }
-                self->buffer_fullness = 5;
-                return BLT_ERROR_PORT_HAS_NO_DATA;
-            }
-            
-            self->buffer_fullness = 7;
 
-            /* found a valid header */
-            return BLT_SUCCESS;
+                /* found a valid header */
+                return BLT_SUCCESS;
+            }
         }
+    
+        /* sync pattern not found, keep the last byte for the next time around */
+        self->buffer[0] = self->buffer[self->buffer_fullness-1];
+        self->buffer_fullness = 1;
     }
-
-    /* sync pattern not found, keep the last byte for the next time around */
-    self->buffer[0] = self->buffer[6];
-    self->buffer_fullness = 1;
     
     return BLT_ERROR_PORT_HAS_NO_DATA;
 }
 
 /*----------------------------------------------------------------------
-|   AdtsParser_ReadHeader
+|   AdtsParser_ReadNextHeader
 +---------------------------------------------------------------------*/
 static BLT_Result
-AdtsParser_ReadHeader(AdtsParser* self, AdtsHeader* header)
+AdtsParser_ReadNextHeader(AdtsParser* self, AdtsHeader* header)
 {
-    BLT_Result    result;
-    unsigned char buffer[7];
+    BLT_Result           result;
+    const unsigned char* buffer;
     
-    /* fill the buffer to have 7 bytes */
-    result = ATX_InputStream_ReadFully(self->input.stream, buffer, 7);
+    /* fill the buffer to have 7 bytes past the frame body */
+    result = AdtsParser_FillBuffer(self, self->frame_header.aac_frame_length+7);
     if (BLT_FAILED(result)) return result;
     
     /* look for a sync pattern */
+    buffer = &self->buffer[self->frame_header.aac_frame_length];
     if (buffer[0] != 0xFF || (buffer[1]&0xF0) != 0xF0) {
         /* not a sync pattern */
         return BLT_FAILURE;
@@ -358,6 +418,29 @@ AdtsParser_UpdateMediaType(AdtsParser* self)
 }
 
 /*----------------------------------------------------------------------
+|   AdtsParser_UpdateTimeStamp
++---------------------------------------------------------------------*/
+static void
+AdtsParser_UpdateTimeStamp(AdtsParser* self)
+{
+    if (self->input.packet_is_new) {
+        if (self->input.packet) {
+            BLT_TimeStamp new_timestamp = BLT_MediaPacket_GetTimeStamp(self->input.packet);
+            if (BLT_TimeStamp_IsLaterOrEqual(new_timestamp, self->time_stamp)) {
+                self->time_stamp = new_timestamp;
+            } else {
+                BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&16]);
+                self->time_stamp = BLT_TimeStamp_Add(self->time_stamp, frame_duration);
+            }
+        }
+        self->input.packet_is_new = BLT_FALSE;
+    } else {
+        BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&0xF]);
+        self->time_stamp = BLT_TimeStamp_Add(self->time_stamp, frame_duration);
+    }
+}
+
+/*----------------------------------------------------------------------
 |   AdtsParserOutput_QueryMediaType
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -383,104 +466,110 @@ BLT_METHOD
 AdtsParserOutput_GetPacket(BLT_PacketProducer* _self,
                            BLT_MediaPacket**   packet)
 {
-    AdtsParser* self   = ATX_SELF_M(output, AdtsParser, BLT_PacketProducer);
-    BLT_Result  result = BLT_SUCCESS;
+    AdtsParser*  self   = ATX_SELF_M(output, AdtsParser, BLT_PacketProducer);
+    AdtsHeader   next_header;
+    BLT_Result   result = BLT_SUCCESS;
     
     /* default value */
     *packet = NULL;
+    ATX_SetMemory(&next_header, 0, sizeof(next_header));
     
-    /* check for EOS */
-    if (self->input.eos) return BLT_ERROR_EOS;
-    
-    /* do the next step of the state machine */
-    switch (self->state) {
-        case BLT_ADTS_PARSER_STATE_NEED_SYNC: {
-            result = AdtsParser_FindHeader(self, &self->frame_header);
-            if (BLT_SUCCEEDED(result)) {
-                AdtsParser_UpdateMediaType(self);
-                self->state = BLT_ADTS_PARSER_STATE_IN_FRAME;
-            }
-        }
-        break;
-                        
-        case BLT_ADTS_PARSER_STATE_IN_FRAME: {
-            unsigned int needed = self->frame_header.aac_frame_length - 
-                                  self->buffer_fullness;
-            if (needed) {
-                ATX_Size bytes_read = 0;
-                result = ATX_InputStream_Read(self->input.stream, 
-                                              &self->buffer[self->buffer_fullness],
-                                              needed,
-                                              &bytes_read);
-                if (BLT_FAILED(result)) break;
-                self->buffer_fullness += bytes_read;
-            }
-            if (self->buffer_fullness == self->frame_header.aac_frame_length) {
-                /* the frame is complete, look for the next header */
-                AdtsHeader next_header = self->frame_header;
-                result = AdtsParser_ReadHeader(self, &next_header);
-                if (BLT_FAILED(result)) {
-                    /* at the end of the stream, it is ok not to have */
-                    /* a next header.                                 */
-                    if (result != BLT_ERROR_EOS) {
-                        self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
-                        self->buffer_fullness = 0;
-                        return BLT_ERROR_PORT_HAS_NO_DATA;
-                    }
-                }
+    /* loop until we get a packet or run out of data */
+    for (;;) {
+        BLT_Boolean have_next_header = BLT_FALSE;
 
-                /* do as if we had read the header at the start of the buffer */
-                self->buffer_fullness = 7;
+        /* if we're not processing a frame, get the next header */
+        if (self->state == BLT_ADTS_PARSER_STATE_NEED_SYNC) {
+            result = AdtsParser_FindHeader(self, &self->frame_header);
+            if (BLT_FAILED(result)) return result;
+            
+            AdtsParser_UpdateMediaType(self);
+            AdtsParser_UpdateTimeStamp(self);
+            self->state = BLT_ADTS_PARSER_STATE_NEED_BODY;
+        }
+                            
+        /* get the frame body */
+        if (self->state == BLT_ADTS_PARSER_STATE_NEED_BODY) {
+            result = AdtsParser_FillBuffer(self, self->frame_header.aac_frame_length);
+            if (BLT_FAILED(result)) return result;
+            self->state = BLT_ADTS_PARSER_STATE_NEED_READAHEAD;
+        }
+
+        /* the frame is complete, look for the next header */
+        if (self->state == BLT_ADTS_PARSER_STATE_NEED_READAHEAD) {
+            result = AdtsParser_ReadNextHeader(self, &next_header);
+            if (BLT_FAILED(result)) {
+                if (result == BLT_ERROR_PORT_HAS_NO_DATA) return result;
                 
+                /* at the end of the stream, it is ok not to have */
+                /* a next header.                                 */
+                if (result != BLT_ERROR_EOS) {
+                    /* invalidate the current frame, we'll try again */
+                    self->buffer[0] = 0;
+                    self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
+                    continue;
+                }
+            } else {
+                have_next_header = BLT_TRUE;
+    
                 /* compare with the current header */
                 if (!AdtsHeader_Match(&next_header, &self->frame_header)) {
                     /* not the same header, look for a new frame */
-                    self->frame_header = next_header;
-                    AdtsParser_UpdateMediaType(self);
-                    return BLT_ERROR_PORT_HAS_NO_DATA;
+                    self->buffer[0] = 0;
+                    self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
+                    continue;
                 }
-
-                /* this frame looks good, create a media packet for it */
-                {
-                    unsigned int payload_offset = self->frame_header.protection_absent?7:9;
-                    unsigned int payload_size = self->frame_header.aac_frame_length-payload_offset;
-                    
-                    if (self->frame_header.aac_frame_length < payload_offset) {
-                        /* something is terrible wrong here */
-                        self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
-                        self->buffer_fullness = 0;
-                        return BLT_ERROR_PORT_HAS_NO_DATA;                        
-                    }
-                    
-                    result = BLT_Core_CreateMediaPacket(
-                        ATX_BASE(self, BLT_BaseMediaNode).core,
-                        payload_size,
-                        (BLT_MediaType*)self->output.media_type,
-                        packet);
-                    if (BLT_FAILED(result)) return result;
-                    ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(*packet),
-                                   &self->buffer[payload_offset],
-                                   payload_size);
-                    BLT_MediaPacket_SetPayloadSize(*packet, payload_size);
-                }
-
-                /* update the header for next time */
-                self->frame_header = next_header;
             }
         }
-        break;
-    }
-    
-    if (*packet == NULL) {
-        if (result == BLT_ERROR_EOS) {
-            self->input.eos = BLT_TRUE;
-            return AdtsParser_MakeEosPacket(self, packet);
-        } else {
-            return result;
+        
+        /* this frame looks good, create a media packet for it */
+        {
+            unsigned int payload_offset = self->frame_header.protection_absent?7:9;
+            unsigned int payload_size   = self->frame_header.aac_frame_length-payload_offset;
+            
+            if (self->frame_header.aac_frame_length < payload_offset) {
+                /* something is terribly wrong here */
+                self->buffer_fullness = 0;
+                self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
+                continue;                        
+            }
+            
+            result = BLT_Core_CreateMediaPacket(
+                ATX_BASE(self, BLT_BaseMediaNode).core,
+                payload_size,
+                (BLT_MediaType*)self->output.media_type,
+                packet);
+            if (BLT_FAILED(result)) {
+                self->buffer_fullness = 0;
+                self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
+                return result;
+            }
+            ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(*packet),
+                           &self->buffer[payload_offset],
+                           payload_size);
+            BLT_MediaPacket_SetPayloadSize(*packet, payload_size);
+            BLT_MediaPacket_SetTimeStamp(*packet, self->time_stamp);
+            ATX_LOG_FINE_3("ADTS packet: size=%d, ts=%d.%09d", payload_size, self->time_stamp.seconds, self->time_stamp.nanoseconds);
         }
-    } else {
+
+        /* update the header for next time */
+        if (have_next_header) {
+            unsigned int i;
+            for (i=0; i<7; i++) {
+                self->buffer[i] = self->buffer[i+self->frame_header.aac_frame_length];
+            }
+            AdtsParser_UpdateTimeStamp(self);
+            self->frame_header = next_header;
+            self->buffer_fullness = 7;
+            self->state = BLT_ADTS_PARSER_STATE_NEED_BODY;
+        } else {
+            self->buffer_fullness = 0;
+            self->state = BLT_ADTS_PARSER_STATE_NEED_SYNC;
+        }
         return BLT_SUCCESS;
     }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -545,7 +634,6 @@ AdtsParser_Create(BLT_Module*              module,
     /* construct the object */
     BLT_MediaType_Init(&self->input.media_type,
                        ((AdtsParserModule*)module)->adts_type_id);
-    self->input.stream = NULL;
     self->output.media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+1);
     BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4AudioMediaType)+1);
     self->output.media_type->base.stream_type              = BLT_MP4_STREAM_TYPE_AUDIO;
@@ -559,7 +647,7 @@ AdtsParser_Create(BLT_Module*              module,
     ATX_SET_INTERFACE_EX(self, AdtsParser, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, AdtsParser, BLT_BaseMediaNode, ATX_Referenceable);
     ATX_SET_INTERFACE(&self->input,  AdtsParserInput,  BLT_MediaPort);
-    ATX_SET_INTERFACE(&self->input,  AdtsParserInput,  BLT_InputStreamUser);
+    ATX_SET_INTERFACE(&self->input,  AdtsParserInput,  BLT_PacketConsumer);
     ATX_SET_INTERFACE(&self->output, AdtsParserOutput, BLT_MediaPort);
     ATX_SET_INTERFACE(&self->output, AdtsParserOutput, BLT_PacketProducer);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
@@ -575,8 +663,10 @@ AdtsParser_Destroy(AdtsParser* self)
 {
     ATX_LOG_FINE("AdtsParser::Destroy");
 
-    /* release the byte stream */
-    ATX_RELEASE_OBJECT(self->input.stream);
+    /* release any packet we have */
+    if (self->input.packet) {
+        BLT_MediaPacket_Release(self->input.packet);
+    }
 
     /* free the media type extensions */
     BLT_MediaType_Free((BLT_MediaType*)self->output.media_type);
@@ -586,25 +676,6 @@ AdtsParser_Destroy(AdtsParser* self)
 
     /* free the object memory */
     ATX_FreeMemory(self);
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    AdtsParser_Deactivate
-+---------------------------------------------------------------------*/
-BLT_METHOD
-AdtsParser_Deactivate(BLT_MediaNode* _self)
-{
-    AdtsParser* self = ATX_SELF_EX(AdtsParser, BLT_BaseMediaNode, BLT_MediaNode);
-
-    ATX_LOG_FINER("AdtsParser::Deactivate");
-
-    /* call the base class method */
-    BLT_BaseMediaNode_Deactivate(_self);
-
-    /* release the stream */
-    ATX_RELEASE_OBJECT(self->input.stream);
 
     return BLT_SUCCESS;
 }
@@ -648,13 +719,6 @@ AdtsParser_Seek(BLT_MediaNode* _self,
     self->buffer_fullness = 0;
     self->input.eos = BLT_FALSE;
 	
-    /* seek into the input stream (ignore return value) */
-    ATX_InputStream_Seek(self->input.stream, point->offset);
-
-    /* set the mode so that the nodes down the chain know the seek has */
-    /* already been done on the stream                                 */
-    *mode = BLT_SEEK_MODE_IGNORE;
-
 	return BLT_SUCCESS;
 }
 
@@ -673,7 +737,7 @@ ATX_BEGIN_INTERFACE_MAP_EX(AdtsParser, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     AdtsParser_GetPortByName,
     BLT_BaseMediaNode_Activate,
-    AdtsParser_Deactivate,
+    BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
@@ -754,12 +818,12 @@ AdtsParserModule_Probe(BLT_Module*              _self,
             BLT_MediaNodeConstructor* constructor = 
                 (BLT_MediaNodeConstructor*)parameters;
 
-            /* we need the input protocol to be STREAM_PULL and the output */
-            /* protocol to be STREAM_PULL                                  */
+            /* we need the input protocol to be PACKET and the output */
+            /* protocol to be PACKET                                  */
              if ((constructor->spec.input.protocol !=
                  BLT_MEDIA_PORT_PROTOCOL_ANY &&
                  constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PULL) ||
+                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
                 (constructor->spec.output.protocol !=
                  BLT_MEDIA_PORT_PROTOCOL_ANY &&
                  constructor->spec.output.protocol != 
@@ -844,5 +908,5 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AdtsParserModule,
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(AdtsParserModule,
                                          "ADTS Parser",
                                          "com.axiosys.parser.adts",
-                                         "1.0.0",
+                                         "1.1.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)

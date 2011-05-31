@@ -75,7 +75,8 @@ typedef struct {
     snd_pcm_t*       device_handle;
     BLT_PcmMediaType expected_media_type;
     BLT_PcmMediaType media_type;
-    ATX_UInt64       media_time;
+    ATX_UInt64       media_time;      /* media time of the last received packet       */
+    ATX_UInt64       next_media_time; /* media time just pas the last received packet */
 } AlsaOutput;
 
 /*----------------------------------------------------------------------
@@ -661,17 +662,22 @@ AlsaOutput_PutPacket(BLT_PacketConsumer* _self,
     {
         BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
         ATX_UInt64    ts_nanos = BLT_TimeStamp_ToNanos(ts);
-        if (ts_nanos == 0 && 
+        BLT_TimeStamp packet_duration;
+        if (media_type->sample_rate   && 
             media_type->channel_count && 
             media_type->bits_per_sample) {
-            BLT_TimeStamp duration;
             unsigned int sample_count = BLT_MediaPacket_GetPayloadSize(packet)/
                                         (media_type->channel_count*media_type->bits_per_sample/8);
-            duration = BLT_TimeStamp_FromSamples(sample_count, media_type->sample_rate);            
-            self->media_time += BLT_TimeStamp_ToNanos(duration);
+            packet_duration = BLT_TimeStamp_FromSamples(sample_count, media_type->sample_rate);            
+        } else {
+            packet_duration = BLT_TimeStamp_FromSeconds(0);
+        }
+        if (ts_nanos == 0) {
+            self->media_time = self->next_media_time;
         } else {
             self->media_time = ts_nanos;
         }
+        self->next_media_time = self->media_time+BLT_TimeStamp_ToNanos(packet_duration);
     }
     
     /* write the audio samples */
@@ -919,8 +925,10 @@ AlsaOutput_Seek(BLT_MediaNode* _self,
     /* update the media time */
     if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
         self->media_time = BLT_TimeStamp_ToNanos(point->time_stamp);
+        self->next_media_time = self->media_time;
     } else {
         self->media_time = 0;
+        self->next_media_time = 0;
     }
     
     return BLT_SUCCESS;
@@ -936,8 +944,6 @@ AlsaOutput_GetStatus(BLT_OutputNode*       _self,
     AlsaOutput*       self = ATX_SELF(AlsaOutput, BLT_OutputNode);
     snd_pcm_status_t* pcm_status;
     snd_pcm_sframes_t delay = 0;
-    ATX_UInt64        delay_ns = 0;
-    ATX_UInt64        media_time = self->media_time;
     int               io_result;
 
     /* default values */
@@ -951,6 +957,7 @@ AlsaOutput_GetStatus(BLT_OutputNode*       _self,
     if (io_result != 0) {
         return BLT_FAILURE;
     }
+    delay = snd_pcm_status_get_delay(pcm_status);
     if (delay == 0) {
         /* workaround buggy alsa drivers */
         io_result = snd_pcm_delay(self->device_handle, &delay);
@@ -958,17 +965,25 @@ AlsaOutput_GetStatus(BLT_OutputNode*       _self,
             return BLT_FAILURE;
         }
     }
-    if (delay > 0 && 
-        self->media_type.sample_rate &&
-        self->media_type.channel_count) {
-        delay_ns = (delay * (ATX_UInt64)self->media_type.channel_count * (ATX_UInt64)1000000000)/self->media_type.sample_rate;
-        if (delay_ns <= media_time) media_time -= delay_ns;
+    
+    if (delay > 0 && self->media_type.sample_rate) {
+        ATX_UInt64 media_time_samples = (self->next_media_time * 
+                                         (ATX_UInt64)self->media_type.sample_rate)/
+                                         (ATX_UInt64)1000000000;
+        ATX_UInt64 media_time_ns;
+        if (delay <= (snd_pcm_sframes_t)media_time_samples) {
+            media_time_samples -= delay;
+        } else {
+            media_time_samples = 0;
+        }
+        media_time_ns = (media_time_samples*(ATX_UInt64)1000000000)/self->media_type.sample_rate;
+        status->media_time = BLT_TimeStamp_FromNanos(media_time_ns);
+    } else {
+        status->media_time = BLT_TimeStamp_FromNanos(self->next_media_time);
     }
     
     /* return the computed media time */
-    status->media_time = BLT_TimeStamp_FromNanos(media_time);
-    ATX_LOG_FINEST_2("delay = %lld, media time = %lld", delay_ns, media_time);
-    
+    ATX_LOG_FINEST_3("delay = %lld samples, input port time = %lld, media time = %lld", (ATX_UInt64)delay, self->next_media_time, BLT_TimeStamp_ToNanos(status->media_time));
     return BLT_SUCCESS;
 }
 

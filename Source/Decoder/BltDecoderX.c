@@ -624,10 +624,10 @@ BLT_DecoderX_AddNodeByName(BLT_DecoderX*  decoder,
 }
 
 /*----------------------------------------------------------------------
-|    BLT_DecoderX_PumpPacket
+|    BLT_DecoderX_PumpPacket_Simple
 +---------------------------------------------------------------------*/
-BLT_Result
-BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
+static BLT_Result
+BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
 {
     BLT_Boolean audio_would_block = BLT_FALSE;
     BLT_Boolean audio_eos         = BLT_FALSE;
@@ -639,7 +639,8 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
     BLT_Stream_Start(decoder->input_stream);
     
     /* pump an audio packet */
-    if (decoder->audio_output) {
+	if (!decoder->audio_output) audio_eos = ATX_TRUE;
+    if (!audio_eos) {
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->audio_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
@@ -676,8 +677,8 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
     }
     
     /* pump a video packet */
-    if (decoder->audio_only) video_eos = BLT_TRUE;
-    if (decoder->video_output && !video_eos) {
+    if (decoder->audio_only || decoder->video_output == NULL) video_eos = BLT_TRUE;
+    if (!video_eos) {
         BLT_OutputNodeStatus status;
         BLT_OutputNode_GetStatus(decoder->video_output, &status);
         if (status.flags & BLT_OUTPUT_NODE_STATUS_QUEUE_FULL) {
@@ -704,11 +705,35 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
 
     /* if both would block, sleep a bit */
     if ((audio_would_block || audio_eos) && (video_would_block || video_eos)) {
-        ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
-        ATX_System_Sleep(&sleep_duration);
+        return BLT_ERROR_WOULD_BLOCK;
     }
     
     return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    BLT_DecoderX_PumpPacket
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
+{
+    BLT_Result result;
+    result = BLT_DecoderX_PumpPacket_Simple(decoder);
+
+    /* if we ran out of data, give a chance to the input stream to produce
+       some more. */
+    if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
+        result = BLT_Stream_PumpPacket(decoder->input_stream);
+    }
+
+    /* if this would block, sleep a bit */
+    if (result == BLT_ERROR_WOULD_BLOCK || result == BLT_ERROR_PORT_HAS_NO_DATA) {
+        ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
+        ATX_System_Sleep(&sleep_duration);
+        result = BLT_SUCCESS;
+    }
+    
+    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -799,5 +824,4 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 ATX_BEGIN_INTERFACE_MAP(BLT_DecoderX, BLT_TimeSource)
     BLT_DecoderX_GetMediaTime
 ATX_END_INTERFACE_MAP
-
 

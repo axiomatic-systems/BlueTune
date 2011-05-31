@@ -252,14 +252,14 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                                    items[i].mASBD.mChannelsPerFrame);
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE && 
                         OsxAudioFileStreamParserModule_FormatIsSupported(self->module, items[i].mASBD.mFormatID)) {
-                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE");
                         self->output.media_type->asbd = items[i].mASBD;
+                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE");
                         break;
                     }
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE_V2 &&
                         OsxAudioFileStreamParserModule_FormatIsSupported(self->module, items[i].mASBD.mFormatID)) {
-                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE_V2");
                         self->output.media_type->asbd = items[i].mASBD;
+                        ATX_LOG_FINE("selecting kAudioFormatMPEG4AAC_HE_V2");
                         break;
                     }
                 }

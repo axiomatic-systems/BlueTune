@@ -134,9 +134,6 @@ BLT_DecoderServer::BLT_DecoderServer(NPT_MessageReceiver* client) :
     ATX_SET_INTERFACE(&m_StreamPropertyListener, 
                       BLT_DecoderServer_PropertyListenerWrapper, 
                       ATX_PropertyListener);
-
-    // start the thread
-    Start();
 }
 
 /*----------------------------------------------------------------------

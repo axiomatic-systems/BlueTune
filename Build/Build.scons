@@ -141,6 +141,16 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
                    extra_cpp_defines     = ['USE_DEFAULT_STDLIB', 'AAC_ENABLE_SBR'],
                    environment           = env['BLT_RELAXED_ENV'])
 
+############################ OpenCoreAAC
+if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'OpenCore':
+    BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/OpenCoreAAC'
+    BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['OpenCoreAAC']}
+    CompiledModule(name                  = 'OpenCoreAAC',
+                   source_root           = 'ThirdParty/OpenCoreAAC',
+                   build_source_patterns = ['*.c', '*.s'],
+                   build_source_dirs     = ['src','include','oscl'],
+                   environment           = env['BLT_RELAXED_ENV'])
+
 ############################# Fluo
 if not env.has_key('FLO_DECODER_ENGINE'):  
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';

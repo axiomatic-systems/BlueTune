@@ -644,6 +644,28 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
         return BLT_FAILURE;
     }
 
+    /* Since SnowLeopard, kAudioHardwarePropertyRunLoop points at the process's main thread.
+       Since not all apps service a run loop on the main thread (like command-line apps), we
+       need to set the run loop to NULL to tell the HAL to run its own thread for this.
+       This is important in order for the HAL to receive events when, for example, the headphones
+       are plugged in or out.
+       NOTE: this was the default before SnowLeopard (10.6), so we only do this if we're 10.6 or
+       after */
+    {
+        SInt32 major, minor;
+
+        Gestalt(gestaltSystemVersionMajor, &major);
+        Gestalt(gestaltSystemVersionMinor, &minor);
+        if (major > 10 || (major == 10 && minor >= 6)) {
+            ATX_LOG_INFO("configuring the HAL to use its own thread for the run loop");
+            CFRunLoopRef null_loop =  NULL;
+            AudioObjectPropertyAddress address = { kAudioHardwarePropertyRunLoop, 
+                                                   kAudioObjectPropertyScopeGlobal, 
+                                                   kAudioObjectPropertyElementMaster };
+            AudioObjectSetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, sizeof(CFRunLoopRef), &null_loop);
+        }
+    }
+    
     /* allocate memory for the object */
     self = ATX_AllocateZeroMemory(sizeof(OsxAudioUnitsOutput));
     if (self == NULL) {

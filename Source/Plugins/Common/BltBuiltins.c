@@ -180,6 +180,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(AacDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER)
+    BLT_REGISTER_BUILTIN(OpenCoreAacDecoder)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMA_DECODER)
     BLT_REGISTER_BUILTIN(WmaDecoder)
 #endif
@@ -210,6 +214,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT)
     BLT_REGISTER_BUILTIN(AlsaOutput)
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_RAOP_OUTPUT)
+    BLT_REGISTER_BUILTIN(RaopOutput)
 #endif
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT)

@@ -60,6 +60,29 @@ ATX_DECLARE_INTERFACE_MAP(FileOutput, BLT_OutputStreamProvider)
 static BLT_Result FileOutput_Destroy(FileOutput* self);
 
 /*----------------------------------------------------------------------
+|    FileOutput_GetStatus
++---------------------------------------------------------------------*/
+BLT_METHOD
+FileOutput_GetStatus(BLT_OutputNode*       self,
+                     BLT_OutputNodeStatus* status)
+{
+    ATX_COMPILER_UNUSED(self);
+    ATX_SetMemory(status, 0, sizeof(*status));
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    FileOutput_Drain
++---------------------------------------------------------------------*/
+BLT_METHOD
+FileOutput_Drain(BLT_OutputNode* self)
+{
+    ATX_COMPILER_UNUSED(self);
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    FileOutput_DecideMediaType
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -314,6 +337,14 @@ ATX_BEGIN_INTERFACE_MAP_EX(FileOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_Resume,
     BLT_BaseMediaNode_Seek
 ATX_END_INTERFACE_MAP_EX
+
+/*----------------------------------------------------------------------
+|    BLT_OutputNode interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(FileOutput, BLT_OutputNode)
+    FileOutput_GetStatus,
+    FileOutput_Drain
+ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface

@@ -36,6 +36,7 @@ BLT_Player::BLT_Player(NPT_MessageQueue* queue) :
 {
     // create a decoder server
     m_Server = new BLT_DecoderServer(this);
+    m_Server->Start();
 }
 
 /*----------------------------------------------------------------------

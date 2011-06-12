@@ -38,7 +38,7 @@ const unsigned int BLT_RAOP_SYNC_PACKET_INTERVAL    = 126;
 const float        BLT_RAOP_MAX_DELAY               = 2.0;
 const unsigned int BLT_RAOP_MAX_THREAD_WAIT_TIMEOUT = 3000; // 3 seconds
 const unsigned int BLT_RAOP_DEFAULT_AUDIO_LATENCY   = 88200; // 2 seconds @ 44.1kHz
-const unsigned int BLT_RAOP_RTP_TIME_ORIGIN         = 88200;
+const unsigned int BLT_RAOP_RTP_TIME_ORIGIN         = 11025; //88200;
 #define BLT_RAOP_RTP_TIME_ORIGIN_STR "88200"
 
 #define BLT_RAOP_OUTPUT_USER_AGENT "BlueTune/1.0"
@@ -1457,6 +1457,8 @@ RaopOutput::SendAudioBuffer()
         NPT_CopyMemory(payload.UseData(), header, 16);
         if (m_UseEncryption) {
             Encrypt(alac.m_Data, payload.UseData()+16, alac_size);
+        } else {
+            NPT_CopyMemory(payload.UseData()+16, alac.m_Data, alac_size);
         }
     
         ATX_LOG_FINER("sending audio buffer over TCP");
@@ -1525,6 +1527,8 @@ RaopOutput::SendAudioBuffer()
         NPT_CopyMemory(payload.UseData(), rtp_header, 12);
         if (m_UseEncryption) {
             Encrypt(alac.m_Data, payload.UseData()+12, alac_size);
+        } else {
+            NPT_CopyMemory(payload.UseData()+12, alac.m_Data, alac_size);
         }
     
         ATX_LOG_FINER("sending audio buffer over UDP");

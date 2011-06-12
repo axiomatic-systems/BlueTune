@@ -18,9 +18,9 @@
  * to a remote RAOP (AirPlay/AirTunes) device.
  * These media nodes expect media pakcets with PCM audio.
  * This module responds to probe with the name:
- * 'raopt://<hostname>:<port>' for version 1 (TCP), supported by older
+ * 'raopt://[password@]<hostname>:<port>' for version 1 (TCP), supported by older
  * devices.
- * 'raop://<hostname>:<port>' for version 2 (UDP), supported by 
+ * 'raop://[password@]<hostname>:<port>' for version 2 (UDP), supported by 
  * newer devices.
  * @{
  */

@@ -1342,6 +1342,13 @@
 			remoteGlobalIDString = CAA3D5A10F97CD6500BAE44C;
 			remoteInfo = FilesTest;
 		};
+		CAC02A14139DBA540034427F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAC02A0C139DBA350034427F;
+			remoteInfo = Mp4Split;
+		};
 		CAD102391015A02800B272F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -2680,6 +2687,7 @@
 				CA44C4750D4522DA00173F5F /* mp4extract */,
 				CA44C4770D4522DA00173F5F /* mp4tag */,
 				CA95E57F128DF3AC00D89889 /* mp4fragment */,
+				CAC02A15139DBA540034427F /* mp4split */,
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
 				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
@@ -5240,6 +5248,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = FilesTest;
 			remoteRef = CAB401500F99278A00B91F51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAC02A15139DBA540034427F /* mp4split */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4split;
+			remoteRef = CAC02A14139DBA540034427F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CAD1023A1015A02800B272F6 /* mp42ts */ = {

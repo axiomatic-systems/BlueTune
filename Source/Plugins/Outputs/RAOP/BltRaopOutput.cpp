@@ -31,7 +31,16 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.raop")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-const NPT_Timeout BLT_RAOP_DEFAULT_CONNECT_TIMEOUT = 10000; // 10 seconds
+const NPT_Timeout BLT_RAOP_DEFAULT_CONNECT_TIMEOUT = 5000; // 5 seconds
+const NPT_Timeout BLT_RAOP_DEFAULT_IO_TIMEOUT      = 5000; // 5 seconds
+
+const unsigned int BLT_RAOP_SYNC_PACKET_INTERVAL    = 126;
+const float        BLT_RAOP_MAX_DELAY               = 2.0;
+const unsigned int BLT_RAOP_MAX_THREAD_WAIT_TIMEOUT = 3000; // 3 seconds
+const unsigned int BLT_RAOP_DEFAULT_AUDIO_LATENCY   = 88200; // 2 seconds @ 44.1kHz
+const unsigned int BLT_RAOP_RTP_TIME_ORIGIN         = 88200;
+#define BLT_RAOP_RTP_TIME_ORIGIN_STR "88200"
+
 #define BLT_RAOP_OUTPUT_USER_AGENT "BlueTune/1.0"
 
 const unsigned int BLT_RAOP_AUDIO_BUFFER_SIZE_V1 = 4096*4;
@@ -43,6 +52,9 @@ const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TIMING_RESPONSE = 0x53;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_SYNC            = 0x54;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_RESEND          = 0x55;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_AUDIO           = 0x60;
+
+// internal RTP types 
+const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TERMINATE       = 0x7F;
 
 /*----------------------------------------------------------------------
 |    types
@@ -57,6 +69,7 @@ class RaopOutput; // forward reference
 class RaopTimingThread : public NPT_Thread {
 public:
     RaopTimingThread(RaopOutput& output) : m_Output(output) {}
+    ~RaopTimingThread();
     virtual void Run();
     
 private:
@@ -65,7 +78,7 @@ private:
 
 class RaopOutput {
 public:
-    RaopOutput(unsigned int version, const char* hostname, unsigned int port);
+    RaopOutput(unsigned int version, const char* hostname, unsigned int port, const char* password);
     ~RaopOutput();
     
     // methods
@@ -74,7 +87,10 @@ public:
                            const char*        extra_headers,
                            const char*        body, 
                            const char*        mime_type,
-                           NPT_HttpResponse*& response);
+                           NPT_HttpResponse*& response,
+                           bool               recurse = false);
+    NPT_String Authorization(const char* method, const char* uri);
+    NPT_Result ParseAuthentication(const NPT_String* header);
     NPT_Result Options();
     NPT_Result Announce();
     NPT_Result Setup();
@@ -89,6 +105,7 @@ public:
     NPT_Result AddAudio(const void* audio, unsigned int audio_size, const BLT_PcmMediaType* media_type);
     NPT_Result DrainAudio();
     NPT_Result SendAudioBuffer();
+    NPT_Result SetVolume(float volume);
     void       Encrypt(const unsigned char* in, unsigned char* out, unsigned int size);
     void       Reset();
     
@@ -100,9 +117,15 @@ public:
     unsigned int                     m_Version;
     BLT_PcmMediaType                 m_ExpectedMediaType;
     BLT_PcmMediaType                 m_MediaType;
-    BLT_Boolean                      m_Paused;
+    bool                             m_Connected;
+    bool                             m_Setup;
+    bool                             m_Paused;
     bool                             m_OptionsReceived;
-    bool                             m_VolumeReceived;
+    float                            m_Volume;
+    bool                             m_VolumePending;
+    NPT_String                       m_AuthenticationNonce;
+    NPT_String                       m_AuthenticationRealm;
+    NPT_String                       m_AuthenticationPassword;
     NPT_String                       m_RemoteHostname;
     NPT_IpAddress                    m_RemoteIpAddress;
     NPT_UInt32                       m_RemotePort;
@@ -123,12 +146,14 @@ public:
     NPT_UInt8*                       m_AudioBuffer;
     unsigned int                     m_AudioBufferSize;
     unsigned int                     m_AudioBufferFullness;
+    signed short                     m_AudioResampleBuffer[2];
     bool                             m_UseEncryption;
     NPT_UdpSocket*                   m_RtpSocket;
     unsigned int                     m_RtpPort;
     NPT_UInt32                       m_RtpTime;
     NPT_UInt32                       m_RtpSequence;
     bool                             m_RtpMarker;
+    NPT_TimeStamp                    m_StartTime;
     NPT_UdpSocket*                   m_ControlSocket;
     unsigned int                     m_ControlPort;
     NPT_UdpSocket*                   m_TimingSocket;
@@ -147,7 +172,6 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_VolumeControl);
     
     RaopOutput* object;
-    float       volume;
 } _RaopOutput;
 
 /*----------------------------------------------------------------------
@@ -203,6 +227,17 @@ RaopBitWriter::Write(unsigned int bits, unsigned int bit_count)
 }
 
 /*----------------------------------------------------------------------
+|    BLT_TimeStampToNtpTime
++---------------------------------------------------------------------*/
+static void
+BLT_TimeStamp_ToNtpTime(NPT_TimeStamp& ts, unsigned char* ntp)
+{
+    ATX_UInt64 ticks = (ATX_UInt64)((double)ts*(double)(((ATX_UInt64)1)<<32));
+    ATX_BytesFromInt32Be(ntp,   (ATX_UInt32)(ticks>>32));
+    ATX_BytesFromInt32Be(ntp+4, (ATX_UInt32)ticks);
+}
+
+/*----------------------------------------------------------------------
 |    RaopOutput_PutPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -226,13 +261,51 @@ RaopOutput_PutPacket(BLT_PacketConsumer* _self,
     if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
-    if (media_type->sample_rate != 44100 ||      
-        media_type->channel_count != 2) {
-        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    if ((media_type->sample_rate != 44100 /*&& 
+         media_type->sample_rate != 22050*/) ||      
+        media_type->channel_count != 2 ||
+        media_type->bits_per_sample != 16 ||
+        media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
+        return BLT_ERROR_NOT_SUPPORTED;
     }
- 
-    result = self->AddAudio(BLT_MediaPacket_GetPayloadBuffer(packet), 
-                            BLT_MediaPacket_GetPayloadSize(packet),
+    const signed short* audio_data      = (const signed short*)BLT_MediaPacket_GetPayloadBuffer(packet);
+    unsigned int        audio_data_size = BLT_MediaPacket_GetPayloadSize(packet);
+    
+#if 0
+    // apply sample-rate conversion if necessary
+    // NOTE: this is a very crude linear interpolator, which should
+    // be replaced by a proper band-limited sample rate converter
+    NPT_DataBuffer converted;
+    if (media_type->sample_rate == 22050) {
+        unsigned int sample_count = audio_data_size/4;
+        audio_data_size *= 2;
+        converted.SetDataSize(audio_data_size);
+        signed short* pcm = (signed short*)converted.UseData();
+        for (unsigned int i=0; i<sample_count; i++) {
+            int l0, l1, r0, r1;
+            if (i==0) {
+                l0 = self->m_AudioResampleBuffer[0];
+                r0 = self->m_AudioResampleBuffer[1];
+            } else {
+                l0 = audio_data[2*(i-1)  ];
+                r0 = audio_data[2*(i-1)+1];
+            }
+            l1 = audio_data[2*i  ];
+            r1 = audio_data[2*i+1];
+            pcm[4*i  ] = (l1+l0)/2;
+            pcm[4*i+1] = (r1+r0)/2;
+            pcm[4*i+2] = l1;
+            pcm[4*i+3] = r1;
+        }
+        self->m_AudioResampleBuffer[0] = audio_data[-2];
+        self->m_AudioResampleBuffer[1] = audio_data[-1];
+        audio_data = (const signed short*)pcm;;
+    }
+#endif
+
+    // send the audio data
+    result = self->AddAudio(audio_data, 
+                            audio_data_size,
                             media_type);
     
     return result;
@@ -302,11 +375,15 @@ RaopOutput_Seek(BLT_MediaNode* _self,
                 BLT_SeekPoint* point)
 {
     RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
-    BLT_COMPILER_UNUSED(self);
-    
+
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
+    self->Flush();
+    if (self->m_Version == 0) {
+        self->Teardown();
+    }
+    
     return BLT_SUCCESS;
 }
 
@@ -359,7 +436,11 @@ RaopOutput_Stop(BLT_MediaNode* _self)
     RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
     
     self->Flush();
-    return self->Teardown();
+    if (self->m_Version == 0) {
+        self->Teardown();
+    }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -372,9 +453,11 @@ RaopOutput_Pause(BLT_MediaNode* _self)
     
     if (!self->m_Paused) {
         ATX_LOG_FINE("pausing output");
-        self->m_Paused = BLT_TRUE;
+        self->m_Paused = true;
         self->Flush();
-        self->Teardown();
+        if (self->m_Version == 0) {
+            self->Teardown();
+        }
     }
     return BLT_SUCCESS;
 }
@@ -389,7 +472,10 @@ RaopOutput_Resume(BLT_MediaNode* _self)
 
     if (self->m_Paused) {
         ATX_LOG_FINE("resuming output");
-        return self->Connect();
+        self->m_Paused = false;
+        if (self->m_Version == 0) {
+            return self->Connect();
+        }
     }
     return BLT_SUCCESS;
 }
@@ -400,24 +486,9 @@ RaopOutput_Resume(BLT_MediaNode* _self)
 BLT_METHOD
 RaopOutput_SetVolume(BLT_VolumeControl* _self, float volume)
 {
-    _RaopOutput* self  = ATX_SELF(_RaopOutput, BLT_VolumeControl);
+    RaopOutput* self = ATX_SELF(_RaopOutput, BLT_VolumeControl)->object;
 
-    // store the value
-    self->volume = volume;
-    
-    // convert the scale
-    if (volume == 0.0f) {
-        volume = -144.0f;
-    } else if (volume >= 1.0f) {
-        volume = 0.0f;
-    } else {
-        volume = -30.0f*volume;
-    }
-    char param[256];
-    NPT_FormatString(param, 256, "volume: %f\r\n", volume);
-    return self->object->SetParameter(param);
-    
-    return BLT_SUCCESS;
+    return self->SetVolume(volume);
 }
 
 /*----------------------------------------------------------------------
@@ -426,9 +497,10 @@ RaopOutput_SetVolume(BLT_VolumeControl* _self, float volume)
 BLT_METHOD
 RaopOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
 {
-    _RaopOutput* self = ATX_SELF(_RaopOutput, BLT_VolumeControl);
+    RaopOutput* self = ATX_SELF(_RaopOutput, BLT_VolumeControl)->object;
     
-    *volume = self->volume;
+    *volume = self->m_Volume;
+    
     return BLT_SUCCESS;
 }
 
@@ -529,10 +601,15 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(_RaopOutput,
 /*----------------------------------------------------------------------
 |    RaopOutput::RaopOutput
 +---------------------------------------------------------------------*/
-RaopOutput::RaopOutput(unsigned int version, const char* hostname, unsigned int port) :
+RaopOutput::RaopOutput(unsigned int version, const char* hostname, unsigned int port, const char* password) :
     m_Version(version),
+    m_Connected(false),
+    m_Setup(false),
+    m_Paused(false),
     m_OptionsReceived(false),
-    m_VolumeReceived(false),
+    m_Volume(1.0f),
+    m_VolumePending(false),
+    m_AuthenticationPassword(password),
     m_RemoteHostname(hostname),
     m_RemotePort(port),
     m_ServerAudioPort(0),
@@ -547,7 +624,7 @@ RaopOutput::RaopOutput(unsigned int version, const char* hostname, unsigned int 
     m_UseEncryption(false),
     m_RtpSocket(NULL),
     m_RtpPort(0),
-    m_RtpTime(0),
+    m_RtpTime(BLT_RAOP_RTP_TIME_ORIGIN),
     m_RtpSequence(0),
     m_RtpMarker(false),
     m_ControlSocket(NULL),
@@ -569,7 +646,10 @@ RaopOutput::RaopOutput(unsigned int version, const char* hostname, unsigned int 
     NPT_BlockCipher::Create(NPT_BlockCipher::AES_128, 
                             NPT_BlockCipher::ENCRYPT, 
                             key, 16, 
-                            m_Cipher);                                
+                            m_Cipher);     
+                            
+    m_AudioResampleBuffer[0] = 0;
+    m_AudioResampleBuffer[1] = 0;
 }
 
 /*----------------------------------------------------------------------
@@ -577,11 +657,89 @@ RaopOutput::RaopOutput(unsigned int version, const char* hostname, unsigned int 
 +---------------------------------------------------------------------*/
 RaopOutput::~RaopOutput()
 {
+    delete m_TimingThread;
     delete[] m_AudioBuffer;
     delete m_RtpSocket;
     delete m_ControlSocket;
     delete m_TimingSocket;
-    delete m_TimingThread;
+}
+
+/*----------------------------------------------------------------------
+|    RaopOutput::ParseAuthentication
++---------------------------------------------------------------------*/
+NPT_Result
+RaopOutput::ParseAuthentication(const NPT_String* header)
+{
+    m_AuthenticationNonce = "";
+    if (!header) return BLT_ERROR_PROTOCOL_FAILURE;
+    if (!header->StartsWith("Digest")) return BLT_ERROR_PROTOCOL_FAILURE;
+
+    // find the realm
+    int pos = header->Find("realm=\"");
+    if (pos < 0) return BLT_ERROR_PROTOCOL_FAILURE;
+    unsigned int start = pos+7;
+    pos = header->Find("\"", start);
+    if (pos < 0) return BLT_ERROR_PROTOCOL_FAILURE;
+    m_AuthenticationRealm = header->SubString(start, pos-start);
+
+    // find the nonce
+    pos = header->Find("nonce=\"");
+    if (pos < 0) return BLT_ERROR_PROTOCOL_FAILURE;
+    start = pos+7;
+    pos = header->Find("\"", start);
+    if (pos < 0) return BLT_ERROR_PROTOCOL_FAILURE;
+    m_AuthenticationNonce = header->SubString(start, pos-start);
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    RaopOutput::Authorization
++---------------------------------------------------------------------*/
+NPT_String
+RaopOutput::Authorization(const char* method, const char* uri)
+{
+    NPT_Digest* md5 = NULL;
+    
+    NPT_DataBuffer ha1;
+    NPT_String a1 = "iTunes:";
+    a1 += m_AuthenticationRealm;
+    a1 += ":";
+    a1 += m_AuthenticationPassword;
+    NPT_Digest::Create(NPT_Digest::ALGORITHM_MD5, md5);
+    md5->Update((const NPT_UInt8*)a1.GetChars(), a1.GetLength());
+    md5->GetDigest(ha1);
+    delete md5;
+
+    NPT_DataBuffer ha2;
+    NPT_String a2 = method;
+    a2 += ":";
+    a2 += uri;
+    NPT_Digest::Create(NPT_Digest::ALGORITHM_MD5, md5);
+    md5->Update((const NPT_UInt8*)a2.GetChars(), a2.GetLength());
+    md5->GetDigest(ha2);
+    delete md5;
+    
+    NPT_DataBuffer hresponse;
+    NPT_String hex_ha1 = NPT_HexString(ha1.GetData(), ha1.GetDataSize(), NULL, false);
+    NPT_String hex_ha2 = NPT_HexString(ha2.GetData(), ha2.GetDataSize(), NULL, false);
+    NPT_String response = hex_ha1 + ":" + m_AuthenticationNonce + ":" + hex_ha2;
+    NPT_Digest::Create(NPT_Digest::ALGORITHM_MD5, md5);
+    md5->Update((const NPT_UInt8*)response.GetChars(), response.GetLength());
+    md5->GetDigest(hresponse);
+    delete md5;
+    
+    NPT_String authorization = "Digest username=\"iTunes\", realm=\"";
+    authorization += m_AuthenticationRealm;
+    authorization += "\", nonce=\"";
+    authorization += m_AuthenticationNonce;
+    authorization += "\", uri=\"";
+    authorization += uri;
+    authorization += "\", response=\"";
+    authorization += NPT_HexString(hresponse.GetData(), hresponse.GetDataSize(), NULL, false);
+    authorization += "\"";
+    
+    return authorization;
 }
 
 /*----------------------------------------------------------------------
@@ -592,7 +750,8 @@ NPT_Result RaopOutput::SendRequest(const char*        command,
                                    const char*        exta_headers,
                                    const char*        body, 
                                    const char*        mime_type,
-                                   NPT_HttpResponse*& response)
+                                   NPT_HttpResponse*& response,
+                                   bool               recurse)
 {
     NPT_String request = command;
     request += " ";
@@ -615,6 +774,11 @@ NPT_Result RaopOutput::SendRequest(const char*        command,
     request += "DACP-ID: ";
     request += m_InstanceId;
     request += "\r\n";
+    if (m_AuthenticationNonce.GetLength()) {
+        request += "Authorization: ";
+        request += Authorization(command, resource);
+        request += "\r\n";
+    }
     if (body) {
         if (mime_type) {
             request += "Content-Type: ";
@@ -655,7 +819,26 @@ NPT_Result RaopOutput::SendRequest(const char*        command,
         ATX_LOG_WARNING_2("response code is not 200 (%d:%s)", 
                           response->GetStatusCode(), 
                           response->GetReasonPhrase().GetChars());
-        return BLT_ERROR_PROTOCOL_FAILURE;
+        switch (response->GetStatusCode()) {
+            case 401:
+                if (recurse) {
+                    // we're already authenticating, something's wrong
+                    return BLT_ERROR_ACCESS_DENIED;
+                }
+                result = ParseAuthentication(response->GetHeaders().GetHeaderValue("WWW-Authenticate"));
+                if (NPT_FAILED(result)) {
+                    return BLT_ERROR_ACCESS_DENIED;
+                }
+                delete response; 
+                response = NULL;
+                return SendRequest(command, resource, exta_headers, body, mime_type, response, true);
+                
+            case 453:
+                return BLT_ERROR_DEVICE_BUSY;
+            
+            default:
+                return BLT_ERROR_PROTOCOL_FAILURE;
+        }
     }
     
     NPT_HttpEntity* response_entity = new NPT_HttpEntity(response->GetHeaders());
@@ -705,77 +888,93 @@ RaopOutput::CreateUdpSocket(unsigned int& port, NPT_UdpSocket*& socket)
 NPT_Result
 RaopOutput::Connect()
 {
-    // resolve the hostname
-    NPT_Result result = m_RemoteIpAddress.ResolveName(m_RemoteHostname);
-    if (NPT_FAILED(result)) {
-        ATX_LOG_WARNING_1("failed to resolve remote hostname (%d)", result);
-        return BLT_ERROR_NO_SUCH_DEVICE;
-    }
-    NPT_SocketAddress remote_address(m_RemoteIpAddress, m_RemotePort);
-    
-    // connect to the remote
-    NPT_TcpClientSocket socket;
-    result = socket.Connect(remote_address, BLT_RAOP_DEFAULT_CONNECT_TIMEOUT);
-    if (NPT_FAILED(result)) {
-        ATX_LOG_WARNING_1("failed to connect to remote (%d)", result);
-        return result;
-    }
-    NPT_InputStreamReference input_stream;
-    socket.GetInputStream(input_stream);
-    m_ControlInputStream = new NPT_BufferedInputStream(input_stream);
-    socket.GetOutputStream(m_ControlOutputStream);
-    
-    // get the socket info
-    NPT_SocketInfo socket_info;
-    socket.GetInfo(socket_info);
-    
-    // compute the session ID and client ID
-    NPT_TimeStamp now;
-    NPT_System::GetCurrentTimeStamp(now);
-    NPT_Digest* digest = NULL;
-    NPT_Digest::Create(NPT_Digest::ALGORITHM_SHA1, digest);
-    digest->Update((const NPT_UInt8*)&now, sizeof(now));
-    digest->Update((const NPT_UInt8*)&socket_info, sizeof(socket_info));
-    NPT_DataBuffer random_data;
-    digest->GetDigest(random_data);
-    if (m_InstanceId.IsEmpty()) {
-        m_InstanceId = NPT_HexString(random_data.GetData(), 8, NULL, true);
-    }
-    m_ClientSessionId = NPT_String::FromIntegerU((NPT_UInt32)now.ToMillis());
-    m_LocalIpAddress  = socket_info.local_address.GetIpAddress();
-    m_RemoteIpAddress = socket_info.remote_address.GetIpAddress();
-    m_RtspRecordUrl   = "rtsp://";
-    m_RtspRecordUrl  += m_LocalIpAddress.ToString();
-    m_RtspRecordUrl  += "/";
-    m_RtspRecordUrl  += m_ClientSessionId;
-    m_ConnectionSequence = 1;
-    
-    // go through the post-connect protocol sequence
-    if (!m_OptionsReceived) {
-        result = Options();
+    if (!m_Connected) {
+        // resolve the hostname
+        NPT_Result result = m_RemoteIpAddress.ResolveName(m_RemoteHostname);
         if (NPT_FAILED(result)) {
-            ATX_LOG_WARNING_1("OPTIONS failed (%d)", result);
+            ATX_LOG_WARNING_1("failed to resolve remote hostname (%d)", result);
+            return BLT_ERROR_NO_SUCH_DEVICE;
         }
+        NPT_SocketAddress remote_address(m_RemoteIpAddress, m_RemotePort);
+        
+        // clear any existing connections
+        m_ControlInputStream  = NULL;
+        m_ControlOutputStream = NULL;
+        m_AudioOutputStream   = NULL;
+        
+        // connect to the remote
+        NPT_TcpClientSocket socket;
+        result = socket.Connect(remote_address, BLT_RAOP_DEFAULT_CONNECT_TIMEOUT);
+        if (NPT_FAILED(result)) {
+            ATX_LOG_WARNING_1("failed to connect to remote (%d)", result);
+            return result;
+        }
+        socket.SetReadTimeout(BLT_RAOP_DEFAULT_IO_TIMEOUT);
+        socket.SetWriteTimeout(BLT_RAOP_DEFAULT_IO_TIMEOUT);
+        NPT_InputStreamReference input_stream;
+        socket.GetInputStream(input_stream);
+        m_ControlInputStream = new NPT_BufferedInputStream(input_stream);
+        socket.GetOutputStream(m_ControlOutputStream);
+        
+        // get the socket info
+        NPT_SocketInfo socket_info;
+        socket.GetInfo(socket_info);
+            
+        // compute the session ID and client ID
+        NPT_TimeStamp now;
+        NPT_System::GetCurrentTimeStamp(now);
+        NPT_Digest* digest = NULL;
+        NPT_Digest::Create(NPT_Digest::ALGORITHM_SHA1, digest);
+        digest->Update((const NPT_UInt8*)&now, sizeof(now));
+        digest->Update((const NPT_UInt8*)&socket_info, sizeof(socket_info));
+        NPT_DataBuffer random_data;
+        digest->GetDigest(random_data);
+        if (m_InstanceId.IsEmpty()) {
+            m_InstanceId = NPT_HexString(random_data.GetData(), 8, NULL, true);
+        }
+        m_ClientSessionId = NPT_String::FromIntegerU((NPT_UInt32)now.ToMillis());
+        m_LocalIpAddress  = socket_info.local_address.GetIpAddress();
+        m_RemoteIpAddress = socket_info.remote_address.GetIpAddress();
+        m_RtspRecordUrl   = "rtsp://";
+        m_RtspRecordUrl  += m_LocalIpAddress.ToString();
+        m_RtspRecordUrl  += "/";
+        m_RtspRecordUrl  += m_ClientSessionId;
+        m_ConnectionSequence = 1;
+        
+        m_Connected = true;
     }
-    result = Announce();
-    if (NPT_FAILED(result)) {
-        ATX_LOG_WARNING_1("ANNOUNCE failed (%d)", result);
-        return result;
-    }
-    result = Setup();
-    if (NPT_FAILED(result)) {
-        ATX_LOG_WARNING_1("SETUP failed (%d)", result);
-        return result;
-    }
-    //if (!m_VolumeReceived) {
-    //    result = GetParameter("volume\r\n");
-    //}
-    result = Record();
-    if (NPT_FAILED(result)) {
-        ATX_LOG_WARNING_1("RECORD failed (%d)", result);
-        return result;
-    }
+    
+    if (!m_Setup) {
+        // go through the post-connect protocol sequence
+        NPT_Result result;
+        if (!m_OptionsReceived) {
+            result = Options();
+            if (NPT_FAILED(result)) {
+                ATX_LOG_WARNING_1("OPTIONS failed (%d)", result);
+            }
+        }
+        result = Announce();
+        if (NPT_FAILED(result)) {
+            ATX_LOG_WARNING_1("ANNOUNCE failed (%d)", result);
+            return result;
+        }
+        result = Setup();
+        if (NPT_FAILED(result)) {
+            ATX_LOG_WARNING_1("SETUP failed (%d)", result);
+            return result;
+        }
+        result = Record();
+        if (NPT_FAILED(result)) {
+            ATX_LOG_WARNING_1("RECORD failed (%d)", result);
+            return result;
+        }
+        if (m_VolumePending) {
+            SetVolume(m_Volume);
+        }
 
+        m_Setup = true;
+    }
+    
     return BLT_SUCCESS;
 }
 
@@ -785,6 +984,8 @@ RaopOutput::Connect()
 NPT_Result
 RaopOutput::Options()
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     NPT_String extra_headers = "Apple-Challenge: AAAAAAAAAAAAAAAAAAAAAA\r\n";
 
     NPT_HttpResponse* response = NULL;
@@ -816,6 +1017,8 @@ RaopOutput::Options()
 NPT_Result
 RaopOutput::Announce()
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     // reset the server session ID
     m_ServerSessionId = "";
     
@@ -863,6 +1066,8 @@ RaopOutput::Announce()
 NPT_Result
 RaopOutput::Setup()
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     NPT_Result result;
     
     NPT_String extra_headers;
@@ -944,13 +1149,15 @@ RaopOutput::Setup()
         if (control_port_position > 0) {
             NPT_ParseInteger(transport->GetChars()+control_port_position+14, m_ServerControlPort, true);
             ATX_LOG_FINE_1("control_port=%d", m_ServerControlPort);
+            NPT_SocketAddress control_address(m_RemoteIpAddress, m_ServerControlPort);
+            m_ControlSocket->Connect(control_address);
         }
         int timing_port_position = transport->Find(";timing_port=");
         if (timing_port_position > 0) {
             NPT_ParseInteger(transport->GetChars()+timing_port_position+13, m_ServerTimingPort, true);
             ATX_LOG_FINE_1("timing_port=%d", m_ServerTimingPort);
-            NPT_SocketAddress timing_address(m_RemoteIpAddress, m_ServerTimingPort);
-            m_TimingSocket->Connect(timing_address);
+            //NPT_SocketAddress timing_address(m_RemoteIpAddress, m_ServerTimingPort);
+            //m_TimingSocket->Connect(timing_address);
         }
     }
     
@@ -972,6 +1179,8 @@ RaopOutput::Setup()
 NPT_Result
 RaopOutput::GetParameter(const char* parameter)
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("GET_PARAMETER", 
                                     m_RtspRecordUrl, 
@@ -1001,6 +1210,8 @@ RaopOutput::GetParameter(const char* parameter)
 NPT_Result
 RaopOutput::SetParameter(const char* parameter)
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("SET_PARAMETER", 
                                     m_RtspRecordUrl, 
@@ -1022,14 +1233,16 @@ RaopOutput::SetParameter(const char* parameter)
 NPT_Result
 RaopOutput::Record()
 {
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
     // reset RTP info
     m_RtpSequence = 0;
-    m_RtpTime= 0;
+    m_RtpTime= BLT_RAOP_RTP_TIME_ORIGIN;
     m_RtpMarker = true;
     
     // send request
     NPT_String extra_headers = "Range: ntp=0-\r\n"
-                               "RTP-Info: seq=0;rtptime=0\r\n";
+                               "RTP-Info: seq=0;rtptime=" BLT_RAOP_RTP_TIME_ORIGIN_STR "\r\n";
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("RECORD", 
                                     m_RtspRecordUrl, 
@@ -1058,6 +1271,8 @@ RaopOutput::Record()
             ATX_LOG_WARNING_1("failed to connect to audio port (%d)", result);
             return result;
         }
+        audio_socket.SetReadTimeout(BLT_RAOP_DEFAULT_IO_TIMEOUT);
+        audio_socket.SetWriteTimeout(BLT_RAOP_DEFAULT_IO_TIMEOUT);
         audio_socket.GetOutputStream(m_AudioOutputStream);
     } else if (m_Version == 1) {
         result = m_RtpSocket->Connect(server_addr);
@@ -1088,7 +1303,11 @@ RaopOutput::Record()
 NPT_Result
 RaopOutput::Flush()
 {
-    NPT_String extra_headers = "RTP-Info: seq=0;rtptime=0\r\n";
+    if (!m_Connected) return BLT_SUCCESS;
+    
+    NPT_String extra_headers = NPT_String::Format("RTP-Info: seq=%d;rtptime=%d\r\n",
+                                                  m_RtpSequence,
+                                                  BLT_RAOP_RTP_TIME_ORIGIN/*m_RtpTime*/);
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("FLUSH", 
                                     m_RtspRecordUrl, 
@@ -1103,6 +1322,10 @@ RaopOutput::Flush()
     
     // flush internal buffers
     m_AudioBufferFullness = 0;
+    m_RtpTime = BLT_RAOP_RTP_TIME_ORIGIN;
+    m_RtpSequence = 0;
+    m_AudioResampleBuffer[0] = 0;
+    m_AudioResampleBuffer[1] = 0;
     
     return result;
 }
@@ -1113,6 +1336,8 @@ RaopOutput::Flush()
 NPT_Result
 RaopOutput::Teardown()
 {
+    if (!m_Connected) return BLT_SUCCESS;
+
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("TEARDOWN", 
                                     m_RtspRecordUrl, 
@@ -1125,7 +1350,11 @@ RaopOutput::Teardown()
     DiscardResponseBody(response);
     delete response;    
     
-    Reset();
+    // partial reset of the state
+    m_Setup = false;
+    m_AudioBufferFullness = 0;
+    m_RtpTime = BLT_RAOP_RTP_TIME_ORIGIN;
+    m_RtpSequence = 0;
     
     return result;
 }
@@ -1136,11 +1365,15 @@ RaopOutput::Teardown()
 void
 RaopOutput::Reset()
 {
+    m_Connected           = false;
+    m_Setup               = false;
     m_ControlInputStream  = NULL;
     m_ControlOutputStream = NULL;
     m_AudioOutputStream   = NULL;
     m_AudioBufferFullness = 0;
     m_ConnectionSequence  = 1;
+    m_RtpSequence         = 0;
+    m_RtpTime             = BLT_RAOP_RTP_TIME_ORIGIN;
 }
 
 /*----------------------------------------------------------------------
@@ -1198,7 +1431,16 @@ RaopOutput::SendAudioBuffer()
         alac.Write(sample, 16);
     }
     
+    // auto-reconnect if needed
     NPT_Result result;
+    if (!m_Connected || !m_Setup) {
+        result = Connect();
+        if (NPT_FAILED(result)) {
+            ATX_LOG_WARNING("failed to auto-reconnect");
+            return result;
+        }
+    }
+
     if (m_Version == 0) {
         // compute the header
         NPT_UInt8 header[16] = {
@@ -1213,72 +1455,77 @@ RaopOutput::SendAudioBuffer()
         NPT_DataBuffer payload;
         payload.SetDataSize(16+alac_size);
         NPT_CopyMemory(payload.UseData(), header, 16);
-        Encrypt(alac.m_Data, payload.UseData()+16, alac_size);
+        if (m_UseEncryption) {
+            Encrypt(alac.m_Data, payload.UseData()+16, alac_size);
+        }
     
         ATX_LOG_FINER("sending audio buffer over TCP");
         result = m_AudioOutputStream->WriteFully(payload.GetData(), payload.GetDataSize());
         if (NPT_FAILED(result)) {
             ATX_LOG_FINER_1("WriteFully failed (%d)", result);
+            if (result == NPT_ERROR_CONNECTION_RESET || result == NPT_ERROR_CONNECTION_ABORTED) {
+                ATX_LOG_WARNING("audio connection reset, reconnecting");
+                Reset();
+            }
         }
     } else {
         // compute the header
         NPT_UInt8 rtp_header[12];
         rtp_header[0] = 0x80;
-        rtp_header[1] = BLT_RAOP_RTP_PACKET_TYPE_AUDIO | (m_RtpMarker?0x80:0);
+        rtp_header[1] = BLT_RAOP_RTP_PACKET_TYPE_AUDIO | (m_RtpMarker?BLT_RAOP_RTP_PACKET_FLAG_MARKER_BIT:0);
         NPT_BytesFromInt16Be(&rtp_header[2], m_RtpSequence);
         NPT_BytesFromInt32Be(&rtp_header[4], m_RtpTime);
         NPT_SetMemory(&rtp_header[8], 0, 4);
                 
-        // FIXME: testing
-        if (((m_RtpSequence+1)%126) == 0) {
-            static bool first_sync = true;
+        // send SYNC packets at regular intervals
+        if (((m_RtpSequence)%BLT_RAOP_SYNC_PACKET_INTERVAL) == 0) {
+            bool first_sync = m_RtpTime == BLT_RAOP_RTP_TIME_ORIGIN;
             NPT_DataBuffer sync_packet;
             sync_packet.SetDataSize(20);
             unsigned char* payload = sync_packet.UseData();
-            payload[0] = 0x80;
-            payload[1] = BLT_RAOP_RTP_PACKET_TYPE_SYNC | (first_sync?0x80:0);
+            payload[0] = first_sync?0x90:0x80;
+            payload[1] = BLT_RAOP_RTP_PACKET_TYPE_SYNC | BLT_RAOP_RTP_PACKET_FLAG_MARKER_BIT;
             payload[2] = 0;
             payload[3] = 7;
-            NPT_BytesFromInt32Be(&payload[4], m_RtpTime-11025);
+            NPT_BytesFromInt32Be(&payload[4], m_RtpTime-BLT_RAOP_DEFAULT_AUDIO_LATENCY);
             NPT_BytesFromInt32Be(&payload[16], m_RtpTime);
 
             NPT_TimeStamp now;
             NPT_System::GetCurrentTimeStamp(now);
-            NPT_UInt64 now_nanos = now.ToNanos();
-            NPT_BytesFromInt32Be(&payload[8], (NPT_UInt32)(now_nanos/1000000000));
-            now_nanos -= 1000000000*(now_nanos/1000000000);
-            NPT_BytesFromInt32Be(&payload[12], (NPT_UInt32)now_nanos);
+            BLT_TimeStamp_ToNtpTime(now, &payload[8]);
             
+            ATX_LOG_FINE("sending sync packet");
             m_ControlSocket->Send(sync_packet);
-            first_sync = false;
         }
 
-        {
-            static NPT_TimeStamp start;
-            NPT_TimeStamp now;
-            NPT_System::GetCurrentTimeStamp(now);
-            if (m_RtpTime == 0) {
-                start = now;
-            } else {
-                double elapsed = (double)(now.ToNanos()-start.ToNanos())/1000000000.0;
-                double target = (double)m_RtpTime/44100.0;
-                double delta = target-elapsed;
-                if (delta > 0.1) {
-                    NPT_System::Sleep(delta);
+        // wait until it is time to send the buffer
+        NPT_TimeStamp now;
+        NPT_System::GetCurrentTimeStamp(now);
+        if (m_RtpTime == BLT_RAOP_RTP_TIME_ORIGIN) {
+            m_StartTime = now;
+        } else {
+            double elapsed = (double)(now.ToNanos()-m_StartTime.ToNanos())/1000000000.0;
+            double target = (double)(m_RtpTime-BLT_RAOP_RTP_TIME_ORIGIN)/44100.0;
+            double delta = target-elapsed;
+            if (delta > 0.001) {
+                if (delta > BLT_RAOP_MAX_DELAY) {
+                    ATX_LOG_WARNING("unexpected large delay, recalibrating");
+                    m_StartTime = now;
                 }
+                NPT_System::Sleep(delta);
             }
         }
 
         // update RTP state
-        ++m_RtpSequence;
-        m_RtpTime += 352;
         if (m_RtpMarker) m_RtpMarker = false;
                 
         // create the output audio payload
         NPT_DataBuffer payload;
         payload.SetDataSize(12+alac_size);
         NPT_CopyMemory(payload.UseData(), rtp_header, 12);
-        Encrypt(alac.m_Data, payload.UseData()+12, alac_size);
+        if (m_UseEncryption) {
+            Encrypt(alac.m_Data, payload.UseData()+12, alac_size);
+        }
     
         ATX_LOG_FINER("sending audio buffer over UDP");
         result = m_RtpSocket->Send(payload);
@@ -1286,6 +1533,10 @@ RaopOutput::SendAudioBuffer()
             ATX_LOG_FINER_1("Send failed (%d)", result);
         }        
     }
+    
+    // update RTP counters
+    ++m_RtpSequence;
+    m_RtpTime += sample_count;
     
     return result;
 }
@@ -1346,6 +1597,32 @@ RaopOutput::DrainAudio()
 }
 
 /*----------------------------------------------------------------------
+|    RaopOutput::SetVolume
++---------------------------------------------------------------------*/
+NPT_Result
+RaopOutput::SetVolume(float volume)
+{   
+    m_Volume = volume;
+    if (m_ControlOutputStream.IsNull()) {
+        m_VolumePending = true;
+        return BLT_SUCCESS;
+    }
+    m_VolumePending = false;
+    
+    // convert the scale
+    if (volume == 0.0f) {
+        volume = -144.0f;
+    } else if (volume >= 1.0f) {
+        volume = 0.0f;
+    } else {
+        volume = (30.0f*volume)-30.0f;
+    }
+    char param[256];
+    NPT_FormatString(param, 256, "volume: %f\r\n", volume);
+    return SetParameter(param);
+}
+
+/*----------------------------------------------------------------------
 |    RaopParseRtpHeader
 +---------------------------------------------------------------------*/
 static NPT_Result
@@ -1387,7 +1664,8 @@ RaopTimingThread::Run()
     
     for (;;) {
         ATX_LOG_FINE("waiting for request on timing port...");
-        NPT_Result result = m_Output.m_TimingSocket->Receive(request_buffer);
+        NPT_SocketAddress remote_address;
+        NPT_Result result = m_Output.m_TimingSocket->Receive(request_buffer, &remote_address);
         if (NPT_FAILED(result)) {
             ATX_LOG_WARNING_1("failed to read datagram (%d)", result);
             return;
@@ -1418,20 +1696,52 @@ RaopTimingThread::Run()
                 NPT_CopyMemory(&response[8], &request[24], 8);
                 NPT_TimeStamp now;
                 NPT_System::GetCurrentTimeStamp(now);
-                NPT_UInt64 now_nanos = now.ToNanos();
-                NPT_BytesFromInt32Be(&response[16], (NPT_UInt32)(now_nanos/1000000000));
-                now_nanos -= 1000000000*(now_nanos/1000000000);
-                NPT_BytesFromInt32Be(&response[20], (NPT_UInt32)now_nanos);
+                BLT_TimeStamp_ToNtpTime(now, &response[16]);
                 NPT_CopyMemory(&response[24], &response[16], 8);
-                m_Output.m_TimingSocket->Send(response_buffer);
+                m_Output.m_TimingSocket->Send(response_buffer, &remote_address);
                 break;
             }
+                
+            case BLT_RAOP_RTP_PACKET_TYPE_TERMINATE:
+                ATX_LOG_FINE("terminating timing thread");
+                return;
                 
             default:
                 ATX_LOG_FINE("unknown request");
                 break;
         }
     }
+}
+
+/*----------------------------------------------------------------------
+|    RaopTimingThread::~RaopTimingThread
++---------------------------------------------------------------------*/
+RaopTimingThread::~RaopTimingThread()
+{
+    // send ourselves a termination packet
+    NPT_DataBuffer terminate_packet;
+    terminate_packet.SetDataSize(8);
+    unsigned char* payload = terminate_packet.UseData();
+    NPT_SetMemory(payload, 0, 8);
+    payload[0] = 0x80;
+    payload[1] = BLT_RAOP_RTP_PACKET_TYPE_TERMINATE;
+    
+    // sending kill packet to timing socket
+    NPT_UdpSocket kill_socket;
+    NPT_SocketInfo socket_info;
+    m_Output.m_TimingSocket->GetInfo(socket_info);
+    NPT_IpAddress localhost;
+    localhost.ResolveName("localhost");
+    socket_info.local_address.SetIpAddress(localhost);
+    kill_socket.Send(terminate_packet, &socket_info.local_address);
+    
+    // wait for thread to terminate
+    ATX_LOG_FINE("waiting for thread to terminate");
+    NPT_Result result = Wait(BLT_RAOP_MAX_THREAD_WAIT_TIMEOUT);
+    if (result == NPT_ERROR_TIMEOUT) {
+        ATX_LOG_WARNING("timed out waiting for thread");
+    }
+    ATX_LOG_FINE("thread terminated");
 }
 
 /*----------------------------------------------------------------------
@@ -1477,14 +1787,20 @@ RaopOutput_Create(BLT_Module*              module,
         return BLT_ERROR_INVALID_PARAMETERS;
     }
     
+    NPT_String password;
+    int pos = hostname.Find('@');
+    if (pos >= 0) {
+        password.Assign(hostname.GetChars(), pos);
+        hostname = hostname.GetChars()+pos+1;
+    }
+    
     /* allocate memory for the object */
     self = (_RaopOutput*)ATX_AllocateZeroMemory(sizeof(_RaopOutput));
     if (self == NULL) {
         *object = NULL;
         return BLT_ERROR_OUT_OF_MEMORY;
     }
-    self->object = new RaopOutput(version, hostname, port);
-    self->volume = 1.0f;
+    self->object = new RaopOutput(version, hostname, port, password);
     
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
@@ -1535,7 +1851,7 @@ RaopOutputModule_Probe(BLT_Module*              self,
                 return BLT_FAILURE;
             }
 
-            /* the name should be 'raop://hostname:port' */
+            /* the name should be 'raop://[password@]hostname:port' */
             if (constructor->name == NULL ||
                 (!ATX_StringsEqualN(constructor->name, "raop://",  7) &&
                  !ATX_StringsEqualN(constructor->name, "raopt://", 8))) {

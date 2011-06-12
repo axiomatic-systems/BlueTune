@@ -60,6 +60,9 @@ BtPlayerServer::BtPlayerServer(const char* web_root, unsigned int port) :
     
     // attach ourselves as a dynamic handler for commands
     m_HttpServer->AddRequestHandler(this, "/player", true);
+
+    // attach ourselves as the top level handler
+    m_HttpServer->AddRequestHandler(this, "/", false);
 }
 
 /*----------------------------------------------------------------------
@@ -330,6 +333,13 @@ BtPlayerServer::SetupResponse(NPT_HttpRequest&              request,
     NPT_AutoLock lock(m_Lock);
     
     // handle form requests
+    if (path == "/") {
+        response.GetHeaders().SetHeader("Location", "/control/ajax");
+        response.SetStatus(301, "Moved Permanently");
+        return BLT_SUCCESS;
+    }
+
+    // handle form requests
     if (path == "/control/form") {
         return SendControlForm(response, NULL);
     }
@@ -350,8 +360,15 @@ BtPlayerServer::SetupResponse(NPT_HttpRequest&              request,
         const char* name_field = query.GetField("name");
         if (name_field) {
             NPT_String name = NPT_UrlQuery::UrlDecode(name_field);
-            printf("BtPlayerServer::SetupResponse - set-input %s\n", name.GetChars());
             m_Player.SetInput(name);
+        } else {
+            form_msg = "INVALID PARAMETERS";
+        }
+    } else if (path == "/player/set-output") {
+        const char* name_field = query.GetField("name");
+        if (name_field) {
+            NPT_String name = NPT_UrlQuery::UrlDecode(name_field);
+            m_Player.SetOutput(name);
         } else {
             form_msg = "INVALID PARAMETERS";
         }
@@ -443,12 +460,44 @@ void
 BtPlayerServer::OnStreamInfoNotification(BLT_Mask update_mask, BLT_StreamInfo& info)
 {       
     NPT_AutoLock lock(m_Lock);
-    unsigned int mask = m_StreamInfo.mask|update_mask;
-    ATX_DESTROY_CSTRING(m_StreamInfo.data_type);
-    m_StreamInfo = info;
-    m_StreamInfo.mask = mask;
-    m_StreamInfo.data_type = NULL;
-    ATX_SET_CSTRING(m_StreamInfo.data_type, info.data_type);
+    m_StreamInfo.mask |= update_mask;
+    if (update_mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
+        m_StreamInfo.average_bitrate = info.average_bitrate;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
+        m_StreamInfo.instant_bitrate = info.instant_bitrate;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
+        m_StreamInfo.nominal_bitrate = info.nominal_bitrate;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
+        m_StreamInfo.channel_count = info.channel_count;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
+        m_StreamInfo.sample_rate = info.sample_rate;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_DURATION) {
+        m_StreamInfo.duration = info.duration;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_SIZE) {
+        m_StreamInfo.size = info.size;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_WIDTH) {
+        m_StreamInfo.width = info.width;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_HEIGHT) {
+        m_StreamInfo.height = info.height;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_ID) {
+        m_StreamInfo.id = info.id;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_TYPE) {
+        m_StreamInfo.type = info.type;
+    }
+    if (update_mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
+        ATX_DESTROY_CSTRING(m_StreamInfo.data_type);
+        ATX_SET_CSTRING(m_StreamInfo.data_type, info.data_type);
+    }
 }
 
 /*----------------------------------------------------------------------

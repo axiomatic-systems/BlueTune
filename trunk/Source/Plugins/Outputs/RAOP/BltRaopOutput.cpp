@@ -1031,7 +1031,13 @@ RaopOutput::Announce()
         "t=0 0\r\n"
         "m=audio 0 RTP/AVP 96\r\n"
         "a=rtpmap:96 AppleLossless\r\n"
-        "a=fmtp:96 %d 0 16 40 10 14 2 255 0 0 44100\r\n"
+        "a=fmtp:96 %d 0 16 40 10 14 2 255 0 0 44100\r\n",
+        m_ClientSessionId.GetChars(), 
+        m_LocalIpAddress.ToString().GetChars(), 
+        m_RemoteIpAddress.ToString().GetChars(),
+        (m_Version==0)?4096:352);
+    if (m_UseEncryption) {
+        sdp += 
         "a=rsaaeskey:"
         "ruhL6ogbzAZwHFR/53gmXCPGslyJxhUOaJCUeISYt93/h7CsNLP0jeMt"
         "pMH8P6xktJXvlh8uws8GqjnBo2uskF01okfgUsfTXuqhTmeLH+E8spox"
@@ -1040,12 +1046,9 @@ RaopOutput::Announce()
         "iEJpuD75I/lw+hyIGlZwKfgztkck+YKzdE+tANWCvwG/XNOALDwsVD0z"
         "TnAcx1qAicFC5eQAzkBC8M8TdAFshdHdwkMk7pYnWX4eown4YEg1sZFq"
         "tTp4Kg\r\n"
-        "a=aesiv:AAAAAAAAAAAAAAAAAAAAAA\r\n",
-        m_ClientSessionId.GetChars(), 
-        m_LocalIpAddress.ToString().GetChars(), 
-        m_RemoteIpAddress.ToString().GetChars(),
-        (m_Version==0)?4096:352);
-
+        "a=aesiv:AAAAAAAAAAAAAAAAAAAAAA\r\n";
+    }
+    
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("ANNOUNCE", 
                                     m_RtspRecordUrl, 
@@ -1278,14 +1281,6 @@ RaopOutput::Record()
         result = m_RtpSocket->Connect(server_addr);
         if (NPT_FAILED(result)) {
             ATX_LOG_WARNING_1("failed to connect to audio port (%d)", result);
-            return result;
-        }
-
-        // connect to the control socket
-        server_addr.SetPort(m_ControlPort);
-        result = m_ControlSocket->Connect(server_addr);
-        if (NPT_FAILED(result)) {
-            ATX_LOG_WARNING_1("failed to connect to control port (%d)", result);
             return result;
         }
     } else {

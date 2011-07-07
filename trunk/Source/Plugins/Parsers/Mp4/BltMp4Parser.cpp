@@ -253,8 +253,8 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
             if (BLT_FAILED(result)) return BLT_ERROR_NO_MEDIA_KEY;
             key.SetDataSize(key_size);
             
-            AP4_PiffSampleDecrypter* decrypter = NULL;
-            result = AP4_PiffSampleDecrypter::Create(sample_description,
+            AP4_CencSampleDecrypter* decrypter = NULL;
+            result = AP4_CencSampleDecrypter::Create(sample_description,
                                                      traf,
                                                      key.GetData(),
                                                      key.GetDataSize(),

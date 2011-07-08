@@ -244,9 +244,9 @@ BLT_METHOD
 RaopOutput_PutPacket(BLT_PacketConsumer* _self,
                      BLT_MediaPacket*    packet)
 {
-    RaopOutput*             self = ATX_SELF(_RaopOutput, BLT_PacketConsumer)->object;
-    const BLT_PcmMediaType* media_type;
-    BLT_Result              result;
+    RaopOutput*          self = ATX_SELF(_RaopOutput, BLT_PacketConsumer)->object;
+    const BLT_MediaType* media_type;
+    BLT_Result           result;
 
     /* check parameters */
     if (packet == NULL) {
@@ -254,18 +254,19 @@ RaopOutput_PutPacket(BLT_PacketConsumer* _self,
     }
 
     /* get the media type */
-    result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+    result = BLT_MediaPacket_GetMediaType(packet, &media_type);
     if (BLT_FAILED(result)) return result;
-
+    
     /* check the media type */
-    if (media_type->base.id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+    if (media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
-    if ((media_type->sample_rate != 44100 /*&& 
-         media_type->sample_rate != 22050*/) ||      
-        media_type->channel_count != 2 ||
-        media_type->bits_per_sample != 16 ||
-        media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
+    const BLT_PcmMediaType* pcm_media_type = (const BLT_PcmMediaType*)media_type;
+    if ((pcm_media_type->sample_rate != 44100 /*&& 
+         pcm_media_type->sample_rate != 22050*/) ||      
+        pcm_media_type->channel_count != 2 ||
+        pcm_media_type->bits_per_sample != 16 ||
+        pcm_media_type->sample_format != BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE) {
         return BLT_ERROR_NOT_SUPPORTED;
     }
     const signed short* audio_data      = (const signed short*)BLT_MediaPacket_GetPayloadBuffer(packet);
@@ -276,7 +277,7 @@ RaopOutput_PutPacket(BLT_PacketConsumer* _self,
     // NOTE: this is a very crude linear interpolator, which should
     // be replaced by a proper band-limited sample rate converter
     NPT_DataBuffer converted;
-    if (media_type->sample_rate == 22050) {
+    if (pcm_media_type->sample_rate == 22050) {
         unsigned int sample_count = audio_data_size/4;
         audio_data_size *= 2;
         converted.SetDataSize(audio_data_size);
@@ -306,7 +307,7 @@ RaopOutput_PutPacket(BLT_PacketConsumer* _self,
     // send the audio data
     result = self->AddAudio(audio_data, 
                             audio_data_size,
-                            media_type);
+                            pcm_media_type);
     
     return result;
 }

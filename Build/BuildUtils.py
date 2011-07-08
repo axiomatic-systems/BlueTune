@@ -265,7 +265,7 @@ class CompiledModule(Module):
         # and compute the list of source files to build
         sources = []
         for directory in build_source_dirs:
-            env.BuildDir(directory, GetDirPath(directory), duplicate=0)
+            env.VariantDir(directory, GetDirPath(directory), duplicate=0)
             sources += GlobSources(directory, build_source_patterns, excluded_files)
             
         # add cherry-picked files
@@ -280,7 +280,7 @@ class CompiledModule(Module):
                 directory_path = directory[1:]
             else:
                 directory_path = source_root+'/'+directory
-            env.BuildDir(directory_path, GetDirPath(directory_path), duplicate=0)
+            env.VariantDir(directory_path, GetDirPath(directory_path), duplicate=0)
             sources += GlobSources(directory_path, pattern)
 
         # check that the source list is not empty

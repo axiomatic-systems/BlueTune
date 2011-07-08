@@ -6214,6 +6214,7 @@
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				ONLY_ACTIVE_ARCH = NO;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 				VALID_ARCHS = "i386 x86_64 ppc";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv6 armv7";
@@ -6257,6 +6258,7 @@
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				ONLY_ACTIVE_ARCH = NO;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 				VALID_ARCHS = "i386 x86_64 ppc";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv6 armv7";
@@ -6370,6 +6372,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = BtCocoaPlayer;
+				SUPPORTED_PLATFORMS = macosx;
 				VALID_ARCHS = "i386 x86_64 ppc";
 			};
 			name = Debug;
@@ -6388,6 +6391,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = BtCocoaPlayer;
+				SUPPORTED_PLATFORMS = macosx;
 				VALID_ARCHS = "i386 x86_64 ppc";
 			};
 			name = Release;

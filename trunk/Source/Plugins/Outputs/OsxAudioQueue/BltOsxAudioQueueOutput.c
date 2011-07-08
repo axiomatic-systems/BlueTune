@@ -222,6 +222,7 @@ Mp4AudioDecoderConfig_ParseAudioObjectType(Mp4AudioDecoderConfig* self,
                                            Mp4AudioDsiParser*     parser, 
                                            ATX_UInt8*             object_type)
 {
+    BLT_COMPILER_UNUSED(self);
     if (Mp4AudioDsiParser_BitsLeft(parser) < 5) return BLT_ERROR_INVALID_MEDIA_FORMAT;
     *object_type = (ATX_UInt8)Mp4AudioDsiParser_ReadBits(parser, 5);
 	if (*object_type == 31) {
@@ -285,6 +286,8 @@ Mp4AudioDecoderConfig_ParseSamplingFrequency(Mp4AudioDecoderConfig* self,
                                              unsigned int*          sampling_frequency_index,
                                              unsigned int*          sampling_frequency)
 {
+    BLT_COMPILER_UNUSED(self);
+
     if (Mp4AudioDsiParser_BitsLeft(parser) < 4) {
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
@@ -465,6 +468,8 @@ OsxAudioQueueOutput_PropertyCallback(void*                _self,
     UInt32               is_running = false;
     UInt32               property_size = sizeof(UInt32);
     OSStatus             status;
+    
+    BLT_COMPILER_UNUSED(property_id);
     
     status = AudioQueueGetProperty(queue, kAudioQueueProperty_IsRunning, &is_running, &property_size);
     if (status != noErr) {

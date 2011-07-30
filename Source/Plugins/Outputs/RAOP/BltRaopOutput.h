@@ -22,6 +22,27 @@
  * devices.
  * 'raop://[password@]<hostname>:<port>' for version 2 (UDP), supported by 
  * newer devices.
+ *
+ * This output module will also send text and image metadata if the stream
+ * property "Metadata.Json" is set. This property, if set, must be encoded
+ * as a JSON object, with one or more of the following fields:
+ *   "name": Track name
+ *   "artist": Artist name
+ *   "album": Album name
+ *   "art": object containing an image, as a JSON object with these fields:
+ *     "type": mime type of the image data
+ *     "image": image data, encoded in Base64
+ *
+ * Example:
+ * { 
+ *    "name":" Frou Frou", 
+ *    "artist": "Blabla", 
+ *    "album": "Test Album", 
+ *    "art": { 
+ *        "type": "image/png", 
+ *        "image": "iVBORw0KGgoAA [...] "
+ *    }
+ * }
  * @{
  */
 

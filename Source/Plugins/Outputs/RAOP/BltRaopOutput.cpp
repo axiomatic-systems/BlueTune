@@ -38,7 +38,7 @@ const unsigned int BLT_RAOP_SYNC_PACKET_INTERVAL    = 126;
 const float        BLT_RAOP_MAX_DELAY               = 2.0;
 const unsigned int BLT_RAOP_MAX_THREAD_WAIT_TIMEOUT = 3000; // 3 seconds
 const unsigned int BLT_RAOP_DEFAULT_AUDIO_LATENCY   = 88200; // 2 seconds @ 44.1kHz
-const unsigned int BLT_RAOP_RTP_TIME_ORIGIN         = 11025; //88200;
+const unsigned int BLT_RAOP_RTP_TIME_ORIGIN         = 88200;
 #define BLT_RAOP_RTP_TIME_ORIGIN_STR "88200"
 
 #define BLT_RAOP_OUTPUT_USER_AGENT "BlueTune/1.0"
@@ -89,6 +89,14 @@ public:
                            const char*        mime_type,
                            NPT_HttpResponse*& response,
                            bool               recurse = false);
+    NPT_Result SendRequest(const char*          command, 
+                           const char*          resource,
+                           const char*          extra_headers,
+                           const unsigned char* body, 
+                           unsigned int         body_length,
+                           const char*          mime_type,
+                           NPT_HttpResponse*&   response,
+                           bool                 recurse = false);
     NPT_String Authorization(const char* method, const char* uri);
     NPT_Result ParseAuthentication(const NPT_String* header);
     NPT_Result Options();
@@ -96,6 +104,10 @@ public:
     NPT_Result Setup();
     NPT_Result GetParameter(const char* parameter);
     NPT_Result SetParameter(const char* parameter);
+    NPT_Result SetParameter(const unsigned char* parameter,
+                            unsigned int         parameter_length,
+                            const char*          mime_type,
+                            const char*          extra_headers = NULL);
     NPT_Result Record();
     NPT_Result Flush();
     //NPT_Result Pause();
@@ -106,6 +118,8 @@ public:
     NPT_Result DrainAudio();
     NPT_Result SendAudioBuffer();
     NPT_Result SetVolume(float volume);
+    NPT_Result SetMetadata(const char* metadata);
+    NPT_Result UpdateMetadata();
     void       Encrypt(const unsigned char* in, unsigned char* out, unsigned int size);
     void       Reset();
     
@@ -123,6 +137,7 @@ public:
     bool                             m_OptionsReceived;
     float                            m_Volume;
     bool                             m_VolumePending;
+    NPT_String                       m_Metadata;
     NPT_String                       m_AuthenticationNonce;
     NPT_String                       m_AuthenticationRealm;
     NPT_String                       m_AuthenticationPassword;
@@ -170,8 +185,10 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_OutputNode);
     ATX_IMPLEMENTS(BLT_MediaPort);
     ATX_IMPLEMENTS(BLT_VolumeControl);
+    ATX_IMPLEMENTS(ATX_PropertyListener);
     
-    RaopOutput* object;
+    RaopOutput*                object;
+    ATX_PropertyListenerHandle metadata_listener_handle;
 } _RaopOutput;
 
 /*----------------------------------------------------------------------
@@ -506,15 +523,54 @@ RaopOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
 }
 
 /*----------------------------------------------------------------------
+|    RaopOutput_OnPropertyChanged
++---------------------------------------------------------------------*/
+BLT_VOID_METHOD
+RaopOutput_OnPropertyChanged(ATX_PropertyListener*    _self,
+                             ATX_CString              name,
+                             const ATX_PropertyValue* value)
+{
+    RaopOutput* self = ATX_SELF(_RaopOutput, ATX_PropertyListener)->object;
+
+    if (name && (value == NULL || value->type == ATX_PROPERTY_VALUE_TYPE_STRING)) {
+        if (ATX_StringsEqual(name, BLT_STREAM_PROPERTY_METADATA_JSON)) {
+            self->SetMetadata(value?value->data.string:NULL);
+        }
+    }
+}
+
+/*----------------------------------------------------------------------
 |   RaopOutput_Activate
 +---------------------------------------------------------------------*/
 BLT_METHOD
 RaopOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 {
-    RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
-    BLT_COMPILER_UNUSED(self);
-    BLT_COMPILER_UNUSED(stream);
-    
+    _RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode);
+
+    /* keep a reference to the stream */
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
+
+    /* listen to settings on the new stream */
+    if (stream) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
+                                                   &properties))) {
+            ATX_PropertyValue property;
+            ATX_Properties_AddListener(properties, 
+                                       BLT_STREAM_PROPERTY_METADATA_JSON,
+                                       &ATX_BASE(self, ATX_PropertyListener),
+                                       &self->metadata_listener_handle);
+
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
+                    properties,
+                    BLT_STREAM_PROPERTY_METADATA_JSON,
+                    &property)) &&
+                property.type == ATX_PROPERTY_VALUE_TYPE_STRING) {
+                self->object->SetMetadata(property.data.string);
+            }
+        }
+    }
+
     return BLT_SUCCESS;
 }
 
@@ -524,9 +580,22 @@ RaopOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
 BLT_METHOD
 RaopOutput_Deactivate(BLT_MediaNode* _self)
 {
-    RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
+    _RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode);
     
-    self->Reset();
+    self->object->Reset();
+    
+    /* remove our listener */
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
+                                                   &properties))) {
+            ATX_Properties_RemoveListener(properties, 
+                                          &self->metadata_listener_handle);
+        }
+    }
+
+    /* we're detached from the stream */
+    ATX_BASE(self, BLT_BaseMediaNode).context = NULL;
     
     return BLT_SUCCESS;
 }
@@ -541,6 +610,7 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(_RaopOutput)
     ATX_GET_INTERFACE_ACCEPT   (_RaopOutput, BLT_MediaPort)
     ATX_GET_INTERFACE_ACCEPT   (_RaopOutput, BLT_PacketConsumer)
     ATX_GET_INTERFACE_ACCEPT   (_RaopOutput, BLT_VolumeControl)
+    ATX_GET_INTERFACE_ACCEPT   (_RaopOutput, ATX_PropertyListener)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
@@ -590,6 +660,13 @@ ATX_END_INTERFACE_MAP
 ATX_BEGIN_INTERFACE_MAP(_RaopOutput, BLT_VolumeControl)
     RaopOutput_GetVolume,
     RaopOutput_SetVolume
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|    ATX_PropertyListener interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(_RaopOutput, ATX_PropertyListener)
+    RaopOutput_OnPropertyChanged
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
@@ -748,19 +825,42 @@ RaopOutput::Authorization(const char* method, const char* uri)
 +---------------------------------------------------------------------*/
 NPT_Result RaopOutput::SendRequest(const char*        command, 
                                    const char*        resource,
-                                   const char*        exta_headers,
+                                   const char*        extra_headers,
                                    const char*        body, 
                                    const char*        mime_type,
                                    NPT_HttpResponse*& response,
                                    bool               recurse)
+{
+    NPT_Size body_length = body?NPT_StringLength(body):0;
+    return SendRequest(command, 
+                       resource, 
+                       extra_headers, 
+                       (const unsigned char*)body, 
+                       body_length, 
+                       mime_type, 
+                       response, 
+                       recurse);
+}
+
+/*----------------------------------------------------------------------
+|    RaopOutput::SendRequest
++---------------------------------------------------------------------*/
+NPT_Result RaopOutput::SendRequest(const char*          command, 
+                                   const char*          resource,
+                                   const char*          extra_headers,
+                                   const unsigned char* body, 
+                                   unsigned int         body_length,
+                                   const char*          mime_type,
+                                   NPT_HttpResponse*&   response,
+                                   bool                 recurse)
 {
     NPT_String request = command;
     request += " ";
     request += resource;
     request += " ";
     request += "RTSP/1.0\r\n";
-    if (exta_headers) {
-        request += exta_headers;
+    if (extra_headers) {
+        request += extra_headers;
     }
     request += NPT_String::Format("CSeq: %u\r\n", m_ConnectionSequence++);
     if (!m_ServerSessionId.IsEmpty()) {
@@ -786,14 +886,20 @@ NPT_Result RaopOutput::SendRequest(const char*        command,
             request += mime_type;
             request += "\r\n";
         }
-        request += NPT_String::Format("Content-Length: %u\r\n\r\n", NPT_StringLength(body));
-        request += body;
+        request += NPT_String::Format("Content-Length: %u\r\n\r\n", body_length);
     } else {
         //request += "Content-Length: 0\r\n\r\n";
         request += "\r\n";
     }
+    NPT_DataBuffer request_bin;
+    request_bin.SetDataSize(request.GetLength()+body_length);
+    NPT_CopyMemory(request_bin.UseData(), request.GetChars(), request.GetLength());
+    if (body && body_length) {
+        NPT_CopyMemory(request_bin.UseData()+request.GetLength(), body, body_length);
+    }
+    
     ATX_LOG_FINE_1("%s", request.GetChars());
-    NPT_Result result = m_ControlOutputStream->WriteFully(request.GetChars(), request.GetLength());
+    NPT_Result result = m_ControlOutputStream->WriteFully(request_bin.GetData(), request_bin.GetDataSize());
     if (NPT_FAILED(result)) return result;
     
     // parse the response
@@ -832,7 +938,7 @@ NPT_Result RaopOutput::SendRequest(const char*        command,
                 }
                 delete response; 
                 response = NULL;
-                return SendRequest(command, resource, exta_headers, body, mime_type, response, true);
+                return SendRequest(command, resource, extra_headers, body, body_length, mime_type, response, true);
                 
             case 453:
                 return BLT_ERROR_DEVICE_BUSY;
@@ -972,7 +1078,8 @@ RaopOutput::Connect()
         if (m_VolumePending) {
             SetVolume(m_Volume);
         }
-
+        UpdateMetadata();
+        
         m_Setup = true;
     }
     
@@ -1222,6 +1329,33 @@ RaopOutput::SetParameter(const char* parameter)
                                     NULL,
                                     parameter,
                                     "text/parameters", 
+                                    response);
+    if (NPT_FAILED(result)) return result;
+            
+    DiscardResponseBody(response);
+    delete response;    
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
+|    RaopOutput::SetParameter
++---------------------------------------------------------------------*/
+NPT_Result
+RaopOutput::SetParameter(const unsigned char* parameter, 
+                         unsigned int         parameter_length,
+                         const char*          mime_type,
+                         const char*          extra_headers)
+{
+    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+
+    NPT_HttpResponse* response = NULL;
+    NPT_Result result = SendRequest("SET_PARAMETER", 
+                                    m_RtspRecordUrl, 
+                                    extra_headers,
+                                    parameter,
+                                    parameter_length,
+                                    mime_type, 
                                     response);
     if (NPT_FAILED(result)) return result;
             
@@ -1623,6 +1757,152 @@ RaopOutput::SetVolume(float volume)
 }
 
 /*----------------------------------------------------------------------
+|    RaopOutput::SetMetadata
++---------------------------------------------------------------------*/
+NPT_Result
+RaopOutput::SetMetadata(const char* metadata)
+{
+    if (metadata == NULL) {
+        m_Metadata = "";
+    } else {
+        m_Metadata = metadata;
+    }
+    
+    if (!m_ControlOutputStream.IsNull()) {
+        return UpdateMetadata();
+    }
+    
+    return NPT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    RaopOutput::UpdateMetadata
++---------------------------------------------------------------------*/
+NPT_Result
+RaopOutput::UpdateMetadata()
+{
+    if (m_ControlOutputStream.IsNull()) return NPT_SUCCESS;
+    if (m_Metadata.IsEmpty()) return NPT_SUCCESS;
+    ATX_Json* json_root = NULL;
+    ATX_Result result = ATX_Json_Parse(m_Metadata.GetChars(), &json_root);
+    if (ATX_FAILED(result) || json_root == NULL) {
+        ATX_LOG_WARNING("invalid JSON syntax for metadata property");
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+    
+    unsigned int daap_length = 8+(8+1)+(8+4); // mlit, mikd+data, miid+data
+    ATX_Json* json_name = ATX_Json_GetChild(json_root, "name");
+    const ATX_String* name = NULL;
+    if (json_name && ATX_Json_GetType(json_name) == ATX_JSON_TYPE_STRING) {
+        name = ATX_Json_AsString(json_name);
+    }
+    ATX_Json* json_album = ATX_Json_GetChild(json_root, "album");
+    const ATX_String* album = NULL;
+    if (json_album && ATX_Json_GetType(json_album) == ATX_JSON_TYPE_STRING) {
+        album = ATX_Json_AsString(json_album);
+    }
+    ATX_Json* json_artist = ATX_Json_GetChild(json_root, "artist");
+    const ATX_String* artist = NULL;
+    if (json_artist && ATX_Json_GetType(json_artist) == ATX_JSON_TYPE_STRING) {
+        artist = ATX_Json_AsString(json_artist);
+    }
+    
+    // encode the data in daap format
+    if (name)   daap_length += 8+ATX_String_GetLength(name);
+    if (album)  daap_length += 8+ATX_String_GetLength(album);
+    if (artist) daap_length += 8+ATX_String_GetLength(artist);
+    
+    unsigned char* daap = new unsigned char[daap_length];
+    unsigned char* d = daap;
+    
+    // mlit
+    d[0] = 'm';
+    d[1] = 'l';
+    d[2] = 'i';
+    d[3] = 't';
+    NPT_BytesFromInt32Be(&d[4], daap_length-8);
+    d += 8;
+    
+    // mikd
+    d[0] = 'm';
+    d[1] = 'i';
+    d[2] = 'k';
+    d[3] = 'd';
+    NPT_BytesFromInt32Be(&d[4], 1);
+    d[8] = 2; // item kind
+    d += 8+1;
+
+    // miid
+    d[0] = 'm';
+    d[1] = 'i';
+    d[2] = 'i';
+    d[3] = 'd';
+    NPT_BytesFromInt32Be(&d[4], 4);
+    NPT_BytesFromInt32Be(&d[8], 0);
+    d += 8+4;
+    
+    // minm
+    if (name) {
+        d[0] = 'm';
+        d[1] = 'i';
+        d[2] = 'n';
+        d[3] = 'm';
+        NPT_Size length = ATX_String_GetLength(name);
+        NPT_BytesFromInt32Be(&d[4], length);
+        NPT_CopyMemory(&d[8], ATX_String_GetChars(name), length);
+        d += 8+length;
+    }
+
+    // asal
+    if (album) {
+        d[0] = 'a';
+        d[1] = 's';
+        d[2] = 'a';
+        d[3] = 'l';
+        NPT_Size length = ATX_String_GetLength(album);
+        NPT_BytesFromInt32Be(&d[4], length);
+        NPT_CopyMemory(&d[8], ATX_String_GetChars(album), length);
+        d += 8+length;
+    }
+
+    // asar
+    if (artist) {
+        d[0] = 'a';
+        d[1] = 's';
+        d[2] = 'a';
+        d[3] = 'r';
+        NPT_Size length = ATX_String_GetLength(artist);
+        NPT_BytesFromInt32Be(&d[4], length);
+        NPT_CopyMemory(&d[8], ATX_String_GetChars(artist), length);
+        d += 8+length;
+    }
+    
+    NPT_String extra_headers = NPT_String::Format("RTP-Info: rtptime=%d\r\n", m_RtpTime);
+    SetParameter(daap, daap_length, "application/x-dmap-tagged", extra_headers.GetChars());
+    
+    NPT_DataBuffer image_data;
+    NPT_String     image_type;
+    ATX_Json* json_art = ATX_Json_GetChild(json_root, "art");
+    if (json_art) {
+        ATX_Json* json_image = ATX_Json_GetChild(json_art, "image");
+        ATX_Json* json_type  = ATX_Json_GetChild(json_art, "type");
+        if (json_image && json_type) {
+            NPT_Base64::Decode(ATX_String_GetChars(ATX_Json_AsString(json_image)), 
+                               ATX_String_GetLength(ATX_Json_AsString(json_image)), 
+                               image_data);
+            image_type = ATX_String_GetChars(ATX_Json_AsString(json_type));
+        }
+    }
+    if (image_data.GetDataSize() && !image_type.IsEmpty()) {
+        SetParameter(image_data.GetData(), image_data.GetDataSize(), image_type, extra_headers);
+    }
+    
+    ATX_Json_Destroy(json_root);
+    
+    return NPT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    RaopParseRtpHeader
 +---------------------------------------------------------------------*/
 static NPT_Result
@@ -1812,6 +2092,7 @@ RaopOutput_Create(BLT_Module*              module,
     ATX_SET_INTERFACE   (self, _RaopOutput, BLT_OutputNode);
     ATX_SET_INTERFACE   (self, _RaopOutput, BLT_MediaPort);
     ATX_SET_INTERFACE   (self, _RaopOutput, BLT_VolumeControl);
+    ATX_SET_INTERFACE   (self, _RaopOutput, ATX_PropertyListener);
     *object = &ATX_BASE_EX(self, BLT_BaseMediaNode, BLT_MediaNode);
 
     return BLT_SUCCESS;

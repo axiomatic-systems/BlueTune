@@ -103,9 +103,11 @@ BLTP_PrintUsageAndExit(int exit_code)
         "  --add-node=<node-name>\n"
         "  --property=<scope>:<type>:<name>:<value>\n"
         "    where <scope> is C (Core) or S (Stream),\n"
-        "    <type> is I (Integer), S (String) or B (Boolean),\n"
-        "    and <value> is an integer, string or boolean ('true' or 'false')\n"
-        "    as appropriate\n"
+        "    <type> is I (Integer), S (String), or B (Boolean),\n"
+        "    and <value> is an integer, string, boolean ('true' or 'false'),\n"
+        "    as appropriate.\n"
+        "    For strings, if <type> is 's' instead of 'S', <value> is the name\n"
+        "    of a file from which to read the string (useful for large strings.\n"
         );
     ATX_ConsoleOutput(
         "  --verbose=<name> : print messages related to <name>, where name is\n"
@@ -250,6 +252,9 @@ BLTP_ParseCommandLine(char** args)
             char*             name = property+4;
             char*             value_string;
             ATX_PropertyValue value;
+            ATX_DataBuffer*   file_buffer = NULL;
+            ATX_Result        result;
+            
             if (ATX_StringLength(property) < 7 || property[1] != ':' || property[3] != ':') {
                 fprintf(stderr, "ERROR: invalid property syntax\n");
                 return NULL;
@@ -282,6 +287,18 @@ BLTP_ParseCommandLine(char** args)
                     value.data.string = value_string;
                     break;
                     
+                case 's':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                    result = ATX_LoadFile(value_string, &file_buffer);
+                    if (ATX_FAILED(result)) {
+                        fprintf(stderr, "ERROR: failed read from property file (%d)\n", result);
+                        return NULL;
+                    }
+                    ATX_DataBuffer_SetDataSize(file_buffer, ATX_DataBuffer_GetDataSize(file_buffer)+1);
+                    ATX_DataBuffer_UseData(file_buffer)[ATX_DataBuffer_GetDataSize(file_buffer)] = '\0';
+                    value.data.string = (const char*)ATX_DataBuffer_GetData(file_buffer);
+                    break;
+
                 case 'B':
                     value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
                     if (ATX_StringsEqual(value_string, "true")) {
@@ -292,13 +309,16 @@ BLTP_ParseCommandLine(char** args)
                         fprintf(stderr, "ERROR: invalid boolean property syntax\n");
                         return NULL;
                     }
-                    break;
-                    
+                    break;                    
+                  
                 default:
                     fprintf(stderr, "ERROR: invalid property type\n");
                     return NULL;
             }
             ATX_Properties_SetProperty(properties, name, &value);
+            if (file_buffer) {
+                ATX_DataBuffer_Destroy(file_buffer);
+            }
         } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {
             if (ATX_StringsEqual(arg+10, "stream-topology")) {
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;

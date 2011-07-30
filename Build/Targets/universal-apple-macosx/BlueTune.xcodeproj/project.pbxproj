@@ -1286,6 +1286,13 @@
 			remoteGlobalIDString = CA9A16D80ED4F42A00C60FDF;
 			remoteInfo = PassthroughWriterTest;
 		};
+		CA9B238713DF87AC004AF156 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA00CB7C13D9F13B00C1A140;
+			remoteInfo = Mp4Compact;
+		};
 		CA9DDC0910AE1C1C008B871E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -2688,6 +2695,7 @@
 				CA44C4770D4522DA00173F5F /* mp4tag */,
 				CA95E57F128DF3AC00D89889 /* mp4fragment */,
 				CAC02A15139DBA540034427F /* mp4split */,
+				CA9B238813DF87AC004AF156 /* mp4compact */,
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
 				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
@@ -5201,6 +5209,13 @@
 			remoteRef = CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA9B238813DF87AC004AF156 /* mp4compact */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4compact;
+			remoteRef = CA9B238713DF87AC004AF156 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA9DDC0A10AE1C1C008B871E /* TimeTest1 */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -6715,7 +6730,6 @@
 		CA9ED8360EAFAAFD003CE43C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
 					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
@@ -6729,17 +6743,19 @@
 					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
-				OTHER_LDFLAGS = "-lippmedia";
+				OTHER_LDFLAGS = (
+					"-lippmedia",
+					"-lippruntime",
+				);
 				PRODUCT_NAME = btplayx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
-				VALID_ARCHS = i386;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
 		CA9ED8370EAFAAFD003CE43C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
 					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
@@ -6753,10 +6769,13 @@
 					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
-				OTHER_LDFLAGS = "-lippmedia";
+				OTHER_LDFLAGS = (
+					"-lippmedia",
+					"-lippruntime",
+				);
 				PRODUCT_NAME = btplayx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
-				VALID_ARCHS = i386;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};

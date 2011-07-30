@@ -68,6 +68,9 @@
 #define BLT_STREAM_VIDEO_TRACK_SELECTOR_ID_PROPERTY     "Video.TrackSelector.ID"
 #define BLT_STREAM_VIDEO_TRACK_SELECTOR_STRICT_PROPERTY "Video.TrackSelector.Strict"
 
+/* Common stream properties */
+#define BLT_STREAM_PROPERTY_METADATA_JSON "Metadata.Json"
+
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/

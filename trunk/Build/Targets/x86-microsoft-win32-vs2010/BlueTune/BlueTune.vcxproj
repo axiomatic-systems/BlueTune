@@ -63,6 +63,9 @@
       <AdditionalDependencies>winmm.lib;$(BLT_DDPLUS_PLUGIN_LIB);%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\..\BlueTuneExtras\WmaPlugin\Targets\x86-microsoft-win32\lib\$(Configuration);..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib\Debug;..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib;$(BLT_DDPLUS_PLUGIN_HOME)\Build\Targets\x86-microsoft-win32-vs2005\$(Configuration);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -78,6 +81,9 @@
       <AdditionalDependencies>winmm.lib;$(BLT_DDPLUS_PLUGIN_LIB);%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\..\BlueTuneExtras\WmaPlugin\Targets\x86-microsoft-win32\lib\$(Configuration);..\..\..\..\ThirdParty\FLAC\Targets\x86-microsoft-win32\lib\Release;..\..\..\..\ThirdParty\Vorbis\Targets\x86-microsoft-win32\lib;$(BLT_DDPLUS_PLUGIN_HOME)\Build\Targets\x86-microsoft-win32-vs2005\$(Configuration);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Source\Adapters\BltBento4Adapters.cpp">

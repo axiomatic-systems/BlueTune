@@ -192,6 +192,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(FfmpegDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_IPP_DECODER)
+    BLT_REGISTER_BUILTIN(IppDecoder)
+#endif
+    
 #if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER)
     BLT_REGISTER_BUILTIN(DolbyDigitalPlusDecoder)
 #endif

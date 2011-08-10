@@ -247,7 +247,7 @@ Win32AudioOutput_RequestQueueItem(Win32AudioOutput* self, ATX_ListItem** item)
 {
     ATX_Cardinal watchdog = BLT_WIN32_OUTPUT_QUEUE_REQUEST_WATCHDOG;
 
-    /* wait to the total pending buffers to be less than the max duration */
+    /* wait for the total pending buffers to be less than the max duration */
     while (self->pending_queue.buffered > 
            self->pending_queue.max_buffered) {
         BLT_Result    result;
@@ -927,6 +927,17 @@ Win32AudioOutput_GetStatus(BLT_OutputNode*       _self,
         /* can't measure the buffer delay, use some estimate */
         status->media_time = BLT_TimeStamp_FromNanos(self->timestamp_after_buffer);
     } 
+
+	/* check if the audio queue is full */
+	if (self->pending_queue.buffered > self->pending_queue.max_buffered) {
+		ATX_ListItem *item = ATX_List_GetFirstItem(self->pending_queue.packets);
+        if (item) {
+			QueueBuffer* queue_buffer = (QueueBuffer*)ATX_ListItem_GetData(item);
+			if (!(queue_buffer->wave_header.dwFlags & WHDR_DONE)) {
+				status->flags |= BLT_OUTPUT_NODE_STATUS_QUEUE_FULL;
+			}
+		}
+	}
 
     return BLT_SUCCESS;
 }

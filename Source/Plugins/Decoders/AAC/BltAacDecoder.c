@@ -52,7 +52,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_PacketConsumer);
 
     /* members */
-    BLT_Boolean eos;
+    BLT_Boolean            eos;
+    BLT_Mp4AudioMediaType* media_type;
 } AacDecoderInput;
 
 typedef struct {
@@ -91,9 +92,11 @@ BLT_METHOD
 AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                           BLT_MediaPacket*    packet)
 {
-    AacDecoder*             self = ATX_SELF_M(input, AacDecoder, BLT_PacketConsumer);
-    const MLO_SampleFormat* sample_format; 
-    ATX_Result              result;
+    AacDecoder*                  self = ATX_SELF_M(input, AacDecoder, BLT_PacketConsumer);
+    const MLO_SampleFormat*      sample_format; 
+    const BLT_MediaType*         media_type;
+    const BLT_Mp4AudioMediaType* mp4_media_type;
+    ATX_Result                   result;
 
     /* check to see if this is the end of a stream */
     if (BLT_MediaPacket_GetFlags(packet) & 
@@ -101,18 +104,33 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->input.eos = BLT_TRUE;
     }
 
+    /* look for a change in media type parameters */
+    BLT_MediaPacket_GetMediaType(packet, &media_type);
+    if (media_type == NULL || media_type->id != self->mp4es_type_id) {
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    }
+    mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
+    if (self->input.media_type) {
+        if (!BLT_MediaType_Equals(media_type, (const BLT_MediaType*)self->input.media_type)) {
+            ATX_LOG_FINE("change of AAC media type parameters detected");
+            MLO_Decoder_Destroy(self->melo);
+            self->melo = NULL;
+            BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
+            self->input.media_type = NULL;
+        }
+    }
+    if (self->input.media_type == NULL) {
+        BLT_MediaType* clone;
+        BLT_MediaType_Clone(media_type, &clone);
+        self->input.media_type = (BLT_Mp4AudioMediaType*)clone;
+    }
+    
     /* check to see if we need to create a decoder for this */
     if (self->melo == NULL) {
         MLO_DecoderConfig            decoder_config;
-        const BLT_MediaType*         media_type;
-        const BLT_Mp4AudioMediaType* mp4_media_type;
-
-        BLT_MediaPacket_GetMediaType(packet, &media_type);
-        if (media_type == NULL || media_type->id != self->mp4es_type_id) {
-            return BLT_ERROR_INVALID_MEDIA_TYPE;
-        }
-        mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
-        if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, mp4_media_type->decoder_info_length, &decoder_config))) {
+        if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, 
+                                               mp4_media_type->decoder_info_length, 
+                                               &decoder_config))) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
         if (decoder_config.object_type != MLO_OBJECT_TYPE_AAC_LC) return BLT_ERROR_UNSUPPORTED_CODEC;
@@ -142,22 +160,13 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         return BLT_SUCCESS;
     }
 
-    /* check that the sample buffer matches our current media type */
+    /* update the output media type */
     sample_format = MLO_SampleBuffer_GetFormat(self->sample_buffer);
-    if (self->output.media_type.channel_count == 0) {
-        /* first time, setup our media type */
-        self->output.media_type.channel_count   = sample_format->channel_count;
-        self->output.media_type.sample_rate     = sample_format->sample_rate;
-        self->output.media_type.bits_per_sample = 16;
-        self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
-        self->output.media_type.channel_mask    = 0;
-    } else {
-        /* we've already setup a media type, check that this is the same */
-        if (self->output.media_type.sample_rate   != sample_format->sample_rate || 
-            self->output.media_type.channel_count != sample_format->channel_count) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
-        }
-    }
+    self->output.media_type.channel_count   = sample_format->channel_count;
+    self->output.media_type.sample_rate     = sample_format->sample_rate;
+    self->output.media_type.bits_per_sample = 16;
+    self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    self->output.media_type.channel_mask    = 0;
 
     /* create a PCM packet for the output */
     {
@@ -366,6 +375,11 @@ AacDecoder_Destroy(AacDecoder* self)
 { 
     ATX_LOG_FINE("AacDecoder::Destroy");
 
+    /* release input resources */
+    if (self->input.media_type) {
+        BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
+    }
+    
     /* release any packet we may hold */
     AacDecoderOutput_Flush(self);
     ATX_List_Destroy(self->output.packets);
@@ -509,14 +523,10 @@ AacDecoderModule_Probe(BLT_Module*              _self,
                 (BLT_MediaNodeConstructor*)parameters;
 
             /* the input and output protocols should be PACKET */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
+            if ((constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_PACKET)) {
                 return BLT_FAILURE;
             }
 
@@ -551,10 +561,8 @@ AacDecoderModule_Probe(BLT_Module*              _self,
             }
 
             /* the output type should be unspecified, or audio/pcm */
-            if (!(constructor->spec.output.media_type->id == 
-                  BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
-                !(constructor->spec.output.media_type->id ==
-                  BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            if (!(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) &&
+                !(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
                 return BLT_FAILURE;
             }
 

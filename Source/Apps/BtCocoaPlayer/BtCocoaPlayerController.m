@@ -130,7 +130,7 @@
     // set the data source for the list views
     [playerPropertiesView setDataSource: [[CocoaPlayerRecordList alloc]init]];
     [playerStreamInfoView setDataSource: [[CocoaPlayerRecordList alloc]init]];
-    [player setOutput: @"raop://192.168.1.45:5000"];
+    //[player setOutput: @"raop://192.168.1.45:5000"];
 }
 
 -(IBAction) play: (id) sender;

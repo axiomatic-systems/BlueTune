@@ -31,8 +31,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.raop")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-const NPT_Timeout BLT_RAOP_DEFAULT_CONNECT_TIMEOUT = 5000; // 5 seconds
-const NPT_Timeout BLT_RAOP_DEFAULT_IO_TIMEOUT      = 5000; // 5 seconds
+const NPT_Timeout BLT_RAOP_DEFAULT_CONNECT_TIMEOUT = 15000; // 15 seconds
+const NPT_Timeout BLT_RAOP_DEFAULT_IO_TIMEOUT      = 10000; // 10 seconds
 
 const unsigned int BLT_RAOP_SYNC_PACKET_INTERVAL    = 126;
 const float        BLT_RAOP_MAX_DELAY               = 2.0;
@@ -590,7 +590,7 @@ RaopOutput_Deactivate(BLT_MediaNode* _self)
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
             ATX_Properties_RemoveListener(properties, 
-                                          &self->metadata_listener_handle);
+                                          self->metadata_listener_handle);
         }
     }
 
@@ -1290,7 +1290,7 @@ RaopOutput::Setup()
 NPT_Result
 RaopOutput::GetParameter(const char* parameter)
 {
-    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+    if (!m_Connected || !m_Setup) return BLT_ERROR_INVALID_STATE;
 
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("GET_PARAMETER", 
@@ -1321,7 +1321,7 @@ RaopOutput::GetParameter(const char* parameter)
 NPT_Result
 RaopOutput::SetParameter(const char* parameter)
 {
-    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+    if (!m_Connected || !m_Setup) return BLT_ERROR_INVALID_STATE;
 
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("SET_PARAMETER", 
@@ -1347,7 +1347,7 @@ RaopOutput::SetParameter(const unsigned char* parameter,
                          const char*          mime_type,
                          const char*          extra_headers)
 {
-    if (!m_Connected) return BLT_ERROR_INVALID_STATE;
+    if (!m_Connected || !m_Setup) return BLT_ERROR_INVALID_STATE;
 
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("SET_PARAMETER", 
@@ -1433,7 +1433,7 @@ RaopOutput::Record()
 NPT_Result
 RaopOutput::Flush()
 {
-    if (!m_Connected) return BLT_SUCCESS;
+    if (!m_Connected || !m_Setup) return BLT_SUCCESS;
     
     NPT_String extra_headers = NPT_String::Format("RTP-Info: seq=%d;rtptime=%d\r\n",
                                                   m_RtpSequence,
@@ -1466,7 +1466,7 @@ RaopOutput::Flush()
 NPT_Result
 RaopOutput::Teardown()
 {
-    if (!m_Connected) return BLT_SUCCESS;
+    if (!m_Connected || !m_Setup) return BLT_SUCCESS;
 
     NPT_HttpResponse* response = NULL;
     NPT_Result result = SendRequest("TEARDOWN", 

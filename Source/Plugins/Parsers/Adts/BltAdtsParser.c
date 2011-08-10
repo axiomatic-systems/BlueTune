@@ -103,6 +103,7 @@ typedef struct {
     unsigned char    buffer[BLT_ADTS_PARSER_MAX_FRAME_SIZE+7];
     unsigned int     buffer_fullness;
     BLT_TimeStamp    time_stamp;
+    BLT_Boolean      last_timestamp_was_zero;
     AdtsHeader       frame_header;
     AdtsParserState  state;
 } AdtsParser;
@@ -426,16 +427,23 @@ AdtsParser_UpdateTimeStamp(AdtsParser* self)
     if (self->input.packet_is_new) {
         if (self->input.packet) {
             BLT_TimeStamp new_timestamp = BLT_MediaPacket_GetTimeStamp(self->input.packet);
-            if (BLT_TimeStamp_IsLaterOrEqual(new_timestamp, self->time_stamp)) {
+            if (new_timestamp.seconds || new_timestamp.nanoseconds) {
                 self->time_stamp = new_timestamp;
+                self->last_timestamp_was_zero = BLT_FALSE;
             } else {
-                BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&16]);
-                self->time_stamp = BLT_TimeStamp_Add(self->time_stamp, frame_duration);
+                if (self->last_timestamp_was_zero) {
+                    BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&0x0F]);
+                    self->time_stamp = BLT_TimeStamp_Add(self->time_stamp, frame_duration);
+                } else {
+                    self->time_stamp.seconds     = 0;
+                    self->time_stamp.nanoseconds = 0;
+                    self->last_timestamp_was_zero = BLT_TRUE;
+                }
             }
         }
         self->input.packet_is_new = BLT_FALSE;
     } else {
-        BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&0xF]);
+        BLT_TimeStamp frame_duration = BLT_TimeStamp_FromSamples(1024, Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&0x0F]);
         self->time_stamp = BLT_TimeStamp_Add(self->time_stamp, frame_duration);
     }
 }

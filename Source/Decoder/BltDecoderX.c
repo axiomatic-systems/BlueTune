@@ -175,7 +175,7 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
     status->position.range  = 0;
     BLT_TimeStamp_Set(status->time_stamp, 0, 0);
     BLT_DecoderX_GetMediaTime(&ATX_BASE(decoder, BLT_TimeSource), &status->time_stamp);
-    if (input_status.position.offset) {
+    /*if (input_status.position.offset) {
         status->position = input_status.position;
     } else if (audio_status.position.offset) {
         status->position = audio_status.position;

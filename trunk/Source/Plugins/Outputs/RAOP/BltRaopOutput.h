@@ -1,6 +1,6 @@
 /*****************************************************************
 |
-|   OSX Audio Units Output Module
+|   RAOP Output Module
 |
 |   (c) 2002-2011 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)

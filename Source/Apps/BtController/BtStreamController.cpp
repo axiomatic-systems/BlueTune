@@ -196,6 +196,11 @@ BtStreamController::Run()
                 m_Player.SetInput(&buffer[10]);
             } else if (NPT_StringsEqualN(buffer, "set-output ", 11)) {
                 m_Player.SetOutput(&buffer[11]);
+            } else if (NPT_StringsEqualN(buffer, "set-volume ", 11)) {
+                float volume = 0.0f;
+                if (NPT_SUCCEEDED(NPT_ParseFloat(&buffer[11], volume))) {
+                    m_Player.SetVolume(volume);
+                }
             } else if (NPT_StringsEqualN(buffer, "add-node ", 9)) {
                 m_Player.AddNode(&buffer[9]);
             } else if (NPT_StringsEqual(buffer, "play")) {

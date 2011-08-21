@@ -1,8 +1,8 @@
 /*****************************************************************
 |
-|   OSX Audio Units Output Module
+|   RAOP Output Module
 |
-|   (c) 2002-2008 Gilles Boccon-Gibod
+|   (c) 2002-2011 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -454,9 +454,7 @@ RaopOutput_Stop(BLT_MediaNode* _self)
     RaopOutput* self = ATX_SELF_EX(_RaopOutput, BLT_BaseMediaNode, BLT_MediaNode)->object;
     
     self->Flush();
-    if (self->m_Version == 0) {
-        self->Teardown();
-    }
+    self->Teardown();
     
     return BLT_SUCCESS;
 }
@@ -473,9 +471,7 @@ RaopOutput_Pause(BLT_MediaNode* _self)
         ATX_LOG_FINE("pausing output");
         self->m_Paused = true;
         self->Flush();
-        if (self->m_Version == 0) {
-            self->Teardown();
-        }
+        self->Teardown();
     }
     return BLT_SUCCESS;
 }
@@ -491,9 +487,7 @@ RaopOutput_Resume(BLT_MediaNode* _self)
     if (self->m_Paused) {
         ATX_LOG_FINE("resuming output");
         self->m_Paused = false;
-        if (self->m_Version == 0) {
-            return self->Connect();
-        }
+        return self->Connect();
     }
     return BLT_SUCCESS;
 }
@@ -1075,12 +1069,13 @@ RaopOutput::Connect()
             ATX_LOG_WARNING_1("RECORD failed (%d)", result);
             return result;
         }
+        m_Setup = true;
+
+        // update the volume and/or metadata if previously set
         if (m_VolumePending) {
             SetVolume(m_Volume);
         }
-        UpdateMetadata();
-        
-        m_Setup = true;
+        UpdateMetadata();        
     }
     
     return BLT_SUCCESS;
@@ -1475,16 +1470,12 @@ RaopOutput::Teardown()
                                     NULL,
                                     NULL, 
                                     response);
-    if (NPT_FAILED(result)) return result;
             
     DiscardResponseBody(response);
     delete response;    
     
-    // partial reset of the state
-    m_Setup = false;
-    m_AudioBufferFullness = 0;
-    m_RtpTime = BLT_RAOP_RTP_TIME_ORIGIN;
-    m_RtpSequence = 0;
+    // reset the state
+    Reset();
     
     return result;
 }
@@ -2103,10 +2094,10 @@ RaopOutput_Create(BLT_Module*              module,
 +---------------------------------------------------------------------*/
 BLT_METHOD
 RaopOutputModule_Probe(BLT_Module*              self, 
-                                BLT_Core*                core,
-                                BLT_ModuleParametersType parameters_type,
-                                BLT_AnyConst             parameters,
-                                BLT_Cardinal*            match)
+                       BLT_Core*                core,
+                       BLT_ModuleParametersType parameters_type,
+                       BLT_AnyConst             parameters,
+                       BLT_Cardinal*            match)
 {
     BLT_COMPILER_UNUSED(self);
     BLT_COMPILER_UNUSED(core);
@@ -2192,5 +2183,5 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(RaopOutputModule,
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(RaopOutputModule,
                                          "RAOP Output",
                                          "com.axiosys.output.raop",
-                                         "1.0.0",
+                                         "1.1.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)

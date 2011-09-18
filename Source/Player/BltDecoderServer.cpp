@@ -38,6 +38,12 @@ NPT_Message::Type
 BLT_DecoderServer_Message::MessageType = "BLT_DecoderServer Message";
 
 /*----------------------------------------------------------------------
+|   dynamic cast support
++---------------------------------------------------------------------*/
+NPT_DEFINE_DYNAMIC_CAST_ANCHOR(BLT_DecoderServer)
+NPT_DEFINE_DYNAMIC_CAST_ANCHOR(BLT_DecoderServer_MessageHandler)
+
+/*----------------------------------------------------------------------
 |    forward references
 +---------------------------------------------------------------------*/
 BLT_VOID_METHOD 
@@ -82,7 +88,7 @@ NPT_Result
 BLT_DecoderServer_Message::Dispatch(NPT_MessageHandler* handler) 
 {
     BLT_DecoderServer_MessageHandler* specific =
-        dynamic_cast<BLT_DecoderServer_MessageHandler*>(handler);
+        NPT_DYNAMIC_CAST(BLT_DecoderServer_MessageHandler, handler);
     if (specific) {
         return Deliver(specific);
     } else {
@@ -175,6 +181,8 @@ BLT_DecoderServer::Run()
 {
     BLT_Result result;
 
+    ATX_LOG_INFO("running");
+    
     // create the decoder
     result = BLT_Decoder_Create(&m_Decoder);
     if (BLT_FAILED(result)) {
@@ -225,8 +233,8 @@ BLT_DecoderServer::Run()
             BLT_DecoderServer::DecoderEvent::EVENT_TYPE_INIT_ERROR,
             result, 
             "error from BLT_Decoder_SetOutput"));
-        WaitForTerminateMessage();
-        return;
+        //WaitForTerminateMessage();
+        //return;
     }
     
     // notify the client of the initial state
@@ -427,6 +435,7 @@ BLT_DecoderServer::SetState(State state)
 BLT_Result 
 BLT_DecoderServer::SetInput(BLT_CString name, BLT_CString type)
 {
+    ATX_LOG_FINER("set-input");
     return PostMessage(
         new BLT_DecoderServer_SetInputCommandMessage(name, type));
 }

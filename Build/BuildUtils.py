@@ -322,7 +322,7 @@ class CompiledModule(Module):
             libs += self.libs
             lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
             lib_path += GetLibDirs(self.GetLinkDeps())
-            self.nodes = env.Program(target=name.lower(), source=objects, LIBS=libs, LIBPATH=lib_path)
+            self.nodes = env.Program(target=name.lower(), source=objects+env['BLT_EXTRA_EXECUTABLE_OBJECTS'], LIBS=libs, LIBPATH=lib_path)
             self.objects = []
         else:
             raise Exception('Unknown Module Type')

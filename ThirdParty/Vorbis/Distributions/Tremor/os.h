@@ -61,4 +61,19 @@
 #  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
+/* GBG start */
+#if !defined(BIG_ENDIAN)
+#define BIG_ENDIAN 4321
+#endif
+
+#if !defined(LITTLE_ENDIAN)
+#define LITTLE_ENDIAN 1234
+#endif
+
+#if !defined(BYTE_ORDER)
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
+
+/* GBG end */
+
 #endif /* _OS_H */

@@ -14,6 +14,8 @@
 #include <TargetConditionals.h>
 #include <AvailabilityMacros.h>
 #if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+#include <CoreAudio/CoreAudio.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
 #include <pthread.h>

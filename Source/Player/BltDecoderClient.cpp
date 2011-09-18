@@ -29,6 +29,11 @@ NPT_Message::Type
 BLT_DecoderClient_Message::MessageType = "bluetune.messages.decoder.client";
 
 /*----------------------------------------------------------------------
+|   dynamic cast support
++---------------------------------------------------------------------*/
+NPT_DEFINE_DYNAMIC_CAST_ANCHOR(BLT_DecoderClient_MessageHandler)
+
+/*----------------------------------------------------------------------
 |   BLT_DecoderClient_Message::Dispatch
 +---------------------------------------------------------------------*/
 NPT_Result

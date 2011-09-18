@@ -199,7 +199,7 @@ Mp4ParserLinearReader::ProcessTrack(AP4_Track* track)
     AP4_Result result = AP4_LinearReader::ProcessTrack(track);
     if (AP4_FAILED(result)) return result;
 
-    // setup a decypter if necessary
+    // setup a decrypter if necessary
     Tracker* tracker = FindTracker(track->GetId());
     if (tracker == NULL) return AP4_SUCCESS;
     return SetupTrackDecrypter(tracker);
@@ -393,7 +393,7 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
         if (AP4_FAILED(result)) return result;
         self->sample_decrypter = sample_decrypter;
     } else {
-        AP4_ProtectedSampleDescription* prot_desc = dynamic_cast<AP4_ProtectedSampleDescription*>(sample_desc);
+        AP4_ProtectedSampleDescription* prot_desc = AP4_DYNAMIC_CAST(AP4_ProtectedSampleDescription, sample_desc);
         if (prot_desc == NULL) {
             ATX_LOG_FINE("unable to obtain cipher info");
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
@@ -443,7 +443,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
                        BLT_STREAM_INFO_MASK_DURATION;
     
     // deal with audio details, if this is an audio track
-    AP4_AudioSampleDescription* audio_desc = dynamic_cast<AP4_AudioSampleDescription*>(sample_desc);
+    AP4_AudioSampleDescription* audio_desc = AP4_DYNAMIC_CAST(AP4_AudioSampleDescription, sample_desc);
     if (audio_desc) {
         ATX_LOG_FINE("sample description is audio");
         stream_info.type          = BLT_STREAM_TYPE_AUDIO;
@@ -457,7 +457,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
-    AP4_VideoSampleDescription* video_desc = dynamic_cast<AP4_VideoSampleDescription*>(sample_desc);
+    AP4_VideoSampleDescription* video_desc = AP4_DYNAMIC_CAST(AP4_VideoSampleDescription, sample_desc);
     if (video_desc) {
         ATX_LOG_FINE("sample description is video");
         stream_info.type     = BLT_STREAM_TYPE_VIDEO;
@@ -474,7 +474,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
     AP4_MpegSampleDescription* mpeg_desc = NULL;
     if (sample_desc->GetType() == AP4_SampleDescription::TYPE_MPEG) {
         ATX_LOG_FINE("sample description is of type MPEG");
-        mpeg_desc = dynamic_cast<AP4_MpegSampleDescription*>(sample_desc);
+        mpeg_desc = AP4_DYNAMIC_CAST(AP4_MpegSampleDescription, sample_desc);
     }
     if (mpeg_desc) {
         stream_info.data_type       = mpeg_desc->GetObjectTypeString(mpeg_desc->GetObjectTypeId());
@@ -511,7 +511,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
             // look for an 'alac' atom (either top-level or inside a 'wave') 
             AP4_Atom* alac = sample_desc->GetDetails().GetChild(AP4_SAMPLE_FORMAT_ALAC);
             if (alac == NULL) {
-                AP4_ContainerAtom* wave = dynamic_cast<AP4_ContainerAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_WAVE));
+                AP4_ContainerAtom* wave = AP4_DYNAMIC_CAST(AP4_ContainerAtom, sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_WAVE));
                 if (wave) {
                     alac = wave->GetChild(AP4_SAMPLE_FORMAT_ALAC);
                 }

@@ -38,6 +38,8 @@ public:
 class BLT_DecoderServer_MessageHandler
 {
 public:
+    NPT_IMPLEMENT_DYNAMIC_CAST(BLT_DecoderServer_MessageHandler)
+    
     // methods
     virtual ~BLT_DecoderServer_MessageHandler() {}
 
@@ -419,6 +421,8 @@ class BLT_DecoderServer : public NPT_Thread,
                           public BLT_DecoderServer_MessageHandler
 {
  public:
+    NPT_IMPLEMENT_DYNAMIC_CAST_D2(BLT_DecoderServer, NPT_MessageHandler, BLT_DecoderServer_MessageHandler)
+
     // types
     typedef enum {
         STATE_STOPPED,

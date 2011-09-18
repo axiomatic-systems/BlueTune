@@ -23,6 +23,7 @@ env['NPT_EXTRA_LIBS']  = []
 env['ATX_EXTRA_LIBS']  = []
 env['BLT_EXTRA_LIBS']  = []
 env['BLT_RELAXED_ENV'] = env
+env['BLT_EXTRA_EXECUTABLE_OBJECTS'] = []
 
 ### target specifics
 target_config_file = env.GetBuildPath('#/Build/Targets/'+env['target']+'/Config.scons')

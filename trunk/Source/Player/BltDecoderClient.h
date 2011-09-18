@@ -25,6 +25,8 @@
 class BLT_DecoderClient_MessageHandler
 {
 public:
+    NPT_IMPLEMENT_DYNAMIC_CAST(BLT_DecoderClient_MessageHandler)
+    
     // methods
     virtual ~BLT_DecoderClient_MessageHandler() {}
 

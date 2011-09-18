@@ -181,8 +181,8 @@ BLT_DecoderX_GetStatus(BLT_DecoderX* decoder, BLT_DecoderStatus* status)
         status->position = audio_status.position;
     } else if (video_status.position.offset) {
         status->position = video_status.position;
-    } else */ 
-	if (input_info.duration) {
+    } else */
+    if (input_info.duration) {
         /* estimate the position from the time stamp and duration */
         status->position.offset = BLT_TimeStamp_ToMillis(status->time_stamp);
         status->position.range  = input_info.duration;

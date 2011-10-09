@@ -629,7 +629,7 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     /* get the default output audio unit */
     ATX_SetMemory(&component_desc, 0, sizeof(component_desc));
     component_desc.componentType         = kAudioUnitType_Output;
-    component_desc.componentSubType      = kAudioUnitSubType_HALOutput;
+    component_desc.componentSubType      = audio_device_id?kAudioUnitSubType_HALOutput:kAudioUnitSubType_DefaultOutput;
     component_desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     component_desc.componentFlags        = 0;
     component_desc.componentFlagsMask    = 0;

@@ -147,6 +147,8 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
   int ampoffseti=ampoffset*4096;
   int ampi=amp;
   ogg_int32_t *ilsp=(ogg_int32_t *)alloca(m*sizeof(*ilsp));
+  (void)ln; /* GBG: unused */
+  
   /* lsp is in 8.24, range 0 to PI; coslook wants it in .16 0 to 1*/
   for(i=0;i<m;i++){
 #ifndef _LOW_ACCURACY_
@@ -411,6 +413,7 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
 
 static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 			   void *memo,ogg_int32_t *out){
+  (void)vb; /* GBG: unused */
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   

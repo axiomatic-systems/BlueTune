@@ -117,14 +117,10 @@ public:
                           AP4_Size         max_buffer      = AP4_LINEAR_READER_DEFAULT_BUFFER_SIZE);
   
     // AP4_LinearReader methods
-    virtual AP4_Result ProcessTrack(AP4_Track* track);
     virtual AP4_Result ProcessMoof(AP4_ContainerAtom* moof, 
                                    AP4_Position       moof_offset, 
                                    AP4_Position       mdat_payload_offset);
         
-    // local methods
-    AP4_Result SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker);
-
     // members
     Mp4Parser* m_Parser;
 };
@@ -139,70 +135,6 @@ Mp4ParserLinearReader::Mp4ParserLinearReader(Mp4Parser*      parser,
     AP4_LinearReader(movie, fragment_stream, max_buffer),
     m_Parser(parser)
 {
-}
-
-/*----------------------------------------------------------------------
-|   Mp4SampleDecrypterProxy
-+---------------------------------------------------------------------*/
-class Mp4SampleDecrypterProxy : public AP4_SampleDecrypter
-{
-public:
-    Mp4SampleDecrypterProxy(Mp4ParserOutput* output) : m_Output(output) {}
-    
-    // AP4_SampleDecrypter methods
-    virtual AP4_Result DecryptSampleData(AP4_DataBuffer&    data_in,
-                                         AP4_DataBuffer&    data_out,
-                                         const AP4_UI08*    iv) {
-        return m_Output->sample_decrypter->DecryptSampleData(data_in, 
-                                                             data_out,
-                                                             iv);
-    }
-    
-private:
-    // members
-    Mp4ParserOutput* m_Output;
-};
-
-/*----------------------------------------------------------------------
-|   Mp4ParserLinearReader::SetupTrackDecrypter
-+---------------------------------------------------------------------*/
-AP4_Result 
-Mp4ParserLinearReader::SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker)
-{
-    // cleanup any previous reader for this tracker
-    delete tracker->m_Reader;
-    tracker->m_Reader = NULL;
-
-    Mp4ParserOutput* output = NULL;
-    if (m_Parser->audio_output.track && 
-        m_Parser->audio_output.track->GetId() == tracker->m_Track->GetId()) {
-        output = &m_Parser->audio_output;
-    }
-    if (m_Parser->video_output.track && 
-        m_Parser->video_output.track->GetId() == tracker->m_Track->GetId()) {
-        output = &m_Parser->video_output;
-    }
-    if (output && output->sample_decrypter) {
-        Mp4SampleDecrypterProxy* decrypter = new Mp4SampleDecrypterProxy(output);
-        tracker->m_Reader = new AP4_DecryptingSampleReader(decrypter, true);
-    }
-    return AP4_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|   Mp4ParserLinearReader::ProcessTrack
-+---------------------------------------------------------------------*/
-AP4_Result
-Mp4ParserLinearReader::ProcessTrack(AP4_Track* track) 
-{
-    // call the base class implementation
-    AP4_Result result = AP4_LinearReader::ProcessTrack(track);
-    if (AP4_FAILED(result)) return result;
-
-    // setup a decrypter if necessary
-    Tracker* tracker = FindTracker(track->GetId());
-    if (tracker == NULL) return AP4_SUCCESS;
-    return SetupTrackDecrypter(tracker);
 }
 
 /*----------------------------------------------------------------------
@@ -235,7 +167,8 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
             AP4_DYNAMIC_CAST(AP4_ProtectedSampleDescription, 
                              tracker->m_Track->GetSampleDescription(0));
         if (sample_description &&
-            sample_description->GetSchemeType() == AP4_PROTECTION_SCHEME_TYPE_PIFF) {
+            (sample_description->GetSchemeType() == AP4_PROTECTION_SCHEME_TYPE_PIFF ||
+             sample_description->GetSchemeType() == AP4_PROTECTION_SCHEME_TYPE_CENC)) {
             // figure out the content ID for this track
             // TODO: support different content ID schemes
             // for now, we just make up a content ID based on the track ID
@@ -256,15 +189,14 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
             AP4_CencSampleDecrypter* decrypter = NULL;
             result = AP4_CencSampleDecrypter::Create(sample_description,
                                                      traf,
+                                                     *m_FragmentStream,
+                                                     moof_offset,
                                                      key.GetData(),
                                                      key.GetDataSize(),
                                                      m_Parser->cipher_factory,
                                                      decrypter);
             if (AP4_FAILED(result)) return result;
             tracker->m_Reader = new AP4_DecryptingSampleReader(decrypter, true);
-        } else {
-            result = SetupTrackDecrypter(tracker);
-            if (AP4_FAILED(result)) return result;
         }
     }
     
@@ -398,17 +330,23 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
             ATX_LOG_FINE("unable to obtain cipher info");
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }
-        self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, 
-                                                             key.GetData(), 
-                                                             key_size, 
-                                                             self->parser->cipher_factory);
-        if (self->sample_decrypter == NULL) {
-            ATX_LOG_FINE("unable to create decrypter");
-            return BLT_ERROR_CRYPTO_FAILURE;
-        }
-        
+
         // switch to the original sample description
         sample_desc = prot_desc->GetOriginalSampleDescription();
+        
+        // create a sample decrypter unless this is a fragmented movie (for
+        // fragmented movies, we will do the decryption through the linear
+        // reader object
+        if (!input.has_fragments) {
+            self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, 
+                                                                 key.GetData(), 
+                                                                 key_size, 
+                                                                 self->parser->cipher_factory);
+            if (self->sample_decrypter == NULL) {
+                ATX_LOG_FINE("unable to create decrypter");
+                return BLT_ERROR_CRYPTO_FAILURE;
+            }
+        }
     }
     
     return BLT_SUCCESS;

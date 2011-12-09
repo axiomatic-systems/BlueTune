@@ -2,7 +2,7 @@
 |
 |   Flac Decoder Module
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2012 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -885,7 +885,7 @@ FlacDecoder_Seek(BLT_MediaNode* _self,
     /* already been done on the stream                                 */
     *mode = BLT_SEEK_MODE_IGNORE;
 
-    return result == result?BLT_SUCCESS:BLT_FAILURE;
+    return result?BLT_SUCCESS:BLT_FAILURE;
 }
 
 /*----------------------------------------------------------------------

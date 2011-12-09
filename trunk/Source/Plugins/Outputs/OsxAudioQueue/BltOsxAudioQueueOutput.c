@@ -549,13 +549,17 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
         if (mp4_type->base.stream_type != BLT_MP4_STREAM_TYPE_AUDIO) {
             return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
+
         /* setup defaults */
         audio_format->mSampleRate       = mp4_type->sample_rate;
         audio_format->mChannelsPerFrame = mp4_type->channel_count;
         audio_format->mFramesPerPacket  = 1024;
         audio_format->mFormatID         = kAudioFormatMPEG4AAC;
+
         switch (mp4_type->base.format_or_object_type_id) {
             case BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO: {
+            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN:
+            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC:
                 if (mp4_type->decoder_info_length >= 2) {
                     BLT_Result result;
                     Mp4AudioDecoderConfig decoder_config;
@@ -590,10 +594,6 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
                 }
                 break;
             }
-                
-            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN:
-            case BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC:
-                break;
                 
             default:
                 return BLT_ERROR_INVALID_MEDIA_TYPE;
@@ -1558,7 +1558,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(OsxAudioQueueOutputModule,
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(OsxAudioQueueOutputModule,
                                          "OSX Audio Queue Output",
                                          "com.axiosys.output.osx-audio-queue",
-                                         "1.1.0",
+                                         "1.2.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)
 #else 
 /*----------------------------------------------------------------------

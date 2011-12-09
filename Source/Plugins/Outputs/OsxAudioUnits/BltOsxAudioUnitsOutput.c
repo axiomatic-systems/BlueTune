@@ -111,8 +111,8 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
 {
     OsxAudioUnitsOutput* self = (OsxAudioUnitsOutput*)inRefCon;
     ATX_ListItem*        item;
-    unsigned int         requested = ioData->mBuffers[0].mDataByteSize;
-    unsigned char*       out = (unsigned char*)ioData->mBuffers[0].mData;
+    unsigned int         requested;
+    unsigned char*       out;
     ATX_Boolean          timestamp_measured = ATX_FALSE;
     
     BLT_COMPILER_UNUSED(ioActionFlags);
@@ -133,9 +133,12 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
         }
         return 0;
     }
-    
+        
+    /* init local variables */
+    requested = ioData->mBuffers[0].mDataByteSize;
+    out = (unsigned char*)ioData->mBuffers[0].mData;
     ATX_LOG_FINEST_2("request for %d bytes, %d frames", requested, inNumberFrames);
-    
+
     /* lock the packet queue */
     pthread_mutex_lock(&self->lock);
     

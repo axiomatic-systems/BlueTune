@@ -48,6 +48,7 @@ typedef struct {
     BLT_MediaTypeId asbd;
     BLT_MediaTypeId audio_mp4;
     BLT_MediaTypeId audio_mp3;
+    BLT_MediaTypeId audio_aac;
 } OsxAudioFileStreamParserMediaTypeIds;
 
 typedef struct {
@@ -408,6 +409,9 @@ OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self,
     } else if (media_type_id == self->module->media_type_ids.audio_mp3) {
         ATX_LOG_FINE("packet type is audio/mp3");
         self->input.type_hint = kAudioFileMP3Type;
+    } else if (media_type_id == self->module->media_type_ids.audio_aac) {
+        ATX_LOG_FINE("packet type is audio/aac");
+        self->input.type_hint = kAudioFileAAC_ADTSType;
     } else {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
@@ -439,7 +443,8 @@ OsxAudioFileStreamParserInput_SetStream(BLT_InputStreamUser* _self,
     /* check the media type */
     if (media_type == NULL || 
         (media_type->id != self->module->media_type_ids.audio_mp4 &&
-         media_type->id != self->module->media_type_ids.audio_mp3)) {
+         media_type->id != self->module->media_type_ids.audio_mp3 &&
+         media_type->id != self->module->media_type_ids.audio_aac)) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     
@@ -912,6 +917,12 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
                                             "audio/mpeg");
     if (BLT_FAILED(result)) return result;
 
+    /* register the ".aac" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".aac",
+                                            "audio/aac");
+    if (BLT_FAILED(result)) return result;
+
     /* register the "audio/mpeg" type */
     result = BLT_Registry_RegisterName(
         registry,
@@ -919,7 +930,7 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/mpeg",
         &self->media_type_ids.audio_mp3);
     if (BLT_FAILED(result)) return result;
-    
+     
     /* register mime type aliases */
     BLT_Registry_RegisterNameForId(registry, 
                                    BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
@@ -942,6 +953,9 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     BLT_Registry_RegisterNameForId(registry, 
                                    BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                    "audio/x-mpeg3", self->media_type_ids.audio_mp3);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "audio/aacp", self->media_type_ids.audio_aac);
 
     /* get the type id for "audio/mp4" */
     result = BLT_Registry_GetIdForName(
@@ -958,6 +972,15 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
         "audio/mp3",
         &self->media_type_ids.audio_mp3);
+    if (BLT_FAILED(result)) return result;
+    ATX_LOG_FINE_1("audio/mp3 type = %d", self->media_type_ids.audio_mp3);
+
+    /* get the type id for "audio/aac" */
+    result = BLT_Registry_GetIdForName(
+        registry,
+        BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+        "audio/aac",
+        &self->media_type_ids.audio_aac);
     if (BLT_FAILED(result)) return result;
     ATX_LOG_FINE_1("audio/mp3 type = %d", self->media_type_ids.audio_mp3);
 
@@ -1003,7 +1026,8 @@ OsxAudioFileStreamParserModule_Probe(BLT_Module*              _self,
 
             /* the input type should be one of the supported types */
             if (constructor->spec.input.media_type->id != self->media_type_ids.audio_mp4 &&
-                constructor->spec.input.media_type->id != self->media_type_ids.audio_mp3) {
+                constructor->spec.input.media_type->id != self->media_type_ids.audio_mp3 &&
+                constructor->spec.input.media_type->id != self->media_type_ids.audio_aac) {
                 return BLT_FAILURE;
             }
 

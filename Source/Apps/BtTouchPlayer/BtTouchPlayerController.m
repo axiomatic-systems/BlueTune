@@ -73,21 +73,25 @@
 
 -(IBAction) play: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     [player play];
 }
 
 -(IBAction) pause: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     [player pause];
 }
 
 -(IBAction) stop: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     [player stop];
 }
 
 -(IBAction) setInput: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     //[player setInput: @"http://www.bok.net/tmp/test.mp3"];
     [player stop];
     [player setInput: [playerInput text]];
@@ -95,12 +99,14 @@
 
 -(IBAction) seek: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     positionSliderPressed = FALSE;
     [player seekToPosition: (unsigned int)(playerPosition.value*1000.0f)  range: (unsigned int)(playerPosition.maximumValue*1000.0f)];
 }
 
 -(IBAction) setVolume: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     if (pendingVolume == volume) {
         [player setVolume: [playerVolume value]];
     }
@@ -109,6 +115,7 @@
 
 -(IBAction) positionSliderWasPressed: (id) sender;
 {
+    BLT_COMPILER_UNUSED(sender);
     positionSliderPressed = TRUE;
 }
 
@@ -160,6 +167,9 @@
 
 -(void) streamInfoDidChange: (const BLT_StreamInfo*) info updateMask: (BLT_Mask) mask
 {
+    BLT_COMPILER_UNUSED(info);
+    BLT_COMPILER_UNUSED(mask);
+
     /*if (mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
         [[playerStreamInfoView dataSource] setProperty: @"Data Type" value: [NSString stringWithUTF8String: info->data_type]];
     }
@@ -195,6 +205,9 @@
                      name: (const char*)              name 
                     value: (const ATX_PropertyValue*) value
 {
+    BLT_COMPILER_UNUSED(scope);
+    BLT_COMPILER_UNUSED(source);
+
     if (name == NULL || value == NULL) return;
     
     NSString* value_string = nil;

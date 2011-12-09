@@ -399,23 +399,64 @@ AdtsParser_ReadNextHeader(AdtsParser* self, AdtsHeader* header)
 }
 
 /*----------------------------------------------------------------------
+|   AdtsWriteBits
++---------------------------------------------------------------------*/
+void 
+AdtsWriteBits(unsigned char* data, unsigned int* total_bits, unsigned int bits, unsigned int bit_count)
+{
+    data += *total_bits/8;
+    unsigned int space = 8-(*total_bits%8);
+    while (bit_count) {
+        unsigned int mask = bit_count==32 ? 0xFFFFFFFF : ((1<<bit_count)-1);
+        if (bit_count <= space) {
+            *data |= ((bits&mask) << (space-bit_count));
+            *total_bits += bit_count;
+            return;
+        } else {
+            *data |= ((bits&mask) >> (bit_count-space));
+            ++data;
+            *total_bits += space;
+            bit_count  -= space;
+            space       = 8;
+        }
+    }
+}
+
+/*----------------------------------------------------------------------
 |   AdtsParser_UpdateMediaType
 +---------------------------------------------------------------------*/
 static void
 AdtsParser_UpdateMediaType(AdtsParser* self)
 {
-    unsigned int dsi = 0;
+    /* default DSI */
+    unsigned char dsi[7] = {0,0,0,0,0,0,0};
+    unsigned int  dsi_bits = 0;
     
+    self->output.media_type->channel_count = self->frame_header.channel_configuration;
+    self->output.media_type->sample_rate   = Adts_SamplingFrequencyTable[self->frame_header.sampling_frequency_index&0x0F];
     self->output.media_type->base.format_or_object_type_id = 
         self->frame_header.id == 0 ?
         BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO :
         BLT_AAC_DECODER_OBJECT_TYPE_MPEG2_AAC_LC;
         
-    dsi = ((self->frame_header.profile_object_type+1)   << 11) |
-          ( self->frame_header.sampling_frequency_index << 7 ) |
-          ( self->frame_header.channel_configuration    << 3 );
-    self->output.media_type->decoder_info[0] = (unsigned char)(dsi>>8);
-    self->output.media_type->decoder_info[1] = (unsigned char)dsi;  
+    AdtsWriteBits(dsi, &dsi_bits, self->frame_header.profile_object_type+1, 5);
+    AdtsWriteBits(dsi, &dsi_bits, self->frame_header.sampling_frequency_index, 4);
+    AdtsWriteBits(dsi, &dsi_bits, self->frame_header.channel_configuration, 4);
+    
+    /* if the sampling rate is less than 24kHz, assume this is He-AAC */
+    if (self->frame_header.sampling_frequency_index >= 6) {
+        self->output.media_type->base.format_or_object_type_id = BLT_AAC_DECODER_OBJECT_TYPE_MPEG4_AUDIO;
+        AdtsWriteBits(dsi, &dsi_bits, 0, 3); /* extension bits */
+        AdtsWriteBits(dsi, &dsi_bits, 0x2b7, 11); /* extension tag */
+        AdtsWriteBits(dsi, &dsi_bits, 5, 5); 
+        AdtsWriteBits(dsi, &dsi_bits, 1, 1); /* sbr present */
+        AdtsWriteBits(dsi, &dsi_bits, self->frame_header.sampling_frequency_index-3, 4); 
+        AdtsWriteBits(dsi, &dsi_bits, 0x548, 11); /* extension tag */
+        AdtsWriteBits(dsi, &dsi_bits, 1, 1); /* ps present */
+    }
+    
+    self->output.media_type->decoder_info_length = (dsi_bits+7)/8;
+    ATX_CopyMemory(&self->output.media_type->decoder_info[0], dsi, self->output.media_type->decoder_info_length);
 }
 
 /*----------------------------------------------------------------------
@@ -642,8 +683,8 @@ AdtsParser_Create(BLT_Module*              module,
     /* construct the object */
     BLT_MediaType_Init(&self->input.media_type,
                        ((AdtsParserModule*)module)->adts_type_id);
-    self->output.media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+1);
-    BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4AudioMediaType)+1);
+    self->output.media_type = (BLT_Mp4AudioMediaType*)ATX_AllocateZeroMemory(sizeof(BLT_Mp4AudioMediaType)+6); /* up to 7 bytes decoder_config */
+    BLT_MediaType_InitEx(&self->output.media_type->base.base, ((AdtsParserModule*)module)->mp4es_type_id, sizeof(BLT_Mp4AudioMediaType)+6);
     self->output.media_type->base.stream_type              = BLT_MP4_STREAM_TYPE_AUDIO;
     self->output.media_type->base.format_or_object_type_id = 0; 
     self->output.media_type->decoder_info_length           = 2;
@@ -916,5 +957,5 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(AdtsParserModule,
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(AdtsParserModule,
                                          "ADTS Parser",
                                          "com.axiosys.parser.adts",
-                                         "1.1.0",
+                                         "1.2.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)

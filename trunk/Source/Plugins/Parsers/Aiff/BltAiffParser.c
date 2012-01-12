@@ -205,7 +205,7 @@ AiffParser_OnCommChunk(AiffParser*      self,
     self->output.media_type.channel_mask    = 0;
     self->output.media_type.bits_per_sample = (BLT_UInt8)sample_size;
     self->output.media_type.sample_rate     = sample_rate;
-
+    ATX_COMPILER_UNUSED(num_sample_frames); /* to fix warning*/
     return BLT_SUCCESS;
 }
 
@@ -219,7 +219,7 @@ AiffParser_OnSsndChunk(AiffParser*      self,
 {
     unsigned char ssnd_buffer[BLT_AIFF_SSND_CHUNK_MIN_SIZE];
     unsigned long offset;
-    unsigned long block_size;
+
     ATX_Position  position;
     BLT_Result    result;
 
@@ -229,7 +229,6 @@ AiffParser_OnSsndChunk(AiffParser*      self,
 
     /* parse the fields */
     offset     = ATX_BytesToInt32Be(ssnd_buffer);
-    block_size = ATX_BytesToInt32Be(&ssnd_buffer[4]);
 
     /* see where we are in the stream */
     result = ATX_InputStream_Tell(stream, &position);

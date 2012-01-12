@@ -1258,6 +1258,34 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Atomix;
 		};
+		CA77BFE914BF572800442B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
+			remoteInfo = Neptune;
+		};
+		CA77BFEB14BF573700442B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
+		CA77BFED14BF574800442B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Bento4;
+		};
+		CA77BFEF14BF574800442B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = CAEA9CE30E144664008C396D;
+			remoteInfo = Bento4Atomix;
+		};
 		CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -4625,6 +4653,10 @@
 			);
 			dependencies = (
 				CA448C221106FAF000A64E7A /* PBXTargetDependency */,
+				CA77BFEA14BF572800442B97 /* PBXTargetDependency */,
+				CA77BFEC14BF573700442B97 /* PBXTargetDependency */,
+				CA77BFEE14BF574800442B97 /* PBXTargetDependency */,
+				CA77BFF014BF574800442B97 /* PBXTargetDependency */,
 			);
 			name = BtTouchPlayer;
 			productName = BtTouchPlayer;
@@ -6057,6 +6089,26 @@
 			name = Atomix;
 			targetProxy = CA649C5511077CCF005B52E9 /* PBXContainerItemProxy */;
 		};
+		CA77BFEA14BF572800442B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA77BFE914BF572800442B97 /* PBXContainerItemProxy */;
+		};
+		CA77BFEC14BF573700442B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = CA77BFEB14BF573700442B97 /* PBXContainerItemProxy */;
+		};
+		CA77BFEE14BF574800442B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4;
+			targetProxy = CA77BFED14BF574800442B97 /* PBXContainerItemProxy */;
+		};
+		CA77BFF014BF574800442B97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bento4Atomix;
+			targetProxy = CA77BFEF14BF574800442B97 /* PBXContainerItemProxy */;
+		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
@@ -6477,9 +6529,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				ARCHS = (
+					armv6,
+					armv7,
+					i386,
+				);
 				"ARCHS[sdk=iphonesimulator*]" = i386;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -6496,7 +6552,7 @@
 					UIKit,
 				);
 				PRODUCT_NAME = BtTouchPlayer;
-				PROVISIONING_PROFILE = "50F9C246-2E51-42E2-A45C-2159DEADC73E";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				VALID_ARCHS = "armv6 armv7 i386";
 			};
@@ -6506,9 +6562,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				ARCHS = (
+					armv6,
+					armv7,
+					i386,
+				);
 				"ARCHS[sdk=iphonesimulator*]" = i386;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Gilles Boccon-Gibod (3KJ4RM9VMF)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -6524,7 +6584,7 @@
 					UIKit,
 				);
 				PRODUCT_NAME = BtTouchPlayer;
-				PROVISIONING_PROFILE = "50F9C246-2E51-42E2-A45C-2159DEADC73E";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				VALID_ARCHS = "armv6 armv7 i386";
 				ZERO_LINK = NO;

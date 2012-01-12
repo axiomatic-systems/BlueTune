@@ -401,13 +401,13 @@ AdtsParser_ReadNextHeader(AdtsParser* self, AdtsHeader* header)
 /*----------------------------------------------------------------------
 |   AdtsWriteBits
 +---------------------------------------------------------------------*/
-void 
+static void 
 AdtsWriteBits(unsigned char* data, unsigned int* total_bits, unsigned int bits, unsigned int bit_count)
 {
-    data += *total_bits/8;
     unsigned int space = 8-(*total_bits%8);
+    data += *total_bits/8;
     while (bit_count) {
-        unsigned int mask = bit_count==32 ? 0xFFFFFFFF : ((1<<bit_count)-1);
+        unsigned int mask = (bit_count==32) ? (unsigned int)0xFFFFFFFF : ((((unsigned int)1)<<bit_count)-1);
         if (bit_count <= space) {
             *data |= ((bits&mask) << (space-bit_count));
             *total_bits += bit_count;

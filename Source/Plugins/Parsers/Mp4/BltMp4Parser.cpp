@@ -117,10 +117,14 @@ public:
                           AP4_Size         max_buffer      = AP4_LINEAR_READER_DEFAULT_BUFFER_SIZE);
   
     // AP4_LinearReader methods
+    virtual AP4_Result ProcessTrack(AP4_Track* track);
     virtual AP4_Result ProcessMoof(AP4_ContainerAtom* moof, 
                                    AP4_Position       moof_offset, 
                                    AP4_Position       mdat_payload_offset);
         
+    // methods
+    AP4_Result SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker);
+    
     // members
     Mp4Parser* m_Parser;
 };
@@ -135,6 +139,47 @@ Mp4ParserLinearReader::Mp4ParserLinearReader(Mp4Parser*      parser,
     AP4_LinearReader(movie, fragment_stream, max_buffer),
     m_Parser(parser)
 {
+}
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::SetupTrackDecrypter
++---------------------------------------------------------------------*/
+AP4_Result 
+Mp4ParserLinearReader::SetupTrackDecrypter(AP4_LinearReader::Tracker* tracker)
+{
+    // cleanup any previous reader for this tracker
+    delete tracker->m_Reader;
+    tracker->m_Reader = NULL;
+
+    Mp4ParserOutput* output = NULL;
+    if (m_Parser->audio_output.track && 
+        m_Parser->audio_output.track->GetId() == tracker->m_Track->GetId()) {
+        output = &m_Parser->audio_output;
+    }
+    if (m_Parser->video_output.track && 
+        m_Parser->video_output.track->GetId() == tracker->m_Track->GetId()) {
+        output = &m_Parser->video_output;
+    }
+    if (output && output->sample_decrypter) {
+        tracker->m_Reader = new AP4_DecryptingSampleReader(output->sample_decrypter, false);
+    }
+    return AP4_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   Mp4ParserLinearReader::ProcessTrack
++---------------------------------------------------------------------*/
+AP4_Result
+Mp4ParserLinearReader::ProcessTrack(AP4_Track* track) 
+{
+    // call the base class implementation
+    AP4_Result result = AP4_LinearReader::ProcessTrack(track);
+    if (AP4_FAILED(result)) return result;
+
+    // setup a decypter if necessary
+    Tracker* tracker = FindTracker(track->GetId());
+    if (tracker == NULL) return AP4_SUCCESS;
+    return SetupTrackDecrypter(tracker);
 }
 
 /*----------------------------------------------------------------------
@@ -161,7 +206,7 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
         result = m_Fragment->GetTrafAtom(tracker->m_Track->GetId(), traf);
         if (AP4_FAILED(result)) continue;
         
-        // get the sample description for this track 
+        // get the sample description for this track
         // TODO: we only support one sample description here
         AP4_ProtectedSampleDescription* sample_description = 
             AP4_DYNAMIC_CAST(AP4_ProtectedSampleDescription, 
@@ -197,6 +242,9 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
                                                      decrypter);
             if (AP4_FAILED(result)) return result;
             tracker->m_Reader = new AP4_DecryptingSampleReader(decrypter, true);
+        } else {
+            result = SetupTrackDecrypter(tracker);
+            if (AP4_FAILED(result)) return result;
         }
     }
     
@@ -835,8 +883,10 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
                     ATX_LOG_WARNING("incomplete media");
                     return BLT_ERROR_INCOMPLETE_MEDIA;
                 }
-            } else {
+            } else if (result == NPT_ERROR_WOULD_BLOCK) {
                 return BLT_ERROR_PORT_HAS_NO_DATA;
+            } else {
+                return result;
             }
         }
 

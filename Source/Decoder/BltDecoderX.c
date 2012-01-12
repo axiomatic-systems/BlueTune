@@ -39,6 +39,7 @@ struct BLT_DecoderX {
     BLT_Stream*       video_stream;
     BLT_DecoderStatus status;
     BLT_Boolean       audio_only;
+    BLT_Boolean       input_needs_pumping;
 };
 
 /*----------------------------------------------------------------------
@@ -258,6 +259,9 @@ BLT_DecoderX_CreateInputNode(BLT_DecoderX*   self,
     /* default return value */
     *input_node = NULL;
     
+    /* by default, the input stream shouldn't be pumped */
+    self->input_needs_pumping = BLT_FALSE;
+
     /* check if this is audio-only */
     if (type) {
         if (ATX_StringsEqual(type, "audio") ||
@@ -283,6 +287,7 @@ BLT_DecoderX_CreateInputNode(BLT_DecoderX*   self,
         if (BLT_FAILED(result)) return result;
    
         /* the input stream's output is what we need to return here */
+        self->input_needs_pumping = BLT_FALSE;
         return BLT_Stream_GetOutputNode(self->input_stream, input_node);
     }
 }
@@ -316,7 +321,8 @@ BLT_DecoderX_SetInput(BLT_DecoderX* decoder, BLT_CString name, BLT_CString type)
         result = BLT_DecoderX_CreateInputNode(decoder, name, type, &node);
         if (BLT_FAILED(result)) return result;
         
-        if (!decoder->audio_only) {
+        if (!decoder->audio_only &&
+            !decoder->input_needs_pumping) {
             /* activate the input stream */
             /* NOTE: this is a temporary hacky solution: we pump a few packets to ensure  */
             /* that all intermediate nodes get created and connected.                     */
@@ -671,6 +677,8 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
                 ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
                 if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
                     /* skip the video decoding, we don't have enough time */
+                    ATX_LOG_FINE_1("skip video decoding, audio buffer = %d ns",
+                                   (int)buffered);
                     return BLT_SUCCESS;
                 }
             }    

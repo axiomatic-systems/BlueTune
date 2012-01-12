@@ -318,11 +318,11 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         ATX_LOG_FINE_1("performing seek of %d as a read", move);
         while (move) {
             unsigned int chunk = ((unsigned int)move) > sizeof(buffer)?sizeof(buffer):(unsigned int)move;
-            ATX_Size     bytes_read;
+            ATX_Size     bytes_read = 0;
             result = BLT_NetworkStream_Read(_self, buffer, chunk, &bytes_read);
             if (ATX_FAILED(result)) return result;
-            if (bytes_read != chunk) return ATX_ERROR_EOS;
-            move -= chunk;
+            if (bytes_read == 0) return ATX_ERROR_EOS;
+            move -= bytes_read;
         }
     } else {
         /* perform a real seek in the source */

@@ -413,9 +413,9 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
 
 static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 			   void *memo,ogg_int32_t *out){
-  (void)vb; /* GBG: unused */
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
+  (void)vb; /* GBG: unused */
   
   if(memo){
     ogg_int32_t *lsp=(ogg_int32_t *)memo;

@@ -19,15 +19,13 @@
 /*----------------------------------------------------------------------
 |    CHECK
 +---------------------------------------------------------------------*/
-static void CHECK(int x)                             
-{               
-    static unsigned long counter = 0;
-    ++counter;
-    if (!(x)) {                                      
-        fprintf(stderr, "FAILED line %d", __LINE__); 
-        abort();                                     
-    }                                                
-}
+#define CHECK(x)                                        \
+do {                                                    \
+    if (!(x)) {                                         \
+        fprintf(stderr, "FAILED line %d\n", __LINE__);  \
+        abort();                                        \
+    }                                                   \
+} while(0)
 
 /*----------------------------------------------------------------------
 |    Test
@@ -58,7 +56,7 @@ Test(int buffer_size, int source_size)
     ATX_MemoryStream_Destroy(memory);
 
     /* create the stream */
-    BLT_NetworkStream_Create(buffer_size, source, &stream);
+    BLT_NetworkStream_Create(buffer_size, 0, source, &stream);
     offset = 0;
     for (;;) {
         ATX_Size bytes_read = 0;
@@ -120,7 +118,9 @@ int
 main(int argc, char** argv)
 {
     int i, j;
-
+    (void)argc;
+    (void)argv;
+    
 #if defined(_DEBUG)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF    |
                    _CRTDBG_CHECK_ALWAYS_DF |

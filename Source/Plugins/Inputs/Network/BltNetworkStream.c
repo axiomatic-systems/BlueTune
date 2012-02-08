@@ -7,14 +7,6 @@
 |
 ****************************************************************/
 
-/**
- * This module implements a buffered stream cache that allows some
- * amount of seeking backward and forward in a slow-to-seek source
- * stream such as a network stream.
- * The cache will try to limit the forward-filling of the buffer to 
- * a small amount to keep as much backward-seek buffer as possible.
- */
-
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
@@ -25,7 +17,7 @@
 /*----------------------------------------------------------------------
 |   types
 +---------------------------------------------------------------------*/
-typedef struct {
+struct BLT_NetworkStream {
     /* interfaces */
     ATX_IMPLEMENTS(ATX_InputStream);
     ATX_IMPLEMENTS(ATX_Properties);
@@ -33,16 +25,18 @@ typedef struct {
 
     /* members */
     ATX_Cardinal     reference_count;
+    BLT_Stream*      context;
     ATX_InputStream* source;
     ATX_Properties*  source_properties;
     ATX_RingBuffer*  buffer;
     ATX_Size         buffer_size;
-    ATX_Size         back_store;
     ATX_Position     position;
     ATX_Boolean      eos;
     ATX_Result       eos_cause;
     ATX_Size         seek_as_read_threshold;
-} BLT_NetworkStream;
+    ATX_Size         min_buffer_fullness;
+    ATX_Int64        last_notification;
+};
 
 /*----------------------------------------------------------------------
 |   logging
@@ -59,10 +53,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.network.stream")
 #define BLT_NETWORK_STREAM_DEFAULT_SEEK_AS_READ_THRESHOLD 0     /* when seek is normal */ 
 #define BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD    32768 /* when seek is slow   */
 
-/**
- * Try to keep this amount of data in the back store 
- */
-#define BLT_NETWORK_STREAM_MIN_BACK_STORE 4096
+#define BLT_NETWORK_STREAM_NOTIFICATION_INTERVAL          1000000000 /* 1 second */
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -75,43 +66,43 @@ ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
 |   BLT_NetworkStream_Create
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_NetworkStream_Create(BLT_Size          buffer_size,
-                         ATX_InputStream*  source, 
-                         ATX_InputStream** stream)
+BLT_NetworkStream_Create(BLT_Size            buffer_size,
+                         BLT_Size            min_buffer_fullness,
+                         ATX_InputStream*    source, 
+                         BLT_NetworkStream** stream)
 {
     ATX_Result result;
 
     /* allocate the object */
-    BLT_NetworkStream* self = (BLT_NetworkStream*)ATX_AllocateZeroMemory(sizeof(BLT_NetworkStream));
-    if (self == NULL) {
-        *stream = NULL;
+    *stream = (BLT_NetworkStream*)ATX_AllocateZeroMemory(sizeof(BLT_NetworkStream));
+    if (*stream == NULL) {
         return ATX_ERROR_OUT_OF_MEMORY;
     }
 
     /* construct the object */
-    self->reference_count = 1;
-    result = ATX_RingBuffer_Create(buffer_size, &self->buffer);
+    (*stream)->reference_count = 1;
+    result = ATX_RingBuffer_Create(buffer_size, &(*stream)->buffer);
     if (ATX_FAILED(result)) {
         *stream = NULL;
         return result;
     }
-    self->buffer_size = buffer_size;
-    self->eos_cause = ATX_ERROR_EOS;
-    self->source = source;
+    (*stream)->buffer_size = buffer_size;
+    (*stream)->min_buffer_fullness = min_buffer_fullness;
+    (*stream)->eos_cause = ATX_ERROR_EOS;
+    (*stream)->source = source;
     ATX_REFERENCE_OBJECT(source);
     
     /* get the properties interface of the source */
-    self->source_properties = ATX_CAST(source, ATX_Properties);
+    (*stream)->source_properties = ATX_CAST(source, ATX_Properties);
     
     /* determine when we should read data instead issuing a seek when */
     /* the target position is close enough                            */
-    self->seek_as_read_threshold = BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD;
+    (*stream)->seek_as_read_threshold = BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD;
     
     /* setup the interfaces */
-    ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_InputStream);
-    ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_Properties);
-    ATX_SET_INTERFACE(self, BLT_NetworkStream, ATX_Referenceable);
-    *stream = &ATX_BASE(self, ATX_InputStream);
+    ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_InputStream);
+    ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_Properties);
+    ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_Referenceable);
 
     return ATX_SUCCESS;
 }
@@ -130,15 +121,65 @@ BLT_NetworkStream_Destroy(BLT_NetworkStream* self)
 }
 
 /*----------------------------------------------------------------------
-|   BLT_NetworkStream_ClampBackStore
+|   BLT_NetworkStream_InputStream_AddReference
 +---------------------------------------------------------------------*/
-static void
-BLT_NetworkStream_ClampBackStore(BLT_NetworkStream* self)
+ATX_METHOD 
+BLT_NetworkStream_InputStream_AddReference(ATX_Referenceable* _self)
 {
-    /** clamp the back store to ensure it is not bigger than the max
-     * possible value */
-    ATX_Size max_back = ATX_RingBuffer_GetSpace(self->buffer);
-    if (self->back_store > max_back) self->back_store = max_back;
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_Referenceable);
+    self->reference_count++;
+    return ATX_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_InputStream_Release
++---------------------------------------------------------------------*/
+ATX_METHOD
+BLT_NetworkStream_InputStream_Release(ATX_Referenceable* _self)
+{
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_Referenceable);
+    return BLT_NetworkStream_Release(self);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_Release
++---------------------------------------------------------------------*/
+BLT_Result
+BLT_NetworkStream_Release(BLT_NetworkStream* self)
+{
+    if (--self->reference_count == 0) {
+        BLT_NetworkStream_Destroy(self);
+    }
+    return ATX_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_SetContext
++---------------------------------------------------------------------*/
+void
+BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context)
+{
+    self->context = context;
+
+    if (self->context) {
+        ATX_Properties* properties = NULL;
+        BLT_Stream_GetProperties(self->context, &properties);
+        if (properties) {
+            ATX_PropertyValue value;
+            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value.data.integer = self->buffer_size;
+            ATX_Properties_SetProperty(properties, "NetworkStream.BufferSize", &value);
+        }
+    }
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_GetInputStream
++---------------------------------------------------------------------*/
+ATX_InputStream*
+BLT_NetworkStream_GetInputStream(BLT_NetworkStream* self)
+{
+    return &ATX_BASE(self, ATX_InputStream);
 }
 
 /*----------------------------------------------------------------------
@@ -166,6 +207,41 @@ BLT_NetworkStream_GetProperty(ATX_Properties*    _self,
 }
 
 /*----------------------------------------------------------------------
+|   BLT_NetworkStream_FillBuffer
++---------------------------------------------------------------------*/
+static ATX_Result
+BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
+{
+    ATX_Size       read_from_source = 0;
+    ATX_Size       should_read = ATX_RingBuffer_GetContiguousSpace(self->buffer);
+    unsigned char* in = ATX_RingBuffer_GetIn(self->buffer);
+    ATX_Result     result = ATX_SUCCESS;
+
+    /* read from the source */
+    ATX_LOG_FINER_1("reading up to %d bytes", should_read);
+    result = ATX_InputStream_Read(self->source, 
+                                  in, 
+                                  should_read, 
+                                  &read_from_source);
+    if (ATX_SUCCEEDED(result)) {
+        ATX_LOG_FINER_2("read %d bytes of %d from source", read_from_source, should_read);
+        
+        /* adjust the ring buffer */
+        ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
+    } else if (result == ATX_ERROR_EOS) {
+        /* we can't continue further */
+        ATX_LOG_FINE("reached EOS");
+        self->eos = ATX_TRUE;
+        self->eos_cause = ATX_ERROR_EOS;
+        result = ATX_SUCCESS;
+    } else {
+        ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
+    }
+    
+    return result;
+}
+
+/*----------------------------------------------------------------------
 |   BLT_NetworkStream_Read
 +---------------------------------------------------------------------*/
 static ATX_Result
@@ -175,10 +251,11 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
                        ATX_Size*        bytes_read)
 {
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, ATX_InputStream);
-    ATX_Size           buffered = ATX_RingBuffer_GetAvailable(self->buffer);
+    ATX_Size           buffered;
     ATX_Size           chunk;
     ATX_Size           bytes_read_storage = 0;
     ATX_LargeSize      source_available = 0;
+    ATX_Result         result = ATX_SUCCESS;
     
     /* default */
     if (bytes_read) {
@@ -190,8 +267,31 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     /* shortcut */
     if (bytes_to_read == 0) return ATX_SUCCESS;
 
-    /* use all we can from the buffer */
+    /* if we have a min buffer fullness setup, wait until we have refilled the buffer enough */
+    if (self->min_buffer_fullness) {
+        while (ATX_RingBuffer_GetAvailable(self->buffer) < self->min_buffer_fullness) {
+            ATX_LOG_FINE_2("buffer below minimum fullness (%d of %d), filling buffer",
+                           ATX_RingBuffer_GetAvailable(self->buffer), self->min_buffer_fullness);
+            result = BLT_NetworkStream_FillBuffer(self);
+            if (BLT_FAILED(result)) return result;
+            if (self->eos) break;
+        }
+    }
+        
+    /* ask the source how much data is available */
+    if (ATX_FAILED(ATX_InputStream_GetAvailable(self->source, &source_available))) {
+        source_available = 0;
+    }
+    
+    /* read what we can from the source */
+    buffered = ATX_RingBuffer_GetAvailable(self->buffer);
     ATX_LOG_FINER_1("buffer available=%d", buffered);
+    if ((buffered == 0 || source_available) && !self->eos) {
+        result = BLT_NetworkStream_FillBuffer(self);
+    }
+    
+    /* use all we can from the buffer */
+    buffered = ATX_RingBuffer_GetAvailable(self->buffer);
     chunk = buffered > bytes_to_read ? bytes_to_read : buffered;
     if (chunk) {
         ATX_RingBuffer_Read(self->buffer, buffer, chunk);
@@ -199,70 +299,31 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
         *bytes_read += chunk;
         self->position += chunk;
         buffer = (void*)((char*)buffer+chunk);
-        self->back_store += chunk;
-        BLT_NetworkStream_ClampBackStore(self);
     }
 
-    /* ask the source how much data is available */
-    if (ATX_FAILED(ATX_InputStream_GetAvailable(self->source, &source_available))) {
-        source_available = 0;
+    /* notify of the stream status periodically */
+    ATX_TimeStamp now;
+    if (ATX_SUCCEEDED(ATX_System_GetCurrentTimeStamp(&now))) {
+        ATX_Int64 next_update;
+        ATX_Int64 now_int;
+        ATX_TimeStamp_ToInt64(now, now_int);
+        next_update = self->last_notification+BLT_NETWORK_STREAM_NOTIFICATION_INTERVAL;
+        if (now_int > next_update) {
+            ATX_LOG_FINE("updating buffer status");
+            self->last_notification = now_int;
+            if (self->context) {
+                ATX_Properties* properties = NULL;
+                BLT_Stream_GetProperties(self->context, &properties);
+                if (properties) {
+                    ATX_PropertyValue value;
+                    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                    value.data.integer = ATX_RingBuffer_GetAvailable(self->buffer);
+                    ATX_Properties_SetProperty(properties, "NetworkStream.BufferFullness", &value);
+                }
+            }
+        }
     }
     
-    /* read what we can from the source */
-    if ((buffered == 0 || source_available) && !self->eos) {
-        ATX_Size       read_from_source = 0;
-        ATX_Size       can_write = ATX_RingBuffer_GetSpace(self->buffer);
-        ATX_Size       should_read = ATX_RingBuffer_GetContiguousSpace(self->buffer);
-        unsigned char* in = ATX_RingBuffer_GetIn(self->buffer);
-        ATX_Result     result;
-
-        /* compute how much to read from the source */
-        if (should_read > BLT_NETWORK_STREAM_MIN_BACK_STORE &&
-            should_read - BLT_NETWORK_STREAM_MIN_BACK_STORE >= bytes_to_read) {
-            /* leave some data in the back store */
-            should_read -= BLT_NETWORK_STREAM_MIN_BACK_STORE;
-        }
-
-        /* read from the source */
-        result = ATX_InputStream_Read(self->source, 
-                                      in, 
-                                      should_read, 
-                                      &read_from_source);
-        if (ATX_SUCCEEDED(result)) {
-            ATX_LOG_FINER_2("read %d bytes of %d from source", read_from_source, should_read);
-            
-            /* adjust the ring buffer */
-            ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
-
-            /* transfer some of what was read */
-            chunk = (bytes_to_read <= read_from_source)?bytes_to_read:read_from_source;
-            ATX_RingBuffer_Read(self->buffer, buffer, chunk);
-
-            /* adjust counters and pointers */
-            *bytes_read += chunk;
-            bytes_to_read -= chunk;
-            self->position += chunk;
-            buffer = (void*)((char*)buffer+chunk);
-
-            /* compute how much back-store we have now */
-            if (can_write-read_from_source < self->back_store) {
-                /* we have reduced (written over) the back store */
-                self->back_store = can_write-read_from_source;
-            }
-            self->back_store += chunk;
-            BLT_NetworkStream_ClampBackStore(self);
-
-        } else if (result == ATX_ERROR_EOS) {
-            /* we can't continue further */
-            ATX_LOG_FINE("reached EOS");
-            self->eos = ATX_TRUE;
-            self->eos_cause = ATX_ERROR_EOS;
-        } else {
-            ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
-            return (*bytes_read == 0) ? result : ATX_SUCCESS;
-        }
-    }
-
     if (self->eos && *bytes_read == 0) {
         return self->eos_cause;
     } else {
@@ -293,18 +354,14 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         return ATX_SUCCESS;
     }
     
-    ATX_LOG_FINER_3("move by %ld, back_store=%ld, forward_store=%ld",
-                    (long)move, (long)self->back_store, (long)ATX_RingBuffer_GetAvailable(self->buffer));
+    ATX_LOG_FINER_2("move by %ld, buffered=%ld",
+                    (long)move, (long)ATX_RingBuffer_GetAvailable(self->buffer));
                   
     /* see if we can seek entirely within our buffer */
-    if ((move < 0 && -move <= (ATX_Int64)self->back_store) ||
-        (move > 0 && move < (ATX_Int64)ATX_RingBuffer_GetAvailable(self->buffer))) {
+    if (move > 0 && move < (ATX_Int64)ATX_RingBuffer_GetAvailable(self->buffer)) {
         ATX_RingBuffer_MoveOut(self->buffer, (ATX_Size)move);
         self->position = position;
         self->eos = ATX_FALSE;
-
-        /* adjust the back-store counter */
-        self->back_store += (ATX_Size)move;
 
         return ATX_SUCCESS;
     }
@@ -330,7 +387,6 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         result = ATX_InputStream_Seek(self->source, position);
         if (ATX_FAILED(result)) return result;
         ATX_RingBuffer_Reset(self->buffer);
-        self->back_store = 0;
         self->position = position;
     }
     
@@ -383,7 +439,7 @@ ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_NetworkStream)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
 
 /*----------------------------------------------------------------------
-|       ATX_InputStream interface
+|   ATX_InputStream interface
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, ATX_InputStream)
     BLT_NetworkStream_Read,
@@ -401,5 +457,8 @@ ATX_IMPLEMENT_STATIC_PROPERTIES_INTERFACE(BLT_NetworkStream)
 /*----------------------------------------------------------------------
 |       ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE(BLT_NetworkStream, reference_count)
+ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
+    BLT_NetworkStream_InputStream_AddReference,
+    BLT_NetworkStream_InputStream_Release
+};         
 

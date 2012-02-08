@@ -662,6 +662,8 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
             if (BLT_FAILED(result)) {
                 if (result == BLT_ERROR_EOS) {
                     audio_eos = BLT_TRUE;
+                } else if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
+                    audio_would_block = BLT_TRUE;
                 } else {
                     return result;
                 }
@@ -677,7 +679,7 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
                 ATX_LOG_FINER_1("audio buffer = %d ns", (int)buffered);
                 if ((int)buffered < (int)BLT_DECODERX_AUDIO_PRIO_THRESHOLD) {
                     /* skip the video decoding, we don't have enough time */
-                    ATX_LOG_FINE_1("skip video decoding, audio buffer = %d ns",
+                    ATX_LOG_INFO_1("skip video decoding, audio buffer = %d ms",
                                    (int)buffered);
                     return BLT_SUCCESS;
                 }
@@ -702,6 +704,8 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
             if (BLT_FAILED(result)) {
                 if (result == BLT_ERROR_EOS) {
                     video_eos = BLT_TRUE;
+                } else if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
+                    video_would_block = BLT_TRUE;
                 } else {
                     return result;
                 }

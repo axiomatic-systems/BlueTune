@@ -19,6 +19,12 @@
 #include "BltNetworkInputSource.h"
 
 /*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+#define BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE_PROPERTY      "NetworkStream.BufferSize"
+#define BLT_HTTP_NETWORK_STREAM_MINIMUM_FULLNESS_PROPERTY "NetworkStream.MinimumFullness"
+
+/*----------------------------------------------------------------------
 |   functions
 +---------------------------------------------------------------------*/
 #if defined(__cplusplus)

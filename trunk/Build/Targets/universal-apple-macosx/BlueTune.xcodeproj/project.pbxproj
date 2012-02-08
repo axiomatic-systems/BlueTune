@@ -1286,6 +1286,13 @@
 			remoteGlobalIDString = CAEA9CE30E144664008C396D;
 			remoteInfo = Bento4Atomix;
 		};
+		CA77C26A14C688DC00442B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA77C0BA14C0BC7700442B97;
+			remoteInfo = NetworkTest1;
+		};
 		CA7DAD5D0D50EA9C00BF2DAA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -3249,6 +3256,7 @@
 				CAE418A00E0DD91C00A530D1 /* MessagesTest1 */,
 				CAE418A20E0DD91C00A530D1 /* MessagesTest2 */,
 				CAE418A40E0DD91C00A530D1 /* MiscTest1 */,
+				CA77C26B14C688DC00442B97 /* NetworkTest1 */,
 				CA0D92170E2732E5005667F1 /* QueueTest1 */,
 				CAE418A60E0DD91C00A530D1 /* RingBufferTest1 */,
 				CAA97B240CF3639D00C01909 /* StringsTest1 */,
@@ -5214,6 +5222,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = FileTest1;
 			remoteRef = CA5826FA0E67C0AC006CC501 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA77C26B14C688DC00442B97 /* NetworkTest1 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetworkTest1;
+			remoteRef = CA77C26A14C688DC00442B97 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA7DAD5E0D50EA9C00BF2DAA /* mp4dcfpackager */ = {

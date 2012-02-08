@@ -27,7 +27,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.inputs.network.http")
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-const BLT_Size BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE = 262144;
+const BLT_Size BLT_HTTP_NETWORK_STREAM_DEFAULT_BUFFER_SIZE  = 262144;
 
 /*----------------------------------------------------------------------
 |   HttpInputStream
@@ -47,14 +47,17 @@ typedef struct {
     NPT_HttpClient*           m_HttpClient;
     NPT_HttpUrl*              m_Url;
     NPT_HttpResponse*         m_Response;
+    BLT_NetworkStream*        m_NetworkStream;
     NPT_InputStreamReference* m_InputStream;
     NPT_LargeSize             m_ContentLength;
+    NPT_Position              m_Position;
     bool                      m_Eos;
     bool                      m_IsIcy;
     bool                      m_CanSeek;
     unsigned int              m_IcyMetaInterval;
     unsigned int              m_IcyMetaCounter;
     BLT_Stream*               m_Context;
+    BLT_UInt64                m_LastNotification;
 } HttpInputStream;
 
 /*----------------------------------------------------------------------
@@ -161,6 +164,9 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
 static void
 HttpInputStream_Destroy(HttpInputStream* self)
 {
+    if (self->m_NetworkStream) {
+        BLT_NetworkStream_Release(self->m_NetworkStream);
+    }
     delete self->m_HttpClient;
     delete self->m_Url;
     delete self->m_Response;
@@ -276,9 +282,14 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
     HttpInputStream* self = ATX_SELF(HttpInputStream, BLT_NetworkInputSource);
     self->m_Context = stream;
 
-    // read the http headers
-    ATX_Properties* properties;
-    if (stream && BLT_SUCCEEDED(BLT_Stream_GetProperties(stream, &properties))) {
+    // check parameters
+    if (!stream) return BLT_SUCCESS;
+    
+    // read and write stream properties
+    ATX_Properties* properties = NULL;
+    BLT_Stream_GetProperties(stream, &properties);
+    if (properties) {
+        // read the http headers
         for (NPT_List<NPT_HttpHeader*>::Iterator i = self->m_Response->GetHeaders().GetHeaders().GetFirstItem();
              i;
              ++i) {
@@ -299,7 +310,7 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
                 value.data.string = header->GetValue();
                 ATX_Properties_SetProperty(properties, "Tags/Genre", &value);
             }
-        }
+        }        
     }
 
     // set some optional stream info flags
@@ -310,6 +321,11 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
         info.flags |= BLT_STREAM_INFO_FLAG_CONTINUOUS; 
         info.mask   = BLT_STREAM_INFO_MASK_FLAGS;
         BLT_Stream_SetInfo(stream, &info);
+    }
+    
+    // pass the context to the source stream
+    if (self->m_NetworkStream) {
+        BLT_NetworkStream_SetContext(self->m_NetworkStream, stream);
     }
     
     return BLT_SUCCESS;
@@ -323,6 +339,9 @@ HttpInputStream_Detach(BLT_NetworkInputSource* _self)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, BLT_NetworkInputSource);
     self->m_Context = NULL;
+    if (self->m_NetworkStream) {
+        BLT_NetworkStream_SetContext(self->m_NetworkStream, NULL);
+    }
 
     return BLT_SUCCESS;
 }
@@ -338,6 +357,10 @@ HttpInputStream_Read(ATX_InputStream* _self,
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, ATX_InputStream);
     if (self->m_Eos) return ATX_ERROR_EOS;
+    if (self->m_ContentLength && self->m_Position == self->m_ContentLength) {
+        self->m_Eos = true;
+        return ATX_ERROR_EOS;
+    }
     if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
 
     // see if we need to truncate the read because of ICY metadata
@@ -416,7 +439,10 @@ HttpInputStream_Seek(ATX_InputStream* _self,
     
     // seek by emitting a new request with a range
     NPT_Result result = HttpInputStream_SendRequest(self, where);
-    if (NPT_SUCCEEDED(result)) self->m_Eos = false;
+    if (NPT_SUCCEEDED(result)) {
+        self->m_Eos      = false;
+        self->m_Position = where;
+    }
     return result;
 }
 
@@ -521,6 +547,7 @@ HttpInputStream_Create(const char* url)
     stream->m_Response        = NULL;
     stream->m_InputStream     = new NPT_InputStreamReference;
     stream->m_ContentLength   = 0;
+    stream->m_Position        = 0;
     stream->m_Eos             = false;
     stream->m_IsIcy           = false;
     stream->m_CanSeek         = false;
@@ -548,12 +575,34 @@ BLT_HttpNetworkStream_Create(const char*              url,
                              BLT_MediaType**          media_type)
 {
     BLT_Result result = BLT_FAILURE;
-
+    ATX_Int32  min_buffer_fullness = 0;
+    ATX_Int32  buffer_size = BLT_HTTP_NETWORK_STREAM_DEFAULT_BUFFER_SIZE;
+    
     // default return value
     *stream = NULL;
     *source = NULL;
     *media_type = NULL;
 
+    // get the settings
+    {
+        ATX_Properties* properties = NULL;
+        if (ATX_SUCCEEDED(BLT_Core_GetProperties(core, &properties))) {
+            ATX_PropertyValue value;
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE_PROPERTY, &value))) {
+                if (value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                    ATX_LOG_INFO_1("setting network stream buffer size to %d", buffer_size);
+                    buffer_size = value.data.integer;
+                }
+            }
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_HTTP_NETWORK_STREAM_MINIMUM_FULLNESS_PROPERTY, &value))) {
+                if (value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+                    ATX_LOG_INFO_1("setting network stream minimum fullness to %d", min_buffer_fullness);
+                    min_buffer_fullness = value.data.integer;
+                }
+            }
+        }
+    }
+    
     // create a stream object
     HttpInputStream* http_stream = HttpInputStream_Create(url);
     if (!http_stream->m_Url->IsValid()) {
@@ -569,10 +618,19 @@ BLT_HttpNetworkStream_Create(const char*              url,
     // see if we can determine the media type
     HttpInputStream_GetMediaType(http_stream, core, media_type);
 
-    // create a stream adapter
+    // create the stream
     ATX_InputStream* adapted_input_stream = &ATX_BASE(http_stream, ATX_InputStream);
-    BLT_NetworkStream_Create(BLT_HTTP_NETWORK_STREAM_BUFFER_SIZE, adapted_input_stream, stream);
-
+    result = BLT_NetworkStream_Create(buffer_size, 
+                                      min_buffer_fullness,
+                                      adapted_input_stream, 
+                                      &http_stream->m_NetworkStream);
+    if (BLT_FAILED(result)) {
+        HttpInputStream_Destroy(http_stream);
+        *stream = NULL;
+        return result;
+    }
+    *stream = BLT_NetworkStream_GetInputStream(http_stream->m_NetworkStream);
+    
     return BLT_SUCCESS;
 }
 

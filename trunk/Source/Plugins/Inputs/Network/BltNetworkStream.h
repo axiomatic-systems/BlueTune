@@ -15,18 +15,34 @@
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltTypes.h"
+#include "BltStream.h"
 
-/*----------------------------------------------------------------------
-|   functions
-+---------------------------------------------------------------------*/
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+/*----------------------------------------------------------------------
+|   types
++---------------------------------------------------------------------*/
+typedef struct BLT_NetworkStream BLT_NetworkStream;
+
+/*----------------------------------------------------------------------
+|   functions
++---------------------------------------------------------------------*/
 BLT_Result 
-BLT_NetworkStream_Create(BLT_Size          size,
-                         ATX_InputStream*  source, 
-                         ATX_InputStream** stream);
+BLT_NetworkStream_Create(BLT_Size            size,
+                         BLT_Size            min_buffer_fullness,
+                         ATX_InputStream*    source, 
+                         BLT_NetworkStream** stream);
+
+ATX_InputStream*
+BLT_NetworkStream_GetInputStream(BLT_NetworkStream* self);
+
+void
+BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context);
+
+BLT_Result
+BLT_NetworkStream_Release(BLT_NetworkStream* self);
 
 #if defined(__cplusplus)
 }

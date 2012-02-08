@@ -35,6 +35,7 @@
 
 -(int) numberOfRowsInTableView: (NSTableView *)view
 {
+    (void)view;
     return [records count];
 }
 
@@ -44,6 +45,7 @@
 {
     id record = [records objectAtIndex: rowIndex];
     id value = [record objectForKey: [column identifier]];    
+    (void) view;
     return value;
 }
 
@@ -128,28 +130,32 @@
 -(void) awakeFromNib
 {        
     // set the data source for the list views
-    [playerPropertiesView setDataSource: [[CocoaPlayerRecordList alloc]init]];
-    [playerStreamInfoView setDataSource: [[CocoaPlayerRecordList alloc]init]];
+    [playerPropertiesView setDataSource: (id)[[CocoaPlayerRecordList alloc]init]];
+    [playerStreamInfoView setDataSource: (id)[[CocoaPlayerRecordList alloc]init]];
     //[player setOutput: @"raop://192.168.1.45:5000"];
 }
 
 -(IBAction) play: (id) sender;
 {
+    (void)sender;
     [player play];
 }
 
 -(IBAction) stop: (id) sender;
 {
+    (void)sender;
     [player stop];
 }
 
 -(IBAction) pause: (id) sender;
 {
+    (void)sender;
     [player pause];
 }
 
 -(IBAction) setInput: (id) sender;
 {
+    (void)sender;
     [player stop];
     [player setInput: [playerInput stringValue]];
     [player play];
@@ -159,18 +165,21 @@
 {
     UInt64 position = [playerPosition floatValue] * 1000.0;
     UInt64 range    = [playerPosition maxValue] * 1000.0;
+    (void)sender;
     [player seekToPosition: position range: range];
 }
 
 -(IBAction) setVolume: (id) sender;
 {
     float volume = [playerVolume floatValue]/[playerVolume maxValue];
+    (void)sender;
     [player setVolume: volume];
 }
 
 -(IBAction) chooseFile: (id) sender;
 {
     NSOpenPanel* op = [NSOpenPanel openPanel];
+    (void)sender;
     
     [op setCanChooseDirectories:NO];
     [op setCanChooseFiles:YES];
@@ -271,6 +280,9 @@
                      name: (const char*)              name 
                     value: (const ATX_PropertyValue*) value
 {
+    (void)scope;
+    (void)source;
+    
     if (name == NULL || name[0] == '\0') {
         // all properties cleared
         [(CocoaPlayerRecordList*)[playerPropertiesView dataSource] clear];
@@ -284,7 +296,7 @@
             break;
 
         case ATX_PROPERTY_VALUE_TYPE_INTEGER:
-            value_string = [NSString stringWithFormat:@"%d", value->data.string];
+            value_string = [NSString stringWithFormat:@"%d", value->data.integer];
             break;
             
         default:

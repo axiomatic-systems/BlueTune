@@ -13,7 +13,7 @@
     NSMutableArray* records;
 }
 -(int) numberOfRowsInTableView:(NSTableView *)aTableView;
--(id)        tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+-(id) tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 @end
 
 
@@ -206,9 +206,6 @@
     if (command_id == BLT_PLAYER_COMMAND_ID_SET_INPUT) {
         [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] clear];
         [playerStreamInfoView reloadData];
-
-        [(CocoaPlayerRecordList*)[playerPropertiesView dataSource] clear];
-        [playerPropertiesView reloadData];
     }
 }
 
@@ -286,6 +283,8 @@
     if (name == NULL || name[0] == '\0') {
         // all properties cleared
         [(CocoaPlayerRecordList*)[playerPropertiesView dataSource] clear];
+        [playerPropertiesView reloadData];
+        return;
     }
     if (value == NULL) return; // TODO: should remove entry from list
     
@@ -304,6 +303,7 @@
     }
     if (value_string) {
         [(CocoaPlayerRecordList*)[playerPropertiesView dataSource] setProperty: [NSString stringWithUTF8String: name] value: value_string];
+        [playerPropertiesView reloadData];
     }
 }
 

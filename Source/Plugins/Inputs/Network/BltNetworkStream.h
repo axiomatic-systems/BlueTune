@@ -2,7 +2,7 @@
 |
 |   BlueTune - Network Stream
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2012 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
 ****************************************************************/
@@ -20,6 +20,10 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#define BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY      "NetworkStream.EndOfStream"
+#define BLT_NETWORK_STREAM_BUFFER_SIZE_PROPERTY     "NetworkStream.BufferSize"
+#define BLT_NETWORK_STREAM_BUFFER_FULLNESS_PROPERTY "NetworkStream.BufferFullness"
 
 /*----------------------------------------------------------------------
 |   types

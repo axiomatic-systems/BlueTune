@@ -166,9 +166,14 @@ BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context)
         BLT_Stream_GetProperties(self->context, &properties);
         if (properties) {
             ATX_PropertyValue value;
+            
             value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
             value.data.integer = self->buffer_size;
-            ATX_Properties_SetProperty(properties, "NetworkStream.BufferSize", &value);
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_SIZE_PROPERTY, &value);
+            
+            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value.data.integer = 0;
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);            
         }
     }
 }
@@ -209,7 +214,7 @@ BLT_NetworkStream_GetProperty(ATX_Properties*    _self,
 /*----------------------------------------------------------------------
 |   BLT_NetworkStream_FillBuffer
 +---------------------------------------------------------------------*/
-static ATX_Result
+static void
 BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
 {
     ATX_Size       read_from_source = 0;
@@ -228,17 +233,23 @@ BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
         
         /* adjust the ring buffer */
         ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
-    } else if (result == ATX_ERROR_EOS) {
-        /* we can't continue further */
-        ATX_LOG_FINE("reached EOS");
-        self->eos = ATX_TRUE;
-        self->eos_cause = ATX_ERROR_EOS;
-        result = ATX_SUCCESS;
     } else {
         ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
+        self->eos = ATX_TRUE;
+        self->eos_cause = result;
+        
+        /* notify that we've reached the end of stream */
+        if (self->context) {
+            ATX_Properties* properties = NULL;
+            BLT_Stream_GetProperties(self->context, &properties);
+            if (properties) {
+                ATX_PropertyValue value;
+                value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                value.data.integer = self->eos_cause;
+                ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
+            }
+        }        
     }
-    
-    return result;
 }
 
 /*----------------------------------------------------------------------
@@ -255,7 +266,6 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     ATX_Size           chunk;
     ATX_Size           bytes_read_storage = 0;
     ATX_LargeSize      source_available = 0;
-    ATX_Result         result = ATX_SUCCESS;
     
     /* default */
     if (bytes_read) {
@@ -267,14 +277,12 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     /* shortcut */
     if (bytes_to_read == 0) return ATX_SUCCESS;
 
-    /* if we have a min buffer fullness setup, wait until we have refilled the buffer enough */
+    /* if we have a min buffer fullness, wait until we have refilled the buffer enough */
     if (self->min_buffer_fullness) {
-        while (ATX_RingBuffer_GetAvailable(self->buffer) < self->min_buffer_fullness) {
+        while ((!self->eos) && (ATX_RingBuffer_GetAvailable(self->buffer) < self->min_buffer_fullness)) {
             ATX_LOG_FINE_2("buffer below minimum fullness (%d of %d), filling buffer",
                            ATX_RingBuffer_GetAvailable(self->buffer), self->min_buffer_fullness);
-            result = BLT_NetworkStream_FillBuffer(self);
-            if (BLT_FAILED(result)) return result;
-            if (self->eos) break;
+            BLT_NetworkStream_FillBuffer(self);
         }
     }
         
@@ -287,7 +295,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     buffered = ATX_RingBuffer_GetAvailable(self->buffer);
     ATX_LOG_FINER_1("buffer available=%d", buffered);
     if ((buffered == 0 || source_available) && !self->eos) {
-        result = BLT_NetworkStream_FillBuffer(self);
+        BLT_NetworkStream_FillBuffer(self);
     }
     
     /* use all we can from the buffer */
@@ -318,7 +326,7 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
                     ATX_PropertyValue value;
                     value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
                     value.data.integer = ATX_RingBuffer_GetAvailable(self->buffer);
-                    ATX_Properties_SetProperty(properties, "NetworkStream.BufferFullness", &value);
+                    ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_FULLNESS_PROPERTY, &value);
                 }
             }
         }
@@ -361,7 +369,6 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     if (move > 0 && move < (ATX_Int64)ATX_RingBuffer_GetAvailable(self->buffer)) {
         ATX_RingBuffer_MoveOut(self->buffer, (ATX_Size)move);
         self->position = position;
-        self->eos = ATX_FALSE;
 
         return ATX_SUCCESS;
     }
@@ -389,6 +396,17 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         ATX_RingBuffer_Reset(self->buffer);
         self->position = position;
     }
+
+    if (self->context) {
+        ATX_Properties* properties = NULL;
+        BLT_Stream_GetProperties(self->context, &properties);
+        if (properties) {
+            ATX_PropertyValue value;
+            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value.data.integer = 0;
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
+        }
+    }        
     
     return ATX_SUCCESS;
 }

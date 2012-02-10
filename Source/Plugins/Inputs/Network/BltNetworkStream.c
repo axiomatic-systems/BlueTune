@@ -28,6 +28,7 @@ struct BLT_NetworkStream {
     BLT_Stream*      context;
     ATX_InputStream* source;
     ATX_Properties*  source_properties;
+    ATX_LargeSize    source_size;
     ATX_RingBuffer*  buffer;
     ATX_Size         buffer_size;
     ATX_Position     position;
@@ -91,6 +92,7 @@ BLT_NetworkStream_Create(BLT_Size            buffer_size,
     (*stream)->eos_cause = ATX_ERROR_EOS;
     (*stream)->source = source;
     ATX_REFERENCE_OBJECT(source);
+    ATX_InputStream_GetSize(source, &(*stream)->source_size);
     
     /* get the properties interface of the source */
     (*stream)->source_properties = ATX_CAST(source, ATX_Properties);
@@ -233,23 +235,30 @@ BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
         
         /* adjust the ring buffer */
         ATX_RingBuffer_MoveIn(self->buffer, read_from_source);
+        
+        /* check if we've read everything there is to read */
+        if (self->source_size && 
+            self->position+ATX_RingBuffer_GetAvailable(self->buffer) >= self->source_size) {
+            self->eos = ATX_TRUE;
+            self->eos_cause = ATX_ERROR_EOS;
+        }
     } else {
         ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
         self->eos = ATX_TRUE;
         self->eos_cause = result;
-        
-        /* notify that we've reached the end of stream */
-        if (self->context) {
-            ATX_Properties* properties = NULL;
-            BLT_Stream_GetProperties(self->context, &properties);
-            if (properties) {
-                ATX_PropertyValue value;
-                value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
-                value.data.integer = self->eos_cause;
-                ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
-            }
-        }        
     }
+    
+    /* notify that we've reached the end of stream */
+    if (self->eos && self->context) {
+        ATX_Properties* properties = NULL;
+        BLT_Stream_GetProperties(self->context, &properties);
+        if (properties) {
+            ATX_PropertyValue value;
+            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value.data.integer = self->eos_cause;
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
+        }
+    }        
 }
 
 /*----------------------------------------------------------------------

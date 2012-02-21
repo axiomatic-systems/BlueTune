@@ -637,8 +637,10 @@ static BLT_Result
 BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
 {
     BLT_Boolean audio_would_block = BLT_FALSE;
+    BLT_Boolean audio_has_no_data = BLT_FALSE;
     BLT_Boolean audio_eos         = BLT_FALSE;
     BLT_Boolean video_would_block = BLT_FALSE;
+    BLT_Boolean video_has_no_data = BLT_FALSE;
     BLT_Boolean video_eos         = BLT_FALSE;
     BLT_Result  result;
     
@@ -663,7 +665,7 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
                 if (result == BLT_ERROR_EOS) {
                     audio_eos = BLT_TRUE;
                 } else if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
-                    audio_would_block = BLT_TRUE;
+                    audio_has_no_data = BLT_TRUE;
                 } else {
                     return result;
                 }
@@ -705,7 +707,7 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
                 if (result == BLT_ERROR_EOS) {
                     video_eos = BLT_TRUE;
                 } else if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
-                    video_would_block = BLT_TRUE;
+                    video_has_no_data = BLT_TRUE;
                 } else {
                     return result;
                 }
@@ -716,9 +718,20 @@ BLT_DecoderX_PumpPacket_Simple(BLT_DecoderX* decoder)
     /* check for the end of both streams */
     if (audio_eos && video_eos) return BLT_ERROR_EOS;
 
-    /* if both would block, sleep a bit */
+    /* check if this would block */
     if ((audio_would_block || audio_eos) && (video_would_block || video_eos)) {
         return BLT_ERROR_WOULD_BLOCK;
+    }
+    
+    /* check if no data was produced */
+    if (decoder->input_needs_pumping) {
+        if (audio_has_no_data || video_has_no_data) {
+            return BLT_ERROR_PORT_HAS_NO_DATA;
+        }
+    } else {
+        if ((audio_has_no_data ||audio_eos) && (video_has_no_data || video_eos)) {
+            return BLT_ERROR_PORT_HAS_NO_DATA;
+        }
     }
     
     return BLT_SUCCESS;
@@ -735,7 +748,7 @@ BLT_DecoderX_PumpPacket(BLT_DecoderX* decoder)
 
     /* if we ran out of data, give a chance to the input stream to produce
        some more. */
-    if (result == BLT_ERROR_PORT_HAS_NO_DATA) {
+    if (result == BLT_ERROR_PORT_HAS_NO_DATA && decoder->input_needs_pumping) {
         result = BLT_Stream_PumpPacket(decoder->input_stream);
     }
 

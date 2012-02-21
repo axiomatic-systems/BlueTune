@@ -76,6 +76,12 @@ typedef struct BLT_MediaPacket BLT_MediaPacket;
  */
 #define BLT_MEDIA_PACKET_FLAG_STREAM_METADATA           0x08
 
+/**
+ * This flag indicates that there has been a change in the stream
+ * characteristics (such as bitrate, resolution)
+ */
+#define BLT_MEDIA_PACKET_FLAG_STREAM_CHANGE             0x100
+
 /** @} */
 
 /** @addtogroup media_packet

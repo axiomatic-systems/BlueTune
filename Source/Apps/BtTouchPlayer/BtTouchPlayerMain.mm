@@ -3,7 +3,7 @@
 //  CocoaPlayer
 //
 //  Created by Gilles on 9/6/08.
-//  Copyright Gilles Boccon-Gibod 2008. All rights reserved.
+//  Copyright Gilles Boccon-Gibod 2008-2012. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

@@ -133,6 +133,7 @@
     [playerPropertiesView setDataSource: (id)[[CocoaPlayerRecordList alloc]init]];
     [playerStreamInfoView setDataSource: (id)[[CocoaPlayerRecordList alloc]init]];
     //[player setOutput: @"raop://192.168.1.45:5000"];
+    //[player setOutput: @"osxaq:0"];
 }
 
 -(IBAction) play: (id) sender;

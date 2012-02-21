@@ -1111,7 +1111,8 @@ Mp4Parser_Construct(Mp4Parser* self, BLT_Module* module, BLT_Core* core)
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* initialize some fields */
-    self->key_manager = NULL;
+    self->key_manager    = NULL;
+    self->cipher_factory = NULL;
     
     /* construct the members */
     Mp4ParserInput_Construct(&self->input, self, module);

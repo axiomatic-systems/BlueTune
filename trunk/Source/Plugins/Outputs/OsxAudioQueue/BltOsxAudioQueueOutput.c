@@ -47,6 +47,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.audio-queue")
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_PACKET_DESCRIPTION_COUNT 512
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_DEFAULT_BUFFER_SIZE      32768
 #define BLT_OSX_AUDIO_QUEUE_OUTPUT_MAX_WAIT                 3 /* seconds */
+#define BLT_OSX_AUDIO_QUEUE_UNDERFLOW_THRESHOLD             11025 /* number of samples */
 
 #define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN 0x66
 #define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC   0x67
@@ -851,17 +852,6 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
         self->buffer_index = 0;
     }
     
-    /* automatically start the queue if it is not already running */
-    if (!self->audio_queue_started) {
-        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
-        ATX_LOG_FINE("auto-starting the queue");
-        if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
-            return BLT_ERROR_INTERNAL;
-        } 
-        self->audio_queue_started = BLT_TRUE;
-    }
-    
     /* queue the buffer */
     ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
     status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
@@ -891,24 +881,40 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     } else {
         self->timestamp_snapshot.host_time = 0;
     }
+
+    /* automatically start the queue if it is not already running */
+    if (!self->audio_queue_started) {
+        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
+        ATX_LOG_FINE("auto-starting the queue");
+        if (status != noErr) {
+            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
+            return BLT_ERROR_INTERNAL;
+        } 
+        self->audio_queue_started = BLT_TRUE;
+    }
+    
+    /* check the current queue time to detect underflows */
     status = AudioQueueGetCurrentTime(self->audio_queue, NULL, &current_time, NULL);
     if (status == noErr) {
         ATX_LOG_FINER_1("current time = %lf", current_time.mSampleTime);
         if ((current_time.mFlags & kAudioTimeStampSampleTimeValid) && 
             (start_time.mFlags & kAudioTimeStampSampleTimeValid)   &&
             (start_time.mSampleTime != 0)) {
-            if (current_time.mSampleTime > start_time.mSampleTime) {
+            if (current_time.mSampleTime > start_time.mSampleTime+BLT_OSX_AUDIO_QUEUE_UNDERFLOW_THRESHOLD) {
+                /* stop the queue (it will restart automatically on the next call) */
                 ATX_LOG_FINE_1("audio queue underflow (%f)", (float)(current_time.mSampleTime - start_time.mSampleTime));
                 AudioQueueStop(self->audio_queue, TRUE);
-                AudioQueueStart(self->audio_queue, NULL /*&start_time*/);
+                self->audio_queue_started = BLT_FALSE;
             }
         }
     } else {
-        ATX_LOG_FINER("no timestamp available");
+        ATX_LOG_FINER_1("no timestamp available (%d)", status);
     }
+    
+    /* remember the timestamps */
     self->timestamp_snapshot.packet_time = buffer->timestamp;
     self->timestamp_snapshot.max_time    = buffer->timestamp + buffer->duration;
-    
+        
     return BLT_SUCCESS;
 }
 

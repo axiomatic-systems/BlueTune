@@ -1025,12 +1025,26 @@ OsxAudioFileStreamParserModule_Probe(BLT_Module*              _self,
             }
 
             /* the input type should be one of the supported types */
-            if (constructor->spec.input.media_type->id != self->media_type_ids.audio_mp4 &&
-                constructor->spec.input.media_type->id != self->media_type_ids.audio_mp3 &&
-                constructor->spec.input.media_type->id != self->media_type_ids.audio_aac) {
-                return BLT_FAILURE;
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP4) || defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3) || defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_AAC)
+        
+            {
+                BLT_Boolean accepted = BLT_FALSE;
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP4)
+                if (constructor->spec.input.media_type->id == self->media_type_ids.audio_mp4) accepted = BLT_TRUE;
+#endif
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3)
+                if (constructor->spec.input.media_type->id == self->media_type_ids.audio_mp3) accepted = BLT_TRUE;
+#endif
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_AAC)
+                if (constructor->spec.input.media_type->id == self->media_type_ids.audio_aac) accepted = BLT_TRUE;
+#endif
+                if (!accepted) return BLT_FAILURE;
             }
-
+#else
+            ATX_LOG_WARNING("BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER defined, but no format enabled");
+            return BLT_FAILURE;
+#endif
+            
             /* the output type should be unspecified, or audio/x-apple-asbd */
             if (!(constructor->spec.output.media_type->id == self->media_type_ids.asbd) &&
                 !(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {

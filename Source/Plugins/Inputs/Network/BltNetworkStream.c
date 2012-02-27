@@ -224,6 +224,9 @@ BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
     unsigned char* in = ATX_RingBuffer_GetIn(self->buffer);
     ATX_Result     result = ATX_SUCCESS;
 
+    /* do nothing if we've reached the end of stream already */
+    if (self->eos) return;
+    
     /* read from the source */
     ATX_LOG_FINER_1("reading up to %d bytes", should_read);
     result = ATX_InputStream_Read(self->source, 
@@ -284,7 +287,10 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     }
 
     /* shortcut */
-    if (bytes_to_read == 0) return ATX_SUCCESS;
+    if (bytes_to_read == 0) {
+        BLT_NetworkStream_FillBuffer(self);
+        return ATX_SUCCESS;
+    }
 
     /* if we have a min buffer fullness, wait until we have refilled the buffer enough */
     if (self->min_buffer_fullness) {

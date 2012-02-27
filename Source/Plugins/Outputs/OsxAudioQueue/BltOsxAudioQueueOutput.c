@@ -853,7 +853,11 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     }
     
     /* queue the buffer */
-    ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
+    if (packet_count) {
+        ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
+    } else {
+        ATX_LOG_FINE_2("enqueuing buffer %d, %d bytes", buffer_index, buffer->data?buffer->data->mAudioDataByteSize:0);
+    }
     status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
                                                    buffer->data, 
                                                    packet_count, 
@@ -884,8 +888,8 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
 
     /* automatically start the queue if it is not already running */
     if (!self->audio_queue_started) {
-        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         ATX_LOG_FINE("auto-starting the queue");
+        OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
             return BLT_ERROR_INTERNAL;
@@ -900,9 +904,12 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
         if ((current_time.mFlags & kAudioTimeStampSampleTimeValid) && 
             (start_time.mFlags & kAudioTimeStampSampleTimeValid)   &&
             (start_time.mSampleTime != 0)) {
+            if (current_time.mSampleTime > start_time.mSampleTime) {
+                ATX_LOG_FINE_1("current time is past queued sample time (%f)", (float)(current_time.mSampleTime - start_time.mSampleTime));
+            }
             if (current_time.mSampleTime > start_time.mSampleTime+BLT_OSX_AUDIO_QUEUE_UNDERFLOW_THRESHOLD) {
                 /* stop the queue (it will restart automatically on the next call) */
-                ATX_LOG_FINE_1("audio queue underflow (%f)", (float)(current_time.mSampleTime - start_time.mSampleTime));
+                ATX_LOG_FINE("audio queue underflow");
                 AudioQueueStop(self->audio_queue, TRUE);
                 self->audio_queue_started = BLT_FALSE;
             }
@@ -1242,6 +1249,7 @@ OsxAudioQueueOutput_Drain(BLT_OutputNode* _self)
     
     /* wait for the queue to be stopped */
     pthread_mutex_lock(&self->lock);
+    ATX_LOG_FINE("stopping audio queue (async)");
     status = AudioQueueStop(self->audio_queue, false);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", status);
@@ -1278,6 +1286,7 @@ OsxAudioQueueOutput_Stop(BLT_MediaNode* _self)
     if (self->audio_queue == NULL) return BLT_SUCCESS;
 
     /* stop the audio queue */
+    ATX_LOG_FINE("stopping audio queue (sync)");
     OSStatus status = AudioQueueStop(self->audio_queue, true);
     if (status != noErr) {
         ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", status);
@@ -1317,6 +1326,7 @@ OsxAudioQueueOutput_Resume(BLT_MediaNode* _self)
     OsxAudioQueueOutput* self = ATX_SELF_EX(OsxAudioQueueOutput, BLT_BaseMediaNode, BLT_MediaNode);
 
     if (self->audio_queue && self->audio_queue_paused) {
+        ATX_LOG_FINE("resuming from pause: starting audio queue");
         OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         if (status != noErr) {
             ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);

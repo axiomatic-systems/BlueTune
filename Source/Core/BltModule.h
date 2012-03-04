@@ -259,7 +259,7 @@ _module_class##_Create(BLT_Module** object)                         \
     return BLT_SUCCESS;                                             \
 }
 
-#define BLT_MODULE_AXIOMATIC_COPYRIGHT "(c) 2001-2010 Axiomatic Systems, LLC"
+#define BLT_MODULE_AXIOMATIC_COPYRIGHT "(c) 2001-2012 Axiomatic Systems, LLC"
 #define BLT_MODULE_DECLARE_STANDARD_PROPERTIES(_version, _copyright) \
 ATX_Property properties[2] = {                                       \
     {"version",   {ATX_PROPERTY_VALUE_TYPE_STRING, {_version}}},     \

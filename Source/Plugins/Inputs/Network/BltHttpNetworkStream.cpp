@@ -47,7 +47,6 @@ typedef struct {
     NPT_HttpClient*           m_HttpClient;
     NPT_HttpUrl*              m_Url;
     NPT_HttpResponse*         m_Response;
-    BLT_NetworkStream*        m_NetworkStream;
     NPT_InputStreamReference* m_InputStream;
     NPT_LargeSize             m_ContentLength;
     NPT_Position              m_Position;
@@ -164,12 +163,10 @@ HttpInputStream_GetMediaType(HttpInputStream*  self,
 static void
 HttpInputStream_Destroy(HttpInputStream* self)
 {
-    if (self->m_NetworkStream) {
-        BLT_NetworkStream_Release(self->m_NetworkStream);
-    }
     delete self->m_HttpClient;
     delete self->m_Url;
     delete self->m_Response;
+    *self->m_InputStream = NULL;
     delete self->m_InputStream;
     delete self;
 }
@@ -322,12 +319,7 @@ HttpInputStream_Attach(BLT_NetworkInputSource* _self,
         info.mask   = BLT_STREAM_INFO_MASK_FLAGS;
         BLT_Stream_SetInfo(stream, &info);
     }
-    
-    // pass the context to the source stream
-    if (self->m_NetworkStream) {
-        BLT_NetworkStream_SetContext(self->m_NetworkStream, stream);
-    }
-    
+        
     return BLT_SUCCESS;
 }
 
@@ -339,9 +331,6 @@ HttpInputStream_Detach(BLT_NetworkInputSource* _self)
 {
     HttpInputStream* self = ATX_SELF(HttpInputStream, BLT_NetworkInputSource);
     self->m_Context = NULL;
-    if (self->m_NetworkStream) {
-        BLT_NetworkStream_SetContext(self->m_NetworkStream, NULL);
-    }
 
     return BLT_SUCCESS;
 }
@@ -568,11 +557,10 @@ HttpInputStream_Create(const char* url)
 |   BLT_HttpNetworkStream_Create
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_HttpNetworkStream_Create(const char*              url, 
-                             BLT_Core*                core,
-                             ATX_InputStream**        stream,
-                             BLT_NetworkInputSource** source,
-                             BLT_MediaType**          media_type)
+BLT_HttpNetworkStream_Create(const char*       url, 
+                             BLT_Core*         core,
+                             ATX_InputStream** stream,
+                             BLT_MediaType**   media_type)
 {
     BLT_Result result = BLT_FAILURE;
     ATX_Int32  min_buffer_fullness = 0;
@@ -580,7 +568,6 @@ BLT_HttpNetworkStream_Create(const char*              url,
     
     // default return value
     *stream = NULL;
-    *source = NULL;
     *media_type = NULL;
 
     // get the settings
@@ -609,7 +596,6 @@ BLT_HttpNetworkStream_Create(const char*              url,
         HttpInputStream_Destroy(http_stream);
         return BLT_ERROR_INVALID_PARAMETERS;
     }
-    *source = &ATX_BASE(http_stream, BLT_NetworkInputSource);
 
     // send the request
     result = HttpInputStream_SendRequest(http_stream, 0);
@@ -618,18 +604,21 @@ BLT_HttpNetworkStream_Create(const char*              url,
     // see if we can determine the media type
     HttpInputStream_GetMediaType(http_stream, core, media_type);
 
-    // create the stream
-    ATX_InputStream* adapted_input_stream = &ATX_BASE(http_stream, ATX_InputStream);
+    // create the network stream
+    ATX_InputStream* input_stream = &ATX_BASE(http_stream, ATX_InputStream);
+    BLT_NetworkStream* network_stream = NULL;
     result = BLT_NetworkStream_Create(buffer_size, 
                                       min_buffer_fullness,
-                                      adapted_input_stream, 
-                                      &http_stream->m_NetworkStream);
+                                      input_stream, 
+                                      &network_stream);
+    ATX_RELEASE_OBJECT(input_stream);
     if (BLT_FAILED(result)) {
         HttpInputStream_Destroy(http_stream);
         *stream = NULL;
         return result;
     }
-    *stream = BLT_NetworkStream_GetInputStream(http_stream->m_NetworkStream);
+    *stream = BLT_NetworkStream_GetInputStream(network_stream);
+    BLT_NetworkStream_Release(network_stream);
     
     return BLT_SUCCESS;
 }

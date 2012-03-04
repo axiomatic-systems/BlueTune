@@ -928,4 +928,6 @@ BLT_DecoderServer_PropertyValueWrapper::~BLT_DecoderServer_PropertyValueWrapper(
         case ATX_PROPERTY_VALUE_TYPE_POINTER:
             break;
     }
+    
+    delete m_Value;
 }

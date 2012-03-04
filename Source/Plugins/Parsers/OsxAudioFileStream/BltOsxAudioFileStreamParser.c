@@ -600,6 +600,7 @@ OsxAudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
         } else {
             payload_size = bytes_read;
         }
+        ATX_LOG_FINER_1("feeding %d bytes to the parser", payload_size);
         status = AudioFileStreamParseBytes(self->stream_parser,
                                            payload_size,
                                            payload,

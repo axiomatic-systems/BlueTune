@@ -84,6 +84,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(NetworkInput)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_NETWORK_QUEUED_INPUT)
+    BLT_REGISTER_BUILTIN(NetworkQueuedInput)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT)
     BLT_REGISTER_BUILTIN(CddaInput)
 #endif

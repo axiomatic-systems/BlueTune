@@ -376,6 +376,17 @@ BLT_NetworkQueuedInputModule_Attach(BLT_Module* _self, BLT_Core* core)
     BLT_NetworkQueuedInputModule* self = ATX_SELF_EX(BLT_NetworkQueuedInputModule, BLT_BaseModule, BLT_Module);
     self->queue->Attach(core);
             
+    /* set a propoerty to publish the module's address */
+    {
+        ATX_Properties* properties = NULL;
+        if (ATX_SUCCEEDED(BLT_Core_GetProperties(core, &properties))) {
+            ATX_PropertyValue property;
+            property.type = ATX_PROPERTY_VALUE_TYPE_POINTER;
+            property.data.pointer = self;
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_QUEUED_INPUT_HANDLE_PROPERTY, &property);
+        }
+    }
+    
     return BLT_SUCCESS;
 }
 

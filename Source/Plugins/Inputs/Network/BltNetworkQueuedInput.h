@@ -29,6 +29,7 @@
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_NETWORK_QUEUED_INPUT_MODULE_UID "com.axiosys.input.queued-network"
+#define BLT_NETWORK_QUEUED_INPUT_HANDLE_PROPERTY "NetworkQueuedInput.Handle"
 
 /*----------------------------------------------------------------------
 |   types

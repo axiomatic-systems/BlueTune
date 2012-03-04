@@ -35,7 +35,6 @@ BLT_Result
 BLT_HttpNetworkStream_Create(const char*              url, 
                              BLT_Core*                core,
                              ATX_InputStream**        stream,
-                             BLT_NetworkInputSource** source,
                              BLT_MediaType**          media_type);
 
 #if defined(__cplusplus)

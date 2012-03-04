@@ -130,12 +130,12 @@ FileInputStream_Create(const char* filename, FileInputStream** object)
     result = ATX_File_Open(self->file, ATX_FILE_OPEN_MODE_READ);
     if (ATX_FAILED(result)) {
         ATX_LOG_WARNING_1("cannot open file (%d)", result);
-        return result;
+        goto end;
     }
     result = ATX_File_Close(self->file);
     if (ATX_FAILED(result)) {
         ATX_LOG_WARNING_1("cannot close file (%d)", result);
-        return result;
+        goto end;
     }
 
     ATX_SET_INTERFACE(self, FileInputStream, ATX_InputStream);
@@ -144,6 +144,10 @@ FileInputStream_Create(const char* filename, FileInputStream** object)
 
 end:
     if (ATX_FAILED(result)) {
+        if (self->file) {
+            ATX_File_Close(self->file);
+            ATX_DESTROY_OBJECT(self->file);
+        }
         ATX_FreeMemory(self);
         *object = NULL;
     }

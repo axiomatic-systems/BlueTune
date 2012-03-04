@@ -380,6 +380,8 @@
 		CA9EDAB00EB0FC1F003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA9EDAB20EB0FC33003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
+		CAA862F014FFC820008956A3 /* BltNetworkQueuedInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAA862EE14FFC820008956A3 /* BltNetworkQueuedInput.cpp */; };
+		CAA862F114FFC820008956A3 /* BltNetworkQueuedInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAA862EF14FFC820008956A3 /* BltNetworkQueuedInput.h */; };
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
 		CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; };
@@ -1910,6 +1912,8 @@
 		CA9ED92F0EB02685003CE43C /* BltFfmpegDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltFfmpegDecoder.c; sourceTree = "<group>"; };
 		CA9ED9300EB02685003CE43C /* BltFfmpegDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltFfmpegDecoder.h; sourceTree = "<group>"; };
 		CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		CAA862EE14FFC820008956A3 /* BltNetworkQueuedInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltNetworkQueuedInput.cpp; sourceTree = "<group>"; };
+		CAA862EF14FFC820008956A3 /* BltNetworkQueuedInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltNetworkQueuedInput.h; sourceTree = "<group>"; };
 		CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVolumeControl.h; sourceTree = "<group>"; };
 		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
 		CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSynchronization.h; sourceTree = "<group>"; };
@@ -3124,6 +3128,8 @@
 		CA5042850C5AE52B0060E6FE /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				CAA862EE14FFC820008956A3 /* BltNetworkQueuedInput.cpp */,
+				CAA862EF14FFC820008956A3 /* BltNetworkQueuedInput.h */,
 				CA5042860C5AE52B0060E6FE /* BltHttpNetworkStream.cpp */,
 				CA5042870C5AE52B0060E6FE /* BltHttpNetworkStream.h */,
 				CA5042880C5AE52B0060E6FE /* BltNetworkInput.c */,
@@ -4536,6 +4542,7 @@
 				CA7513D21256D8F30022D1A8 /* BltBento4Adapters.h in Headers */,
 				CA92075E125AAC0C001F2456 /* BltWmsProtocol.h in Headers */,
 				CA360A6213765CBD001D3DE0 /* BltRaopOutput.h in Headers */,
+				CAA862F114FFC820008956A3 /* BltNetworkQueuedInput.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5948,6 +5955,7 @@
 				CA92075D125AAC0C001F2456 /* BltWmsProtocol.cpp in Sources */,
 				CAE74C8212BCAA3500C36C5F /* BltAacDecoder.c in Sources */,
 				CA360A6113765CBD001D3DE0 /* BltRaopOutput.cpp in Sources */,
+				CAA862F014FFC820008956A3 /* BltNetworkQueuedInput.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6167,12 +6175,14 @@
 				BLT_CONFIG_DEFAULT_VIDEO_OUTPUT = "osxv:0";
 				BLT_DDPLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
 					BLT_CONFIG_VORBIS_USE_TREMOR,
 					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_AUDIO_OUTPUT)",
 					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_VIDEO_OUTPUT)",
 					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_NETWORK_QUEUED_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
 					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
 					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
@@ -6194,8 +6204,8 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
@@ -6203,6 +6213,16 @@
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL,
+				);
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphoneos*][arch=*]" = (
+					"$(inherited)",
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
+				);
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphonesimulator*][arch=*]" = (
+					"$(inherited)",
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
 				);
 				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;
@@ -6220,12 +6240,14 @@
 				BLT_CONFIG_DEFAULT_VIDEO_OUTPUT = "osxv:0";
 				BLT_DDPLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
+					ATX_CONFIG_ENABLE_LOGGING,
+					NPT_CONFIG_ENABLE_LOGGING,
 					BLT_CONFIG_VORBIS_USE_TREMOR,
 					"BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_AUDIO_OUTPUT)",
 					"BLT_CONFIG_MODULES_DEFAULT_VIDEO_OUTPUT_NAME=$(BLT_CONFIG_DEFAULT_VIDEO_OUTPUT)",
 					BLT_CONFIG_MODULES_ENABLE_FILE_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT,
+					BLT_CONFIG_MODULES_ENABLE_NETWORK_QUEUED_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_STREAM_PACKETIZER,
 					BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER,
 					BLT_CONFIG_MODULES_ENABLE_SILENCE_REMOVER,
@@ -6247,8 +6269,8 @@
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
-					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT,
@@ -6256,6 +6278,16 @@
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER,
 					_BLT_CONFIG_MODULES_ENABLE_DDPLUS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL,
+				);
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphoneos*][arch=*]" = (
+					"$(inherited)",
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
+				);
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphonesimulator*][arch=*]" = (
+					"$(inherited)",
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER,
+					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_FILE_STREAM_PARSER_MP3,
 				);
 				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;

@@ -7,8 +7,8 @@
 |
  ****************************************************************/
 
-#ifndef _BLT_NETWORK_INPUT__H_
-#define _BLT_NETWORK_INPUT__H_
+#ifndef _BLT_NETWORK_INPUT_SOURCE_H_
+#define _BLT_NETWORK_INPUT_SOURCE_H_
 
 /*----------------------------------------------------------------------
 |   includes
@@ -35,4 +35,4 @@ BLT_NetworkInputSource_Attach(BLT_NetworkInputSource* self,
 BLT_Result 
 BLT_NetworkInputSource_Detach(BLT_NetworkInputSource* self);
 
-#endif /* _BLT_NETWORK_INPUT__H_ */
+#endif /* _BLT_NETWORK_INPUT_SOURCE_H_ */

@@ -30,9 +30,32 @@ extern "C" {
 +---------------------------------------------------------------------*/
 typedef struct BLT_NetworkStream BLT_NetworkStream;
 
+typedef struct {
+    unsigned int buffer_size;
+    unsigned int buffer_fullness;
+    unsigned int end_of_stream;
+} BLT_BufferedNetworkStreamStatus;
+
+/*----------------------------------------------------------------------
+|   BLT_BufferedNetworkStream
++---------------------------------------------------------------------*/
+ATX_DECLARE_INTERFACE(BLT_BufferedNetworkStream)
+ATX_BEGIN_INTERFACE_DEFINITION(BLT_BufferedNetworkStream)
+    BLT_Result (*FillBuffer)(BLT_BufferedNetworkStream* self);
+    BLT_Result (*GetStatus)(BLT_BufferedNetworkStream*       self, 
+                            BLT_BufferedNetworkStreamStatus* status);
+ATX_END_INTERFACE_DEFINITION
+
 /*----------------------------------------------------------------------
 |   functions
 +---------------------------------------------------------------------*/
+BLT_Result 
+BLT_BufferedNetworkStream_FillBuffer(BLT_BufferedNetworkStream* self);
+
+BLT_Result 
+BLT_BufferedNetworkStream_GetStatus(BLT_BufferedNetworkStream*       self, 
+                                    BLT_BufferedNetworkStreamStatus* status);
+
 BLT_Result 
 BLT_NetworkStream_Create(BLT_Size            size,
                          BLT_Size            min_buffer_fullness,
@@ -41,9 +64,6 @@ BLT_NetworkStream_Create(BLT_Size            size,
 
 ATX_InputStream*
 BLT_NetworkStream_GetInputStream(BLT_NetworkStream* self);
-
-void
-BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context);
 
 BLT_Result
 BLT_NetworkStream_Release(BLT_NetworkStream* self);

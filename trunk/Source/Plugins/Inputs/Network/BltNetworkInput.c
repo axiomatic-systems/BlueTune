@@ -42,8 +42,8 @@ typedef struct {
     ATX_IMPLEMENTS(BLT_InputStreamProvider);
 
     /* members */
-    BLT_NetworkInputSource* source;
     ATX_InputStream*        stream;
+    BLT_NetworkInputSource* source;
     ATX_Flags               flags;
     BLT_MediaType*          media_type;
 } NetworkInput;
@@ -130,7 +130,6 @@ NetworkInput_Create(BLT_Module*              module,
         result = BLT_HttpNetworkStream_Create(constructor->name, 
                                               core, 
                                               &input->stream,
-                                              &input->source, 
                                               &input->media_type);
     } else {
         result = BLT_ERROR_INVALID_PARAMETERS;
@@ -142,6 +141,9 @@ NetworkInput_Create(BLT_Module*              module,
         return result;
     }
 
+    /* get the network source interface of the stream */
+    input->source = ATX_CAST(input->stream, BLT_NetworkInputSource);
+    
     /* figure out the media type */
     if (input->media_type == NULL) {
         if (constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN ||
@@ -178,9 +180,6 @@ NetworkInput_Destroy(NetworkInput* self)
     /* release the input stream */
     ATX_RELEASE_OBJECT(self->stream);
     
-    /* release the input source */
-    ATX_RELEASE_OBJECT(self->source);
-
     /* free the media type extensions */
     BLT_MediaType_Free(self->media_type);
 

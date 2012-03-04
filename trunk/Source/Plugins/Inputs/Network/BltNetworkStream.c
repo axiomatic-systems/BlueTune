@@ -12,6 +12,7 @@
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
 #include "BltNetworkStream.h"
+#include "BltNetworkInputSource.h"
 #include "BltErrors.h"
 
 /*----------------------------------------------------------------------
@@ -20,9 +21,11 @@
 struct BLT_NetworkStream {
     /* interfaces */
     ATX_IMPLEMENTS(ATX_InputStream);
+    ATX_IMPLEMENTS(BLT_NetworkInputSource);
+    ATX_IMPLEMENTS(BLT_BufferedNetworkStream);
     ATX_IMPLEMENTS(ATX_Properties);
     ATX_IMPLEMENTS(ATX_Referenceable);
-
+    
     /* members */
     ATX_Cardinal     reference_count;
     BLT_Stream*      context;
@@ -56,10 +59,14 @@ ATX_SET_LOCAL_LOGGER("bluetune.network.stream")
 
 #define BLT_NETWORK_STREAM_NOTIFICATION_INTERVAL          1000000000 /* 1 second */
 
+const ATX_InterfaceId ATX_INTERFACE_ID(BLT_BufferedNetworkStream) = {0x0202, 0x0001};
+
 /*----------------------------------------------------------------------
 |   forward declarations
 +---------------------------------------------------------------------*/
 ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_InputStream)
+ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, BLT_NetworkInputSource)
+ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, BLT_BufferedNetworkStream)
 ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Properties)
 ATX_DECLARE_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
 
@@ -103,6 +110,8 @@ BLT_NetworkStream_Create(BLT_Size            buffer_size,
     
     /* setup the interfaces */
     ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_InputStream);
+    ATX_SET_INTERFACE((*stream), BLT_NetworkStream, BLT_NetworkInputSource);
+    ATX_SET_INTERFACE((*stream), BLT_NetworkStream, BLT_BufferedNetworkStream);
     ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_Properties);
     ATX_SET_INTERFACE((*stream), BLT_NetworkStream, ATX_Referenceable);
 
@@ -156,12 +165,14 @@ BLT_NetworkStream_Release(BLT_NetworkStream* self)
 }
 
 /*----------------------------------------------------------------------
-|   BLT_NetworkStream_SetContext
+|   HttpInputStream_Attach
 +---------------------------------------------------------------------*/
-void
-BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context)
+BLT_METHOD
+BLT_NetworkStream_Attach(BLT_NetworkInputSource* _self,
+                         BLT_Stream*             stream)
 {
-    self->context = context;
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, BLT_NetworkInputSource);
+    self->context = stream;
 
     if (self->context) {
         ATX_Properties* properties = NULL;
@@ -174,10 +185,44 @@ BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context)
             ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_SIZE_PROPERTY, &value);
             
             value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+            value.data.integer = ATX_RingBuffer_GetAvailable(self->buffer);
+            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_FULLNESS_PROPERTY, &value);
+
+            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
             value.data.integer = 0;
             ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);            
         }
     }
+
+    /* propagate */
+    {
+        BLT_NetworkInputSource* next = ATX_CAST(self->source, BLT_NetworkInputSource);
+        if (next) {
+            BLT_NetworkInputSource_Attach(next, stream);
+        }
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   HttpInputStream_Detach
++---------------------------------------------------------------------*/
+BLT_METHOD
+BLT_NetworkStream_Detach(BLT_NetworkInputSource* _self)
+{
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, BLT_NetworkInputSource);
+    self->context = NULL;
+    
+    /* propagate */
+    {
+        BLT_NetworkInputSource* next = ATX_CAST(self->source, BLT_NetworkInputSource);
+        if (next) {
+            BLT_NetworkInputSource_Detach(next);
+        }
+    }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -186,7 +231,9 @@ BLT_NetworkStream_SetContext(BLT_NetworkStream* self, BLT_Stream* context)
 ATX_InputStream*
 BLT_NetworkStream_GetInputStream(BLT_NetworkStream* self)
 {
-    return &ATX_BASE(self, ATX_InputStream);
+    ATX_InputStream* stream = &ATX_BASE(self, ATX_InputStream);
+    ATX_REFERENCE_OBJECT(stream);
+    return stream;
 }
 
 /*----------------------------------------------------------------------
@@ -278,18 +325,13 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     ATX_Size           chunk;
     ATX_Size           bytes_read_storage = 0;
     ATX_LargeSize      source_available = 0;
+    ATX_TimeStamp      now;
     
     /* default */
     if (bytes_read) {
         *bytes_read = 0;
     } else {
         bytes_read = &bytes_read_storage;
-    }
-
-    /* shortcut */
-    if (bytes_to_read == 0) {
-        BLT_NetworkStream_FillBuffer(self);
-        return ATX_SUCCESS;
     }
 
     /* if we have a min buffer fullness, wait until we have refilled the buffer enough */
@@ -325,7 +367,6 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
     }
 
     /* notify of the stream status periodically */
-    ATX_TimeStamp now;
     if (ATX_SUCCEEDED(ATX_System_GetCurrentTimeStamp(&now))) {
         ATX_Int64 next_update;
         ATX_Int64 now_int;
@@ -463,10 +504,49 @@ BLT_NetworkStream_GetAvailable(ATX_InputStream* _self, ATX_LargeSize* available)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_NetworkStream_FillBuffer_
++---------------------------------------------------------------------*/
+BLT_METHOD
+BLT_NetworkStream_FillBuffer_(BLT_BufferedNetworkStream* _self)
+{
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, BLT_BufferedNetworkStream);
+    ATX_LargeSize      source_available = 0;
+    
+    if (ATX_SUCCEEDED(ATX_InputStream_GetAvailable(self->source, &source_available))) {
+        if (source_available) {
+            BLT_NetworkStream_FillBuffer(self);
+        }
+    }
+    return ATX_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   BLT_NetworkStream_GetStatus
++---------------------------------------------------------------------*/
+BLT_METHOD
+BLT_NetworkStream_GetStatus(BLT_BufferedNetworkStream*       _self,
+                            BLT_BufferedNetworkStreamStatus* status)
+{
+    BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, BLT_BufferedNetworkStream);
+
+    status->buffer_size     = self->buffer_size;
+    status->buffer_fullness = ATX_RingBuffer_GetAvailable(self->buffer);
+    if (self->eos) {
+        status->end_of_stream = self->eos_cause;
+    } else {
+        status->end_of_stream = 0;
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(BLT_NetworkStream)
     ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_InputStream)
+    ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, BLT_NetworkInputSource)
+    ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, BLT_BufferedNetworkStream)
     ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_Properties)
     ATX_GET_INTERFACE_ACCEPT(BLT_NetworkStream, ATX_Referenceable)
 ATX_END_GET_INTERFACE_IMPLEMENTATION
@@ -483,6 +563,22 @@ ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, ATX_InputStream)
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------
+|   BLT_NetworkInputSource interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, BLT_NetworkInputSource)
+    BLT_NetworkStream_Attach,
+    BLT_NetworkStream_Detach
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
+|   BLT_BufferedNetworkStream interface
++---------------------------------------------------------------------*/
+ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, BLT_BufferedNetworkStream)
+    BLT_NetworkStream_FillBuffer_,
+    BLT_NetworkStream_GetStatus
+ATX_END_INTERFACE_MAP
+
+/*----------------------------------------------------------------------
 |       ATX_Properties interface
 +---------------------------------------------------------------------*/
 ATX_IMPLEMENT_STATIC_PROPERTIES_INTERFACE(BLT_NetworkStream)
@@ -494,4 +590,24 @@ ATX_BEGIN_INTERFACE_MAP(BLT_NetworkStream, ATX_Referenceable)
     BLT_NetworkStream_InputStream_AddReference,
     BLT_NetworkStream_InputStream_Release
 };         
+
+/*----------------------------------------------------------------------
+|   BLT_BufferedNetworkStream_FillBuffer
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_BufferedNetworkStream_FillBuffer(BLT_BufferedNetworkStream* self)
+{
+    return ATX_INTERFACE(self)->FillBuffer(self);
+}
+
+/*----------------------------------------------------------------------
+|   BLT_BufferedNetworkStream_GetStatus
++---------------------------------------------------------------------*/
+BLT_Result 
+BLT_BufferedNetworkStream_GetStatus(BLT_BufferedNetworkStream*       self, 
+                                    BLT_BufferedNetworkStreamStatus* status)
+{
+    return ATX_INTERFACE(self)->GetStatus(self, status);
+}
+
 

@@ -33,7 +33,15 @@
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result BLT_NetworkInputModule_GetModuleObject(BLT_Module** module);
+
+#if defined(__cplusplus)
+}
+#endif
 
 /** @} */
 

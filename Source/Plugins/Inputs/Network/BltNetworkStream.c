@@ -2,7 +2,7 @@
 |
 |   BlueTune - Network Stream
 |
-|   (c) 2002-2006 Gilles Boccon-Gibod
+|   (c) 2002-2012 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
 ****************************************************************/
@@ -355,8 +355,45 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
         BLT_NetworkStream_FillBuffer(self);
     }
     
-    /* use all we can from the buffer */
+    /* check how much we have in the buffer */
     buffered = ATX_RingBuffer_GetAvailable(self->buffer);
+
+    /* decide what to do if the buffer is empty */
+    if (buffered == 0) {
+        if (self->eos) {
+            /* attempt to seek, it may reconnect to the source */
+            ATX_Position position = 0;
+            ATX_Result result = ATX_InputStream_Tell(self->source, &position);
+            if (ATX_SUCCEEDED(result) && position) {
+                ATX_LOG_FINE_1("attempting a reconnection by seeking to %lld", position);
+                result = ATX_InputStream_Seek(self->source, position);
+                if (ATX_SUCCEEDED(result)) {
+                    /* refill the buffer */
+                    ATX_LOG_FINE("seek succeeded, refilling buffer");
+                    self->eos = ATX_FALSE;
+                    self->eos_cause = ATX_ERROR_EOS;
+                    BLT_NetworkStream_FillBuffer(self);
+                    buffered = ATX_RingBuffer_GetAvailable(self->buffer);
+
+                    /* notify that we're not longer at the end of stream */
+                    if (!self->eos && self->context) {
+                        ATX_Properties* properties = NULL;
+                        BLT_Stream_GetProperties(self->context, &properties);
+                        if (properties) {
+                            ATX_PropertyValue value;
+                            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                            value.data.integer = 0;
+                            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
+                        }
+                    }        
+                } else {
+                    ATX_LOG_FINE_1("seek failed (%d)", result);
+                }
+            }
+        }
+    }
+    
+    /* use all we can from the buffer */
     chunk = buffered > bytes_to_read ? bytes_to_read : buffered;
     if (chunk) {
         ATX_RingBuffer_Read(self->buffer, buffer, chunk);

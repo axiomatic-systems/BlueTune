@@ -66,7 +66,8 @@ static BLT_Result
 HttpInputStream_MapResult(NPT_Result result)
 {
     switch (result) {
-        case NPT_ERROR_EOS: return ATX_ERROR_EOS;
+        case NPT_ERROR_EOS: 
+            return ATX_ERROR_EOS;
         default: return result;
     }
 }
@@ -364,6 +365,7 @@ HttpInputStream_Read(ATX_InputStream* _self,
     if (NPT_SUCCEEDED(result)) {
         if (bytes_read) *bytes_read = local_bytes_read;
         self->m_IcyMetaCounter += local_bytes_read;
+        self->m_Position += local_bytes_read;
     }
 
     // see if we should read ICY metadata now 
@@ -449,10 +451,8 @@ HttpInputStream_Tell(ATX_InputStream* _self,
         }
     }
     if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
-    NPT_Position _position;
-    ATX_Result result = HttpInputStream_MapResult((*(self->m_InputStream))->Tell(_position));
-    if (position) *position = _position;
-    return result;
+    *position = self->m_Position;
+    return ATX_SUCCESS;
 }
 
 /*----------------------------------------------------------------------

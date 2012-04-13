@@ -30,6 +30,7 @@ do {                                                    \
 /*----------------------------------------------------------------------
 |    Test
 +---------------------------------------------------------------------*/
+#if 0
 static void
 Test(int buffer_size, int source_size)
 {
@@ -106,6 +107,7 @@ Test(int buffer_size, int source_size)
     ATX_RELEASE_OBJECT(stream);
     ATX_RELEASE_OBJECT(source);
 }
+#endif
 
 #if defined(_DEBUG)
 #include <crtdbg.h>
@@ -117,7 +119,7 @@ Test(int buffer_size, int source_size)
 int
 main(int argc, char** argv)
 {
-    int i, j;
+    /*int i, j;*/
     (void)argc;
     (void)argv;
     
@@ -127,6 +129,7 @@ main(int argc, char** argv)
                    _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+#if 0
     ATX_System_SetRandomSeed(0);
     for (i=2; i<1000; i++) {
         for (j=1; j<3000; j++) {
@@ -138,6 +141,7 @@ main(int argc, char** argv)
             Test(i,j);
         }
     }
-    
+#endif
+
     return 0;
 }

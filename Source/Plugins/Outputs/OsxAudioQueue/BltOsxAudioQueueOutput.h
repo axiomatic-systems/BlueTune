@@ -31,6 +31,11 @@
 #include "BltModule.h"
 
 /*----------------------------------------------------------------------
+|   constants
++---------------------------------------------------------------------*/
+#define BLT_AUDIO_QUEUE_OUTPUT_HANDLE_PROPERTY "AudioQueueOutput.Handle"
+
+/*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_OsxAudioQueueOutputModule_GetModuleObject(BLT_Module** module);

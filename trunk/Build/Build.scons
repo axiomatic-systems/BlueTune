@@ -287,6 +287,7 @@ PluginsSettings = {
     'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
     'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },
     'AlsaOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',            'src_dir':'Outputs/Alsa'             },
+    'AndroidOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT',         'src_dir':'Outputs/Android'             },
     'OsxVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_VIDEO_OUTPUT',       'src_dir':'Outputs/OsxVideo'         },
     'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
     'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },

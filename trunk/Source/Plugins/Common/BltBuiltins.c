@@ -224,6 +224,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(AlsaOutput)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT)
+    BLT_REGISTER_BUILTIN(AndroidOutput)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_RAOP_OUTPUT)
     BLT_REGISTER_BUILTIN(RaopOutput)
 #endif

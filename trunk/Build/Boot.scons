@@ -54,7 +54,7 @@ options.AddVariables(
     ListVariable('extra_plugins', 'Extra Plugins', '', names=['WmaDecoder','FfmpegDecoder','SdlVideoOutput'])
 )
 
-env = Environment(variables=options)
+env = Environment(variables=options, platform='posix')
 Help(options.GenerateHelpText(env))
 
 ### call the actual build script for each build config

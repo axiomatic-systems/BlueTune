@@ -318,7 +318,7 @@ class CompiledModule(Module):
             link_deps = self.flat_link_deps
             libs = GetProducts(link_deps)
             if env.has_key('LIBS'): libs += env['LIBS']
-            libs += GetLibs(link_deps)
+            libs += GetLibs(link_deps) + env['BLT_EXTRA_LIBS']
             libs += self.libs
             lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
             lib_path += GetLibDirs(self.GetLinkDeps())
@@ -406,7 +406,7 @@ class SharedLibraryModule(Module):
         # compute the list of objects to link
         objects = Modules[anchor_module].objects
         all_deps = [anchor_module]+link_deps
-        libs = GetProducts(all_deps)+GetLibs(all_deps)
+        libs = GetProducts(all_deps)+GetLibs(all_deps)+env['BLT_EXTRA_LIBS']
         lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
         lib_path += GetLibDirs(all_deps)
         

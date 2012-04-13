@@ -657,6 +657,18 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
         return BLT_ERROR_UNSUPPORTED_FORMAT;
     }
     
+    /* set a property to expose the handle to the outside */
+    {
+        ATX_Properties* properties = NULL;
+        BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties);
+        if (properties) {
+            ATX_PropertyValue value;
+            value.type = ATX_PROPERTY_VALUE_TYPE_POINTER;
+            value.data.pointer = self->audio_queue;
+            ATX_Properties_SetProperty(properties, BLT_AUDIO_QUEUE_OUTPUT_HANDLE_PROPERTY, &value);
+        }    
+    }
+    
     /* listen for property changes */
     status = AudioQueueAddPropertyListener(self->audio_queue, 
                                            kAudioQueueProperty_IsRunning, 

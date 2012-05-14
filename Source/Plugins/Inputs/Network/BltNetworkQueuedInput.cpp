@@ -406,7 +406,7 @@ BLT_NetworkQueuedInputModule_Probe(BLT_Module*              self,
 #if 0
     // FIXME: testing
     static bool done=false;
-    if (0 && !done) {
+    if (1 && !done) {
         BLT_NetworkQueuedInputModule* blabla = NULL;
         BLT_NetworkQueuedInputModule_GetFromCore(core, &blabla);
         const char* entry_id = NULL;

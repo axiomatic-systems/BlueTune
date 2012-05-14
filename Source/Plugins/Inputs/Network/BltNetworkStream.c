@@ -39,6 +39,7 @@ struct BLT_NetworkStream {
     ATX_Result       eos_cause;
     ATX_Size         seek_as_read_threshold;
     ATX_Size         min_buffer_fullness;
+    ATX_Int64        last_connection;
     ATX_Int64        last_notification;
 };
 
@@ -57,7 +58,8 @@ ATX_SET_LOCAL_LOGGER("bluetune.network.stream")
 #define BLT_NETWORK_STREAM_DEFAULT_SEEK_AS_READ_THRESHOLD 0     /* when seek is normal */ 
 #define BLT_NETWORK_STREAM_SLOW_SEEK_AS_READ_THRESHOLD    32768 /* when seek is slow   */
 
-#define BLT_NETWORK_STREAM_NOTIFICATION_INTERVAL          1000000000 /* 1 second */
+#define BLT_NETWORK_STREAM_NOTIFICATION_INTERVAL       1000000000    /* 1 second   */
+#define BLT_NETWORK_STREAM_RECONNECT_INTERVAL          10000000000LL /* 10 seconds */
 
 const ATX_InterfaceId ATX_INTERFACE_ID(BLT_BufferedNetworkStream) = {0x0202, 0x0001};
 
@@ -100,6 +102,11 @@ BLT_NetworkStream_Create(BLT_Size            buffer_size,
     (*stream)->source = source;
     ATX_REFERENCE_OBJECT(source);
     ATX_InputStream_GetSize(source, &(*stream)->source_size);
+    {
+        ATX_TimeStamp now;
+        ATX_System_GetCurrentTimeStamp(&now);
+        ATX_TimeStamp_ToInt64(now, (*stream)->last_connection);
+    }
     
     /* get the properties interface of the source */
     (*stream)->source_properties = ATX_CAST(source, ATX_Properties);
@@ -312,6 +319,65 @@ BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
 }
 
 /*----------------------------------------------------------------------
+|   BLT_NetworkStream_CheckReconnection
++---------------------------------------------------------------------*/
+static void
+BLT_NetworkStream_CheckReconnection(BLT_NetworkStream* self)
+{
+    ATX_TimeStamp now;
+    ATX_Int64     now_int = 0;
+    ATX_Size      buffered = 0;
+    
+    /* do nothing if we're still connected */
+    if (!self->eos) return;
+    
+    /* check the current buffer status and time */
+    buffered = ATX_RingBuffer_GetAvailable(self->buffer);
+    ATX_System_GetCurrentTimeStamp(&now);
+    ATX_TimeStamp_ToInt64(now, now_int);
+    
+    /* decide what to do if the buffer is empty */
+    if (buffered == 0 || now_int > self->last_connection+BLT_NETWORK_STREAM_RECONNECT_INTERVAL) {
+        if (buffered == 0) {
+            ATX_LOG_FINE("will attempt to reconnect because the buffer is empty");
+        } else {
+            ATX_LOG_FINE_1("will attempt to reconnect because enough time has elapsed since last connection (%d)",
+                           (int)(now_int-self->last_connection));
+        }
+        
+        /* attempt to seek, it may reconnect to the source */
+        self->last_connection = now_int;
+        ATX_Position position = 0;
+        ATX_Result result = ATX_InputStream_Tell(self->source, &position);
+        if (ATX_SUCCEEDED(result) && position) {
+            ATX_LOG_FINE_1("attempting a reconnection by seeking to %lld", position);
+            result = ATX_InputStream_Seek(self->source, position);
+            if (ATX_SUCCEEDED(result)) {
+                /* refill the buffer */
+                ATX_LOG_FINE("seek succeeded, refilling buffer");
+                self->eos = ATX_FALSE;
+                self->eos_cause = ATX_ERROR_EOS;
+                BLT_NetworkStream_FillBuffer(self);
+
+                /* notify that we're no longer at the end of stream */
+                if (!self->eos && self->context) {
+                    ATX_Properties* properties = NULL;
+                    BLT_Stream_GetProperties(self->context, &properties);
+                    if (properties) {
+                        ATX_PropertyValue value;
+                        value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                        value.data.integer = 0;
+                        ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
+                    }
+                }        
+            } else {
+                ATX_LOG_FINE_1("seek failed (%d)", result);
+            }
+        }
+    }
+}
+
+/*----------------------------------------------------------------------
 |   BLT_NetworkStream_Read
 +---------------------------------------------------------------------*/
 static ATX_Result
@@ -355,43 +421,11 @@ BLT_NetworkStream_Read(ATX_InputStream* _self,
         BLT_NetworkStream_FillBuffer(self);
     }
     
+    /* we may need to reconnect if the connection was dropped */
+    BLT_NetworkStream_CheckReconnection(self);
+    
     /* check how much we have in the buffer */
     buffered = ATX_RingBuffer_GetAvailable(self->buffer);
-
-    /* decide what to do if the buffer is empty */
-    if (buffered == 0) {
-        if (self->eos) {
-            /* attempt to seek, it may reconnect to the source */
-            ATX_Position position = 0;
-            ATX_Result result = ATX_InputStream_Tell(self->source, &position);
-            if (ATX_SUCCEEDED(result) && position) {
-                ATX_LOG_FINE_1("attempting a reconnection by seeking to %lld", position);
-                result = ATX_InputStream_Seek(self->source, position);
-                if (ATX_SUCCEEDED(result)) {
-                    /* refill the buffer */
-                    ATX_LOG_FINE("seek succeeded, refilling buffer");
-                    self->eos = ATX_FALSE;
-                    self->eos_cause = ATX_ERROR_EOS;
-                    BLT_NetworkStream_FillBuffer(self);
-                    buffered = ATX_RingBuffer_GetAvailable(self->buffer);
-
-                    /* notify that we're not longer at the end of stream */
-                    if (!self->eos && self->context) {
-                        ATX_Properties* properties = NULL;
-                        BLT_Stream_GetProperties(self->context, &properties);
-                        if (properties) {
-                            ATX_PropertyValue value;
-                            value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
-                            value.data.integer = 0;
-                            ATX_Properties_SetProperty(properties, BLT_NETWORK_STREAM_BUFFER_EOS_PROPERTY, &value);
-                        }
-                    }        
-                } else {
-                    ATX_LOG_FINE_1("seek failed (%d)", result);
-                }
-            }
-        }
-    }
     
     /* use all we can from the buffer */
     chunk = buffered > bytes_to_read ? bytes_to_read : buffered;
@@ -549,6 +583,7 @@ BLT_NetworkStream_FillBuffer_(BLT_BufferedNetworkStream* _self)
     BLT_NetworkStream* self = ATX_SELF(BLT_NetworkStream, BLT_BufferedNetworkStream);
     ATX_LargeSize      source_available = 0;
     
+    BLT_NetworkStream_CheckReconnection(self);
     if (ATX_SUCCEEDED(ATX_InputStream_GetAvailable(self->source, &source_available))) {
         if (source_available) {
             BLT_NetworkStream_FillBuffer(self);

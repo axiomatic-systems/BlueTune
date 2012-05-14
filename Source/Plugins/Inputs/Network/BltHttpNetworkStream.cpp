@@ -376,7 +376,7 @@ HttpInputStream_Read(ATX_InputStream* _self,
         if (NPT_SUCCEEDED(result) && meta_size != 0) {
             char* meta_value = new char[meta_size*16+1];
             meta_value[meta_size*16] = '\0'; // terminate
-            result = (*(self->m_InputStream))->ReadFully(meta_value, meta_size*16);
+            result = (*self->m_InputStream)->ReadFully(meta_value, meta_size*16);
             if (NPT_SUCCEEDED(result)) {
                 // extract the title
                 NPT_String title(meta_value);
@@ -450,7 +450,7 @@ HttpInputStream_Tell(ATX_InputStream* _self,
             *position = self->m_Response->GetEntity()->GetContentLength();
         }
     }
-    if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
+    //if (self->m_InputStream->IsNull()) return ATX_ERROR_INVALID_STATE;
     *position = self->m_Position;
     return ATX_SUCCESS;
 }
@@ -543,7 +543,7 @@ HttpInputStream_Create(const char* url)
     stream->m_IcyMetaInterval = 0;
     stream->m_IcyMetaCounter  = 0;
     stream->m_Context         = NULL;
-
+                                    
     // setup interfaces
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_InputStream);
     ATX_SET_INTERFACE(stream, HttpInputStream, ATX_Properties);

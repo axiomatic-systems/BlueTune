@@ -1,5 +1,5 @@
 #################################################################
-# Important: this build file has been tested with Android NDK r6 and r7
+# Important: this build file has been tested with Android NDK r6, r7 and r8
 # It may or may not work with other releases of the NDK. Please notify
 # us if you find a newer NDK for which this does not work.
 #################################################################

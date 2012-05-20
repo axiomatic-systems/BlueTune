@@ -983,7 +983,7 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/aac",
         &self->media_type_ids.audio_aac);
     if (BLT_FAILED(result)) return result;
-    ATX_LOG_FINE_1("audio/mp3 type = %d", self->media_type_ids.audio_mp3);
+    ATX_LOG_FINE_1("audio/aac type = %d", self->media_type_ids.audio_aac);
 
     /* register the audio/x-apple-asbd type id */
     result = BLT_Registry_RegisterName(

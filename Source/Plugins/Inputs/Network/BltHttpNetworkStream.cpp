@@ -210,12 +210,15 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
     switch (self->m_Response->GetStatusCode()) {
         case 200:
             // if this is a Range request, expect a 206 instead
-            if (position) result = BLT_ERROR_PROTOCOL_FAILURE;
+            if (position) {
+                result = BLT_ERROR_PROTOCOL_FAILURE;
+            } else {
+                result = BLT_SUCCESS;
+            }
             
             // get the body stream and size
             self->m_Response->GetEntity()->GetInputStream(*self->m_InputStream);
             self->m_ContentLength = self->m_Response->GetEntity()->GetContentLength();
-            result = BLT_SUCCESS;
             break;
 
         case 206:

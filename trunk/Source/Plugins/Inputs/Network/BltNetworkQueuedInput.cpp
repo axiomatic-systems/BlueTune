@@ -370,7 +370,7 @@ BLT_NetworkQueuedInputModule_GetEntryStatus(BLT_NetworkQueuedInputModule*    sel
 /*----------------------------------------------------------------------
 |   BLT_NetworkQueuedInputModule_Attach
 +---------------------------------------------------------------------*/
-BLT_DIRECT_METHOD
+BLT_METHOD
 BLT_NetworkQueuedInputModule_Attach(BLT_Module* _self, BLT_Core* core)
 {
     BLT_NetworkQueuedInputModule* self = ATX_SELF_EX(BLT_NetworkQueuedInputModule, BLT_BaseModule, BLT_Module);
@@ -519,7 +519,7 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(BLT_NetworkQueuedInputModule,
 /*----------------------------------------------------------------------
 |   BLT_NetworkQueuedInputModule_Create
 +---------------------------------------------------------------------*/
-BLT_Result
+static BLT_Result
 BLT_NetworkQueuedInputModule_Create(BLT_Module** object)
 {
     BLT_NetworkQueuedInputModule* module = NULL;

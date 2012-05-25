@@ -338,7 +338,10 @@ BLT_NetworkStream_CheckReconnection(BLT_NetworkStream* self)
     
     /* decide what to do if the buffer is empty */
     if (buffered == 0 || now_int > self->last_connection+BLT_NETWORK_STREAM_RECONNECT_INTERVAL) {
-        if (buffered == 0) {
+        ATX_Position position = 0;
+		ATX_Result result;
+
+		if (buffered == 0) {
             ATX_LOG_FINE("will attempt to reconnect because the buffer is empty");
         } else {
             ATX_LOG_FINE_1("will attempt to reconnect because enough time has elapsed since last connection (%d)",
@@ -347,8 +350,7 @@ BLT_NetworkStream_CheckReconnection(BLT_NetworkStream* self)
         
         /* attempt to seek, it may reconnect to the source */
         self->last_connection = now_int;
-        ATX_Position position = 0;
-        ATX_Result result = ATX_InputStream_Tell(self->source, &position);
+        result = ATX_InputStream_Tell(self->source, &position);
         if (ATX_SUCCEEDED(result) && position) {
             ATX_LOG_FINE_1("attempting a reconnection by seeking to %lld", position);
             result = ATX_InputStream_Seek(self->source, position);

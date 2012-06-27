@@ -1,0 +1,34 @@
+BlueTune for Android
+
+1. Building BlueTune for Android
+
+1.a Requirements
+  Android NDK r8 or above
+  Android SDK
+  
+1.b Build the main runtime
+
+Follow the build instructions in order to build the target 'arm-android-linux' in 'Release' mode.
+This will produce a number of .a libraries under Build/Targets/arm-android-linux/Release
+
+1.c Build the JNI layer
+
+Go to Source/Platform/Android/modules/bluetune
+build with the command 'ndk-build' (make sure that the NDK directory is in your path)
+
+This will produce a JAR file and a shared library (.so):
+bin/bluetune.jar
+libs/armeabi/libbluetune-jni.so
+
+You can use this NDK module (Source/Platform/Android/modules/bluetune) as a dependency in your own Android application or module.
+This way, your application will pull in the Java classes in bluetune.jar as well as the JNI runtime library libbluetune-jni.so
+
+For an example, see the 'simple-player' sample application
+
+2. Simple Player sample app
+
+This is a sample GUI application that shows how to use the BlueTune player API (defined in bluetune.jar)
+This application has a dependency on the bluetune runtime module.
+An Eclipse project is provided both for the bluetune module (Source/Platform/Android/modules/bluetune/.project)
+and for the simple player example (Source/Platform/Androi/samples/simple-player/.project)
+

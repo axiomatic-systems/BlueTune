@@ -90,7 +90,7 @@ env.AppendUnique(CCFLAGS = ['-I'+ANDROID_NDK_ROOT+'/sources/cxx-stl/system/inclu
                             '-fstack-protector',
                             '-fno-short-enums'])
 env.AppendUnique(CXXFLAGS = ['-fno-exceptions', '-fno-rtti'])
-env.AppendUnique(CPPDEFINES = ['ANDROID', 'NPT_CONFIG_HAVE_SYSTEM_LOG_CONFIG'])
+env.AppendUnique(CPPDEFINES = ['ANDROID', 'ATX_CONFIG_HAVE_SYSTEM_LOG_CONFIG', 'NPT_CONFIG_HAVE_SYSTEM_LOG_CONFIG'])
 env.AppendUnique(LINKFLAGS = ['--sysroot', ANDROID_SYSROOT,
                 			  '-Wl,--no-undefined', 
                               '-Wl,-z,noexecstack',
@@ -104,7 +104,10 @@ env.AppendUnique(LINKFLAGS = ['--sysroot', ANDROID_SYSROOT,
 
 # BlueTune specifics
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
-env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
+env['ATX_SYSTEM_SOURCES']={'System/StdC':'AtxStdc[!D]*.c', 
+                           'System/Bsd':'*.c', 
+                           'System/Posix':'*.c',
+                           'System/Android':'*.c'}
 env['ATX_EXTRA_LIBS']=['m']
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'NptStdc[!D]*.cpp',
                            'System/Bsd':'*.cpp',

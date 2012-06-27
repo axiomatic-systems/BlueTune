@@ -49,7 +49,111 @@ ATX_DECLARE_INTERFACE_MAP(AndroidOutput, BLT_VolumeControl)
 #define BLT_ANDROID_OUTPUT_PACKET_QUEUE_MAX_WAIT    50
 #define BLT_ANDROID_OUTPUT_PACKET_QUEUE_WAIT_TIME   100000000 /* 0.1 seconds */
 
-const float BLT_ANDROID_OUTPUT_VOLUME_RANGE = 5000.0;
+const float BLT_ANDROID_OUTPUT_VOLUME_SCALE = 50.0;
+
+// 20*log10(vol) for volume between 0.0 and 1.0
+const float BLT_ANDROID_OUTPUT_VOLUME_CURVE[101] = {
+    -92.1034037198,
+    -78.2404601086,
+    -70.1311579464,
+    -64.3775164974,
+    -59.9146454711,
+    -56.2682143352,
+    -53.1852007387,
+    -50.5145728862,
+    -48.158912173,
+    -46.0517018599,
+    -44.1454982638,
+    -42.405270724,
+    -40.8044165705,
+    -39.3222571275,
+    -37.9423996977,
+    -36.651629275,
+    -35.4391368386,
+    -34.2959685618,
+    -33.2146241364,
+    -32.1887582487,
+    -31.2129549653,
+    -30.2825546526,
+    -29.3935194012,
+    -28.5423271128,
+    -27.7258872224,
+    -26.9414729593,
+    -26.1866663997,
+    -25.4593135163,
+    -24.75748712,
+    -24.0794560865,
+    -23.4236596301,
+    -22.7886856638,
+    -22.1732524904,
+    -21.5761932274,
+    -20.99644249,
+    -20.4330249506,
+    -19.8850454669,
+    -19.3516805252,
+    -18.8321707972,
+    -18.3258146375,
+    -17.8319623857,
+    -17.3500113541,
+    -16.8794014059,
+    -16.4196110414,
+    -15.9701539244,
+    -15.53057579,
+    -15.1004516856,
+    -14.6793835016,
+    -14.2669977575,
+    -13.8629436112,
+    -13.4668910653,
+    -13.0785293481,
+    -12.6975654487,
+    -12.3237227885,
+    -11.9567400151,
+    -11.5963699051,
+    -11.2423783631,
+    -10.8945435088,
+    -10.5526548416,
+    -10.2165124753,
+    -9.8859264363,
+    -9.56071601886,
+    -9.24070919193,
+    -8.92574205257,
+    -8.61565832185,
+    -8.31030887923,
+    -8.00955133194,
+    -7.71324961624,
+    -7.42127362782,
+    -7.13349887877,
+    -6.84980617894,
+    -6.57008133944,
+    -6.29421489679,
+    -6.02210185568,
+    -5.75364144904,
+    -5.48873691404,
+    -5.22729528269,
+    -4.96922718597,
+    -4.71444667042,
+    -4.46287102628,
+    -4.21442062631,
+    -3.96901877448,
+    -3.72659156383,
+    -3.4870677429,
+    -3.25037858996,
+    -3.01645779469,
+    -2.78524134667,
+    -2.5566674302,
+    -2.33067632512,
+    -2.10721031316,
+    -1.88621358942,
+    -1.66763217878,
+    -1.4514138567,
+    -1.23750807436,
+    -1.02586588775,
+    -0.816439890405,
+    -0.609184149694,
+    -0.40405414635,
+    -0.20100671707,
+    0.0
+};
 
 /*----------------------------------------------------------------------
 |    types
@@ -133,12 +237,6 @@ AndroidOutput_Reset(AndroidOutput* self)
     unsigned int i;
     
     ATX_LOG_FINER("resetting output");
-
-    /* set the player's state to stopped */
-    result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_STOPPED);
-    if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
-    }
 
     /* clear the queue */
     result = (*self->sl_player_buffer_queue)->Clear(self->sl_player_buffer_queue);
@@ -508,6 +606,8 @@ AndroidOutput_Start(BLT_MediaNode* _self)
     AndroidOutput* self = ATX_SELF_EX(AndroidOutput, BLT_BaseMediaNode, BLT_MediaNode);
     SLresult result;
     
+    ATX_LOG_FINER("starting output");
+
     /* set the player's state to playing */
     result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
     if (result != SL_RESULT_SUCCESS) {
@@ -524,8 +624,15 @@ BLT_METHOD
 AndroidOutput_Stop(BLT_MediaNode* _self)
 {
     AndroidOutput* self = ATX_SELF_EX(AndroidOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    SLresult result;
 
     ATX_LOG_FINER("stopping output");
+
+    /* set the player's state to stopped */
+    result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_STOPPED);
+    if (result != SL_RESULT_SUCCESS) {
+        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+    }
 
     /* reset the device */
     AndroidOutput_Reset(self);
@@ -604,6 +711,8 @@ AndroidOutput_Seek(BLT_MediaNode* _self,
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
 
+    ATX_LOG_FINER("seeking");
+
     /* reset the device */
     AndroidOutput_Reset(self);
 
@@ -642,11 +751,17 @@ BLT_METHOD
 AndroidOutput_SetVolume(BLT_VolumeControl* _self, float volume)
 {
     AndroidOutput* self = ATX_SELF(AndroidOutput, BLT_VolumeControl);
-    float millibels = self->sl_player_max_volume-((1.0-volume)*BLT_ANDROID_OUTPUT_VOLUME_RANGE);
+    float scaled;
+    if (volume < 0.0f) volume = 0.0f;
+    if (volume > 1.0f) volume = 1.0f;
+    scaled = BLT_ANDROID_OUTPUT_VOLUME_CURVE[(int)(volume*100.0f)];
+    float millibels = BLT_ANDROID_OUTPUT_VOLUME_SCALE*(self->sl_player_max_volume+scaled);
     ATX_LOG_FINE_1("setting volume to %d millibels", (int)millibels);
     if (self->sl_player_volume) {
         (*self->sl_player_volume)->SetVolumeLevel(self->sl_player_volume, (SLmillibel)millibels);
     }
+    
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -657,15 +772,21 @@ AndroidOutput_GetVolume(BLT_VolumeControl* _self, float* volume)
 {
     AndroidOutput* self = ATX_SELF(AndroidOutput, BLT_VolumeControl);
     SLmillibel millibels = 0;
+    *volume = 0.0f;
     if (self->sl_player_volume) {
         if ((*self->sl_player_volume)->GetVolumeLevel(self->sl_player_volume, &millibels) == SL_RESULT_SUCCESS) {
-            *volume = 1.0-((self->sl_player_max_volume-millibels)/BLT_ANDROID_OUTPUT_VOLUME_RANGE);
-            if (*volume > 1.0) *volume = 1.0;
-            if (*volume < 0.0) *volume = 0.0;
+            int i = 0;
+            for (i=0; i<=100; i++) {
+                float scaled = BLT_ANDROID_OUTPUT_VOLUME_CURVE[i];
+                float tmillibels = BLT_ANDROID_OUTPUT_VOLUME_SCALE*(self->sl_player_max_volume+scaled);
+                if (millibels >= tmillibels) {
+                    *volume = (float)i/100.0f;
+                }
+            }
+            ATX_LOG_FINE_1("volume is %f", *volume);
             return BLT_SUCCESS;
         }
     }
-    *volume = 0.0;
     return BLT_SUCCESS;
 }
 

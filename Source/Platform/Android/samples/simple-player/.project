@@ -3,6 +3,7 @@
 	<name>BlueTunePlayer</name>
 	<comment></comment>
 	<projects>
+		<project>BlueTune</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -19,10 +19,13 @@ LOCAL_C_INCLUDES += $(BLT_SRC_ROOT)/Plugins/DynamicLoading
 LOCAL_C_INCLUDES += $(BLT_ROOT)/../Neptune/Source/Core
 LOCAL_C_INCLUDES += $(BLT_ROOT)/../Atomix/Source/Core
 
+LOCAL_CFLAGS += -DATX_CONFIG_ENABLE_LOGGING
+LOCAL_CFLAGS += -DNPT_CONFIG_ENABLE_LOGGING
+
 LOCAL_LDLIBS += -lBlueTune
 LOCAL_LDLIBS += -lAtomix
 LOCAL_LDLIBS += -lNeptune
 LOCAL_LDLIBS += -lBento4
-LOCAL_LDLIBS += -L$(BLT_ROOT)/Build/Targets/arm-android-linux/Debug
+LOCAL_LDLIBS += -L$(BLT_ROOT)/Build/Targets/arm-android-linux/Release
 
 include $(BUILD_SHARED_LIBRARY)

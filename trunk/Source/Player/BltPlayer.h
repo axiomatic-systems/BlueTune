@@ -56,6 +56,8 @@
 class BLT_Player : public BLT_DecoderClient
 {
  public:
+    NPT_IMPLEMENT_DYNAMIC_CAST_D(BLT_Player, BLT_DecoderClient_MessageHandler)
+
     /**
      * A class must derive from this interface class if it wants
      * to receive event notifications from the player.
@@ -99,9 +101,9 @@ class BLT_Player : public BLT_DecoderClient
     
     /**
      * Dequeue and dispatch one message from the queue. 
-     * @param blocking Indicate whether this call should block until a
-     * message is available, or if it should return right away, regardless
-     * of whether a message is available or not.
+     * @param timeout Number of milliseconds the caller is willing to wait until
+     * a message is available. Pass BLT_TIMEOUT_INFINITE to wait indefinitely until
+     * a message is available.
      */
     virtual BLT_Result PumpMessage(BLT_UInt32 timeout = BLT_TIMEOUT_INFINITE);
 

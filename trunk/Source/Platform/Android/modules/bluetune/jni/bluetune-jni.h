@@ -7,29 +7,113 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef com_bluetune_player_Player_COMMAND_ID_SET_INPUT
+#define com_bluetune_player_Player_COMMAND_ID_SET_INPUT 0L
+#undef com_bluetune_player_Player_COMMAND_ID_SET_OUTPUT
+#define com_bluetune_player_Player_COMMAND_ID_SET_OUTPUT 1L
+#undef com_bluetune_player_Player_COMMAND_ID_SET_VOLUME
+#define com_bluetune_player_Player_COMMAND_ID_SET_VOLUME 2L
+#undef com_bluetune_player_Player_COMMAND_ID_PLAY
+#define com_bluetune_player_Player_COMMAND_ID_PLAY 3L
+#undef com_bluetune_player_Player_COMMAND_ID_STOP
+#define com_bluetune_player_Player_COMMAND_ID_STOP 4L
+#undef com_bluetune_player_Player_COMMAND_ID_PAUSE
+#define com_bluetune_player_Player_COMMAND_ID_PAUSE 5L
+#undef com_bluetune_player_Player_COMMAND_ID_PING
+#define com_bluetune_player_Player_COMMAND_ID_PING 6L
+#undef com_bluetune_player_Player_COMMAND_ID_SEEK_TO_TIME
+#define com_bluetune_player_Player_COMMAND_ID_SEEK_TO_TIME 7L
+#undef com_bluetune_player_Player_COMMAND_ID_SEEK_TO_POSITION
+#define com_bluetune_player_Player_COMMAND_ID_SEEK_TO_POSITION 8L
+#undef com_bluetune_player_Player_COMMAND_ID_REGISTER_MODULE
+#define com_bluetune_player_Player_COMMAND_ID_REGISTER_MODULE 9L
+#undef com_bluetune_player_Player_COMMAND_ID_ADD_NODE
+#define com_bluetune_player_Player_COMMAND_ID_ADD_NODE 10L
+#undef com_bluetune_player_Player_COMMAND_ID_SET_PROPERTY
+#define com_bluetune_player_Player_COMMAND_ID_SET_PROPERTY 11L
+#undef com_bluetune_player_Player_COMMAND_ID_LOAD_PLUGIN
+#define com_bluetune_player_Player_COMMAND_ID_LOAD_PLUGIN 12L
+#undef com_bluetune_player_Player_COMMAND_ID_LOAD_PLUGINS
+#define com_bluetune_player_Player_COMMAND_ID_LOAD_PLUGINS 13L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_ACK
+#define com_bluetune_player_Player_MESSAGE_TYPE_ACK 0L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_NACK
+#define com_bluetune_player_Player_MESSAGE_TYPE_NACK 1L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_PONG
+#define com_bluetune_player_Player_MESSAGE_TYPE_PONG 2L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_DECODER_STATE
+#define com_bluetune_player_Player_MESSAGE_TYPE_DECODER_STATE 3L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_DECODER_EVENT
+#define com_bluetune_player_Player_MESSAGE_TYPE_DECODER_EVENT 4L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_VOLUME
+#define com_bluetune_player_Player_MESSAGE_TYPE_VOLUME 5L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_STREAM_TIMECODE
+#define com_bluetune_player_Player_MESSAGE_TYPE_STREAM_TIMECODE 6L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_STREAM_POSITION
+#define com_bluetune_player_Player_MESSAGE_TYPE_STREAM_POSITION 7L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_STREAM_INFO
+#define com_bluetune_player_Player_MESSAGE_TYPE_STREAM_INFO 8L
+#undef com_bluetune_player_Player_MESSAGE_TYPE_PROPERTY
+#define com_bluetune_player_Player_MESSAGE_TYPE_PROPERTY 9L
+#undef com_bluetune_player_Player_DECODER_STATE_STOPPED
+#define com_bluetune_player_Player_DECODER_STATE_STOPPED 0L
+#undef com_bluetune_player_Player_DECODER_STATE_PLAYING
+#define com_bluetune_player_Player_DECODER_STATE_PLAYING 1L
+#undef com_bluetune_player_Player_DECODER_STATE_PAUSED
+#define com_bluetune_player_Player_DECODER_STATE_PAUSED 2L
+#undef com_bluetune_player_Player_DECODER_STATE_EOS
+#define com_bluetune_player_Player_DECODER_STATE_EOS 3L
+#undef com_bluetune_player_Player_DECODER_STATE_TERMINATED
+#define com_bluetune_player_Player_DECODER_STATE_TERMINATED 4L
+#undef com_bluetune_player_Player_DECODER_EVENT_TYPE_INIT_ERROR
+#define com_bluetune_player_Player_DECODER_EVENT_TYPE_INIT_ERROR 0L
+#undef com_bluetune_player_Player_DECODER_EVENT_TYPE_DECODER_ERROR
+#define com_bluetune_player_Player_DECODER_EVENT_TYPE_DECODER_ERROR 1L
+#undef com_bluetune_player_Player_PROPERTY_SCOPE_CORE
+#define com_bluetune_player_Player_PROPERTY_SCOPE_CORE 0L
+#undef com_bluetune_player_Player_PROPERTY_SCOPE_STREAM
+#define com_bluetune_player_Player_PROPERTY_SCOPE_STREAM 1L
+#undef com_bluetune_player_Player_PROPERTY_SCOPE_MODULE
+#define com_bluetune_player_Player_PROPERTY_SCOPE_MODULE 2L
+#undef com_bluetune_player_Player_PROPERTY_VALUE_TYPE_INTEGER
+#define com_bluetune_player_Player_PROPERTY_VALUE_TYPE_INTEGER 0L
+#undef com_bluetune_player_Player_PROPERTY_VALUE_TYPE_FLOAT
+#define com_bluetune_player_Player_PROPERTY_VALUE_TYPE_FLOAT 1L
+#undef com_bluetune_player_Player_PROPERTY_VALUE_TYPE_STRING
+#define com_bluetune_player_Player_PROPERTY_VALUE_TYPE_STRING 2L
+#undef com_bluetune_player_Player_PROPERTY_VALUE_TYPE_BOOLEAN
+#define com_bluetune_player_Player_PROPERTY_VALUE_TYPE_BOOLEAN 3L
 /*
  * Class:     com_bluetune_player_Player
  * Method:    _init
- * Signature: (Lcom/bluetune/player/PlayerListener;)J
+ * Signature: (Lcom/bluetune/player/Player/MessageHandler;)J
  */
 JNIEXPORT jlong JNICALL Java_com_bluetune_player_Player__1init
   (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     com_bluetune_player_Player
+ * Method:    _pumpMessage
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1pumpMessage
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     com_bluetune_player_Player
  * Method:    _setInput
- * Signature: (JLjava/lang/String;)I
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setInput
-  (JNIEnv *, jclass, jlong, jstring);
+  (JNIEnv *, jclass, jlong, jstring, jstring);
 
 /*
  * Class:     com_bluetune_player_Player
  * Method:    _setOutput
- * Signature: (JLjava/lang/String;)I
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setOutput
-  (JNIEnv *, jclass, jlong, jstring);
+  (JNIEnv *, jclass, jlong, jstring, jstring);
 
 /*
  * Class:     com_bluetune_player_Player
@@ -87,6 +171,34 @@ JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1seekToPosition
 JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setVolume
   (JNIEnv *, jclass, jlong, jfloat);
 
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class com_bluetune_player_Player_MessageHandler */
+
+#ifndef _Included_com_bluetune_player_Player_MessageHandler
+#define _Included_com_bluetune_player_Player_MessageHandler
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class com_bluetune_player_Player_MessageLoop */
+
+#ifndef _Included_com_bluetune_player_Player_MessageLoop
+#define _Included_com_bluetune_player_Player_MessageLoop
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef com_bluetune_player_Player_MessageLoop_MIN_PRIORITY
+#define com_bluetune_player_Player_MessageLoop_MIN_PRIORITY 1L
+#undef com_bluetune_player_Player_MessageLoop_NORM_PRIORITY
+#define com_bluetune_player_Player_MessageLoop_NORM_PRIORITY 5L
+#undef com_bluetune_player_Player_MessageLoop_MAX_PRIORITY
+#define com_bluetune_player_Player_MessageLoop_MAX_PRIORITY 10L
 #ifdef __cplusplus
 }
 #endif

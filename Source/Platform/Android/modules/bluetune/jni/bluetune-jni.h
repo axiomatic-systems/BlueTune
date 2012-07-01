@@ -104,8 +104,16 @@ JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1pumpMessage
  * Method:    _setInput
  * Signature: (JLjava/lang/String;Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setInput
+JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setInput__JLjava_lang_String_2Ljava_lang_String_2
   (JNIEnv *, jclass, jlong, jstring, jstring);
+
+/*
+ * Class:     com_bluetune_player_Player
+ * Method:    _setInput
+ * Signature: (JLcom/bluetune/player/Input;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setInput__JLcom_bluetune_player_Input_2Ljava_lang_String_2
+  (JNIEnv *, jclass, jlong, jobject, jstring);
 
 /*
  * Class:     com_bluetune_player_Player

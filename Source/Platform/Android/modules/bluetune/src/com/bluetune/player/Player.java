@@ -196,6 +196,14 @@ public class Player {
 		setInput(input, null);
 	}
 
+	public void setInput(Input input, String mimeType) {
+		_setInput(cSelf, input, mimeType);
+	}
+
+	public void setInput(Input input) {
+		setInput(input, null);
+	}
+
 	public void setOutput(String output, String mimeType) {
 		_setOutput(cSelf, output, mimeType);
 	}
@@ -236,6 +244,7 @@ public class Player {
 	private static native long _init(MessageHandler messageHandler);
 	private static native int _pumpMessage(long self);
 	private static native int _setInput(long self, String input, String mimeType);
+	private static native int _setInput(long self, Input input, String mimeType);
 	private static native int _setOutput(long self, String output, String mimeType);
 	private static native int _play(long self);
 	private static native int _stop(long self);

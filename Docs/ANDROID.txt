@@ -8,17 +8,23 @@ BlueTune for Android
   
 1.b Build the main runtime
 
-Follow the build instructions in order to build the target 'arm-android-linux' in 'Release' mode.
-This will produce a number of .a libraries under Build/Targets/arm-android-linux/Release
+Follow the build instructions in order to build the target 'arm-android-linux' and/or 'x86-android-linux' in 'Release' and 'Debug' mode.
+This will produce a number of .a libraries under 
+Build/Targets/arm-android-linux/Release and Build/Targets/arm-android-linux/Release 
+and/or
+Build/Targets/x86-android-linux/Release and Build/Targets/x86-android-linux/Release 
 
 1.c Build the JNI layer
 
 Go to Source/Platform/Android/modules/bluetune
 build with the command 'ndk-build' (make sure that the NDK directory is in your path)
 
-This will produce a JAR file and a shared library (.so):
+You can pass the option 'NDK_DEBUG=1' to use the debug mode (in this case you need to have built the 'Debug' release of the BlueTune runtime)
+You can pass the option APP_ABI=<abi> if you want to build for more than just the default architecture (arm)
+This will produce a JAR file and one or more shared library(ies) (.so):
 bin/bluetune.jar
 libs/armeabi/libbluetune-jni.so
+libs/x86/libbluetune-jni.so 
 
 You can use this NDK module (Source/Platform/Android/modules/bluetune) as a dependency in your own Android application or module.
 This way, your application will pull in the Java classes in bluetune.jar as well as the JNI runtime library libbluetune-jni.so

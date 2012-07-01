@@ -22,6 +22,7 @@ env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN')]
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
+                      'CallbackInput',
                       'WmsProtocol',
                       'MpegAudioDecoder', 
                       'FlacDecoder',

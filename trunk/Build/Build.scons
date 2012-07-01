@@ -283,6 +283,7 @@ PluginsSettings = {
     'CddaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_CDDA_INPUT',             'src_dir':'Inputs/CDDA'              },
     'AlsaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',             'src_dir':'Inputs/Alsa'              },
     'NetworkInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',          'src_dir':'Inputs/Network'           },
+    'CallbackInput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT',         'src_dir':'Inputs/Callback'          },
     'WmsProtocol'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL',           'src_dir':'Protocols/WMS'            },
     'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
     'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },

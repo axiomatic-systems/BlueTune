@@ -1,5 +1,8 @@
 package com.bluetune.sample;
 
+import java.io.FileNotFoundException;
+import java.io.RandomAccessFile;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +16,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.bluetune.player.FileInputAdapter;
+import com.bluetune.player.Input;
 import com.bluetune.player.Player;
 import com.bluetune.player.PlayerListener;
 import com.bluetune.player.StreamInfo;
@@ -72,6 +77,17 @@ public class BlueTunePlayerActivity extends Activity implements PlayerListener, 
     public void onOpenButtonClicked(View button) {
     	String inputName = inputEdit.getText().toString();
     	player.setInput(inputName);
+
+//    	// this is how you would go through a Java input instead of a native input
+//    	RandomAccessFile rfile;
+//		try {
+//			rfile = new RandomAccessFile(inputName, "r");
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//    	Input input = new FileInputAdapter(rfile);
+//    	player.setInput(input, "audio/mp3"); // hardcode the mime type here for convenience
     }
     
     public void onPlayButtonClicked(View button) {

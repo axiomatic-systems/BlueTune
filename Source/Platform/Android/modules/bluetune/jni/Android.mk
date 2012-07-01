@@ -26,6 +26,12 @@ LOCAL_LDLIBS += -lBlueTune
 LOCAL_LDLIBS += -lAtomix
 LOCAL_LDLIBS += -lNeptune
 LOCAL_LDLIBS += -lBento4
-LOCAL_LDLIBS += -L$(BLT_ROOT)/Build/Targets/arm-android-linux/Release
+ifeq ($(NDK_DEBUG),1) 
+LOCAL_LDLIBS += -L$(BLT_ROOT)/Build/Targets/$(TARGET_ARCH)-android-linux/Debug
+else
+LOCAL_LDLIBS += -L$(BLT_ROOT)/Build/Targets/$(TARGET_ARCH)-android-linux/Release
+endif
 
 include $(BUILD_SHARED_LIBRARY)
+$(info "----------------------")
+$(info $(TARGET_ARCH_ABI) $(TARGET_ARCH))

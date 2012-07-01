@@ -575,9 +575,10 @@ Registry_RegisterNameAndId(Registry*   registry,
                            BLT_UInt32  id,
                            BLT_Boolean register_reverse_mapping)
 {
-    BLT_RegistryKey* namespace_key;
-    BLT_RegistryKey* category_key;
-    BLT_Result       result;
+    BLT_RegistryKey*  namespace_key;
+    BLT_RegistryKey*  category_key;
+    BLT_RegistryValue value;
+    BLT_Result        result;
 
     /* get the key for the namespace */
     result = Registry_GetKey(&ATX_BASE(registry, BLT_Registry), 
@@ -595,11 +596,12 @@ Registry_RegisterNameAndId(Registry*   registry,
     if (BLT_FAILED(result)) return result;
         
     /* set the value for the key */
+    value.integer = id;
     result = Registry_SetKeyValue(&ATX_BASE(registry, BLT_Registry),
                                   category_key, 
                                   name,
                                   BLT_REGISTRY_VALUE_TYPE_INTEGER, 
-                                  (BLT_RegistryValue*)&id);
+                                  &value);
     if (BLT_FAILED(result)) return result;
 
     /* stop now if we dont' want to create a reverse mapping */

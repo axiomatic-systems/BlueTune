@@ -217,17 +217,6 @@ AndroidOutput_Callback(SLAndroidSimpleBufferQueueItf queue, void* context)
 }
 
 /*----------------------------------------------------------------------
-|    AndroidOutput_Drain
-+---------------------------------------------------------------------*/
-static BLT_Result
-AndroidOutput_Drain(AndroidOutput* self)
-{
-    ATX_LOG_FINER("draining output");
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
 |    AndroidOutput_Reset
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -278,9 +267,10 @@ AndroidOutput_PutPacket(BLT_PacketConsumer* _self,
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
 
-    /* wait for some space in the packet queue */
+    /* exit early if the packet is empty */
+    if (BLT_MediaPacket_GetPayloadSize(packet) == 0) return BLT_SUCCESS;
     
-    /* enqueue the payload */
+    /* wait for some space in the packet queue */
     for (;;) {
         if (self->packet_queue[queue_index] == NULL) {
             break;
@@ -293,9 +283,12 @@ AndroidOutput_PutPacket(BLT_PacketConsumer* _self,
         }
         if (watchdog-- == 0) {
             ATX_LOG_WARNING("the watchdog bit us!");
+            AndroidOutput_Reset(self);
             return ATX_ERROR_TIMEOUT;
         }
     }
+    
+    /* enqueue the payload */
     ATX_LOG_FINER_2("enqueueing packet %d, size=%d", queue_index, BLT_MediaPacket_GetPayloadSize(packet));
     self->packet_queue[queue_index] = packet;
     BLT_MediaPacket_AddReference(packet);
@@ -303,6 +296,8 @@ AndroidOutput_PutPacket(BLT_PacketConsumer* _self,
                                                       BLT_MediaPacket_GetPayloadBuffer(packet),
                                                       BLT_MediaPacket_GetPayloadSize(packet));
     if (result != SL_RESULT_SUCCESS) {
+        self->packet_queue[queue_index] = NULL;
+        BLT_MediaPacket_Release(packet);
         ATX_LOG_WARNING_1("Enqueue failed (%d)", result);
         return BLT_FAILURE;
     }
@@ -733,13 +728,29 @@ BLT_METHOD
 AndroidOutput_GetStatus(BLT_OutputNode*       _self,
                         BLT_OutputNodeStatus* status)
 {
-    AndroidOutput*       self = ATX_SELF(AndroidOutput, BLT_OutputNode);
+    AndroidOutput* self = ATX_SELF(AndroidOutput, BLT_OutputNode);
 
     /* default values */
     status->media_time.seconds = 0;
     status->media_time.nanoseconds = 0;
     status->flags = 0;
     status->media_time = BLT_TimeStamp_FromNanos(self->media_time);
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    AndroidOutput_Drain
++---------------------------------------------------------------------*/
+static BLT_Result
+AndroidOutput_Drain(BLT_OutputNode* _self)
+{
+    /*AndroidOutput* self = ATX_SELF(AndroidOutput, BLT_OutputNode);*/
+    BLT_COMPILER_UNUSED(_self);
+
+    ATX_LOG_FINER("draining output");
+    
+    /* FIXME: not implemented yet */
     
     return BLT_SUCCESS;
 }
@@ -840,7 +851,7 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(AndroidOutput, BLT_OutputNode)
     AndroidOutput_GetStatus,
-    NULL
+    AndroidOutput_Drain
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

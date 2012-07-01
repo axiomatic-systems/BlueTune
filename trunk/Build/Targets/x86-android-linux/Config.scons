@@ -1,12 +1,10 @@
-# set defaults
-ANDROID_ARCH          = 'arm'
+ANDROID_ARCH          = 'x86'
 ANDROID_PLATFORM      = 'android-9'
-ANDROID_TOOLCHAIN     = 'arm-linux-androideabi-4.4.3'
-ANDROID_CROSS_PREFIX  = 'arm-linux-androideabi'
-ANDROID_EXTRA_CCFLAGS = ['-msoft-float', '-mthumb-interwork']
+ANDROID_TOOLCHAIN     = ''
+ANDROID_CROSS_PREFIX  = 'i686-android-linux'
+ANDROID_EXTRA_CCFLAGS = []
 
 # BlueTune specifics
-env['BLT_CPU_CONFIG_NO_FLOAT'] = True
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'AtxStdc[!D]*.c', 
                            'System/Bsd':'*.c', 
                            'System/Posix':'*.c',
@@ -47,9 +45,6 @@ env['BLT_PLUGINS'] = ['FileInput',
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE']  = 'Linux'
 env['BLT_DEFAULT_AUDIO_OUTPUT']      = 'android:default'
 env['BLT_PLUGINS_VORBIS_LIBRARY']    = 'Tremor'
-env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
-env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']
-env['BLT_WMA_DECODER_MODE']          = 'Integer'                                   
 
 ### load the common part
 execfile(env.GetBuildPath('#/Build/BuildAndroidNdk.py'))

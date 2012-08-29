@@ -150,14 +150,16 @@ SampleFilterInput_PutPacket(BLT_PacketConsumer* _self,
     }
 
     /* check that the packet looks OK to be processed */
-    if (BLT_MediaPacket_GetPayloadSize(packet) < 2) {
-        // less than one sample, skip this
+    unsigned int channel_count = pcm_type->channel_count;
+    unsigned int sample_count  = BLT_MediaPacket_GetPayloadSize(packet)/(channel_count*2);
+    if (sample_count < self->coefficient_count) {
+        // this packet is too small, skip this (that's the easy way out, we should
+        // buffer the packet and wait until later, but that's just an example
+        // filter, so we don't implement the more complicated case
         return BLT_SUCCESS;
     }
 
     /* ensure we have the proper buffer in place */
-    unsigned int channel_count = pcm_type->channel_count;
-    unsigned int sample_count  = BLT_MediaPacket_GetPayloadSize(packet)/(channel_count*2);
     unsigned int buffer_needed = (self->coefficient_count-1)*channel_count*2;
     if (self->buffer_size < buffer_needed) {
         delete[] self->buffer;

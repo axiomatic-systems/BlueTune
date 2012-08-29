@@ -176,8 +176,8 @@ SampleFilterInput_PutPacket(BLT_PacketConsumer* _self,
     /* apply the FIR coefficients */
     for (unsigned int c=0; c<channel_count; c++) {
         for (int i=sample_count-1; i>=0; i--) {
-            float out = 0.0;
-            for (int x=0; x<self->coefficient_count; x++) {
+            double out = 0.0;
+            for (int x=0; x<(int)self->coefficient_count; x++) {
                 double sample;
                 if (i >= x) {
                     sample = (double)pcm[c+channel_count*(i-x)];

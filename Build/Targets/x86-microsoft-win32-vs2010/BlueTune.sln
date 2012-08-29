@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tremor", "Tremor\Tremor.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FLAC", "FLAC\FLAC.vcxproj", "{3CA63D6C-C2CD-4DB0-A979-C007DA7CC60B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleFilterPlugin", "SampleFilterPlugin\SampleFilterPlugin.vcxproj", "{2A2E94A0-8DB7-4594-BC66-147B7850D828}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -85,6 +87,10 @@ Global
 		{3CA63D6C-C2CD-4DB0-A979-C007DA7CC60B}.Debug|Win32.Build.0 = Debug|Win32
 		{3CA63D6C-C2CD-4DB0-A979-C007DA7CC60B}.Release|Win32.ActiveCfg = Release|Win32
 		{3CA63D6C-C2CD-4DB0-A979-C007DA7CC60B}.Release|Win32.Build.0 = Release|Win32
+		{2A2E94A0-8DB7-4594-BC66-147B7850D828}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A2E94A0-8DB7-4594-BC66-147B7850D828}.Debug|Win32.Build.0 = Debug|Win32
+		{2A2E94A0-8DB7-4594-BC66-147B7850D828}.Release|Win32.ActiveCfg = Release|Win32
+		{2A2E94A0-8DB7-4594-BC66-147B7850D828}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

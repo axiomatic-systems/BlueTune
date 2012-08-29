@@ -139,7 +139,9 @@ do {                                            \
                                            BLT_PCM_SPEAKER_BACK_LEFT    | BLT_PCM_SPEAKER_BACK_RIGHT    | \
                                            BLT_PCM_SPEAKER_SIDE_LEFT    | BLT_PCM_SPEAKER_SIDE_RIGHT)
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 /*----------------------------------------------------------------------
 |   globals
 +---------------------------------------------------------------------*/
@@ -148,10 +150,6 @@ extern const BLT_MediaType BLT_GenericPcmMediaType;
 /*----------------------------------------------------------------------
 |   prototypes
 +---------------------------------------------------------------------*/
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 extern void
 BLT_PcmMediaType_Init(BLT_PcmMediaType* media_type);
 

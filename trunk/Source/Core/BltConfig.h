@@ -23,7 +23,12 @@
 |    compiler specifics
 +---------------------------------------------------------------------*/
 #if defined(_MSC_VER)
+#define BLT_DLL_EXPORT __declspec( dllexport )
 #if !defined(__cplusplus)
 #define inline __inline
 #endif
+#endif
+
+#if !defined(BLT_DLL_EXPORT)
+#define BLT_DLL_EXPORT
 #endif

@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------
 |    includes
 +---------------------------------------------------------------------*/
+#include "BltConfig.h"
 #include "BltErrors.h"
 #include "BltModule.h"
 #include "BltVersion.h"
@@ -29,9 +30,9 @@
 extern "C" {
 #endif
 BLT_Result BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION(BLT_Module** module);
-BLT_Result BLT_PLUGIN_GET_MODULE_FUNCTION_NAME(BLT_UInt32   abi_version, 
-                                               BLT_Ordinal  module_index,
-                                               BLT_Module** module);
+BLT_DLL_EXPORT BLT_Result BLT_PLUGIN_GET_MODULE_FUNCTION_NAME(BLT_UInt32   abi_version, 
+                                                              BLT_Ordinal  module_index,
+                                                              BLT_Module** module);
 #if defined(__cplusplus)
 }
 #endif

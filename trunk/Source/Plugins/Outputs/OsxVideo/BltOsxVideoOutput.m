@@ -60,7 +60,7 @@ typedef struct {
     void*            pixel_memory;
 	CVPixelBufferRef pixel_buffer;
     uint64_t         display_time;
-} OsxVideoPicture;
+};
 
 - (void)             dealloc;
 - (CVPixelBufferRef) buffer;
@@ -154,6 +154,7 @@ ATX_DECLARE_INTERFACE_MAP(OsxVideoOutput, BLT_SyncSlave)
 static void 
 OsxVideoPicture_PixelBufferReleaseCallback(void* context, const void* base_address)
 {
+    (void)context;
     free((void*)base_address);
 }   
 
@@ -458,6 +459,7 @@ end:
 +---------------------------------------------------------------------*/
 - (void) drawRect: (NSRect) bounds
 {
+    (void)bounds;
 	[self render];
 }
     
@@ -717,6 +719,10 @@ end:
                          flagsIn: (CVOptionFlags)flags_in
                         flagsOut: (CVOptionFlags*)flags_out
 {
+    (void)now;
+    (void)flags_in;
+    (void)flags_out;
+    
     // make sure we have the target timestamp in host time units
     CVTimeStamp target_time = *output_time;
     if (!(target_time.flags &  kCVTimeStampHostTimeValid)) {

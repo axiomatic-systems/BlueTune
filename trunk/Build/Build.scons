@@ -437,6 +437,18 @@ ExecutableModule(name                  = 'PcmDiff',
                  source_root           = 'Source/Apps/PcmDiff',
                  link_and_include_deps = ['Neptune'])
 
+############################# SampleFilterPlugin
+CompiledModule(name                     = 'SampleFilter',
+               source_root              = 'Source/Examples/Filter',
+               build_source_files       = {'/Source/Plugins/DynamicLoading':'BltDynamicPluginTemplate.cpp'},
+               build_include_dirs       = ['Source/Plugins/Common', 'Source/Config'],
+               extra_cpp_defines        = [('BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION','BLT_SampleFilterModule_GetModuleObject')],
+               chained_link_only_deps   = ['BlueTune'])
+SharedLibraryModule(name          = 'SampleFilterPlugin',
+                    library_name  = 'SampleFilterPlugin.so',
+                    anchor_module = 'SampleFilter',
+                    link_deps     = ['SampleFilter'])
+
 ############################# BtGtk
 if env['target'] == 'x86-unknown-linux':
     try:    

@@ -67,6 +67,12 @@
 		CA0C9CFF0D16068B00E23496 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9C150D16047100E23496 /* CoreServices.framework */; };
 		CA0C9D000D16068E00E23496 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */; };
 		CA0C9D010D16068F00E23496 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
+		CA13EF7315E71C7000214EE1 /* BltDynamicPluginTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA1859CA0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp */; };
+		CA13EF7515E71C7000214EE1 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA13EF8115E71E3900214EE1 /* SampleFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA13EF7F15E71E3900214EE1 /* SampleFilter.cpp */; };
+		CA13EF8215E71E3900214EE1 /* SampleFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA13EF8015E71E3900214EE1 /* SampleFilter.h */; };
+		CA13EF8315E7232F00214EE1 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA13EF8415E7233600214EE1 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
 		CA17CB3610B75E6100EB2FFA /* BtPlayerServerMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA17CB3510B75E6100EB2FFA /* BtPlayerServerMain.cpp */; };
 		CA17CB3E10B75F5E00EB2FFA /* BtPlayerServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA550C910D2093A500B22D72 /* BtPlayerServer.cpp */; };
 		CA1859BA0F22D0F700CF3552 /* BltOsxAudioUnitsOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA1859B50F22D0E500CF3552 /* BltOsxAudioUnitsOutput.c */; };
@@ -882,6 +888,13 @@
 			remoteGlobalIDString = CA197D1E0E1AE4360018E87C;
 			remoteInfo = QueueTest1;
 		};
+		CA13EF7015E71C7000214EE1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
 		CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */;
@@ -1612,6 +1625,18 @@
 		CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		CA0C9BFC0D16024B00E23496 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		CA0C9C150D16047100E23496 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		CA13EF6015E71BA500214EE1 /* SampleFilterPlugin-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SampleFilterPlugin-Info.plist"; sourceTree = "<group>"; };
+		CA13EF6215E71BA500214EE1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CA13EF6315E71BA500214EE1 /* SampleFilterPlugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SampleFilterPlugin-Prefix.pch"; sourceTree = "<group>"; };
+		CA13EF6415E71BA500214EE1 /* SampleFilterPluginProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = SampleFilterPluginProj.xcconfig; sourceTree = "<group>"; };
+		CA13EF6515E71BA500214EE1 /* SampleFilterPluginTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = SampleFilterPluginTarget.xcconfig; sourceTree = "<group>"; };
+		CA13EF6615E71BA500214EE1 /* SampleFilterPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleFilterPlugin.h; sourceTree = "<group>"; };
+		CA13EF6815E71BA500214EE1 /* SampleFilterPluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleFilterPluginPriv.h; sourceTree = "<group>"; };
+		CA13EF6915E71BA500214EE1 /* SampleFilterPlugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SampleFilterPlugin.cp; sourceTree = "<group>"; };
+		CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = SampleFilterPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA13EF7F15E71E3900214EE1 /* SampleFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleFilter.cpp; sourceTree = "<group>"; };
+		CA13EF8015E71E3900214EE1 /* SampleFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleFilter.h; sourceTree = "<group>"; };
 		CA17CB3410B75E6100EB2FFA /* BtPlayerServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtPlayerServer.h; sourceTree = "<group>"; };
 		CA17CB3510B75E6100EB2FFA /* BtPlayerServerMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BtPlayerServerMain.cpp; sourceTree = "<group>"; };
 		CA1859B20F22D0E500CF3552 /* BltOsxAudioQueueOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltOsxAudioQueueOutput.c; sourceTree = "<group>"; };
@@ -2303,6 +2328,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA13EF7415E71C7000214EE1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA13EF8415E7233600214EE1 /* libNeptune.a in Frameworks */,
+				CA13EF8315E7232F00214EE1 /* libAtomix.a in Frameworks */,
+				CA13EF7515E71C7000214EE1 /* libBlueTune.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA1ACEF80D30C5FA00C350CD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -2502,6 +2537,8 @@
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
+				CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */,
+				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
 				CA53C27B10A7876300950FAF /* CoreAudio.framework */,
@@ -2532,6 +2569,7 @@
 				CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */,
 				CA53C0B910A6277800950FAF /* BtTouchPlayer.app */,
 				CAD788DC12A33F8B00D7EBA7 /* libOpenCoreAAC.a */,
+				CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2591,6 +2629,47 @@
 				CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */,
 			);
 			path = PcmDiff;
+			sourceTree = "<group>";
+		};
+		CA13EF5B15E71BA500214EE1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				CA13EF6415E71BA500214EE1 /* SampleFilterPluginProj.xcconfig */,
+				CA13EF6515E71BA500214EE1 /* SampleFilterPluginTarget.xcconfig */,
+				CA13EF6615E71BA500214EE1 /* SampleFilterPlugin.h */,
+				CA13EF6815E71BA500214EE1 /* SampleFilterPluginPriv.h */,
+				CA13EF6915E71BA500214EE1 /* SampleFilterPlugin.cp */,
+				CA13EF5F15E71BA500214EE1 /* Supporting Files */,
+			);
+			path = SampleFilterPlugin;
+			sourceTree = "<group>";
+		};
+		CA13EF5F15E71BA500214EE1 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CA13EF6015E71BA500214EE1 /* SampleFilterPlugin-Info.plist */,
+				CA13EF6115E71BA500214EE1 /* InfoPlist.strings */,
+				CA13EF6315E71BA500214EE1 /* SampleFilterPlugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CA13EF7E15E71E3900214EE1 /* Filter */ = {
+			isa = PBXGroup;
+			children = (
+				CA13EF7F15E71E3900214EE1 /* SampleFilter.cpp */,
+				CA13EF8015E71E3900214EE1 /* SampleFilter.h */,
+			);
+			name = Filter;
+			path = Examples/Filter;
 			sourceTree = "<group>";
 		};
 		CA1859B10F22D0E500CF3552 /* OsxAudioQueue */ = {
@@ -4132,6 +4211,7 @@
 		CAF2EE110E5FDD8D00948C04 /* Examples */ = {
 			isa = PBXGroup;
 			children = (
+				CA13EF7E15E71E3900214EE1 /* Filter */,
 				CAF2EE120E5FDDB200948C04 /* AsyncApi */,
 				CAF2EE130E5FDDB200948C04 /* SyncApi */,
 			);
@@ -4168,6 +4248,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		CA13EF7115E71C7000214EE1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA13EF8215E71E3900214EE1 /* SampleFilter.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA504E6B0C5EA3960060E6FE /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -4566,6 +4654,24 @@
 			productReference = CA0C9AF50D15D27D00E23496 /* btplay */;
 			productType = "com.apple.product-type.tool";
 		};
+		CA13EF6E15E71C7000214EE1 /* SampleFilterPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA13EF7615E71C7000214EE1 /* Build configuration list for PBXNativeTarget "SampleFilterPlugin" */;
+			buildPhases = (
+				CA13EF7115E71C7000214EE1 /* Headers */,
+				CA13EF7215E71C7000214EE1 /* Sources */,
+				CA13EF7415E71C7000214EE1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA13EF6F15E71C7000214EE1 /* PBXTargetDependency */,
+			);
+			name = SampleFilterPlugin;
+			productName = BltWmaDecoderInputPlugin;
+			productReference = CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
 		CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CA1ACF000D30C62000C350CD /* Build configuration list for PBXNativeTarget "NetworkStreamTest" */;
@@ -4894,6 +5000,7 @@
 				Japanese,
 				French,
 				German,
+				en,
 			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* BlueTune */;
 			projectDirPath = "";
@@ -4930,6 +5037,7 @@
 				CA615D8010449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin */,
 				CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */,
 				CA5827120E68B39D006CC501 /* BltWmaDecoderPlugin */,
+				CA13EF6E15E71C7000214EE1 /* SampleFilterPlugin */,
 				CA0C9AF40D15D27D00E23496 /* BtPlay */,
 				CA9ED8330EAFAAFB003CE43C /* BtPlayX */,
 				CA550B9B0D1F372C00B22D72 /* BtController */,
@@ -5543,6 +5651,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA13EF7215E71C7000214EE1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA13EF7315E71C7000214EE1 /* BltDynamicPluginTemplate.cpp in Sources */,
+				CA13EF8115E71E3900214EE1 /* SampleFilter.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA1ACEF70D30C5FA00C350CD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -5997,6 +6114,11 @@
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA0C9AF90D15D28500E23496 /* PBXContainerItemProxy */;
 		};
+		CA13EF6F15E71C7000214EE1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA13EF7015E71C7000214EE1 /* PBXContainerItemProxy */;
+		};
 		CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Melo;
@@ -6155,6 +6277,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		CA13EF6115E71BA500214EE1 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA13EF6215E71BA500214EE1 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 		CA1EC1800ED29B080033F894 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -6457,6 +6587,30 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btplay;
+			};
+			name = Release;
+		};
+		CA13EF7715E71C7000214EE1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject",
+					ATX_CONFIG_ENABLE_LOGGING,
+				);
+				PRODUCT_NAME = SampleFilterPlugin;
+			};
+			name = Debug;
+		};
+		CA13EF7815E71C7000214EE1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject",
+					ATX_CONFIG_ENABLE_LOGGING,
+				);
+				PRODUCT_NAME = SampleFilterPlugin;
 			};
 			name = Release;
 		};
@@ -6981,6 +7135,15 @@
 			buildConfigurations = (
 				CA0C9AF70D15D27D00E23496 /* Debug */,
 				CA0C9AF80D15D27D00E23496 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA13EF7615E71C7000214EE1 /* Build configuration list for PBXNativeTarget "SampleFilterPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA13EF7715E71C7000214EE1 /* Debug */,
+				CA13EF7815E71C7000214EE1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

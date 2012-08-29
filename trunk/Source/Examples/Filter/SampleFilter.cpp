@@ -317,6 +317,15 @@ SampleFilter_Destroy(SampleFilter* self)
 { 
     ATX_LOG_INFO("destroying sample filter node instance");
 
+    /* remove our listener */
+    BLT_Core* core = ATX_BASE(self, BLT_BaseMediaNode).core;
+    if (core && self->property_listener_handle) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(core, &properties))) {
+            ATX_Properties_RemoveListener(properties, &self->property_listener_handle);
+        }
+    }
+
     /* release any input packet we may hold */
     if (self->output.packet) {
         BLT_MediaPacket_Release(self->output.packet);
@@ -356,67 +365,6 @@ SampleFilter_GetPortByName(BLT_MediaNode*  _self,
         *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
-}
-
-/*----------------------------------------------------------------------
-|    SampleFilter_Activate
-+---------------------------------------------------------------------*/
-BLT_METHOD
-SampleFilter_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
-{
-    SampleFilter* self = ATX_SELF_EX(SampleFilter, BLT_BaseMediaNode, BLT_MediaNode);
-
-    ATX_LOG_INFO("activating");
-    
-    /* keep a reference to the stream */
-    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
-
-    /* listen to settings on the new stream */
-    if (stream) {
-        ATX_Properties* properties;
-        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
-                                                   &properties))) {
-            ATX_PropertyValue property;
-            ATX_Properties_AddListener(properties,
-                                       SAMPLE_FILTER_COEFFICIENTS_PROPERTY,
-                                       &ATX_BASE(self, ATX_PropertyListener),
-                                       &self->property_listener_handle);
-
-            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
-                    properties,
-                    SAMPLE_FILTER_COEFFICIENTS_PROPERTY,
-                    &property)) &&
-                property.type == ATX_PROPERTY_VALUE_TYPE_STRING) {
-                SampleFilter_SetCoefficients(self, property.data.string);
-            }
-        }
-    }
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
-|    SampleFilter_Deactivate
-+---------------------------------------------------------------------*/
-BLT_METHOD
-SampleFilter_Deactivate(BLT_MediaNode* _self)
-{
-    SampleFilter* self = ATX_SELF_EX(SampleFilter, BLT_BaseMediaNode, BLT_MediaNode);
-
-    ATX_LOG_INFO("de-activating");
-
-    /* remove our listener */
-    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
-        ATX_Properties* properties;
-        if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
-            ATX_Properties_RemoveListener(properties, &self->property_listener_handle);
-        }
-    }
-
-    /* we're detached from the stream */
-    ATX_BASE(self, BLT_BaseMediaNode).context = NULL;
-
-    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -488,8 +436,8 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 ATX_BEGIN_INTERFACE_MAP_EX(SampleFilter, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     SampleFilter_GetPortByName,
-    SampleFilter_Activate,
-    SampleFilter_Deactivate,
+    BLT_BaseMediaNode_Activate,
+    BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,
     BLT_BaseMediaNode_Pause,
@@ -539,6 +487,26 @@ SampleFilter_Create(BLT_Module*              module,
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
+    /* register a property listener and check if the property is already set */
+    if (core) {
+        ATX_Properties* properties;
+        if (BLT_SUCCEEDED(BLT_Core_GetProperties(core, &properties))) {
+            ATX_PropertyValue property;
+            ATX_Properties_AddListener(properties,
+                                       SAMPLE_FILTER_COEFFICIENTS_PROPERTY,
+                                       &ATX_BASE(self, ATX_PropertyListener),
+                                       &self->property_listener_handle);
+
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(
+                    properties,
+                    SAMPLE_FILTER_COEFFICIENTS_PROPERTY,
+                    &property)) &&
+                property.type == ATX_PROPERTY_VALUE_TYPE_STRING) {
+                SampleFilter_SetCoefficients(self, property.data.string);
+            }
+        }
+    }
+    
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, SampleFilter, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, SampleFilter, BLT_BaseMediaNode, ATX_Referenceable);

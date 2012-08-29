@@ -1634,7 +1634,7 @@
 		CA13EF6615E71BA500214EE1 /* SampleFilterPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleFilterPlugin.h; sourceTree = "<group>"; };
 		CA13EF6815E71BA500214EE1 /* SampleFilterPluginPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleFilterPluginPriv.h; sourceTree = "<group>"; };
 		CA13EF6915E71BA500214EE1 /* SampleFilterPlugin.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SampleFilterPlugin.cp; sourceTree = "<group>"; };
-		CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = SampleFilterPlugin.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA13EF7915E71C7000214EE1 /* SampleFilter.plugin */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = SampleFilter.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA13EF7F15E71E3900214EE1 /* SampleFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleFilter.cpp; sourceTree = "<group>"; };
 		CA13EF8015E71E3900214EE1 /* SampleFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleFilter.h; sourceTree = "<group>"; };
 		CA17CB3410B75E6100EB2FFA /* BtPlayerServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtPlayerServer.h; sourceTree = "<group>"; };
@@ -2569,7 +2569,7 @@
 				CA615D8110449B66007E9E7B /* BltDolbyDigitalPlusDecoderPlugin.dylib */,
 				CA53C0B910A6277800950FAF /* BtTouchPlayer.app */,
 				CAD788DC12A33F8B00D7EBA7 /* libOpenCoreAAC.a */,
-				CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */,
+				CA13EF7915E71C7000214EE1 /* SampleFilter.plugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -4669,7 +4669,7 @@
 			);
 			name = SampleFilterPlugin;
 			productName = BltWmaDecoderInputPlugin;
-			productReference = CA13EF7915E71C7000214EE1 /* SampleFilterPlugin.dylib */;
+			productReference = CA13EF7915E71C7000214EE1 /* SampleFilter.plugin */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */ = {
@@ -6593,24 +6593,26 @@
 		CA13EF7715E71C7000214EE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EXECUTABLE_EXTENSION = plugin;
 				EXECUTABLE_PREFIX = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject",
 					ATX_CONFIG_ENABLE_LOGGING,
 				);
-				PRODUCT_NAME = SampleFilterPlugin;
+				PRODUCT_NAME = SampleFilter;
 			};
 			name = Debug;
 		};
 		CA13EF7815E71C7000214EE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EXECUTABLE_EXTENSION = plugin;
 				EXECUTABLE_PREFIX = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject",
 					ATX_CONFIG_ENABLE_LOGGING,
 				);
-				PRODUCT_NAME = SampleFilterPlugin;
+				PRODUCT_NAME = SampleFilter;
 			};
 			name = Release;
 		};

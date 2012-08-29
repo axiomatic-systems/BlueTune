@@ -341,8 +341,8 @@ SampleFilter_Destroy(SampleFilter* self)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 SampleFilter_GetPortByName(BLT_MediaNode*  _self,
-                                BLT_CString     name,
-                                BLT_MediaPort** port)
+                           BLT_CString     name,
+                           BLT_MediaPort** port)
 {
     SampleFilter* self = ATX_SELF_EX(SampleFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -424,8 +424,8 @@ SampleFilter_Deactivate(BLT_MediaNode* _self)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 SampleFilter_Seek(BLT_MediaNode* _self,
-                       BLT_SeekMode*  mode,
-                       BLT_SeekPoint* point)
+                  BLT_SeekMode*  mode,
+                  BLT_SeekPoint* point)
 {
     SampleFilter* self = ATX_SELF_EX(SampleFilter, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -434,7 +434,8 @@ SampleFilter_Seek(BLT_MediaNode* _self,
 
     ATX_LOG_INFO("seek received, flushing internal state");
 
-    /* TODO: reset any filter internals */
+    /* reset filter state */
+    NPT_SetMemory(self->buffer, 0, self->buffer_size);
     
     /* release any pending output packet */
     if (self->output.packet) {
@@ -515,10 +516,10 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SampleFilter,
 +---------------------------------------------------------------------*/
 static BLT_Result
 SampleFilter_Create(BLT_Module*              module,
-                         BLT_Core*                core, 
-                         BLT_ModuleParametersType parameters_type,
-                         BLT_AnyConst             parameters, 
-                         BLT_MediaNode**          object)
+                    BLT_Core*                core,
+                    BLT_ModuleParametersType parameters_type,
+                    BLT_AnyConst             parameters,
+                    BLT_MediaNode**          object)
 {
     ATX_LOG_INFO("creating SampleFilter node instance");
 

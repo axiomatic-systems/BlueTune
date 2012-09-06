@@ -208,6 +208,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(DolbyDigitalPlusDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER)
+    BLT_REGISTER_BUILTIN(OsxAudioConverterDecoder)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL)
     BLT_REGISTER_BUILTIN(WmsProtocol)
 #endif

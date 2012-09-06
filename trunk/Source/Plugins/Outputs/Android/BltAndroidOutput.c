@@ -177,7 +177,6 @@ typedef struct {
     SLObjectItf                   sl_engine_object;
     SLEngineItf                   sl_engine;
     SLObjectItf                   sl_output_mix_object;
-    SLVolumeItf                   sl_output_mix_volume;
     SLObjectItf                   sl_player_object;
     SLPlayItf                     sl_player_play;
     SLAndroidSimpleBufferQueueItf sl_player_buffer_queue;
@@ -191,6 +190,12 @@ typedef struct {
     BLT_PcmMediaType media_type;
     ATX_UInt64       media_time;      /* media time of the last received packet */
 } AndroidOutput;
+
+/*----------------------------------------------------------------------
+|    forward declarations
++---------------------------------------------------------------------*/
+static BLT_Result AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format);
+static BLT_Result AndroidOutput_Drain(BLT_OutputNode* self);
 
 /*----------------------------------------------------------------------
 |    AndroidOutput_Callback
@@ -228,9 +233,11 @@ AndroidOutput_Reset(AndroidOutput* self)
     ATX_LOG_FINER("resetting output");
 
     /* clear the queue */
-    result = (*self->sl_player_buffer_queue)->Clear(self->sl_player_buffer_queue);
-    if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_FINE_1("Clear() failed (%d)", result);
+    if (self->sl_player_buffer_queue) {
+        result = (*self->sl_player_buffer_queue)->Clear(self->sl_player_buffer_queue);
+        if (result != SL_RESULT_SUCCESS) {
+            ATX_LOG_FINE_1("Clear() failed (%d)", result);
+        }
     }
     
     /* reset the queue state */
@@ -255,8 +262,10 @@ AndroidOutput_PutPacket(BLT_PacketConsumer* _self,
     AndroidOutput*          self = ATX_SELF(AndroidOutput, BLT_PacketConsumer);
     const BLT_PcmMediaType* media_type;
     unsigned int            watchdog = BLT_ANDROID_OUTPUT_PACKET_QUEUE_MAX_WAIT;
-    unsigned int            queue_index = self->packet_index%BLT_ANDROID_OUTPUT_PACKET_QUEUE_SIZE;
+    unsigned int            queue_index;
     BLT_Result              result;
+    
+    ATX_LOG_FINEST("put packet");
     
     /* get the media type */
     result = BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)(const void*)&media_type);
@@ -270,7 +279,36 @@ AndroidOutput_PutPacket(BLT_PacketConsumer* _self,
     /* exit early if the packet is empty */
     if (BLT_MediaPacket_GetPayloadSize(packet) == 0) return BLT_SUCCESS;
     
+    /* check if the media type has changed */
+    if (media_type->sample_rate     != self->media_type.sample_rate     ||
+        media_type->channel_count   != self->media_type.channel_count   ||
+        media_type->bits_per_sample != self->media_type.bits_per_sample) {
+        ATX_LOG_FINE("PCM format changed, configuring output");
+        
+        if (self->media_type.sample_rate) {
+            AndroidOutput_Drain(&ATX_BASE(self, BLT_OutputNode));
+            AndroidOutput_Reset(self);
+        }
+        result = AndroidOutput_SetupOutput(self, media_type);
+
+        self->media_type = *media_type;
+        if (BLT_FAILED(result)) {
+            ATX_LOG_WARNING_1("AndroidOutput_SetupOutput failed (%d)", result);
+            return result;
+        }
+        if (self->sl_player_play) {
+            result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
+            if (result != SL_RESULT_SUCCESS) {
+                ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+            }
+        } else {
+            ATX_LOG_WARNING("sl_player_play is NULL...");
+            return BLT_ERROR_INVALID_STATE;
+        }
+    }
+    
     /* wait for some space in the packet queue */
+    queue_index = self->packet_index%BLT_ANDROID_OUTPUT_PACKET_QUEUE_SIZE;
     for (;;) {
         if (self->packet_queue[queue_index] == NULL) {
             break;
@@ -374,16 +412,46 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
         ATX_LOG_WARNING_1("Realize failed (%d)", result);
         return BLT_FAILURE;
     }
-    
-    /* get the output mix volume interface */
-    result = (*self->sl_output_mix_object)->GetInterface(self->sl_output_mix_object, 
-                                                         SL_IID_VOLUME, 
-                                                         &self->sl_output_mix_volume);
-    if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_FINE_1("GetInterface (sl_output_mix_object, SL_IID_VOLUME) failed (%d)", result);
-        self->sl_output_mix_volume = NULL;
+                
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|    AndroidOutput_GetChannelMask
++---------------------------------------------------------------------*/
+static SLuint32
+AndroidOutput_GetDefaultChannelMask(BLT_UInt32 channel_count)
+{
+    switch (channel_count) {
+        case 1: return SL_SPEAKER_FRONT_CENTER;
+        case 2: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+        case 3: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_CENTER | SL_SPEAKER_FRONT_RIGHT;
+        case 4: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT  | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT;
+        case 5: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_CENTER | SL_SPEAKER_FRONT_RIGHT  | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT;
+        case 6: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_CENTER | SL_SPEAKER_FRONT_RIGHT  | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT  | SL_SPEAKER_LOW_FREQUENCY;
+        case 7: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_CENTER | SL_SPEAKER_FRONT_RIGHT  | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_CENTER | SL_SPEAKER_BACK_RIGHT   | SL_SPEAKER_LOW_FREQUENCY;
+        case 8: return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_CENTER | SL_SPEAKER_FRONT_RIGHT  | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT  | SL_SPEAKER_SIDE_LEFT    | SL_SPEAKER_SIDE_RIGHT    | SL_SPEAKER_LOW_FREQUENCY;
+        default: return 0;
     }
+}
+
+/*----------------------------------------------------------------------
+|    AndroidOutput_SetupOutput
++---------------------------------------------------------------------*/
+static BLT_Result
+AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
+{
+    SLresult result;
     
+    /* release the audio player if one exists */
+    if (self->sl_player_object) {
+        (*self->sl_player_object)->Destroy(self->sl_player_object);
+        self->sl_player_object = NULL;
+        self->sl_player_play = NULL;
+        self->sl_player_buffer_queue = NULL;
+        self->sl_player_volume = NULL;
+    }
+
     /* create audio player */
     {
         /* audio source configuration */
@@ -391,13 +459,14 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
             SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 
             BLT_ANDROID_OUTPUT_PACKET_QUEUE_SIZE /* number of buffers */
         };
+        SLuint32 channel_mask = format->channel_mask?format->channel_mask:AndroidOutput_GetDefaultChannelMask(format->channel_count);
         SLDataFormat_PCM format_pcm = {
             SL_DATAFORMAT_PCM, 
-            2, 
-            SL_SAMPLINGRATE_44_1,
-            16, 
-            16,
-            SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT, 
+            format->channel_count,
+            1000*format->sample_rate,
+            format->bits_per_sample,
+            format->bits_per_sample,
+            channel_mask,
             SL_BYTEORDER_LITTLEENDIAN};
         SLDataSource audio_source = {
             &bq_locator, 
@@ -414,9 +483,13 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
             NULL
         };
 
+        ATX_LOG_FINE_3("creating SL Audio Player, sr=%d, ch=%d, chmsk=%x",
+                       format->sample_rate,
+                       format->channel_count,
+                       channel_mask);
         const SLInterfaceID ids[2] = { SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_VOLUME };
         const SLboolean req[2]     = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
-        result = (*self->sl_engine)->CreateAudioPlayer(self->sl_engine, 
+        result = (*self->sl_engine)->CreateAudioPlayer(self->sl_engine,
                                                        &self->sl_player_object, 
                                                        &audio_source, 
                                                        &audio_sink,
@@ -483,7 +556,7 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
         }
         ATX_LOG_FINE_2("volume: current=%d, max=%d", (int)volume, (int)self->sl_player_max_volume);
     }
-        
+
     return BLT_SUCCESS;
 }
 
@@ -495,6 +568,19 @@ AndroidOutput_Destroy(AndroidOutput* self)
 {
     ATX_LOG_FINE("destroying output");
 
+    /* release the OpenSL resources */
+    if (self->sl_player_object) {
+        (*self->sl_player_object)->Destroy(self->sl_player_object);
+    }
+    /* destroy the output mix */
+    if (self->sl_output_mix_object) {
+        (*self->sl_output_mix_object)->Destroy(self->sl_output_mix_object);
+    }
+    /* destroy the OpenSL engine */
+    if (self->sl_engine_object) {
+        (*self->sl_engine_object)->Destroy(self->sl_engine_object);
+    }
+    
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
@@ -545,11 +631,13 @@ AndroidOutput_Create(BLT_Module*              module,
     BLT_PcmMediaType_Init(&output->expected_media_type);
     
     /* setup OpenSL */
+    ATX_LOG_FINE("setting up OpenSL...");
     result = AndroidOutput_SetupOpenSL(output);
     if (BLT_FAILED(result)) {
         AndroidOutput_Destroy(output);
         return result;
     }
+    ATX_LOG_FINE("OpenSL setup");
     
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(output, AndroidOutput, BLT_BaseMediaNode, BLT_MediaNode);
@@ -604,9 +692,11 @@ AndroidOutput_Start(BLT_MediaNode* _self)
     ATX_LOG_FINER("starting output");
 
     /* set the player's state to playing */
-    result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
-    if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+    if (self->sl_player_play) {
+        result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
+        if (result != SL_RESULT_SUCCESS) {
+            ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+        }
     }
     
     return BLT_SUCCESS;
@@ -624,11 +714,13 @@ AndroidOutput_Stop(BLT_MediaNode* _self)
     ATX_LOG_FINER("stopping output");
 
     /* set the player's state to stopped */
-    result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_STOPPED);
-    if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+    if (self->sl_player_play) {
+        result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_STOPPED);
+        if (result != SL_RESULT_SUCCESS) {
+            ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+        }
     }
-
+    
     /* reset the device */
     AndroidOutput_Reset(self);
 

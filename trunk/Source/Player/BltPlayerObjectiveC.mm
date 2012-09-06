@@ -154,10 +154,50 @@ private:
     return player->SeekToPosition(position, range);
 }
 
+-(BLT_Result) ping: (const void*) cookie
+{
+    return player->Ping(cookie);
+}
+
+-(BLT_Result) registerModule: (BLT_Module*) module
+{
+    return player->RegisterModule(module);
+}
+
+-(BLT_Result) addNode: (BLT_CString) name;
+{
+    return player->AddNode(name);
+}
+
 -(BLT_Result) setVolume: (float) volume
 {
     return player->SetVolume(volume);
 }
 
+-(BLT_Result) setProperty: (BLT_PropertyScope) scope target: (const char*) target name: (const char*) name value: (const ATX_PropertyValue*) value
+{
+    return player->SetProperty(scope, target, name, value);
+}
+
+-(BLT_Result) loadPlugin: (const char*) name flags: (BLT_Flags) search_flags;
+{
+    return player->LoadPlugin(name, search_flags);
+    
+}
+
+-(BLT_Result) loadPlugins: (const char*) directory fileExtension: (const char*) file_extension;
+{
+    return player->LoadPlugins(directory, file_extension);
+}
+
+-(BLT_Result) shutdown
+{
+    return player->Shutdown();
+}
+
+-(BLT_Result) interrup
+{
+    return player->Interrupt();
+}
 
 @end

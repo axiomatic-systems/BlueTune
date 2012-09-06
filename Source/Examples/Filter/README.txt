@@ -13,7 +13,7 @@ To build the media node plugin, another file is also compiled: Source/Plugins/Dy
 BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject
 and is implemented in SampleFilter.cpp
 
-The build files for the plugin are at the same place as the build files for the general BlueTune project (see the main documentation for details). When building the plugin, the build output is a dynamically loadable plugin. It can also be built as a statically linkable module (in this case it is not necessary to build and link with the file BltDynamicPluginTemplate.cpp, as the factory method BLT_SampleFilterModule_GetModuleObject can be called directly)
+The build files for the plugin are at the same place as the build files for the general BlueTune project (see the main documentation for details). When building the plugin, the build output is a dynamically loadable plugin, as a file named SampleFilter.plugin. It can also be built as a statically linkable module (in this case it is not necessary to build and link with the file BltDynamicPluginTemplate.cpp, as the factory method BLT_SampleFilterModule_GetModuleObject can be called directly)
 
 When building the plugin, the C pre-processor symbol ATX_CONFIG_ENABLE_LOGGING is also defined, so as to enable logging.
 
@@ -47,3 +47,17 @@ Here is an example command line:
 Using the plugin in a final application:
 ----------------------------------------
 
+In order to use the plugin in an application that uses the BlueTune decoder or player APIs, the application needs to request, first, that the plugin module be registered with the system, and then to add an instance of the plugin media node to the decoding pipeline.
+To register the plugin module when built as a dynamic library plugin, the application can choose to call the BLT_Player::LoadPlugin() method (Player API), or the BLT_Decoder_LoadPlugin() function (Decoder API) depending on which API is used.
+To register the plugin module when build as a statically linked library, the application must instantiate the module object by calling BLT_SampleFilterModule_GetModuleObject() and then register it by calling BLT_Player::RegisterModule() method (Player API) or BLT_Decoder_RegisterModule() (Decoder API). Please note that when calling BLT_Decoder_RegisterModule(), the caller should subsequently call ATX_RELEASE_OBJECT(module) to release its reference to the module (this is not necessary when using the Player API, because BLT_Player::RegisterModule() takes ownership of the caller's reference).
+This registration should be done before playing files or streams, but only needs to be done once.
+
+To add the media node to the decoding pipeline, the application must call BLT_Player::AddNode() (Player API) or BLT_Decoder_AddNodeByName()(Decoder API), using the module name chosen for this example plugin ("com.example.filter.sample").
+This should be done before playing files or streams, but only needs to be done once.
+
+Debugging with the logger:
+--------------------------
+
+This example plugin uses the Atomix logging API. This can be convenient for tracing what the plugin does without having to use a debugger.
+The logger name used in this example is 'sample.filter', so, for example, one can set the logging configuration to be at its most verbose setting by setting the environment variable ATOMIX_LOG_CONFIG=plist:sample.filter.level=ALL
+Please refer to the Atomix logging documentation for details on how to use the Atomix logging subsystem.

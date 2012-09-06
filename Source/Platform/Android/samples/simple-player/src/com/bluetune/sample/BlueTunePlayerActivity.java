@@ -1,8 +1,5 @@
 package com.bluetune.sample;
 
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,8 +13,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-import com.bluetune.player.FileInputAdapter;
-import com.bluetune.player.Input;
 import com.bluetune.player.Player;
 import com.bluetune.player.PlayerListener;
 import com.bluetune.player.StreamInfo;
@@ -48,7 +43,7 @@ public class BlueTunePlayerActivity extends Activity implements PlayerListener, 
 
     	inputEdit = (EditText)findViewById(R.id.inputNameText);
 
-    	streamInfoItems = new String[] {"", "", "", "", "", "", "", ""};
+    	streamInfoItems = new String[] {"", "", "", "", "", "", "", "", ""};
     	streamInfoView = (ListView)findViewById(R.id.streamInfoView);
 		streamInfoAdapter = new ArrayAdapter<String>(this,
 				R.layout.stream_info_list_item, R.id.streamInfoListItem, streamInfoItems);

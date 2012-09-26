@@ -171,6 +171,7 @@ typedef struct {
     unsigned int         position;
 } Mp4AudioDsiParser;
 
+#if !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
 /*----------------------------------------------------------------------
 |   Mp4AudioDsiParser_BitsLeft
 +---------------------------------------------------------------------*/
@@ -435,6 +436,7 @@ Mp4AudioDecoderConfig_Parse(Mp4AudioDecoderConfig* self,
 
     return BLT_SUCCESS;
 }
+#endif /* !defined(#define BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY) */
 
 /*----------------------------------------------------------------------
 |    OsxAudioQueueOutput_BufferCallback
@@ -539,7 +541,9 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
             default:
                 return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-    } else if (media_type->id == self->expected_media_types.asbd.base.id) {
+    }
+#if !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
+     else if (media_type->id == self->expected_media_types.asbd.base.id) {
         const AsbdMediaType* asbd_type = (const AsbdMediaType*)media_type;
         *audio_format = asbd_type->asbd;
     } else if (media_type->id == self->expected_media_types.mp4.base.base.id) {
@@ -599,7 +603,9 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
             default:
                 return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-    } else {
+    }
+#endif /* !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY) */
+     else {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
     

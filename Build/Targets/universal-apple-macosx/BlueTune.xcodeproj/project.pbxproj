@@ -766,6 +766,8 @@
 		CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; };
 		CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; };
 		CAFBDCFD0CAE019C00E6B62F /* BltBitStream.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */; };
+		CAFE7EBA15F4541500E6E003 /* BltOsxAudioConverterDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAFE7EB815F4541500E6E003 /* BltOsxAudioConverterDecoder.cpp */; };
+		CAFE7EBB15F4541500E6E003 /* BltOsxAudioConverterDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFE7EB915F4541500E6E003 /* BltOsxAudioConverterDecoder.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2308,6 +2310,8 @@
 		CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAlacDecoder.h; sourceTree = "<group>"; };
 		CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltBitStream.h; sourceTree = "<group>"; };
 		CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltBitStream.c; sourceTree = "<group>"; };
+		CAFE7EB815F4541500E6E003 /* BltOsxAudioConverterDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltOsxAudioConverterDecoder.cpp; sourceTree = "<group>"; };
+		CAFE7EB915F4541500E6E003 /* BltOsxAudioConverterDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltOsxAudioConverterDecoder.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libBlueTune.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBlueTune.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -3047,14 +3051,15 @@
 		CA5042500C5AE52B0060E6FE /* Decoders */ = {
 			isa = PBXGroup;
 			children = (
-				CA7F2F750FA81381006A1B2D /* IPP */,
-				CA9ED92E0EB02685003CE43C /* FFMPEG */,
-				CAFBDAE80CAD717F00E6B62F /* ALAC */,
-				CA6434AC0C971B5500F67CD5 /* HelixAAC */,
-				CAD78A5D12A3718000D7EBA7 /* OpenCoreAAC */,
 				CA5042510C5AE52B0060E6FE /* AAC */,
+				CAFBDAE80CAD717F00E6B62F /* ALAC */,
+				CA9ED92E0EB02685003CE43C /* FFMPEG */,
 				CA5042540C5AE52B0060E6FE /* FLAC */,
+				CA6434AC0C971B5500F67CD5 /* HelixAAC */,
+				CA7F2F750FA81381006A1B2D /* IPP */,
 				CA5042570C5AE52B0060E6FE /* MpegAudio */,
+				CAD78A5D12A3718000D7EBA7 /* OpenCoreAAC */,
+				CAFE7EB715F4541500E6E003 /* OsxAudioConverter */,
 				CA50425A0C5AE52B0060E6FE /* Vorbis */,
 				CA50425D0C5AE52B0060E6FE /* WMA */,
 			);
@@ -4245,6 +4250,15 @@
 			path = ALAC;
 			sourceTree = "<group>";
 		};
+		CAFE7EB715F4541500E6E003 /* OsxAudioConverter */ = {
+			isa = PBXGroup;
+			children = (
+				CAFE7EB815F4541500E6E003 /* BltOsxAudioConverterDecoder.cpp */,
+				CAFE7EB915F4541500E6E003 /* BltOsxAudioConverterDecoder.h */,
+			);
+			path = OsxAudioConverter;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -4631,6 +4645,7 @@
 				CA92075E125AAC0C001F2456 /* BltWmsProtocol.h in Headers */,
 				CA360A6213765CBD001D3DE0 /* BltRaopOutput.h in Headers */,
 				CAA862F114FFC820008956A3 /* BltNetworkQueuedInput.h in Headers */,
+				CAFE7EBB15F4541500E6E003 /* BltOsxAudioConverterDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6073,6 +6088,7 @@
 				CAE74C8212BCAA3500C36C5F /* BltAacDecoder.c in Sources */,
 				CA360A6113765CBD001D3DE0 /* BltRaopOutput.cpp in Sources */,
 				CAA862F014FFC820008956A3 /* BltNetworkQueuedInput.cpp in Sources */,
+				CAFE7EBA15F4541500E6E003 /* BltOsxAudioConverterDecoder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6331,6 +6347,7 @@
 					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,
@@ -6396,6 +6413,7 @@
 					BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					_BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
 					BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT,

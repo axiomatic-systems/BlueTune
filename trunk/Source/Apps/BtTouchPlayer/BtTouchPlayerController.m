@@ -217,7 +217,7 @@
             break;
 
         case ATX_PROPERTY_VALUE_TYPE_INTEGER:
-            value_string = [NSString stringWithFormat:@"%d", value->data.string];
+            value_string = [NSString stringWithFormat:@"%d", value->data.integer];
             break;
             
         default:

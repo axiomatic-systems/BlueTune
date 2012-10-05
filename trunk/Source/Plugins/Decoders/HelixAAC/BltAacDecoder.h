@@ -33,6 +33,7 @@
 /**
  * Returns a pointer to the AAC Decoder module.
  */
+BLT_Result BLT_HelixAacDecoderModule_GetModuleObject(BLT_Module** module);
 BLT_Result BLT_AacDecoderModule_GetModuleObject(BLT_Module** module);
 
 /** @} */

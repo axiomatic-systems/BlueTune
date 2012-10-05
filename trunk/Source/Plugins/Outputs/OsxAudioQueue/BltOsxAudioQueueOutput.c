@@ -2,7 +2,7 @@
 |
 |   OSX Audio Queue Output Module
 |
-|   (c) 2002-2010 Gilles Boccon-Gibod
+|   (c) 2002-2012 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -171,7 +171,7 @@ typedef struct {
     unsigned int         position;
 } Mp4AudioDsiParser;
 
-#if !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
+#if !defined(BLT_CONFIG_MODULES_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
 /*----------------------------------------------------------------------
 |   Mp4AudioDsiParser_BitsLeft
 +---------------------------------------------------------------------*/
@@ -542,7 +542,7 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
                 return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
     }
-#if !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
+#if !defined(BLT_CONFIG_MODULES_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY)
      else if (media_type->id == self->expected_media_types.asbd.base.id) {
         const AsbdMediaType* asbd_type = (const AsbdMediaType*)media_type;
         *audio_format = asbd_type->asbd;
@@ -604,7 +604,7 @@ OsxAudioQueueOutput_ConvertFormat(OsxAudioQueueOutput*         self,
                 return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
     }
-#endif /* !defined(BLT_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY) */
+#endif /* !defined(BLT_CONFIG_MODULES_OSX_AUDIO_QUEUE_OUTPUT_PCM_ONLY) */
      else {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }

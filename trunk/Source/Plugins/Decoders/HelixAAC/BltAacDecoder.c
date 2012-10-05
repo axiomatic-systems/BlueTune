@@ -924,3 +924,9 @@ BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(AacDecoderModule,
                                          "com.axiosys.decoder.aac",
                                          "1.2.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)
+
+BLT_Result 
+BLT_HelixAacDecoderModule_GetModuleObject(BLT_Module** module)
+{
+    return BLT_AacDecoderModule_GetModuleObject(module);
+}

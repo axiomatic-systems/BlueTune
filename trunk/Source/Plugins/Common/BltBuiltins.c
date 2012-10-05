@@ -188,6 +188,14 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(AacDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_HELIX_AAC_DECODER)
+    BLT_REGISTER_BUILTIN(HelixAacDecoder)
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_FHG_AAC_DECODER)
+    BLT_REGISTER_BUILTIN(FhgAacDecoder)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER)
     BLT_REGISTER_BUILTIN(OpenCoreAacDecoder)
 #endif

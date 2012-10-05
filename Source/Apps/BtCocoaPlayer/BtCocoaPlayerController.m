@@ -259,7 +259,7 @@
         [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Instant Bitrate" value: [NSString stringWithFormat:@"%d", info->instant_bitrate]];
     }
     if (mask & BLT_STREAM_INFO_MASK_SIZE) {
-        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Size" value: [NSString stringWithFormat:@"%d", info->size]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Size" value: [NSString stringWithFormat:@"%lld", info->size]];
     }
     if (mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
         [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Sample Rate" value: [NSString stringWithFormat:@"%d", info->sample_rate]];

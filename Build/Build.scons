@@ -52,6 +52,7 @@ for plugin in env['BLT_PLUGINS']:
 ############################ select AAC library
 BLT_AAC_DECODER_PLUGIN_DIR    = ''
 BLT_AAC_DECODER_PLUGIN_EXTRAS = {}
+BLT_AAC_MODULE_CONFIG_NAME = 'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER'
 if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
     env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
@@ -129,6 +130,7 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
     
 ############################ HelixAAC
 if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
+    BLT_AAC_MODULE_CONFIG_NAME    = 'BLT_CONFIG_MODULES_ENABLE_HELIX_AAC_DECODER'
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/HelixAAC'
     BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['HelixAAC']}
     if env.has_key('BLT_PLUGINS_HELIX_AAC_ASM_DIR'):
@@ -144,12 +146,28 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
 
 ############################ OpenCoreAAC
 if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'OpenCore':
+    BLT_AAC_MODULE_CONFIG_NAME    = 'BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER'
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/OpenCoreAAC'
     BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['OpenCoreAAC']}
     CompiledModule(name                  = 'OpenCoreAAC',
                    source_root           = 'ThirdParty/OpenCoreAAC',
                    build_source_patterns = ['*.c', '*.s'],
                    build_source_dirs     = ['src','include','oscl'],
+                   environment           = env['BLT_RELAXED_ENV'])
+
+############################ FhgAAC
+if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'FHG':
+    BLT_AAC_MODULE_CONFIG_NAME    = 'BLT_CONFIG_MODULES_ENABLE_FHG_AAC_DECODER'
+    BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/FhgAAC'
+    BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['FhgAAC']}
+    CompiledModule(name                  = 'FhgAAC',
+                   source_root           = 'ThirdParty/FhgAAC',
+                   build_source_dirs     = ['libAACdec/src', 'libAACdec/include',
+                                            'libFDK/src', 'libFDK/include',
+                                            'libMpegTPDec/src', 'libMpegTPDec/include',
+                                            'libPCMutils/src', 'libPCMutils/include',
+                                            'libSBRdec/src', 'libSBRdec/include',
+                                            'libSYS/src', 'libSYS/include'],
                    environment           = env['BLT_RELAXED_ENV'])
 
 ############################# Fluo
@@ -301,7 +319,7 @@ PluginsSettings = {
     'AlacDecoder'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER',           'src_dir':'Decoders/ALAC'            },
     'VorbisDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER',         'src_dir':'Decoders/Vorbis'          },
     'FfmpegDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_FFMPEG_DECODER',         'src_dir':'Decoders/FFMPEG'          },
-    'AacDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER',            'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
+    'AacDecoder'          : {'defines': BLT_AAC_MODULE_CONFIG_NAME,                        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
     'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',            'src_dir':BLT_WMA_DECODER_PLUGIN_DIR },
     'WaveParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',            'src_dir':'Parsers/Wave'             },
     'AiffParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',            'src_dir':'Parsers/Aiff'             },

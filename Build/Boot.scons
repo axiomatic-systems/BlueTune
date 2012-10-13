@@ -35,7 +35,7 @@ def DefaultTarget():
             platform_id = 'linux-i386'
         if (platform.machine() == 'x86_64'):
             platform_id = 'linux-x86_64'
-        if (platform.machine() == 'arm'):
+        if (platform.machine().startswith('arm')):
             platform_id = 'linux-arm'
 
     if PLATFORM_TO_TARGET_MAP.has_key(platform_id):

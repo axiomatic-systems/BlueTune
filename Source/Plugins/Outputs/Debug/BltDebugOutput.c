@@ -75,12 +75,15 @@ DebugOutput_PutPacket(BLT_PacketConsumer* _self,
     /* print type info extensions if they are known to us */
     if (media_type->id == BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
         BLT_PcmMediaType* pcm_type = (BLT_PcmMediaType*)media_type;
-        ATX_LOG_INFO_3("PCM packet - sr=%ld, ch=%d, bps=%d",
+        ATX_LOG_INFO_4("PCM packet - sr=%ld, ch=%d, bps=%d, flags=%x",
                        pcm_type->sample_rate,
                        pcm_type->channel_count,
-                       pcm_type->bits_per_sample);
+                       pcm_type->bits_per_sample,
+                       BLT_MediaPacket_GetFlags(packet));
     } else {
-        ATX_LOG_INFO_1("packet - type=%d", media_type->id);
+        ATX_LOG_INFO_2("packet - type=%d, flags=%x",
+                       media_type->id,
+                       BLT_MediaPacket_GetFlags(packet));
     }
 #endif
 

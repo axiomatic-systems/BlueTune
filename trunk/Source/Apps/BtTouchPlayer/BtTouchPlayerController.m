@@ -1,22 +1,25 @@
 #import "BtTouchPlayerController.h"
 
-#if 0
-@interface CocoaPlayerRecordList : NSObject 
+@interface CocoaPlayerRecordList : NSObject<UITableViewDataSource>
 {
     NSMutableArray* records;
+    NSString*       titleString;
 }
--(int) numberOfRowsInTableView:(NSTableView *)aTableView;
--(id)        tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+-(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView;
+-(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+-(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section;
 @end
 
 
 @implementation CocoaPlayerRecordList
 
--(id) init
+-(id) initWithTitle:(NSString*) title
 {
     if ((self = [super init])) {
         records = [[NSMutableArray alloc] init];
     }
+    titleString = [title retain];
     return self;
 }
 
@@ -26,18 +29,41 @@
     [super dealloc];
 }
 
--(int) numberOfRowsInTableView: (NSTableView *)view
-{
-    return [records count];
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    BLT_COMPILER_UNUSED(tableView);
+	return 1;
 }
 
--(id)             tableView: (NSTableView *)   view 
-  objectValueForTableColumn: (NSTableColumn *) column 
-                        row: (int)             rowIndex
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    BLT_COMPILER_UNUSED(tableView);
+    BLT_COMPILER_UNUSED(section);
+	return [records count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	static NSString *MyIdentifier = @"MyIdentifier";
+	
+	// Try to retrieve from the table view a now-unused cell with the given identifier.
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:MyIdentifier];
+	
+	// If no cell is available, create a new one using the given identifier.
+	if (cell == nil) {
+		// Use the default cell style.
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:MyIdentifier] autorelease];
+	}
+
+    NSDictionary* entry = [records objectAtIndex: indexPath.row];
+    NSString* entryText = [NSString stringWithFormat:@"%@: %@", [entry valueForKey: @"Name"], [entry valueForKey: @"Value"]];
+    cell.textLabel.text = entryText;
+	
+	return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    id record = [records objectAtIndex: rowIndex];
-    id value = [record objectForKey: [column identifier]];    
-    return value;
+    BLT_COMPILER_UNUSED(tableView);
+    BLT_COMPILER_UNUSED(section);
+    return titleString;
 }
 
 -(void) setProperty: (NSString*) name value: (NSString*) value
@@ -45,11 +71,20 @@
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     [dict setValue: name forKey: @"Name"];
     [dict setValue: value forKey: @"Value"];
+    
+    unsigned int record_count = [records count];
+    unsigned int i;
+    for (i=0; i<record_count; i++) {
+        NSString* record_name = [[records objectAtIndex: i] valueForKey: @"Name"];
+        if ([record_name compare: name] == NSOrderedSame) {
+            [records replaceObjectAtIndex: i withObject: dict];
+            return;
+        }
+    }
     [records addObject: dict];
 }
 
 @end
-#endif
 
 @implementation TouchPlayerController
 -(id) init 
@@ -67,8 +102,8 @@
 -(void) awakeFromNib
 {        
     // set the data source for the list views
-    //[playerPropertiesView setDataSource: [[CocoaPlayerRecordList alloc]init]];
-    //[playerStreamInfoView setDataSource: [[CocoaPlayerRecordList alloc]init]];
+    playerPropertiesView.dataSource = [[CocoaPlayerRecordList alloc]initWithTitle: @"Properties"];
+    playerStreamInfoView.dataSource = [[CocoaPlayerRecordList alloc]initWithTitle: @"Stream Info"];
 }
 
 -(IBAction) play: (id) sender;
@@ -170,34 +205,34 @@
     BLT_COMPILER_UNUSED(info);
     BLT_COMPILER_UNUSED(mask);
 
-    /*if (mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Data Type" value: [NSString stringWithUTF8String: info->data_type]];
+    if (mask & BLT_STREAM_INFO_MASK_DATA_TYPE) {
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Data Type" value: [NSString stringWithUTF8String: info->data_type]];
     }
     if (mask & BLT_STREAM_INFO_MASK_DURATION) {
-        [[playerStreamInfoView dataSource] setProperty: @"Duration" value: [NSString stringWithFormat:@"%2f", (float)info->duration/1000.0f]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Duration" value: [NSString stringWithFormat:@"%2f", (float)info->duration/1000.0f]];
     }
     if (mask & BLT_STREAM_INFO_MASK_NOMINAL_BITRATE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Nominal Bitrate" value: [NSString stringWithFormat:@"%d", info->nominal_bitrate]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Nominal Bitrate" value: [NSString stringWithFormat:@"%d", info->nominal_bitrate]];
     }
     if (mask & BLT_STREAM_INFO_MASK_AVERAGE_BITRATE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Average Bitrate" value: [NSString stringWithFormat:@"%d", info->average_bitrate]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Average Bitrate" value: [NSString stringWithFormat:@"%d", info->average_bitrate]];
     }
     if (mask & BLT_STREAM_INFO_MASK_INSTANT_BITRATE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Instant Bitrate" value: [NSString stringWithFormat:@"%d", info->instant_bitrate]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Instant Bitrate" value: [NSString stringWithFormat:@"%d", info->instant_bitrate]];
     }
     if (mask & BLT_STREAM_INFO_MASK_SIZE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Size" value: [NSString stringWithFormat:@"%d", info->size]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Size" value: [NSString stringWithFormat:@"%lld", info->size]];
     }
     if (mask & BLT_STREAM_INFO_MASK_SAMPLE_RATE) {
-        [[playerStreamInfoView dataSource] setProperty: @"Sample Rate" value: [NSString stringWithFormat:@"%d", info->sample_rate]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Sample Rate" value: [NSString stringWithFormat:@"%d", info->sample_rate]];
     }
     if (mask & BLT_STREAM_INFO_MASK_CHANNEL_COUNT) {
-        [[playerStreamInfoView dataSource] setProperty: @"Channels" value: [NSString stringWithFormat:@"%d", info->channel_count]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Channels" value: [NSString stringWithFormat:@"%d", info->channel_count]];
     }
     if (mask & BLT_STREAM_INFO_MASK_FLAGS) {
-        [[playerStreamInfoView dataSource] setProperty: @"Flags" value: [NSString stringWithFormat:@"%x", info->flags]];
+        [(CocoaPlayerRecordList*)[playerStreamInfoView dataSource] setProperty: @"Flags" value: [NSString stringWithFormat:@"%x", info->flags]];
     }
-    [playerStreamInfoView reloadData];*/
+    [playerStreamInfoView reloadData];
 }
 
 -(void) propertyDidChange: (BLT_PropertyScope)        scope 
@@ -221,11 +256,12 @@
             break;
             
         default:
-            value_string = @"";
+            break;
     }
     if (value_string) {
-        //[[playerPropertiesView dataSource] setProperty: [NSString stringWithUTF8String: name] value: value_string];
+        [(CocoaPlayerRecordList*)[playerPropertiesView dataSource] setProperty: [NSString stringWithUTF8String: name] value: value_string];
     }
+    [playerPropertiesView reloadData];
 }
 
 @end

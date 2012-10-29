@@ -185,6 +185,9 @@ AacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         /* copy the timestamp */
         BLT_MediaPacket_SetTimeStamp(out_packet, BLT_MediaPacket_GetTimeStamp(packet));
 
+        /* copy the flags */
+        BLT_MediaPacket_SetFlags(out_packet, BLT_MediaPacket_GetFlags(packet));
+        
         /* add to the output packet list */
         ATX_List_AddData(self->output.packets, out_packet);
     }

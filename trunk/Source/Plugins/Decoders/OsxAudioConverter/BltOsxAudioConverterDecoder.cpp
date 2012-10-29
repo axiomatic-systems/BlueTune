@@ -79,6 +79,7 @@ typedef struct {
     /* members */
     BLT_PcmMediaType media_type;
     unsigned char    buffer[BLT_OSX_AUDIO_CONVERTER_DECODER_MAX_OUTPUT_BUFFER_SIZE];
+    ATX_UInt64       packet_count;
 } OsxAudioConverterDecoderOutput;
 
 typedef struct {
@@ -270,6 +271,22 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             return BLT_ERROR_UNSUPPORTED_FORMAT;
         }
         
+        /* notify of the format name */
+        if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+            BLT_StreamInfo info;
+            switch (source_format.mFormatID) {
+                case kAudioFormatMPEG4AAC:       info.data_type = "MPEG-4 AAC";      break;
+                case kAudioFormatMPEG4AAC_HE:    info.data_type = "MPEG-4 He-AAC";   break;
+                case kAudioFormatMPEG4AAC_HE_V2: info.data_type = "MPEG-4 He-AACv2"; break;
+                case kAudioFormatMPEGLayer3:     info.data_type = "MP3";             break;
+                default:                         info.data_type = NULL;
+            }
+            if (info.data_type) {
+                info.mask = BLT_STREAM_INFO_MASK_DATA_TYPE;
+                BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
+            }
+        }
+        
         /* setup codec-specific parameters */
         if (input_type->id == self->module->mp4es_type_id) {
             const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)input_type;
@@ -393,7 +410,10 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                    output_buffers.mBuffers[0].mData,
                    output_buffers.mBuffers[0].mDataByteSize);
     BLT_MediaPacket_SetPayloadSize(*packet, output_buffers.mBuffers[0].mDataByteSize);
-                   
+    if (self->output.packet_count++ == 0) {
+        BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+    }
+    
     return BLT_SUCCESS;
 }
 

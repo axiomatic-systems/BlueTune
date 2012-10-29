@@ -66,6 +66,7 @@ typedef struct {
     /* members */
     BLT_PcmMediaType media_type;
     short            pcm_buffer[BLT_FHG_AAC_DECODER_MAX_PCM_BUFFER_SIZE];
+    ATX_UInt64       packet_count;
 } FhgAacDecoderOutput;
 
 typedef struct {
@@ -235,7 +236,9 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         NPT_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(*packet),
                        output_buffer,
                        output_packet_size);
-        
+        if (self->output.packet_count++ == 0) {
+            BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+        }
         return BLT_SUCCESS;
     }
     

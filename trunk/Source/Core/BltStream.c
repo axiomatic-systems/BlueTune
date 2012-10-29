@@ -98,6 +98,7 @@ typedef struct {
     ATX_Properties*    properties;
     BLT_StreamInfo     info;
     BLT_EventListener* event_listener;
+    ATX_Boolean        at_start;
 } Stream;
 
 /*----------------------------------------------------------------------
@@ -540,7 +541,8 @@ Stream_Create(BLT_Core* core, BLT_Stream** object)
     stream->reference_count = 1;
     stream->core            = core;
     ATX_Properties_Create(&stream->properties);
-
+    stream->at_start        = ATX_TRUE;
+    
     /* setup interfaces */
     ATX_SET_INTERFACE(stream, Stream, BLT_Stream);
     ATX_SET_INTERFACE(stream, Stream, BLT_EventListener);
@@ -836,7 +838,10 @@ Stream_SetInputNode(BLT_Stream*    _self,
     /* install the new input */
     self->input.node = stream_node;
     Stream_InsertChain(self, NULL, stream_node);
-        
+    
+    /* mark that we're at the start of the stream */
+    self->at_start = ATX_TRUE;
+    
     return BLT_SUCCESS;
 }
 
@@ -1682,6 +1687,10 @@ Stream_PumpPacket(BLT_Stream* _self)
                 node->output.iface.packet_producer,
                 &packet);
             if (BLT_SUCCEEDED(result) && packet != NULL) {
+                if (self->at_start) {
+                    BLT_MediaPacket_SetFlags(packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+                    self->at_start = ATX_FALSE;
+                }
                 return Stream_DeliverPacket(self, packet, node);
             } else {
                 if (result != BLT_ERROR_PORT_HAS_NO_DATA) {

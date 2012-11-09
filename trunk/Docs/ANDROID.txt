@@ -35,6 +35,8 @@ For an example, see the 'simple-player' sample application
 
 This is a sample GUI application that shows how to use the BlueTune player API (defined in bluetune.jar)
 This application has a dependency on the bluetune runtime module.
-An Eclipse project is provided both for the bluetune module (Source/Platform/Android/modules/bluetune/.project)
-and for the simple player example (Source/Platform/Androi/samples/simple-player/.project)
+An Eclipse project is provided both for the Bluetune module (Source/Platform/Android/modules/bluetune/.project)
+and for the BlueTunePlayer example (Source/Platform/Androi/samples/simple-player/.project).
+The BlueTunePlayer example eclipse project depends on the BlueTune eclipse project, so make sure you import both projects (one convenient way to do this from eclipse is to choose 'Import.. -> existing projects into workspace' and browse to Source/Platform/Android, click Open and you will see both the BlueTune and BlueTunePlayer projects in the list of available projects to import).
+
 

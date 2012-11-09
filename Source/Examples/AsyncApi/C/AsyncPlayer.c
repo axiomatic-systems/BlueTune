@@ -39,6 +39,7 @@ OnSetInputSucceeded(PlayerState* self)
 static void
 OnSetInputFailed(PlayerState* self, BLT_Result result)
 {
+    ATX_COMPILER_UNUSED(self);
     printf("Cannot open input (%d)\n", result);
 }
  

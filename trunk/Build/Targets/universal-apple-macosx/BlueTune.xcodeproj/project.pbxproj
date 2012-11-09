@@ -13,6 +13,7 @@
 			buildPhases = (
 			);
 			dependencies = (
+				CA46DD51164CC4C500E45133 /* PBXTargetDependency */,
 				CA07A32C0D40228D00DC3E33 /* PBXTargetDependency */,
 				CA07A32A0D40228D00DC3E33 /* PBXTargetDependency */,
 				CA07A3280D40228D00DC3E33 /* PBXTargetDependency */,
@@ -1268,6 +1269,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Bento4;
+		};
+		CA46DD50164CC4C500E45133 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA1EC0F80ED299AD0033F894;
+			remoteInfo = BtCocoaPlayer;
 		};
 		CA4DD9A3104DB7800024BC0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -7350,6 +7358,11 @@
 			name = Bento4;
 			targetProxy = CA44C4AA0D45231100173F5F /* PBXContainerItemProxy */;
 		};
+		CA46DD51164CC4C500E45133 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */;
+			targetProxy = CA46DD50164CC4C500E45133 /* PBXContainerItemProxy */;
+		};
 		CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Neptune;
@@ -7739,6 +7752,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btplay;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -7746,6 +7760,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btplay;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -7779,6 +7794,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = NetworkStreamTest;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -7786,6 +7802,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = NetworkStreamTest;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -7831,6 +7848,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = pcmdiff;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -7838,6 +7856,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = pcmdiff;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -7963,6 +7982,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btcontroller;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -7970,6 +7990,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btcontroller;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -7977,6 +7998,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btplayerserver;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -7984,6 +8006,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = btplayerserver;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -8172,6 +8195,7 @@
 					"-lippruntime",
 				);
 				PRODUCT_NAME = btplayx;
+				SUPPORTED_PLATFORMS = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
 				VALID_ARCHS = "i386 x86_64";
 			};
@@ -8198,6 +8222,7 @@
 					"-lippruntime",
 				);
 				PRODUCT_NAME = btplayx;
+				SUPPORTED_PLATFORMS = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
 				VALID_ARCHS = "i386 x86_64";
 			};
@@ -8276,6 +8301,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = AsyncPlayerC;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -8283,6 +8309,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = AsyncPlayerC;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};

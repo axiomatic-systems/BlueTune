@@ -69,6 +69,7 @@ typedef struct {
     BLT_MediaPacket*             pending_packet;
     BLT_MediaPacket*             current_packet;
     AudioStreamPacketDescription current_packet_desc;
+    ATX_UInt64                   packets_since_seek;
 } OsxAudioConverterDecoderInput;
 
 typedef struct {
@@ -79,7 +80,9 @@ typedef struct {
     /* members */
     BLT_PcmMediaType media_type;
     unsigned char    buffer[BLT_OSX_AUDIO_CONVERTER_DECODER_MAX_OUTPUT_BUFFER_SIZE];
-    ATX_UInt64       packet_count;
+    bool             started;
+    BLT_TimeStamp    timestamp_base;
+    ATX_UInt64       samples_since_seek;
 } OsxAudioConverterDecoderOutput;
 
 typedef struct {
@@ -162,6 +165,10 @@ OsxAudioConverterDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     }
     self->input.pending_packet = packet;
     BLT_MediaPacket_AddReference(packet);
+    
+    if (self->input.packets_since_seek++ == 0) {
+        self->output.timestamp_base = BLT_MediaPacket_GetTimeStamp(packet);
+    }
     
     return BLT_SUCCESS;
 }
@@ -389,11 +396,20 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             info.sample_rate   = output_format.mSampleRate;
             info.channel_count = output_format.mChannelsPerFrame;
             info.mask = 
-                //BLT_STREAM_INFO_MASK_DATA_TYPE    |
                 BLT_STREAM_INFO_MASK_SAMPLE_RATE  |
                 BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
             BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
         }
+    }
+    
+    // update the sample counters
+    if (self->output.media_type.sample_rate && self->output.media_type.sample_rate != output_format.mSampleRate) {
+        double ratio = (double)output_format.mSampleRate/(double)self->output.media_type.sample_rate;
+        self->output.samples_since_seek = (ATX_UInt64)((double)self->output.samples_since_seek*ratio);
+    }
+    if (output_format.mChannelsPerFrame) {
+        unsigned int sample_count = output_buffers.mBuffers[0].mDataByteSize/(2*output_format.mChannelsPerFrame);
+        self->output.samples_since_seek += sample_count;
     }
     
     // return a media packet
@@ -410,8 +426,16 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                    output_buffers.mBuffers[0].mData,
                    output_buffers.mBuffers[0].mDataByteSize);
     BLT_MediaPacket_SetPayloadSize(*packet, output_buffers.mBuffers[0].mDataByteSize);
-    if (self->output.packet_count++ == 0) {
+    if (!self->output.started) {
         BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+        self->output.started = true;
+    }
+    
+    // compute the timestamp
+    if (self->output.media_type.sample_rate) {
+        BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
+                                                     self->output.media_type.sample_rate);
+        BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_Add(elapsed, self->output.timestamp_base));
     }
     
     return BLT_SUCCESS;
@@ -518,6 +542,7 @@ OsxAudioConverterDecoder_Seek(BLT_MediaNode* _self,
         BLT_MediaPacket_Release(self->input.current_packet);
         self->input.current_packet = NULL;
     }
+    self->input.packets_since_seek = 0;
     
     if (self->converter) {
         AudioConverterReset(self->converter);

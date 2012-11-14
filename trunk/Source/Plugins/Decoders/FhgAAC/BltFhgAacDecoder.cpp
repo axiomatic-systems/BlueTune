@@ -56,6 +56,7 @@ typedef struct {
     /* members */
     BLT_MediaPacket*       packet;
     BLT_Mp4AudioMediaType* media_type;
+    ATX_UInt64             packets_since_seek;
 } FhgAacDecoderInput;
 
 typedef struct {
@@ -66,7 +67,9 @@ typedef struct {
     /* members */
     BLT_PcmMediaType media_type;
     short            pcm_buffer[BLT_FHG_AAC_DECODER_MAX_PCM_BUFFER_SIZE];
-    ATX_UInt64       packet_count;
+    bool             started;
+    BLT_TimeStamp    timestamp_base;
+    ATX_UInt64       samples_since_seek;
 } FhgAacDecoderOutput;
 
 typedef struct {
@@ -104,6 +107,10 @@ FhgAacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     self->input.packet = packet;
     BLT_MediaPacket_AddReference(packet);
         
+    if (self->input.packets_since_seek++ == 0) {
+        self->output.timestamp_base = BLT_MediaPacket_GetTimeStamp(packet);
+    }
+
     return BLT_SUCCESS;
 }
 
@@ -223,6 +230,11 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                                    BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
                 BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
             }
+
+            if (self->output.media_type.sample_rate) {
+                double ratio = (double)aac_info->sampleRate/(double)self->output.media_type.sample_rate;
+                self->output.samples_since_seek = (ATX_UInt64)((double)self->output.samples_since_seek*ratio);
+            }
         }
         
         // create a PCM packet for the output
@@ -236,9 +248,21 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         NPT_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(*packet),
                        output_buffer,
                        output_packet_size);
-        if (self->output.packet_count++ == 0) {
+        if (!self->output.started) {
             BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
+            self->output.started = true;
         }
+
+
+        // compute the timestamp
+        if (aac_info->sampleRate) {
+            unsigned int sample_count = output_buffers.mBuffers[0].mDataByteSize/(2*output_format.mChannelsPerFrame);
+            self->output.samples_since_seek += sample_count;
+            BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
+                                                              self->output.media_type.sample_rate);
+            BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_Add(elapsed, self->output.timestamp_base));
+        }
+
         return BLT_SUCCESS;
     }
     
@@ -344,6 +368,8 @@ FhgAacDecoder_Seek(BLT_MediaNode* _self,
         BLT_MediaPacket_Release(self->input.packet);
         self->input.packet = NULL;
     }
+
+    self->input.packets_since_seek = 0;
     
     return BLT_SUCCESS;
 }

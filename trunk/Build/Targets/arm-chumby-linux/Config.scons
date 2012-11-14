@@ -1,7 +1,7 @@
 env['BLT_RELAXED_ENV'] = env.Clone()
-GCC_ARM_OPTIONS='-mcpu=arm9e -fdollars-in-identifiers -I/usr/arm-linux/include -L/usr/arm-linux/lib'
-LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix='arm-linux', gcc_strict=False, gcc_stop_on_warning=False, gcc_extra_options=GCC_ARM_OPTIONS)
-LoadTool('gcc-generic', env, gcc_cross_prefix='arm-linux', gcc_extra_options=GCC_ARM_OPTIONS)
+GCC_ARM_OPTIONS='-mcpu=arm9e -fdollars-in-identifiers'
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix='arm-none-linux-gnueabi', gcc_strict=False, gcc_stop_on_warning=False, gcc_extra_options=GCC_ARM_OPTIONS)
+LoadTool('gcc-generic', env, gcc_cross_prefix='arm-none-linux-gnueabi', gcc_extra_options=GCC_ARM_OPTIONS)
 
 
 env['BLT_CPU_CONFIG_NO_FLOAT'] = True
@@ -38,6 +38,7 @@ env['BLT_PLUGINS'] = ['FileInput',
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE']  = 'Linux'
 env['BLT_DEFAULT_AUDIO_OUTPUT']      = 'alsa:default'
 env['BLT_PLUGINS_VORBIS_LIBRARY']    = 'Tremor'
-env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
-env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']
+#env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
+#env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']
+env['BLT_PLUGINS_AAC_LIBRARY']       = 'FHG'
 env['BLT_WMA_DECODER_MODE']          = 'Integer'                                   

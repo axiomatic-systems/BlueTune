@@ -256,7 +256,7 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
 
         // compute the timestamp
         if (aac_info->sampleRate) {
-            unsigned int sample_count = output_buffers.mBuffers[0].mDataByteSize/(2*output_format.mChannelsPerFrame);
+            unsigned int sample_count = aac_info->frameSize;
             self->output.samples_since_seek += sample_count;
             BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
                                                               self->output.media_type.sample_rate);

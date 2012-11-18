@@ -11,6 +11,8 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
+#include "AP4.h"
+#include "Ap4Mp4AudioInfo.h"
 #include "BltConfig.h"
 #include "BltCore.h"
 #include "BltOsxAudioConverterDecoder.h"
@@ -239,17 +241,28 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             source_format.mFormatID = kAudioFormatMPEGLayer3;
         } else if (input_type->id == self->module->mp4es_type_id) {
             const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)input_type;
+        
             if (mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC ||
                 mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO) {
+                source_format.mFormatID = kAudioFormatMPEG4AAC;
+                source_format.mSampleRate = mp4_type->sample_rate;
                 if (mp4_type->decoder_info_length > 2) {
                     // if the decoder info is more than 2 bytes, assume this is He-AAC
-                    source_format.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
-                    source_format.mSampleRate = mp4_type->sample_rate;
-                    if (source_format.mSampleRate < 32000.0) {
-                        source_format.mSampleRate *= 2;
+                    AP4_Mp4AudioDecoderConfig dec_config;
+                    AP4_Result result = dec_config.Parse(mp4_type->decoder_info, mp4_type->decoder_info_length);
+                    if (AP4_SUCCEEDED(result)) {
+                        ATX_LOG_FINE("He-AAC detected");
+                        if (dec_config.m_Extension.m_SbrPresent) {
+                            source_format.mFormatID = kAudioFormatMPEG4AAC_HE;
+                            source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                        }
+                        if (dec_config.m_Extension.m_PsPresent) {
+                            source_format.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
+                            source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                        }
+                    } else {
+                        ATX_LOG_WARNING_1("unable to parse decoder specific info (%d)", result);
                     }
-                } else {
-                    source_format.mFormatID = kAudioFormatMPEG4AAC;
                 }
             } else {
                 return BLT_ERROR_UNSUPPORTED_CODEC;

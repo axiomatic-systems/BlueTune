@@ -46,8 +46,9 @@ const unsigned int BLT_OSX_AUDIO_CONVERTER_DECODER_PACKETS_PER_CONVERSION = 1024
 const unsigned int BLT_OSX_AUDIO_CONVERTER_DECODER_MAX_OUTPUT_BUFFER_SIZE = 1024*2*8; /* max 8 channels @ 16 bits */
 const int          BLT_OSX_AUDIO_CONVERTER_DATA_UNDERFLOW_ERROR = 1234; /* arbitrary positive value */
 
-#define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC 0x67
-#define BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO  0x40
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN 0x66
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC   0x67
+#define BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO    0x40
 
 /*----------------------------------------------------------------------
 |    types
@@ -242,10 +243,12 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         } else if (input_type->id == self->module->mp4es_type_id) {
             const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)input_type;
         
-            if (mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC ||
+            if (mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC   ||
+                mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN ||
                 mp4_type->base.format_or_object_type_id == BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO) {
                 source_format.mFormatID = kAudioFormatMPEG4AAC;
-                source_format.mSampleRate = mp4_type->sample_rate;
+                source_format.mSampleRate       = mp4_type->sample_rate;
+                source_format.mChannelsPerFrame = mp4_type->channel_count;
                 if (mp4_type->decoder_info_length > 2) {
                     // if the decoder info is more than 2 bytes, assume this is He-AAC
                     AP4_Mp4AudioDecoderConfig dec_config;

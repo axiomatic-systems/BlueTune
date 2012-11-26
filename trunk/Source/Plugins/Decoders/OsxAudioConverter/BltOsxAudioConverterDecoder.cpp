@@ -169,8 +169,9 @@ OsxAudioConverterDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     self->input.pending_packet = packet;
     BLT_MediaPacket_AddReference(packet);
     
-    if (self->input.packets_since_seek++ == 0) {
-        self->output.timestamp_base = BLT_MediaPacket_GetTimeStamp(packet);
+    BLT_TimeStamp ts = BLT_MediaPacket_GetTimeStamp(packet);
+    if (self->input.packets_since_seek++ == 0 && BLT_TimeStamp_ToNanos(ts)) {
+        self->output.timestamp_base = ts;
     }
     
     return BLT_SUCCESS;
@@ -450,7 +451,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     // compute the timestamp
     if (self->output.media_type.sample_rate) {
         BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
-                                                     self->output.media_type.sample_rate);
+                                                          self->output.media_type.sample_rate);
         BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_Add(elapsed, self->output.timestamp_base));
     }
     
@@ -520,8 +521,8 @@ OsxAudioConverterDecoder_Destroy(OsxAudioConverterDecoder* self)
 +---------------------------------------------------------------------*/
 BLT_METHOD
 OsxAudioConverterDecoder_GetPortByName(BLT_MediaNode*  _self,
-                         BLT_CString     name,
-                         BLT_MediaPort** port)
+                                       BLT_CString     name,
+                                       BLT_MediaPort** port)
 {
     OsxAudioConverterDecoder* self = ATX_SELF_EX(OsxAudioConverterDecoder, BLT_BaseMediaNode, BLT_MediaNode);
 
@@ -559,6 +560,14 @@ OsxAudioConverterDecoder_Seek(BLT_MediaNode* _self,
         self->input.current_packet = NULL;
     }
     self->input.packets_since_seek = 0;
+    self->output.samples_since_seek = 0;
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+        if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
+            self->output.timestamp_base = point->time_stamp;
+        }
+    }
+
     
     if (self->converter) {
         AudioConverterReset(self->converter);

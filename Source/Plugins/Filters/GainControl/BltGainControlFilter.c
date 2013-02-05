@@ -517,9 +517,9 @@ GainControlFilter_Deactivate(BLT_MediaNode* _self)
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, 
                                                    &properties))) {
             ATX_Properties_RemoveListener(properties, 
-                                          &self->track_gain_listener_handle);
+                                          self->track_gain_listener_handle);
             ATX_Properties_RemoveListener(properties, 
-                                          &self->album_gain_listener_handle);
+                                          self->album_gain_listener_handle);
         }
     }
 

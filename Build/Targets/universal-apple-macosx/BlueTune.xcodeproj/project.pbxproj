@@ -392,6 +392,82 @@
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
 		CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; };
+		CAC91A611663202700201C94 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAC91A601663202700201C94 /* Cocoa.framework */; };
+		CAC91A6B1663202700201C94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CAC91A691663202700201C94 /* InfoPlist.strings */; };
+		CAC91A78166323C600201C94 /* BltSvnVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5827730E68C2EC006CC501 /* BltSvnVersion.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A79166323C600201C94 /* BltVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = CA58276D0E68C14F006CC501 /* BltVersion.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7A166323C600201C94 /* BlueTune.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F00C5AE52B0060E6FE /* BlueTune.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7B1663248600201C94 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7C1663248600201C94 /* BltSynchronization.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7D1663248600201C94 /* BltPixels.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED2930EAD3A8D003CE43C /* BltPixels.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7E1663248600201C94 /* BltBuiltins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A7F1663248600201C94 /* BltByteStreamProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A801663248600201C94 /* BltByteStreamUser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F40C5AE52B0060E6FE /* BltByteStreamUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A811663248600201C94 /* BltConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F50C5AE52B0060E6FE /* BltConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A821663248600201C94 /* BltCore.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F70C5AE52B0060E6FE /* BltCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A831663248600201C94 /* BltDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041F90C5AE52B0060E6FE /* BltDefs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A841663248600201C94 /* BltErrors.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FA0C5AE52B0060E6FE /* BltErrors.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A851663248600201C94 /* BltEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FB0C5AE52B0060E6FE /* BltEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A861663248600201C94 /* BltEventListener.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FC0C5AE52B0060E6FE /* BltEventListener.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A871663248600201C94 /* BltMedia.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5041FF0C5AE52B0060E6FE /* BltMedia.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A881663248600201C94 /* BltMediaNode.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042010C5AE52B0060E6FE /* BltMediaNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A891663248600201C94 /* BltMediaPacket.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042030C5AE52B0060E6FE /* BltMediaPacket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8A1663248600201C94 /* BltMediaPort.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042060C5AE52B0060E6FE /* BltMediaPort.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8B1663248600201C94 /* BltModule.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042080C5AE52B0060E6FE /* BltModule.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8C1663248600201C94 /* BltOutputNode.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042090C5AE52B0060E6FE /* BltOutputNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8D1663248600201C94 /* BltPacketConsumer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420A0C5AE52B0060E6FE /* BltPacketConsumer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8E1663248600201C94 /* BltPacketProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420B0C5AE52B0060E6FE /* BltPacketProducer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A8F1663248600201C94 /* BltPcm.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420D0C5AE52B0060E6FE /* BltPcm.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A901663248600201C94 /* BltRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50420F0C5AE52B0060E6FE /* BltRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A911663248600201C94 /* BltStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042120C5AE52B0060E6FE /* BltStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A921663248600201C94 /* BltTime.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042150C5AE52B0060E6FE /* BltTime.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A931663248600201C94 /* BltTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042160C5AE52B0060E6FE /* BltTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A941663248600201C94 /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A951663248600201C94 /* BltDecoderX.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A961663248600201C94 /* BltDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042190C5AE52B0060E6FE /* BltDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A971663248600201C94 /* BltPcmAdapter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042470C5AE52B0060E6FE /* BltPcmAdapter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A981663248600201C94 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A991663248600201C94 /* BltCommonMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9A1663248600201C94 /* BltReplayGain.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424B0C5AE52B0060E6FE /* BltReplayGain.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9B1663248600201C94 /* BltFilterHost.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50424F0C5AE52B0060E6FE /* BltFilterHost.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9C1663248600201C94 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9D1663248600201C94 /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9E1663248600201C94 /* BltFfmpegDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED9300EB02685003CE43C /* BltFfmpegDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91A9F1663248600201C94 /* BltFhgAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC2E816192D6B004F3C53 /* BltFhgAacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA01663248600201C94 /* BltFlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042560C5AE52B0060E6FE /* BltFlacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA11663248600201C94 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA6434AE0C971B5500F67CD5 /* BltAacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA21663248600201C94 /* BltIppDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA31663248600201C94 /* BltMpegAudioDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042590C5AE52B0060E6FE /* BltMpegAudioDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA41663248600201C94 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD78A5F12A3718000D7EBA7 /* BltAacDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA51663248600201C94 /* BltOsxAudioConverterDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFE7EB915F4541500E6E003 /* BltOsxAudioConverterDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA61663248600201C94 /* BltVorbisDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50425C0C5AE52B0060E6FE /* BltVorbisDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA71663248600201C94 /* BltWmaDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50425F0C5AE52B0060E6FE /* BltWmaDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA81663248600201C94 /* BltDynamicPlugins.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5827DF0E68CF15006CC501 /* BltDynamicPlugins.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AA91663248600201C94 /* BltFingerprintFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAA1663248600201C94 /* BltGainControlFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042630C5AE52B0060E6FE /* BltGainControlFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAB1663248600201C94 /* BltWaveFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042670C5AE52B0060E6FE /* BltWaveFormatter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAC1663248600201C94 /* BltPacketStreamer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50426E0C5AE52B0060E6FE /* BltPacketStreamer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAD1663248600201C94 /* BltSilenceRemover.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042710C5AE52B0060E6FE /* BltSilenceRemover.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAE1663248600201C94 /* BltStreamPacketizer.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042740C5AE52B0060E6FE /* BltStreamPacketizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AAF1663248600201C94 /* BltFileInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042840C5AE52B0060E6FE /* BltFileInput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB01663248600201C94 /* BltNetworkInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042890C5AE52B0060E6FE /* BltNetworkInput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB11663248600201C94 /* BltOsxAudioQueueOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA1859B30F22D0E500CF3552 /* BltOsxAudioQueueOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB21663248600201C94 /* BltOsxAudioUnitsOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA1859B60F22D0E500CF3552 /* BltOsxAudioUnitsOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB31663248600201C94 /* BltOsxVideoOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA1859B80F22D0E500CF3552 /* BltOsxVideoOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB41663248600201C94 /* BltRaopOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA360A6013765CBD001D3DE0 /* BltRaopOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB51663248600201C94 /* BltDebugOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042960C5AE52B0060E6FE /* BltDebugOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB61663248600201C94 /* BltFileOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50429A0C5AE52B0060E6FE /* BltFileOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB71663248600201C94 /* BltNullOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042A00C5AE52B0060E6FE /* BltNullOutput.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB81663248600201C94 /* BltAdtsParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487870C99E13800638991 /* BltAdtsParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AB91663248600201C94 /* BltAiffParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042AA0C5AE52B0060E6FE /* BltAiffParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABA1663248600201C94 /* BltDcfParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CAE4150A0E0AFD8800A530D1 /* BltDcfParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABB1663248600201C94 /* BltMp4Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042AD0C5AE52B0060E6FE /* BltMp4Parser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABC1663248600201C94 /* BltOsxAudioFileStreamParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA649D161107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABD1663248600201C94 /* BltApeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B00C5AE52B0060E6FE /* BltApeParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABE1663248600201C94 /* BltId3Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B20C5AE52B0060E6FE /* BltId3Parser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91ABF1663248600201C94 /* BltTagParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B40C5AE52B0060E6FE /* BltTagParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AC01663248600201C94 /* BltWaveParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042B70C5AE52B0060E6FE /* BltWaveParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CAC91AC11663248600201C94 /* BltWmsProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CAD788DF12A33FB100D7EBA7 /* aac_mem_funcs.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD7878A12A33F5E00D7EBA7 /* aac_mem_funcs.h */; };
 		CAD788E012A33FB200D7EBA7 /* analysis_sub_band.c in Sources */ = {isa = PBXBuildFile; fileRef = CAD7878B12A33F5E00D7EBA7 /* analysis_sub_band.c */; };
 		CAD788E112A33FB300D7EBA7 /* analysis_sub_band.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD7878C12A33F5E00D7EBA7 /* analysis_sub_band.h */; };
@@ -1571,6 +1647,13 @@
 			remoteGlobalIDString = CAC02A0C139DBA350034427F;
 			remoteInfo = Mp4Split;
 		};
+		CAC91A731663203E00201C94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
 		CAD102391015A02800B272F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -2108,6 +2191,13 @@
 		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
 		CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSynchronization.h; sourceTree = "<group>"; };
 		CAC7D5770E453A1100037D81 /* BltKeyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltKeyManager.h; sourceTree = "<group>"; };
+		CAC91A5F1663202700201C94 /* BlueTune.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueTune.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAC91A601663202700201C94 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		CAC91A631663202700201C94 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		CAC91A641663202700201C94 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		CAC91A651663202700201C94 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		CAC91A681663202700201C94 /* BlueTune-Framework-OSX-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BlueTune-Framework-OSX-Info.plist"; sourceTree = "<group>"; };
+		CAC91A6A1663202700201C94 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CAD7878A12A33F5E00D7EBA7 /* aac_mem_funcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aac_mem_funcs.h; sourceTree = "<group>"; };
 		CAD7878B12A33F5E00D7EBA7 /* analysis_sub_band.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = analysis_sub_band.c; sourceTree = "<group>"; };
 		CAD7878C12A33F5E00D7EBA7 /* analysis_sub_band.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = analysis_sub_band.h; sourceTree = "<group>"; };
@@ -2943,6 +3033,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAC91A5B1663202700201C94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAC91A611663202700201C94 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CAD788DA12A33F8B00D7EBA7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -2990,12 +3088,10 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
-				CA1C6A4B10F6BCBF00D50ABE /* WebRoot */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
-				CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */,
 				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
@@ -3029,6 +3125,7 @@
 				CAD788DC12A33F8B00D7EBA7 /* libOpenCoreAAC.a */,
 				CA13EF7915E71C7000214EE1 /* SampleFilter.plugin */,
 				CADFC2CD16192A2F004F3C53 /* libFhgAAC.a */,
+				CAC91A5F1663202700201C94 /* BlueTune.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3094,6 +3191,8 @@
 			isa = PBXGroup;
 			children = (
 				CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */,
+				CAC91A601663202700201C94 /* Cocoa.framework */,
+				CAC91A621663202700201C94 /* Other Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -3108,7 +3207,8 @@
 				CA13EF6915E71BA500214EE1 /* SampleFilterPlugin.cp */,
 				CA13EF5F15E71BA500214EE1 /* Supporting Files */,
 			);
-			path = SampleFilterPlugin;
+			name = SampleFilterPlugin;
+			path = "../Build/Targets/universal-apple-macosx/SampleFilterPlugin";
 			sourceTree = "<group>";
 		};
 		CA13EF5F15E71BA500214EE1 /* Supporting Files */ = {
@@ -3221,6 +3321,8 @@
 		CA1EC10E0ED29A1C0033F894 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CAC91A751663214C00201C94 /* BtPlayerServer */,
+				CAC91A661663202700201C94 /* BlueTune-Framework-OSX */,
 				CA53C0C710A628E000950FAF /* BtTouchPlayer */,
 				CA1EC2460ED2A07E0033F894 /* BtCocoaPlayer */,
 			);
@@ -4283,6 +4385,41 @@
 			path = FFMPEG;
 			sourceTree = "<group>";
 		};
+		CAC91A621663202700201C94 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CAC91A631663202700201C94 /* AppKit.framework */,
+				CAC91A641663202700201C94 /* CoreData.framework */,
+				CAC91A651663202700201C94 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		CAC91A661663202700201C94 /* BlueTune-Framework-OSX */ = {
+			isa = PBXGroup;
+			children = (
+				CAC91A671663202700201C94 /* Supporting Files */,
+			);
+			path = "BlueTune-Framework-OSX";
+			sourceTree = "<group>";
+		};
+		CAC91A671663202700201C94 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CAC91A681663202700201C94 /* BlueTune-Framework-OSX-Info.plist */,
+				CAC91A691663202700201C94 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CAC91A751663214C00201C94 /* BtPlayerServer */ = {
+			isa = PBXGroup;
+			children = (
+				CA1C6A4B10F6BCBF00D50ABE /* WebRoot */,
+			);
+			name = BtPlayerServer;
+			sourceTree = "<group>";
+		};
 		CAD7878712A33F5E00D7EBA7 /* OpenCoreAAC */ = {
 			isa = PBXGroup;
 			children = (
@@ -5202,6 +5339,7 @@
 		CAF2EE110E5FDD8D00948C04 /* Examples */ = {
 			isa = PBXGroup;
 			children = (
+				CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */,
 				CA13EF7E15E71E3900214EE1 /* Filter */,
 				CAF2EE120E5FDDB200948C04 /* AsyncApi */,
 				CAF2EE130E5FDDB200948C04 /* SyncApi */,
@@ -5322,6 +5460,87 @@
 				CA6434900C97197C00F67CD5 /* sbr.h in Headers */,
 				CA6434B70C971C2200F67CD5 /* BltAacDecoder.h in Headers */,
 				CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAC91A5C1663202700201C94 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAC91A78166323C600201C94 /* BltSvnVersion.h in Headers */,
+				CAC91A79166323C600201C94 /* BltVersion.h in Headers */,
+				CAC91A7A166323C600201C94 /* BlueTune.h in Headers */,
+				CAC91A7B1663248600201C94 /* BltVolumeControl.h in Headers */,
+				CAC91A7C1663248600201C94 /* BltSynchronization.h in Headers */,
+				CAC91A7D1663248600201C94 /* BltPixels.h in Headers */,
+				CAC91A7E1663248600201C94 /* BltBuiltins.h in Headers */,
+				CAC91A7F1663248600201C94 /* BltByteStreamProvider.h in Headers */,
+				CAC91A801663248600201C94 /* BltByteStreamUser.h in Headers */,
+				CAC91A811663248600201C94 /* BltConfig.h in Headers */,
+				CAC91A821663248600201C94 /* BltCore.h in Headers */,
+				CAC91A831663248600201C94 /* BltDefs.h in Headers */,
+				CAC91A841663248600201C94 /* BltErrors.h in Headers */,
+				CAC91A851663248600201C94 /* BltEvent.h in Headers */,
+				CAC91A861663248600201C94 /* BltEventListener.h in Headers */,
+				CAC91A871663248600201C94 /* BltMedia.h in Headers */,
+				CAC91A881663248600201C94 /* BltMediaNode.h in Headers */,
+				CAC91A891663248600201C94 /* BltMediaPacket.h in Headers */,
+				CAC91A8A1663248600201C94 /* BltMediaPort.h in Headers */,
+				CAC91A8B1663248600201C94 /* BltModule.h in Headers */,
+				CAC91A8C1663248600201C94 /* BltOutputNode.h in Headers */,
+				CAC91A8D1663248600201C94 /* BltPacketConsumer.h in Headers */,
+				CAC91A8E1663248600201C94 /* BltPacketProducer.h in Headers */,
+				CAC91A8F1663248600201C94 /* BltPcm.h in Headers */,
+				CAC91A901663248600201C94 /* BltRegistry.h in Headers */,
+				CAC91A911663248600201C94 /* BltStream.h in Headers */,
+				CAC91A921663248600201C94 /* BltTime.h in Headers */,
+				CAC91A931663248600201C94 /* BltTypes.h in Headers */,
+				CAC91A941663248600201C94 /* BltBitStream.h in Headers */,
+				CAC91A951663248600201C94 /* BltDecoderX.h in Headers */,
+				CAC91A961663248600201C94 /* BltDecoder.h in Headers */,
+				CAC91A971663248600201C94 /* BltPcmAdapter.h in Headers */,
+				CAC91A981663248600201C94 /* BltKeyManager.h in Headers */,
+				CAC91A991663248600201C94 /* BltCommonMediaTypes.h in Headers */,
+				CAC91A9A1663248600201C94 /* BltReplayGain.h in Headers */,
+				CAC91A9B1663248600201C94 /* BltFilterHost.h in Headers */,
+				CAC91A9C1663248600201C94 /* BltAacDecoder.h in Headers */,
+				CAC91A9D1663248600201C94 /* BltAlacDecoder.h in Headers */,
+				CAC91A9E1663248600201C94 /* BltFfmpegDecoder.h in Headers */,
+				CAC91A9F1663248600201C94 /* BltFhgAacDecoder.h in Headers */,
+				CAC91AA01663248600201C94 /* BltFlacDecoder.h in Headers */,
+				CAC91AA11663248600201C94 /* BltAacDecoder.h in Headers */,
+				CAC91AA21663248600201C94 /* BltIppDecoder.h in Headers */,
+				CAC91AA31663248600201C94 /* BltMpegAudioDecoder.h in Headers */,
+				CAC91AA41663248600201C94 /* BltAacDecoder.h in Headers */,
+				CAC91AA51663248600201C94 /* BltOsxAudioConverterDecoder.h in Headers */,
+				CAC91AA61663248600201C94 /* BltVorbisDecoder.h in Headers */,
+				CAC91AA71663248600201C94 /* BltWmaDecoder.h in Headers */,
+				CAC91AA81663248600201C94 /* BltDynamicPlugins.h in Headers */,
+				CAC91AA91663248600201C94 /* BltFingerprintFilter.h in Headers */,
+				CAC91AAA1663248600201C94 /* BltGainControlFilter.h in Headers */,
+				CAC91AAB1663248600201C94 /* BltWaveFormatter.h in Headers */,
+				CAC91AAC1663248600201C94 /* BltPacketStreamer.h in Headers */,
+				CAC91AAD1663248600201C94 /* BltSilenceRemover.h in Headers */,
+				CAC91AAE1663248600201C94 /* BltStreamPacketizer.h in Headers */,
+				CAC91AAF1663248600201C94 /* BltFileInput.h in Headers */,
+				CAC91AB01663248600201C94 /* BltNetworkInput.h in Headers */,
+				CAC91AB11663248600201C94 /* BltOsxAudioQueueOutput.h in Headers */,
+				CAC91AB21663248600201C94 /* BltOsxAudioUnitsOutput.h in Headers */,
+				CAC91AB31663248600201C94 /* BltOsxVideoOutput.h in Headers */,
+				CAC91AB41663248600201C94 /* BltRaopOutput.h in Headers */,
+				CAC91AB51663248600201C94 /* BltDebugOutput.h in Headers */,
+				CAC91AB61663248600201C94 /* BltFileOutput.h in Headers */,
+				CAC91AB71663248600201C94 /* BltNullOutput.h in Headers */,
+				CAC91AB81663248600201C94 /* BltAdtsParser.h in Headers */,
+				CAC91AB91663248600201C94 /* BltAiffParser.h in Headers */,
+				CAC91ABA1663248600201C94 /* BltDcfParser.h in Headers */,
+				CAC91ABB1663248600201C94 /* BltMp4Parser.h in Headers */,
+				CAC91ABC1663248600201C94 /* BltOsxAudioFileStreamParser.h in Headers */,
+				CAC91ABD1663248600201C94 /* BltApeParser.h in Headers */,
+				CAC91ABE1663248600201C94 /* BltId3Parser.h in Headers */,
+				CAC91ABF1663248600201C94 /* BltTagParser.h in Headers */,
+				CAC91AC01663248600201C94 /* BltWaveParser.h in Headers */,
+				CAC91AC11663248600201C94 /* BltWmsProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6006,6 +6225,26 @@
 			productReference = CA9ED8340EAFAAFC003CE43C /* btplayx */;
 			productType = "com.apple.product-type.tool";
 		};
+		CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAC91A701663202800201C94 /* Build configuration list for PBXNativeTarget "BlueTune-Framework-OSX" */;
+			buildPhases = (
+				CAC91A5A1663202700201C94 /* Sources */,
+				CAC91A5B1663202700201C94 /* Frameworks */,
+				CAC91A5C1663202700201C94 /* Headers */,
+				CAC91A5D1663202700201C94 /* Resources */,
+				CAC91A77166322E600201C94 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CAC91A741663203E00201C94 /* PBXTargetDependency */,
+			);
+			name = "BlueTune-Framework-OSX";
+			productName = "BlueTune-Framework-OSX";
+			productReference = CAC91A5F1663202700201C94 /* BlueTune.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		CAD788DB12A33F8B00D7EBA7 /* OpenCoreAAC */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CAD7893D12A33FFE00D7EBA7 /* Build configuration list for PBXNativeTarget "OpenCoreAAC" */;
@@ -6146,6 +6385,7 @@
 				CAF2EE260E60C38D00948C04 /* AsyncPlayerC */,
 				CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */,
 				CA53C0B810A6277800950FAF /* BtTouchPlayer */,
+				CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */,
 			);
 		};
 /* End PBXProject section */
@@ -6738,7 +6978,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAC91A5D1663202700201C94 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAC91A6B1663202700201C94 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		CAC91A77166322E600201C94 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CA0C9AF20D15D27D00E23496 /* Sources */ = {
@@ -6933,6 +7197,13 @@
 				CA9ED8450EAFAB56003CE43C /* BtPlayXForceCpp.cpp in Sources */,
 				CA9EDA800EB0F899003CE43C /* BltDecoderX.c in Sources */,
 				CA1859BC0F22D10600CF3552 /* BltOsxVideoOutput.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAC91A5A1663202700201C94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7453,6 +7724,11 @@
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA9ED8460EAFAB6C003CE43C /* PBXContainerItemProxy */;
 		};
+		CAC91A741663203E00201C94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CAC91A731663203E00201C94 /* PBXContainerItemProxy */;
+		};
 		CADCAB5C12D54BE5002A8B79 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */;
@@ -7485,6 +7761,14 @@
 				CA1EC1810ED29B080033F894 /* English */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		CAC91A691663202700201C94 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CAC91A6A1663202700201C94 /* en */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -8228,6 +8512,61 @@
 			};
 			name = Release;
 		};
+		CAC91A711663202800201C94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "BlueTune-Framework-OSX/BlueTune-Framework-OSX-Info.plist";
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = BlueTune;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		CAC91A721663202800201C94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				INFOPLIST_FILE = "BlueTune-Framework-OSX/BlueTune-Framework-OSX-Info.plist";
+				PRODUCT_NAME = BlueTune;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
 		CAD788DD12A33F8D00D7EBA7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -8510,6 +8849,15 @@
 			buildConfigurations = (
 				CA9ED8360EAFAAFD003CE43C /* Debug */,
 				CA9ED8370EAFAAFD003CE43C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAC91A701663202800201C94 /* Build configuration list for PBXNativeTarget "BlueTune-Framework-OSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAC91A711663202800201C94 /* Debug */,
+				CAC91A721663202800201C94 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -388,7 +388,7 @@ FingerprintFilter_Deactivate(BLT_MediaNode* _self)
     if (ATX_BASE(self, BLT_BaseMediaNode).context) {
         ATX_Properties* properties;
         if (BLT_SUCCEEDED(BLT_Core_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).core, &properties))) {
-            ATX_Properties_RemoveListener(properties, &self->property_listener_handle);
+            ATX_Properties_RemoveListener(properties, self->property_listener_handle);
         }
     }
 

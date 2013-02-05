@@ -94,6 +94,7 @@ public:
 
     // methods
     BLT_DecoderServer_Message(CommandId id) : m_Id(id) {}
+    CommandId GetCommandId() { return m_Id; }
     virtual NPT_Result Deliver(BLT_DecoderServer_MessageHandler* handler) = 0;
     virtual NPT_Result Dispatch(NPT_MessageHandler* handler);
     

@@ -119,7 +119,6 @@ private:
     NPT_String    m_Guid;
     NPT_String    m_UserAgent;
     NPT_UInt32    m_RequestContext;
-    NPT_LargeSize m_ContentLength;
     Stream        m_Streams[BLT_WMS_ASF_MAX_STREAMS];
     NPT_Ordinal   m_SelectedStream;
     struct {
@@ -490,7 +489,6 @@ WmsClient::WmsClient(const char* url) :
     m_Url(url),
     m_UserAgent("NSPlayer/7.10.0.3059"),
     m_RequestContext(0),
-    m_ContentLength(0),
     m_SelectedStream(0)
 {
     NPT_TimeStamp now;

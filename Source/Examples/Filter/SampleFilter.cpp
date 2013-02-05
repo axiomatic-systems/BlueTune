@@ -324,7 +324,7 @@ SampleFilter_Destroy(SampleFilter* self)
     if (core && self->property_listener_handle) {
         ATX_Properties* properties;
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(core, &properties))) {
-            ATX_Properties_RemoveListener(properties, &self->property_listener_handle);
+            ATX_Properties_RemoveListener(properties, self->property_listener_handle);
         }
     }
 

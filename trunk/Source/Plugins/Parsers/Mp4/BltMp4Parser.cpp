@@ -62,8 +62,8 @@ struct Mp4ParserInput {
     BLT_MediaType     audio_media_type;
     BLT_MediaType     video_media_type;
     AP4_File*         mp4_file;
-    bool              slow_seek;
     AP4_LinearReader* reader;
+    bool              slow_seek;
     bool              has_fragments;
     bool              is_encrypted;
     bool              is_ipmp;
@@ -83,6 +83,7 @@ struct Mp4ParserOutput {
     BLT_UInt32           iso_base_es_type_id;
     BLT_MediaType*       media_type;
     AP4_Track*           track;
+    AP4_LinearReader*    reader;
     BLT_Ordinal          sample;
     AP4_DataBuffer*      sample_buffer;
     AP4_SampleDecrypter* sample_decrypter;
@@ -257,12 +258,11 @@ Mp4ParserLinearReader::ProcessMoof(AP4_ContainerAtom* moof,
 static void
 Mp4ParserInput_Construct(Mp4ParserInput* self, Mp4Parser* parser, BLT_Module* module)
 {
+    NPT_SetMemory(self, 0, sizeof(*self));
     Mp4ParserModule* mp4_parser_module = (Mp4ParserModule*)module;
     BLT_MediaType_Init(&self->audio_media_type, mp4_parser_module->mp4_audio_type_id);
     BLT_MediaType_Init(&self->video_media_type, mp4_parser_module->mp4_video_type_id);
     self->parser        = parser;
-    self->mp4_file      = NULL;
-    self->reader        = NULL;
     self->slow_seek     = false;
     self->has_fragments = false;
     self->is_encrypted  = false;
@@ -551,7 +551,9 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
     if (self->parser->input.reader) {
         self->parser->input.reader->EnableTrack(self->track->GetId());
     }
-    
+    if (self->reader) {
+        self->reader->EnableTrack(self->track->GetId());
+    }
     return BLT_SUCCESS;    
 }
 
@@ -705,9 +707,17 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                        BLT_STREAM_INFO_MASK_DURATION;    
     BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     
-    // create a linear reader if the source is slow-seeking or the movie is fragmented
-    if (self->input.slow_seek || self->input.has_fragments) {
+    // create a shared linear reader if the source is slow-seeking
+    if (self->input.slow_seek) {
+        ATX_LOG_INFO("source has slow random access, creating a shared reader");
         self->input.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
+    } else {
+        ATX_LOG_INFO("source is fragmented, creating pre-track readers");
+        // create a per-track reader if we need to (if we have fast random access and the movie is fragmented)
+        if (self->input.has_fragments) {
+            self->audio_output.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
+            self->video_output.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
+        }
     }
     
     // setup the tracks
@@ -791,12 +801,10 @@ ATX_END_INTERFACE_MAP
 static void
 Mp4ParserOutput_Construct(Mp4ParserOutput* self, Mp4Parser* parser)
 {
+    NPT_SetMemory(self, 0, sizeof(*self));
     self->parser                  = parser;
-    self->media_type              = NULL;
-    self->sample                  = 0;
     self->sample_buffer           = new AP4_DataBuffer();
     self->sample_decrypted_buffer = new AP4_DataBuffer();
-    self->sample_decrypter        = NULL;
 }
 
 /*----------------------------------------------------------------------
@@ -805,7 +813,8 @@ Mp4ParserOutput_Construct(Mp4ParserOutput* self, Mp4Parser* parser)
 static void
 Mp4ParserOutput_Destruct(Mp4ParserOutput* self)
 {
-    /* release the sample buffer */
+    // free resources
+    delete self->reader;
     delete self->sample_buffer;
     delete self->sample_decrypted_buffer;
 
@@ -842,12 +851,7 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
     Mp4ParserOutput* self = ATX_SELF(Mp4ParserOutput, BLT_PacketProducer);
 
     *packet = NULL;
-     
-    // if we don't have an input yet, we can't produce packets
-    //if (self->parser->input.mp4_file == NULL) {
-    //    return BLT_ERROR_PORT_HAS_NO_DATA;
-    //}
-    
+         
     if (self->track == NULL) {
         return BLT_ERROR_EOS;
     } else {
@@ -860,9 +864,13 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         AP4_Sample sample;
         AP4_DataBuffer* sample_buffer = self->sample_buffer;
         AP4_Result result;
-        if (self->parser->input.reader) {
+        
+        // look if we have a per-track reader or a shared reader
+        AP4_LinearReader* reader = self->reader;
+        if (reader == NULL) reader = self->parser->input.reader;
+        if (reader) {
             // linear reader mode
-            result = self->parser->input.reader->ReadNextSample(self->track->GetId(), sample, *sample_buffer);
+            result = reader->ReadNextSample(self->track->GetId(), sample, *sample_buffer);
             if (AP4_SUCCEEDED(result)) ++self->sample;
         } else {
             // normal mode

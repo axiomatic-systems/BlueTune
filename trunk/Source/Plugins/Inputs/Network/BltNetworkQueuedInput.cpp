@@ -59,7 +59,6 @@ public:
 private:
     // members
     NPT_Mutex        m_Lock;
-    NPT_Thread*      m_Thread;
     volatile bool    m_ShouldExit;
     NPT_List<Entry*> m_Entries;
     NPT_UInt64       m_Sequence;

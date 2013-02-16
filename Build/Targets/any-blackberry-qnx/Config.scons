@@ -1,0 +1,68 @@
+env['BLT_RELAXED_ENV'] = env
+
+### compiler flags
+env.AppendUnique(CCFLAGS = ['-w9'])
+env.AppendUnique(CFLAGS  = [])
+env.AppendUnique(CPPFLAGS = [])
+
+if env['build_config'] == 'Debug':
+    env.AppendUnique(CCFLAGS = '-g')
+else:
+    env.AppendUnique(CCFLAGS = '-O')
+
+env['ARCOM']  = 'qcc -A $TARGET $SOURCES'
+env['RANLIB'] = 'echo'
+env['CC']     = 'qcc -lang-c'
+env['CXX']    = 'qcc -lang-c++'
+env['LINK']   = 'qcc -lang-c++'
+
+env['SHOBJSUFFIX'] = '.o'
+env['ENV']['PATH'] = os.environ['PATH'] + ':' + env['ENV']['PATH']
+env['ENV']['QNX_HOST'] = os.environ['QNX_HOST']
+env['ENV']['QNX_TARGET'] = os.environ['QNX_TARGET']
+
+
+env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
+env['ATX_EXTRA_LIBS']=['m']
+env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
+env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
+env['NPT_EXTRA_LIBS']=['socket']
+#env['AP4_CPP_DEFINES']=['AP4_CONFIG_MINI_BUILD']
+env['BLT_PLUGINS'] = ['FileInput', 
+                      'NetworkInput',
+#                      'WmsProtocol',
+                      'MpegAudioDecoder', 
+                      'StreamPacketizer', 
+                      'NullOutput',
+                      'FileOutput',
+                      'PacketStreamer',
+                      'TagParser',
+                      'DebugOutput',
+                      'WaveParser',
+                      'AiffParser',
+                      'Mp4Parser',
+                      'AdtsParser',
+                      'WaveFormatter',
+                      'SilenceRemover',
+                      'GainControlFilter',
+                      'PcmAdapter',
+                      'FlacDecoder',
+                      'AlacDecoder',
+                      'VorbisDecoder',
+                      'AacDecoder',
+#                      'CddaInput',
+#                      'AlsaOutput',
+#                      'AlsaInput',
+                      'RaopOutput']
+
+env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
+env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
+env['BLT_DEFAULT_AUDIO_OUTPUT']     = 'alsa:default'
+#env['FLO_DECODER_ENGINE']      = 'FLO_DECODER_ENGINE_MPG123'
+#env['BLT_PLUGINS_AAC_LIBRARY'] = 'Helix'
+#env['BLT_PLUGINS_AAC_LIBRARY'] = 'OpenCore'
+env['BLT_PLUGINS_AAC_LIBRARY'] = 'FHG'
+
+                                             
+
+

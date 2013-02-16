@@ -266,7 +266,7 @@ AlsaOutput_Prepare(AlsaOutput* self)
 
         ior = snd_pcm_prepare(self->device_handle);
         if (ior != 0) {
-            ATX_LOG_FINER_2("snd_pcm_prepare() failed (%d)", ior, snd_strerror(ior));
+            ATX_LOG_FINER_2("snd_pcm_prepare() failed (%d : %s)", ior, snd_strerror(ior));
             return BLT_FAILURE;
         }
         break;
@@ -530,14 +530,14 @@ AlsaOutput_Configure(AlsaOutput*             self,
             if (rate != format->sample_rate) {
                 ATX_LOG_FINER_1("actual sample = %d", rate);
             }
-            ATX_LOG_FINER_1("actual buffer time = %d", buffer_time);
-            ATX_LOG_FINER_1("buffer size = %d", buffer_size); 
+            ATX_LOG_FINER_1("actual buffer time = %d", (int)buffer_time);
+            ATX_LOG_FINER_1("buffer size = %d", (int)buffer_size); 
             snd_pcm_sw_params_get_start_threshold(sw_params, &val);
-            ATX_LOG_FINER_1("start threshold = %d", val); 
+            ATX_LOG_FINER_1("start threshold = %d", (int)val); 
             snd_pcm_sw_params_get_stop_threshold(sw_params, &val);
-            ATX_LOG_FINER_1("stop threshold = %d", val); 
+            ATX_LOG_FINER_1("stop threshold = %d", (int)val); 
             snd_pcm_hw_params_get_period_size(hw_params, &val, NULL);
-            ATX_LOG_FINER_1("period size = %d", val);
+            ATX_LOG_FINER_1("period size = %d", (int)val);
         }
 
         break;

@@ -127,7 +127,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     if (ioData->mNumberBuffers != 1) {
         unsigned int i;
         ATX_LOG_FINEST_1("strange request with %d buffers", 
-                         ioData->mNumberBuffers);
+                         (int)ioData->mNumberBuffers);
         for (i=0; i<ioData->mNumberBuffers; i++) {
             ATX_SetMemory(ioData->mBuffers[i].mData, 0, ioData->mBuffers[i].mDataByteSize);
         }
@@ -137,7 +137,7 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     /* init local variables */
     requested = ioData->mBuffers[0].mDataByteSize;
     out = (unsigned char*)ioData->mBuffers[0].mData;
-    ATX_LOG_FINEST_2("request for %d bytes, %d frames", requested, inNumberFrames);
+    ATX_LOG_FINEST_2("request for %d bytes, %d frames", (int)requested, (int)inNumberFrames);
 
     /* lock the packet queue */
     pthread_mutex_lock(&self->lock);
@@ -347,7 +347,7 @@ OsxAudioUnitsOutput_SetStreamFormat(OsxAudioUnitsOutput*    self,
                                   &audio_desc,
                                   sizeof(audio_desc));
     if (result != noErr) {
-        ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", (int)result);
         return BLT_FAILURE;
     }
     
@@ -478,7 +478,7 @@ OsxAudioUnitsOutput_MapDeviceName(const char* name, AudioDeviceID* device_id)
                 prop_size = 0;
                 err = AudioDeviceGetPropertyInfo(default_device_id, 0, FALSE, kAudioDevicePropertyStreams, &prop_size, NULL);
                 if (err == noErr) {
-                    ATX_LOG_FINE_1("device has %d streams", prop_size/4);
+                    ATX_LOG_FINE_1("device has %d streams", (int)prop_size/4);
                 }
             }
             return BLT_SUCCESS;
@@ -488,7 +488,7 @@ OsxAudioUnitsOutput_MapDeviceName(const char* name, AudioDeviceID* device_id)
     /* ask how many devices exist */
     err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices, &prop_size, NULL);
     if (err != noErr) {
-        ATX_LOG_FINE_1("AudioHardwareGetPropertyInfo failed (%d)", err);
+        ATX_LOG_FINE_1("AudioHardwareGetPropertyInfo failed (%d)", (int)err);
         return 0;
     }
     device_count = prop_size/sizeof(AudioDeviceID);
@@ -501,7 +501,7 @@ OsxAudioUnitsOutput_MapDeviceName(const char* name, AudioDeviceID* device_id)
     /* retrieve the list of device IDs */
     err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices, &prop_size, devices);
     if (err != noErr) {
-        ATX_LOG_FINE_1("AudioHardwareGetProperty(kAudioHardwarePropertyDevices) failed (%d)", err);
+        ATX_LOG_FINE_1("AudioHardwareGetProperty(kAudioHardwarePropertyDevices) failed (%d)", (int)err);
         return 0;
     }
     
@@ -645,7 +645,7 @@ OsxAudioUnitsOutput_Create(BLT_Module*              module,
     /* open the audio unit (we will initialize it later) */
     result = OpenAComponent(component, &audio_unit);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("OpenAComponent failed (%d)", result);
+        ATX_LOG_WARNING_1("OpenAComponent failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -732,7 +732,7 @@ OsxAudioUnitsOutput_Destroy(OsxAudioUnitsOutput* self)
         
         result = CloseComponent(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("CloseComponent failed (%d)", result);
+            ATX_LOG_WARNING_1("CloseComponent failed (%d)", (int)result);
         }
     }
     
@@ -793,7 +793,7 @@ OsxAudioUnitsOutput_Seek(BLT_MediaNode* _self,
     /* reset the device */
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", (int)result);
     }
 
     return BLT_SUCCESS;
@@ -896,7 +896,7 @@ OsxAudioUnitsOutput_Start(BLT_MediaNode* _self)
     /* start the audio unit */
     result = AudioOutputUnitStart(self->audio_unit);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", (int)result);
     }
     
     return BLT_SUCCESS;
@@ -920,11 +920,11 @@ OsxAudioUnitsOutput_Stop(BLT_MediaNode* _self)
     /* stop the and reset audio unit */
     result = AudioOutputUnitStop(self->audio_unit);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", (int)result);
     }
     result = AudioUnitReset(self->audio_unit, kAudioUnitScope_Input, 0);
     if (result != noErr) {
-        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", result);
+        ATX_LOG_WARNING_1("AudioUnitReset failed (%d)", (int)result);
     }
     
     return BLT_SUCCESS;
@@ -944,7 +944,7 @@ OsxAudioUnitsOutput_Pause(BLT_MediaNode* _self)
         self->paused = BLT_TRUE;
         result = AudioOutputUnitStop(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitOutputStop failed (%d)", (int)result);
         }
     }
     return BLT_SUCCESS;
@@ -964,7 +964,7 @@ OsxAudioUnitsOutput_Resume(BLT_MediaNode* _self)
         self->paused = BLT_FALSE;
         result = AudioOutputUnitStart(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitOutputStart failed (%d)", (int)result);
         }
     }
     return BLT_SUCCESS;
@@ -1031,7 +1031,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                                       &self->audio_device_id,
                                       sizeof(self->audio_device_id));
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitSetProperty (kAudioOutputUnitProperty_CurrentDevice) failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitSetProperty (kAudioOutputUnitProperty_CurrentDevice) failed (%d)", (int)result);
         }
     }
 
@@ -1039,7 +1039,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
     if (self->audio_unit) {
         result = AudioUnitInitialize(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitInitialize failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitInitialize failed (%d)", (int)result);
             return BLT_FAILURE;
         }
     }
@@ -1066,7 +1066,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                                       &audio_desc,
                                       sizeof(audio_desc));
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitSetProperty failed (%d)", (int)result);
             return BLT_FAILURE;
         }
     }
@@ -1084,7 +1084,7 @@ OsxAudioUnitsOutput_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
                                   &callback, 
                                   sizeof(callback));
     if (result != noErr) {
-        ATX_LOG_SEVERE_1("AudioUnitSetProperty failed when setting callback (%d)", result);
+        ATX_LOG_SEVERE_1("AudioUnitSetProperty failed when setting callback (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -1106,7 +1106,7 @@ OsxAudioUnitsOutput_Deactivate(BLT_MediaNode* _self)
     if (self->audio_unit) {
         result = AudioUnitUninitialize(self->audio_unit);
         if (result != noErr) {
-            ATX_LOG_WARNING_1("AudioUnitUninitialize failed (%d)", result);
+            ATX_LOG_WARNING_1("AudioUnitUninitialize failed (%d)", (int)result);
             return BLT_FAILURE;
         }
     }

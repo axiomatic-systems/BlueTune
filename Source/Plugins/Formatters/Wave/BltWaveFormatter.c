@@ -147,7 +147,7 @@ WaveFormatter_UpdateWavHeader(WaveFormatter* self)
     BLT_Result    result;
     unsigned char buffer[4];
 
-    ATX_LOG_FINER_1("WaveFormatter::UpdateWavHeader - size = %d", self->input.size);
+    ATX_LOG_FINER_1("WaveFormatter::UpdateWavHeader - size = %lld", self->input.size);
 
     result = ATX_OutputStream_Seek(self->output.stream, 4);
     if (BLT_FAILED(result)) return result;

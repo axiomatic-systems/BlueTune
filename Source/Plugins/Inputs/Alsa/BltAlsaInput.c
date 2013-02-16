@@ -199,7 +199,7 @@ AlsaInputStream_ParseName(AlsaInputStream* self,
                     channel_count,
                     sample_rate);
     if (duration != 0) {
-        ATX_LOG_FINER_2("AlsaInput - duration=%dms (%d bytes)", duration, self->size);
+        ATX_LOG_FINER_2("AlsaInput - duration=%dms (%d bytes)", (int)duration, (int)self->size);
     }
 
     return BLT_SUCCESS;
@@ -336,12 +336,12 @@ AlsaInputStream_Construct(AlsaInputStream* self, BLT_CString name)
         if (rate != self->media_type.sample_rate) {
             ATX_LOG_FINER_1("AlsaOutput::Prepare - actual sample = %d", rate);
         }
-        ATX_LOG_FINER_1("AlsaStream::Prepare - actual buffer size = %d", buffer_size);
-        ATX_LOG_FINER_1("AlsaOutput::Prepare - buffer size = %d", buffer_size); 
+        ATX_LOG_FINER_1("AlsaStream::Prepare - actual buffer size = %d", (int)buffer_size);
+        ATX_LOG_FINER_1("AlsaOutput::Prepare - buffer size = %d", (int)buffer_size); 
         snd_pcm_sw_params_get_start_threshold(sw_params, &val);
-        ATX_LOG_FINER_1("AlsaOutput::Prepare - start threshold = %d", val); 
+        ATX_LOG_FINER_1("AlsaOutput::Prepare - start threshold = %d", (int)val); 
         snd_pcm_sw_params_get_stop_threshold(sw_params, &val);
-        ATX_LOG_FINER_1("AlsaOutput::Prepare - stop threshold = %d", val); 
+        ATX_LOG_FINER_1("AlsaOutput::Prepare - stop threshold = %d", (int)val); 
     }
 
     return BLT_SUCCESS;

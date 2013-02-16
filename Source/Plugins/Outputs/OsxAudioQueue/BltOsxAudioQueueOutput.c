@@ -476,10 +476,10 @@ OsxAudioQueueOutput_PropertyCallback(void*                _self,
     
     status = AudioQueueGetProperty(queue, kAudioQueueProperty_IsRunning, &is_running, &property_size);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueGetProperty failed (%x)", status);
+        ATX_LOG_WARNING_1("AudioQueueGetProperty failed (%x)", (int)status);
         return;
     }
-    ATX_LOG_FINE_1("is_running property = %d", is_running);
+    ATX_LOG_FINE_1("is_running property = %d", (int)is_running);
     
     if (!is_running) {
         pthread_mutex_lock(&self->lock);
@@ -658,7 +658,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
                                  0,
                                  &self->audio_queue);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueNewOutput returned %x", status);
+        ATX_LOG_WARNING_1("AudioQueueNewOutput returned %x", (int)status);
         self->audio_queue = NULL;
         return BLT_ERROR_UNSUPPORTED_FORMAT;
     }
@@ -681,7 +681,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
                                            OsxAudioQueueOutput_PropertyCallback, 
                                            self);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueAddPropertyListener returned %x", status);
+        ATX_LOG_WARNING_1("AudioQueueAddPropertyListener returned %x", (int)status);
         AudioQueueDispose(self->audio_queue, true);
         return BLT_FAILURE;
     }
@@ -874,7 +874,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
     if (packet_count) {
         ATX_LOG_FINE_2("enqueuing buffer %d, %d packets", buffer_index, packet_count);
     } else {
-        ATX_LOG_FINE_2("enqueuing buffer %d, %d bytes", buffer_index, buffer->data?buffer->data->mAudioDataByteSize:0);
+        ATX_LOG_FINE_2("enqueuing buffer %d, %d bytes", buffer_index, (int)(buffer->data?buffer->data->mAudioDataByteSize:0));
     }
     status = AudioQueueEnqueueBufferWithParameters(self->audio_queue, 
                                                    buffer->data, 
@@ -887,7 +887,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
                                                    NULL, 
                                                    &start_time);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueEnqueueBuffer returned %x", status);
+        ATX_LOG_WARNING_1("AudioQueueEnqueueBuffer returned %x", (int)status);
         buffer->data->mUserData = NULL;
         buffer->data->mAudioDataByteSize = 0;
         return BLT_FAILURE;
@@ -909,7 +909,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
         ATX_LOG_FINE("auto-starting the queue");
         OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
+            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", (int)status);
             return BLT_ERROR_INTERNAL;
         } 
         self->audio_queue_started = BLT_TRUE;
@@ -933,7 +933,7 @@ OsxAudioQueueOutput_EnqueueBuffer(OsxAudioQueueOutput* self)
             }
         }
     } else {
-        ATX_LOG_FINER_1("no timestamp available (%d)", status);
+        ATX_LOG_FINER_1("no timestamp available (%d)", (int)status);
     }
     
     /* remember the timestamps */
@@ -1259,7 +1259,7 @@ OsxAudioQueueOutput_Drain(BLT_OutputNode* _self)
     ATX_LOG_FINE("flusing queued buffers");
     status = AudioQueueFlush(self->audio_queue);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueFlush failed (%x)", status);
+        ATX_LOG_WARNING_1("AudioQueueFlush failed (%x)", (int)status);
     }
     
     /* if the queue is not started, we're done */
@@ -1270,7 +1270,7 @@ OsxAudioQueueOutput_Drain(BLT_OutputNode* _self)
     ATX_LOG_FINE("stopping audio queue (async)");
     status = AudioQueueStop(self->audio_queue, false);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", status);
+        ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", (int)status);
     }
     self->waiting_for_stop = BLT_TRUE;
     OsxAudioQueueOutput_WaitForCondition(self, &self->audio_queue_stopped_cond);
@@ -1307,7 +1307,7 @@ OsxAudioQueueOutput_Stop(BLT_MediaNode* _self)
     ATX_LOG_FINE("stopping audio queue (sync)");
     OSStatus status = AudioQueueStop(self->audio_queue, true);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", status);
+        ATX_LOG_WARNING_1("AudioQueueStop failed (%x)", (int)status);
     }
     self->audio_queue_started = BLT_FALSE;
 
@@ -1328,7 +1328,7 @@ OsxAudioQueueOutput_Pause(BLT_MediaNode* _self)
     if (self->audio_queue && !self->audio_queue_paused) {
         OSStatus status = AudioQueuePause(self->audio_queue);
         if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueuePause failed (%x)", status);
+            ATX_LOG_WARNING_1("AudioQueuePause failed (%x)", (int)status);
         }
         self->audio_queue_paused = BLT_TRUE;
     }
@@ -1347,7 +1347,7 @@ OsxAudioQueueOutput_Resume(BLT_MediaNode* _self)
         ATX_LOG_FINE("resuming from pause: starting audio queue");
         OSStatus status = AudioQueueStart(self->audio_queue, NULL);
         if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", status);
+            ATX_LOG_WARNING_1("AudioQueueStart failed (%x)", (int)status);
         }
         self->audio_queue_paused = BLT_FALSE;
         self->audio_queue_started = BLT_TRUE;

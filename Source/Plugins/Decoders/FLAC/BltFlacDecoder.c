@@ -339,7 +339,7 @@ FlacDecoder_SeekCallback(const FLAC__StreamDecoder *decoder,
     self->output.eos = BLT_FALSE;
 
     /* seek */
-    ATX_LOG_FINER_1("FlacDecoder::SeekCallback - offset = %ld", offset);
+    ATX_LOG_FINER_1("FlacDecoder::SeekCallback - offset = %lld", offset);
     result = ATX_InputStream_Seek(self->input.stream, (ATX_Position)offset);
     if (BLT_FAILED(result)) {
         return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;

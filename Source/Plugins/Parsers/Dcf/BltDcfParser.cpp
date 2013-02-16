@@ -298,7 +298,7 @@ DcfParser_ParseV1Header(DcfParser* self, ATX_InputStream* stream)
     }
 
     if (!encryption_supported) {
-        ATX_LOG_FINE_1("unsupported encryption format (%s)", encryption_method);
+        ATX_LOG_FINE_1("unsupported encryption format (%s)", encryption_method->GetChars());
         return BLT_ERROR_UNSUPPORTED_FORMAT;
     }
     

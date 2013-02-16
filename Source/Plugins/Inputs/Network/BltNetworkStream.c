@@ -300,7 +300,7 @@ BLT_NetworkStream_FillBuffer(BLT_NetworkStream* self)
             self->eos_cause = ATX_ERROR_EOS;
         }
     } else {
-        ATX_LOG_FINE_2("read from source failed: %d (%S)", result, BLT_ResultText(result));
+        ATX_LOG_FINE_2("read from source failed: %d (%s)", result, BLT_ResultText(result));
         self->eos = ATX_TRUE;
         self->eos_cause = result;
     }
@@ -508,7 +508,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
     if (move > 0 && (unsigned int)move <= self->seek_as_read_threshold) {
         /* simulate a seek by reading data up to the position */
         char buffer[256];
-        ATX_LOG_FINE_1("performing seek of %d as a read", move);
+        ATX_LOG_FINE_1("performing seek of %d as a read", (int)move);
         while (move) {
             unsigned int chunk = ((unsigned int)move) > sizeof(buffer)?sizeof(buffer):(unsigned int)move;
             ATX_Size     bytes_read = 0;
@@ -519,7 +519,7 @@ BLT_NetworkStream_Seek(ATX_InputStream* _self, ATX_Position position)
         }
     } else {
         /* perform a real seek in the source */
-        ATX_LOG_FINE_2("performing seek of %ld as input seek(%ld)", move, (long)position);
+        ATX_LOG_FINE_2("performing seek of %ld as input seek(%ld)", (long)move, (long)position);
         result = ATX_InputStream_Seek(self->source, position);
         if (ATX_FAILED(result)) return result;
         ATX_RingBuffer_Reset(self->buffer);

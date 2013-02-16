@@ -178,17 +178,17 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
     ATX_COMPILER_UNUSED(flags);
     
     ATX_LOG_FINE_4("stream property %c%c%c%c", 
-                   (property_id>>24)&0xFF, 
-                   (property_id>>16)&0xFF,
-                   (property_id>> 8)&0xFF, 
-                   (property_id    )&0xFF);
+                   (int)((property_id>>24)&0xFF),
+                   (int)((property_id>>16)&0xFF),
+                   (int)((property_id>> 8)&0xFF),
+                   (int)((property_id    )&0xFF));
                    
     switch (property_id) {
         case kAudioFileStreamProperty_FileFormat: {
             UInt32 property_value = 0;
             property_size = sizeof(property_value);
             if (AudioFileStreamGetProperty(stream, property_id, &property_size, &property_value) == noErr) {
-                ATX_LOG_FINE_1("kAudioFileStreamProperty_FileFormat = %x", property_value);
+                ATX_LOG_FINE_1("kAudioFileStreamProperty_FileFormat = %x", (int)property_value);
             }
             break;
         }
@@ -210,7 +210,7 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
             /* get the magic cookie size */
             result = AudioFileStreamGetPropertyInfo(stream, kAudioFileStreamProperty_MagicCookieData, &property_size, NULL);
             if (result == noErr) {
-                ATX_LOG_FINE_1("magic cookie size=%d", property_size);
+                ATX_LOG_FINE_1("magic cookie size=%d", (int)property_size);
             } else {
                 ATX_LOG_FINE("no magic cookie");
                 property_size = 0;
@@ -228,7 +228,7 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
             if (property_size) {
                 result = AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_MagicCookieData, &property_size, self->output.media_type->magic_cookie);
                 if (result != noErr) {
-                    ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", result);
+                    ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", (int)result);
                     ATX_FreeMemory(self->output.media_type);
                     self->output.media_type = NULL;
                     return;
@@ -245,12 +245,12 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                 for (i=0; i<item_count; i++) {
                     ATX_LOG_FINE_7("format %d: %c%c%c%c, %d %d", 
                                    i,
-                                   (items[i].mASBD.mFormatID>>24)&0xFF,
-                                   (items[i].mASBD.mFormatID>>16)&0xFF,
-                                   (items[i].mASBD.mFormatID>> 8)&0xFF,
-                                   (items[i].mASBD.mFormatID    )&0xFF,
+                                   (int)(items[i].mASBD.mFormatID>>24)&0xFF,
+                                   (int)(items[i].mASBD.mFormatID>>16)&0xFF,
+                                   (int)(items[i].mASBD.mFormatID>> 8)&0xFF,
+                                   (int)(items[i].mASBD.mFormatID    )&0xFF,
                                    (int)items[i].mASBD.mSampleRate,
-                                   items[i].mASBD.mChannelsPerFrame);
+                                   (int)items[i].mASBD.mChannelsPerFrame);
                     if (items[i].mASBD.mFormatID == kAudioFormatMPEG4AAC_HE && 
                         OsxAudioFileStreamParserModule_FormatIsSupported(self->module, items[i].mASBD.mFormatID)) {
                         self->output.media_type->asbd = items[i].mASBD;
@@ -272,18 +272,18 @@ OsxAudioFileStreamParser_OnProperty(void*                     _self,
                 property_size = sizeof(AudioStreamBasicDescription);
                 result = AudioFileStreamGetProperty(stream, kAudioFileStreamProperty_DataFormat, &property_size, &self->output.media_type->asbd);
                 if (result != noErr) {
-                    ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", result);
+                    ATX_LOG_WARNING_1("AudioFileStreamGetProperty failed (%d)", (int)result);
                     ATX_FreeMemory(self->output.media_type);
                     self->output.media_type = NULL;
                     return;
                 }
                 ATX_LOG_FINE_6("kAudioFileStreamProperty_DataFormat: %c%c%c%c, %d %d", 
-                               (self->output.media_type->asbd.mFormatID>>24)&0xFF,
-                               (self->output.media_type->asbd.mFormatID>>16)&0xFF,
-                               (self->output.media_type->asbd.mFormatID>> 8)&0xFF,
-                               (self->output.media_type->asbd.mFormatID    )&0xFF,
+                               (int)(self->output.media_type->asbd.mFormatID>>24)&0xFF,
+                               (int)(self->output.media_type->asbd.mFormatID>>16)&0xFF,
+                               (int)(self->output.media_type->asbd.mFormatID>> 8)&0xFF,
+                               (int)(self->output.media_type->asbd.mFormatID    )&0xFF,
                                (int)self->output.media_type->asbd.mSampleRate,
-                               self->output.media_type->asbd.mChannelsPerFrame);
+                               (int)self->output.media_type->asbd.mChannelsPerFrame);
             }
             
             /* get some info about the format */
@@ -352,7 +352,7 @@ OsxAudioFileStreamParser_OnPacket(void*                         _self,
 {
     OsxAudioFileStreamParser* self = (OsxAudioFileStreamParser*)_self;
     
-    ATX_LOG_FINER_2("new packet data, size=%d, count=%d", number_of_bytes, number_of_packets);
+    ATX_LOG_FINER_2("new packet data, size=%d, count=%d", (int)number_of_bytes, (int)number_of_packets);
     if (self->output.media_type == NULL) return; 
     unsigned int i;
     for (i=0; i<number_of_packets; i++) {
@@ -423,7 +423,7 @@ OsxAudioFileStreamParserInput_Setup(OsxAudioFileStreamParser* self,
                                  self->input.type_hint,
                                  &self->stream_parser);
     if (status != noErr) {
-        ATX_LOG_WARNING_1("AudioFileStreamOpen failed (%d)", status);
+        ATX_LOG_WARNING_1("AudioFileStreamOpen failed (%d)", (int)status);
         return BLT_FAILURE;
     }
     
@@ -606,7 +606,7 @@ OsxAudioFileStreamParserOutput_GetPacket(BLT_PacketProducer* _self,
                                            payload,
                                            0);
         if (status != noErr) {
-            ATX_LOG_WARNING_1("AudioFileStreamParseBytes failed (%x)", status);
+            ATX_LOG_WARNING_1("AudioFileStreamParseBytes failed (%x)", (int)status);
             return BLT_ERROR_INVALID_MEDIA_FORMAT;
         }            
     }
@@ -888,10 +888,10 @@ OsxAudioFileStreamParserModule_Attach(BLT_Module* _self, BLT_Core* core)
             for (i=0; i<self->supported_format_count; i++) {
                 ATX_LOG_FINE_5("supported format %d: %c%c%c%c", 
                                i, 
-                               (self->supported_formats[i]>>24)&0xFF,
-                               (self->supported_formats[i]>>16)&0xFF,
-                               (self->supported_formats[i]>> 8)&0xFF,
-                               (self->supported_formats[i]    )&0xFF);
+                               (int)(self->supported_formats[i]>>24)&0xFF,
+                               (int)(self->supported_formats[i]>>16)&0xFF,
+                               (int)(self->supported_formats[i]>> 8)&0xFF,
+                               (int)(self->supported_formats[i]    )&0xFF);
             }
         }
     }

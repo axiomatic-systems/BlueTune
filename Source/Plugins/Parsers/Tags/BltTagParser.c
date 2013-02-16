@@ -151,8 +151,8 @@ TagParserInput_SetStream(BLT_InputStreamUser* _self,
 
     if (header_size != 0 || trailer_size != 0) {
         /* create a sub stream without the header and the trailer */
-        ATX_LOG_FINER_3("TagParserInput_SetStream: substream %ld [%ld - %ld]",
-                         stream_size, header_size, trailer_size);
+        ATX_LOG_FINER_3("TagParserInput_SetStream: substream %d [%d - %d]",
+                         (int)stream_size, (int)header_size, (int)trailer_size);
         result = ATX_SubInputStream_Create(stream, 
                                            header_size, 
                                            stream_size,

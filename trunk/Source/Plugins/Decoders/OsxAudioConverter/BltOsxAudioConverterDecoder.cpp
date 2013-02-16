@@ -291,7 +291,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                                    &dest_format,
                                    &self->converter);
         if (status != noErr) {
-            ATX_LOG_FINER_1("AudioConvertNew failed (%d)", status);
+            ATX_LOG_FINER_1("AudioConvertNew failed (%d)", (int)status);
             return BLT_ERROR_UNSUPPORTED_FORMAT;
         }
         
@@ -361,7 +361,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                                                    magic_cookie);
                 delete[] magic_cookie;
                 if (status != noErr) {
-                    ATX_LOG_WARNING_1("failed to set codec magic cookie (%d)", status);
+                    ATX_LOG_WARNING_1("failed to set codec magic cookie (%d)", (int)status);
                     return BLT_ERROR_UNSUPPORTED_FORMAT;
                 }
             }
@@ -383,7 +383,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                                              NULL);
 
     if (status != noErr && status != BLT_OSX_AUDIO_CONVERTER_DATA_UNDERFLOW_ERROR) {
-        ATX_LOG_WARNING_1("AudioConverterFillComplexBuffer() failed (%d)", status);
+        ATX_LOG_WARNING_1("AudioConverterFillComplexBuffer() failed (%d)", (int)status);
         return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
     if (output_packet_count == 0) {

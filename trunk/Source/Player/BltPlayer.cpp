@@ -115,7 +115,7 @@ BLT_Player::Shutdown()
 BLT_Result 
 BLT_Player::SetInput(BLT_CString name, BLT_CString type)
 {
-    ATX_LOG_FINE_2("BLT_Player::SetInput - name=%s, type=%d", BLT_SAFE_STRING(name), type);
+    ATX_LOG_FINE_2("BLT_Player::SetInput - name=%s, type=%s", BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SetInput(name, type);
 }
@@ -126,7 +126,7 @@ BLT_Player::SetInput(BLT_CString name, BLT_CString type)
 BLT_Result
 BLT_Player::SetOutput(BLT_CString name, BLT_CString type)
 {
-    ATX_LOG_FINE_2(" BLT_Player::SetOutput - name=%s, type=%d", BLT_SAFE_STRING(name), type);
+    ATX_LOG_FINE_2(" BLT_Player::SetOutput - name=%s, type=%s", BLT_SAFE_STRING(name), BLT_SAFE_STRING(type));
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SetOutput(name, type);
 }
@@ -195,7 +195,7 @@ BLT_Player::SeekToTimeStamp(BLT_UInt8 h,
 BLT_Result
 BLT_Player::SeekToPosition(BLT_UInt64 offset, BLT_UInt64 range)
 {
-    ATX_LOG_FINE_2("BLT_Player::SeekToPosition, offset=%d, range=%d", offset, range);
+    ATX_LOG_FINE_2("BLT_Player::SeekToPosition, offset=%lld, range=%lld", offset, range);
     if (m_Server == NULL) return BLT_ERROR_INVALID_STATE;
     return m_Server->SeekToPosition(offset, range);
 }

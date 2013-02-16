@@ -246,8 +246,8 @@ SilenceRemoverInput_PutPacket(BLT_PacketConsumer* _self,
         result = ScanPacket(packet, &zero_head, &zero_tail);    
         if (BLT_FAILED(result)) return result;
         if (zero_head || zero_tail) {
-            ATX_LOG_FINER_2("SilenceRemoverInput::PutPacket zero_head=%ld, zero_tail=%ld",
-                            zero_head, zero_tail);
+            ATX_LOG_FINER_2("SilenceRemoverInput::PutPacket zero_head=%d, zero_tail=%d",
+                            (int)zero_head, (int)zero_tail);
         }
     }
 

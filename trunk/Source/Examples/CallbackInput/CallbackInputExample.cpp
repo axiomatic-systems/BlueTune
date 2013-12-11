@@ -195,6 +195,8 @@ main(int argc, char** argv)
     sprintf(input_name, "callback-input:%lld", (long long)ATX_POINTER_TO_LONG(input_object));
 
     /* open the input */
+    /* IMPORTANT NOTE: this example is hardcoded to an input mime type audio/mp4,
+       change to different type if you're not using MP4 */
     result = BLT_Decoder_SetInput(decoder, input_name, "audio/mp4");
     if (BLT_FAILED(result)) {
         fprintf(stderr, "ERROR: SetInput failed (%d)\n", result);

@@ -14,7 +14,6 @@
 #include <stdlib.h>
 
 #include "BlueTune.h"
-#include "BltCallbackInput.h"
 
 /*----------------------------------------------------------------------
 |   MyInputStream
@@ -175,12 +174,6 @@ main(int argc, char** argv)
     
     /* register builtin modules */
     BLT_Decoder_RegisterBuiltins(decoder);
-    
-    /* register the callback input module */
-    BLT_Module* input_module = NULL;
-    BLT_CallbackInputModule_GetModuleObject(&input_module);
-    BLT_Decoder_RegisterModule(decoder, input_module);
-    ATX_RELEASE_OBJECT(input_module);
     
     /* create an input object to be called back */
     ATX_InputStream* input_object = NULL;

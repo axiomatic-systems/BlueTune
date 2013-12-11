@@ -17,7 +17,6 @@
 #include <stdlib.h>
 
 #include "BlueTune.h"
-#include "BltMemoryOutput.h"
 
 /*----------------------------------------------------------------------
 |    main
@@ -39,12 +38,6 @@ main(int argc, char** argv)
     
     /* register builtin modules */
     BLT_Decoder_RegisterBuiltins(decoder);
-    
-    /* register the memory output module */
-    BLT_Module* output_module = NULL;
-    BLT_MemoryOutputModule_GetModuleObject(&output_module);
-    BLT_Decoder_RegisterModule(decoder, output_module);
-    ATX_RELEASE_OBJECT(output_module);
     
     /* open the input */
     result = BLT_Decoder_SetInput(decoder, input, NULL);

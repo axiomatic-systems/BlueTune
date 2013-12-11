@@ -32,7 +32,10 @@ env['BLT_PLUGINS'] = ['FileInput',
                       'CddaInput',
                       'AlsaOutput',
                       'AlsaInput',
-                      'RaopOutput']
+                      'RaopOutput',
+                      'MemoryOutput',
+                      'CallbackInput',
+                      'CallbackOutput']
 
 env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
 env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'

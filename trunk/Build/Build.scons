@@ -302,6 +302,8 @@ PluginsSettings = {
     'AlsaInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_INPUT',             'src_dir':'Inputs/Alsa'              },
     'NetworkInput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_NETWORK_INPUT',          'src_dir':'Inputs/Network'           },
     'CallbackInput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT',         'src_dir':'Inputs/Callback'          },
+    'CallbackOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_CALLBACK_OUTPUT',        'src_dir':'Outputs/Callback'         },
+    'MemoryOutput'        : {'defines':'BLT_CONFIG_MODULES_ENABLE_MEMORY_OUTPUT',          'src_dir':'Outputs/Memory'           },
     'WmsProtocol'         : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL',           'src_dir':'Protocols/WMS'            },
     'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
     'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },
@@ -457,6 +459,16 @@ ExecutableModule(name                  = 'PcmDiff',
                  source_root           = 'Source/Apps/PcmDiff',
                  link_and_include_deps = ['Neptune'])
 
+############################# PcmDecoder
+ExecutableModule(name                  = 'PcmDecoder',
+                 source_root           = 'Source/Examples/PcmDecoder',
+                 link_and_include_deps = ['BlueTune'])
+
+############################# CallbackInputExample
+ExecutableModule(name                  = 'CallbackInputExample',
+                 source_root           = 'Source/Examples/CallbackInput',
+                 link_and_include_deps = ['BlueTune'])
+
 ############################# SampleFilterPlugin
 CompiledModule(name                     = 'SampleFilter',
                source_root              = 'Source/Examples/Filter',
@@ -483,7 +495,7 @@ if env['target'] == 'x86-unknown-linux':
         pass
 
 ################################################
-# Default Build Modues
+# Default Build Modules
 ################################################
 env.Default(['BtPlay', 'BtController'] + OptionalModules + plugins_dynamic_modules)
 

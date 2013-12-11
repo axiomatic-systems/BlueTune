@@ -341,13 +341,7 @@ BLT_Result
 BLT_Decoder_GetOutputNode(BLT_Decoder*    decoder, 
                           BLT_MediaNode** node)
 {
-    if (decoder->output) {
-        *node = ATX_CAST(decoder->output, BLT_MediaNode);
-        if (*node) ATX_REFERENCE_OBJECT(*node);
-    } else {
-        *node = NULL;
-    }
-    return BLT_SUCCESS;
+    return BLT_Stream_GetOutputNode(decoder->stream, node);
 }
 
 /*----------------------------------------------------------------------

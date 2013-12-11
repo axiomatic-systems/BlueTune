@@ -384,7 +384,7 @@ Mp4ParserOutput_ProcessCryptoInfo(Mp4ParserOutput*        self,
         
         // create a sample decrypter unless this is a fragmented movie (for
         // fragmented movies, we will do the decryption through the linear
-        // reader object
+        // reader object)
         if (!input.has_fragments) {
             self->sample_decrypter = AP4_SampleDecrypter::Create(prot_desc, 
                                                                  key.GetData(), 
@@ -485,7 +485,7 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
         stream_info.data_type = AP4_GetFormatName(sample_desc->GetFormat());
         stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
         format_or_object_type_id = sample_desc->GetFormat();
-        if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_AVC1) {
+        if (sample_desc->GetType() == AP4_SampleDescription::TYPE_AVC) {
             // look for an 'avcC' atom
             AP4_AvccAtom* avcc = static_cast<AP4_AvccAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_AVCC));
             if (avcc) {
@@ -1028,10 +1028,25 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
     if (!(point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP)) {
         return BLT_FAILURE;
     }
+    AP4_UI32 ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
 
+    /* if the source is fragmented, use the reader(s) */
+    if (self->input.has_fragments) {
+        if (self->input.reader) {
+            self->input.reader->SeekTo(ts_ms);
+        } else {
+            AP4_UI32 video_time = ts_ms;
+            if (self->video_output.reader) {
+                self->video_output.reader->SeekTo(ts_ms, &video_time);
+            }
+            if (self->audio_output.reader) {
+                self->audio_output.reader->SeekTo(video_time);
+            }
+        }
+    }
+    
     /* seek to the estimated offset on all tracks */
     AP4_Ordinal sample_index = 0;
-    AP4_UI32    ts_ms = point->time_stamp.seconds*1000+point->time_stamp.nanoseconds/1000000;
     if (self->video_output.track) {
         AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
         if (AP4_FAILED(result)) {
@@ -1223,6 +1238,18 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Registry_RegisterExtension(registry, 
                                             ".mov",
                                             "video/mp4");
+    if (BLT_FAILED(result)) return result;
+
+    /* register the ".ismv" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".ismv",
+                                            "video/mp4");
+    if (BLT_FAILED(result)) return result;
+
+    /* register the ".isma" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".isma",
+                                            "audio/mp4");
     if (BLT_FAILED(result)) return result;
 
     /* get the type id for "audio/mp4" */

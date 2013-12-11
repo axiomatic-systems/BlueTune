@@ -306,7 +306,8 @@ PluginsSettings = {
     'FileOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT',            'src_dir':'Outputs/File'             },
     'OssOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSS_OUTPUT',             'src_dir':'Outputs/OSS'              },
     'AlsaOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',            'src_dir':'Outputs/Alsa'             },
-    'AndroidOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT',         'src_dir':'Outputs/Android'             },
+    'QnxOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_QNX_OUTPUT',             'src_dir':'Outputs/QNX'              },
+    'AndroidOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT',         'src_dir':'Outputs/Android'          },
     'OsxVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_VIDEO_OUTPUT',       'src_dir':'Outputs/OsxVideo'         },
     'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
     'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },
@@ -341,6 +342,7 @@ PluginsExtras = {
                          'dep_mods':['FLAC']},
     'AlsaOutput':       {'libs':['asound']},   
     'AlsaInput':        {'libs':['asound']},
+    'QnxOutput':        {'libs':['asound']},   
     'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS,
     'FfmpegDecoder':    {'inc_dirs':['/usr/include/ffmpeg'],'libs':['avcodec'],'env':env['BLT_RELAXED_ENV']},
     'SdlVideoOutput':   {'libs':['SDL'],'env':env['BLT_RELAXED_ENV']}

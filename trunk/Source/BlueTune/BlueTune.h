@@ -124,6 +124,7 @@ See the BLT_Player class for details.
 #include "BltByteStreamUser.h"
 #include "BltByteStreamProvider.h"
 #include "BltDecoder.h"
+#include "BltUtils.h"
 #include "BltEvent.h"
 #include "BltEventListener.h"
 #include "BltKeyManager.h"

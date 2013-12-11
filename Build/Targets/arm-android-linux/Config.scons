@@ -23,6 +23,8 @@ env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITT
 env['BLT_PLUGINS'] = ['FileInput', 
                       'NetworkInput',
                       'CallbackInput',
+                      'CallbackOutput',
+                      'MemoryOutput',
                       'WmsProtocol',
                       'MpegAudioDecoder', 
                       'FlacDecoder',

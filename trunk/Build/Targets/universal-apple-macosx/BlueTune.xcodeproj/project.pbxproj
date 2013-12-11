@@ -14,6 +14,9 @@
 			);
 			dependencies = (
 				CA46DD51164CC4C500E45133 /* PBXTargetDependency */,
+				CAB82A021858519C00FC4944 /* PBXTargetDependency */,
+				CAB82A041858519C00FC4944 /* PBXTargetDependency */,
+				CAB82A061858519C00FC4944 /* PBXTargetDependency */,
 				CA07A32C0D40228D00DC3E33 /* PBXTargetDependency */,
 				CA07A32A0D40228D00DC3E33 /* PBXTargetDependency */,
 				CA07A3280D40228D00DC3E33 /* PBXTargetDependency */,
@@ -1685,6 +1688,27 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAA3D5A10F97CD6500BAE44C;
 			remoteInfo = FilesTest;
+		};
+		CAB82A011858519C00FC4944 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA44DE6D0DEDEAE50020CB81;
+			remoteInfo = PcmDiff;
+		};
+		CAB82A031858519C00FC4944 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CAA8DBF0184435A8000EFC1A;
+			remoteInfo = PcmDecoder;
+		};
+		CAB82A051858519C00FC4944 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CAB4C85D18566783006EFEC1;
+			remoteInfo = CallbackInputExample;
 		};
 		CAC02A14139DBA540034427F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -7981,6 +8005,21 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CAA8DC0A18443A4D000EFC1A /* PBXContainerItemProxy */;
+		};
+		CAB82A021858519C00FC4944 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA44DE6D0DEDEAE50020CB81 /* PcmDiff */;
+			targetProxy = CAB82A011858519C00FC4944 /* PBXContainerItemProxy */;
+		};
+		CAB82A041858519C00FC4944 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CAA8DBF0184435A8000EFC1A /* PcmDecoder */;
+			targetProxy = CAB82A031858519C00FC4944 /* PBXContainerItemProxy */;
+		};
+		CAB82A061858519C00FC4944 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CAB4C85D18566783006EFEC1 /* CallbackInputExample */;
+			targetProxy = CAB82A051858519C00FC4944 /* PBXContainerItemProxy */;
 		};
 		CAC91A741663203E00201C94 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

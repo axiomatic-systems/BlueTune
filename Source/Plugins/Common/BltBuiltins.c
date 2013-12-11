@@ -240,6 +240,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(AlsaOutput)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_QNX_OUTPUT)
+    BLT_REGISTER_BUILTIN(QnxOutput)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT)
     BLT_REGISTER_BUILTIN(AndroidOutput)
 #endif
@@ -270,6 +274,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_DEBUG_OUTPUT)
     BLT_REGISTER_BUILTIN(DebugOutput)
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_MEMORY_OUTPUT)
+    BLT_REGISTER_BUILTIN(MemoryOutput)
 #endif
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_FILE_OUTPUT)

@@ -34,6 +34,7 @@ typedef struct {
     BLT_CString  video_output_name;
     BLT_CString  video_output_type;
     unsigned int duration;
+    unsigned int seek; /* milliseconds */
     unsigned int verbosity;
     ATX_List*    keys;
 } BLTP_Options;
@@ -178,6 +179,7 @@ BLTP_ParseCommandLine(char** args)
     Options.video_output_name = BLT_DECODER_DEFAULT_OUTPUT_NAME;
     Options.video_output_type = NULL;
     Options.duration    = 0;
+    Options.seek        = 0;
     Options.verbosity   = 0;
     ATX_List_Create(&Options.keys);
     
@@ -197,6 +199,10 @@ BLTP_ParseCommandLine(char** args)
             int duration = 0;
             ATX_ParseInteger(arg+11, &duration, ATX_FALSE);
             Options.duration = duration;
+        } else if (ATX_StringsEqualN(arg, "--seek=", 7)) {
+            int seek = 0;
+            ATX_ParseInteger(arg+7, &seek, ATX_FALSE);
+            Options.seek = seek;
         } else if (ATX_StringsEqualN(arg, "--verbose=", 10)) {
             if (ATX_StringsEqual(arg+10, "stream-topology")) {
                 Options.verbosity |= BLTP_VERBOSITY_STREAM_TOPOLOGY;
@@ -492,6 +498,22 @@ BLTP_CheckElapsedTime(BLT_DecoderX* decoder, unsigned int duration)
     return BLT_SUCCESS;
 }
 
+/*----------------------------------------------------------------------
+|    BLTP_CheckElapsedTime
++---------------------------------------------------------------------*/
+static BLT_Boolean
+BLTP_TrySeek(BLT_DecoderX* decoder, unsigned int seek_time)
+{
+    BLT_DecoderStatus status;
+        BLT_DecoderX_GetStatus(decoder, &status);
+    if (status.time_stamp.seconds > 0) {
+        BLT_Result result = BLT_DecoderX_SeekToTime(decoder, seek_time);
+        ATX_ConsoleOutputF("SEEKING to %dms ... resut = %d\n", seek_time, result);
+        return BLT_TRUE;
+    }
+    return BLT_FALSE;
+}
+
 /* optional plugins */
 #if defined(BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER)
 #include "BltFfmpegDecoder.h"
@@ -555,6 +577,7 @@ main(int argc, char** argv)
     BLT_CString   input_type = NULL;
     BLTP          player;
     BLT_Result    result;
+    BLT_Boolean   seek_done = BLT_FALSE;
 
     /*mtrace();*/
     BLT_COMPILER_UNUSED(argc);
@@ -648,6 +671,13 @@ main(int argc, char** argv)
             /* process one packet */
             result = BLT_DecoderX_PumpPacket(decoder);
             
+            /* seek if needed */
+            if (Options.seek && !seek_done) {
+                if (BLTP_TrySeek(decoder, Options.seek)) {
+                    seek_done = BLT_TRUE;
+                }
+            }
+
             /* if a duration is specified, check if we have exceeded it */
             if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, Options.duration);
         } while (BLT_SUCCEEDED(result));

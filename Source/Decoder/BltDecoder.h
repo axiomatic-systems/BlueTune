@@ -160,8 +160,8 @@ BLT_Result BLT_Decoder_SetOutput(BLT_Decoder* decoder,
 
 /**
  * Set a BLT_Decoder object's output node.
+ * @param name Name of the output.
  * @param node The node object that will be the decoder's output node.
- * @param type Mime-type of the output, if known, or NULL.
  */
 BLT_Result BLT_Decoder_SetOutputNode(BLT_Decoder*   decoder, 
                                      BLT_CString    name,

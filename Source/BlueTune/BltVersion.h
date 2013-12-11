@@ -16,8 +16,8 @@
 /*----------------------------------------------------------------------
 |   constants
 +---------------------------------------------------------------------*/
-#define BLT_BLUETUNE_SDK_VERSION            0x01040200
-#define BLT_BLUETUNE_SDK_VERSION_STRING     "1.4.2.0"
+#define BLT_BLUETUNE_SDK_VERSION            0x01040400
+#define BLT_BLUETUNE_SDK_VERSION_STRING     "1.4.4.0"
 
 #define BLT_PLUGIN_ABI_VERSION 0x0100
 

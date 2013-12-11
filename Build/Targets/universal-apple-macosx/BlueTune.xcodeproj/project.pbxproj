@@ -389,8 +389,33 @@
 		CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CAA862F014FFC820008956A3 /* BltNetworkQueuedInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAA862EE14FFC820008956A3 /* BltNetworkQueuedInput.cpp */; };
 		CAA862F114FFC820008956A3 /* BltNetworkQueuedInput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAA862EF14FFC820008956A3 /* BltNetworkQueuedInput.h */; };
+		CAA8DB9418443286000EFC1A /* BltMemoryOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = CAA8DB9218443286000EFC1A /* BltMemoryOutput.c */; };
+		CAA8DB9518443286000EFC1A /* BltMemoryOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CAA8DB9318443286000EFC1A /* BltMemoryOutput.h */; };
+		CAA8DBFE184435EC000EFC1A /* PcmDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAA8DBFD184435EC000EFC1A /* PcmDecoder.cpp */; };
+		CAA8DBFF18443A1E000EFC1A /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CAA8DC0018443A1E000EFC1A /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CAA8DC0118443A1E000EFC1A /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
+		CAA8DC0618443A39000EFC1A /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
+		CAA8DC0718443A39000EFC1A /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
+		CAA8DC0C18443AA6000EFC1A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27B10A7876300950FAF /* CoreAudio.framework */; };
+		CAA8DC0D18443BA0000EFC1A /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C28610A787D100950FAF /* AudioToolbox.framework */; };
+		CAA8DC0E18443BA0000EFC1A /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27D10A7876F00950FAF /* AudioUnit.framework */; };
+		CAA8DC1018443BAB000EFC1A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */; };
+		CAB4C8BE18566815006EFEC1 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CAB4C8BF18566815006EFEC1 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CAB4C8C018566820006EFEC1 /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
+		CAB4C8C118566820006EFEC1 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
+		CAB4C8C21856683D006EFEC1 /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
+		CAB4C8C318566845006EFEC1 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */; };
+		CAB4C8C41856684E006EFEC1 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C28610A787D100950FAF /* AudioToolbox.framework */; };
+		CAB4C8C518566858006EFEC1 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27D10A7876F00950FAF /* AudioUnit.framework */; };
+		CAB4C8C61856685F006EFEC1 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27B10A7876300950FAF /* CoreAudio.framework */; };
+		CAB4C8C918566899006EFEC1 /* CallbackInputExample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4C8C818566899006EFEC1 /* CallbackInputExample.cpp */; };
+		CAB4C8CD18568DFA006EFEC1 /* BltCallbackInput.c in Sources */ = {isa = PBXBuildFile; fileRef = CA765C321852358A0093A9E5 /* BltCallbackInput.c */; };
 		CAB4F5F70EEA90E800848CF2 /* BltVolumeControl.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */; };
 		CAB4F6630EEABA3500848CF2 /* BltErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */; };
+		CAB829FF185840EB00FC4944 /* BltUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = CAB829FD185840EB00FC4944 /* BltUtils.c */; };
+		CAB82A00185840EB00FC4944 /* BltUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = CAB829FE185840EB00FC4944 /* BltUtils.h */; };
 		CAC7D5780E453A1100037D81 /* BltKeyManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CAC7D5770E453A1100037D81 /* BltKeyManager.h */; };
 		CAC91A611663202700201C94 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAC91A601663202700201C94 /* Cocoa.framework */; };
 		CAC91A6B1663202700201C94 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CAC91A691663202700201C94 /* InfoPlist.strings */; };
@@ -1437,6 +1462,20 @@
 			remoteGlobalIDString = CA550D550D20A37E00B22D72;
 			remoteInfo = HttpServerTest1;
 		};
+		CA552B5A1721116100CC1C99 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAC8F17016BE444D00C49741;
+			remoteInfo = Mp4AudioClip;
+		};
+		CA552B851721116100CC1C99 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAC8F0A116AB54EA00C49741;
+			remoteInfo = NetBench;
+		};
 		CA5556291198A32E0069EA6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -1606,6 +1645,13 @@
 			remoteInfo = Bento4C;
 		};
 		CA9ED8460EAFAB6C003CE43C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
+		};
+		CAA8DC0A18443A4D000EFC1A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
@@ -1858,6 +1904,27 @@
 			remoteInfo = TlsTest1;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CAA8DBEF184435A8000EFC1A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		CAB4C85C18566783006EFEC1 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		CA0487870C99E13800638991 /* BltAdtsParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAdtsParser.h; sourceTree = "<group>"; };
@@ -2164,6 +2231,10 @@
 		CA6B38720C965CE9000D7A0A /* libHelixAAC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHelixAAC.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA7513CF1256D8F30022D1A8 /* BltBento4Adapters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltBento4Adapters.cpp; sourceTree = "<group>"; };
 		CA7513D01256D8F30022D1A8 /* BltBento4Adapters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltBento4Adapters.h; sourceTree = "<group>"; };
+		CA765C321852358A0093A9E5 /* BltCallbackInput.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = BltCallbackInput.c; sourceTree = "<group>"; };
+		CA765C331852358A0093A9E5 /* BltCallbackInput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BltCallbackInput.h; sourceTree = "<group>"; };
+		CA765C35185237EC0093A9E5 /* BltCallbackOutput.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = BltCallbackOutput.c; sourceTree = "<group>"; };
+		CA765C36185237EC0093A9E5 /* BltCallbackOutput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BltCallbackOutput.h; sourceTree = "<group>"; };
 		CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltIppDecoder.cpp; sourceTree = "<group>"; };
 		CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltIppDecoder.h; sourceTree = "<group>"; };
 		CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBltIppDecoder.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2187,9 +2258,20 @@
 		CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		CAA862EE14FFC820008956A3 /* BltNetworkQueuedInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltNetworkQueuedInput.cpp; sourceTree = "<group>"; };
 		CAA862EF14FFC820008956A3 /* BltNetworkQueuedInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltNetworkQueuedInput.h; sourceTree = "<group>"; };
+		CAA8DB9218443286000EFC1A /* BltMemoryOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltMemoryOutput.c; sourceTree = "<group>"; };
+		CAA8DB9318443286000EFC1A /* BltMemoryOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltMemoryOutput.h; sourceTree = "<group>"; };
+		CAA8DBF1184435A8000EFC1A /* pcmdecoder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pcmdecoder; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAA8DBFD184435EC000EFC1A /* PcmDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PcmDecoder.cpp; sourceTree = "<group>"; };
+		CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		CAB4C85E18566783006EFEC1 /* CallbackInputExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CallbackInputExample; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAB4C86018566783006EFEC1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		CAB4C86218566783006EFEC1 /* CallbackInputExample.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = CallbackInputExample.1; sourceTree = "<group>"; };
+		CAB4C8C818566899006EFEC1 /* CallbackInputExample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CallbackInputExample.cpp; sourceTree = "<group>"; };
 		CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVolumeControl.h; sourceTree = "<group>"; };
 		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
 		CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSynchronization.h; sourceTree = "<group>"; };
+		CAB829FD185840EB00FC4944 /* BltUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltUtils.c; sourceTree = "<group>"; };
+		CAB829FE185840EB00FC4944 /* BltUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltUtils.h; sourceTree = "<group>"; };
 		CAC7D5770E453A1100037D81 /* BltKeyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltKeyManager.h; sourceTree = "<group>"; };
 		CAC91A5F1663202700201C94 /* BlueTune.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueTune.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAC91A601663202700201C94 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -3033,6 +3115,38 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAA8DBEE184435A8000EFC1A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAA8DC1018443BAB000EFC1A /* CoreServices.framework in Frameworks */,
+				CAA8DC0D18443BA0000EFC1A /* AudioToolbox.framework in Frameworks */,
+				CAA8DC0E18443BA0000EFC1A /* AudioUnit.framework in Frameworks */,
+				CAA8DC0C18443AA6000EFC1A /* CoreAudio.framework in Frameworks */,
+				CAA8DC0018443A1E000EFC1A /* libAtomix.a in Frameworks */,
+				CAA8DC0118443A1E000EFC1A /* libNeptune.a in Frameworks */,
+				CAA8DBFF18443A1E000EFC1A /* libBlueTune.a in Frameworks */,
+				CAA8DC0618443A39000EFC1A /* libBento4.a in Frameworks */,
+				CAA8DC0718443A39000EFC1A /* libBento4Atomix.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAB4C85B18566783006EFEC1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAB4C8C318566845006EFEC1 /* CoreServices.framework in Frameworks */,
+				CAB4C8C41856684E006EFEC1 /* AudioToolbox.framework in Frameworks */,
+				CAB4C8C518566858006EFEC1 /* AudioUnit.framework in Frameworks */,
+				CAB4C8C61856685F006EFEC1 /* CoreAudio.framework in Frameworks */,
+				CAB4C8C21856683D006EFEC1 /* libBento4Atomix.a in Frameworks */,
+				CAB4C8BF18566815006EFEC1 /* libAtomix.a in Frameworks */,
+				CAB4C8C118566820006EFEC1 /* libNeptune.a in Frameworks */,
+				CAB4C8BE18566815006EFEC1 /* libBlueTune.a in Frameworks */,
+				CAB4C8C018566820006EFEC1 /* libBento4.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CAC91A5B1663202700201C94 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3092,6 +3206,7 @@
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
+				CAB4C85F18566783006EFEC1 /* CallbackInputExample */,
 				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
@@ -3126,6 +3241,8 @@
 				CA13EF7915E71C7000214EE1 /* SampleFilter.plugin */,
 				CADFC2CD16192A2F004F3C53 /* libFhgAAC.a */,
 				CAC91A5F1663202700201C94 /* BlueTune.framework */,
+				CAA8DBF1184435A8000EFC1A /* pcmdecoder */,
+				CAB4C85E18566783006EFEC1 /* CallbackInputExample */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3149,12 +3266,12 @@
 		CA0C9AD90D15D24500E23496 /* Apps */ = {
 			isa = PBXGroup;
 			children = (
-				CA53C0C410A628B900950FAF /* BtTouchPlayer */,
 				CA1EC1830ED29B8C0033F894 /* BtCocoaPlayer */,
-				CA9ED8410EAFAB56003CE43C /* BtPlayX */,
-				CA0C9AED0D15D24500E23496 /* BtPlay */,
 				CA0C9ADA0D15D24500E23496 /* BtController */,
+				CA0C9AED0D15D24500E23496 /* BtPlay */,
 				CA550C900D2093A500B22D72 /* BtPlayerServer */,
+				CA9ED8410EAFAB56003CE43C /* BtPlayX */,
+				CA53C0C410A628B900950FAF /* BtTouchPlayer */,
 				CA0C9AF00D15D24500E23496 /* PcmDiff */,
 			);
 			path = Apps;
@@ -3190,6 +3307,7 @@
 		CA13EF5B15E71BA500214EE1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */,
 				CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */,
 				CAC91A601663202700201C94 /* Cocoa.framework */,
 				CAC91A621663202700201C94 /* Other Frameworks */,
@@ -3379,6 +3497,7 @@
 				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
+				CA552B5B1721116100CC1C99 /* mp4audioclip */,
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
 				CA44C47F0D4522DA00173F5F /* cryptotest */,
@@ -3426,11 +3545,8 @@
 		CA5041F10C5AE52B0060E6FE /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */,
-				CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */,
-				CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */,
-				CA9ED2920EAD3A8D003CE43C /* BltPixels.c */,
-				CA9ED2930EAD3A8D003CE43C /* BltPixels.h */,
+				CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */,
+				CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */,
 				CA5041F20C5AE52B0060E6FE /* BltBuiltins.h */,
 				CA5041F30C5AE52B0060E6FE /* BltByteStreamProvider.h */,
 				CA5041F40C5AE52B0060E6FE /* BltByteStreamUser.h */,
@@ -3439,6 +3555,7 @@
 				CA5041F70C5AE52B0060E6FE /* BltCore.h */,
 				CA5041F80C5AE52B0060E6FE /* BltCorePriv.h */,
 				CA5041F90C5AE52B0060E6FE /* BltDefs.h */,
+				CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */,
 				CA5041FA0C5AE52B0060E6FE /* BltErrors.h */,
 				CA5041FB0C5AE52B0060E6FE /* BltEvent.h */,
 				CA5041FC0C5AE52B0060E6FE /* BltEventListener.h */,
@@ -3459,17 +3576,21 @@
 				CA50420B0C5AE52B0060E6FE /* BltPacketProducer.h */,
 				CA50420C0C5AE52B0060E6FE /* BltPcm.c */,
 				CA50420D0C5AE52B0060E6FE /* BltPcm.h */,
+				CA9ED2920EAD3A8D003CE43C /* BltPixels.c */,
+				CA9ED2930EAD3A8D003CE43C /* BltPixels.h */,
 				CA50420E0C5AE52B0060E6FE /* BltRegistry.c */,
 				CA50420F0C5AE52B0060E6FE /* BltRegistry.h */,
 				CA5042100C5AE52B0060E6FE /* BltRegistryPriv.h */,
 				CA5042110C5AE52B0060E6FE /* BltStream.c */,
 				CA5042120C5AE52B0060E6FE /* BltStream.h */,
 				CA5042130C5AE52B0060E6FE /* BltStreamPriv.h */,
+				CAB7B2AA0EDCA8AB00195273 /* BltSynchronization.h */,
 				CA5042140C5AE52B0060E6FE /* BltTime.c */,
 				CA5042150C5AE52B0060E6FE /* BltTime.h */,
 				CA5042160C5AE52B0060E6FE /* BltTypes.h */,
-				CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */,
-				CAFBDCFB0CAE019C00E6B62F /* BltBitStream.c */,
+				CAB829FD185840EB00FC4944 /* BltUtils.c */,
+				CAB829FE185840EB00FC4944 /* BltUtils.h */,
+				CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -3752,6 +3873,7 @@
 		CA5042750C5AE52B0060E6FE /* Inputs */ = {
 			isa = PBXGroup;
 			children = (
+				CA765C311852358A0093A9E5 /* Callback */,
 				CA5042820C5AE52B0060E6FE /* File */,
 				CA5042850C5AE52B0060E6FE /* Network */,
 			);
@@ -3789,13 +3911,15 @@
 		CA5042900C5AE52B0060E6FE /* Outputs */ = {
 			isa = PBXGroup;
 			children = (
+				CA765C34185237EC0093A9E5 /* Callback */,
+				CA5042940C5AE52B0060E6FE /* Debug */,
+				CA5042980C5AE52B0060E6FE /* File */,
+				CAA8DB9118443286000EFC1A /* Memory */,
+				CA50429E0C5AE52B0060E6FE /* Null */,
 				CA1859B10F22D0E500CF3552 /* OsxAudioQueue */,
 				CA1859B40F22D0E500CF3552 /* OsxAudioUnits */,
 				CA1859B70F22D0E500CF3552 /* OsxVideo */,
 				CA360A5E13765CBD001D3DE0 /* RAOP */,
-				CA5042940C5AE52B0060E6FE /* Debug */,
-				CA5042980C5AE52B0060E6FE /* File */,
-				CA50429E0C5AE52B0060E6FE /* Null */,
 			);
 			path = Outputs;
 			sourceTree = "<group>";
@@ -3892,6 +4016,7 @@
 				CAE418B40E0DD91C00A530D1 /* NetConfig */,
 				CAE418B60E0DD91C00A530D1 /* NetPing */,
 				CADF6049124199FE007C78F9 /* NetGet */,
+				CA552B861721116100CC1C99 /* NetBench */,
 				CA33F0C1131B1C65005CA17E /* NetResolve */,
 				CAE418940E0DD91C00A530D1 /* ArraysTest1 */,
 				CAE418960E0DD91C00A530D1 /* BufferedStreamsTest1 */,
@@ -4332,6 +4457,24 @@
 			path = Adapters;
 			sourceTree = "<group>";
 		};
+		CA765C311852358A0093A9E5 /* Callback */ = {
+			isa = PBXGroup;
+			children = (
+				CA765C321852358A0093A9E5 /* BltCallbackInput.c */,
+				CA765C331852358A0093A9E5 /* BltCallbackInput.h */,
+			);
+			path = Callback;
+			sourceTree = "<group>";
+		};
+		CA765C34185237EC0093A9E5 /* Callback */ = {
+			isa = PBXGroup;
+			children = (
+				CA765C35185237EC0093A9E5 /* BltCallbackOutput.c */,
+				CA765C36185237EC0093A9E5 /* BltCallbackOutput.h */,
+			);
+			path = Callback;
+			sourceTree = "<group>";
+		};
 		CA7F2F750FA81381006A1B2D /* IPP */ = {
 			isa = PBXGroup;
 			children = (
@@ -4383,6 +4526,42 @@
 				CA9ED9300EB02685003CE43C /* BltFfmpegDecoder.h */,
 			);
 			path = FFMPEG;
+			sourceTree = "<group>";
+		};
+		CAA8DB9118443286000EFC1A /* Memory */ = {
+			isa = PBXGroup;
+			children = (
+				CAA8DB9218443286000EFC1A /* BltMemoryOutput.c */,
+				CAA8DB9318443286000EFC1A /* BltMemoryOutput.h */,
+			);
+			path = Memory;
+			sourceTree = "<group>";
+		};
+		CAA8DBFC184435EC000EFC1A /* PcmDecoder */ = {
+			isa = PBXGroup;
+			children = (
+				CAA8DBFD184435EC000EFC1A /* PcmDecoder.cpp */,
+			);
+			name = PcmDecoder;
+			path = Examples/PcmDecoder;
+			sourceTree = "<group>";
+		};
+		CAB4C85F18566783006EFEC1 /* CallbackInputExample */ = {
+			isa = PBXGroup;
+			children = (
+				CAB4C86018566783006EFEC1 /* main.cpp */,
+				CAB4C86218566783006EFEC1 /* CallbackInputExample.1 */,
+			);
+			path = CallbackInputExample;
+			sourceTree = "<group>";
+		};
+		CAB4C8C718566899006EFEC1 /* CallbackInput */ = {
+			isa = PBXGroup;
+			children = (
+				CAB4C8C818566899006EFEC1 /* CallbackInputExample.cpp */,
+			);
+			name = CallbackInput;
+			path = Examples/CallbackInput;
 			sourceTree = "<group>";
 		};
 		CAC91A621663202700201C94 /* Other Frameworks */ = {
@@ -5339,9 +5518,11 @@
 		CAF2EE110E5FDD8D00948C04 /* Examples */ = {
 			isa = PBXGroup;
 			children = (
-				CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */,
-				CA13EF7E15E71E3900214EE1 /* Filter */,
 				CAF2EE120E5FDDB200948C04 /* AsyncApi */,
+				CAB4C8C718566899006EFEC1 /* CallbackInput */,
+				CA13EF7E15E71E3900214EE1 /* Filter */,
+				CAA8DBFC184435EC000EFC1A /* PcmDecoder */,
+				CA13EF5E15E71BA500214EE1 /* SampleFilterPlugin */,
 				CAF2EE130E5FDDB200948C04 /* SyncApi */,
 			);
 			name = Examples;
@@ -5867,6 +6048,7 @@
 				CA5042F90C5AE52B0060E6FE /* FloEngine.h in Headers */,
 				CA5042FA0C5AE52B0060E6FE /* FloErrors.h in Headers */,
 				CA5042FC0C5AE52B0060E6FE /* FloFilter.h in Headers */,
+				CAA8DB9518443286000EFC1A /* BltMemoryOutput.h in Headers */,
 				CA5042FE0C5AE52B0060E6FE /* FloFrame.h in Headers */,
 				CA5043000C5AE52B0060E6FE /* FloHeaders.h in Headers */,
 				CA5043020C5AE52B0060E6FE /* FloHuffman.h in Headers */,
@@ -5924,6 +6106,7 @@
 				CA1859BB0F22D0F900CF3552 /* BltOsxAudioUnitsOutput.h in Headers */,
 				CA53C27110A7865100950FAF /* BltOsxAudioQueueOutput.h in Headers */,
 				CA649D181107D0E1005B52E9 /* BltOsxAudioFileStreamParser.h in Headers */,
+				CAB82A00185840EB00FC4944 /* BltUtils.h in Headers */,
 				CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */,
 				CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */,
 				CA7513D21256D8F30022D1A8 /* BltBento4Adapters.h in Headers */,
@@ -6225,6 +6408,41 @@
 			productReference = CA9ED8340EAFAAFC003CE43C /* btplayx */;
 			productType = "com.apple.product-type.tool";
 		};
+		CAA8DBF0184435A8000EFC1A /* PcmDecoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAA8DBF7184435A8000EFC1A /* Build configuration list for PBXNativeTarget "PcmDecoder" */;
+			buildPhases = (
+				CAA8DBED184435A8000EFC1A /* Sources */,
+				CAA8DBEE184435A8000EFC1A /* Frameworks */,
+				CAA8DBEF184435A8000EFC1A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CAA8DC0B18443A4D000EFC1A /* PBXTargetDependency */,
+			);
+			name = PcmDecoder;
+			productName = PcmDecoder;
+			productReference = CAA8DBF1184435A8000EFC1A /* pcmdecoder */;
+			productType = "com.apple.product-type.tool";
+		};
+		CAB4C85D18566783006EFEC1 /* CallbackInputExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAB4C8BD18566783006EFEC1 /* Build configuration list for PBXNativeTarget "CallbackInputExample" */;
+			buildPhases = (
+				CAB4C85A18566783006EFEC1 /* Sources */,
+				CAB4C85B18566783006EFEC1 /* Frameworks */,
+				CAB4C85C18566783006EFEC1 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CallbackInputExample;
+			productName = CallbackInputExample;
+			productReference = CAB4C85E18566783006EFEC1 /* CallbackInputExample */;
+			productType = "com.apple.product-type.tool";
+		};
 		CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CAC91A701663202800201C94 /* Build configuration list for PBXNativeTarget "BlueTune-Framework-OSX" */;
@@ -6382,7 +6600,9 @@
 				CA550C940D2093D800B22D72 /* BtPlayerServer */,
 				CA1ACEF90D30C5FA00C350CD /* NetworkStreamTest */,
 				CA44DE6D0DEDEAE50020CB81 /* PcmDiff */,
+				CAA8DBF0184435A8000EFC1A /* PcmDecoder */,
 				CAF2EE260E60C38D00948C04 /* AsyncPlayerC */,
+				CAB4C85D18566783006EFEC1 /* CallbackInputExample */,
 				CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */,
 				CA53C0B810A6277800950FAF /* BtTouchPlayer */,
 				CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */,
@@ -6655,6 +6875,20 @@
 			fileType = "compiled.mach-o.executable";
 			path = HttpServerTest1;
 			remoteRef = CA550DAC0D23255E00B22D72 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA552B5B1721116100CC1C99 /* mp4audioclip */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4audioclip;
+			remoteRef = CA552B5A1721116100CC1C99 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA552B861721116100CC1C99 /* NetBench */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = NetBench;
+			remoteRef = CA552B851721116100CC1C99 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA55562A1198A32E0069EA6D /* DigestsTest1 */ = {
@@ -7200,6 +7434,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAA8DBED184435A8000EFC1A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAA8DBFE184435EC000EFC1A /* PcmDecoder.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAB4C85A18566783006EFEC1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAB4C8C918566899006EFEC1 /* CallbackInputExample.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CAC91A5A1663202700201C94 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -7461,6 +7711,7 @@
 			files = (
 				CA5042CE0C5AE52B0060E6FE /* BltCore.c in Sources */,
 				CA5042D50C5AE52B0060E6FE /* BltInterfaces.c in Sources */,
+				CAB4C8CD18568DFA006EFEC1 /* BltCallbackInput.c in Sources */,
 				CA5042D60C5AE52B0060E6FE /* BltMedia.c in Sources */,
 				CA5042D80C5AE52B0060E6FE /* BltMediaNode.c in Sources */,
 				CA5042DA0C5AE52B0060E6FE /* BltMediaPacket.c in Sources */,
@@ -7479,6 +7730,7 @@
 				CA5042FD0C5AE52B0060E6FE /* FloFrame.c in Sources */,
 				CA5042FF0C5AE52B0060E6FE /* FloHeaders.c in Sources */,
 				CA5043010C5AE52B0060E6FE /* FloHuffman.c in Sources */,
+				CAA8DB9418443286000EFC1A /* BltMemoryOutput.c in Sources */,
 				CA5043030C5AE52B0060E6FE /* FloLayerI.c in Sources */,
 				CA5043050C5AE52B0060E6FE /* FloLayerII.c in Sources */,
 				CA5043070C5AE52B0060E6FE /* FloLayerIII.c in Sources */,
@@ -7507,6 +7759,7 @@
 				CA50434D0C5AE52B0060E6FE /* BltFileOutput.c in Sources */,
 				CA5043510C5AE52B0060E6FE /* BltNullOutput.c in Sources */,
 				CA5043570C5AE52B0060E6FE /* BltAiffParser.c in Sources */,
+				CAB829FF185840EB00FC4944 /* BltUtils.c in Sources */,
 				CA50435B0C5AE52B0060E6FE /* BltApeParser.c in Sources */,
 				CA50435D0C5AE52B0060E6FE /* BltId3Parser.c in Sources */,
 				CA50435F0C5AE52B0060E6FE /* BltTagParser.c in Sources */,
@@ -7723,6 +7976,11 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA9ED8460EAFAB6C003CE43C /* PBXContainerItemProxy */;
+		};
+		CAA8DC0B18443A4D000EFC1A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CAA8DC0A18443A4D000EFC1A /* PBXContainerItemProxy */;
 		};
 		CAC91A741663203E00201C94 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8211,7 +8469,6 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -8224,7 +8481,8 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 i386";
+				VALID_ARCHS = "armv7 armv7s i386";
+				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 			};
 			name = Debug;
 		};
@@ -8244,7 +8502,6 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -8257,7 +8514,8 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 i386";
+				VALID_ARCHS = "armv7 armv7s i386";
+				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -8509,6 +8767,126 @@
 				SUPPORTED_PLATFORMS = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
 				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Release;
+		};
+		CAA8DBF8184435A8000EFC1A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = pcmdecoder;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Debug;
+		};
+		CAA8DBF9184435A8000EFC1A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = pcmdecoder;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
+		};
+		CAB4C86418566783006EFEC1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CAB4C86518566783006EFEC1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -8849,6 +9227,24 @@
 			buildConfigurations = (
 				CA9ED8360EAFAAFD003CE43C /* Debug */,
 				CA9ED8370EAFAAFD003CE43C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAA8DBF7184435A8000EFC1A /* Build configuration list for PBXNativeTarget "PcmDecoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAA8DBF8184435A8000EFC1A /* Debug */,
+				CAA8DBF9184435A8000EFC1A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAB4C8BD18566783006EFEC1 /* Build configuration list for PBXNativeTarget "CallbackInputExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAB4C86418566783006EFEC1 /* Debug */,
+				CAB4C86518566783006EFEC1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

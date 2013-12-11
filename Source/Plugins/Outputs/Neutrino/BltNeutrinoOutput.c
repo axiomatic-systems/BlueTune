@@ -90,8 +90,7 @@ static BLT_Result
 NeutrinoOutput_SetState(NeutrinoOutput* output, NeutrinoOutputState state)
 {
     if (state != output->state) {
-        BLT_Debug("NeutrinoOutput::SetState - from %d to %d\n",
-                  output->state, state);
+        ATX_LOG_FINER("state changed from %d to %d", output->state, state);
     }
     output->state = state;
     return BLT_SUCCESS;
@@ -214,8 +213,7 @@ NeutrinoOutput_Drain(NeutrinoOutput* output)
       case BLT_NEUTRINO_OUTPUT_STATE_OPEN:
         /* flush samples buffered by the driver */
         BLT_Debug("NeutrinoOutput::Drain - snd_pcm_flush\n");
-        snd_pcm_channel_flush(output->device_handle,
-                              SND_PCM_CHANNEL_PLAYBACK);
+        snd_pcm_channel_flush(output->device_handle, SND_PCM_CHANNEL_PLAYBACK);
         break;
     }
 
@@ -263,11 +261,9 @@ NeutrinoOutput_Prepare(NeutrinoOutput* output)
         }
 
         /* prepare the device */
-        BLT_Debug("NeutrinoOutput::Prepare - snd_pcm_playback_prepare\n");
-        io_result = snd_pcm_playback_prepare(output->device_handle);
+        io_result = snd_pcm_plugin_params(output->device_handle, &params);
         if (io_result != 0) {
-            BLT_Debug("NeutrinoOutput::Prepare: - snd_pcm_playback_prepare failed (%d)\n",
-                      io_result);
+            ATX_LOG_WARNING_1("snd_pcm_plugin_params failed (%s)", );
             return BLT_FAILURE;
         }
 
@@ -534,8 +530,6 @@ NeutrinoOutput_Create(BLT_Core*                core,
     output->media_format.sample_rate     = 0;
     output->media_format.channel_count   = 0;
     output->media_format.bits_per_sample = 0;
-    output->min_fragments = BLT_NEUTRINO_OUTPUT_DEFAULT_MIN_FRAGMENTS;
-    output->max_fragments = BLT_NEUTRINO_OUTPUT_DEFAULT_MAX_FRAGMENTS;
     output->fragment.valid_bytes         = 0;
 
     /* construct reference */

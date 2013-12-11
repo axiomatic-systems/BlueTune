@@ -957,7 +957,7 @@ Stream_ResetOutput(BLT_Stream* _self)
 +---------------------------------------------------------------------*/
 BLT_METHOD 
 Stream_SetOutputNode(BLT_Stream*    _self, 
-		     BLT_CString    name,
+                     BLT_CString    name,
                      BLT_MediaNode* node)
 {
     Stream*     self = ATX_SELF(Stream, BLT_Stream);

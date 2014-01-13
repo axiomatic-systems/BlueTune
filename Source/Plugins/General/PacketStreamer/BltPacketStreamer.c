@@ -94,9 +94,9 @@ PacketStreamerInput_PutPacket(BLT_PacketConsumer* _self,
                 self->media_type->extension_size == sizeof(BLT_PcmMediaType)-sizeof(BLT_MediaType)) {
                 const BLT_PcmMediaType* pcm_in  = (const BLT_PcmMediaType*)media_type;
                 const BLT_PcmMediaType* pcm_out = (const BLT_PcmMediaType*)self->media_type;
-                if (pcm_in->channel_count   != pcm_out->channel_count ||
-                    pcm_in->sample_format   != pcm_out->sample_format ||
-                    pcm_in->bits_per_sample != pcm_out->bits_per_sample) {
+                if ((pcm_out->channel_count   && (pcm_in->channel_count   != pcm_out->channel_count  )) ||
+                    (pcm_out->sample_format   && (pcm_in->sample_format   != pcm_out->sample_format  )) ||
+                    (pcm_out->bits_per_sample && (pcm_in->bits_per_sample != pcm_out->bits_per_sample))) {
                     return BLT_ERROR_INVALID_MEDIA_TYPE;
                 }
             } 

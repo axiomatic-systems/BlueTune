@@ -82,6 +82,11 @@ typedef struct {
     BLT_UInt32          mp4es_type_id;
     
     HANDLE_AACDECODER   aac_decoder;
+    struct {
+        unsigned int leading_frames;
+        unsigned int trailing_frames;
+        ATX_UInt64   valid_frames;
+    } gapless_info;
 } FhgAacDecoder;
 
 /*----------------------------------------------------------------------
@@ -236,9 +241,53 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                 self->output.samples_since_seek = (ATX_UInt64)((double)self->output.samples_since_seek*ratio);
             }
         }
+        BLT_Size output_packet_size = aac_info->frameSize*aac_info->numChannels*2;
+
+        // deal with gapless info
+        if (self->output.timestamp_base.seconds == 0 && self->output.timestamp_base.nanoseconds == 0) {
+            if (self->output.samples_since_seek < self->gapless_info.leading_frames) {
+                BLT_Size samples_to_skip = self->gapless_info.leading_frames-self->output.samples_since_seek;
+                BLT_Size bytes_to_skip  = samples_to_skip*aac_info->numChannels*2;
+                if (bytes_to_skip > output_packet_size) {
+                    bytes_to_skip = output_packet_size;
+                }
+                if (bytes_to_skip) {
+                    output_buffer += bytes_to_skip/2;
+                    output_packet_size -= bytes_to_skip;
+                }
+            }
+            if (self->gapless_info.valid_frames &&
+                (self->output.samples_since_seek+aac_info->frameSize) >
+                (self->gapless_info.leading_frames+self->gapless_info.valid_frames)) {
+                BLT_Size samples_to_truncate = (self->output.samples_since_seek+aac_info->frameSize) -
+                                               (self->gapless_info.leading_frames+self->gapless_info.valid_frames);
+                BLT_Size bytes_to_truncate = (samples_to_truncate*aac_info->numChannels)*2;
+                if (bytes_to_truncate > output_packet_size) {
+                    bytes_to_truncate = output_packet_size;
+                }
+                output_packet_size -= bytes_to_truncate;
+            }
+        }
+
+        // compute this packet's timestamp
+        BLT_TimeStamp timestamp;
+        if (aac_info->sampleRate) {
+            BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
+                                                              self->output.media_type.sample_rate);
+            timestamp = BLT_TimeStamp_Add(elapsed, self->output.timestamp_base);
+        } else {
+            timestamp = BLT_TimeStamp_FromMillis(0);
+        }
+
+        // update the sample counters
+        self->output.samples_since_seek += aac_info->frameSize;
         
+        // return now if there's nothing to return
+        if (output_packet_size == 0) {
+            return BLT_ERROR_PORT_HAS_NO_DATA;
+        }
+
         // create a PCM packet for the output
-        BLT_Size   output_packet_size = aac_info->frameSize*aac_info->numChannels*2;
         BLT_Result result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
                                                        output_packet_size,
                                                        (BLT_MediaType*)&self->output.media_type,
@@ -252,16 +301,7 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
             self->output.started = true;
         }
-
-
-        // compute the timestamp
-        if (aac_info->sampleRate) {
-            unsigned int sample_count = aac_info->frameSize;
-            self->output.samples_since_seek += sample_count;
-            BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
-                                                              self->output.media_type.sample_rate);
-            BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_Add(elapsed, self->output.timestamp_base));
-        }
+        BLT_MediaPacket_SetTimeStamp(*packet, timestamp);
 
         return BLT_SUCCESS;
     }
@@ -346,6 +386,39 @@ FhgAacDecoder_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
+|    FhgAacDecoder_Activate
++---------------------------------------------------------------------*/
+BLT_METHOD
+FhgAacDecoder_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
+{
+    FhgAacDecoder* self = ATX_SELF_EX(FhgAacDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
+
+    /* setup gapless info */
+    self->gapless_info.leading_frames  = 0;
+    self->gapless_info.trailing_frames = 0;
+    self->gapless_info.valid_frames    = 0;
+    ATX_Properties* properties = NULL;
+    if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
+        ATX_PropertyValue property;
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_LEADING_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+            self->gapless_info.leading_frames = (unsigned int)property.data.integer;
+        }
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_TRAILING_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+            self->gapless_info.trailing_frames = (unsigned int)property.data.integer;
+        }
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_VALID_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER) {
+            self->gapless_info.valid_frames = (ATX_UInt64)property.data.large_integer;
+        }
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |    FhgAacDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -370,6 +443,13 @@ FhgAacDecoder_Seek(BLT_MediaNode* _self,
     }
 
     self->input.packets_since_seek = 0;
+    self->output.samples_since_seek = 0;
+    if (ATX_BASE(self, BLT_BaseMediaNode).context) {
+        BLT_Stream_EstimateSeekPoint(ATX_BASE(self, BLT_BaseMediaNode).context, *mode, point);
+        if (point->mask & BLT_SEEK_POINT_MASK_TIME_STAMP) {
+            self->output.timestamp_base = point->time_stamp;
+        }
+    }
     
     return BLT_SUCCESS;
 }
@@ -388,7 +468,7 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 ATX_BEGIN_INTERFACE_MAP_EX(FhgAacDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     FhgAacDecoder_GetPortByName,
-    BLT_BaseMediaNode_Activate,
+    FhgAacDecoder_Activate,
     BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,

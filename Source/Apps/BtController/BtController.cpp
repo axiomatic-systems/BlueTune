@@ -234,6 +234,10 @@ BtController::OnPropertyNotification(BLT_PropertyScope        scope,
             ATX_ConsoleOutputF("= [I] %d\n", value->data.integer);
             break;
             
+        case ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER:
+            ATX_ConsoleOutputF("= [L] %lld\n", (long long)value->data.large_integer);
+            break;
+
         case ATX_PROPERTY_VALUE_TYPE_FLOAT:
             ATX_ConsoleOutputF("= [F] %f\n", value->data.fp);
             break;

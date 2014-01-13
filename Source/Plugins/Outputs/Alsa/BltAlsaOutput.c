@@ -197,31 +197,6 @@ AlsaOutput_Close(AlsaOutput* self)
 }
 
 /*----------------------------------------------------------------------
-|    AlsaOutput_Drain
-+---------------------------------------------------------------------*/
-static BLT_Result
-AlsaOutput_Drain(AlsaOutput* self)
-{
-    ATX_LOG_FINER("draining output");
-
-    switch (self->state) {
-      case BLT_ALSA_OUTPUT_STATE_CLOSED:
-      case BLT_ALSA_OUTPUT_STATE_OPEN:
-      case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
-        /* ignore */
-        return BLT_SUCCESS;
-
-      case BLT_ALSA_OUTPUT_STATE_PREPARED:
-        /* drain samples buffered by the driver (wait until they are played) */
-        ATX_LOG_FINER("snd_pcm_drain");
-        snd_pcm_drain(self->device_handle);
-        break;
-    }
-
-    return BLT_SUCCESS;
-}
-
-/*----------------------------------------------------------------------
 |    AlsaOutput_Reset
 +---------------------------------------------------------------------*/
 static BLT_Result
@@ -288,8 +263,6 @@ AlsaOutput_Prepare(AlsaOutput* self)
 static BLT_Result
 AlsaOutput_Unprepare(AlsaOutput* self)
 {
-    BLT_Result result;
-
     ATX_LOG_FINER("unpreparing output");
 
     switch (self->state) {
@@ -301,8 +274,8 @@ AlsaOutput_Unprepare(AlsaOutput* self)
 
       case BLT_ALSA_OUTPUT_STATE_PREPARED:
         /* drain any pending samples */
-        result = AlsaOutput_Drain(self);
-        if (BLT_FAILED(result)) return result;
+        ATX_LOG_FINER("snd_pcm_drain");
+        snd_pcm_drain(self->device_handle);
         
         /* update the state */
         AlsaOutput_SetState(self, BLT_ALSA_OUTPUT_STATE_CONFIGURED);
@@ -988,6 +961,33 @@ AlsaOutput_GetStatus(BLT_OutputNode*       _self,
 }
 
 /*----------------------------------------------------------------------
+|    AlsaOutput_Drain
++---------------------------------------------------------------------*/
+BLT_METHOD
+AlsaOutput_Drain(BLT_OutputNode* _self)
+{
+    AlsaOutput* self = ATX_SELF(AlsaOutput, BLT_OutputNode);
+
+    ATX_LOG_FINER("draining output");
+
+    switch (self->state) {
+      case BLT_ALSA_OUTPUT_STATE_CLOSED:
+      case BLT_ALSA_OUTPUT_STATE_OPEN:
+      case BLT_ALSA_OUTPUT_STATE_CONFIGURED:
+        /* ignore */
+        return BLT_SUCCESS;
+
+      case BLT_ALSA_OUTPUT_STATE_PREPARED:
+        /* drain samples buffered by the driver (wait until they are played) */
+        ATX_LOG_FINER("snd_pcm_drain");
+        snd_pcm_drain(self->device_handle);
+        break;
+    }
+
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
 |   GetInterface implementation
 +---------------------------------------------------------------------*/
 ATX_BEGIN_GET_INTERFACE_IMPLEMENTATION(AlsaOutput)
@@ -1036,7 +1036,7 @@ ATX_END_INTERFACE_MAP_EX
 +---------------------------------------------------------------------*/
 ATX_BEGIN_INTERFACE_MAP(AlsaOutput, BLT_OutputNode)
     AlsaOutput_GetStatus,
-    NULL
+    AlsaOutput_Drain
 ATX_END_INTERFACE_MAP
 
 /*----------------------------------------------------------------------

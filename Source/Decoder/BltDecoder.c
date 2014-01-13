@@ -151,12 +151,18 @@ static BLT_Result
 BLT_Decoder_UpdateStatus(BLT_Decoder* decoder) 
 {
     BLT_StreamStatus status;
+    BLT_StreamInfo   stream_info;
     BLT_Result       result;
 
     result = BLT_Stream_GetStatus(decoder->stream, &status);
     if (BLT_SUCCEEDED(result)) {
         decoder->status.time_stamp = status.time_stamp;
         decoder->status.position   = status.position;
+    }
+
+    result = BLT_Stream_GetInfo(decoder->stream, &stream_info);
+    if (BLT_SUCCEEDED(result)) {
+        decoder->status.stream_info = stream_info;
     }
 
     return BLT_SUCCESS;

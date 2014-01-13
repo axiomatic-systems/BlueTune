@@ -271,7 +271,6 @@
 		CA504F540C5EBF710060E6FE /* libFLAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504EB70C5EABCC0060E6FE /* libFLAC.a */; };
 		CA504F5A0C5EC0A70060E6FE /* BltFlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042560C5AE52B0060E6FE /* BltFlacDecoder.h */; };
 		CA504F5B0C5EC0A80060E6FE /* BltFlacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042550C5AE52B0060E6FE /* BltFlacDecoder.c */; };
-		CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA504E1B0C5E8D5A0060E6FE /* libMelo.a */; };
 		CA53C0C110A6278700950FAF /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
 		CA53C0C610A628B900950FAF /* BtTouchPlayer.xib in Resources */ = {isa = PBXBuildFile; fileRef = CA53C0C510A628B900950FAF /* BtTouchPlayer.xib */; };
 		CA53C0CD10A62A7C00950FAF /* BtTouchPlayerMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA53C0CC10A62A7C00950FAF /* BtTouchPlayerMain.mm */; };
@@ -1156,13 +1155,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = BlueTune;
-		};
-		CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = CA504E160C5E8D5A0060E6FE /* Melo.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = Melo;
 		};
 		CA1ACEFE0D30C60200C350CD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2288,8 +2280,6 @@
 		CAA8DBFD184435EC000EFC1A /* PcmDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PcmDecoder.cpp; sourceTree = "<group>"; };
 		CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		CAB4C85E18566783006EFEC1 /* CallbackInputExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CallbackInputExample; sourceTree = BUILT_PRODUCTS_DIR; };
-		CAB4C86018566783006EFEC1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		CAB4C86218566783006EFEC1 /* CallbackInputExample.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = CallbackInputExample.1; sourceTree = "<group>"; };
 		CAB4C8C818566899006EFEC1 /* CallbackInputExample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CallbackInputExample.cpp; sourceTree = "<group>"; };
 		CAB4F5F60EEA90E800848CF2 /* BltVolumeControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltVolumeControl.h; sourceTree = "<group>"; };
 		CAB4F6620EEABA3500848CF2 /* BltErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltErrors.cpp; sourceTree = "<group>"; };
@@ -3214,7 +3204,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA504FDE0C5ED6240060E6FE /* libMelo.a in Frameworks */,
 				CA504E950C5EA3FF0060E6FE /* libTremor.a in Frameworks */,
 				CA504F540C5EBF710060E6FE /* libFLAC.a in Frameworks */,
 			);
@@ -3230,7 +3219,6 @@
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
-				CAB4C85F18566783006EFEC1 /* CallbackInputExample */,
 				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
@@ -4568,15 +4556,6 @@
 			);
 			name = PcmDecoder;
 			path = Examples/PcmDecoder;
-			sourceTree = "<group>";
-		};
-		CAB4C85F18566783006EFEC1 /* CallbackInputExample */ = {
-			isa = PBXGroup;
-			children = (
-				CAB4C86018566783006EFEC1 /* main.cpp */,
-				CAB4C86218566783006EFEC1 /* CallbackInputExample.1 */,
-			);
-			path = CallbackInputExample;
 			sourceTree = "<group>";
 		};
 		CAB4C8C718566899006EFEC1 /* CallbackInput */ = {
@@ -6553,7 +6532,6 @@
 				CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */,
 				CA44C4AB0D45231100173F5F /* PBXTargetDependency */,
 				CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */,
-				CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */,
 				CA504F8D0C5EC79A0060E6FE /* PBXTargetDependency */,
 				CA504F8F0C5EC79A0060E6FE /* PBXTargetDependency */,
 			);
@@ -7855,11 +7833,6 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CA13EF7015E71C7000214EE1 /* PBXContainerItemProxy */;
-		};
-		CA18AD2B0C9326D300A5FE6D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Melo;
-			targetProxy = CA18AD2A0C9326D300A5FE6D /* PBXContainerItemProxy */;
 		};
 		CA1ACEFF0D30C60200C350CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

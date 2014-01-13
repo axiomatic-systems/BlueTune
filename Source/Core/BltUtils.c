@@ -125,7 +125,7 @@ BLT_InputStreamWrapper_Create(void*                                    stream_in
 {
     /* create a new object */
     BLT_InputStreamWrapper* self = (BLT_InputStreamWrapper*)ATX_AllocateZeroMemory(sizeof(BLT_InputStreamWrapper));
-    if (self == NULL) return ATX_ERROR_OUT_OF_MEMORY;
+    if (self == NULL) return NULL;
     
     /* construct the object */
     self->reference_count  = 1;

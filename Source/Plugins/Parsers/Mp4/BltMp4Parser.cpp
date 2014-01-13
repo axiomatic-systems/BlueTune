@@ -12,6 +12,7 @@
 +---------------------------------------------------------------------*/
 #include "Ap4.h"
 #include "Ap4AtomixAdapters.h"
+#include "Ap4Utils.h"
 #include "Atomix.h"
 #include "BltConfig.h"
 #include "BltMp4Parser.h"
@@ -636,6 +637,85 @@ Mp4Parser_SetupVideoOutput(Mp4Parser* self, AP4_Movie* movie)
     return Mp4ParserOutput_SetSampleDescription(&self->video_output, 0);
 }
 
+
+/*----------------------------------------------------------------------
+|   Mp4ParserInput_ParseGaplessMetadata
++---------------------------------------------------------------------*/
+static void
+Mp4Parser_ParseGaplessMetadata(Mp4Parser* self, AP4_Movie* movie)
+{
+    AP4_ContainerAtom* ilst = NULL;
+    
+    ilst = AP4_DYNAMIC_CAST(AP4_ContainerAtom, movie->GetMoovAtom()->FindChild("udta/meta/ilst"));
+    if (!ilst) return;
+    
+    for (AP4_List<AP4_Atom>::Item* child = ilst->GetChildren().FirstItem();
+                                   child;
+                                   child = child->GetNext()) {
+        AP4_Atom* atom = child->GetData();
+        if (atom->GetType() != AP4_ATOM_TYPE_dddd) continue;
+        
+        AP4_ContainerAtom* ddd = AP4_DYNAMIC_CAST(AP4_ContainerAtom, atom);
+        AP4_MetaDataStringAtom* mean = AP4_DYNAMIC_CAST(AP4_MetaDataStringAtom, ddd->GetChild(AP4_ATOM_TYPE_MEAN));
+        AP4_MetaDataStringAtom* name = AP4_DYNAMIC_CAST(AP4_MetaDataStringAtom, ddd->GetChild(AP4_ATOM_TYPE_NAME));
+        if (mean && mean->GetValue()=="com.apple.iTunes" && name && name->GetValue() == "iTunSMPB") {
+            // that's a gapless metadata entry
+            AP4_DataAtom* smpb = AP4_DYNAMIC_CAST(AP4_DataAtom, ddd->GetChild(AP4_ATOM_TYPE_DATA));
+            if (smpb && smpb->GetValueType() == AP4_MetaData::Value::TYPE_STRING_UTF_8) {
+                // that's what we expect to find, check the payload
+                AP4_String* payload = NULL;
+                smpb->LoadString(payload);
+                if (payload && payload->GetLength() >= 44) {
+                    // the payload looks ok, parse it
+                    unsigned char int_buffer[8];
+                    const char* hex = payload->GetChars();
+                    while (*hex == ' ') {
+                        ++hex;
+                    }
+                    
+                    AP4_String priming_frames_hex;
+                    AP4_UI32   priming_frames = 0;
+                    priming_frames_hex.Assign(hex+9, 8);
+                    if (AP4_SUCCEEDED(AP4_ParseHex(priming_frames_hex.GetChars(), int_buffer, 4))) {
+                        priming_frames = AP4_BytesToUInt32BE(int_buffer);
+                    }
+                    
+                    AP4_String remainder_frames_hex;
+                    AP4_UI32   remainder_frames = 0;
+                    remainder_frames_hex.Assign(hex+18, 8);
+                    if (AP4_SUCCEEDED(AP4_ParseHex(remainder_frames_hex.GetChars(), int_buffer, 4))) {
+                        remainder_frames = AP4_BytesToUInt32BE(int_buffer);
+                    }
+                    
+                    AP4_String valid_frames_hex;
+                    AP4_UI64   valid_frames = 0;
+                    valid_frames_hex.Assign(hex+27, 16);
+                    if (AP4_SUCCEEDED(AP4_ParseHex(valid_frames_hex.GetChars(), int_buffer, 8))) {
+                        valid_frames = AP4_BytesToUInt64BE(int_buffer);
+                    }
+
+                    // update the stream properties
+                    ATX_Properties* properties = NULL;
+                    if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
+                        ATX_PropertyValue property_value;
+                        property_value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                        property_value.data.integer = (ATX_Int32)priming_frames;
+                        ATX_Properties_SetProperty(properties, BLT_STREAM_GAPLESS_LEADING_FRAMES_PROPERTY, &property_value);
+                        property_value.data.integer = (ATX_Int32)remainder_frames;
+                        ATX_Properties_SetProperty(properties, BLT_STREAM_GAPLESS_TRAILING_FRAMES_PROPERTY, &property_value);
+                        property_value.type = ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER;
+                        property_value.data.large_integer = (ATX_Int64)valid_frames;
+                        ATX_Properties_SetProperty(properties, BLT_STREAM_GAPLESS_VALID_FRAMES_PROPERTY, &property_value);
+                    }
+                    
+                    // done
+                    break;
+                }
+            }
+        }
+    }
+}
+
 /*----------------------------------------------------------------------
 |   Mp4ParserInput_SetStream
 +---------------------------------------------------------------------*/
@@ -697,6 +777,9 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
     }
     if (movie->HasFragments()) self->input.has_fragments = true;
     
+    // check for gapless metadata
+    Mp4Parser_ParseGaplessMetadata(self, movie);
+
     // update the stream info
     BLT_StreamInfo stream_info;
     stream_info.type     = BLT_STREAM_TYPE_MULTIPLEXED;
@@ -706,7 +789,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
                        BLT_STREAM_INFO_MASK_ID   |
                        BLT_STREAM_INFO_MASK_DURATION;    
     BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
-    
+
     // create a shared linear reader if the source is slow-seeking
     if (self->input.slow_seek) {
         ATX_LOG_INFO("source has slow random access, creating a shared reader");
@@ -851,7 +934,8 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
     Mp4ParserOutput* self = ATX_SELF(Mp4ParserOutput, BLT_PacketProducer);
 
     *packet = NULL;
-         
+    unsigned int packet_flags = 0;
+    
     if (self->track == NULL) {
         return BLT_ERROR_EOS;
     } else {
@@ -861,9 +945,14 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         }
 
         // read one sample
-        AP4_Sample sample;
+        AP4_Sample      sample;
         AP4_DataBuffer* sample_buffer = self->sample_buffer;
-        AP4_Result result;
+        AP4_Result      result;
+        
+        // check if this is the first sample
+        if (self->sample == 0) {
+            packet_flags |=BLT_MEDIA_PACKET_FLAG_START_OF_STREAM;
+        }
         
         // look if we have a per-track reader or a shared reader
         AP4_LinearReader* reader = self->reader;
@@ -880,6 +969,11 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
             if (AP4_SUCCEEDED(result) && self->sample_decrypter) {
                 self->sample_decrypter->DecryptSampleData(*sample_buffer, *self->sample_decrypted_buffer);
                 sample_buffer = self->sample_decrypted_buffer;
+            }
+            
+            // check if this is the last sample
+            if (self->sample == self->track->GetSampleCount()) {
+                packet_flags |= BLT_MEDIA_PACKET_FLAG_END_OF_STREAM;
             }
         }
         if (AP4_FAILED(result)) {
@@ -927,9 +1021,7 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         }
 
         // set packet flags
-        if (self->sample == 1) {
-            BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
-        }
+        BLT_MediaPacket_SetFlags(*packet, packet_flags);
 
         return BLT_SUCCESS;
     }

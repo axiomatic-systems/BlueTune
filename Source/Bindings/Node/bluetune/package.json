@@ -1,0 +1,8 @@
+{
+  "name": "bluetune",
+  "version": "0.0.0",
+  "description": "BlueTune Media Player addon for Node.js",
+  "main": "bluetune.js",
+  "private": true,
+  "gypfile": true
+}

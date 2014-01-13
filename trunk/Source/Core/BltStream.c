@@ -1767,7 +1767,7 @@ BLT_METHOD
 Stream_Pause(BLT_Stream* _self)
 {
     Stream*     self = ATX_SELF(Stream, BLT_Stream);
-    StreamNode* node   = self->nodes.head;
+    StreamNode* node = self->nodes.head;
 
     /* pause all the nodes */
     while (node) {
@@ -1784,7 +1784,7 @@ Stream_Pause(BLT_Stream* _self)
 BLT_METHOD
 Stream_SetInfo(BLT_Stream* _self, const BLT_StreamInfo* info)
 {
-    Stream*  self = ATX_SELF(Stream, BLT_Stream);
+    Stream*  self        = ATX_SELF(Stream, BLT_Stream);
     BLT_Mask update_mask = 0;
 
     self->info.mask |= info->mask;

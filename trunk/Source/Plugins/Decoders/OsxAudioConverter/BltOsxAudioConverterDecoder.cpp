@@ -44,7 +44,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.decoders.osx.audio-converter")
 +---------------------------------------------------------------------*/
 const unsigned int BLT_OSX_AUDIO_CONVERTER_DECODER_PACKETS_PER_CONVERSION = 1024;
 const unsigned int BLT_OSX_AUDIO_CONVERTER_DECODER_MAX_OUTPUT_BUFFER_SIZE = 1024*2*8; /* max 8 channels @ 16 bits */
-const int          BLT_OSX_AUDIO_CONVERTER_DATA_UNDERFLOW_ERROR = 1234; /* arbitrary positive value */
+const int          BLT_OSX_AUDIO_CONVERTER_DATA_UNDERFLOW_ERROR           = 1234; /* arbitrary positive value */
 
 #define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN 0x66
 #define BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC   0x67
@@ -97,6 +97,11 @@ typedef struct {
     OsxAudioConverterDecoderInput   input;
     OsxAudioConverterDecoderOutput  output;
     AudioConverterRef               converter;
+    struct {
+        unsigned int leading_frames;
+        unsigned int trailing_frames;
+        ATX_UInt64   valid_frames;
+    } gapless_info;
 } OsxAudioConverterDecoder;
 
 typedef struct {
@@ -250,22 +255,32 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                 source_format.mFormatID = kAudioFormatMPEG4AAC;
                 source_format.mSampleRate       = mp4_type->sample_rate;
                 source_format.mChannelsPerFrame = mp4_type->channel_count;
-                if (mp4_type->decoder_info_length > 2) {
-                    // if the decoder info is more than 2 bytes, assume this is He-AAC
+
+                if (mp4_type->decoder_info_length) {
                     AP4_Mp4AudioDecoderConfig dec_config;
                     AP4_Result result = dec_config.Parse(mp4_type->decoder_info, mp4_type->decoder_info_length);
-                    if (AP4_SUCCEEDED(result)) {
-                        ATX_LOG_FINE("He-AAC detected");
-                        if (dec_config.m_Extension.m_SbrPresent) {
-                            source_format.mFormatID = kAudioFormatMPEG4AAC_HE;
-                            source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                    
+                    // use the info from the decoder info to update the source format
+                    // (what's in the MP4 is not always accurate)
+                    source_format.mChannelsPerFrame = dec_config.m_ChannelCount;
+                    source_format.mSampleRate       = dec_config.m_SamplingFrequency;
+                    
+                    // check if this looks like HeAAC
+                    if (mp4_type->decoder_info_length > 2) {
+                        // if the decoder info is more than 2 bytes, assume this is He-AAC
+                        if (AP4_SUCCEEDED(result)) {
+                            ATX_LOG_FINE("He-AAC detected");
+                            if (dec_config.m_Extension.m_SbrPresent) {
+                                source_format.mFormatID = kAudioFormatMPEG4AAC_HE;
+                                source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                            }
+                            if (dec_config.m_Extension.m_PsPresent) {
+                                source_format.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
+                                source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                            }
+                        } else {
+                            ATX_LOG_WARNING_1("unable to parse decoder specific info (%d)", result);
                         }
-                        if (dec_config.m_Extension.m_PsPresent) {
-                            source_format.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
-                            source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
-                        }
-                    } else {
-                        ATX_LOG_WARNING_1("unable to parse decoder specific info (%d)", result);
                     }
                 }
             } else {
@@ -417,18 +432,63 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                 BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
             BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &info);
         }
+
+        if (self->output.media_type.sample_rate) {
+            double ratio = (double)output_format.mSampleRate/(double)self->output.media_type.sample_rate;
+            self->output.samples_since_seek = (ATX_UInt64)((double)self->output.samples_since_seek*ratio);
+        }
+    }
+    
+    // compute the number of samples we decoded
+    unsigned int sample_count = 0;
+    if (output_format.mChannelsPerFrame) {
+        sample_count = output_buffers.mBuffers[0].mDataByteSize/(2*output_format.mChannelsPerFrame);
+    }
+
+    // deal with gapless info
+    if (self->output.timestamp_base.seconds == 0 && self->output.timestamp_base.nanoseconds == 0) {
+        if (self->output.samples_since_seek < self->gapless_info.leading_frames) {
+            unsigned int samples_to_skip = self->gapless_info.leading_frames-self->output.samples_since_seek;
+            unsigned int bytes_to_skip = (samples_to_skip*output_format.mChannelsPerFrame)*2;
+            if (bytes_to_skip > output_buffers.mBuffers[0].mDataByteSize) {
+                bytes_to_skip = output_buffers.mBuffers[0].mDataByteSize;
+            }
+            if (bytes_to_skip) {
+                output_buffers.mBuffers[0].mData = ((ATX_UInt8*)output_buffers.mBuffers[0].mData)+bytes_to_skip;
+                output_buffers.mBuffers[0].mDataByteSize -= bytes_to_skip;
+            }
+        }
+        if (self->gapless_info.valid_frames &&
+            (self->output.samples_since_seek+sample_count) >
+            (self->gapless_info.leading_frames+self->gapless_info.valid_frames)) {
+            unsigned int samples_to_truncate = (self->output.samples_since_seek+sample_count) -
+                                               (self->gapless_info.leading_frames+self->gapless_info.valid_frames);
+            unsigned int bytes_to_truncate = (samples_to_truncate*output_format.mChannelsPerFrame)*2;
+            if (bytes_to_truncate > output_buffers.mBuffers[0].mDataByteSize) {
+                bytes_to_truncate = output_buffers.mBuffers[0].mDataByteSize;
+            }
+            output_buffers.mBuffers[0].mDataByteSize -= bytes_to_truncate;
+        }
+    }
+    
+    // compute this packet's timestamp
+    BLT_TimeStamp timestamp;
+    if (self->output.media_type.sample_rate) {
+        BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
+                                                          self->output.media_type.sample_rate);
+        timestamp = BLT_TimeStamp_Add(elapsed, self->output.timestamp_base);
+    } else {
+        timestamp = BLT_TimeStamp_FromMillis(0);
     }
     
     // update the sample counters
-    if (self->output.media_type.sample_rate && self->output.media_type.sample_rate != output_format.mSampleRate) {
-        double ratio = (double)output_format.mSampleRate/(double)self->output.media_type.sample_rate;
-        self->output.samples_since_seek = (ATX_UInt64)((double)self->output.samples_since_seek*ratio);
-    }
-    if (output_format.mChannelsPerFrame) {
-        unsigned int sample_count = output_buffers.mBuffers[0].mDataByteSize/(2*output_format.mChannelsPerFrame);
-        self->output.samples_since_seek += sample_count;
-    }
+    self->output.samples_since_seek += sample_count;
     
+    // return now if there's nothing to return
+    if (output_buffers.mBuffers[0].mDataByteSize == 0) {
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
+
     // return a media packet
     self->output.media_type.sample_rate     = output_format.mSampleRate;
     self->output.media_type.channel_count   = output_format.mChannelsPerFrame;
@@ -447,13 +507,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         BLT_MediaPacket_SetFlags(*packet, BLT_MEDIA_PACKET_FLAG_START_OF_STREAM);
         self->output.started = true;
     }
-    
-    // compute the timestamp
-    if (self->output.media_type.sample_rate) {
-        BLT_TimeStamp elapsed = BLT_TimeStamp_FromSamples(self->output.samples_since_seek,
-                                                          self->output.media_type.sample_rate);
-        BLT_MediaPacket_SetTimeStamp(*packet, BLT_TimeStamp_Add(elapsed, self->output.timestamp_base));
-    }
+    BLT_MediaPacket_SetTimeStamp(*packet, timestamp);
     
     return BLT_SUCCESS;
 }
@@ -539,6 +593,40 @@ OsxAudioConverterDecoder_GetPortByName(BLT_MediaNode*  _self,
 }
 
 /*----------------------------------------------------------------------
+|    OsxAudioConverterDecoder_Activate
++---------------------------------------------------------------------*/
+BLT_METHOD
+OsxAudioConverterDecoder_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
+{
+    OsxAudioConverterDecoder* self = ATX_SELF_EX(OsxAudioConverterDecoder, BLT_BaseMediaNode, BLT_MediaNode);
+    ATX_BASE(self, BLT_BaseMediaNode).context = stream;
+
+    /* setup gapless info */
+    self->gapless_info.leading_frames  = 0;
+    self->gapless_info.trailing_frames = 0;
+    self->gapless_info.valid_frames    = 0;
+    ATX_Properties* properties = NULL;
+    if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
+        ATX_PropertyValue property;
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_LEADING_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+            self->gapless_info.leading_frames = (unsigned int)property.data.integer;
+        }
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_TRAILING_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
+            self->gapless_info.trailing_frames = (unsigned int)property.data.integer;
+        }
+        if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_STREAM_GAPLESS_VALID_FRAMES_PROPERTY, &property)) &&
+            property.type == ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER) {
+            self->gapless_info.valid_frames = (ATX_UInt64)property.data.large_integer;
+        }
+    }
+
+    return BLT_SUCCESS;
+}
+
+
+/*----------------------------------------------------------------------
 |    OsxAudioConverterDecoder_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
@@ -567,7 +655,6 @@ OsxAudioConverterDecoder_Seek(BLT_MediaNode* _self,
             self->output.timestamp_base = point->time_stamp;
         }
     }
-
     
     if (self->converter) {
         AudioConverterReset(self->converter);
@@ -590,7 +677,7 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 ATX_BEGIN_INTERFACE_MAP_EX(OsxAudioConverterDecoder, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_GetInfo,
     OsxAudioConverterDecoder_GetPortByName,
-    BLT_BaseMediaNode_Activate,
+    OsxAudioConverterDecoder_Activate,
     BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
     BLT_BaseMediaNode_Stop,

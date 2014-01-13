@@ -92,16 +92,17 @@ MemoryOutput_PutPacket(BLT_PacketConsumer* _self,
 |    MemoryOutput_GetPacket
 +---------------------------------------------------------------------*/
 BLT_METHOD
-MemoryOutput_GetPacket(BLT_PacketProducer* _self,
-                       BLT_MediaPacket**   packet)
+MemoryOutput_GetPacket(BLT_PacketProducer* _self, BLT_MediaPacket** packet)
 {
     MemoryOutput* self = ATX_SELF(MemoryOutput, BLT_PacketProducer);
     *packet = self->packet;
-    if (self->packet) {
-        BLT_MediaPacket_AddReference(self->packet);
-    }
+    self->packet = NULL;
     
-    return BLT_SUCCESS;
+    if (*packet) {
+        return BLT_SUCCESS;
+    } else {
+        return BLT_ERROR_PORT_HAS_NO_DATA;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -177,6 +178,12 @@ MemoryOutput_Destroy(MemoryOutput* self)
 {
     ATX_LOG_FINE("Destroy");
 
+    /* release any packet we may be holding on to */
+    if (self->packet) {
+        BLT_MediaPacket_Release(self->packet);
+        self->packet = NULL;
+    }
+    
     /* free the media type extensions */
     BLT_MediaType_Free(self->expected_media_type);
 
@@ -206,6 +213,45 @@ MemoryOutput_GetPortByName(BLT_MediaNode*  _self,
         *port = NULL;
         return BLT_ERROR_NO_SUCH_PORT;
     }
+}
+
+/*----------------------------------------------------------------------
+|   MemoryOutput_Stop
++---------------------------------------------------------------------*/
+BLT_METHOD
+MemoryOutput_Stop(BLT_MediaNode* _self)
+{
+    MemoryOutput* self = ATX_SELF_EX(MemoryOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    
+    /* release any packet we may be holding on to */
+    if (self->packet) {
+        BLT_MediaPacket_Release(self->packet);
+        self->packet = NULL;
+    }
+    
+    return BLT_SUCCESS;
+}
+
+/*----------------------------------------------------------------------
+|   MemoryOutput_Seek
++---------------------------------------------------------------------*/
+BLT_METHOD
+MemoryOutput_Seek(BLT_MediaNode*  _self,
+                  BLT_SeekMode*  mode,
+                  BLT_SeekPoint* point)
+{
+    MemoryOutput* self = ATX_SELF_EX(MemoryOutput, BLT_BaseMediaNode, BLT_MediaNode);
+    
+    ATX_COMPILER_UNUSED(mode);
+    ATX_COMPILER_UNUSED(point);
+    
+    /* release any packet we may be holding on to */
+    if (self->packet) {
+        BLT_MediaPacket_Release(self->packet);
+        self->packet = NULL;
+    }
+
+    return BLT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
@@ -253,10 +299,10 @@ ATX_BEGIN_INTERFACE_MAP_EX(MemoryOutput, BLT_BaseMediaNode, BLT_MediaNode)
     BLT_BaseMediaNode_Activate,
     BLT_BaseMediaNode_Deactivate,
     BLT_BaseMediaNode_Start,
-    BLT_BaseMediaNode_Stop,
+    MemoryOutput_Stop,
     BLT_BaseMediaNode_Pause,
     BLT_BaseMediaNode_Resume,
-    BLT_BaseMediaNode_Seek
+    MemoryOutput_Seek
 ATX_END_INTERFACE_MAP_EX
 
 /*----------------------------------------------------------------------

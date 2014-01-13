@@ -1,7 +1,7 @@
 ANDROID_ARCH          = 'x86'
 ANDROID_PLATFORM      = 'android-9'
 ANDROID_TOOLCHAIN     = ''
-ANDROID_CROSS_PREFIX  = 'i686-android-linux'
+ANDROID_CROSS_PREFIX  = 'i686-linux-android'
 ANDROID_EXTRA_CCFLAGS = []
 
 # BlueTune specifics

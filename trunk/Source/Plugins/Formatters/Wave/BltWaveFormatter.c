@@ -525,14 +525,10 @@ WaveFormatterModule_Probe(BLT_Module*              _self,
 
             /* the input protocol should be STREAM_PUSH and the */
             /* output protocol should be STREAM_PUSH            */
-            if ((constructor->spec.input.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.input.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH) ||
-                (constructor->spec.output.protocol !=
-                 BLT_MEDIA_PORT_PROTOCOL_ANY &&
-                 constructor->spec.output.protocol != 
-                 BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH)) {
+            if ((constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.input.protocol  != BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH) ||
+                (constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_ANY &&
+                 constructor->spec.output.protocol != BLT_MEDIA_PORT_PROTOCOL_STREAM_PUSH)) {
                 return BLT_FAILURE;
             }
 

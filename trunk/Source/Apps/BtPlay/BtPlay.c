@@ -355,6 +355,10 @@ BLTP_PrintPropertyValue(const ATX_PropertyValue* value)
         ATX_ConsoleOutputF("%d", value->data.integer);
         break;
 
+      case ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER:
+        ATX_ConsoleOutputF("%lld", (long long)value->data.integer);
+        break;
+
       default:
         break;
     }

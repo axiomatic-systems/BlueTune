@@ -68,6 +68,10 @@
 #define BLT_STREAM_VIDEO_TRACK_SELECTOR_ID_PROPERTY     "Video.TrackSelector.ID"
 #define BLT_STREAM_VIDEO_TRACK_SELECTOR_STRICT_PROPERTY "Video.TrackSelector.Strict"
 
+#define BLT_STREAM_GAPLESS_LEADING_FRAMES_PROPERTY   "Audio.Gapless.LeadingFrames"
+#define BLT_STREAM_GAPLESS_TRAILING_FRAMES_PROPERTY  "Audio.Gapless.TrailingFrames"
+#define BLT_STREAM_GAPLESS_VALID_FRAMES_PROPERTY     "Audio.Gapless.ValidFrames"
+
 /* Common stream properties */
 #define BLT_STREAM_PROPERTY_METADATA_JSON "Metadata.Json"
 

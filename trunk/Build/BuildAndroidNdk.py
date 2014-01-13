@@ -30,6 +30,11 @@ else:
 	else:
 		raise Exception('Android Host Platform cannot be determined')
 
+# check if we're on darwin-x86_64 (not detected by sys.platform)
+if ANDROID_HOST_SYSTEM == 'darwin-x86':
+    if not os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'prebuilt', 'darwin-x86')) and os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'prebuilt', 'darwin-x86_64')):
+        ANDROID_HOST_SYSTEM = 'darwin-x86_64'
+
 if ANDROID_TOOLCHAIN == '' or not os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'toolchains', ANDROID_TOOLCHAIN)):
     toolchain_dirs = os.listdir(ANDROID_NDK_ROOT+'/toolchains')
     for toolchain_dir in toolchain_dirs:
@@ -65,9 +70,6 @@ print 'ANDROID_PLATFORM    =', ANDROID_PLATFORM
 print 'ANDROID_ARCH        =', ANDROID_ARCH
 
 ANDROID_TOOLCHAIN_BIN = ANDROID_NDK_ROOT+'/toolchains/'+ANDROID_TOOLCHAIN+'/prebuilt/'+ANDROID_HOST_SYSTEM+'/bin'
-if not os.path.exists(ANDROID_TOOLCHAIN_BIN) and ANDROID_HOST_SYSTEM is 'darwin-x86':
-    ANDROID_HOST_SYSTEM = 'darwin-x86_64'
-    ANDROID_TOOLCHAIN_BIN = ANDROID_NDK_ROOT+'/toolchains/'+ANDROID_TOOLCHAIN+'/prebuilt/'+ANDROID_HOST_SYSTEM+'/bin'
 ANDROID_SYSROOT = ANDROID_NDK_ROOT+'/platforms/'+ANDROID_PLATFORM+'/arch-'+ANDROID_ARCH
 
 ### add the tools to the path

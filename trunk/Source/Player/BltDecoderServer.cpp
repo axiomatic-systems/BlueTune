@@ -878,6 +878,7 @@ BLT_DecoderServer_PropertyValueWrapper::BLT_DecoderServer_PropertyValueWrapper(
         case ATX_PROPERTY_VALUE_TYPE_BOOLEAN:
         case ATX_PROPERTY_VALUE_TYPE_FLOAT:
         case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+        case ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER:
         case ATX_PROPERTY_VALUE_TYPE_POINTER:
             m_Value->data = value->data;
             break;
@@ -925,6 +926,7 @@ BLT_DecoderServer_PropertyValueWrapper::~BLT_DecoderServer_PropertyValueWrapper(
         case ATX_PROPERTY_VALUE_TYPE_BOOLEAN:
         case ATX_PROPERTY_VALUE_TYPE_FLOAT:
         case ATX_PROPERTY_VALUE_TYPE_INTEGER:
+        case ATX_PROPERTY_VALUE_TYPE_LARGE_INTEGER:
         case ATX_PROPERTY_VALUE_TYPE_POINTER:
             break;
     }

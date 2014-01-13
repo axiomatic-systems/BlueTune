@@ -61,25 +61,32 @@ main(int argc, char** argv)
     BLT_PacketProducer* packet_source = ATX_CAST(output_node, BLT_PacketProducer);
 
     /* pump packets until there are no more */
-    do {
+    for (;;) {
         result = BLT_Decoder_PumpPacket(decoder);
-        if (BLT_SUCCEEDED(result)) {
-            BLT_MediaPacket* packet = NULL;
-            result = BLT_PacketProducer_GetPacket(packet_source, &packet);
-            if (BLT_SUCCEEDED(result) && packet) {
-                const BLT_PcmMediaType* media_type;
-                BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
-                printf("PACKET: sample_rate=%d, channels=%d, bits_per_sample=%d, size=%d\n",
-                       media_type->sample_rate,
-                       media_type->channel_count,
-                       media_type->bits_per_sample,
-                       BLT_MediaPacket_GetPayloadSize(packet));
-                
-                /* don't forget to release the packet */
-                BLT_MediaPacket_Release(packet);
+        if (BLT_FAILED(result)) {
+            if (result == BLT_ERROR_EOS) {
+                printf("decoding done\n");
+            } else {
+                printf("deocding stopped (%d)\n", result);
             }
+            break;
         }
-    } while (BLT_SUCCEEDED(result));
+
+        BLT_MediaPacket* packet = NULL;
+        result = BLT_PacketProducer_GetPacket(packet_source, &packet);
+        if (BLT_SUCCEEDED(result) && packet) {
+            const BLT_PcmMediaType* media_type;
+            BLT_MediaPacket_GetMediaType(packet, (const BLT_MediaType**)&media_type);
+            printf("PACKET: sample_rate=%d, channels=%d, bits_per_sample=%d, size=%d\n",
+                   media_type->sample_rate,
+                   media_type->channel_count,
+                   media_type->bits_per_sample,
+                   BLT_MediaPacket_GetPayloadSize(packet));
+            
+            /* don't forget to release the packet */
+            BLT_MediaPacket_Release(packet);
+        }
+    }
     
     /* cleanup */
     BLT_Decoder_Destroy(decoder);

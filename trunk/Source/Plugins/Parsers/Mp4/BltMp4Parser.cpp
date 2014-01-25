@@ -709,8 +709,10 @@ Mp4Parser_ParseGaplessMetadata(Mp4Parser* self, AP4_Movie* movie)
                     }
                     
                     // done
+                    delete payload;
                     break;
                 }
+                delete payload;
             }
         }
     }

@@ -111,7 +111,16 @@ FhgAacDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     }
     self->input.packet = packet;
     BLT_MediaPacket_AddReference(packet);
-        
+    
+    // pad the packet with some zeros because the internals of the codec
+    // library read past the end of the input buffer
+    BLT_Size payload_size = BLT_MediaPacket_GetPayloadSize(self->input.packet);
+    BLT_Size padded_size = payload_size+8;
+    BLT_MediaPacket_SetAllocatedSize(self->input.packet, padded_size);
+    unsigned char* payload = (unsigned char*)BLT_MediaPacket_GetPayloadBuffer(self->input.packet);
+    ATX_SetMemory(payload+payload_size, 0, 8);
+    
+    // set the timestamp base if this is the first packet after a seek
     if (self->input.packets_since_seek++ == 0) {
         self->output.timestamp_base = BLT_MediaPacket_GetTimeStamp(packet);
     }
@@ -354,6 +363,11 @@ FhgAacDecoder_Destroy(FhgAacDecoder* self)
         BLT_MediaPacket_Release(self->input.packet);
     }
     
+    /* destroy the decoder */
+    if (self->aac_decoder) {
+        aacDecoder_Close(self->aac_decoder);
+    }
+    
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
@@ -434,6 +448,7 @@ FhgAacDecoder_Seek(BLT_MediaNode* _self,
     // reset the decoder by destroying it
     if (self->aac_decoder) {
         aacDecoder_Close(self->aac_decoder);
+        self->aac_decoder = NULL;
     }
     
     // free any pending input packet

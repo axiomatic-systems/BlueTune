@@ -89,6 +89,7 @@ main(int argc, char** argv)
     }
     
     /* cleanup */
+    ATX_RELEASE_OBJECT(output_node);
     BLT_Decoder_Destroy(decoder);
     
     return 0;

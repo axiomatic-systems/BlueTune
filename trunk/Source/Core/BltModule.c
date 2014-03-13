@@ -20,12 +20,6 @@
 ATX_SET_LOCAL_LOGGER("bluetune.core.module")
 
 /*----------------------------------------------------------------------
-|   forward references
-+---------------------------------------------------------------------*/
-ATX_DECLARE_INTERFACE_MAP(BLT_BaseModule, BLT_Module)
-ATX_DECLARE_INTERFACE_MAP(BLT_BaseModule, ATX_Referenceable)
-
-/*----------------------------------------------------------------------
 |   BLT_BaseModule_Construct
 +---------------------------------------------------------------------*/
 BLT_Result

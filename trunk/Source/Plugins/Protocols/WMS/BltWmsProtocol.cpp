@@ -188,7 +188,7 @@ const unsigned int BLT_WMS_PACKET_ID_EOS           = 0x45;
 const unsigned int BLT_WMS_PACKET_ID_STREAM_CHANGE = 0x43;
 
 const unsigned int BLT_WMS_ASF_FILE_PROPERTY_FLAG_BROADCAST = 1;
-const unsigned int BLT_WMS_ASF_FILE_PROPERTY_FLAG_SEEKABLE  = 2;
+//const unsigned int BLT_WMS_ASF_FILE_PROPERTY_FLAG_SEEKABLE  = 2;
 
 const unsigned char BLT_WMS_ASF_GUID_HEADER[16] = 
     // 75B22630-668E-11CF-A6D9-00AA0062CE6C

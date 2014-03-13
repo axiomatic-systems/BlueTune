@@ -50,7 +50,7 @@ const unsigned int BLT_RAOP_RTP_PACKET_FLAG_MARKER_BIT      = 0x80;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TIMING_REQUEST  = 0x52;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_TIMING_RESPONSE = 0x53;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_SYNC            = 0x54;
-const unsigned int BLT_RAOP_RTP_PACKET_TYPE_RESEND          = 0x55;
+//const unsigned int BLT_RAOP_RTP_PACKET_TYPE_RESEND          = 0x55;
 const unsigned int BLT_RAOP_RTP_PACKET_TYPE_AUDIO           = 0x60;
 
 // internal RTP types 

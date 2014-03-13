@@ -136,13 +136,6 @@ BLT_METHOD OsxAudioQueueOutput_Drain(BLT_OutputNode* self);
 |   constants
 +---------------------------------------------------------------------*/
 const unsigned int MP4_AAC_MAX_SAMPLING_FREQUENCY_INDEX = 12;
-static const unsigned int MP4_AacSamplingFreqTable[13] =
-{
-	96000, 88200, 64000, 48000, 
-    44100, 32000, 24000, 22050, 
-    16000, 12000, 11025, 8000, 
-    7350
-};
 
 #define MP4_MPEG4_AUDIO_OBJECT_TYPE_SBR             5  /**< Spectral Band Replication                    */
 #define MP4_MPEG4_AUDIO_OBJECT_TYPE_PS              29 /**< Parametric Stereo                            */

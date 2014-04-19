@@ -835,7 +835,7 @@
 		CAD78A4C12A3474100D7EBA7 /* oscl_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD78A4A12A3474100D7EBA7 /* oscl_mem.h */; };
 		CAD78A6012A3718000D7EBA7 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAD78A5E12A3718000D7EBA7 /* BltAacDecoder.c */; };
 		CAD78A6112A3718000D7EBA7 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD78A5F12A3718000D7EBA7 /* BltAacDecoder.h */; };
-		CADCAB5A12D54BDE002A8B79 /* libBltIppDecoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */; };
+		CADD04A51902177C00AD432B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CADD04A41902177C00AD432B /* Default-568h@2x.png */; };
 		CADFC2D116192AF7004F3C53 /* aac_ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC175161929C9004F3C53 /* aac_ram.cpp */; };
 		CADFC2D216192AF7004F3C53 /* aac_ram.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC176161929C9004F3C53 /* aac_ram.h */; };
 		CADFC2D316192AF7004F3C53 /* aac_rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC177161929C9004F3C53 /* aac_rom.cpp */; };
@@ -1021,6 +1021,7 @@
 		CAF901420FE047CC0066101F /* metadata_iterators.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901330FE047CC0066101F /* metadata_iterators.c */; };
 		CAF901430FE047CC0066101F /* metadata_object.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901340FE047CC0066101F /* metadata_object.c */; };
 		CAF901440FE047CC0066101F /* stream_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAF901350FE047CC0066101F /* stream_decoder.c */; };
+		CAF981A918DE47390001B999 /* BltFfmpegDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED92F0EB02685003CE43C /* BltFfmpegDecoder.c */; };
 		CAFBDB6A0CAD7F2000E6B62F /* BltAlacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAFBDAE90CAD717F00E6B62F /* BltAlacDecoder.c */; };
 		CAFBDB6B0CAD7F2000E6B62F /* BltAlacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDAEA0CAD717F00E6B62F /* BltAlacDecoder.h */; };
 		CAFBDCFC0CAE019C00E6B62F /* BltBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = CAFBDCFA0CAE019C00E6B62F /* BltBitStream.h */; };
@@ -1737,13 +1738,6 @@
 			remoteGlobalIDString = CAB3CB710FCB35B8007C4260;
 			remoteInfo = BufferedStreamTest;
 		};
-		CADCAB5B12D54BE5002A8B79 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CA7F2F7B0FA813FB006A1B2D;
-			remoteInfo = BltIppDecoder;
-		};
 		CADF6048124199FE007C78F9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -1911,6 +1905,34 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAF4792B0F0951B8004073ED;
 			remoteInfo = BenchmarksTest;
+		};
+		CAF9817618DE46810001B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAF9812F18DBF34B0001B999;
+			remoteInfo = Mp42Hevc;
+		};
+		CAF9817818DE46810001B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAF9811A18DBED9B0001B999;
+			remoteInfo = HevcInfo;
+		};
+		CAF981A518DE46810001B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAF26E8E18C74A2F0015ABB9;
+			remoteInfo = ZipTest2;
+		};
+		CAF981A718DE46810001B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAF26E9F18C7FF630015ABB9;
+			remoteInfo = ZipHttpServer;
 		};
 		CAFB21BC0EC2960C009C3459 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2635,6 +2657,7 @@
 		CAD78A4A12A3474100D7EBA7 /* oscl_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oscl_mem.h; sourceTree = "<group>"; };
 		CAD78A5E12A3718000D7EBA7 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
 		CAD78A5F12A3718000D7EBA7 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
+		CADD04A41902177C00AD432B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		CADFC173161929C9004F3C53 /* aacdecoder_lib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aacdecoder_lib.h; sourceTree = "<group>"; };
 		CADFC175161929C9004F3C53 /* aac_ram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aac_ram.cpp; sourceTree = "<group>"; };
 		CADFC176161929C9004F3C53 /* aac_ram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aac_ram.h; sourceTree = "<group>"; };
@@ -3125,7 +3148,6 @@
 				CA9ED84E0EAFABAA003CE43C /* libNeptune.a in Frameworks */,
 				CA9ED84F0EAFABAA003CE43C /* libBento4.a in Frameworks */,
 				CA9ED8500EAFABAA003CE43C /* libBento4Atomix.a in Frameworks */,
-				CADCAB5A12D54BDE002A8B79 /* libBltIppDecoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3215,6 +3237,7 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
+				CADD04A41902177C00AD432B /* Default-568h@2x.png */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
@@ -3506,11 +3529,13 @@
 				CAC02A15139DBA540034427F /* mp4split */,
 				CA9B238813DF87AC004AF156 /* mp4compact */,
 				CA44C47B0D4522DA00173F5F /* mp42aac */,
+				CAF9817718DE46810001B999 /* mp42hevc */,
 				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
 				CA552B5B1721116100CC1C99 /* mp4audioclip */,
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
+				CAF9817918DE46810001B999 /* hevcinfo */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
 				CA44C47F0D4522DA00173F5F /* cryptotest */,
 				CA9ED1E90EACFA6A003CE43C /* AvcTrackWriterTest */,
@@ -4050,6 +4075,7 @@
 				CAE418AC0E0DD91C00A530D1 /* UrlTest1 */,
 				CAA97B220CF3639D00C01909 /* XmlTest1 */,
 				CAE418AE0E0DD91C00A530D1 /* ZipTest1 */,
+				CAF981A618DE46810001B999 /* ZipTest2 */,
 				CAAA4D630E3D5AB200783AE4 /* StreamsTest1 */,
 				CA5826FB0E67C0AC006CC501 /* FileTest1 */,
 				CAFB21BD0EC2960C009C3459 /* TlsTest1 */,
@@ -4059,6 +4085,7 @@
 				CA1C69DF10F69CD800D50ABE /* SocketsTest1 */,
 				CA55562A1198A32E0069EA6D /* DigestsTest1 */,
 				CA55562C1198A32E0069EA6D /* CryptoTest1 */,
+				CAF981A818DE46810001B999 /* ziphttpserver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -6404,7 +6431,6 @@
 			);
 			dependencies = (
 				CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */,
-				CADCAB5C12D54BE5002A8B79 /* PBXTargetDependency */,
 			);
 			name = BtPlayX;
 			productName = BtPlayV;
@@ -6546,7 +6572,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "BlueTune" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -7187,6 +7213,34 @@
 			remoteRef = CAF479DB0F0989C3004073ED /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CAF9817718DE46810001B999 /* mp42hevc */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp42hevc;
+			remoteRef = CAF9817618DE46810001B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAF9817918DE46810001B999 /* hevcinfo */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = hevcinfo;
+			remoteRef = CAF9817818DE46810001B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAF981A618DE46810001B999 /* ZipTest2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ZipTest2;
+			remoteRef = CAF981A518DE46810001B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CAF981A818DE46810001B999 /* ziphttpserver */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = ziphttpserver;
+			remoteRef = CAF981A718DE46810001B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CAFB21BD0EC2960C009C3459 /* TlsTest1 */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -7211,6 +7265,7 @@
 			files = (
 				CA53C0C610A628B900950FAF /* BtTouchPlayer.xib in Resources */,
 				CA1C6A9210F6C49B00D50ABE /* WebRoot in Resources */,
+				CADD04A51902177C00AD432B /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7429,6 +7484,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAF981A918DE47390001B999 /* BltFfmpegDecoder.c in Sources */,
 				CA9ED8440EAFAB56003CE43C /* BtPlayX.c in Sources */,
 				CA9ED8450EAFAB56003CE43C /* BtPlayXForceCpp.cpp in Sources */,
 				CA9EDA800EB0F899003CE43C /* BltDecoderX.c in Sources */,
@@ -7999,11 +8055,6 @@
 			target = D2AAC045055464E500DB518D /* BlueTune */;
 			targetProxy = CAC91A731663203E00201C94 /* PBXContainerItemProxy */;
 		};
-		CADCAB5C12D54BE5002A8B79 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CA7F2F7B0FA813FB006A1B2D /* BltIppDecoder */;
-			targetProxy = CADCAB5B12D54BE5002A8B79 /* PBXContainerItemProxy */;
-		};
 		CAEA9D0A0E144C9C008C396D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Bento4Atomix;
@@ -8101,7 +8152,6 @@
 				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor/** $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -8162,7 +8212,6 @@
 				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor/** $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Release;
 		};
@@ -8170,9 +8219,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				"ARCHS[sdk=iphoneos*]" = armv7;
-				"ARCHS[sdk=iphonesimulator*]" = i386;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				COPY_PHASE_STRIP = NO;
@@ -8200,10 +8246,10 @@
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				ONLY_ACTIVE_ARCH = NO;
-				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
 				VALID_ARCHS = "i386 x86_64 ppc";
-				"VALID_ARCHS[sdk=iphoneos*]" = armv7;
+				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				WARNING_CFLAGS = "-Wall";
 			};
@@ -8213,9 +8259,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				"ARCHS[sdk=iphoneos*]" = armv7;
-				"ARCHS[sdk=iphonesimulator*]" = i386;
 				ATOMIX_HOME = "$(SRCROOT)/../../../../Atomix";
 				BENTO4_HOME = "$(SRCROOT)/../../../../Bento4";
 				DOLBY_DIGITAL_PLUS_PLUGIN_HOME = "$(SRCROOT)/../../../../DolbyDigitalPlusPlugin";
@@ -8241,10 +8284,10 @@
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
 				ONLY_ACTIVE_ARCH = NO;
-				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
 				VALID_ARCHS = "i386 x86_64 ppc";
-				"VALID_ARCHS[sdk=iphoneos*]" = armv7;
+				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				WARNING_CFLAGS = "-Wall";
 			};
@@ -8371,6 +8414,7 @@
 		CA1EC0FC0ED299AE0033F894 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = BtCocoaPlayer/BtCocoaPlayer_Prefix.pch;
 				INFOPLIST_FILE = "BtCocoaPlayer/BtCocoaPlayer-Info.plist";
@@ -8390,6 +8434,7 @@
 		CA1EC0FD0ED299AE0033F894 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = BtCocoaPlayer/BtCocoaPlayer_Prefix.pch;
 				INFOPLIST_FILE = "BtCocoaPlayer/BtCocoaPlayer-Info.plist";
@@ -8425,16 +8470,20 @@
 		CA504EA90C5EA4110060E6FE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				PRODUCT_NAME = Tremor;
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
+				WARNING_CFLAGS = "";
 			};
 			name = Debug;
 		};
 		CA504EAA0C5EA4110060E6FE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				PRODUCT_NAME = Tremor;
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
+				WARNING_CFLAGS = "";
 			};
 			name = Release;
 		};
@@ -8449,7 +8498,6 @@
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 				WARNING_CFLAGS = "";
 			};
 			name = Debug;
@@ -8465,7 +8513,6 @@
 				GCC_WARN_UNUSED_FUNCTION = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 				WARNING_CFLAGS = "";
 			};
 			name = Release;
@@ -8474,11 +8521,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7,
-					i386,
-				);
-				"ARCHS[sdk=iphonesimulator*]" = i386;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -8499,8 +8541,6 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s i386";
-				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 			};
 			name = Debug;
 		};
@@ -8508,11 +8548,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7,
-					i386,
-				);
-				"ARCHS[sdk=iphonesimulator*]" = i386;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -8532,8 +8567,6 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s i386";
-				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -8666,7 +8699,6 @@
 					"$(SRCROOT)/../../..",
 				);
 				PRODUCT_NAME = HelixAAC;
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Debug;
 		};
@@ -8684,7 +8716,6 @@
 					"$(SRCROOT)/../../..",
 				);
 				PRODUCT_NAME = HelixAAC;
-				VALID_ARCHS = "i386 x86_64 ppc armv6 armv7";
 			};
 			name = Release;
 		};
@@ -8739,24 +8770,25 @@
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
-					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
-					BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
+					BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
+					_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				IPP_HOME = /opt/intel/ipp;
 				IPP_SAMPLES_HOME = "/Users/gilles/Develop/Intel-IPP/MacOSX/ipp-samples";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/universal-apple-macosx/lib",
 					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					/usr/local/lib,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
-					"-lippmedia",
-					"-lippruntime",
+					"-lavcodec",
+					"-lavutil",
 				);
 				PRODUCT_NAME = btplayx;
 				SUPPORTED_PLATFORMS = macosx;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /usr/local/include /usr/local/include/libavcodec /usr/local/include/libavutil";
 				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
@@ -8766,24 +8798,24 @@
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					ATX_CONFIG_ENABLE_LOGGING,
-					_BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
-					BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
+					BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER,
+					_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER,
 					BLT_CONFIG_BTPLAYX_ENABLE_OSX_VIDEO_OUTPUT,
 				);
 				IPP_HOME = /opt/intel/ipp;
 				IPP_SAMPLES_HOME = "/Users/gilles/Develop/Intel-IPP/MacOSX/ipp-samples";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ThirdParty/ffmpeg/Targets/universal-apple-macosx/lib",
 					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					/usr/local/lib,
 				);
 				OTHER_LDFLAGS = (
-					"-lippmedia",
-					"-lippruntime",
+					"-lavcodec",
+					"-lavutil",
 				);
 				PRODUCT_NAME = btplayx;
 				SUPPORTED_PLATFORMS = macosx;
-				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavcodec /Users/gilles/Develop/ffmpeg-export-2008-02-25/libavutil";
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/** /usr/local/include /usr/local/include/libavcodec /usr/local/include/libavutil";
 				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
@@ -8876,7 +8908,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -8904,7 +8935,6 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};

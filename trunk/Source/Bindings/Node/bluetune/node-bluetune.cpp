@@ -31,14 +31,13 @@ class NodeMessageQueue : public NPT_SimpleMessageQueue
 private:
     // class methods
     static void OnAsyncWakeup(uv_async_t* handle, int status /*UNUSED*/) {
-        printf("---------- WAKEUP --------- handle=%p\n", handle);
         BLT_Player* player = (BLT_Player*)(handle->data);
         if (player) {
             NPT_Result result;
             do {
                 result = player->PumpMessage(0);
             } while (NPT_SUCCEEDED(result));
-         }
+        }
     }
 
 public:
@@ -233,6 +232,8 @@ private:
     static Handle<Value> New(const Arguments& args);
     static Handle<Value> Close(const Arguments& args);
     static Handle<Value> SetInput(const Arguments& args);
+    static Handle<Value> SetOutput(const Arguments& args);
+    static Handle<Value> SetVolume(const Arguments& args);
     static Handle<Value> Play(const Arguments& args);
     static Handle<Value> Pause(const Arguments& args);
     
@@ -280,9 +281,12 @@ PlayerWrapper::Init(Handle<Object> exports)
   
     // Prototype
     Local<ObjectTemplate> ptpl = ftpl->PrototypeTemplate();
-    ptpl->Set(String::NewSymbol("setInput"), FunctionTemplate::New(SetInput)->GetFunction());
-    ptpl->Set(String::NewSymbol("play"),     FunctionTemplate::New(Play)->GetFunction());
-    ptpl->Set(String::NewSymbol("pause"),    FunctionTemplate::New(Pause)->GetFunction());
+    ptpl->Set(String::NewSymbol("setInput"),  FunctionTemplate::New(SetInput)->GetFunction());
+    ptpl->Set(String::NewSymbol("setOutput"), FunctionTemplate::New(SetOutput)->GetFunction());
+    ptpl->Set(String::NewSymbol("setVolume"), FunctionTemplate::New(SetVolume)->GetFunction());
+    ptpl->Set(String::NewSymbol("play"),      FunctionTemplate::New(Play)->GetFunction());
+    ptpl->Set(String::NewSymbol("stop"),      FunctionTemplate::New(Stop)->GetFunction());
+    ptpl->Set(String::NewSymbol("pause"),     FunctionTemplate::New(Pause)->GetFunction());
 
     constructor = Persistent<Function>::New(ftpl->GetFunction());
     exports->Set(String::NewSymbol("Player"), constructor);
@@ -362,19 +366,102 @@ PlayerWrapper::SetInput(const Arguments& args) {
     NPT_LOG_FINE("SetInput");
     
     if (args.Length() < 1) {
-        ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+        ThrowException(Exception::Error(String::New("Too few arguments")));
         return scope.Close(Undefined());
     }
 
     if (!args[0]->IsString()) {
-        ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+        ThrowException(Exception::TypeError(String::New("Wrong argument 1 type")));
+        return scope.Close(Undefined());
+    }
+    if (args.Length() >= 2 && !args[1]->IsString()) {
+        ThrowException(Exception::TypeError(String::New("Wrong argument 2 type")));
         return scope.Close(Undefined());
     }
 
     String::Utf8Value input_name(args[0]->ToString());
 
     PlayerWrapper* self = ObjectWrap::Unwrap<PlayerWrapper>(args.This());
-    if (self->m_Player) self->m_Player->SetInput(*input_name);
+    if (self->m_Player) {
+        if (args.Length() >= 2) {
+            String::Utf8Value type(args[1]->ToString());
+            self->m_Player->SetInput(*input_name, *type);
+        } else {
+            self->m_Player->SetInput(*input_name);
+        }
+    }
+    
+    return scope.Close(args.This());
+}
+
+/*----------------------------------------------------------------------
+|    NodePlayer::SetOutput
++---------------------------------------------------------------------*/
+Handle<Value>
+PlayerWrapper::SetOutput(const Arguments& args) {
+    HandleScope scope;
+
+    NPT_LOG_FINE("SetOutput");
+    
+    if (args.Length() < 1) {
+        ThrowException(Exception::Error(String::New("Too few arguments")));
+        return scope.Close(Undefined());
+    }
+
+    if (!args[0]->IsString()) {
+        ThrowException(Exception::TypeError(String::New("Wrong argument 1 type")));
+        return scope.Close(Undefined());
+    }
+    if (args.Length() >= 2 && !args[1]->IsString()) {
+        ThrowException(Exception::TypeError(String::New("Wrong argument 2 type")));
+        return scope.Close(Undefined());
+    }
+
+    String::Utf8Value output_name(args[0]->ToString());
+
+    PlayerWrapper* self = ObjectWrap::Unwrap<PlayerWrapper>(args.This());
+    if (self->m_Player) {
+        if (args.Length() >= 2) {
+            String::Utf8Value type(args[1]->ToString());
+            self->m_Player->SetOutput(*output_name, *type);
+        } else {
+            self->m_Player->SetOutput(*output_name);
+        }
+    }
+    
+    return scope.Close(args.This());
+}
+
+/*----------------------------------------------------------------------
+|    NodePlayer::SetVolume
++---------------------------------------------------------------------*/
+Handle<Value>
+PlayerWrapper::SetVolume(const Arguments& args) {
+    HandleScope scope;
+
+    NPT_LOG_FINE("SetVolume");
+    
+    if (args.Length() < 1) {
+        ThrowException(Exception::Error(String::New("Too few arguments")));
+        return scope.Close(Undefined());
+    }
+
+    if (!args[0]->IsNumber()) {
+        ThrowException(Exception::TypeError(String::New("Wrong argument 1 type")));
+        return scope.Close(Undefined());
+    }
+
+    double volume = args[0]->NumberValue();
+
+    if (volume < 0.0 || volume > 1.0) {
+        ThrowException(Exception::RangeError(String::New("Argument 1 out of range")));
+        return scope.Close(Undefined());
+    }
+
+    PlayerWrapper* self = ObjectWrap::Unwrap<PlayerWrapper>(args.This());
+    if (self->m_Player) {
+        self->m_Player->SetVolume(volume);
+    }
     
     return scope.Close(args.This());
 }
@@ -390,6 +477,21 @@ PlayerWrapper::Play(const Arguments& args) {
     
     PlayerWrapper* self = ObjectWrap::Unwrap<PlayerWrapper>(args.This());
     if (self->m_Player) self->m_Player->Play();
+    
+    return scope.Close(args.This());
+}
+
+/*----------------------------------------------------------------------
+|    PlayerWrapper::Play
++---------------------------------------------------------------------*/
+Handle<Value>
+PlayerWrapper::Stop(const Arguments& args) {
+    HandleScope scope;
+
+    NPT_LOG_FINE("Stop");
+    
+    PlayerWrapper* self = ObjectWrap::Unwrap<PlayerWrapper>(args.This());
+    if (self->m_Player) self->m_Player->Stop();
     
     return scope.Close(args.This());
 }

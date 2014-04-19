@@ -296,7 +296,7 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
     if (header[0] == 'I' &&
         header[1] == 'D' &&
         header[2] == '3') {
-        unsigned int footer_size = 0;
+        BLT_UInt32 footer_size = 0;
         /* look at the tag version */
         if (header[3] == 2 || header[3] == 3) {
             /* version 2.x or 3.x */
@@ -312,10 +312,10 @@ BLT_Id3Parser_ParseV2(ATX_InputStream* stream,
 
         /* get the tag size */
         *tag_size = BLT_ID3V2_TAG_HEADER_SIZE + footer_size +
-            (((unsigned long)(header[9] & 0x7F)      ) |
-             ((unsigned long)(header[8] & 0x7F) <<  7) |
-             ((unsigned long)(header[7] & 0x7F) << 14) |
-             ((unsigned long)(header[6] & 0x7F) << 21));
+            (((BLT_UInt32)(header[9] & 0x7F)      ) |
+             ((BLT_UInt32)(header[8] & 0x7F) <<  7) |
+             ((BLT_UInt32)(header[7] & 0x7F) << 14) |
+             ((BLT_UInt32)(header[6] & 0x7F) << 21));
         return BLT_SUCCESS;
     }
 

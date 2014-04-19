@@ -102,7 +102,7 @@ VorbisDecoder_ReadCallback(void *ptr, size_t size, size_t nbelem, void *datasour
     BLT_Size       bytes_read;
     BLT_Result     result;
 
-    bytes_to_read = (BLT_Size)size*nbelem;
+    bytes_to_read = (BLT_Size)(size*nbelem);
     result = ATX_InputStream_Read(self->input.stream, ptr, bytes_to_read, &bytes_read);
     if (BLT_SUCCEEDED(result)) {
         return bytes_read;
@@ -234,7 +234,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
     /* get info about the stream */
     info = ov_info(&self->input.vorbis_file, -1);
     if (info == NULL) return BLT_ERROR_INVALID_MEDIA_FORMAT;
-    self->output.media_type.sample_rate     = info->rate;
+    self->output.media_type.sample_rate     = (BLT_UInt32)info->rate;
     self->output.media_type.channel_count   = info->channels;
     self->output.media_type.channel_mask    = 0;
     self->output.media_type.bits_per_sample = 16;
@@ -248,7 +248,7 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
         stream_info.mask = 0;
 
         /* sample rate */
-        stream_info.sample_rate = info->rate;
+        stream_info.sample_rate = (BLT_UInt32)info->rate;
         stream_info.mask |= BLT_STREAM_INFO_MASK_SAMPLE_RATE;
 
         /* channel count */
@@ -260,16 +260,16 @@ VorbisDecoder_OpenStream(VorbisDecoder* self)
         stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
 
         /* nominal bitrate */
-        stream_info.nominal_bitrate = info->bitrate_nominal;
+        stream_info.nominal_bitrate = (BLT_UInt32)info->bitrate_nominal;
         stream_info.mask |= BLT_STREAM_INFO_MASK_NOMINAL_BITRATE;
 
         /* average bitrate */
         {
             long bitrate = ov_bitrate(&self->input.vorbis_file, -1);
             if (bitrate > 0) {
-                stream_info.average_bitrate = bitrate;
+                stream_info.average_bitrate = (BLT_UInt32)bitrate;
             } else {
-                stream_info.average_bitrate = info->bitrate_nominal;
+                stream_info.average_bitrate = (BLT_UInt32)info->bitrate_nominal;
             }
             stream_info.mask |= BLT_STREAM_INFO_MASK_AVERAGE_BITRATE;
         }
@@ -469,7 +469,7 @@ VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     }   
     
     /* update the size of the packet */
-    BLT_MediaPacket_SetPayloadSize(*packet, bytes_read);
+    BLT_MediaPacket_SetPayloadSize(*packet, (BLT_UInt32)bytes_read);
 
     /* set flags */     
     if (self->output.packet_count == 0) {
@@ -491,7 +491,7 @@ VorbisDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         BLT_MediaPacket_SetTimeStamp(*packet, time_stamp);
 
         /* update sample count */
-        sample_count = bytes_read/(self->output.media_type.channel_count*
+        sample_count = (BLT_UInt32)bytes_read/(self->output.media_type.channel_count*
                                    self->output.media_type.bits_per_sample/8);
         self->output.sample_count += sample_count;
     } 

@@ -230,9 +230,9 @@ FLO_ByteStream_AlignToByte(FLO_ByteStream* self)
 |    FLO_ByteStream_FindHeader
 +----------------------------------------------------------------------*/
 static FLO_Result
-FLO_ByteStream_FindHeader(FLO_ByteStream* self, unsigned long* header)
+FLO_ByteStream_FindHeader(FLO_ByteStream* self, FLO_UInt32* header)
 {
-    unsigned long packed;
+    FLO_UInt32    packed;
     int           available = FLO_ByteStream_GetBytesAvailable(self);
     unsigned int  current   = self->out;
 
@@ -285,7 +285,7 @@ FLO_Result
 FLO_ByteStream_FindFrame(FLO_ByteStream* self, FLO_FrameInfo* frame_info)
 {
     unsigned int    available;
-    unsigned long   packed;
+    FLO_UInt32      packed;
     FLO_FrameHeader frame_header;
     FLO_Result      result;
 
@@ -320,7 +320,7 @@ FLO_ByteStream_FindFrame(FLO_ByteStream* self, FLO_FrameInfo* frame_info)
     } else {
         /* peek at the header of the next frame */
         unsigned int    peek_offset;
-        unsigned long   peek_packed;
+        FLO_UInt32      peek_packed;
         FLO_FrameHeader peek_header;
 
         if (available < frame_info->size+4) {

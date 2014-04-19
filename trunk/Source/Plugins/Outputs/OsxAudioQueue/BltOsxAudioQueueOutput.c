@@ -733,7 +733,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
         self->packet_count_max = 0;
     }
     if (audio_format.mFramesPerPacket) {
-        self->packet_count_max = 
+        self->packet_count_max = (BLT_Cardinal)
             (((((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
                 (UInt64)audio_format.mSampleRate)/audio_format.mFramesPerPacket)/1000) +
                 BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT/2)/
@@ -749,7 +749,7 @@ OsxAudioQueueOutput_UpdateStreamFormat(OsxAudioQueueOutput* self,
         unsigned int i;
         unsigned int buffer_size;
         if (audio_format.mBytesPerFrame && ((UInt32)audio_format.mSampleRate != 0)) {
-            buffer_size = (((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION * 
+            buffer_size = (unsigned int)(((UInt64)BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFERS_TOTAL_DURATION *
                             (UInt64)audio_format.mBytesPerFrame*(UInt64)audio_format.mSampleRate)/1000)/
                             BLT_OSX_AUDIO_QUEUE_OUTPUT_BUFFER_COUNT;
         } else {

@@ -137,7 +137,8 @@ OsxAudioUnitsOutput_RenderCallback(void*						inRefCon,
     /* init local variables */
     requested = ioData->mBuffers[0].mDataByteSize;
     out = (unsigned char*)ioData->mBuffers[0].mData;
-    ATX_LOG_FINEST_2("request for %d bytes, %d frames", (int)requested, (int)inNumberFrames);
+    ATX_LOG_FINEST_4("request for %d bytes, %d frames, in_time=%lld | %lld", (int)requested, (int)inNumberFrames,
+                     inTimeStamp?inTimeStamp->mHostTime:0, inTimeStamp?(UInt64)inTimeStamp->mSampleTime:0);
 
     /* lock the packet queue */
     pthread_mutex_lock(&self->lock);
@@ -824,10 +825,11 @@ OsxAudioUnitsOutput_GetStatus(BLT_OutputNode*       _self,
     if (self->media_time_snapshot.rendered_host_time) {
         UInt64 host_time  = AudioConvertHostTimeToNanos(AudioGetCurrentHostTime());
         UInt64 media_time = BLT_TimeStamp_ToNanos(self->media_time_snapshot.rendered_packet_ts); 
-        ATX_LOG_FINER_3("host time = %lld, last rendered packet = %lld, rendered ts = %lld", 
+        ATX_LOG_FINER_4("host time = %lld, last rendered host time = %lld (ts = %lld), diff = %lld",
                         host_time, 
                         self->media_time_snapshot.rendered_host_time,
-                        media_time);
+                        media_time,
+                        host_time-self->media_time_snapshot.rendered_host_time);
         if (host_time > self->media_time_snapshot.rendered_host_time) {
             media_time += host_time-self->media_time_snapshot.rendered_host_time;
         } 

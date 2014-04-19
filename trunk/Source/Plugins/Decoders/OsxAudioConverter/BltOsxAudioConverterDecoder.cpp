@@ -448,7 +448,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
     // deal with gapless info
     if (self->output.timestamp_base.seconds == 0 && self->output.timestamp_base.nanoseconds == 0) {
         if (self->output.samples_since_seek < self->gapless_info.leading_frames) {
-            unsigned int samples_to_skip = self->gapless_info.leading_frames-self->output.samples_since_seek;
+            unsigned int samples_to_skip = (unsigned int)(self->gapless_info.leading_frames-self->output.samples_since_seek);
             unsigned int bytes_to_skip = (samples_to_skip*output_format.mChannelsPerFrame)*2;
             if (bytes_to_skip > output_buffers.mBuffers[0].mDataByteSize) {
                 bytes_to_skip = output_buffers.mBuffers[0].mDataByteSize;
@@ -461,8 +461,8 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         if (self->gapless_info.valid_frames &&
             (self->output.samples_since_seek+sample_count) >
             (self->gapless_info.leading_frames+self->gapless_info.valid_frames)) {
-            unsigned int samples_to_truncate = (self->output.samples_since_seek+sample_count) -
-                                               (self->gapless_info.leading_frames+self->gapless_info.valid_frames);
+            unsigned int samples_to_truncate = (unsigned int)((self->output.samples_since_seek+sample_count) -
+                                                              (self->gapless_info.leading_frames+self->gapless_info.valid_frames));
             unsigned int bytes_to_truncate = (samples_to_truncate*output_format.mChannelsPerFrame)*2;
             if (bytes_to_truncate > output_buffers.mBuffers[0].mDataByteSize) {
                 bytes_to_truncate = output_buffers.mBuffers[0].mDataByteSize;

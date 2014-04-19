@@ -210,7 +210,7 @@ BtPlayerServer::SendStatus(NPT_HttpResponse& response, NPT_UrlQuery& query)
         json += NPT_String::Format("\"size\": %d, ", m_StreamInfo.size);
     }
     if (m_StreamInfo.mask & BLT_STREAM_INFO_MASK_DURATION) {
-        unsigned int seconds = m_StreamInfo.duration/1000;
+        unsigned int seconds = (unsigned int)(m_StreamInfo.duration/1000);
         json += NPT_String::Format("\"duration\": \"%02d:%02d:%02d\", ", 
                                    (seconds)/36000,
                                    (seconds%3600)/60,

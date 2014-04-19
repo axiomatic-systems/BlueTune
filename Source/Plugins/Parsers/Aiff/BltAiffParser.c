@@ -120,10 +120,10 @@ Aiff_ReadChunkHeader(ATX_InputStream* stream,
 /*----------------------------------------------------------------------
 |   Aiff_ParseExtended
 +---------------------------------------------------------------------*/
-static unsigned long 
+static BLT_UInt32
 Aiff_ParseExtended(unsigned char * buffer)
 {
-   unsigned long mantissa;
+   BLT_UInt32    mantissa;
    unsigned long last = 0;
    unsigned char exp;
 
@@ -150,7 +150,7 @@ AiffParser_OnCommChunk(AiffParser*      self,
     unsigned short num_channels;
     unsigned long  num_sample_frames;
     unsigned short sample_size;
-    unsigned long  sample_rate;
+    BLT_UInt32     sample_rate;
     BLT_Size       header_size;
     BLT_Boolean    is_float = BLT_FALSE;
     BLT_Result     result;

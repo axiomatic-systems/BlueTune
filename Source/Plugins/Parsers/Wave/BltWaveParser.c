@@ -152,8 +152,8 @@ WaveParser_ParseHeader(WaveParser*      self,
     }
 
     do {
-        unsigned long chunk_size;
-        unsigned int  format_tag;
+        BLT_UInt32   chunk_size;
+        unsigned int format_tag;
         result = ATX_InputStream_ReadFully(stream, buffer, 8);
         if (BLT_FAILED(result)) {
             return BLT_ERROR_INVALID_MEDIA_FORMAT;

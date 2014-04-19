@@ -86,6 +86,11 @@ typedef struct {
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_FFMPEG_FORMAT_TAG_AVC1 0x61766331    /* 'avc1' */
+#define BLT_FFMPEG_FORMAT_TAG_AVC2 0x61766332    /* 'avc2' */
+#define BLT_FFMPEG_FORMAT_TAG_AVC3 0x61766333    /* 'avc3' */
+#define BLT_FFMPEG_FORMAT_TAG_AVC4 0x61766334    /* 'avc4' */
+#define BLT_FFMPEG_FORMAT_TAG_HVC1 0x68766331    /* 'hvc1' */
+#define BLT_FFMPEG_FORMAT_TAG_HEV1 0x68657631    /* 'hev1' */
 
 /*----------------------------------------------------------------------
 |   forward declarations
@@ -99,37 +104,16 @@ ATX_DECLARE_INTERFACE_MAP(FfmpegDecoder, ATX_Referenceable)
 +---------------------------------------------------------------------*/
 static int 
 FfmpegDecoder_GetBufferCallback(struct AVCodecContext* context, 
-                                AVFrame*               pic) 
+                                AVFrame*               pic,
+                                int                    flags)
 {
-    int ret = avcodec_default_get_buffer(context, pic);
+    int ret = avcodec_default_get_buffer2(context, pic, flags);
     if (context->opaque) {
         BLT_TimeStamp *pts = av_malloc(sizeof(BLT_TimeStamp));
         *pts = BLT_TimeStamp_FromNanos(*(int64_t*)context->opaque);
         pic->opaque = pts;
     }
     return ret;
-}
-
-/*----------------------------------------------------------------------
-|   FfmpegDecoder_ReGetBufferCallback
-+---------------------------------------------------------------------*/
-static int 
-FfmpegDecoder_ReGetBufferCallback(struct AVCodecContext* context, 
-                                  AVFrame*               pic) 
-{
-    int ret = avcodec_default_reget_buffer(context, pic);
-    return ret;
-}
-
-/*----------------------------------------------------------------------
-|   FfmpegDecoder_ReleaseBufferCallback
-+---------------------------------------------------------------------*/
-static void 
-FfmpegDecoder_ReleaseBufferCallback(struct AVCodecContext* context, 
-                                    AVFrame*               pic) 
-{
-    if (pic && pic->opaque) av_freep(&pic->opaque);
-    avcodec_default_release_buffer(context, pic);
 }
 
 /*----------------------------------------------------------------------
@@ -168,7 +152,7 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
         }
         ATX_SetMemory(packet_buffer+packet_size, 0, BLT_FFMPEG_INPUT_PADDING_SIZE);
 
-        ATX_LOG_FINEST_2("decoding frame size=%ld, pts=%f", 
+        ATX_LOG_FINEST_2("decoding frame size=%d, pts=%f", 
                          packet_size, 
                          (float)BLT_MediaPacket_GetTimeStamp(packet).seconds +
                          (float)BLT_MediaPacket_GetTimeStamp(packet).nanoseconds/1000000000.0f);
@@ -180,17 +164,19 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
         uint8_t*    frame_buffer      = NULL;
         int         frame_buffer_size = 0;
         int64_t     frame_ts          = 0;
-    
+        AVPacket    av_packet;
+        
         /* parse the data if needed */
         if (self->parser_context) {
-            int consumed = av_parser_parse(self->parser_context, 
-                                           self->codec_context,
-                                           &frame_buffer,
-                                           &frame_buffer_size,
-                                           packet_buffer,
-                                           packet_size,
-                                           packet_ts,
-                                           packet_ts);
+            int consumed = av_parser_parse2(self->parser_context,
+                                            self->codec_context,
+                                            &frame_buffer,
+                                            &frame_buffer_size,
+                                            packet_buffer,
+                                            packet_size,
+                                            packet_ts,
+                                            packet_ts,
+                                            0);
             if (consumed > 0) {
                 packet_buffer += consumed;
                 packet_size   -= consumed;
@@ -211,11 +197,11 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
         /* feed the codec */
         ATX_LOG_FINE_1("decoding video frame (%d bytes)", frame_buffer_size);
         self->codec_context->opaque = &frame_ts;
-        av_result = avcodec_decode_video(self->codec_context, 
-                                         self->frame, 
-                                         &got_picture, 
-                                         frame_buffer, 
-                                         frame_buffer_size);
+        av_packet_from_data(&av_packet, frame_buffer, frame_buffer_size);
+        av_result = avcodec_decode_video2(self->codec_context,
+                                          self->frame,
+                                          &got_picture,
+                                          &av_packet);
         if (av_result < 0) {
             ATX_LOG_FINE_1("avcodec_decode_video returned %d", av_result);
             continue;
@@ -292,11 +278,13 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
     FfmpegDecoder*               self   = ATX_SELF_M(input, FfmpegDecoder, BLT_PacketConsumer);
     const BLT_Mp4VideoMediaType* mp4_media_type = NULL;
     const BLT_MediaType*         media_type;
+    enum AVCodecID               codec_id = AV_CODEC_ID_NONE;
     
     /* check the media type */
     BLT_MediaPacket_GetMediaType(packet, &media_type);
     if (media_type->id == self->module->h264_es_type_id) {
         ATX_LOG_FINER("annex-b format");
+        codec_id = AV_CODEC_ID_H264;
     } else if (media_type->id == self->module->iso_base_video_es_type_id ||
                media_type->id == self->module->mp4_video_es_type_id) {
         mp4_media_type = (const BLT_Mp4VideoMediaType*)media_type;
@@ -304,7 +292,15 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             ATX_LOG_FINE("invalid media type (not video)");
             return BLT_ERROR_INVALID_MEDIA_TYPE;
         }
-        if (mp4_media_type->base.format_or_object_type_id != BLT_FFMPEG_FORMAT_TAG_AVC1) {
+        if (mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC1 ||
+            mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC2 ||
+            mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC3 ||
+            mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_AVC4) {
+            codec_id = AV_CODEC_ID_H264;
+        } else if (mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_HVC1 ||
+                   mp4_media_type->base.format_or_object_type_id == BLT_FFMPEG_FORMAT_TAG_HEV1) {
+            codec_id = AV_CODEC_ID_HEVC;
+        } else {
             ATX_LOG_FINE_1("unsupported codec (%x)", mp4_media_type->base.format_or_object_type_id);
             return BLT_ERROR_UNSUPPORTED_CODEC;
         }
@@ -336,21 +332,21 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* find the codec handle */
-        codec = avcodec_find_decoder(CODEC_ID_H264);
+        codec = avcodec_find_decoder(codec_id);
         if (codec == NULL) {
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_find_decoder failed");
             return BLT_ERROR_UNSUPPORTED_CODEC;
         }
         
         /* allocate the codec context */
-        self->codec_context = avcodec_alloc_context();
+        self->codec_context = avcodec_alloc_context3(codec);
         if (self->codec_context == NULL) {
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
             return BLT_ERROR_OUT_OF_MEMORY;
         }
         
         /* setup the codec options */
-        avcodec_get_context_defaults(self->codec_context);
+        avcodec_get_context_defaults3(self->codec_context, codec);
         self->codec_context->debug_mv          = 0;
         self->codec_context->debug             = 0;
         self->codec_context->workaround_bugs   = 1;
@@ -363,9 +359,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->codec_context->thread_count      = 1;
         
         /* setup the callbacks */
-        self->codec_context->get_buffer     = FfmpegDecoder_GetBufferCallback;
-        self->codec_context->reget_buffer   = FfmpegDecoder_ReGetBufferCallback;
-        self->codec_context->release_buffer = FfmpegDecoder_ReleaseBufferCallback;
+        self->codec_context->get_buffer2    = FfmpegDecoder_GetBufferCallback;
         
         if (mp4_media_type) {
             /* set the generic video config */
@@ -384,7 +378,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* open the codec */
-        av_result = avcodec_open(self->codec_context, codec);
+        av_result = avcodec_open2(self->codec_context, codec, NULL);
         if (av_result < 0) {
             ATX_LOG_WARNING_1("FfmpegDecoderInput::PutPacket - avcodec_open returned %d", av_result);
             return BLT_ERROR_INTERNAL;
@@ -395,7 +389,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             
         /* open a parser if necessary */
         if (mp4_media_type == NULL) {
-            self->parser_context = av_parser_init(CODEC_ID_H264);
+            self->parser_context = av_parser_init(codec_id);
             if (self->parser_context == NULL) {
                 ATX_LOG_WARNING("no parser for the selected codec");
             } 
@@ -736,7 +730,7 @@ FfmpegDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     ATX_LOG_FINE_1(BLT_ISO_BASE_VIDEO_ES_MIME_TYPE " type = %d)", self->iso_base_video_es_type_id);
     
     /* initialize libavcodec */
-    avcodec_init();
+    /*avcodec_init();*/
     avcodec_register_all();
 
     return BLT_SUCCESS;

@@ -487,12 +487,18 @@ Mp4ParserOutput_SetSampleDescription(Mp4ParserOutput* self,
         stream_info.mask |= BLT_STREAM_INFO_MASK_DATA_TYPE;
         format_or_object_type_id = sample_desc->GetFormat();
         if (sample_desc->GetType() == AP4_SampleDescription::TYPE_AVC) {
-            // look for an 'avcC' atom
-            AP4_AvccAtom* avcc = static_cast<AP4_AvccAtom*>(sample_desc->GetDetails().GetChild(AP4_ATOM_TYPE_AVCC));
-            if (avcc) {
+            AP4_AvcSampleDescription* avc_desc = AP4_DYNAMIC_CAST(AP4_AvcSampleDescription, sample_desc);
+            if (avc_desc) {
                 // pass the avcc payload as the decoder info
-                decoder_info.SetData(avcc->GetRawBytes().GetData(),
-                                     avcc->GetRawBytes().GetDataSize());
+                decoder_info.SetData(avc_desc->GetRawBytes().GetData(),
+                                     avc_desc->GetRawBytes().GetDataSize());
+            } 
+        } else if (sample_desc->GetType() == AP4_SampleDescription::TYPE_HEVC) {
+            AP4_HevcSampleDescription* hevc_desc = AP4_DYNAMIC_CAST(AP4_HevcSampleDescription, sample_desc);
+            if (hevc_desc) {
+                // pass the avcc payload as the decoder info
+                decoder_info.SetData(hevc_desc->GetRawBytes().GetData(),
+                                     hevc_desc->GetRawBytes().GetDataSize());
             } 
         } else if (sample_desc->GetFormat() == AP4_SAMPLE_FORMAT_ALAC) {
             // look for an 'alac' atom (either top-level or inside a 'wave') 

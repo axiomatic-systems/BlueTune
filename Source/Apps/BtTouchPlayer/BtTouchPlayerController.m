@@ -72,7 +72,7 @@
     [dict setValue: name forKey: @"Name"];
     [dict setValue: value forKey: @"Value"];
     
-    unsigned int record_count = [records count];
+    unsigned int record_count = (unsigned int)[records count];
     unsigned int i;
     for (i=0; i<record_count; i++) {
         NSString* record_name = [[records objectAtIndex: i] valueForKey: @"Name"];

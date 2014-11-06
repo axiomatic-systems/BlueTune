@@ -8438,7 +8438,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
-				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
 				VALID_ARCHS = "i386 x86_64";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
@@ -8475,7 +8475,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
-				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
 				VALID_ARCHS = "i386 x86_64";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
@@ -8680,7 +8680,6 @@
 				);
 				INFOPLIST_FILE = "BlueTune-Node/BlueTune-Node-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-undefined",
 					dynamic_lookup,
@@ -9129,7 +9128,6 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = pcmdecoder;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -9189,8 +9187,8 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
@@ -9218,6 +9216,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};

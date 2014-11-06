@@ -2,7 +2,7 @@
 |
 |      Android Output Module
 |
-|      (c) 2002-2012 Gilles Boccon-Gibod
+|      (c) 2002-2014 Gilles Boccon-Gibod
 |      Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -206,13 +206,12 @@ AndroidOutput_Callback(SLAndroidSimpleBufferQueueItf queue, void* context)
     AndroidOutput*                  self = (AndroidOutput*)context;
     unsigned int                    queue_index;
     SLAndroidSimpleBufferQueueState state;
-    SLresult                        result;
     
     if (queue == NULL || context == NULL) return;
 
-    result = (*queue)->GetState(queue, &state);
+    (*queue)->GetState(queue, &state);
     queue_index = (state.index-1)%BLT_ANDROID_OUTPUT_PACKET_QUEUE_SIZE;
-    ATX_LOG_FINER_3("callback for %d, count=%d, index=%d", queue_index, state.count, state.index);
+    ATX_LOG_FINER_3("callback for %u, count=%u, index=%u", queue_index, (unsigned int)state.count, (unsigned int)state.index);
     if (self->packet_queue[queue_index] == NULL) {
         ATX_LOG_WARNING("queue entry null, not expected");
         return;
@@ -236,7 +235,7 @@ AndroidOutput_Reset(AndroidOutput* self)
     if (self->sl_player_buffer_queue) {
         result = (*self->sl_player_buffer_queue)->Clear(self->sl_player_buffer_queue);
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_FINE_1("Clear() failed (%d)", result);
+            ATX_LOG_FINE_1("Clear() failed (%d)", (int)result);
         }
     }
     
@@ -373,14 +372,14 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
     /* create the OpenSL engine */
     result = slCreateEngine(&self->sl_engine_object, 0, NULL, 0, NULL, NULL);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("slCreateEngine failed (%d)", result);
+        ATX_LOG_WARNING_1("slCreateEngine failed (%d)", (int)result);
         return BLT_FAILURE;
     }
     
     /* realize the engine */
     result = (*self->sl_engine_object)->Realize(self->sl_engine_object, SL_BOOLEAN_FALSE);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("Realize failed (%d)", result);
+        ATX_LOG_WARNING_1("Realize failed (%d)", (int)result);
         return BLT_FAILURE;
     }
     
@@ -389,7 +388,7 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
                                                      SL_IID_ENGINE, 
                                                      &self->sl_engine);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("GetInterface (SL_IID_ENGINE) failed (%d)", result);
+        ATX_LOG_WARNING_1("GetInterface (SL_IID_ENGINE) failed (%d)", (int)result);
         return BLT_FAILURE;
     }
     
@@ -401,7 +400,7 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
                                                      &self->sl_output_mix_object, 
                                                      1, ids, req);
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_WARNING_1("CreateOutputMix failed (%d)", result);
+            ATX_LOG_WARNING_1("CreateOutputMix failed (%d)", (int)result);
             return BLT_FAILURE;
         }
     }
@@ -409,7 +408,7 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
     /* realize the output mix */
     result = (*self->sl_output_mix_object)->Realize(self->sl_output_mix_object, SL_BOOLEAN_FALSE);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("Realize failed (%d)", result);
+        ATX_LOG_WARNING_1("Realize failed (%d)", (int)result);
         return BLT_FAILURE;
     }
                 
@@ -483,10 +482,10 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
             NULL
         };
 
-        ATX_LOG_FINE_3("creating SL Audio Player, sr=%d, ch=%d, chmsk=%x",
-                       format->sample_rate,
-                       format->channel_count,
-                       channel_mask);
+        ATX_LOG_FINE_3("creating SL Audio Player, sr=%u, ch=%u, chmsk=%x",
+                       (unsigned int)format->sample_rate,
+                       (unsigned int)format->channel_count,
+                       (unsigned int)channel_mask);
         const SLInterfaceID ids[2] = { SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_VOLUME };
         const SLboolean req[2]     = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
         result = (*self->sl_engine)->CreateAudioPlayer(self->sl_engine,
@@ -496,14 +495,14 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
                                                        2, ids, req);
     }
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("CreateAudioPlayer failed (%d)", result);
+        ATX_LOG_WARNING_1("CreateAudioPlayer failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
     /* realize the player */
     result = (*self->sl_player_object)->Realize(self->sl_player_object, SL_BOOLEAN_FALSE);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("Realize failed (%d)", result);
+        ATX_LOG_WARNING_1("Realize failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -512,7 +511,7 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
                                                      SL_IID_PLAY, 
                                                      &self->sl_player_play);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("GetInterface (SL_IID_PLAY) failed (%d)", result);
+        ATX_LOG_WARNING_1("GetInterface (SL_IID_PLAY) failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -521,7 +520,7 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
                                                      SL_IID_ANDROIDSIMPLEBUFFERQUEUE /*SL_IID_BUFFERQUEUE*/,
                                                      &self->sl_player_buffer_queue);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("GetInterface (SL_IID_ANDROIDSIMPLEBUFFERQUEUE) failed (%d)", result);
+        ATX_LOG_WARNING_1("GetInterface (SL_IID_ANDROIDSIMPLEBUFFERQUEUE) failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -530,7 +529,7 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
                                                                AndroidOutput_Callback, 
                                                                self);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("RegisterCallback failed (%d)", result);
+        ATX_LOG_WARNING_1("RegisterCallback failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -539,7 +538,7 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
                                                      SL_IID_VOLUME, 
                                                      &self->sl_player_volume);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("GetInterface (sl_player_object, SL_IID_VOLUME) failed (%d)", result);
+        ATX_LOG_WARNING_1("GetInterface (sl_player_object, SL_IID_VOLUME) failed (%d)", (int)result);
         return BLT_FAILURE;
     }
 
@@ -548,11 +547,11 @@ AndroidOutput_SetupOutput(AndroidOutput* self, const BLT_PcmMediaType* format)
         SLmillibel volume = 0;
         result = (*self->sl_player_volume)->GetMaxVolumeLevel(self->sl_player_volume, &self->sl_player_max_volume);
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_WARNING_1("GetMaxVolumeLevel failed (%d)", result);
+            ATX_LOG_WARNING_1("GetMaxVolumeLevel failed (%d)", (int)result);
         }
         result = (*self->sl_player_volume)->GetVolumeLevel(self->sl_player_volume, &volume);        
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_WARNING_1("GetVolumeLevel failed (%d)", result);
+            ATX_LOG_WARNING_1("GetVolumeLevel failed (%d)", (int)result);
         }
         ATX_LOG_FINE_2("volume: current=%d, max=%d", (int)volume, (int)self->sl_player_max_volume);
     }
@@ -695,7 +694,7 @@ AndroidOutput_Start(BLT_MediaNode* _self)
     if (self->sl_player_play) {
         result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+            ATX_LOG_WARNING_1("SetPlayState failed (%d)", (int)result);
         }
     }
     
@@ -717,7 +716,7 @@ AndroidOutput_Stop(BLT_MediaNode* _self)
     if (self->sl_player_play) {
         result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_STOPPED);
         if (result != SL_RESULT_SUCCESS) {
-            ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+            ATX_LOG_WARNING_1("SetPlayState failed (%d)", (int)result);
         }
     }
     
@@ -741,7 +740,7 @@ AndroidOutput_Pause(BLT_MediaNode* _self)
     /* set the player's state to playing */
     result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PAUSED);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+        ATX_LOG_WARNING_1("SetPlayState failed (%d)", (int)result);
     }
 
     return BLT_SUCCESS;
@@ -761,7 +760,7 @@ AndroidOutput_Resume(BLT_MediaNode* _self)
     /* set the player's state to playing */
     result = (*self->sl_player_play)->SetPlayState(self->sl_player_play, SL_PLAYSTATE_PLAYING);
     if (result != SL_RESULT_SUCCESS) {
-        ATX_LOG_WARNING_1("SetPlayState failed (%d)", result);
+        ATX_LOG_WARNING_1("SetPlayState failed (%d)", (int)result);
     }
 
     return BLT_SUCCESS;

@@ -158,6 +158,7 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
                          (float)BLT_MediaPacket_GetTimeStamp(packet).nanoseconds/1000000000.0f);
     } else {
         ATX_LOG_FINEST("flushing delayed frames");
+        return BLT_SUCCESS;
     }
     
     while (packet_size) {
@@ -318,10 +319,10 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             
         /* release any previous delayed pictures, codec and frame */
         if (self->codec_context) {
-            BLT_Result result;
-            do {
-                result = FfmpegDecoder_DecodePicture(self, NULL);
-            } while (BLT_SUCCEEDED(result));
+            //BLT_Result result;
+            //do {
+            //    result = FfmpegDecoder_DecodePicture(self, NULL);
+            //} while (BLT_SUCCEEDED(result));
             avcodec_close(self->codec_context);
             av_free(self->codec_context);
             self->codec_context = NULL;
@@ -385,8 +386,8 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         }
         
         /* allocate a frame */
-        self->frame = avcodec_alloc_frame();
-            
+        self->frame = av_frame_alloc();
+        
         /* open a parser if necessary */
         if (mp4_media_type == NULL) {
             self->parser_context = av_parser_init(codec_id);

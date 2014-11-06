@@ -581,7 +581,7 @@ Dx9VideoOutput_InitializeDirect3D(Dx9VideoOutput* self)
                                       D3DADAPTER_DEFAULT,
                                       D3DDEVTYPE_HAL, 
                                       self->window,
-                                      D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
+                                      D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED | D3DCREATE_FPU_PRESERVE,
                                       &d3d_params, 
                                       &self->d3d_device);
     if (FAILED(hresult)) {
@@ -1018,6 +1018,44 @@ end:
 }
 
 /*----------------------------------------------------------------------
+|   Dx9VideoOutput_GetPicture
++---------------------------------------------------------------------*/
+static void
+Dx9VideoOutput_GetPicture(Dx9VideoOutput*          self,
+                          BLT_UInt64               now,
+                          unsigned int             picture_count,
+                          unsigned int*            picture_index,
+                          Dx9VideoOutput_Picture** picture,
+                          unsigned int*            pictures_handled)
+{
+    unsigned int            i;
+    unsigned int            pic_idx;
+    Dx9VideoOutput_Picture* pic;
+
+    // initialize return parameters
+    *picture_index = 0;
+    *picture = NULL;
+    *pictures_handled = 0;
+
+    // pick presentable picture, catch up to latest presentable picture if
+    // necessary
+    for (i = 0; i < picture_count; i++) {
+        pic_idx = (self->cur_picture + i) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE;
+        pic = &self->pictures[pic_idx];
+        if (pic->display_time <= now + BLT_DX9_VIDEO_DEFAULT_PRESENTATION_LATENCY) {
+            *picture_index = pic_idx;
+            *picture = pic;
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+
+    *pictures_handled = i;
+}
+
+/*----------------------------------------------------------------------
 |   Dx9VideoOutput_RenderingThread
 +---------------------------------------------------------------------*/
 static long WINAPI
@@ -1027,24 +1065,31 @@ Dx9VideoOutput_RenderingThread(Dx9VideoOutput* self)
 
     while (self->time_to_quit == ATX_FALSE) {
         BLT_UInt64   sleep_time = BLT_DX9_VIDEO_DEFAULT_SLEEP_TIME;
+        BLT_UInt64   picture_display_time = 0;
         unsigned int picture_count = 0;
         Dx9VideoOutput_Picture* picture = NULL;
 
         // only try to render if we have one in the bank
         EnterCriticalSection(&self->render_crit_section);
         picture_count = self->num_pictures;
-        picture = &self->pictures[self->cur_picture];
+        picture_display_time = self->pictures[self->cur_picture].display_time;
         LeaveCriticalSection(&self->render_crit_section);
 
         // if a picture is available, check if it is time to show it
         if (picture_count > 0) {
-            // get the next picture to display
+            unsigned int picture_index    = 0;
+            unsigned int pictures_handled = 0;
             BLT_UInt64 now = Dx9VideoOutput_GetHostTime(self);
+
             ATX_LOG_FINEST_1("now=%lld", now);
             
-            if (picture->display_time <= now+BLT_DX9_VIDEO_DEFAULT_PRESENTATION_LATENCY) {
+            // get the next picture to display
+            Dx9VideoOutput_GetPicture(self, now, picture_count, &picture_index, &picture, &pictures_handled);
+            if (picture) {
                 // this picture needs to be displayed
-                ATX_LOG_FINER_2("rendering pic %d, num in bank: %d", self->cur_picture, self->num_pictures );
+                ATX_LOG_FINER_3("rendering pic %d (cur pic %d), "
+                                "num in bank: %d",
+                                picture_index, self->cur_picture, self->num_pictures);
                 result = Dx9VideoOutput_RenderPicture(self, picture);
                 if (BLT_SUCCEEDED(result)) {
 					RECT wnd_rect;
@@ -1066,13 +1111,13 @@ Dx9VideoOutput_RenderingThread(Dx9VideoOutput* self)
 
                 // move to the next picture
                 EnterCriticalSection(&self->render_crit_section);
-                self->cur_picture = (self->cur_picture + 1) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE;
-                self->num_pictures--;
+                self->cur_picture = (self->cur_picture + pictures_handled) % BLT_DX9_VIDEO_OUTPUT_PICTURE_QUEUE_SIZE;
+                self->num_pictures -= pictures_handled;
                 LeaveCriticalSection(&self->render_crit_section);
 
                 sleep_time = 0;
             } else {
-                sleep_time = picture->display_time-now;
+                sleep_time = picture_display_time-now;
                 if (sleep_time > BLT_DX9_VIDEO_DEFAULT_PRESENTATION_LATENCY) {
                     sleep_time -= BLT_DX9_VIDEO_DEFAULT_PRESENTATION_LATENCY;
                 }
@@ -1380,15 +1425,22 @@ Dx9VideoOutput_PutPacket_Locked(Dx9VideoOutput* self, BLT_MediaPacket* packet)
             if (self->time_source) {
                 BLT_TimeStamp master_ts;
                 BLT_TimeStamp packet_ts;
+                BLT_TimeStamp delay_ts;
                 BLT_TimeSource_GetTime(self->time_source, &master_ts);
                 packet_ts = BLT_MediaPacket_GetTimeStamp(packet);
                 if (BLT_TimeStamp_IsLater(packet_ts, master_ts)) {
+                    delay_ts = BLT_TimeStamp_Sub(packet_ts, master_ts);
                     delay = BLT_TimeStamp_ToNanos(packet_ts)-BLT_TimeStamp_ToNanos(master_ts);
                     self->underflow = BLT_FALSE;
-                    ATX_LOG_FINER_3("video is early (%lld) master_ts=%lld, packet_ts=%lld", 
-                                    delay, 
-                                    BLT_TimeStamp_ToNanos(master_ts),
-                                    BLT_TimeStamp_ToNanos(packet_ts)); 
+                    ATX_LOG_FINER_6("video is early (by %d sec %d msec) "
+                                    "master_ts=%d sec %d msec "
+                                    "packet_ts=%d sec %d msec",
+                                    delay_ts.seconds,
+                                    delay_ts.nanoseconds / 1000000,
+                                    master_ts.seconds,
+                                    master_ts.nanoseconds / 1000000,
+                                    packet_ts.seconds,
+                                    packet_ts.nanoseconds / 1000000);
 
                     /* clamp the delay to a safe maximum */
                     if (delay > BLT_DX9_VIDEO_OUTPUT_MAX_DELAY) {
@@ -1396,13 +1448,19 @@ Dx9VideoOutput_PutPacket_Locked(Dx9VideoOutput* self, BLT_MediaPacket* packet)
                         ATX_LOG_FINER("video delay clamped to max");
                     }
                 } else {
+                    BLT_TimeStamp late_ts;
                     BLT_UInt64 late = BLT_TimeStamp_ToNanos(master_ts)-BLT_TimeStamp_ToNanos(packet_ts);
+                    late_ts = BLT_TimeStamp_Sub(master_ts, packet_ts);
                     self->underflow =  late>BLT_DX9_VIDEO_UNDERFLOW_THRESHOLD ? BLT_TRUE:BLT_FALSE;
-                    ATX_LOG_FINER_3("video is late (%lld) master_ts=%lld, packet_ts=%lld", 
-                                    late,
-                                    BLT_TimeStamp_ToNanos(master_ts),
-                                    BLT_TimeStamp_ToNanos(packet_ts));  
-
+                    ATX_LOG_FINER_6("video is late (by %d sec %d msec) "
+                                    "master_ts=%d sec %d msec "
+                                    "packet_ts=%d sec %d msec",
+                                    late_ts.seconds,
+                                    late_ts.nanoseconds / 1000000,
+                                    master_ts.seconds,
+                                    master_ts.nanoseconds / 1000000,
+                                    packet_ts.seconds,
+                                    packet_ts.nanoseconds / 1000000);
                 }
             }
             picture->display_time = Dx9VideoOutput_GetHostTime(self)+delay;

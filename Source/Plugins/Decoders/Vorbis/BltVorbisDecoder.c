@@ -7,6 +7,8 @@
 |
  ****************************************************************/
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER)
+
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
@@ -866,3 +868,5 @@ BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(VorbisDecoderModule,
                                          "com.axiosys.decoder.vorbis",
                                          "1.1.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)
+
+#endif /* defined(BLT_CONFIG_ENABLE_VORBIS_DECODER) */

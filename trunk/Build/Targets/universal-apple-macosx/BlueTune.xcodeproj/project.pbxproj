@@ -1653,6 +1653,13 @@
 			remoteGlobalIDString = CA00CB7C13D9F13B00C1A140;
 			remoteInfo = Mp4Compact;
 		};
+		CA9C06FB1A0BEEA700FBD263 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F912B69E0B8EB1C700C1E90D;
+			remoteInfo = Neptune;
+		};
 		CA9DDC0910AE1C1C008B871E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA5043640C5AE61E0060E6FE /* Neptune.xcodeproj */;
@@ -6378,6 +6385,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				CA9C06FC1A0BEEA700FBD263 /* PBXTargetDependency */,
 			);
 			name = PcmDiff;
 			productName = PcmDiff;
@@ -8196,6 +8204,11 @@
 			isa = PBXTargetDependency;
 			name = Bento4Atomix;
 			targetProxy = CA77BFEF14BF574800442B97 /* PBXContainerItemProxy */;
+		};
+		CA9C06FC1A0BEEA700FBD263 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Neptune;
+			targetProxy = CA9C06FB1A0BEEA700FBD263 /* PBXContainerItemProxy */;
 		};
 		CA9ED8470EAFAB6C003CE43C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

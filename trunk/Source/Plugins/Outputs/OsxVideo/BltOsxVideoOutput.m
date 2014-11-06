@@ -734,14 +734,14 @@ end:
     
     [lock lock];
     BLT_Boolean need_to_render = BLT_FALSE;
-    if (pictures_in_queue) {
+    while (pictures_in_queue) {
         OsxVideoPicture* picture = pictures[picture_tail];
-        if (picture) {
-            if ([picture displayTime] <= output_time->hostTime) {
+        if (picture && [picture displayTime] <= output_time->hostTime) {
                 // select the next picture for display
                 [self selectNextPicture];
                 need_to_render = BLT_TRUE;
-            }
+        } else {
+            break;
         }
     }
     [lock unlock];
@@ -1064,7 +1064,7 @@ OsxVideoOutput_Stop(BLT_MediaNode*  _self)
 }
 
 /*----------------------------------------------------------------------
-|    OsxAudioUnitsOutput_Seek
+|    OsxVideoOutput_Seek
 +---------------------------------------------------------------------*/
 BLT_METHOD
 OsxVideoOutput_Seek(BLT_MediaNode* _self,

@@ -103,7 +103,7 @@ if env['build_config'] == 'Debug':
 MapSourceDir(AP4_SOURCE_ROOT, '#/../Bento4/Source/C++')
 CompiledModule(name                          = 'Bento4Objects',
                source_root                   = AP4_SOURCE_ROOT,
-               build_source_dirs             = ['Core', 'MetaData', 'Crypto', 'Adapters'],
+               build_source_dirs             = ['Core', 'MetaData', 'Crypto', 'Adapters', 'Codecs'],
                build_source_files            = {'/Source/Adapters':'BltBento4Adapters.cpp'},
                build_include_dirs            = ['Source/Core', 'Source/Plugins/Common'],
                exported_include_dirs         = ['Source/Adapters'],
@@ -404,7 +404,7 @@ for plugin in PluginsMap:
                        chained_link_only_deps   = ['BltCore', 'BltPluginsSupport', 'Neptune'] + extra_dep_mods,
                        extra_libs               = extra_libs,
                        extra_lib_dirs           = extra_lib_dirs,
-                       extra_cpp_defines        = extra_defines,
+                       extra_cpp_defines        = extra_defines+[PluginsSettings[plugin]['defines']],
                        environment              = extra_env)
         StaticLibraryModule(name                          = 'Blt'+plugin+'PluginStatic',
                             chained_link_and_include_deps = ['Blt'+plugin])

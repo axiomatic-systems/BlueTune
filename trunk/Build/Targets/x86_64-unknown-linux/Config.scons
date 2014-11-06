@@ -3,7 +3,7 @@ LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_strict=False, gcc_stop_on_wa
 LoadTool('gcc-generic', env)
 
 env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Bsd':'*.c', 'System/Posix':'*.c'}
-env['ATX_EXTRA_LIBS']=['m']
+env['ATX_EXTRA_LIBS']=['m', 'dl', 'pthread']
 env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Bsd':'*.cpp', 'System/Posix':'*.cpp'}
 env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
 #env['AP4_CPP_DEFINES']=['AP4_CONFIG_MINI_BUILD']

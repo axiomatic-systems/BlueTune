@@ -100,6 +100,19 @@
 		CA1EC2360ED2A0400033F894 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
 		CA360A6113765CBD001D3DE0 /* BltRaopOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA360A5F13765CBD001D3DE0 /* BltRaopOutput.cpp */; };
 		CA360A6213765CBD001D3DE0 /* BltRaopOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA360A6013765CBD001D3DE0 /* BltRaopOutput.h */; };
+		CA418B241950F3AD00D202E0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */; };
+		CA418B2E1950F3AD00D202E0 /* BlueTune_Node.h in Headers */ = {isa = PBXBuildFile; fileRef = CA418B2D1950F3AD00D202E0 /* BlueTune_Node.h */; };
+		CA418B311950F3AD00D202E0 /* BlueTune_Node.cp in Sources */ = {isa = PBXBuildFile; fileRef = CA418B301950F3AD00D202E0 /* BlueTune_Node.cp */; };
+		CA418BA61950F3D600D202E0 /* node-bluetune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA418BA31950F3D600D202E0 /* node-bluetune.cpp */; };
+		CA418BA91950F61600D202E0 /* libBlueTune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libBlueTune.a */; };
+		CA418BAA1950F62C00D202E0 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		CA418BAB1950F63200D202E0 /* libNeptune.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA50437F0C5AE61E0060E6FE /* libNeptune.a */; };
+		CA418BAC1950F64000D202E0 /* libBento4Atomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAEA9CED0E144683008C396D /* libBento4Atomix.a */; };
+		CA418BAD1950F64700D202E0 /* libBento4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA44C4690D4522DA00173F5F /* libBento4.a */; };
+		CA418BAE1950F66000D202E0 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27B10A7876300950FAF /* CoreAudio.framework */; };
+		CA418BAF1950F67900D202E0 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C27D10A7876F00950FAF /* AudioUnit.framework */; };
+		CA418BB01950F68800D202E0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA53C28610A787D100950FAF /* AudioToolbox.framework */; };
+		CA418BB11950F69500D202E0 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */; };
 		CA4277EE0DA3A47400557A8B /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA5042520C5AE52B0060E6FE /* BltAacDecoder.c */; };
 		CA4277EF0DA3A47500557A8B /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA44DE720DEDEB0E0020CB81 /* PcmDiff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0C9AF10D15D24500E23496 /* PcmDiff.cpp */; };
@@ -835,7 +848,6 @@
 		CAD78A4C12A3474100D7EBA7 /* oscl_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD78A4A12A3474100D7EBA7 /* oscl_mem.h */; };
 		CAD78A6012A3718000D7EBA7 /* BltAacDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CAD78A5E12A3718000D7EBA7 /* BltAacDecoder.c */; };
 		CAD78A6112A3718000D7EBA7 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD78A5F12A3718000D7EBA7 /* BltAacDecoder.h */; };
-		CADD04A51902177C00AD432B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CADD04A41902177C00AD432B /* Default-568h@2x.png */; };
 		CADFC2D116192AF7004F3C53 /* aac_ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC175161929C9004F3C53 /* aac_ram.cpp */; };
 		CADFC2D216192AF7004F3C53 /* aac_ram.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC176161929C9004F3C53 /* aac_ram.h */; };
 		CADFC2D316192AF7004F3C53 /* aac_rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC177161929C9004F3C53 /* aac_rom.cpp */; };
@@ -1031,6 +1043,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CA03CEF31938EA450099D05B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA8A94CE1929A65E00836179;
+			remoteInfo = Mp4Mux;
+		};
 		CA07A3270D40228D00DC3E33 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -1268,6 +1287,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CA40CB290F40DC100008649B;
 			remoteInfo = BasicTest;
+		};
+		CA418BA71950F5FF00D202E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = BlueTune;
 		};
 		CA448C211106FAF000A64E7A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1611,6 +1637,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CA9A16D80ED4F42A00C60FDF;
 			remoteInfo = PassthroughWriterTest;
+		};
+		CA9A91D71A0AE3E800C2216E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA86EED719A95DD3008A3B00;
+			remoteInfo = FragmentCreatorTest;
 		};
 		CA9B238713DF87AC004AF156 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2030,6 +2063,18 @@
 		CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BtCocoaPlayerMain.mm; sourceTree = "<group>"; };
 		CA360A5F13765CBD001D3DE0 /* BltRaopOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltRaopOutput.cpp; sourceTree = "<group>"; };
 		CA360A6013765CBD001D3DE0 /* BltRaopOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltRaopOutput.h; sourceTree = "<group>"; };
+		CA418B231950F3AD00D202E0 /* bluetune.node.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bluetune.node.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA418B271950F3AD00D202E0 /* BlueTune-Node-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BlueTune-Node-Info.plist"; sourceTree = "<group>"; };
+		CA418B291950F3AD00D202E0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CA418B2A1950F3AD00D202E0 /* BlueTune-Node-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BlueTune-Node-Prefix.pch"; sourceTree = "<group>"; };
+		CA418B2B1950F3AD00D202E0 /* BlueTune_NodeProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = BlueTune_NodeProj.xcconfig; sourceTree = "<group>"; };
+		CA418B2C1950F3AD00D202E0 /* BlueTune_NodeTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = BlueTune_NodeTarget.xcconfig; sourceTree = "<group>"; };
+		CA418B2D1950F3AD00D202E0 /* BlueTune_Node.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlueTune_Node.h; sourceTree = "<group>"; };
+		CA418B2F1950F3AD00D202E0 /* BlueTune_NodePriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlueTune_NodePriv.h; sourceTree = "<group>"; };
+		CA418B301950F3AD00D202E0 /* BlueTune_Node.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BlueTune_Node.cp; sourceTree = "<group>"; };
+		CA418B941950F3D600D202E0 /* binding.gyp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = binding.gyp; sourceTree = "<group>"; };
+		CA418BA31950F3D600D202E0 /* node-bluetune.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "node-bluetune.cpp"; sourceTree = "<group>"; };
+		CA418BA41950F3D600D202E0 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
 		CA44C4480D4522D900173F5F /* Bento4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Bento4.xcodeproj; path = "../../../../Bento4/Build/Targets/universal-apple-macosx/Bento4.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		CA44DE6E0DEDEAE50020CB81 /* pcmdiff */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pcmdiff; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA5041F00C5AE52B0060E6FE /* BlueTune.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BlueTune.h; sourceTree = "<group>"; };
@@ -2657,7 +2702,6 @@
 		CAD78A4A12A3474100D7EBA7 /* oscl_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oscl_mem.h; sourceTree = "<group>"; };
 		CAD78A5E12A3718000D7EBA7 /* BltAacDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltAacDecoder.c; sourceTree = "<group>"; };
 		CAD78A5F12A3718000D7EBA7 /* BltAacDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltAacDecoder.h; sourceTree = "<group>"; };
-		CADD04A41902177C00AD432B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		CADFC173161929C9004F3C53 /* aacdecoder_lib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aacdecoder_lib.h; sourceTree = "<group>"; };
 		CADFC175161929C9004F3C53 /* aac_ram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aac_ram.cpp; sourceTree = "<group>"; };
 		CADFC176161929C9004F3C53 /* aac_ram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aac_ram.h; sourceTree = "<group>"; };
@@ -3025,6 +3069,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA418B201950F3AD00D202E0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA418BAD1950F64700D202E0 /* libBento4.a in Frameworks */,
+				CA418BAC1950F64000D202E0 /* libBento4Atomix.a in Frameworks */,
+				CA418BAB1950F63200D202E0 /* libNeptune.a in Frameworks */,
+				CA418BAA1950F62C00D202E0 /* libAtomix.a in Frameworks */,
+				CA418BA91950F61600D202E0 /* libBlueTune.a in Frameworks */,
+				CA418BB01950F68800D202E0 /* AudioToolbox.framework in Frameworks */,
+				CA418BAF1950F67900D202E0 /* AudioUnit.framework in Frameworks */,
+				CA418BB11950F69500D202E0 /* CoreServices.framework in Frameworks */,
+				CA418BAE1950F66000D202E0 /* CoreAudio.framework in Frameworks */,
+				CA418B241950F3AD00D202E0 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA44DE6C0DEDEAE50020CB81 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3237,11 +3298,11 @@
 		08FB7794FE84155DC02AAC07 /* BlueTune */ = {
 			isa = PBXGroup;
 			children = (
-				CADD04A41902177C00AD432B /* Default-568h@2x.png */,
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
+				CA418B251950F3AD00D202E0 /* BlueTune-Node */,
 				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
@@ -3278,6 +3339,7 @@
 				CAC91A5F1663202700201C94 /* BlueTune.framework */,
 				CAA8DBF1184435A8000EFC1A /* pcmdecoder */,
 				CAB4C85E18566783006EFEC1 /* CallbackInputExample */,
+				CA418B231950F3AD00D202E0 /* bluetune.node.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3510,6 +3572,55 @@
 			path = RAOP;
 			sourceTree = "<group>";
 		};
+		CA418B251950F3AD00D202E0 /* BlueTune-Node */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B2B1950F3AD00D202E0 /* BlueTune_NodeProj.xcconfig */,
+				CA418B2C1950F3AD00D202E0 /* BlueTune_NodeTarget.xcconfig */,
+				CA418B2D1950F3AD00D202E0 /* BlueTune_Node.h */,
+				CA418B2F1950F3AD00D202E0 /* BlueTune_NodePriv.h */,
+				CA418B301950F3AD00D202E0 /* BlueTune_Node.cp */,
+				CA418B261950F3AD00D202E0 /* Supporting Files */,
+			);
+			path = "BlueTune-Node";
+			sourceTree = "<group>";
+		};
+		CA418B261950F3AD00D202E0 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B271950F3AD00D202E0 /* BlueTune-Node-Info.plist */,
+				CA418B281950F3AD00D202E0 /* InfoPlist.strings */,
+				CA418B2A1950F3AD00D202E0 /* BlueTune-Node-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CA418B911950F3D600D202E0 /* Bindings */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B921950F3D600D202E0 /* Node */,
+			);
+			path = Bindings;
+			sourceTree = "<group>";
+		};
+		CA418B921950F3D600D202E0 /* Node */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B931950F3D600D202E0 /* bluetune */,
+			);
+			path = Node;
+			sourceTree = "<group>";
+		};
+		CA418B931950F3D600D202E0 /* bluetune */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B941950F3D600D202E0 /* binding.gyp */,
+				CA418BA31950F3D600D202E0 /* node-bluetune.cpp */,
+				CA418BA41950F3D600D202E0 /* package.json */,
+			);
+			path = bluetune;
+			sourceTree = "<group>";
+		};
 		CA44C4490D4522DA00173F5F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -3534,6 +3645,7 @@
 				CAD1023A1015A02800B272F6 /* mp42ts */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
 				CA552B5B1721116100CC1C99 /* mp4audioclip */,
+				CA03CEF41938EA450099D05B /* mp4mux */,
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
 				CAF9817918DE46810001B999 /* hevcinfo */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
@@ -3547,6 +3659,7 @@
 				CAD66A560FCEF922006238F0 /* LinearReaderTest */,
 				CAD66A580FCEF922006238F0 /* BufferedStreamTest */,
 				CA093D9710077DA3004FE377 /* FragmentParserTest */,
+				CA9A91D81A0AE3E800C2216E /* FragmentCreatorTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3555,14 +3668,15 @@
 			isa = PBXGroup;
 			children = (
 				CA7513CE1256D8F30022D1A8 /* Adapters */,
-				CAF2EE110E5FDD8D00948C04 /* Examples */,
+				CA0C9AD90D15D24500E23496 /* Apps */,
+				CA418B911950F3D600D202E0 /* Bindings */,
 				CA5041EF0C5AE52B0060E6FE /* BlueTune */,
 				CA5041F10C5AE52B0060E6FE /* Core */,
 				CA5042170C5AE52B0060E6FE /* Decoder */,
+				CAF2EE110E5FDD8D00948C04 /* Examples */,
 				CA50421A0C5AE52B0060E6FE /* Fluo */,
 				CA50423C0C5AE52B0060E6FE /* Player */,
 				CA5042430C5AE52B0060E6FE /* Plugins */,
-				CA0C9AD90D15D24500E23496 /* Apps */,
 				CA1ACEF40D30C5D600C350CD /* Tests */,
 			);
 			name = Source;
@@ -5605,6 +5719,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA418B211950F3AD00D202E0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA418B2E1950F3AD00D202E0 /* BlueTune_Node.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CA504E6B0C5EA3960060E6FE /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -6225,6 +6347,24 @@
 			productReference = CA1EC0F90ED299AD0033F894 /* BtCocoaPlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CA418B221950F3AD00D202E0 /* BlueTune-Node */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA418B901950F3AD00D202E0 /* Build configuration list for PBXNativeTarget "BlueTune-Node" */;
+			buildPhases = (
+				CA418B1F1950F3AD00D202E0 /* Sources */,
+				CA418B201950F3AD00D202E0 /* Frameworks */,
+				CA418B211950F3AD00D202E0 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA418BA81950F5FF00D202E0 /* PBXTargetDependency */,
+			);
+			name = "BlueTune-Node";
+			productName = "BlueTune-Node";
+			productReference = CA418B231950F3AD00D202E0 /* bluetune.node.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		CA44DE6D0DEDEAE50020CB81 /* PcmDiff */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CA44DE740DEDEB2D0020CB81 /* Build configuration list for PBXNativeTarget "PcmDiff" */;
@@ -6634,11 +6774,19 @@
 				CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */,
 				CA53C0B810A6277800950FAF /* BtTouchPlayer */,
 				CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */,
+				CA418B221950F3AD00D202E0 /* BlueTune-Node */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		CA03CEF41938EA450099D05B /* mp4mux */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4mux;
+			remoteRef = CA03CEF31938EA450099D05B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA093D9710077DA3004FE377 /* FragmentParserTest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -6975,6 +7123,13 @@
 			remoteRef = CA9A17AE0ED50F6D00C60FDF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA9A91D81A0AE3E800C2216E /* FragmentCreatorTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = FragmentCreatorTest;
+			remoteRef = CA9A91D71A0AE3E800C2216E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA9B238813DF87AC004AF156 /* mp4compact */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -7265,7 +7420,6 @@
 			files = (
 				CA53C0C610A628B900950FAF /* BtTouchPlayer.xib in Resources */,
 				CA1C6A9210F6C49B00D50ABE /* WebRoot in Resources */,
-				CADD04A51902177C00AD432B /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7328,6 +7482,15 @@
 			files = (
 				CA1EC1870ED29B8C0033F894 /* BtCocoaPlayerController.m in Sources */,
 				CA1EC1880ED29B8C0033F894 /* BtCocoaPlayerMain.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA418B1F1950F3AD00D202E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA418BA61950F3D600D202E0 /* node-bluetune.cpp in Sources */,
+				CA418B311950F3AD00D202E0 /* BlueTune_Node.cp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7925,6 +8088,11 @@
 			name = Neptune;
 			targetProxy = CA1EC1DC0ED29EAC0033F894 /* PBXContainerItemProxy */;
 		};
+		CA418BA81950F5FF00D202E0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* BlueTune */;
+			targetProxy = CA418BA71950F5FF00D202E0 /* PBXContainerItemProxy */;
+		};
 		CA448C221106FAF000A64E7A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* BlueTune */;
@@ -8082,6 +8250,14 @@
 				CA1EC1810ED29B080033F894 /* English */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		CA418B281950F3AD00D202E0 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA418B291950F3AD00D202E0 /* en */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 		CAC91A691663202700201C94 /* InfoPlist.strings */ = {
@@ -8245,10 +8421,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
-				ONLY_ACTIVE_ARCH = NO;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SUPPORTED_PLATFORMS = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
-				VALID_ARCHS = "i386 x86_64 ppc";
+				VALID_ARCHS = "i386 x86_64";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				WARNING_CFLAGS = "-Wall";
@@ -8283,10 +8458,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MELO_HOME = "$(SRCROOT)/../../../../Melo";
 				NEPTUNE_HOME = "$(SRCROOT)/../../../../Neptune";
-				ONLY_ACTIVE_ARCH = NO;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SUPPORTED_PLATFORMS = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
-				VALID_ARCHS = "i386 x86_64 ppc";
+				VALID_ARCHS = "i386 x86_64";
 				"VALID_ARCHS[sdk=iphoneos*]" = "armv7 armv7s arm64";
 				"VALID_ARCHS[sdk=iphonesimulator*]" = i386;
 				WARNING_CFLAGS = "-Wall";
@@ -8451,6 +8625,99 @@
 			};
 			name = Release;
 		};
+		CA418B321950F3AD00D202E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BlueTune-Node/BlueTune-Node-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include/node,
+				);
+				INFOPLIST_FILE = "BlueTune-Node/BlueTune-Node-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
+				PRODUCT_NAME = bluetune.node;
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
+			};
+			name = Debug;
+		};
+		CA418B331950F3AD00D202E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BlueTune-Node/BlueTune-Node-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include/node,
+				);
+				INFOPLIST_FILE = "BlueTune-Node/BlueTune-Node-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
+				PRODUCT_NAME = bluetune.node;
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core";
+			};
+			name = Release;
+		};
 		CA44DE700DEDEAE60020CB81 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -8530,6 +8797,7 @@
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -9158,6 +9426,15 @@
 			buildConfigurations = (
 				CA1EC0FC0ED299AE0033F894 /* Debug */,
 				CA1EC0FD0ED299AE0033F894 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA418B901950F3AD00D202E0 /* Build configuration list for PBXNativeTarget "BlueTune-Node" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA418B321950F3AD00D202E0 /* Debug */,
+				CA418B331950F3AD00D202E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -50,14 +50,14 @@ and the date of any change. For modified versions of the FDK AAC Codec, the term
 "Fraunhofer FDK AAC Codec Library for Android" must be replaced by the term
 "Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android."
 
-3.    NO PATENT LICENSE
+3.    NO PATENT LICENSEq
 
 NO EXPRESS OR IMPLIED LICENSES TO ANY PATENT CLAIMS, including without limitation the patents of Fraunhofer,
 ARE GRANTED BY THIS SOFTWARE LICENSE. Fraunhofer provides no warranty of patent non-infringement with
 respect to this software.
 
-You may use this FDK AAC Codec software or modifications thereto only for purposes that are authorized
-by appropriate patent licenses.
+You may use this FDK AAC Codec software or modifications thereto only for purposes that are authoriqzed
+by appropriate patent licenses.q
 
 4.    DISCLAIMER
 

@@ -803,7 +803,7 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
         ATX_LOG_INFO("source has slow random access, creating a shared reader");
         self->input.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
     } else {
-        ATX_LOG_INFO("source is fragmented, creating pre-track readers");
+        ATX_LOG_INFO("source is fragmented, creating per-track readers");
         // create a per-track reader if we need to (if we have fast random access and the movie is fragmented)
         if (self->input.has_fragments) {
             self->audio_output.reader = new Mp4ParserLinearReader(self, *movie, movie->HasFragments()?stream_adapter:NULL);
@@ -908,6 +908,7 @@ Mp4ParserOutput_Destruct(Mp4ParserOutput* self)
     delete self->reader;
     delete self->sample_buffer;
     delete self->sample_decrypted_buffer;
+    delete self->sample_decrypter;
 
     /* free the media type extensions */
     BLT_MediaType_Free((BLT_MediaType*)self->media_type);
@@ -1143,48 +1144,48 @@ Mp4Parser_Seek(BLT_MediaNode* _self,
                 self->audio_output.reader->SeekTo(video_time);
             }
         }
-    }
-    
-    /* seek to the estimated offset on all tracks */
-    AP4_Ordinal sample_index = 0;
-    if (self->video_output.track) {
-        AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
-        if (AP4_FAILED(result)) {
-            ATX_LOG_WARNING_1("video GetSampleIndexForTimeStampMs failed (%d)", result);
-            return BLT_FAILURE;
-        }
-        ATX_LOG_FINE_1("seeking to video time %d ms", ts_ms);
-        
-        // go to the nearest sync sample
-        self->video_output.sample = self->video_output.track->GetNearestSyncSampleIndex(sample_index);
-        if (self->input.reader) {
-            self->input.reader->SetSampleIndex(self->video_output.track->GetId(), self->video_output.sample);
-        }
-        ATX_LOG_FINE_1("seeking to video sync sample %d", self->video_output.sample);
-        
-        // compute the timestamp of the video sample we're seeking to, so we can pick an audio
-        // sample that is close in time (there are many more audio sync points than video)
-        AP4_Sample sample;
-        if (AP4_SUCCEEDED(self->video_output.track->GetSample(self->video_output.sample, sample))) {
-            AP4_UI32 media_timescale = self->video_output.track->GetMediaTimeScale();
-            if (media_timescale) {
-                ts_ms = (AP4_UI32)((((AP4_UI64)sample.GetCts())*1000)/media_timescale);
-                ATX_LOG_FINE_1("sync sample time is %d ms", ts_ms);
-            }
-        } else {
-            ATX_LOG_FINE_1("unable to get sample info for sample %d", self->video_output.sample);
-        }
-    }
-    if (self->audio_output.track) {
-        AP4_Result result = self->audio_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
-        if (AP4_FAILED(result)) {
-            ATX_LOG_WARNING_1("audio GetSampleIndexForTimeStampMs failed (%d)", result);
-            return BLT_FAILURE;
-        }
-        self->audio_output.sample = sample_index;
-        if (self->input.reader) {
-            self->input.reader->SetSampleIndex(self->audio_output.track->GetId(), sample_index);
-        }
+    } else {
+      /* seek to the estimated offset on all tracks */
+      AP4_Ordinal sample_index = 0;
+      if (self->video_output.track) {
+          AP4_Result result = self->video_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+          if (AP4_FAILED(result)) {
+              ATX_LOG_WARNING_1("video GetSampleIndexForTimeStampMs failed (%d)", result);
+              return BLT_FAILURE;
+          }
+          ATX_LOG_FINE_1("seeking to video time %d ms", ts_ms);
+          
+          // go to the nearest sync sample
+          self->video_output.sample = self->video_output.track->GetNearestSyncSampleIndex(sample_index);
+          if (self->input.reader) {
+              self->input.reader->SetSampleIndex(self->video_output.track->GetId(), self->video_output.sample);
+          }
+          ATX_LOG_FINE_1("seeking to video sync sample %d", self->video_output.sample);
+          
+          // compute the timestamp of the video sample we're seeking to, so we can pick an audio
+          // sample that is close in time (there are many more audio sync points than video)
+          AP4_Sample sample;
+          if (AP4_SUCCEEDED(self->video_output.track->GetSample(self->video_output.sample, sample))) {
+              AP4_UI32 media_timescale = self->video_output.track->GetMediaTimeScale();
+              if (media_timescale) {
+                  ts_ms = (AP4_UI32)((((AP4_UI64)sample.GetCts())*1000)/media_timescale);
+                  ATX_LOG_FINE_1("sync sample time is %d ms", ts_ms);
+              }
+          } else {
+              ATX_LOG_FINE_1("unable to get sample info for sample %d", self->video_output.sample);
+          }
+      }
+      if (self->audio_output.track) {
+          AP4_Result result = self->audio_output.track->GetSampleIndexForTimeStampMs(ts_ms, sample_index);
+          if (AP4_FAILED(result)) {
+              ATX_LOG_WARNING_1("audio GetSampleIndexForTimeStampMs failed (%d)", result);
+              return BLT_FAILURE;
+          }
+          self->audio_output.sample = sample_index;
+          if (self->input.reader) {
+              self->input.reader->SetSampleIndex(self->audio_output.track->GetId(), sample_index);
+          }
+      }
     }
     
     /* set the mode so that the nodes down the chain know the seek has */
@@ -1413,6 +1414,15 @@ Mp4ParserModule_Attach(BLT_Module* _self, BLT_Core* core)
     BLT_Registry_RegisterNameForId(registry, 
                                    BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
                                    "video/m4v", self->mp4_video_type_id);
+    BLT_Registry_RegisterNameForId(registry, 
+                                   BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
+                                   "video/vnd.dece.mp4", self->mp4_video_type_id);
+
+    /* register the ".uvu" file extension */
+    result = BLT_Registry_RegisterExtension(registry, 
+                                            ".uvu",
+                                            "video/vnd.dece.mp4");
+    if (BLT_FAILED(result)) return result;
 
     return BLT_SUCCESS;
 }

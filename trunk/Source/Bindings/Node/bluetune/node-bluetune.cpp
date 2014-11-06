@@ -235,6 +235,7 @@ private:
     static Handle<Value> SetOutput(const Arguments& args);
     static Handle<Value> SetVolume(const Arguments& args);
     static Handle<Value> Play(const Arguments& args);
+    static Handle<Value> Stop(const Arguments& args);
     static Handle<Value> Pause(const Arguments& args);
     
     // members
@@ -482,7 +483,7 @@ PlayerWrapper::Play(const Arguments& args) {
 }
 
 /*----------------------------------------------------------------------
-|    PlayerWrapper::Play
+|    PlayerWrapper::Stop
 +---------------------------------------------------------------------*/
 Handle<Value>
 PlayerWrapper::Stop(const Arguments& args) {

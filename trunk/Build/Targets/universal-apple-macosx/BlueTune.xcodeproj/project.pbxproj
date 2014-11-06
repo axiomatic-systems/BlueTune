@@ -382,6 +382,7 @@
 		CA8AE8010E73CEF000DDFCBB /* BltPlayerObjectiveC.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */; };
 		CA92075D125AAC0C001F2456 /* BltWmsProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA92075B125AAC0C001F2456 /* BltWmsProtocol.cpp */; };
 		CA92075E125AAC0C001F2456 /* BltWmsProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */; };
+		CA9C06991A0BECBA00FBD263 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CA9C06981A0BECBA00FBD263 /* Default-568h@2x.png */; };
 		CA9ED2940EAD3A8D003CE43C /* BltPixels.c in Sources */ = {isa = PBXBuildFile; fileRef = CA9ED2920EAD3A8D003CE43C /* BltPixels.c */; };
 		CA9ED2950EAD3A8D003CE43C /* BltPixels.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED2930EAD3A8D003CE43C /* BltPixels.h */; };
 		CA9ED81F0EAF9F18003CE43C /* BltDecoderX.h in Headers */ = {isa = PBXBuildFile; fileRef = CA9ED81D0EAF9F18003CE43C /* BltDecoderX.h */; };
@@ -2326,6 +2327,7 @@
 		CA8AE8000E73CEF000DDFCBB /* BltPlayerObjectiveC.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BltPlayerObjectiveC.mm; sourceTree = "<group>"; };
 		CA92075B125AAC0C001F2456 /* BltWmsProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltWmsProtocol.cpp; sourceTree = "<group>"; };
 		CA92075C125AAC0C001F2456 /* BltWmsProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltWmsProtocol.h; sourceTree = "<group>"; };
+		CA9C06981A0BECBA00FBD263 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		CA9ED2920EAD3A8D003CE43C /* BltPixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltPixels.c; sourceTree = "<group>"; };
 		CA9ED2930EAD3A8D003CE43C /* BltPixels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltPixels.h; sourceTree = "<group>"; };
 		CA9ED81C0EAF9F18003CE43C /* BltDecoderX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltDecoderX.c; sourceTree = "<group>"; };
@@ -4409,6 +4411,7 @@
 				CA1C6A7810F6C49B00D50ABE /* WebRoot */,
 				CA53C0BB10A6277800950FAF /* BtTouchPlayer-Info.plist */,
 				CA53C0C510A628B900950FAF /* BtTouchPlayer.xib */,
+				CA9C06981A0BECBA00FBD263 /* Default-568h@2x.png */,
 			);
 			name = BtTouchPlayer;
 			sourceTree = "<group>";
@@ -7420,6 +7423,7 @@
 			files = (
 				CA53C0C610A628B900950FAF /* BtTouchPlayer.xib in Resources */,
 				CA1C6A9210F6C49B00D50ABE /* WebRoot in Resources */,
+				CA9C06991A0BECBA00FBD263 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8797,7 +8801,6 @@
 				INFOPLIST_FILE = "BtTouchPlayer-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -9049,7 +9052,6 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					/usr/local/lib,
 				);
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
@@ -9228,7 +9230,6 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "BlueTune-Framework-OSX/BlueTune-Framework-OSX-Info.plist";
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = BlueTune;
 				SUPPORTED_PLATFORMS = macosx;
 				VALID_ARCHS = "i386 x86_64";

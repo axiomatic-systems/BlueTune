@@ -200,6 +200,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(OpenCoreAacDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_ANDROID_OPENSL_DECODER)
+    BLT_REGISTER_BUILTIN(AndroidOpenSlDecoder)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMA_DECODER)
     BLT_REGISTER_BUILTIN(WmaDecoder)
 #endif

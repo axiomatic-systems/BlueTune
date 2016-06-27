@@ -77,7 +77,7 @@ typedef struct {
 
 @interface OsxVideoView : NSOpenGLView
 {
-    NSLock*                 lock;
+    NSRecursiveLock*        lock;
 	NSRect                  screen_bounds;
 	NSRect                  texture_bounds;
 	CVOpenGLTextureCacheRef texture_cache;
@@ -319,7 +319,7 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 +---------------------------------------------------------------------*/
 - (id) initWithFrame:(NSRect)frameRect pixelFormat:(NSOpenGLPixelFormat *)format
 {
-    lock = [[NSLock alloc] init];
+    lock = [[NSRecursiveLock alloc] init];
     self = [super initWithFrame: frameRect pixelFormat: format];
     [self setupDisplayLink];
     return self;
@@ -365,8 +365,11 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
 +---------------------------------------------------------------------*/
 - (void)reshape
 {
-    NSRect frame = [self bounds];
+    // get the frame bounds, allowing for retina support
+    NSRect bounds = [self bounds];
+    NSRect frame = [self convertRectToBacking:bounds];
 	
+    ATX_LOG_FINE_4("reshape: bounds=%fx%f, frame=%fx%f", bounds.size.width, bounds.size.height, frame.size.width, frame.size.height);
     [lock lock];
     
 	// setup the frame
@@ -409,10 +412,9 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
     CVOpenGLTextureGetCleanTexCoords(texture, bottom_left, bottom_right, top_right, top_left);	
 
     // compute the aspect ratio and the positioning of the image in the view
-    NSRect view_bounds = [self bounds];
-    if (view_bounds.size.height < BLT_OSX_VIDEO_MIN_VIEW_HEIGHT) goto end;
-    if (view_bounds.size.height < BLT_OSX_VIDEO_MIN_VIEW_WIDTH) goto end;
-    if (view_bounds.size.width  < 0.0) goto end;
+    NSRect view_bounds = [self convertRectToBacking:[self bounds]];
+    if (view_bounds.size.height <= 0.0) goto end;
+    if (view_bounds.size.width  <= 0.0) goto end;
     GLfloat view_aspect_ratio = view_bounds.size.width/view_bounds.size.height;
     GLfloat texture_width  = bottom_right[0]-bottom_left[0];
     GLfloat texture_height = bottom_left[1]-top_left[1];
@@ -434,11 +436,19 @@ OsxVideoView_DisplayLinkCallback(CVDisplayLinkRef   display_link,
         picture_bounds.origin.y    = (view_bounds.size.height-picture_bounds.size.height)/2;
     }
     
-    // display the texture
+    // setup the texture
     GLenum target = CVOpenGLTextureGetTarget(texture);
     GLint name = CVOpenGLTextureGetName(texture);
     glEnable(target);
     glBindTexture(target, name);
+
+    // enable linear filtering for texture stretching
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // draw the texture
     glColor3f(1,1,1);
     glBegin(GL_QUADS);
         glTexCoord2fv(top_left);     glVertex2i(picture_bounds.origin.x,                           picture_bounds.origin.y);
@@ -585,6 +595,7 @@ end:
     for (i=0; i<pictures_in_queue; i++) {
         OsxVideoPicture* picture = pictures[(picture_tail+i)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE];
         if (picture && [picture displayTime] > displayTime) {
+            ATX_LOG_FINEST_3("restamping picture %d from %lld to %lld", (picture_tail+i)%BLT_OSX_VIDEO_PICTURE_QUEUE_SIZE, [picture displayTime], displayTime);
             [picture setDisplayTime: displayTime];
         }
     }
@@ -872,6 +883,9 @@ OsxVideoOutput_CreateView(OsxVideoOutput* self, id host_view)
         return BLT_FAILURE;
     }
 
+    /* enable retina screen support */
+    [self->video_view  setWantsBestResolutionOpenGLSurface:YES];
+    
     /* attach the video view */
     if (host_view) {
         [host_view addSubview: self->video_view];

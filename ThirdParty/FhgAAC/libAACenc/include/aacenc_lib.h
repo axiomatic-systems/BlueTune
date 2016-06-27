@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -316,7 +316,8 @@ if the parameter was not set from extern. The bitrate depends on the number of e
 channels and sampling rate and is determined as follows.
 \code
 AAC-LC (AOT_AAC_LC): 1.5 bits per sample
-HE-AAC (AOT_SBR): 0.625 bits per sample
+HE-AAC (AOT_SBR): 0.625 bits per sample (dualrate sbr)
+HE-AAC (AOT_SBR): 1.125 bits per sample (downsampled sbr)
 HE-AAC v2 (AOT_PS): 0.5 bits per sample
 \endcode
 
@@ -341,6 +342,33 @@ increase which might be significant. If workload is not an issue in the applicat
 we recommended to activate this feature.
 \code aacEncoder_SetParam(hAacEncoder, AACENC_AFTERBURNER, 1); \endcode
 
+\subsection encELD ELD Auto Configuration Mode
+For ELD configuration a so called auto configurator is available which configures SBR and the SBR ratio by itself.
+The configurator is used when the encoder parameter ::AACENC_SBR_MODE and ::AACENC_SBR_RATIO are not set explicitely.
+
+Based on sampling rate and chosen bitrate per channel a reasonable SBR configuration will be used.
+\verbatim
+------------------------------------------------------------
+  Sampling Rate  | Channel Bitrate |  SBR |       SBR Ratio
+-----------------+-----------------+------+-----------------
+ ]min, 16] kHz   |     min - 27999 |   on | downsampled SBR
+                 |   28000 -   max |  off |             ---
+-----------------+-----------------+------+-----------------
+ ]16 - 24] kHz   |     min - 39999 |   on | downsampled SBR
+                 |   40000 -   max |  off |             ---
+-----------------+-----------------+------+-----------------
+ ]24 - 32] kHz   |     min - 27999 |   on |    dualrate SBR
+                 |   28000 - 55999 |   on | downsampled SBR
+                 |   56000 -   max |  off |             ---
+-----------------+-----------------+------+-----------------
+ ]32 - 44.1] kHz |     min - 63999 |   on |    dualrate SBR
+                 |   64000 -   max |  off |             ---
+-----------------+-----------------+------+-----------------
+ ]44.1 - 48] kHz |     min - 63999 |   on |    dualrate SBR
+                 |   64000 - max   |  off |             ---
+------------------------------------------------------------
+\endverbatim
+
 
 \section audiochCfg Audio Channel Configuration
 The MPEG standard refers often to the so-called Channel Configuration. This Channel Configuration is used for a fixed Channel
@@ -349,16 +377,20 @@ For user defined Configurations the Channel Configuration is set to 0 and the Ch
 Program Config Element. The present Encoder implementation does not allow the user to configure this Channel Configuration from
 extern. The Encoder implementation supports fixed Channel Modes which are mapped to Channel Configuration as follow.
 \verbatim
---------------------------------------------------------------------
- ChannelMode     | ChCfg  | front_El | side_El  | back_El  | lfe_El
------------------+--------+----------+----------+----------+--------
-MODE_1           |      1 | SCE      |          |          |
-MODE_2           |      2 | CPE      |          |          |
-MODE_1_2         |      3 | SCE, CPE |          |          |
-MODE_1_2_1       |      4 | SCE, CPE |          | SCE      |
-MODE_1_2_2       |      5 | SCE, CPE |          | CPE      |
-MODE_1_2_2_1     |      6 | SCE, CPE |          | CPE      | LFE
---------------------------------------------------------------------
+-------------------------------------------------------------------------------
+ ChannelMode           | ChCfg  | front_El      | side_El  | back_El  | lfe_El
+-----------------------+--------+---------------+----------+----------+--------
+MODE_1                 |      1 | SCE           |          |          |
+MODE_2                 |      2 | CPE           |          |          |
+MODE_1_2               |      3 | SCE, CPE      |          |          |
+MODE_1_2_1             |      4 | SCE, CPE      |          | SCE      |
+MODE_1_2_2             |      5 | SCE, CPE      |          | CPE      |
+MODE_1_2_2_1           |      6 | SCE, CPE      |          | CPE      | LFE
+MODE_1_2_2_2_1         |      7 | SCE, CPE, CPE |          | CPE      | LFE
+-----------------------+--------+---------------+----------+----------+--------
+MODE_7_1_REAR_SURROUND |      0 | SCE, CPE      |          | CPE, CPE | LFE
+MODE_7_1_FRONT_CENTER  |      0 | SCE, CPE, CPE |          | CPE      | LFE
+-------------------------------------------------------------------------------
  - SCE: Single Channel Element.
  - CPE: Channel Pair.
  - SCE: Low Frequency Element.
@@ -374,16 +406,20 @@ Beside the Channel Element assignment the Channel Modes are resposible for audio
 of the audio data depends on the selected ::AACENC_CHANNELORDER which can be MPEG or WAV like order.\n
 Following Table describes the complete channel mapping for both Channel Order configurations.
 \verbatim
----------------------------------------------------------------------------------
-ChannelMode      |  MPEG-Channelorder            |  WAV-Channelorder
------------------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---
-MODE_1           | 0 |   |   |   |   |   |   |   | 0 |   |   |   |   |   |   |
-MODE_2           | 0 | 1 |   |   |   |   |   |   | 0 | 1 |   |   |   |   |   |
-MODE_1_2         | 0 | 1 | 2 |   |   |   |   |   | 2 | 0 | 1 |   |   |   |   |
-MODE_1_2_1       | 0 | 1 | 2 | 3 |   |   |   |   | 2 | 0 | 1 | 3 |   |   |   |
-MODE_1_2_2       | 0 | 1 | 2 | 3 | 4 |   |   |   | 2 | 0 | 1 | 3 | 4 |   |   |
-MODE_1_2_2_1     | 0 | 1 | 2 | 3 | 4 | 5 |   |   | 2 | 0 | 1 | 4 | 5 | 3 |   |
----------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+ChannelMode            |  MPEG-Channelorder            |  WAV-Channelorder
+-----------------------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---
+MODE_1                 | 0 |   |   |   |   |   |   |   | 0 |   |   |   |   |   |   |
+MODE_2                 | 0 | 1 |   |   |   |   |   |   | 0 | 1 |   |   |   |   |   |
+MODE_1_2               | 0 | 1 | 2 |   |   |   |   |   | 2 | 0 | 1 |   |   |   |   |
+MODE_1_2_1             | 0 | 1 | 2 | 3 |   |   |   |   | 2 | 0 | 1 | 3 |   |   |   |
+MODE_1_2_2             | 0 | 1 | 2 | 3 | 4 |   |   |   | 2 | 0 | 1 | 3 | 4 |   |   |
+MODE_1_2_2_1           | 0 | 1 | 2 | 3 | 4 | 5 |   |   | 2 | 0 | 1 | 4 | 5 | 3 |   |
+MODE_1_2_2_2_1         | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 2 | 6 | 7 | 0 | 1 | 4 | 5 | 3
+-----------------------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---
+MODE_7_1_REAR_SURROUND | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 2 | 0 | 1 | 6 | 7 | 4 | 5 | 3
+MODE_7_1_FRONT_CENTER  | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 2 | 6 | 7 | 0 | 1 | 4 | 5 | 3
+---------------------------------------------------------------------------------------
 \endverbatim
 
 The denoted mapping is important for correct audio channel assignment when using MPEG or WAV ordering. The incoming audio
@@ -416,116 +452,26 @@ determines the maximum allowed bitrate for AAC-LC. For HE-AAC and HE-AAC v2 a li
 look-up table is used.
 
 A good working point in terms of audio quality, sampling rate and bitrate, is at 1 to 1.5
-bits/audio sample for AAC-LC, 0.625 bits/audio sample for HE-AAC and 0.5 bits/audio sample
-for HE-AAC v2. For example for one channel with a sampling frequency of 48 kHz, the range from
+bits/audio sample for AAC-LC, 0.625 bits/audio sample for dualrate HE-AAC, 1.125 bits/audio sample
+for downsampled HE-AAC and 0.5 bits/audio sample for HE-AAC v2.
+For example for one channel with a sampling frequency of 48 kHz, the range from
 48 kbit/s to 72 kbit/s achieves reasonable audio quality for AAC-LC.
 
 For HE-AAC and HE-AAC v2 the lowest possible audio input sampling frequency is 16 kHz because then the
 AAC-LC core encoder operates in dual rate mode at its lowest possible sampling frequency, which is 8 kHz.
 HE-AAC v2 requires stereo input audio data.
 
-The following table lists the supported bitrates for AAC-LC, HE-AAC and HE-AAC v2 encoding depending
-on input sampling frequency ("Hz") and number of input channels ("chan"). The minimum and maximum
-allowed bitrate ("BR Min", "BR Max") is given in bits per second.
-In case the desired combination of bitrate and sampling frequency is not available ("NA") for HE-AAC or
-HE-AAC v2 then the encoder will automatically switch to AAC-LC and give a command line warning.
 Please note that in HE-AAC or HE-AAC v2 mode the encoder supports much higher bitrates than are
 appropriate for HE-AAC or HE-AAC v2. For example, at a bitrate of more than 64 kbit/s for a stereo
 audio signal at 44.1 kHz it usually makes sense to use AAC-LC, which will produce better audio
 quality at that bitrate than HE-AAC or HE-AAC v2.
-
-
-\verbatim
-  Config            AAC-LC                  HE-AAC (SBR)          HE-AACv2 (SBR+PS)
-
- Hz   chan       BR Min   BR Max          BR Min   BR Max          BR Min   BR Max
-
-8000    1        758      48000           NA       NA               NA       NA
-11025   1        1045     66150           NA       NA               NA       NA
-12000   1        1137     72000           NA       NA               NA       NA
-16000   1        1516     96000           8000     48000            NA       NA
-22050   1        2089     132300          8000     64000            NA       NA
-24000   1        2274     144000          8000     64000            NA       NA
-32000   1        3032     192000          8000     64000            NA       NA
-44100   1        4178     264576          8000     64000            NA       NA
-48000   1        4547     288000          12000    64000            NA       NA
-64000   1        6063     384000          24000    160000           NA       NA
-88200   1        8355     529200          24000    160000           NA       NA
-96000   1        9094     576000          24000    160000           NA       NA
------------------------------------------------------------------------------------
-8000    2        1071     96000           NA       NA               NA       NA
-11025   2        1476     132300          NA       NA               NA       NA
-12000   2        1606     144000          NA       NA               NA       NA
-16000   2        2141     192000          16000    96000            8000     48000
-22050   2        2951     264600          16000    128000           8000     64000
-24000   2        3211     288000          16000    128000           8000     64000
-32000   2        4282     384000          16000    128000           8000     64000
-44100   2        5900     529152          16000    128000           8000     64000
-48000   2        6422     576000          16000    128000           12000    64000
-64000   2        8563     768000          32000    256000           24000    160000
-88200   2        11801    1058400         32000    256000           24000    160000
-96000   2        12844    1152000         32000    256000           24000    160000
------------------------------------------------------------------------------------
-8000    3        1383     144000          NA       NA               NA       NA
-11025   3        1906     198450          NA       NA               NA       NA
-12000   3        2075     216000          NA       NA               NA       NA
-16000   3        2766     288000          26667    120000           NA       NA
-22050   3        3812     396900          26667    160000           NA       NA
-24000   3        4149     432000          26667    160000           NA       NA
-32000   3        5532     576000          26667    160000           NA       NA
-44100   3        7623     793728          26667    160000           NA       NA
-48000   3        8297     864000          29996    160000           NA       NA
-64000   3        11063    1152000         59996    400000           NA       NA
-88200   3        15246    1587600         59996    400000           NA       NA
-96000   3        16594    1728000         59996    400000           NA       NA
------------------------------------------------------------------------------------
-8000    4        1696     192000          NA       NA               NA       NA
-11025   4        2337     264600          NA       NA               NA       NA
-12000   4        2543     288000          NA       NA               NA       NA
-16000   4        3391     384000          40000    160000           NA       NA
-22050   4        4673     529200          40000    213330           NA       NA
-24000   4        5086     576000          40000    213330           NA       NA
-32000   4        6782     768000          40000    213330           NA       NA
-44100   4        9345     1058304         40000    213330           NA       NA
-48000   4        10172    1152000         40000    213330           NA       NA
-64000   4        13563    1536000         80000    533330           NA       NA
-88200   4        18691    2116800         80000    533330           NA       NA
-96000   4        20344    2304000         80000    533330           NA       NA
------------------------------------------------------------------------------------
-8000    5        2008     240000          NA       NA               NA       NA
-11025   5        2768     330750          NA       NA               NA       NA
-12000   5        3012     360000          NA       NA               NA       NA
-16000   5        4016     480000          43244    184612           NA       NA
-22050   5        5535     661500          43244    246152           NA       NA
-24000   5        6024     720000          43244    246152           NA       NA
-32000   5        8032     960000          43244    246152           NA       NA
-44100   5        11068    1322880         43244    246152           NA       NA
-48000   5        12047    1440000         46140    246152           NA       NA
-64000   5        16063    1920000         92296    615384           NA       NA
-88200   5        22137    2646000         92296    615384           NA       NA
-96000   5        24094    2880000         92296    615384           NA       NA
------------------------------------------------------------------------------------
-8000    5.1      2321     240000          NA       NA               NA       NA
-11025   5.1      3198     330750          NA       NA               NA       NA
-12000   5.1      3481     360000          NA       NA               NA       NA
-16000   5.1      4641     480000          45715    199990           NA       NA
-22050   5.1      6396     661500          45715    266658           NA       NA
-24000   5.1      6961     720000          45715    266658           NA       NA
-32000   5.1      9282     960000          45715    266658           NA       NA
-44100   5.1      12790    1322880         45715    266658           NA       NA
-48000   5.1      13922    1440000         49982    266658           NA       NA
-64000   5.1      18563    1920000         99982    666658           NA       NA
-88200   5.1      25582    2646000         99982    666658           NA       NA
-96000   5.1      27844    2880000         99982    666658           NA       NA
-
-\endverbatim \n
 
 \section reommendedConfig Recommended Sampling Rate and Bitrate Combinations
 
 The following table provides an overview of recommended encoder configuration parameters
 which we determined by virtue of numerous listening tests.
 
-\subsection reommendedConfigLC AAC-LC, HE-AAC, HE-AACv2.
+\subsection reommendedConfigLC AAC-LC, HE-AAC, HE-AACv2 in Dualrate SBR mode.
 \verbatim
 -----------------------------------------------------------------------------------
 Audio Object Type  |  Bit Rate Range  |            Supported  | Preferred  | No. of
@@ -548,8 +494,8 @@ AAC LC + SBR       |  64000 - 128000  |  32.00, 44.10, 48.00  |     48.00  |    
 -------------------+------------------+-----------------------+------------+-------
 AAC LC + SBR       |  64000 -  69999  |  32.00, 44.10, 48.00  |     32.00  | 5, 5.1
 AAC LC + SBR       |  70000 - 159999  |  32.00, 44.10, 48.00  |     44.10  | 5, 5.1
-AAC LC + SBR       | 160000 - 319999  |  32.00, 44.10, 48.00  |     48.00  | 5, 5.1
-AAC LC + SBR       | 320000 - 640000  |  64.00, 88.20, 96.00  |     96.00  | 5, 5.1
+AAC LC + SBR       | 160000 - 245999  |  32.00, 44.10, 48.00  |     48.00  |      5
+AAC LC + SBR       | 160000 - 265999  |  32.00, 44.10, 48.00  |     48.00  |    5.1
 -------------------+------------------+-----------------------+------------+-------
 AAC LC             |   8000 -  15999  | 11.025, 12.00, 16.00  |     12.00  |      1
 AAC LC             |  16000 -  23999  |                16.00  |     16.00  |      1
@@ -572,7 +518,7 @@ AAC LC             | 280000 - 800000  |  32.00, 44.10, 48.00  |     44.10  | 5, 
 -----------------------------------------------------------------------------------
 \endverbatim \n
 
-\subsection reommendedConfigLD AAC-LD, AAC-ELD, AAC-ELD with SBR.
+\subsection reommendedConfigLD AAC-LD, AAC-ELD, AAC-ELD with SBR in Dualrate SBR mode.
 \verbatim
 -----------------------------------------------------------------------------------
 Audio Object Type  |  Bit Rate Range  |            Supported  | Preferred  | No. of
@@ -580,18 +526,20 @@ Audio Object Type  |  Bit Rate Range  |            Supported  | Preferred  | No.
                    |                  |                [kHz]  |      Rate  |
                    |                  |                       |     [kHz]  |
 -------------------+------------------+-----------------------+------------+-------
-ELD + SBR          |  16000 -  24999  |        32.00 - 44.10  |     32.00  |      1
+ELD + SBR          |  18000 -  24999  |        32.00 - 44.10  |     32.00  |      1
 ELD + SBR          |  25000 -  31999  |        32.00 - 48.00  |     32.00  |      1
 ELD + SBR          |  32000 -  64000  |        32.00 - 48.00  |     48.00  |      1
 -------------------+------------------+-----------------------+------------+-------
 ELD + SBR          |  32000 -  51999  |        32.00 - 48.00  |     44.10  |      2
 ELD + SBR          |  52000 - 128000  |        32.00 - 48.00  |     48.00  |      2
 -------------------+------------------+-----------------------+------------+-------
-ELD + SBR          |  72000 - 192000  |        44.10 - 48.00  |     48.00  |      3
+ELD + SBR          |  72000 - 160000  |        44.10 - 48.00  |     48.00  |      3
 -------------------+------------------+-----------------------+------------+-------
-ELD + SBR          |  96000 - 256000  |        44.10 - 48.00  |     48.00  |      4
+ELD + SBR          |  96000 - 212000  |        44.10 - 48.00  |     48.00  |      4
 -------------------+------------------+-----------------------+------------+-------
-ELD + SBR          | 120000 - 320000  |        44.10 - 48.00  |     48.00  |      5
+ELD + SBR          | 120000 - 246000  |        44.10 - 48.00  |     48.00  |      5
+-------------------+------------------+-----------------------+------------+-------
+ELD + SBR          | 120000 - 266000  |        44.10 - 48.00  |     48.00  |    5.1
 -------------------+------------------+-----------------------+------------+-------
 LD, ELD            |  16000 -  19999  |        16.00 - 24.00  |     16.00  |      1
 LD, ELD            |  20000 -  39999  |        16.00 - 32.00  |     24.00  |      1
@@ -622,13 +570,33 @@ LD, ELD            | 340000 - 960000  |        44.10 - 48.00  |     48.00  |    
 -----------------------------------------------------------------------------------
 \endverbatim \n
 
+\subsection reommendedConfigELD AAC-ELD with SBR in Downsampled SBR mode.
+\verbatim
+-----------------------------------------------------------------------------------
+Audio Object Type  |  Bit Rate Range  |            Supported  | Preferred  | No. of
+                   |         [bit/s]  |       Sampling Rates  |    Sampl.  |  Chan.
+                   |                  |                [kHz]  |      Rate  |
+                   |                  |                       |     [kHz]  |
+-------------------+------------------+-----------------------+------------+-------
+ELD + SBR          |  18000 -  24999  |        16.00 - 22.05  |     22.05  |      1
+(downsampled SBR)  |  25000 -  35999  |        22.05 - 32.00  |     24.00  |      1
+                   |  36000 -  64000  |        32.00 - 48.00  |     32.00  |      1
+-----------------------------------------------------------------------------------
+\endverbatim \n
+
+
 \page ENCODERBEHAVIOUR Encoder Behaviour
 
 \section BEHAVIOUR_BANDWIDTH Bandwidth
 
 The FDK AAC encoder usually does not use the full frequency range of the input signal, but restricts the bandwidth
 according to certain library-internal settings. They can be changed in the table "bandWidthTable" in the
-file bandwidth.cpp (if available), or via command-line argument "-w" (see chapter \ref CommandLineUsage).
+file bandwidth.cpp (if available).
+
+The encoder API provides the ::AACENC_BANDWIDTH parameter to adjust the bandwidth explicitly.
+\code
+aacEncoder_SetParam(hAacEncoder, AACENC_BANDWIDTH, value);
+\endcode
 
 However it is not recommended to change these settings, because they are based on numerious listening
 tests and careful tweaks to ensure the best overall encoding quality.
@@ -728,7 +696,6 @@ an MPEG-2 AOT is choosen since PNS is an MPEG-4 AAC feature.
 
 If SBR is activated, the encoder automatically deactivates PNS internally. If TNS is disabled but PNS is allowed,
 the encoder deactivates PNS calculation internally.
-
 
 */
 
@@ -949,22 +916,32 @@ typedef enum
   AACENC_SAMPLERATE               = 0x0103,  /*!< Audio input data sampling rate. Encoder supports following sampling rates:
                                                   8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 64000, 88200, 96000 */
 
-  AACENC_SBR_MODE                 = 0x0104,  /*!< Configure SBR independently of the chosen Audio Object Type ::AUDIO_OBJECT_TYPE:.
-                                                  This parameter is only available for ELD.
+  AACENC_SBR_MODE                 = 0x0104,  /*!< Configure SBR independently of the chosen Audio Object Type ::AUDIO_OBJECT_TYPE.
+                                                  This parameter is for ELD audio object type only.
+                                                  - -1: Use ELD SBR auto configurator (default).
                                                   - 0: Disable Spectral Band Replication.
                                                   - 1: Enable Spectral Band Replication. */
 
   AACENC_GRANULE_LENGTH           = 0x0105,  /*!< Core encoder (AAC) audio frame length in samples:
                                                   - 1024: Default configuration.
-                                                  - 512: Optional length in LD/ELD configuration.
-                                                  - 480: Default LD/ELD configuration. */
+                                                  - 512: Default LD/ELD configuration.
+                                                  - 480: Optional length in LD/ELD configuration. */
 
   AACENC_CHANNELMODE              = 0x0106,  /*!< Set explicit channel mode. Channel mode must match with number of input channels.
-                                                  - 1-6: MPEG channel modes supported, see ::CHANNEL_MODE in FDK_audio.h. */
+                                                  - 1-7 and 33,34: MPEG channel modes supported, see ::CHANNEL_MODE in FDK_audio.h. */
 
   AACENC_CHANNELORDER             = 0x0107,  /*!< Input audio data channel ordering scheme:
                                                   - 0: MPEG channel ordering (e. g. 5.1: C, L, R, SL, SR, LFE). (default)
                                                   - 1: WAVE file format channel ordering (e. g. 5.1: L, R, C, LFE, SL, SR). */
+
+  AACENC_SBR_RATIO                = 0x0108,  /*!<  Controls activation of downsampled SBR. With downsampled SBR, the delay will be
+                                                   shorter. On the other hand, for achieving the same quality level, downsampled SBR
+                                                   needs more bits than dual-rate SBR.
+                                                   With downsampled SBR, the AAC encoder will work at the same sampling rate as the
+                                                   SBR encoder (single rate).
+                                                   Downsampled SBR is supported for AAC-ELD and HE-AACv1.
+                                                   - 1: Downsampled SBR (default for ELD).
+                                                   - 2: Dual-rate SBR   (default for HE-AAC). */
 
   AACENC_AFTERBURNER              = 0x0200,  /*!< This parameter controls the use of the afterburner feature.
                                                   The afterburner is a type of analysis by synthesis algorithm which increases the
@@ -997,14 +974,50 @@ typedef enum
                                                   - n: Frame count period. */
 
   AACENC_SIGNALING_MODE           = 0x0302,  /*!< Signaling mode of the extension AOT:
-                                                  - 0: Implicit backward compatible signaling. (default)
-                                                  - 1: Explicit SBR and implicit PS signaling.
-                                                  - 2: Explicit hierarchical signaling.
+                                                  - 0: Implicit backward compatible signaling (default for non-MPEG-4 based
+                                                       AOT's and for the transport formats ADIF and ADTS)
+                                                       - A stream that uses implicit signaling can be decoded by every AAC decoder, even AAC-LC-only decoders
+                                                       - An AAC-LC-only decoder will only decode the low-frequency part of the stream, resulting in a band-limited output
+                                                       - This method works with all transport formats
+                                                       - This method does not work with downsampled SBR
+                                                  - 1: Explicit backward compatible signaling
+                                                       - A stream that uses explicit backward compatible signaling can be decoded by every AAC decoder, even AAC-LC-only decoders
+                                                       - An AAC-LC-only decoder will only decode the low-frequency part of the stream, resulting in a band-limited output
+                                                       - A decoder not capable of decoding PS will only decode the AAC-LC+SBR part.
+                                                         If the stream contained PS, the result will be a a decoded mono downmix
+                                                       - This method does not work with ADIF or ADTS. For LOAS/LATM, it only works with AudioMuxVersion==1
+                                                       - This method does work with downsampled SBR
+                                                  - 2: Explicit hierarchical signaling (default for MPEG-4 based AOT's and for all transport formats excluding ADIF and ADTS)
+                                                       - A stream that uses explicit hierarchical signaling can be decoded only by HE-AAC decoders
+                                                       - An AAC-LC-only decoder will not decode a stream that uses explicit hierarchical signaling
+                                                       - A decoder not capable of decoding PS will not decode the stream at all if it contained PS
+                                                       - This method does not work with ADIF or ADTS. It works with LOAS/LATM and the MPEG-4 File format
+                                                       - This method does work with downsampled SBR
 
-                                                  The use of backward-compatible implicit signaling is recommended if the user specically
-                                                  aims at preserving compatibility with decoders only capable of decoding AAC-LC. Otherwise
-                                                  use non-backward-compatible explicit signaling.
-                                                  Bitstream formats ADTS and ADIF can only do implicit signaling. */
+                                                   For making sure that the listener always experiences the best audio quality,
+                                                   explicit hierarchical signaling should be used.
+                                                   This makes sure that only a full HE-AAC-capable decoder will decode those streams.
+                                                   The audio is played at full bandwidth.
+                                                   For best backwards compatibility, it is recommended to encode with implicit SBR signaling.
+                                                   A decoder capable of AAC-LC only will then only decode the AAC part, which means the decoded
+                                                   audio will sound band-limited.
+
+                                                   For MPEG-2 transport types (ADTS,ADIF), only implicit signaling is possible.
+
+                                                   For LOAS and LATM, explicit backwards compatible signaling only works together with AudioMuxVersion==1.
+                                                   The reason is that, for explicit backwards compatible signaling, additional information will be appended to the ASC.
+                                                   A decoder that is only capable of decoding AAC-LC will skip this part.
+                                                   Nevertheless, for jumping to the end of the ASC, it needs to know the ASC length.
+                                                   Transmitting the length of the ASC is a feature of AudioMuxVersion==1, it is not possible to transmit the
+                                                   length of the ASC with AudioMuxVersion==0, therefore an AAC-LC-only decoder will not be able to parse a
+                                                   LOAS/LATM stream that was being encoded with AudioMuxVersion==0.
+
+                                                   For downsampled SBR, explicit signaling is mandatory. The reason for this is that the
+                                                   extension sampling frequency (which is in case of SBR the sampling frequqncy of the SBR part)
+                                                   can only be signaled in explicit mode.
+
+                                                   For AAC-ELD, the SBR information is transmitted in the ELDSpecific Config, which is part of the
+                                                   AudioSpecificConfig. Therefore, the settings here will have no effect on AAC-ELD.*/
 
   AACENC_TPSUBFRAMES              = 0x0303,  /*!< Number of sub frames in a transport frame for LOAS/LATM or ADTS (default 1).
                                                   - ADTS: Maximum number of sub frames restricted to 4.

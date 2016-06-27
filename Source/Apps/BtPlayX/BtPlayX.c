@@ -29,14 +29,16 @@ typedef struct {
 } BLTP_Key;
 
 typedef struct {
-    BLT_CString  audio_output_name;
-    BLT_CString  audio_output_type;
-    BLT_CString  video_output_name;
-    BLT_CString  video_output_type;
-    unsigned int duration;
-    unsigned int seek; /* milliseconds */
-    unsigned int verbosity;
-    ATX_List*    keys;
+    BLT_CString     audio_output_name;
+    BLT_CString     audio_output_type;
+    BLT_CString     video_output_name;
+    BLT_CString     video_output_type;
+    unsigned int    duration;
+    unsigned int    seek; /* milliseconds */
+    unsigned int    verbosity;
+    ATX_List*       keys;
+    ATX_Properties* core_properties;
+    ATX_Properties* stream_properties;
 } BLTP_Options;
 
 typedef struct  {
@@ -96,6 +98,15 @@ BLTP_PrintUsageAndExit(int exit_code)
         "                     (multiple --verbose= options can be specified)\n"
         "  --key=<name>:<value> : content decryption key for content ID <name>.\n"
         "                         The key value is in hexadecimal\n");
+    ATX_ConsoleOutput(
+        "  --property=<scope>:<type>:<name>:<value>\n"
+        "    where <scope> is C (Core) or S (Stream),\n"
+        "    <type> is I (Integer), S (String), or B (Boolean),\n"
+        "    and <value> is an integer, string, boolean ('true' or 'false'),\n"
+        "    as appropriate.\n"
+        "    For strings, if <type> is 's' instead of 'S', <value> is the name\n"
+        "    of a file from which to read the string (useful for large strings.\n"
+        );
     exit(exit_code);
 }
 
@@ -182,6 +193,8 @@ BLTP_ParseCommandLine(char** args)
     Options.seek        = 0;
     Options.verbosity   = 0;
     ATX_List_Create(&Options.keys);
+    ATX_Properties_Create(&Options.core_properties);
+    ATX_Properties_Create(&Options.stream_properties);
     
     while ((arg = *args)) {
         if (ATX_StringsEqual(arg, "-h") ||
@@ -213,6 +226,79 @@ BLTP_ParseCommandLine(char** args)
             }
         } else if (ATX_StringsEqualN(arg, "--key=", 6)) {
             BLTP_ParseKey(arg+6);
+        } else if (ATX_StringsEqualN(arg, "--property=", 11)) {
+            char*             property = arg+11;
+            ATX_Properties*   properties = NULL;
+            char*             name = property+4;
+            char*             value_string;
+            ATX_PropertyValue value;
+            ATX_DataBuffer*   file_buffer = NULL;
+            ATX_Result        result;
+            
+            if (ATX_StringLength(property) < 7 || property[1] != ':' || property[3] != ':') {
+                fprintf(stderr, "ERROR: invalid property syntax\n");
+                return NULL;
+            }
+            switch (property[0]) {
+                case 'C': properties = Options.core_properties; break;
+                case 'S': properties = Options.stream_properties; break;
+                default: fprintf(stderr, "ERROR: invalid property scope\n"); return NULL;
+            }
+            value_string = &property[4];
+            while (*value_string != '\0' && *value_string != ':') {
+                value_string++;
+            }
+            if (*value_string != ':') {
+                fprintf(stderr, "ERROR: invalid property syntax\n");
+                return NULL;
+            } 
+            *value_string++ = '\0';
+            switch (property[2]) {
+                case 'I': 
+                    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                    if (ATX_FAILED(ATX_ParseInteger(value_string, &value.data.integer, ATX_FALSE))) {
+                        fprintf(stderr, "ERROR: invalid integer property syntax\n");
+                        return NULL;
+                    }
+                    break;
+                    
+                case 'S':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                    value.data.string = value_string;
+                    break;
+                    
+                case 's':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                    result = ATX_LoadFile(value_string, &file_buffer);
+                    if (ATX_FAILED(result)) {
+                        fprintf(stderr, "ERROR: failed read from property file (%d)\n", result);
+                        return NULL;
+                    }
+                    ATX_DataBuffer_SetDataSize(file_buffer, ATX_DataBuffer_GetDataSize(file_buffer)+1);
+                    ATX_DataBuffer_UseData(file_buffer)[ATX_DataBuffer_GetDataSize(file_buffer)] = '\0';
+                    value.data.string = (const char*)ATX_DataBuffer_GetData(file_buffer);
+                    break;
+
+                case 'B':
+                    value.type = ATX_PROPERTY_VALUE_TYPE_BOOLEAN;
+                    if (ATX_StringsEqual(value_string, "true")) {
+                        value.data.boolean = ATX_TRUE;
+                    } else if (ATX_StringsEqual(value_string, "false")) {
+                        value.data.boolean = ATX_FALSE;
+                    } else {
+                        fprintf(stderr, "ERROR: invalid boolean property syntax\n");
+                        return NULL;
+                    }
+                    break;                    
+                  
+                default:
+                    fprintf(stderr, "ERROR: invalid property type\n");
+                    return NULL;
+            }
+            ATX_Properties_SetProperty(properties, name, &value);
+            if (file_buffer) {
+                ATX_DataBuffer_Destroy(file_buffer);
+            }
         } else {
             return args;
         }
@@ -585,6 +671,7 @@ main(int argc, char** argv)
     /* parse command line */
     if (argc < 2) BLTP_PrintUsageAndExit(0);
     argv = BLTP_ParseCommandLine(argv+1);
+    if (argv == NULL) return 1;
 
     /* create a decoder */
     result = BLT_DecoderX_Create(&decoder);
@@ -649,6 +736,20 @@ main(int argc, char** argv)
     if (BLT_FAILED(result)) {
         fprintf(stderr, "SetVideoOutput failed: %d (%s)\n", result, BLT_ResultText(result));
         exit(1);
+    }
+
+    /* set core properties */
+    {
+        ATX_Properties* properties;
+        ATX_Iterator*   it;
+        void*           next;
+        BLT_DecoderX_GetProperties(decoder, &properties);
+        ATX_Properties_GetIterator(Options.core_properties, &it);
+        while (ATX_SUCCEEDED(ATX_Iterator_GetNext(it, &next))) {
+            ATX_Property* property = (ATX_Property*)next;
+            ATX_Properties_SetProperty(properties, property->name, &property->value); 
+        }
+        ATX_DESTROY_OBJECT(it);
     }
 
     /* process each input in turn */

@@ -772,8 +772,9 @@ Mp4ParserInput_SetStream(BLT_InputStreamUser* _self,
 
     /* parse the MP4 file */
     ATX_LOG_FINE("parsing MP4 file");
+    AP4_DefaultAtomFactory atom_factory;
     self->input.mp4_file = new AP4_File(*stream_adapter, 
-                                        AP4_DefaultAtomFactory::Instance,
+                                        atom_factory,
                                         true); /* parse until moov only */
     stream_adapter->Release();
 

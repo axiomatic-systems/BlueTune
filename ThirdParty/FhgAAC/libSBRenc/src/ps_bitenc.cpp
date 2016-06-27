@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -269,7 +269,7 @@ static const INT psBands[] =
 
 static INT getNoBands(PS_RESOLUTION mode)
 {
-  if(mode>=6)
+  if((int)mode>=6)
     return 0;
 
   if(mode>=3)

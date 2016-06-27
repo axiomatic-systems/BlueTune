@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -100,6 +100,9 @@ amm-info@iis.fraunhofer.de
 #elif defined(__mips__)	/* cppp replaced: elif */
 #include "mips/clz_mips.h"
 
+#elif defined(__x86__)	/* cppp replaced: elif */
+#include "x86/clz_x86.h"
+
 #endif /* all cores */
 
 
@@ -114,11 +117,6 @@ amm-info@iis.fraunhofer.de
 inline INT fixnormz_S (SHORT a)
 {
   return fixnormz_D((INT)(a));
-}
-#elif defined(__GNUC__)
-inline INT fixnormz_S (SHORT a)
-{
-    return a ? __builtin_clz(a) : 16;
 }
 #else
 inline INT fixnormz_S (SHORT a)
@@ -136,12 +134,6 @@ inline INT fixnormz_S (SHORT a)
 #endif
 
 #if !defined(FUNCTION_fixnormz_D)
-#if defined(__GNUC__)
-inline INT fixnormz_D (LONG a)
-{
-    return a ? __builtin_clz(a) : 32;
-}
-#else
 inline INT fixnormz_D (LONG a)
 {
     INT leadingBits = 0;
@@ -153,7 +145,6 @@ inline INT fixnormz_D (LONG a)
 
     return (leadingBits);
 }
-#endif
 #endif
 
 

@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -459,7 +459,7 @@ void BidirectionalEstimation_UseScfOfPrevFrameAsReference (
           break;
 
         case NOISE_HCB:
-          if ( (pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousCodebook[bnds]==NOISE_HCB) ) {
+          if ( pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousCodebook[bnds]==NOISE_HCB ) {
             commonMin = FDKmin(pAacDecoderChannelInfo->pComData->overlay.aac.aRvlcScfFwd[bnds],pAacDecoderChannelInfo->pComData->overlay.aac.aRvlcScfBwd[bnds]);
             pAacDecoderChannelInfo->pDynData->aScaleFactor[bnds] = FDKmin(commonMin, pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousScaleFactor[bnds]);
           } else {
@@ -669,7 +669,7 @@ void PredictiveInterpolation (
           break;
 
         case NOISE_HCB:
-          if ( (pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousCodebook[bnds]==NOISE_HCB) ) {
+          if ( pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousCodebook[bnds]==NOISE_HCB ) {
             commonMin = FDKmin(pAacDecoderChannelInfo->pComData->overlay.aac.aRvlcScfFwd[bnds],pAacDecoderChannelInfo->pComData->overlay.aac.aRvlcScfBwd[bnds]);
             pAacDecoderChannelInfo->pDynData->aScaleFactor[bnds] = FDKmin(commonMin, pAacDecoderStaticChannelInfo->concealmentInfo.aRvlcPreviousScaleFactor[bnds]);
           }

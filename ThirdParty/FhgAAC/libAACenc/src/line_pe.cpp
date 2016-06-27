@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -122,6 +122,8 @@ void FDKaacEnc_prepareSfbPe(PE_CHANNEL_DATA *peChanData,
          avgFormFactorLdData = ((-sfbEnergyLdData[sfbGrp+sfb]>>1) + (CalcLdInt(sfbWidth)>>1))>>1;
          peChanData->sfbNLines[sfbGrp+sfb] =
            (INT)CalcInvLdData( (sfbFormFactorLdData[sfbGrp+sfb] + formFacScaling) + avgFormFactorLdData);
+         /* Make sure sfbNLines is never greater than sfbWidth due to unaccuracies (e.g. sfbEnergyLdData[sfbGrp+sfb] = 0x80000000) */
+         peChanData->sfbNLines[sfbGrp+sfb] = fMin(sfbWidth, peChanData->sfbNLines[sfbGrp+sfb]);
       }
       else {
          peChanData->sfbNLines[sfbGrp+sfb] = 0;
@@ -182,7 +184,7 @@ void FDKaacEnc_calcSfbPe(PE_CHANNEL_DATA  *RESTRICT peChanData,
          }
          peChanData->sfbNActiveLines[sfbGrp+sfb] = nLines;
       }
-      else if( isBook[sfb] ) {
+      else if( isBook[sfbGrp+sfb] ) {
         /* provide for cost of scale factor for Intensity */
         INT delta = isScale[sfbGrp+sfb] - lastValIs;
         lastValIs = isScale[sfbGrp+sfb];

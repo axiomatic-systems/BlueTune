@@ -86,6 +86,17 @@ static jint MapDecoderState(BLT_DecoderServer::State state)
     }
 }
 
+static BLT_PropertyScope MapPropertyScope(jint scope)
+{
+    switch (scope) {
+        case com_bluetune_player_Player_PROPERTY_SCOPE_CORE:   return BLT_PROPERTY_SCOPE_CORE;
+        case com_bluetune_player_Player_PROPERTY_SCOPE_STREAM: return BLT_PROPERTY_SCOPE_STREAM;
+        case com_bluetune_player_Player_PROPERTY_SCOPE_MODULE: return BLT_PROPERTY_SCOPE_MODULE;
+        default: 
+            return BLT_PROPERTY_SCOPE_CORE;
+    }
+}
+
 class JniPlayer : public BLT_Player
 {
 public:
@@ -644,7 +655,7 @@ Java_com_bluetune_player_Player__1setInput__JLcom_bluetune_player_Input_2Ljava_l
     JniInput* input = JniInput_Create(env, _input);
     
     char input_name[64];
-    sprintf(input_name, "callback-input:%lld", ATX_POINTER_TO_LONG(input));
+    sprintf(input_name, "callback-input:%lld", (ATX_Int64)ATX_POINTER_TO_LONG(input));
     
     const char* mimeType = NULL;
     if (_mimeType){
@@ -775,4 +786,57 @@ Java_com_bluetune_player_Player__1setVolume(JNIEnv *env, jclass, jlong _self, jf
     return self->SetVolume(volume);
 }
 
+JNIEXPORT jint JNICALL 
+Java_com_bluetune_player_Player__1setPropertyInteger(JNIEnv *env, jclass, jlong _self, jint _scope, jstring _name, jint _value)
+{
+    JniPlayer* self = (JniPlayer*)_self;
+
+    BLT_PropertyScope scope = MapPropertyScope(_scope);
+
+    const char* name = env->GetStringUTFChars(_name, JNI_FALSE);
+    if (name == NULL) return BLT_ERROR_INTERNAL;
+    
+    ATX_PropertyValue value;
+    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+    value.data.integer = (ATX_Int32)_value;
+
+    BLT_Result result =  self->SetProperty(scope, NULL, name, &value);
+    
+    env->ReleaseStringUTFChars(_name, name);
+
+    return result;
+}
+
+/*
+ * Class:     com_bluetune_player_Player
+ * Method:    _setPropertyString
+ * Signature: (JILjava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL 
+Java_com_bluetune_player_Player__1setPropertyString(JNIEnv *env, jclass, jlong _self, jint _scope, jstring _name, jstring _value)
+{
+    JniPlayer* self = (JniPlayer*)_self;
+
+    BLT_PropertyScope scope = MapPropertyScope(_scope);
+
+    const char* name = env->GetStringUTFChars(_name, JNI_FALSE);
+    if (name == NULL) return BLT_ERROR_INTERNAL;
+    
+    const char* value_cstr = env->GetStringUTFChars(_value, JNI_FALSE);
+    if (value_cstr == NULL) {
+        env->ReleaseStringUTFChars(_name, name);
+        return BLT_ERROR_INVALID_PARAMETERS;
+    }
+
+    ATX_PropertyValue value;
+    value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+    value.data.string = value_cstr;
+
+    BLT_Result result =  self->SetProperty(scope, NULL, name, &value);
+    
+    env->ReleaseStringUTFChars(_name, name);
+    env->ReleaseStringUTFChars(_value, value_cstr);
+
+    return result;
+}
 

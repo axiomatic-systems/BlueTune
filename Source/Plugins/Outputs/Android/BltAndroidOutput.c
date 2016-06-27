@@ -370,7 +370,10 @@ AndroidOutput_SetupOpenSL(AndroidOutput* self)
     SLresult result;
 
     /* create the OpenSL engine */
-    result = slCreateEngine(&self->sl_engine_object, 0, NULL, 0, NULL, NULL);
+    SLEngineOption engine_options[] = {
+        {(SLuint32) SL_ENGINEOPTION_THREADSAFE, (SLuint32) SL_BOOLEAN_TRUE}
+    };    
+    result = slCreateEngine(&self->sl_engine_object, 1, engine_options, 0, NULL, NULL);
     if (result != SL_RESULT_SUCCESS) {
         ATX_LOG_WARNING_1("slCreateEngine failed (%d)", (int)result);
         return BLT_FAILURE;

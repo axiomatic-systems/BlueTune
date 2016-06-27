@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -148,12 +148,20 @@ FIXP_DBL scaleValueSaturate(
 {
   if(scalefactor > 0) {
     if (fNorm(value) < scalefactor && value != (FIXP_DBL)0) {
-      return (FIXP_DBL)MAXVAL_DBL;
+      if (value > (FIXP_DBL)0) {
+        return (FIXP_DBL)MAXVAL_DBL;
+      } else {
+        return (FIXP_DBL)MINVAL_DBL;
+      }
     } else {
       return (value<<scalefactor);
     }
   } else {
+    if (-(DFRACT_BITS-1) > scalefactor) {
+      return (FIXP_DBL)0;
+    } else {
     return (value>>(-scalefactor));
+    }
   }
 }
 #endif

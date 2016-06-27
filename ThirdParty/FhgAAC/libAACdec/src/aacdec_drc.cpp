@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -130,18 +130,23 @@ void aacDecoder_drcInit (
   /* init control fields */
   self->enable = 0;
   self->numThreads = 0;
-  self->digitalNorm = 0;
 
   /* init params */
   pParams = &self->params;
   pParams->bsDelayEnable = 0;
-  pParams->cut   = FL2FXCONST_DBL(0.0f);
-  pParams->boost = FL2FXCONST_DBL(0.0f);
-  pParams->targetRefLevel = AACDEC_DRC_DEFAULT_REF_LEVEL;
+  pParams->cut      = FL2FXCONST_DBL(0.0f);
+  pParams->usrCut   = FL2FXCONST_DBL(0.0f);
+  pParams->boost    = FL2FXCONST_DBL(0.0f);
+  pParams->usrBoost = FL2FXCONST_DBL(0.0f);
+  pParams->targetRefLevel = -1;
   pParams->expiryFrame = AACDEC_DRC_DFLT_EXPIRY_FRAMES;
+  pParams->applyDigitalNorm = 0;
+  pParams->applyHeavyCompression = 0;
 
   /* initial program ref level = target ref level */
   self->progRefLevel = pParams->targetRefLevel;
+  self->progRefLevelPresent = 0;
+  self->presMode = -1;
 }
 
 
@@ -193,7 +198,9 @@ AAC_DECODER_ERROR aacDecoder_drcSetParam (
     if (self == NULL) {
       return AAC_DEC_INVALID_HANDLE;
     }
-    self->params.cut = (FIXP_DBL)((INT)(DRC_PARAM_QUANT_STEP>>DRC_PARAM_SCALE) * (INT)value);
+    self->params.usrCut = (FIXP_DBL)((INT)(DRC_PARAM_QUANT_STEP>>DRC_PARAM_SCALE) * (INT)value);
+    if (self->params.applyHeavyCompression == 0)
+      self->params.cut = self->params.usrCut;
     break;
   case DRC_BOOST_SCALE:
     /* set boost factor */
@@ -204,7 +211,9 @@ AAC_DECODER_ERROR aacDecoder_drcSetParam (
     if (self == NULL) {
       return AAC_DEC_INVALID_HANDLE;
     }
-    self->params.boost = (FIXP_DBL)((INT)(DRC_PARAM_QUANT_STEP>>DRC_PARAM_SCALE) * (INT)value);
+    self->params.usrBoost = (FIXP_DBL)((INT)(DRC_PARAM_QUANT_STEP>>DRC_PARAM_SCALE) * (INT)value);
+    if (self->params.applyHeavyCompression == 0)
+      self->params.boost = self->params.usrBoost;
     break;
   case TARGET_REF_LEVEL:
     if ( value >  MAX_REFERENCE_LEVEL
@@ -215,14 +224,28 @@ AAC_DECODER_ERROR aacDecoder_drcSetParam (
       return AAC_DEC_INVALID_HANDLE;
     }
     if (value < 0) {
-      self->digitalNorm = 0;
+      self->params.applyDigitalNorm = 0;
+      self->params.targetRefLevel = -1;
     }
     else {
       /* ref_level must be between 0 and MAX_REFERENCE_LEVEL, inclusive */
-      self->digitalNorm    = 1;
-      self->progRefLevel   = AACDEC_DRC_DEFAULT_REF_LEVEL;
-      self->params.targetRefLevel = value;
+      self->params.applyDigitalNorm = 1;
+      if (self->params.targetRefLevel != (SCHAR)value) {
+        self->params.targetRefLevel = (SCHAR)value;
+        self->progRefLevel = (SCHAR)value;  /* Always set the program reference level equal to the
+                                               target level according to 4.5.2.7.3 of ISO/IEC 14496-3. */
+      }
     }
+    break;
+  case APPLY_NORMALIZATION:
+    if (value < 0 || value > 1) {
+      return AAC_DEC_SET_PARAM_FAIL;
+    }
+    if (self == NULL) {
+      return AAC_DEC_INVALID_HANDLE;
+    }
+    /* Store new parameter value */
+    self->params.applyDigitalNorm = (UCHAR)value;
     break;
   case APPLY_HEAVY_COMPRESSION:
     if (value < 0 || value > 1) {
@@ -231,7 +254,19 @@ AAC_DECODER_ERROR aacDecoder_drcSetParam (
     if (self == NULL) {
       return AAC_DEC_INVALID_HANDLE;
     }
-    self->params.applyHeavyCompression = (UCHAR)value;
+    if (self->params.applyHeavyCompression != (UCHAR)value) {
+      if (value == 1) {
+        /* Disable scaling of DRC values by setting the max values */
+        self->params.boost = FL2FXCONST_DBL(1.0f/(float)(1<<DRC_PARAM_SCALE));
+        self->params.cut   = FL2FXCONST_DBL(1.0f/(float)(1<<DRC_PARAM_SCALE));
+      } else {
+        /* Restore the user params */
+        self->params.boost = self->params.usrBoost;
+        self->params.cut   = self->params.usrCut;
+      }
+      /* Store new parameter value */
+      self->params.applyHeavyCompression = (UCHAR)value;
+    }
     break;
   case DRC_BS_DELAY:
     if (value < 0 || value > 1) {
@@ -256,7 +291,7 @@ AAC_DECODER_ERROR aacDecoder_drcSetParam (
   self->enable = ( (self->params.boost > (FIXP_DBL)0)
                 || (self->params.cut   > (FIXP_DBL)0)
                 || (self->params.applyHeavyCompression != 0)
-                || (self->digitalNorm == 1) );
+                || (self->params.targetRefLevel >= 0) );
 
 
   return ErrorStatus;
@@ -472,7 +507,7 @@ static int aacDecoder_drcParse (
     }
   }
   else {
-    pDrcBs->channelData.bandTop[0] = 255;
+    pDrcBs->channelData.bandTop[0] = (1024 >> 2) - 1;  /* ... comprising the whole spectrum. */;
   }
 
   pDrcBs->channelData.numBands = numBands;
@@ -517,7 +552,7 @@ static int aacDecoder_drcReadCompression (
     UINT                  payloadPosition )
 {
   int  bitCnt = 0;
-  int  dmxLevelsPresent, compressionPresent;
+  int  dmxLevelsPresent, extensionPresent, compressionPresent;
   int  coarseGrainTcPresent, fineGrainTcPresent;
 
   /* Move to the beginning of the DRC payload field */
@@ -539,8 +574,9 @@ static int aacDecoder_drcReadCompression (
     return 0;
   }
   FDKreadBits(bs, 2);                          /* dolby_surround_mode */
-  FDKreadBits(bs, 2);                          /* presentation_mode */
-  if (FDKreadBits(bs, 2) != 0) {               /* reserved, set to 0 */
+  pDrcBs->presMode = FDKreadBits(bs, 2);       /* presentation_mode */
+  FDKreadBits(bs, 1);                          /* stereo_downmix_mode */
+  if (FDKreadBits(bs, 1) != 0) {               /* reserved, set to 0 */
     return 0;
   }
 
@@ -549,9 +585,7 @@ static int aacDecoder_drcReadCompression (
     return 0;
   }
   dmxLevelsPresent = FDKreadBits(bs, 1);       /* downmixing_levels_MPEG4_status */
-  if (FDKreadBits(bs, 1) != 0) {               /* reserved, set to 0 */
-    return 0;
-  }
+  extensionPresent = FDKreadBits(bs, 1);       /* ancillary_data_extension_status; */
   compressionPresent   = FDKreadBits(bs, 1);   /* audio_coding_mode_and_compression status */
   coarseGrainTcPresent = FDKreadBits(bs, 1);   /* coarse_grain_timecode_status */
   fineGrainTcPresent   = FDKreadBits(bs, 1);   /* fine_grain_timecode_status */
@@ -609,6 +643,19 @@ static int aacDecoder_drcReadCompression (
     bitCnt += 16;
   }
 
+  /* Read extension just to get the right amount of bits. */
+  if (extensionPresent) {
+    int  extBits = 8;
+
+    FDKreadBits(bs, 1);                     /* reserved, set to 0 */
+    if (FDKreadBits(bs, 1)) extBits += 8;   /* ext_downmixing_levels_status */
+    if (FDKreadBits(bs, 1)) extBits += 16;  /* ext_downmixing_global_gains_status */
+    if (FDKreadBits(bs, 1)) extBits += 8;   /* ext_downmixing_lfe_level_status */
+
+    FDKpushFor(bs, extBits - 4);            /* skip the extension payload remainder. */
+    bitCnt += extBits;
+  }
+
   return (bitCnt);
 }
 
@@ -626,9 +673,16 @@ static int aacDecoder_drcExtractAndMap (
 {
   CDrcPayload  threadBs[MAX_DRC_THREADS];
   CDrcPayload *validThreadBs[MAX_DRC_THREADS];
+  CDrcParams  *pParams;
   UINT backupBsPosition;
   int  i, thread, validThreads = 0;
   int  numExcludedChns[MAX_DRC_THREADS];
+
+  FDK_ASSERT(self != NULL);
+  FDK_ASSERT(hBs != NULL);
+  FDK_ASSERT(pAacDecoderStaticChannelInfo != NULL);
+
+  pParams = &self->params;
 
   self->numThreads = 0;
   backupBsPosition = FDKgetValidBits(hBs);
@@ -751,6 +805,13 @@ static int aacDecoder_drcExtractAndMap (
      */
     if (pThreadBs->progRefLevel >= 0) {
       self->progRefLevel = pThreadBs->progRefLevel;
+      self->progRefLevelPresent = 1;
+      self->prlExpiryCount = 0;  /* Got a new value -> Reset counter */
+    }
+
+    if (drcPayloadType == DVB_DRC_ANC_DATA) {
+      /* Announce the presentation mode of this valid thread. */
+      self->presMode = pThreadBs->presMode;
     }
 
     /* SCE, CPE and LFE */
@@ -768,6 +829,15 @@ static int aacDecoder_drcExtractAndMap (
     /* CCEs not supported by now */
   }
 
+  /* Increment and check expiry counter for the program reference level: */
+  if ( (pParams->expiryFrame > 0)
+    && (self->prlExpiryCount++ > pParams->expiryFrame) )
+  { /* The program reference level is too old, so set it back to the target level. */
+    self->progRefLevelPresent = 0;
+    self->progRefLevel = pParams->targetRefLevel;
+    self->prlExpiryCount = 0;
+  }
+
   return 0;
 }
 
@@ -777,18 +847,20 @@ void aacDecoder_drcApply (
         void                   *pSbrDec,
         CAacDecoderChannelInfo *pAacDecoderChannelInfo,
         CDrcChannelData        *pDrcChData,
+        FIXP_DBL               *extGain,
         int  ch,   /* needed only for SBR */
         int  aacFrameSize,
         int  bSbrPresent )
 {
   int band, top, bin, numBands;
   int bottom = 0;
+  int modifyBins = 0;
 
   FIXP_DBL max_mantissa;
   INT max_exponent;
 
-  FIXP_DBL norm_mantissa = FL2FXCONST_DBL(0.0f);
-  INT  norm_exponent = 0;
+  FIXP_DBL norm_mantissa = FL2FXCONST_DBL(0.5f);
+  INT  norm_exponent = 1;
 
   FIXP_DBL fact_mantissa[MAX_DRC_BANDS];
   INT  fact_exponent[MAX_DRC_BANDS];
@@ -810,6 +882,15 @@ void aacDecoder_drcApply (
 
   if (!self->enable) {
     sbrDecoder_drcDisable( (HANDLE_SBRDECODER)pSbrDec, ch );
+    if (extGain != NULL) {
+      INT gainScale = (INT)*extGain;
+      /* The gain scaling must be passed to the function in the buffer pointed on by extGain. */
+      if (gainScale >= 0 && gainScale <= DFRACT_BITS) {
+        *extGain = scaleValue(norm_mantissa, norm_exponent-gainScale);
+      } else {
+        FDK_ASSERT(0);
+      }
+    }
     return;
   }
 
@@ -825,7 +906,7 @@ void aacDecoder_drcApply (
   reduced DAC SNR (if signal is attenuated) or clipping (if signal is
   boosted) */
 
-  if (self->digitalNorm == 1)
+  if (pParams->targetRefLevel >= 0)
   {
     /* 0.5^((targetRefLevel - progRefLevel)/24) */
     norm_mantissa = fLdPow(
@@ -835,7 +916,18 @@ void aacDecoder_drcApply (
             3,
            &norm_exponent );
   }
-  else {
+  /* Always export the normalization gain (if possible). */
+  if (extGain != NULL) {
+    INT gainScale = (INT)*extGain;
+    /* The gain scaling must be passed to the function in the buffer pointed on by extGain. */
+    if (gainScale >= 0 && gainScale <= DFRACT_BITS) {
+      *extGain = scaleValue(norm_mantissa, norm_exponent-gainScale);
+    } else {
+      FDK_ASSERT(0);
+    }
+  }
+  if (self->params.applyDigitalNorm == 0) {
+    /* Reset normalization gain since this module must not apply it */
     norm_mantissa = FL2FXCONST_DBL(0.5f);
     norm_exponent = 1;
   }
@@ -937,6 +1029,12 @@ void aacDecoder_drcApply (
       if (fact_exponent[band] < max_exponent) {
         fact_mantissa[band] >>= max_exponent - fact_exponent[band];
       }
+      if (fact_mantissa[band] != FL2FXCONST_DBL(0.5f)) {
+        modifyBins = 1;
+      }
+    }
+    if (max_exponent != 1) {
+      modifyBins = 1;
     }
   }
 
@@ -948,23 +1046,28 @@ void aacDecoder_drcApply (
   {
     bottom = 0;
 
-    for (band = 0; band < numBands; band++)
+    if (!modifyBins) {
+      /* We don't have to modify the spectral bins because the fractional part of all factors is 0.5.
+         In order to keep accurancy we don't apply the factor but decrease the exponent instead. */
+      max_exponent -= 1;
+    } else
     {
-      top = fixMin((int)( (pDrcChData->bandTop[band]+1)<<2 ), aacFrameSize);   /* ... * DRC_BAND_MULT; */
+      for (band = 0; band < numBands; band++)
+      {
+        top = fixMin((int)( (pDrcChData->bandTop[band]+1)<<2 ), aacFrameSize);   /* ... * DRC_BAND_MULT; */
 
-      for (bin = bottom; bin < top; bin++) {
-        pSpectralCoefficient[bin] = fMult(pSpectralCoefficient[bin], fact_mantissa[band]);
+        for (bin = bottom; bin < top; bin++) {
+          pSpectralCoefficient[bin] = fMult(pSpectralCoefficient[bin], fact_mantissa[band]);
+        }
+
+        bottom = top;
       }
-
-      bottom = top;
     }
 
     /* above topmost DRC band gain factor is 1 */
     if (max_exponent > 0) {
-      FIXP_DBL fact = FL2FXCONST_DBL(0.5f) >> (max_exponent - 1);
-
-      for (bin = top; bin < aacFrameSize; bin++) {
-        pSpectralCoefficient[bin] = fMult(pSpectralCoefficient[bin], fact);
+      for (bin = bottom; bin < aacFrameSize; bin+=1) {
+        pSpectralCoefficient[bin] >>= max_exponent;
       }
     }
 
@@ -980,12 +1083,13 @@ void aacDecoder_drcApply (
   }
   else {
     HANDLE_SBRDECODER hSbrDecoder = (HANDLE_SBRDECODER)pSbrDec;
+    UINT numBands = pDrcChData->numBands;
 
     /* feed factors into SBR decoder for application in QMF domain. */
     sbrDecoder_drcFeedChannel (
             hSbrDecoder,
             ch,
-            pDrcChData->numBands,
+            numBands,
             fact_mantissa,
             max_exponent,
             pDrcChData->drcInterpolationScheme,
@@ -1061,3 +1165,24 @@ int aacDecoder_drcEpilog (
   return err;
 }
 
+/*
+ * Export relevant metadata info from bitstream payload.
+ */
+void aacDecoder_drcGetInfo (
+        HANDLE_AAC_DRC  self,
+        SCHAR          *pPresMode,
+        SCHAR          *pProgRefLevel )
+{
+  if (self != NULL) {
+    if (pPresMode != NULL) {
+      *pPresMode = self->presMode;
+    }
+    if (pProgRefLevel != NULL) {
+      if (self->progRefLevelPresent) {
+        *pProgRefLevel = self->progRefLevel;
+      } else {
+        *pProgRefLevel = -1;
+      }
+    }
+  }
+}

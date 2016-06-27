@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -128,9 +128,6 @@ FDKsbrEnc_getEnergyFromCplxQmfData(FIXP_DBL **RESTRICT energyValues,/*!< the res
 
   /* Get Scratch buffer */
   C_ALLOC_SCRATCH_START(tmpNrg, FIXP_DBL, QMF_CHANNELS*QMF_MAX_TIME_SLOTS/2);
-
-  FDK_ASSERT(numberBands <= QMF_CHANNELS);
-  FDK_ASSERT(numberCols <= QMF_MAX_TIME_SLOTS);
 
   /* Get max possible scaling of QMF data */
   scale = DFRACT_BITS;
@@ -536,13 +533,18 @@ mhLoweringEnergy(FIXP_DBL nrg, INT M)
   \return void
 
 ****************************************************************************/
-static FIXP_DBL
-nmhLoweringEnergy(FIXP_DBL nrg, FIXP_DBL nrgSum, INT M)
+static FIXP_DBL nmhLoweringEnergy(
+        FIXP_DBL nrg,
+        const FIXP_DBL nrgSum,
+        const INT nrgSum_scale,
+        const INT M
+        )
 {
   if (nrg>FL2FXCONST_DBL(0)) {
     int sc=0;
     /* gain = nrgSum / (nrg*(M+1)) */
     FIXP_DBL gain = fMult(fDivNorm(nrgSum, nrg, &sc), GetInvInt(M+1));
+    sc += nrgSum_scale;
 
     /* reduce nrg if gain smaller 1.f */
     if ( !((sc>=0) && ( gain > ((FIXP_DBL)MAXVAL_DBL>>sc) )) ) {
@@ -616,6 +618,7 @@ calculateSbrEnvelope (FIXP_DBL **RESTRICT YBufferLeft,  /*! energy buffer left *
 
     FIXP_DBL pNrgLeft[QMF_MAX_TIME_SLOTS];
     FIXP_DBL pNrgRight[QMF_MAX_TIME_SLOTS];
+    int envNrg_scale;
     FIXP_DBL envNrgLeft  = FL2FXCONST_DBL(0.0f);
     FIXP_DBL envNrgRight = FL2FXCONST_DBL(0.0f);
     int      missingHarmonic[QMF_MAX_TIME_SLOTS];
@@ -625,6 +628,7 @@ calculateSbrEnvelope (FIXP_DBL **RESTRICT YBufferLeft,  /*! energy buffer left *
     stop_pos = timeStep * frame_info->borders[i + 1];
     freq_res = frame_info->freqRes[i];
     no_of_bands = h_con->nSfb[freq_res];
+    envNrg_scale = DFRACT_BITS-fNormz((FIXP_DBL)no_of_bands);
 
     if (i == short_env) {
       stop_pos -= fixMax(2, timeStep);  /* consider at least 2 QMF slots less for short envelopes (envelopes just before transients) */
@@ -762,9 +766,8 @@ calculateSbrEnvelope (FIXP_DBL **RESTRICT YBufferLeft,  /*! energy buffer left *
       /* save energies */
       pNrgLeft[j]  = nrgLeft;
       pNrgRight[j] = nrgRight;
-      envNrgLeft   = fAddSaturate(envNrgLeft, nrgLeft);
-      envNrgRight  = fAddSaturate(envNrgRight, nrgRight);
-
+      envNrgLeft  += (nrgLeft>>envNrg_scale);
+      envNrgRight += (nrgRight>>envNrg_scale);
     } /* j */
 
     for (j = 0; j < no_of_bands; j++) {
@@ -777,9 +780,9 @@ calculateSbrEnvelope (FIXP_DBL **RESTRICT YBufferLeft,  /*! energy buffer left *
       if(!missingHarmonic[j] && h_sbr->fLevelProtect) {
         /* in case of missing energy in base band,
            reduce reference energy to prevent overflows in decoder output */
-        nrgLeft = nmhLoweringEnergy(nrgLeft, envNrgLeft, no_of_bands);
+        nrgLeft = nmhLoweringEnergy(nrgLeft, envNrgLeft, envNrg_scale, no_of_bands);
         if (stereoMode == SBR_COUPLING) {
-          nrgRight = nmhLoweringEnergy(nrgRight, envNrgRight, no_of_bands);
+          nrgRight = nmhLoweringEnergy(nrgRight, envNrgRight, envNrg_scale, no_of_bands);
         }
       }
 
@@ -811,22 +814,22 @@ calculateSbrEnvelope (FIXP_DBL **RESTRICT YBufferLeft,  /*! energy buffer left *
       }
 
       /* ld64 to integer conversion */
-      nrgLeft = fixMin(fixMax(nrgLeft,FL2FXCONST_DBL(0.0f)),FL2FXCONST_DBL(0.5f));
+      nrgLeft = fixMin(fixMax(nrgLeft,FL2FXCONST_DBL(0.0f)),(FL2FXCONST_DBL(0.5f)>>oneBitLess));
       nrgLeft = (FIXP_DBL)(LONG)nrgLeft >> (DFRACT_BITS-1-LD_DATA_SHIFT-1-oneBitLess-1);
       sfb_nrgLeft[m] = ((INT)nrgLeft+1)>>1; /* rounding */
 
       if (stereoMode == SBR_COUPLING) {
         FIXP_DBL scaleFract;
+        int sc0, sc1;
 
-        if (nrgRight != FL2FXCONST_DBL(0.0f)) {
-          int sc0 = CountLeadingBits(nrgLeft2);
-          int sc1 = CountLeadingBits(nrgRight);
+        nrgLeft2 = fixMax((FIXP_DBL)0x1, nrgLeft2);
+        nrgRight = fixMax((FIXP_DBL)0x1, nrgRight);
 
-          scaleFract = ((FIXP_DBL)(sc0-sc1)) << (DFRACT_BITS-1-LD_DATA_SHIFT); /* scale value in ld64 representation */
-          nrgRight = CalcLdData(nrgLeft2<<sc0) - CalcLdData(nrgRight<<sc1) - scaleFract;
-        }
-        else
-          nrgRight =  FL2FXCONST_DBL(0.5f);   /* ld64(4294967296.0f) */
+        sc0 = CountLeadingBits(nrgLeft2);
+        sc1 = CountLeadingBits(nrgRight);
+
+        scaleFract = ((FIXP_DBL)(sc0-sc1)) << (DFRACT_BITS-1-LD_DATA_SHIFT); /* scale value in ld64 representation */
+        nrgRight = CalcLdData(nrgLeft2<<sc0) - CalcLdData(nrgRight<<sc1) - scaleFract;
 
         /* ld64 to integer conversion */
         nrgRight = (FIXP_DBL)(LONG)(nrgRight) >> (DFRACT_BITS-1-LD_DATA_SHIFT-1-oneBitLess);

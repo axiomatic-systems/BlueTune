@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -155,7 +155,6 @@ amm-info@iis.fraunhofer.de
 #endif
 
 
-
 /* Define preferred Multiplication type */
 #if defined(FDK_HIGH_PERFORMANCE) && !defined(FDK_HIGH_QUALITY) /* FDK_HIGH_PERFORMANCE */
 
@@ -204,7 +203,7 @@ amm-info@iis.fraunhofer.de
 
 #else
 
-  #error  >>>> Please set architecture characterization defines for your platform (FDK_HIGH_PERFORMANCE)! <<<<
+  #warning  >>>> Please set architecture characterization defines for your platform (FDK_HIGH_PERFORMANCE)! <<<<
 
 #endif /* Architecture switches */
 

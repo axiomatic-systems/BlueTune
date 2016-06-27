@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -164,8 +164,8 @@ extern const UINT   aHuffTreeRvlCodewds[];
 
 extern const UCHAR tns_max_bands_tbl[13][2];
 
-extern const UCHAR tns_max_bands_tbl_480[5];
-extern const UCHAR tns_max_bands_tbl_512[5];
+extern const UCHAR tns_max_bands_tbl_480[13];
+extern const UCHAR tns_max_bands_tbl_512[13];
 
 #define FIXP_TCC FIXP_DBL
 
@@ -177,11 +177,12 @@ extern const USHORT randomSign[AAC_NF_NO_RANDOM_VAL/16];
 extern const FIXP_DBL pow2_div24minus1[47];
 extern const int offsetTab[2][16];
 
-/* Channel mapping indices for time domain I/O. First dimension is channel count-1. */
-extern const UCHAR channelMappingTablePassthrough[8][8];
-extern const UCHAR channelMappingTableWAV[8][8];
+/* Channel mapping indices for time domain I/O.
+   The first dimension is the channel configuration index. */
+extern const UCHAR channelMappingTablePassthrough[15][8];
+extern const UCHAR channelMappingTableWAV[15][8];
 
 /* Lookup tables for elements in ER bitstream */
-extern const MP4_ELEMENT_ID elementsTab[8][7];
+extern const MP4_ELEMENT_ID elementsTab[15][7];
 
 #endif /* #ifndef AAC_ROM_H */

@@ -1,0 +1,12 @@
+# platform settings
+ANDROID_ARCH          = 'arm64'
+ANDROID_PLATFORM      = 'android-21'
+ANDROID_TOOLCHAIN     = ''
+ANDROID_CROSS_PREFIX  = 'aarch64-linux-android'
+ANDROID_EXTRA_CCFLAGS = []
+
+# load common config
+execfile(env.GetBuildPath('#/Build/Targets/any-android-linux/AndroidConfig.scons'))
+
+### load common build instructions
+execfile(env.GetBuildPath('#/Build/BuildAndroidNdk.py'))

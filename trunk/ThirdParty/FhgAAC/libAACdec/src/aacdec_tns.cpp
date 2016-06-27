@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -374,10 +374,10 @@ void CTns_Apply (
 
              switch (granuleLength) {
                case 480:
-                 tns_max_bands = tns_max_bands_tbl_480[pSamplingRateInfo->samplingRateIndex-3];
+                 tns_max_bands = tns_max_bands_tbl_480[pSamplingRateInfo->samplingRateIndex];
                  break;
                case 512:
-                 tns_max_bands = tns_max_bands_tbl_512[pSamplingRateInfo->samplingRateIndex-3];
+                 tns_max_bands = tns_max_bands_tbl_512[pSamplingRateInfo->samplingRateIndex];
                  break;
                default:
                  tns_max_bands = GetMaximumTnsBands(pIcsInfo, pSamplingRateInfo->samplingRateIndex);

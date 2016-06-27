@@ -277,6 +277,7 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
                             if (dec_config.m_Extension.m_PsPresent) {
                                 source_format.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
                                 source_format.mSampleRate = dec_config.m_Extension.m_SamplingFrequency;
+                                source_format.mChannelsPerFrame = 2*dec_config.m_ChannelCount;
                             }
                         } else {
                             ATX_LOG_WARNING_1("unable to parse decoder specific info (%d)", result);
@@ -330,9 +331,10 @@ OsxAudioConverterDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         if (input_type->id == self->module->mp4es_type_id) {
             const BLT_Mp4AudioMediaType* mp4_type = (const BLT_Mp4AudioMediaType*)input_type;
 
-            /* cheat a bit: pretent that MPEG2_AAC_LC is actually MPEG4_AUDIO */
+            /* cheat a bit: pretend that MPEG2_AAC_LC and BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN are actually MPEG4_AUDIO */
             unsigned int oti = mp4_type->base.format_or_object_type_id;
-            if (oti == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC) {
+            if (oti == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_LC ||
+                oti == BLT_AAC_OBJECT_TYPE_ID_MPEG2_AAC_MAIN) {
                 oti = BLT_AAC_OBJECT_TYPE_ID_MPEG4_AUDIO;
             }
             

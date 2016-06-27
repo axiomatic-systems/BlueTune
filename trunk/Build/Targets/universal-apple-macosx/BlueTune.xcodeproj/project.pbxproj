@@ -98,6 +98,10 @@
 		CA1EC1F50ED29F820033F894 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
 		CA1EC2190ED29FCD0033F894 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA0C9BEA0D16012A00E23496 /* AudioUnit.framework */; };
 		CA1EC2360ED2A0400033F894 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA9EDA9B0EB0FB30003CE43C /* CoreAudio.framework */; };
+		CA35400D1A40D69B007E631F /* limiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA35400C1A40D69B007E631F /* limiter.cpp */; };
+		CA35400F1A40D6A6007E631F /* limiter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA35400E1A40D6A6007E631F /* limiter.h */; };
+		CA3540121A40D75E007E631F /* sbr_ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3540101A40D75E007E631F /* sbr_ram.cpp */; };
+		CA3540131A40D75E007E631F /* sbr_rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3540111A40D75E007E631F /* sbr_rom.cpp */; };
 		CA360A6113765CBD001D3DE0 /* BltRaopOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA360A5F13765CBD001D3DE0 /* BltRaopOutput.cpp */; };
 		CA360A6213765CBD001D3DE0 /* BltRaopOutput.h in Headers */ = {isa = PBXBuildFile; fileRef = CA360A6013765CBD001D3DE0 /* BltRaopOutput.h */; };
 		CA418B241950F3AD00D202E0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */; };
@@ -376,6 +380,8 @@
 		CA649DD611081417005B52E9 /* BltAacDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA5042530C5AE52B0060E6FE /* BltAacDecoder.h */; };
 		CA7513D11256D8F30022D1A8 /* BltBento4Adapters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7513CF1256D8F30022D1A8 /* BltBento4Adapters.cpp */; };
 		CA7513D21256D8F30022D1A8 /* BltBento4Adapters.h in Headers */ = {isa = PBXBuildFile; fileRef = CA7513D01256D8F30022D1A8 /* BltBento4Adapters.h */; };
+		CA76974B1D04D1A500EA51FE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA76974A1D04D1A500EA51FE /* VideoToolbox.framework */; };
+		CA76974D1D04D51300EA51FE /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA76974C1D04D51300EA51FE /* CoreMedia.framework */; };
 		CA7F2F9C0FA81789006A1B2D /* BltIppDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */; };
 		CA87F410114AC6CA0082AAFC /* BltFingerprintFilter.c in Sources */ = {isa = PBXBuildFile; fileRef = CA87F40E114AC6CA0082AAFC /* BltFingerprintFilter.c */; };
 		CA87F411114AC6CA0082AAFC /* BltFingerprintFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = CA87F40F114AC6CA0082AAFC /* BltFingerprintFilter.h */; };
@@ -970,9 +976,7 @@
 		CADFC34F161936BB004F3C53 /* sbr_misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC2A5161929C9004F3C53 /* sbr_misc.cpp */; };
 		CADFC350161936BB004F3C53 /* sbr_misc.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC2A6161929C9004F3C53 /* sbr_misc.h */; };
 		CADFC351161936BB004F3C53 /* sbr_ram.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC2A7161929C9004F3C53 /* sbr_ram.h */; };
-		CADFC352161936BB004F3C53 /* sbr_ram_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC2A8161929C9004F3C53 /* sbr_ram_enc.cpp */; };
 		CADFC353161936BB004F3C53 /* sbr_rom.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC2A9161929C9004F3C53 /* sbr_rom.h */; };
-		CADFC354161936BB004F3C53 /* sbr_rom_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC2AA161929C9004F3C53 /* sbr_rom_enc.cpp */; };
 		CADFC355161936BB004F3C53 /* sbrenc_freq_sca.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC2AB161929C9004F3C53 /* sbrenc_freq_sca.cpp */; };
 		CADFC356161936BB004F3C53 /* sbrenc_freq_sca.h in Headers */ = {isa = PBXBuildFile; fileRef = CADFC2AC161929C9004F3C53 /* sbrenc_freq_sca.h */; };
 		CADFC357161936BB004F3C53 /* ton_corr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADFC2AD161929C9004F3C53 /* ton_corr.cpp */; };
@@ -1260,6 +1264,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = CAAAA07C12FF824E00ABC84B;
 			remoteInfo = NetResolve;
+		};
+		CA353FDF1A40D687007E631F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CA00A6531A1C36560064B4D3;
+			remoteInfo = Mp4Pssh;
 		};
 		CA3650800D8364EB004A4DCB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1575,6 +1586,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Atomix;
+		};
+		CA76971D1D04CEE200EA51FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CAE1FBF61AF8493E00607B3C;
+			remoteInfo = Mp42Hls;
 		};
 		CA77BFE914BF572800442B97 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2069,6 +2087,10 @@
 		CA1EC1840ED29B8C0033F894 /* BtCocoaPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BtCocoaPlayerController.h; sourceTree = "<group>"; };
 		CA1EC1850ED29B8C0033F894 /* BtCocoaPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BtCocoaPlayerController.m; sourceTree = "<group>"; };
 		CA1EC1860ED29B8C0033F894 /* BtCocoaPlayerMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BtCocoaPlayerMain.mm; sourceTree = "<group>"; };
+		CA35400C1A40D69B007E631F /* limiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = limiter.cpp; sourceTree = "<group>"; };
+		CA35400E1A40D6A6007E631F /* limiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = limiter.h; sourceTree = "<group>"; };
+		CA3540101A40D75E007E631F /* sbr_ram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sbr_ram.cpp; sourceTree = "<group>"; };
+		CA3540111A40D75E007E631F /* sbr_rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sbr_rom.cpp; sourceTree = "<group>"; };
 		CA360A5F13765CBD001D3DE0 /* BltRaopOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltRaopOutput.cpp; sourceTree = "<group>"; };
 		CA360A6013765CBD001D3DE0 /* BltRaopOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltRaopOutput.h; sourceTree = "<group>"; };
 		CA418B231950F3AD00D202E0 /* bluetune.node.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bluetune.node.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2326,6 +2348,9 @@
 		CA765C331852358A0093A9E5 /* BltCallbackInput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BltCallbackInput.h; sourceTree = "<group>"; };
 		CA765C35185237EC0093A9E5 /* BltCallbackOutput.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = BltCallbackOutput.c; sourceTree = "<group>"; };
 		CA765C36185237EC0093A9E5 /* BltCallbackOutput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BltCallbackOutput.h; sourceTree = "<group>"; };
+		CA76974A1D04D1A500EA51FE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		CA76974C1D04D51300EA51FE /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		CA76974E1D04F06F00EA51FE /* ffmpeg_videotoolbox.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = ffmpeg_videotoolbox.o; path = ../../../../../Temp/ffmpeg/ffmpeg_videotoolbox.o; sourceTree = "<group>"; };
 		CA7F2F760FA81381006A1B2D /* BltIppDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BltIppDecoder.cpp; sourceTree = "<group>"; };
 		CA7F2F770FA81381006A1B2D /* BltIppDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltIppDecoder.h; sourceTree = "<group>"; };
 		CA7F2F7C0FA813FB006A1B2D /* libBltIppDecoder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBltIppDecoder.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2967,9 +2992,7 @@
 		CADFC2A5161929C9004F3C53 /* sbr_misc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sbr_misc.cpp; sourceTree = "<group>"; };
 		CADFC2A6161929C9004F3C53 /* sbr_misc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sbr_misc.h; sourceTree = "<group>"; };
 		CADFC2A7161929C9004F3C53 /* sbr_ram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sbr_ram.h; sourceTree = "<group>"; };
-		CADFC2A8161929C9004F3C53 /* sbr_ram_enc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sbr_ram_enc.cpp; sourceTree = "<group>"; };
 		CADFC2A9161929C9004F3C53 /* sbr_rom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sbr_rom.h; sourceTree = "<group>"; };
-		CADFC2AA161929C9004F3C53 /* sbr_rom_enc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sbr_rom_enc.cpp; sourceTree = "<group>"; };
 		CADFC2AB161929C9004F3C53 /* sbrenc_freq_sca.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sbrenc_freq_sca.cpp; sourceTree = "<group>"; };
 		CADFC2AC161929C9004F3C53 /* sbrenc_freq_sca.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sbrenc_freq_sca.h; sourceTree = "<group>"; };
 		CADFC2AD161929C9004F3C53 /* ton_corr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ton_corr.cpp; sourceTree = "<group>"; };
@@ -3210,8 +3233,10 @@
 				CA9ED8E40EB02413003CE43C /* Cocoa.framework in Frameworks */,
 				CA9ED8CE0EAFCB26003CE43C /* CoreVideo.framework in Frameworks */,
 				CA9EDAB50EB0FC53003CE43C /* CoreAudio.framework in Frameworks */,
+				CA76974D1D04D51300EA51FE /* CoreMedia.framework in Frameworks */,
 				CA9ED84B0EAFABAA003CE43C /* AudioUnit.framework in Frameworks */,
 				CA62B97F1102665F00BCACD7 /* AudioToolbox.framework in Frameworks */,
+				CA76974B1D04D1A500EA51FE /* VideoToolbox.framework in Frameworks */,
 				CA9ED8EA0EB02441003CE43C /* OpenGL.framework in Frameworks */,
 				CA9ED84C0EAFABAA003CE43C /* libAtomix.a in Frameworks */,
 				CA9ED84D0EAFABAA003CE43C /* libBlueTune.a in Frameworks */,
@@ -3413,6 +3438,9 @@
 		CA13EF5B15E71BA500214EE1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CA76974E1D04F06F00EA51FE /* ffmpeg_videotoolbox.o */,
+				CA76974C1D04D51300EA51FE /* CoreMedia.framework */,
+				CA76974A1D04D1A500EA51FE /* VideoToolbox.framework */,
 				CAA8DC0F18443BAB000EFC1A /* CoreServices.framework */,
 				CA13EF5C15E71BA500214EE1 /* CoreFoundation.framework */,
 				CAC91A601663202700201C94 /* Cocoa.framework */,
@@ -3652,9 +3680,11 @@
 				CAF9817718DE46810001B999 /* mp42hevc */,
 				CA3186331087F596002B38A8 /* mp42avc */,
 				CAD1023A1015A02800B272F6 /* mp42ts */,
+				CA76971E1D04CEE200EA51FE /* mp42hls */,
 				CA44C47D0D4522DA00173F5F /* mp4rtphintinfo */,
 				CA552B5B1721116100CC1C99 /* mp4audioclip */,
 				CA03CEF41938EA450099D05B /* mp4mux */,
+				CA353FE01A40D687007E631F /* mp4pssh */,
 				CA44C4790D4522DA00173F5F /* aac2mp4 */,
 				CAF9817918DE46810001B999 /* hevcinfo */,
 				CA3650810D8364EB004A4DCB /* avcinfo */,
@@ -5469,6 +5499,7 @@
 		CADFC258161929C9004F3C53 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				CA35400E1A40D6A6007E631F /* limiter.h */,
 				CADFC259161929C9004F3C53 /* pcmutils_lib.h */,
 			);
 			path = include;
@@ -5477,6 +5508,7 @@
 		CADFC25A161929C9004F3C53 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				CA35400C1A40D69B007E631F /* limiter.cpp */,
 				CADFC25B161929C9004F3C53 /* pcmutils_lib.cpp */,
 			);
 			path = src;
@@ -5559,6 +5591,8 @@
 		CADFC287161929C9004F3C53 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				CA3540101A40D75E007E631F /* sbr_ram.cpp */,
+				CA3540111A40D75E007E631F /* sbr_rom.cpp */,
 				CADFC288161929C9004F3C53 /* bit_sbr.cpp */,
 				CADFC289161929C9004F3C53 /* bit_sbr.h */,
 				CADFC28A161929C9004F3C53 /* cmondata.h */,
@@ -5591,9 +5625,7 @@
 				CADFC2A5161929C9004F3C53 /* sbr_misc.cpp */,
 				CADFC2A6161929C9004F3C53 /* sbr_misc.h */,
 				CADFC2A7161929C9004F3C53 /* sbr_ram.h */,
-				CADFC2A8161929C9004F3C53 /* sbr_ram_enc.cpp */,
 				CADFC2A9161929C9004F3C53 /* sbr_rom.h */,
-				CADFC2AA161929C9004F3C53 /* sbr_rom_enc.cpp */,
 				CADFC2AB161929C9004F3C53 /* sbrenc_freq_sca.cpp */,
 				CADFC2AC161929C9004F3C53 /* sbrenc_freq_sca.h */,
 				CADFC2AD161929C9004F3C53 /* ton_corr.cpp */,
@@ -6154,6 +6186,7 @@
 				CADFC356161936BB004F3C53 /* sbrenc_freq_sca.h in Headers */,
 				CADFC358161936BB004F3C53 /* ton_corr.h in Headers */,
 				CADFC35A161936BB004F3C53 /* tran_det.h in Headers */,
+				CA35400F1A40D6A6007E631F /* limiter.h in Headers */,
 				CADFC3B716193AB7004F3C53 /* block.h in Headers */,
 				CADFC3B916193AB7004F3C53 /* channel.h in Headers */,
 				CADFC3BB16193AB7004F3C53 /* channelinfo.h in Headers */,
@@ -6903,6 +6936,13 @@
 			remoteRef = CA33F0C0131B1C65005CA17E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		CA353FE01A40D687007E631F /* mp4pssh */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp4pssh;
+			remoteRef = CA353FDF1A40D687007E631F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		CA3650810D8364EB004A4DCB /* avcinfo */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -7097,6 +7137,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = FileTest1;
 			remoteRef = CA5826FA0E67C0AC006CC501 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CA76971E1D04CEE200EA51FE /* mp42hls */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = mp42hls;
+			remoteRef = CA76971D1D04CEE200EA51FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		CA77C26B14C688DC00442B97 /* NetworkTest1 */ = {
@@ -7868,9 +7915,11 @@
 				CADFC2FA1619367B004F3C53 /* fixpoint_math.cpp in Sources */,
 				CADFC2FB1619367B004F3C53 /* mdct_fhg.cpp in Sources */,
 				CADFC2FC16193683004F3C53 /* qmf.cpp in Sources */,
+				CA35400D1A40D69B007E631F /* limiter.cpp in Sources */,
 				CADFC2FD16193683004F3C53 /* scale.cpp in Sources */,
 				CADFC2FF1619368D004F3C53 /* tpdec_adif.cpp in Sources */,
 				CADFC3011619368D004F3C53 /* tpdec_adts.cpp in Sources */,
+				CA3540131A40D75E007E631F /* sbr_rom.cpp in Sources */,
 				CADFC3031619368D004F3C53 /* tpdec_asc.cpp in Sources */,
 				CADFC3041619368D004F3C53 /* tpdec_latm.cpp in Sources */,
 				CADFC3061619368D004F3C53 /* tpdec_lib.cpp in Sources */,
@@ -7879,6 +7928,7 @@
 				CADFC30B16193699004F3C53 /* tpenc_asc.cpp in Sources */,
 				CADFC30D16193699004F3C53 /* tpenc_latm.cpp in Sources */,
 				CADFC30F16193699004F3C53 /* tpenc_lib.cpp in Sources */,
+				CA3540121A40D75E007E631F /* sbr_ram.cpp in Sources */,
 				CADFC310161936A2004F3C53 /* pcmutils_lib.cpp in Sources */,
 				CADFC311161936AD004F3C53 /* env_calc.cpp in Sources */,
 				CADFC313161936AD004F3C53 /* env_dec.cpp in Sources */,
@@ -7910,8 +7960,6 @@
 				CADFC34A161936BB004F3C53 /* resampler.cpp in Sources */,
 				CADFC34E161936BB004F3C53 /* sbr_encoder.cpp in Sources */,
 				CADFC34F161936BB004F3C53 /* sbr_misc.cpp in Sources */,
-				CADFC352161936BB004F3C53 /* sbr_ram_enc.cpp in Sources */,
-				CADFC354161936BB004F3C53 /* sbr_rom_enc.cpp in Sources */,
 				CADFC355161936BB004F3C53 /* sbrenc_freq_sca.cpp in Sources */,
 				CADFC357161936BB004F3C53 /* ton_corr.cpp in Sources */,
 				CADFC359161936BB004F3C53 /* tran_det.cpp in Sources */,
@@ -8342,7 +8390,6 @@
 					BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_CALLBACK_OUTPUT,
 				);
-				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor/** $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 			};
@@ -8402,7 +8449,6 @@
 					BLT_CONFIG_MODULES_ENABLE_CALLBACK_INPUT,
 					BLT_CONFIG_MODULES_ENABLE_CALLBACK_OUTPUT,
 				);
-				"MACOSX_DEPLOYMENT_TARGET[sdk=iphoneos*][arch=*]" = "";
 				PRODUCT_NAME = BlueTune;
 				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(NEPTUNE_HOME)/Source/System/Cocoa $(BENTO4_HOME)/Source/C++/** $(MELO_HOME)/Source $(SRCROOT)/../../../ThirdParty/Vorbis/Distributions/Tremor/** $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 			};
@@ -8679,7 +8725,6 @@
 					/usr/local/include/node,
 				);
 				INFOPLIST_FILE = "BlueTune-Node/BlueTune-Node-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_LDFLAGS = (
 					"-undefined",
 					dynamic_lookup,
@@ -8724,7 +8769,6 @@
 					/usr/local/include/node,
 				);
 				INFOPLIST_FILE = "BlueTune-Node/BlueTune-Node-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_LDFLAGS = (
 					"-undefined",
 					dynamic_lookup,
@@ -9060,13 +9104,15 @@
 				IPP_HOME = /opt/intel/ipp;
 				IPP_SAMPLES_HOME = "/Users/gilles/Develop/Intel-IPP/MacOSX/ipp-samples";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					/Users/gilles/Temp/ffmpeg/lib,
 					/usr/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
+					"-lswresample",
+					"-lswscale",
+					"-lz",
 				);
 				PRODUCT_NAME = btplayx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -9087,13 +9133,15 @@
 				IPP_HOME = /opt/intel/ipp;
 				IPP_SAMPLES_HOME = "/Users/gilles/Develop/Intel-IPP/MacOSX/ipp-samples";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ThirdParty/IPP/Targets/universal-apple-macosx/lib",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					/Users/gilles/Temp/ffmpeg/lib,
 					/usr/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lavcodec",
 					"-lavutil",
+					"-lswresample",
+					"-lswscale",
+					"-lz",
 				);
 				PRODUCT_NAME = btplayx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -9127,7 +9175,6 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pcmdecoder;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -9155,7 +9202,6 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pcmdecoder;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -9186,7 +9232,6 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -9214,7 +9259,6 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = macosx;
 			};

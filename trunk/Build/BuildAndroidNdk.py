@@ -38,7 +38,7 @@ if ANDROID_HOST_SYSTEM == 'darwin-x86':
 if ANDROID_TOOLCHAIN == '' or not os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'toolchains', ANDROID_TOOLCHAIN)):
     toolchain_dirs = os.listdir(ANDROID_NDK_ROOT+'/toolchains')
     for toolchain_dir in toolchain_dirs:
-        if os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'toolchains', toolchain_dir, 'prebuilt', ANDROID_HOST_SYSTEM)) and toolchain_dir.startswith(ANDROID_ARCH+'-'):
+        if os.path.exists(os.path.join(ANDROID_NDK_ROOT, 'toolchains', toolchain_dir, 'prebuilt', ANDROID_HOST_SYSTEM)) and (toolchain_dir.startswith(ANDROID_CROSS_PREFIX+'-') or toolchain_dir.startswith(ANDROID_ARCH+'-')):
             ANDROID_TOOLCHAIN=toolchain_dir
             if ANDROID_CROSS_PREFIX == '':
                 suffix_pos = toolchain_dir.rfind('-')
@@ -86,6 +86,7 @@ LoadTool('gcc-generic', env, gcc_cross_prefix=ANDROID_CROSS_PREFIX, gcc_strict=F
 env.AppendUnique(CCFLAGS = ['-I'+ANDROID_NDK_ROOT+'/sources/cxx-stl/system/include' , 
                             '--sysroot', ANDROID_SYSROOT,
                             '-fpic',
+                            '-fpie',
                             '-ffunction-sections',
                             '-funwind-tables',
                             '-fstack-protector',
@@ -93,6 +94,7 @@ env.AppendUnique(CCFLAGS = ['-I'+ANDROID_NDK_ROOT+'/sources/cxx-stl/system/inclu
 env.AppendUnique(CXXFLAGS = ['-fno-exceptions', '-fno-rtti'])
 env.AppendUnique(CPPDEFINES = ['ANDROID', 'ATX_CONFIG_HAVE_SYSTEM_LOG_CONFIG', 'NPT_CONFIG_HAVE_SYSTEM_LOG_CONFIG'])
 env.AppendUnique(LINKFLAGS = ['--sysroot', ANDROID_SYSROOT,
+                              '-pie',
                 			  '-Wl,--no-undefined', 
                               '-Wl,-z,noexecstack',
                 			  '-L'+ANDROID_SYSROOT+'/usr/lib', 

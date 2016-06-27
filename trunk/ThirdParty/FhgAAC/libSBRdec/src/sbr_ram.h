@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -118,8 +118,8 @@ typedef struct
 
 struct SBR_DECODER_INSTANCE
 {
-  SBR_DECODER_ELEMENT  *pSbrElement[(4)];
-  SBR_HEADER_DATA       sbrHeader[(4)][(1)+1];      /* Sbr header for each individual channel of an element */
+  SBR_DECODER_ELEMENT  *pSbrElement[(8)];
+  SBR_HEADER_DATA       sbrHeader[(8)][(1)+1];      /* Sbr header for each individual channel of an element */
 
   FIXP_DBL *workBuffer1;
   FIXP_DBL *workBuffer2;

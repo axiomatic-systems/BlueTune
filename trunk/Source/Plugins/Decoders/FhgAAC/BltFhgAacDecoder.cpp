@@ -255,7 +255,7 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
         // deal with gapless info
         if (self->output.timestamp_base.seconds == 0 && self->output.timestamp_base.nanoseconds == 0) {
             if (self->output.samples_since_seek < self->gapless_info.leading_frames) {
-                BLT_Size samples_to_skip = self->gapless_info.leading_frames-self->output.samples_since_seek;
+                BLT_Size samples_to_skip = (BLT_Size)(self->gapless_info.leading_frames-self->output.samples_since_seek);
                 BLT_Size bytes_to_skip  = samples_to_skip*aac_info->numChannels*2;
                 if (bytes_to_skip > output_packet_size) {
                     bytes_to_skip = output_packet_size;
@@ -268,8 +268,8 @@ FhgAacDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             if (self->gapless_info.valid_frames &&
                 (self->output.samples_since_seek+aac_info->frameSize) >
                 (self->gapless_info.leading_frames+self->gapless_info.valid_frames)) {
-                BLT_Size samples_to_truncate = (self->output.samples_since_seek+aac_info->frameSize) -
-                                               (self->gapless_info.leading_frames+self->gapless_info.valid_frames);
+                BLT_Size samples_to_truncate = (BLT_Size)((self->output.samples_since_seek+aac_info->frameSize) -
+                                                          (self->gapless_info.leading_frames+self->gapless_info.valid_frames));
                 BLT_Size bytes_to_truncate = (samples_to_truncate*aac_info->numChannels)*2;
                 if (bytes_to_truncate > output_packet_size) {
                     bytes_to_truncate = output_packet_size;

@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -581,18 +581,20 @@ sbr_dec ( HANDLE_SBR_DEC hSbrDec,            /*!< handle to Decoder channel */
       outScalefactor += (SCAL_HEADROOM+1); /* psDiffScale! */
 
     {
-      C_ALLOC_SCRATCH_START(pWorkBuffer, FIXP_DBL, 2*(64));
+      C_AALLOC_SCRATCH_START(pWorkBuffer, FIXP_DBL, 2*(64));
 
       int maxShift = 0;
 
-      if (hSbrDec->sbrDrcChannel.prevFact_exp > maxShift) {
-        maxShift = hSbrDec->sbrDrcChannel.prevFact_exp;
-      }
-      if (hSbrDec->sbrDrcChannel.currFact_exp > maxShift) {
-        maxShift = hSbrDec->sbrDrcChannel.currFact_exp;
-      }
-      if (hSbrDec->sbrDrcChannel.nextFact_exp > maxShift) {
-        maxShift = hSbrDec->sbrDrcChannel.nextFact_exp;
+      if (hSbrDec->sbrDrcChannel.enable != 0) {
+        if (hSbrDec->sbrDrcChannel.prevFact_exp > maxShift) {
+          maxShift = hSbrDec->sbrDrcChannel.prevFact_exp;
+        }
+        if (hSbrDec->sbrDrcChannel.currFact_exp > maxShift) {
+          maxShift = hSbrDec->sbrDrcChannel.currFact_exp;
+        }
+        if (hSbrDec->sbrDrcChannel.nextFact_exp > maxShift) {
+          maxShift = hSbrDec->sbrDrcChannel.nextFact_exp;
+        }
       }
 
       /* copy DRC data to right channel (with PS both channels use the same DRC gains) */
@@ -682,7 +684,7 @@ sbr_dec ( HANDLE_SBR_DEC hSbrDec,            /*!< handle to Decoder channel */
                               synQmf->lsb,
                               synQmf->no_col );
 
-      C_ALLOC_SCRATCH_END(pWorkBuffer, FIXP_DBL, 2*(64));
+      C_AALLOC_SCRATCH_END(pWorkBuffer, FIXP_DBL, 2*(64));
     }
   }
 
@@ -758,6 +760,8 @@ createSbrDec (SBR_CHANNEL * hSbrChannel,
   */
   {
     int qmfErr;
+    /* Adapted QMF analysis post-twiddles for down-sampled HQ SBR */
+    const UINT downSampledFlag = (downsampleFac==2) ? QMF_FLAG_DOWNSAMPLED : 0;
 
     qmfErr = qmfInitAnalysisFilterBank (
                     &hs->AnalysiscQMF,
@@ -766,7 +770,7 @@ createSbrDec (SBR_CHANNEL * hSbrChannel,
                      hHeaderData->freqBandData.lowSubband,
                      hHeaderData->freqBandData.highSubband,
                      hHeaderData->numberOfAnalysisBands,
-                     qmfFlags & (~QMF_FLAG_KEEP_STATES)
+                     (qmfFlags & (~QMF_FLAG_KEEP_STATES)) | downSampledFlag
                      );
     if (qmfErr != 0) {
       return SBRDEC_UNSUPPORTED_CONFIG;

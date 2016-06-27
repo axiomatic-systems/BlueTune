@@ -300,7 +300,7 @@ BLTP_ParseCommandLine(char** args)
                     break;
 
                 case 'B':
-                    value.type = ATX_PROPERTY_VALUE_TYPE_INTEGER;
+                    value.type = ATX_PROPERTY_VALUE_TYPE_BOOLEAN;
                     if (ATX_StringsEqual(value_string, "true")) {
                         value.data.boolean = ATX_TRUE;
                     } else if (ATX_StringsEqual(value_string, "false")) {
@@ -811,8 +811,18 @@ main(int argc, char** argv)
             /* process one packet */
             result = BLT_Decoder_PumpPacket(decoder);
             
-            /* if a duration is specified, check if we have exceeded it */
-            if (BLT_SUCCEEDED(result)) result = BLTP_CheckElapsedTime(decoder, Options.duration);
+            if (result == BLT_ERROR_WOULD_BLOCK || result == BLT_ERROR_PORT_HAS_NO_DATA) {
+                /* wait a bit before we try again */
+                ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
+                //ATX_TimeInterval sleep_duration = {1,0}; /* 1s */
+                ATX_System_Sleep(&sleep_duration);
+                result = BLT_SUCCESS;
+            } else {
+                /* if a duration is specified, check if we have exceeded it */
+                if (BLT_SUCCEEDED(result)) {
+                    result = BLTP_CheckElapsedTime(decoder, Options.duration);
+                }
+            }
         } while (BLT_SUCCEEDED(result));
         if (Options.verbosity & BLTP_VERBOSITY_MISC) {
             ATX_ConsoleOutputF("final result = %d (%s)\n", result, BLT_ResultText(result));

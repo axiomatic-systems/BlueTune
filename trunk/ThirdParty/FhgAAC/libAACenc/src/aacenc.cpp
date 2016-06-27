@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -149,7 +149,7 @@ INT FDKaacEnc_LimitBitrate(
       transportBits = 208;
     }
 
-    bitRate = FDKmax(bitRate, ((((40 * nChannels) + transportBits + frameLength) * (coreSamplingRate)) / frameLength) );
+    bitRate = FDKmax(bitRate, ((((40 * nChannels) + transportBits) * (coreSamplingRate)) / frameLength) );
     FDK_ASSERT(bitRate >= 0);
 
     bitRate = FDKmin(bitRate, ((nChannelsEff * MIN_BUFSIZE_PER_EFF_CHAN)*(coreSamplingRate>>shift)) / (frameLength>>shift)) ;
@@ -280,7 +280,7 @@ void FDKaacEnc_AacInitDefaultConfig(AACENC_CONFIG *config)
     config->useTns          = TNS_ENABLE_MASK;      /* tns enabled completly */
     config->usePns          = 1;                    /* depending on channelBitrate this might be set to 0 later */
     config->useIS           = 1;                    /* Intensity Stereo Configuration */
-    config->framelength     = DEFAULT_FRAMELENGTH;  /* used frame size */
+    config->framelength     = -1;                   /* Framesize not configured */
     config->syntaxFlags     = 0;                    /* default syntax with no specialities */
     config->epConfig        = -1;                   /* no ER syntax -> no additional error protection */
     config->nSubFrames      = 1;                    /* default, no sub frames */
@@ -393,7 +393,7 @@ AAC_ENCODER_ERROR FDKaacEnc_Initialize(HANDLE_AAC_ENC      hAacEnc,
   /******************* sanity checks *******************/
 
   /* check config structure */
-  if (config->nChannels  < 1 || config->nChannels > (6)) {
+  if (config->nChannels  < 1 || config->nChannels > (8)) {
     return AAC_ENC_UNSUPPORTED_CHANNELCONFIG;
   }
 
@@ -451,11 +451,8 @@ AAC_ENCODER_ERROR FDKaacEnc_Initialize(HANDLE_AAC_ENC      hAacEnc,
   switch (config->framelength)
   {
     case 1024:
-      if ( config->audioObjectType != AOT_AAC_LC
-        && config->audioObjectType != AOT_SBR
-        && config->audioObjectType != AOT_PS
-        && config->audioObjectType != AOT_ER_AAC_LC
-        && config->audioObjectType != AOT_AAC_SCAL )
+      if ( config->audioObjectType == AOT_ER_AAC_LD
+        || config->audioObjectType == AOT_ER_AAC_ELD )
       {
         return AAC_ENC_INVALID_FRAME_LENGTH;
       }
@@ -561,6 +558,13 @@ AAC_ENCODER_ERROR FDKaacEnc_Initialize(HANDLE_AAC_ENC      hAacEnc,
   qcInit.channelMapping      = &hAacEnc->channelMapping;
   qcInit.sceCpe              = 0;
 
+  if ((config->bitrateMode>=1) && (config->bitrateMode<=5)) {
+      qcInit.averageBits     = (averageBitsPerFrame+7)&~7;
+      qcInit.bitRes          = MIN_BUFSIZE_PER_EFF_CHAN*cm->nChannelsEff;
+      qcInit.maxBits         = MIN_BUFSIZE_PER_EFF_CHAN*cm->nChannelsEff;
+      qcInit.minBits         = 0;
+  }
+  else
   {
       int maxBitres;
       qcInit.averageBits     = (averageBitsPerFrame+7)&~7;
@@ -574,6 +578,8 @@ AAC_ENCODER_ERROR FDKaacEnc_Initialize(HANDLE_AAC_ENC      hAacEnc,
       qcInit.minBits         = (config->minBitsPerFrame!=-1) ? fixMax(qcInit.minBits, config->minBitsPerFrame) : qcInit.minBits;
   }
 
+  qcInit.sampleRate          = config->sampleRate;
+  qcInit.advancedBitsToPe    = isLowDelay(config->audioObjectType) ? 1 : 0 ;
   qcInit.nSubFrames          = config->nSubFrames;
   qcInit.padding.paddingRest = config->sampleRate;
 

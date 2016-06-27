@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2012 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -95,7 +95,6 @@ amm-info@iis.fraunhofer.de
 #define __GENERICSTDS_H__
 
 #include "machine_type.h"
-
 
 
 /* Always increase verbosity of memory allocation in case of a debug built. DEBUG is defined globally in that case. */

@@ -351,7 +351,8 @@ DcfParser_ParseV2Header(DcfParser* self, ATX_InputStream* stream)
     /* parse the atoms from the stream */
     AP4_ByteStream* mp4_stream = new ATX_InputStream_To_AP4_ByteStream_Adapter(stream);
     AP4_AtomParent  atoms;
-    AP4_Result result = AP4_DefaultAtomFactory::Instance.CreateAtomsFromStream(*mp4_stream, atoms);
+    AP4_DefaultAtomFactory atom_factory;
+    AP4_Result result = atom_factory.CreateAtomsFromStream(*mp4_stream, atoms);
     mp4_stream->Release();
     
     AP4_ByteStream* decrypting_stream = NULL;

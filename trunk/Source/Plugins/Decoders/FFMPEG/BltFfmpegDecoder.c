@@ -2,7 +2,7 @@
 |
 |   BlueTune - FFMPEG Wrapper Decoder Module
 |
-|   (c) 2008 Gilles Boccon-Gibod
+|   (c) 2008-2016 Gilles Boccon-Gibod
 |   Author: Gilles Boccon-Gibod (bok@bok.net)
 |
  ****************************************************************/
@@ -26,6 +26,13 @@
 #include "BltOutputNode.h"
 
 #include "avcodec.h"
+
+//#define BLT_CONFIG_ENABLE_FFMPEG_HWACCEL
+
+#if defined(BLT_CONFIG_ENABLE_FFMPEG_HWACCEL)
+#include "libavcodec/videotoolbox.h"
+#include "libavutil/pixdesc.h"
+#endif
 
 /*----------------------------------------------------------------------
 |   logging
@@ -80,6 +87,7 @@ typedef struct {
     AVCodecContext*       codec_context;
     AVCodecParserContext* parser_context;
     AVFrame*              frame;
+    ATX_Boolean           enable_hwaccel;
 } FfmpegDecoder;
 
 /*----------------------------------------------------------------------
@@ -99,22 +107,36 @@ ATX_DECLARE_INTERFACE_MAP(FfmpegDecoderModule, BLT_Module)
 ATX_DECLARE_INTERFACE_MAP(FfmpegDecoder, BLT_MediaNode)
 ATX_DECLARE_INTERFACE_MAP(FfmpegDecoder, ATX_Referenceable)
 
+#if defined(BLT_CONFIG_ENABLE_FFMPEG_HWACCEL)
 /*----------------------------------------------------------------------
-|   FfmpegDecoder_GetBufferCallback
+|   FfmpegDecoder_GetFormatCallback
 +---------------------------------------------------------------------*/
-static int 
-FfmpegDecoder_GetBufferCallback(struct AVCodecContext* context, 
-                                AVFrame*               pic,
-                                int                    flags)
+static enum AVPixelFormat
+FfmpegDecoder_GetFormatCallback(struct AVCodecContext* context, const enum AVPixelFormat* formats)
 {
-    int ret = avcodec_default_get_buffer2(context, pic, flags);
-    if (context->opaque) {
-        BLT_TimeStamp *pts = av_malloc(sizeof(BLT_TimeStamp));
-        *pts = BLT_TimeStamp_FromNanos(*(int64_t*)context->opaque);
-        pic->opaque = pts;
+    BLT_COMPILER_UNUSED(context);
+    
+    while (*formats != AV_PIX_FMT_NONE) {
+        const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*formats);
+
+        if (*formats == AV_PIX_FMT_VIDEOTOOLBOX) {
+            /* prefer hardware-accelerated formats if available */
+            ATX_LOG_FINE("selecting hardware-accelerated codec mode");
+            int result = av_videotoolbox_default_init(context);
+            if (result < 0) {
+                ATX_LOG_FINE_1("av_videotoolbox_default_init failed (%d)", result);
+                continue;
+            }
+            
+            return *formats;
+        } else if (!(desc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+            return *formats;
+        }
+        ++formats;
     }
-    return ret;
+    return *formats;
 }
+#endif
 
 /*----------------------------------------------------------------------
 |   FfmpegDecoder_ListItem_Destroy
@@ -125,6 +147,150 @@ FfmpegDecoder_ListItemDestruct(ATX_ListDataDestructor* self, ATX_Any data, ATX_U
     ATX_COMPILER_UNUSED(self);
     ATX_COMPILER_UNUSED(type);
     BLT_MediaPacket_Release((BLT_MediaPacket*)data);
+}
+
+/*----------------------------------------------------------------------
+|   FfmpegDecoder_ConvertFrame
++---------------------------------------------------------------------*/
+static BLT_MediaPacket*
+FfmpegDecoder_ConvertFrame(FfmpegDecoder* self)
+{
+    BLT_MediaPacket* picture = NULL;
+    BLT_Result       result;
+    unsigned int     picture_size = 0;
+    unsigned char*   picture_buffer;
+    unsigned int     i;
+
+    self->output.media_type.width  = self->codec_context->width;
+    self->output.media_type.height = self->codec_context->height;
+    self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
+    self->output.media_type.flags  = 0;
+    
+#if defined(BLT_CONFIG_ENABLE_FFMPEG_HWACCEL)
+    if (self->frame->format == AV_PIX_FMT_VIDEOTOOLBOX) {
+        CVPixelBufferRef pixel_buffer = (CVPixelBufferRef)self->frame->data[3];
+        OSType           pixel_format = CVPixelBufferGetPixelFormatType(pixel_buffer);
+        unsigned int     line;
+        const uint8_t*   cr_cb_in;
+        uint8_t*         cb_out;
+        uint8_t*         cr_out;
+        CVReturn         err;
+
+        /* kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange = '420v', Bi-Planar Component Y'CbCr 8-bit 4:2:0, video-range (luma=[16,235] chroma=[16,240]).  baseAddr points to a big-endian CVPlanarPixelBufferInfo_YCbCrBiPlanar struct */
+        if (pixel_format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
+            ATX_LOG_WARNING_1("unexpected pixel format %x", pixel_format);
+            return NULL;
+        }
+
+        /* lock the buffer */
+        err = CVPixelBufferLockBaseAddress(pixel_buffer, kCVPixelBufferLock_ReadOnly);
+        if (err != kCVReturnSuccess) {
+            ATX_LOG_WARNING_1("CVPixelBufferLockBaseAddress failed (%d)", err);
+            return NULL;
+        }
+
+        /* init */
+        for (i=0; i<4; i++) {
+            self->output.media_type.planes[i].offset         = 0;
+            self->output.media_type.planes[i].bytes_per_line = 0;
+        }
+        self->output.media_type.planes[0].offset         = 0;
+        self->output.media_type.planes[0].bytes_per_line = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
+        self->output.media_type.planes[1].offset         = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0)*self->codec_context->height;
+        self->output.media_type.planes[1].bytes_per_line = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1)/2;
+        self->output.media_type.planes[2].offset         = self->output.media_type.planes[1].offset+self->output.media_type.planes[1].bytes_per_line*self->codec_context->height/2;
+        self->output.media_type.planes[2].bytes_per_line = self->output.media_type.planes[1].bytes_per_line;
+        picture_size = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0)*self->codec_context->height+
+                       CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1)*self->codec_context->height/2;
+        
+        /* allocate a packet */
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                            picture_size, 
+                                            &self->output.media_type.base, 
+                                            &picture);
+        if (BLT_FAILED(result)) {
+            ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
+            return NULL;
+        }
+
+        /* retrieve the timestamp from the frame */
+        {
+            BLT_TimeStamp pts = BLT_TimeStamp_FromNanos(av_frame_get_best_effort_timestamp(self->frame));
+            BLT_MediaPacket_SetTimeStamp(picture, pts);
+        }
+
+        /* copy the pixels */
+        BLT_MediaPacket_SetPayloadSize(picture, picture_size);
+        picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
+        ATX_CopyMemory(picture_buffer+self->output.media_type.planes[0].offset,
+                       CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 0),
+                       CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0)*self->codec_context->height);
+        cr_cb_in = (const uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
+        cr_out   = (uint8_t*)(picture_buffer+self->output.media_type.planes[1].offset);
+        cb_out   = (uint8_t*)(picture_buffer+self->output.media_type.planes[2].offset);
+        for (line=0; line<self->output.media_type.planes[1].bytes_per_line*self->codec_context->height/2; line++) {
+            *cr_out++ = *cr_cb_in++;
+            *cb_out++ = *cr_cb_in++;
+        }
+
+        /* unlock the buffer */
+        CVPixelBufferUnlockBaseAddress(pixel_buffer, kCVPixelBufferLock_ReadOnly);
+    } else
+#endif
+    if (self->frame->format == AV_PIX_FMT_YUV420P) {
+        unsigned int     plane_size[3]   = {0,0,0};
+        void*            plane_data[3]   = {0,0,0};
+        unsigned int     padding_size[3] = {0,0,0};
+        for (i=0; i<3; i++) {
+            plane_data[i] = self->frame->data[i];
+            
+            if (i==0) {
+                /* Y' plane */
+                plane_size[i] = self->frame->linesize[i]*self->codec_context->height;
+            } else {
+                /* Cb and Cr planes */
+                plane_size[i] = self->frame->linesize[i]*self->codec_context->height/2;
+            }
+            if (plane_size[i]%16) {
+                padding_size[i] = 16-(plane_size[i]%16);
+            }
+            self->output.media_type.planes[i].offset = picture_size;
+            self->output.media_type.planes[i].bytes_per_line = self->frame->linesize[i];
+            picture_size += plane_size[i]+padding_size[i];
+        }
+
+        /* allocate a packet */
+        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                            picture_size, 
+                                            &self->output.media_type.base, 
+                                            &picture);
+        if (BLT_FAILED(result)) {
+            ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
+            return NULL;
+        }
+
+        /* retrieve the timestamp from the frame */
+        {
+            BLT_TimeStamp pts = BLT_TimeStamp_FromNanos(av_frame_get_best_effort_timestamp(self->frame));
+            BLT_MediaPacket_SetTimeStamp(picture, pts);
+        }
+
+        /* copy the pixels */
+        BLT_MediaPacket_SetPayloadSize(picture, picture_size);
+        picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
+        for (i=0; i<3; i++) {
+            if (plane_size[i] && plane_data[i]) {
+                ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset,
+                               plane_data[i],
+                               plane_size[i]);
+            }
+        }
+    } else {
+        ATX_LOG_WARNING_1("unsupported pixel format %d, skipping", self->frame->format);
+        return NULL;
+    }
+    
+    return picture;
 }
 
 /*----------------------------------------------------------------------
@@ -162,10 +328,10 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
     }
     
     while (packet_size) {
-        uint8_t*    frame_buffer      = NULL;
-        int         frame_buffer_size = 0;
-        int64_t     frame_ts          = 0;
-        AVPacket    av_packet;
+        uint8_t* frame_buffer      = NULL;
+        int      frame_buffer_size = 0;
+        int64_t  frame_ts          = 0;
+        AVPacket av_packet;
         
         /* parse the data if needed */
         if (self->parser_context) {
@@ -198,7 +364,9 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
         /* feed the codec */
         ATX_LOG_FINE_1("decoding video frame (%d bytes)", frame_buffer_size);
         self->codec_context->opaque = &frame_ts;
+        av_init_packet(&av_packet);
         av_packet_from_data(&av_packet, frame_buffer, frame_buffer_size);
+        av_packet.pts = packet_ts;
         av_result = avcodec_decode_video2(self->codec_context,
                                           self->frame,
                                           &got_picture,
@@ -208,61 +376,26 @@ FfmpegDecoder_DecodePicture(FfmpegDecoder* self, BLT_MediaPacket* packet)
             continue;
         }
         if (got_picture) {
-            BLT_MediaPacket* picture = NULL;
-            BLT_Result       result;
-            unsigned int     plane_size[3];
-            unsigned int     padding_size[3] = {0,0,0};
-            unsigned int     picture_size = 0;
-            unsigned char*   picture_buffer;
-            unsigned int     i;
-        
             ATX_LOG_FINEST_2("decoded frame width=%d, height=%d",
                               self->codec_context->width, 
                               self->codec_context->height);
-            self->output.media_type.width  = self->codec_context->width;
-            self->output.media_type.height = self->codec_context->height;
-            self->output.media_type.format = BLT_PIXEL_FORMAT_YV12;
-            self->output.media_type.flags  = 0;
-            for (i=0; i<3; i++) {
-                if (i==0) {
-                    /* Y' plane */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height;
-                } else {
-                    /* Cb and Cr planes */
-                    plane_size[i] = self->frame->linesize[i]*self->codec_context->height/2;
-                }
-                if (plane_size[i]%16) {
-                    padding_size[i] = 16-(plane_size[i]%16);
-                }
-                self->output.media_type.planes[i].offset = picture_size;
-                self->output.media_type.planes[i].bytes_per_line = self->frame->linesize[i];
-                picture_size += plane_size[i]+padding_size[i];
-            }
 
-            result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core, 
-                                                picture_size, 
-                                                &self->output.media_type.base, 
-                                                &picture);
-            if (BLT_FAILED(result)) {
-                ATX_LOG_WARNING_1("BLT_Core_CreateMediaPacket returned %d", result);
+            BLT_MediaPacket* picture = FfmpegDecoder_ConvertFrame(self);
+            if (picture == NULL) {
+                ATX_LOG_WARNING("unable to convert frame, skipping picture");
                 continue;
             }
             
-            /* retrieve the timestamp from the frame */
-            if (self->frame->opaque) {
-                BLT_TimeStamp* pts = (BLT_TimeStamp*)self->frame->opaque;
-                if (pts) BLT_MediaPacket_SetTimeStamp(picture, *pts);
+#if defined(BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER)
+            /* FIXME: test */
+            if (self->enable_hwaccel) {
+                BLT_MediaPacket_SetTimeStamp(picture, BLT_MediaPacket_GetTimeStamp(packet));
             }
+#endif
 
-            /* setup the picture buffer */
-            BLT_MediaPacket_SetPayloadSize(picture, picture_size);
-            picture_buffer = BLT_MediaPacket_GetPayloadBuffer(picture);
-            for (i=0; i<3; i++) {
-                ATX_CopyMemory(picture_buffer+self->output.media_type.planes[i].offset, 
-                               self->frame->data[i], 
-                               plane_size[i]);
-            }
             ATX_List_AddData(self->output.pictures, picture);
+            
+            av_frame_unref(self->frame);
         }
     } 
     
@@ -319,10 +452,10 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             
         /* release any previous delayed pictures, codec and frame */
         if (self->codec_context) {
-            //BLT_Result result;
+            /*BLT_Result result;
             //do {
             //    result = FfmpegDecoder_DecodePicture(self, NULL);
-            //} while (BLT_SUCCEEDED(result));
+            //} while (BLT_SUCCEEDED(result)); */
             avcodec_close(self->codec_context);
             av_free(self->codec_context);
             self->codec_context = NULL;
@@ -345,7 +478,7 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
             ATX_LOG_WARNING("FfmpegDecoderInput::PutPacket - avcodec_alloc_context returned NULL");
             return BLT_ERROR_OUT_OF_MEMORY;
         }
-        
+                    
         /* setup the codec options */
         avcodec_get_context_defaults3(self->codec_context, codec);
         self->codec_context->debug_mv          = 0;
@@ -360,7 +493,12 @@ FfmpegDecoderInput_PutPacket(BLT_PacketConsumer* _self,
         self->codec_context->thread_count      = 1;
         
         /* setup the callbacks */
-        self->codec_context->get_buffer2    = FfmpegDecoder_GetBufferCallback;
+#if defined(BLT_CONFIG_ENABLE_FFMPEG_HWACCEL)
+        ATX_LOG_INFO_1("FFMPEG hwaccel enabled = %s", self->enable_hwaccel?"yes":"no");
+        if (self->enable_hwaccel) {
+            self->codec_context->get_format  = FfmpegDecoder_GetFormatCallback;
+        }
+#endif
         
         if (mp4_media_type) {
             /* set the generic video config */
@@ -566,6 +704,19 @@ FfmpegDecoder_Create(BLT_Module*              module,
         return result;
     }
 
+    /* configure options */
+    {
+        ATX_Properties* properties = NULL;
+        if (BLT_SUCCEEDED(BLT_Core_GetProperties(core, &properties))) {
+            ATX_PropertyValue property;
+            if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, "com.axiosys.decoders.ffmpeg.hwaccel", &property))) {
+                if (property.type == ATX_PROPERTY_VALUE_TYPE_BOOLEAN) {
+                    self->enable_hwaccel = property.data.boolean;
+                }
+            }
+        }
+    }
+    
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, FfmpegDecoder, BLT_BaseMediaNode, BLT_MediaNode);
     ATX_SET_INTERFACE_EX(self, FfmpegDecoder, BLT_BaseMediaNode, ATX_Referenceable);
@@ -841,6 +992,6 @@ ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(FfmpegDecoderModule,
 +---------------------------------------------------------------------*/
 BLT_MODULE_IMPLEMENT_STANDARD_GET_MODULE(FfmpegDecoderModule,
                                          "FFMPEG Decoder",
-                                         "com.axiosys.decoder.ffmpeg",
+                                         "com.axiosys.decoders.ffmpeg",
                                          "1.2.0",
                                          BLT_MODULE_AXIOMATIC_COPYRIGHT)

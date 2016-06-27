@@ -310,6 +310,7 @@ PluginsSettings = {
     'AlsaOutput'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_ALSA_OUTPUT',            'src_dir':'Outputs/Alsa'             },
     'QnxOutput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_QNX_OUTPUT',             'src_dir':'Outputs/QNX'              },
     'AndroidOutput'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_ANDROID_OUTPUT',         'src_dir':'Outputs/Android'          },
+    'AndroidOpenSlDecoder': {'defines':'BLT_CONFIG_MODULES_ENABLE_ANDROID_OPENSL_DECODER', 'src_dir':'Decoders/AndroidOpenSL'   },
     'OsxVideoOutput'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_VIDEO_OUTPUT',       'src_dir':'Outputs/OsxVideo'         },
     'OsxAudioQueueOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_QUEUE_OUTPUT', 'src_dir':'Outputs/OsxAudioQueue'    },
     'OsxAudioUnitsOutput' : {'defines':'BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_UNITS_OUTPUT', 'src_dir':'Outputs/OsxAudioUnits'    },

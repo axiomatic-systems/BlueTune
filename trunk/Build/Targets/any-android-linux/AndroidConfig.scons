@@ -1,0 +1,51 @@
+# BlueTune specifics
+env['BLT_CPU_CONFIG_NO_FLOAT'] = True
+env['ATX_SYSTEM_SOURCES']={'System/StdC':'AtxStdc[!D]*.c', 
+                           'System/Bsd':'*.c', 
+                           'System/Posix':'*.c',
+                           'System/Android':'*.c'}
+env['ATX_EXTRA_LIBS']=['m']
+env['NPT_SYSTEM_SOURCES']={'System/StdC':'NptStdc[!D]*.cpp',
+                           'System/Bsd':'*.cpp',
+                           'System/Posix':'*.cpp',
+                           'System/Null':'NptNullSerialPort.cpp',
+                           'System/Android':'*.cpp'}
+env['NPT_EXTRA_LIBS']=['dl']
+env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
+env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN')]
+env['BLT_PLUGINS'] = ['FileInput', 
+                      'NetworkInput',
+                      'CallbackInput',
+                      'CallbackOutput',
+                      'MemoryOutput',
+                      'WmsProtocol',
+                      'MpegAudioDecoder', 
+                      'FlacDecoder',
+                      'AlacDecoder',
+                      'AacDecoder',
+                      'StreamPacketizer', 
+                      'NullOutput',
+                      'FileOutput',
+                      'AndroidOutput',
+                      'PacketStreamer',
+                      'TagParser',
+                      'DebugOutput',
+                      'WaveParser',
+                      'AiffParser',
+                      'Mp4Parser',
+                      'AdtsParser',
+                      'WaveFormatter',
+                      'SilenceRemover',
+                      'GainControlFilter',
+                      'PcmAdapter',
+                      'VorbisDecoder',
+                      'AndroidOpenSlDecoder']
+
+env['BLT_PLUGINS_CDDA_DEVICE_TYPE']  = 'Linux'
+env['BLT_DEFAULT_AUDIO_OUTPUT']      = 'android:default'
+env['BLT_PLUGINS_VORBIS_LIBRARY']    = 'Tremor'
+env['BLT_PLUGINS_AAC_LIBRARY']       = 'FHG'
+#env['BLT_PLUGINS_AAC_LIBRARY']       = 'Helix'
+env['BLT_PLUGINS_HELIX_AAC_ASM_DIR'] = ['real/asm/armgcc']
+env['BLT_WMA_DECODER_MODE']          = 'Integer'                                   
+

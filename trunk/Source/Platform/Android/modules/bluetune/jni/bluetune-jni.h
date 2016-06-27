@@ -179,6 +179,22 @@ JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1seekToPosition
 JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setVolume
   (JNIEnv *, jclass, jlong, jfloat);
 
+/*
+ * Class:     com_bluetune_player_Player
+ * Method:    _setPropertyInteger
+ * Signature: (JILjava/lang/String;I)I
+ */
+JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setPropertyInteger
+  (JNIEnv *, jclass, jlong, jint, jstring, jint);
+
+/*
+ * Class:     com_bluetune_player_Player
+ * Method:    _setPropertyString
+ * Signature: (JILjava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_bluetune_player_Player__1setPropertyString
+  (JNIEnv *, jclass, jlong, jint, jstring, jstring);
+
 #ifdef __cplusplus
 }
 #endif

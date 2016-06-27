@@ -240,6 +240,14 @@ public class Player {
 		_setVolume(cSelf, volume);
 	}
 
+	public void setProperty(int scope, String name, int value) {
+		_setPropertyInteger(cSelf, scope, name, value);
+	}
+
+	public void setProperty(int scope, String name, String value) {
+		_setPropertyString(cSelf, scope, name, value);
+	}
+
 	// C glue
 	private static native long _init(MessageHandler messageHandler);
 	private static native int _pumpMessage(long self);
@@ -253,6 +261,8 @@ public class Player {
 	private static native int _seekToTimeStamp(long self, int h, int m, int s, int f);
 	private static native int _seekToPosition(long self, long offset, long range);
 	private static native int _setVolume(long self, float volume);
+	private static native int _setPropertyInteger(long self, int scope, String name, int value);
+	private static native int _setPropertyString(long self, int scope, String name, String value);
 	private final long     cSelf;
 	private MessageHandler messageHandler;
 	private MessageLoop    messageLoop;

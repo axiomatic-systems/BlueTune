@@ -1,0 +1,16 @@
+*.suo
+*.opendb
+*.db
+Build/Targets/x86-microsoft-win32-vs2015/BlueTune/Debug/
+*.log
+Build/Targets/x86-microsoft-win32-vs2015/BtController/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/BtMfcGui/Debug/
+*.user
+Build/Targets/x86-microsoft-win32-vs2015/BtPlay/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/BtPlayX/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/FLAC/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/Fluo/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/SampleFilterPlugin/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/Tremor/Debug/
+Build/Targets/x86-microsoft-win32-vs2015/Win32SoundcardProbe/Debug/

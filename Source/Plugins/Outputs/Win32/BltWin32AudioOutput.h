@@ -18,9 +18,8 @@
  * to a sound card on Windows.
  * These media nodes expect media packets with PCM audio.
  * This module responds to probe with the name:
- * 'wave:<n>'
- * (In this version, <n> is ignored, and the default sound card will
- * be used).
+ * 'wave:<n> or wave:+<n>' where <n> is a device ID >= 0 or the character * 
+ * for automatic device selection.
  * @{ 
  */
 

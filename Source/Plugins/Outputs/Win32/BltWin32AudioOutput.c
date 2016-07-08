@@ -767,19 +767,23 @@ Win32AudioOutput_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* parse the device name */
-    self->device_id = WAVE_MAPPER;
     device_name = constructor->name+5;
     if (device_name[0] == '+') {
         self->use_passthrough = ATX_TRUE;
         ++device_name;
     }
-    if (ATX_SUCCEEDED(ATX_ParseIntegerU(device_name, &self->device_id, ATX_FALSE))) {
-        if (self->device_id > 0) --self->device_id;
-    } else {
-        ATX_FreeMemory(self);
-        return BLT_ERROR_NO_SUCH_DEVICE;
-    }
-    ATX_LOG_FINE_1("selected device id %d", self->device_id);
+	if (ATX_StringsEqual(device_name, "*")) {
+		self->device_id = WAVE_MAPPER;
+		ATX_LOG_FINE("selected device mapper");
+	} else {
+		if (ATX_SUCCEEDED(ATX_ParseIntegerU(device_name, &self->device_id, ATX_FALSE))) {
+			if (self->device_id > 0) --self->device_id;
+		} else {
+			ATX_FreeMemory(self);
+			return BLT_ERROR_NO_SUCH_DEVICE;
+		}
+		ATX_LOG_FINE_1("selected device id %d", self->device_id);
+	}
 
     /* construct the object */
     self->device_handle              = NULL;
@@ -1159,6 +1163,7 @@ Win32AudioOutputModule_Probe(BLT_Module*              _self,
             }
 
             /* the name should be 'wave:<n>' or 'wave:+<n>' (+ for spdif/hdmi passthrough) */
+			/* <n> can be a device ID >=0 or the * character for the device mapper         */
             if (constructor->name == NULL) return BLT_FAILURE;
             if (!ATX_StringsEqualN(constructor->name, "wave:", 5)) return BLT_FAILURE;
             if (ATX_StringLength(constructor->name) < 6) return BLT_FAILURE;

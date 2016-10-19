@@ -391,8 +391,8 @@ void SBC_Encoder_Init(SBC_ENC_PARAMS *pstrEncParams)
             EncMaxShiftCounter=((ENC_VX_BUFFER_SIZE-8*10*2)>>4)<<3;
     }
 
-    APPL_TRACE_EVENT("SBC_Encoder_Init : bitrate %d, bitpool %d",
-            pstrEncParams->u16BitRate, pstrEncParams->s16BitPool);
+    /* GBG: APPL_TRACE_EVENT("SBC_Encoder_Init : bitrate %d, bitpool %d",
+            pstrEncParams->u16BitRate, pstrEncParams->s16BitPool); */
 
     SbcAnalysisInit();
 

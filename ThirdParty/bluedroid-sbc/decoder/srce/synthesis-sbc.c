@@ -359,14 +359,14 @@ static const SYNTH_FRAME SynthFrameEnhanced[] = {
 #endif
 
 static const SYNTH_FRAME SynthFrame8SB[] = {
-    NULL,             /* invalid */
+    0,             /* invalid */
     OI_SBC_SynthFrame_80, /* mono */
     OI_SBC_SynthFrame_80  /* stereo */
 };
 
 
 static const SYNTH_FRAME SynthFrame4SB[] = {
-    NULL,                  /* invalid */
+    0,                  /* invalid */
     OI_SBC_SynthFrame_4SB, /* mono */
     OI_SBC_SynthFrame_4SB  /* stereo */
 };

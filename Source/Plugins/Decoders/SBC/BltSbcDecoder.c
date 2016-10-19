@@ -24,6 +24,8 @@
 
 #include "BltSbcDecoder.h"
 
+#include "oi_codec_sbc.h"
+
 /*----------------------------------------------------------------------
 |   logging
 +---------------------------------------------------------------------*/
@@ -41,6 +43,7 @@ typedef struct {
     ATX_EXTENDS(BLT_BaseModule);
 
     /* members */
+    BLT_MediaTypeId sbc_type_id;
 } SbcDecoderModule;
 
 typedef struct {
@@ -66,8 +69,11 @@ typedef struct {
     ATX_EXTENDS(BLT_BaseMediaNode);
 
     /* members */
-    SbcDecoderInput   input;
-    SbcDecoderOutput  output;
+    OI_CODEC_SBC_DECODER_CONTEXT   decoder;
+    OI_CODEC_SBC_CODEC_DATA_STEREO decoder_data;
+    OI_INT16                       pcm_buffer[SBC_MAX_SAMPLES_PER_FRAME*SBC_MAX_CHANNELS];
+    SbcDecoderInput                input;
+    SbcDecoderOutput               output;
 } SbcDecoder;
 
 /*----------------------------------------------------------------------
@@ -84,106 +90,69 @@ BLT_METHOD
 SbcDecoderInput_PutPacket(BLT_PacketConsumer* _self,
                           BLT_MediaPacket*    packet)
 {
-    SbcDecoder*                  self = ATX_SELF_M(input, SbcDecoder, BLT_PacketConsumer);
-    const MLO_SampleFormat*      sample_format; 
-    const BLT_MediaType*         media_type;
-    ATX_Result                   result;
-
-#if 0
-    /* check to see if this is the end of a stream */
-    if (BLT_MediaPacket_GetFlags(packet) & 
-        BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) {
-        self->input.eos = BLT_TRUE;
+    SbcDecoder*      self          = ATX_SELF_M(input, SbcDecoder, BLT_PacketConsumer);
+    const OI_BYTE*   frame_data    = BLT_MediaPacket_GetPayloadBuffer(packet);
+    OI_UINT32        frame_size    = BLT_MediaPacket_GetPayloadSize(packet);
+    OI_INT16*        pcm_data      = self->pcm_buffer;
+    OI_UINT32        pcm_size      = sizeof(self->pcm_buffer);
+    BLT_MediaPacket* output_packet = NULL;
+    BLT_StreamInfo   stream_info;
+    OI_STATUS        status;
+    BLT_Result       result;
+    
+    /* decode a frame */
+    status = OI_CODEC_SBC_DecodeFrame(&self->decoder,
+                                      &frame_data,
+                                      &frame_size,
+                                      pcm_data,
+                                      &pcm_size);
+    if (status != OI_STATUS_SUCCESS) {
+        return BLT_ERROR_INVALID_MEDIA_FORMAT;
     }
 
-    /* look for a change in media type parameters */
-    BLT_MediaPacket_GetMediaType(packet, &media_type);
-    if (media_type == NULL || media_type->id != self->mp4es_type_id) {
-        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    /* see if the media type has changed */
+    stream_info.mask = 0;
+    if (self->output.media_type.sample_rate != self->decoder.common.frameInfo.frequency) {
+        self->output.media_type.sample_rate  = self->decoder.common.frameInfo.frequency;
+        stream_info.mask       |= BLT_STREAM_INFO_MASK_SAMPLE_RATE;
+        stream_info.sample_rate = self->output.media_type.sample_rate;
     }
-    mp4_media_type = (const BLT_Mp4AudioMediaType*)media_type;
-    if (self->input.media_type) {
-        if (!BLT_MediaType_Equals(media_type, (const BLT_MediaType*)self->input.media_type)) {
-            ATX_LOG_FINE("change of SBC media type parameters detected");
-            MLO_Decoder_Destroy(self->melo);
-            self->melo = NULL;
-            BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
-            self->input.media_type = NULL;
-        }
+    if (self->output.media_type.channel_count != self->decoder.common.frameInfo.nrof_channels) {
+        self->output.media_type.channel_count  = self->decoder.common.frameInfo.nrof_channels;
+        stream_info.mask         |= BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
+        stream_info.channel_count = self->output.media_type.channel_count;
     }
-    if (self->input.media_type == NULL) {
-        BLT_MediaType* clone;
-        BLT_MediaType_Clone(media_type, &clone);
-        self->input.media_type = (BLT_Mp4AudioMediaType*)clone;
+    if (self->output.media_type.sample_rate != self->decoder.common.frameInfo.frequency) {
+        self->output.media_type.sample_rate  = self->decoder.common.frameInfo.frequency;
+        stream_info.mask       |= BLT_STREAM_INFO_MASK_SAMPLE_RATE;
+        stream_info.sample_rate = self->output.media_type.sample_rate;
+    }
+    if (ATX_BASE(self, BLT_BaseMediaNode).context && stream_info.mask) {
+        stream_info.mask     |= BLT_STREAM_INFO_MASK_DATA_TYPE | BLT_STREAM_INFO_MASK_DATA_TYPE;
+        stream_info.type      = BLT_STREAM_TYPE_AUDIO;
+        stream_info.data_type = "SBC";
+        BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
     }
     
-    /* check to see if we need to create a decoder for this */
-    if (self->melo == NULL) {
-        MLO_DecoderConfig            decoder_config;
-        if (MLO_FAILED(MLO_DecoderConfig_Parse(mp4_media_type->decoder_info, 
-                                               mp4_media_type->decoder_info_length, 
-                                               &decoder_config))) {
-            return BLT_ERROR_INVALID_MEDIA_FORMAT;
-        }
-        if (decoder_config.object_type != MLO_OBJECT_TYPE_SBC_LC) return BLT_ERROR_UNSUPPORTED_CODEC;
-        result = MLO_Decoder_Create(&decoder_config, &self->melo);
-        if (MLO_FAILED(result)) return BLT_ERROR_INVALID_MEDIA_FORMAT;
-
-        /* update the stream info */
-        if (ATX_BASE(self, BLT_BaseMediaNode).context) {
-            BLT_StreamInfo stream_info;
-            stream_info.data_type     = "MPEG-4 SBC";
-            stream_info.sample_rate   = MLO_DecoderConfig_GetSampleRate(&decoder_config);
-            stream_info.channel_count = MLO_DecoderConfig_GetChannelCount(&decoder_config);
-            stream_info.mask = BLT_STREAM_INFO_MASK_DATA_TYPE    |
-                               BLT_STREAM_INFO_MASK_SAMPLE_RATE  |
-                               BLT_STREAM_INFO_MASK_CHANNEL_COUNT;
-            BLT_Stream_SetInfo(ATX_BASE(self, BLT_BaseMediaNode).context, &stream_info);
-        }
-    }
-
-    /* decode the packet as a frame */
-    result = MLO_Decoder_DecodeFrame(self->melo, 
-                                     BLT_MediaPacket_GetPayloadBuffer(packet),
-                                     BLT_MediaPacket_GetPayloadSize(packet),
-                                     self->sample_buffer);
-    if (MLO_FAILED(result)) {
-        ATX_LOG_FINE_1("MLO_Decoder_DecodeFrame failed (%d)", result);
-        return BLT_SUCCESS;
-    }
-
-    /* update the output media type */
-    sample_format = MLO_SampleBuffer_GetFormat(self->sample_buffer);
-    self->output.media_type.channel_count   = sample_format->channel_count;
-    self->output.media_type.sample_rate     = sample_format->sample_rate;
-    self->output.media_type.bits_per_sample = 16;
-    self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
-    self->output.media_type.channel_mask    = 0;
-
     /* create a PCM packet for the output */
-    {
-        BLT_Size         out_packet_size = MLO_SampleBuffer_GetSize(self->sample_buffer);
-        BLT_MediaPacket* out_packet;
-        result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
-                                            out_packet_size,
-                                            (BLT_MediaType*)&self->output.media_type,
-                                            &out_packet);
-        if (BLT_FAILED(result)) return result;
-        BLT_MediaPacket_SetPayloadSize(out_packet, out_packet_size);
-        ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(out_packet), 
-                       MLO_SampleBuffer_GetSamples(self->sample_buffer), 
-                       out_packet_size);
-
-        /* copy the timestamp */
-        BLT_MediaPacket_SetTimeStamp(out_packet, BLT_MediaPacket_GetTimeStamp(packet));
-
-        /* copy the flags */
-        BLT_MediaPacket_SetFlags(out_packet, BLT_MediaPacket_GetFlags(packet));
-        
-        /* add to the output packet list */
-        ATX_List_AddData(self->output.packets, out_packet);
-    }
-#endif
+    result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
+                                        pcm_size,
+                                        (BLT_MediaType*)&self->output.media_type,
+                                        &output_packet);
+    if (BLT_FAILED(result)) return result;
+    BLT_MediaPacket_SetPayloadSize(output_packet, pcm_size);
+    ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(output_packet),
+                   pcm_data,
+                   pcm_size);
+    
+    /* copy the timestamp */
+    BLT_MediaPacket_SetTimeStamp(output_packet, BLT_MediaPacket_GetTimeStamp(packet));
+    
+    /* copy the flags */
+    BLT_MediaPacket_SetFlags(output_packet, BLT_MediaPacket_GetFlags(packet));
+    
+    /* add to the output packet list */
+    ATX_List_AddData(self->output.packets, output_packet);
     
     return BLT_SUCCESS;
 }
@@ -290,13 +259,9 @@ ATX_END_INTERFACE_MAP
 |   SbcDecoder_SetupPorts
 +---------------------------------------------------------------------*/
 static BLT_Result
-SbcDecoder_SetupPorts(SbcDecoder* self, BLT_MediaTypeId mp4es_type_id)
+SbcDecoder_SetupPorts(SbcDecoder* self)
 {
     ATX_Result result;
-
-    /* init the input port */
-    self->mp4es_type_id = mp4es_type_id;
-    self->input.eos = BLT_FALSE;
 
     /* create a list of input packets */
     result = ATX_List_Create(&self->output.packets);
@@ -304,7 +269,9 @@ SbcDecoder_SetupPorts(SbcDecoder* self, BLT_MediaTypeId mp4es_type_id)
     
     /* setup the output port */
     BLT_PcmMediaType_Init(&self->output.media_type);
-
+    self->output.media_type.sample_format   = BLT_PCM_SAMPLE_FORMAT_SIGNED_INT_NE;
+    self->output.media_type.bits_per_sample = 16;
+    
     return BLT_SUCCESS;
 }
 
@@ -319,7 +286,6 @@ SbcDecoder_Create(BLT_Module*              module,
                   BLT_MediaNode**          object)
 {
     SbcDecoder*       self;
-    SbcDecoderModule* sbc_decoder_module = (SbcDecoderModule*)module;
     BLT_Result        result;
 
     ATX_LOG_FINE("SbcDecoder::Create");
@@ -341,15 +307,20 @@ SbcDecoder_Create(BLT_Module*              module,
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
 
     /* setup the input and output ports */
-    result = SbcDecoder_SetupPorts(self, sbc_decoder_module->mp4es_type_id);
+    result = SbcDecoder_SetupPorts(self);
     if (BLT_FAILED(result)) {
         ATX_FreeMemory(self);
         *object = NULL;
         return result;
     }
 
-    /* create a sample buffer */
-    MLO_SampleBuffer_Create(0, &(self->sample_buffer));
+    /* init the decoder */
+    OI_CODEC_SBC_DecoderReset(&self->decoder,
+                              self->decoder_data.data,
+                              sizeof(self->decoder_data.data),
+                              2 /* maxChannels */,
+                              2 /* pcmStride   */,
+                              0 /* enhanced    */);
 
     /* setup interfaces */
     ATX_SET_INTERFACE_EX(self, SbcDecoder, BLT_BaseMediaNode, BLT_MediaNode);
@@ -371,23 +342,12 @@ SbcDecoder_Destroy(SbcDecoder* self)
 { 
     ATX_LOG_FINE("SbcDecoder::Destroy");
 
-    /* release input resources */
-    if (self->input.media_type) {
-        BLT_MediaType_Free((BLT_MediaType*)self->input.media_type);
-    }
-    
     /* release any packet we may hold */
     SbcDecoderOutput_Flush(self);
     ATX_List_Destroy(self->output.packets);
     
-    /* destroy the Melo decoder */
-    if (self->melo) MLO_Decoder_Destroy(self->melo);
-    
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
-
-    /* destroy the sample buffer */
-    //MLO_SampleBuffer_Destroy(self->sample_buffer);
 
     /* free the object memory */
     ATX_FreeMemory(self);
@@ -431,13 +391,13 @@ SbcDecoder_Seek(BLT_MediaNode* _self,
     BLT_COMPILER_UNUSED(point);
     
     /* clear the eos flag */
-    self->input.eos  = BLT_FALSE;
+    //self->input.eos  = BLT_FALSE;
 
     /* remove any packets in the output list */
     SbcDecoderOutput_Flush(self);
 
     /* reset the decoder */
-    if (self->melo) MLO_Decoder_Reset(self->melo);
+    //if (self->melo) MLO_Decoder_Reset(self->melo);
 
     return BLT_SUCCESS;
 }
@@ -490,11 +450,11 @@ SbcDecoderModule_Attach(BLT_Module* _self, BLT_Core* core)
     result = BLT_Registry_RegisterName(
         registry,
         BLT_REGISTRY_NAME_CATEGORY_MEDIA_TYPE_IDS,
-        BLT_MP4_AUDIO_ES_MIME_TYPE,
-        &self->mp4es_type_id);
+        "audio/SBC",
+        &self->sbc_type_id);
     if (BLT_FAILED(result)) return result;
     
-    ATX_LOG_FINE_1("SbcDecoderModule::Attach (" BLT_MP4_AUDIO_ES_MIME_TYPE " = %d)", self->mp4es_type_id);
+    ATX_LOG_FINE_1("SbcDecoderModule::Attach (audio/SBC = %d)", self->sbc_type_id);
 
     return BLT_SUCCESS;
 }
@@ -527,33 +487,8 @@ SbcDecoderModule_Probe(BLT_Module*              _self,
             }
 
             /* the input type should be BLT_MP4_ES_MIME_TYPE */
-            if (constructor->spec.input.media_type->id != 
-                self->mp4es_type_id) {
+            if (constructor->spec.input.media_type->id != self->sbc_type_id) {
                 return BLT_FAILURE;
-            } else {
-                /* check the object type id */
-                BLT_Mp4AudioMediaType* media_type = (BLT_Mp4AudioMediaType*)constructor->spec.input.media_type;
-				if (media_type->base.stream_type != BLT_MP4_STREAM_TYPE_AUDIO) return BLT_FAILURE;
-                if (media_type->base.format_or_object_type_id != BLT_SBC_DECODER_OBJECT_TYPE_MPEG2_SBC_LC &&
-                    media_type->base.format_or_object_type_id != BLT_SBC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
-                    return BLT_FAILURE;
-                }
-                if (media_type->base.format_or_object_type_id == BLT_SBC_DECODER_OBJECT_TYPE_MPEG4_AUDIO) {
-                    /* check that this is SBC LC */
-                    MLO_DecoderConfig decoder_config;
-                    if (MLO_FAILED(MLO_DecoderConfig_Parse(media_type->decoder_info, media_type->decoder_info_length, &decoder_config))) {
-                        return BLT_FAILURE;
-                    }
-                    if (decoder_config.object_type != MLO_OBJECT_TYPE_SBC_LC) return BLT_FAILURE;
-                    if (decoder_config.channel_configuration == 0) {
-                        ATX_LOG_INFO("SBC channel configuration is 0");
-                        return BLT_FAILURE;
-                    }
-                    if (decoder_config.channel_configuration > 2) {
-                        ATX_LOG_INFO_1("SBC channel configuration not supported (%d)", decoder_config.channel_configuration);
-                        return BLT_FAILURE;
-                    }
-                }
             }
 
             /* the output type should be unspecified, or audio/pcm */

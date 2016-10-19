@@ -31,6 +31,11 @@
     #include "bt_target.h"
 #endif
 
+/* GBG */
+#ifndef SBC_API
+#define SBC_API
+#endif
+
 /*DEFINES*/
 #ifndef FALSE
 #define FALSE 0

@@ -428,7 +428,7 @@ OI_UINT32 OI_CODEC_SBC_CalculateBitrate(OI_CODEC_SBC_FRAME_INFO *frame);
 /**
   Calculate decoded audio data length for one frame.
 
-  @param frame The frame whose audio data length to calculate
+  #param frame The frame whose audio data length to calculate
 
   @return length of decoded audio data for a
   single frame, in bytes

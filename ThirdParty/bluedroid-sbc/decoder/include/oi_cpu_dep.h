@@ -75,7 +75,16 @@ extern "C" {
 #define OI_CPU_M64111     19 /**< Renesas M64111 processor (M32R family) */
 #define OI_CPU_ARMV5_LEND 20 //*< ARM5, little-endian */
 
-#define OI_CPU_TYPE 12
+/* GBG #define OI_CPU_TYPE 12 */
+/* <GBG */
+#define OI_CPU_X64 50 //*< X86_64, little-endian */
+#if defined(__i386__)
+#define OI_CPU_TYPE OI_CPU_X86
+#elif defined(__x86_64__)
+#define OI_CPU_TYPE OI_CPU_X64
+#endif
+    
+/* GBG> */
 
 #ifndef OI_CPU_TYPE
     #error "OI_CPU_TYPE type not defined"
@@ -127,6 +136,28 @@ typedef OI_UINT32 OI_ELEMENT_UNION; /**< Type for first element of a union to su
 
 /**@}*/
 
+#endif
+
+/*********************************************************************************/
+/* GBG */
+#if OI_CPU_TYPE==OI_CPU_X64
+
+#define OI_CPU_BYTE_ORDER OI_LITTLE_ENDIAN_BYTE_ORDER  /**< x86 platform byte ordering is little-endian */
+
+/** @name CPU/compiler-dependent primitive data type definitions for x86 processor family
+ *  @{
+ */
+typedef signed char     OI_INT8;   /**< 8-bit signed integer values use native signed character data type for x86_64 processor. */
+typedef signed short    OI_INT16;  /**< 16-bit signed integer values use native signed short integer data type for x86_64 processor. */
+typedef signed int     OI_INT32;  /**< 32-bit signed integer values use native signed long integer data type for x86_64 processor. */
+typedef unsigned char   OI_UINT8;  /**< 8-bit unsigned integer values use native unsigned character data type for x86_64 processor. */
+typedef unsigned short  OI_UINT16; /**< 16-bit unsigned integer values use native unsigned short integer data type for x86_64 processor. */
+typedef unsigned int   OI_UINT32; /**< 32-bit unsigned integer values use native unsigned long integer data type for x86_64 processor. */
+
+typedef OI_UINT32 OI_ELEMENT_UNION; /**< Type for first element of a union to support all data types up to pointer width. */
+
+/**@}*/
+    
 #endif
 
 /*********************************************************************************/

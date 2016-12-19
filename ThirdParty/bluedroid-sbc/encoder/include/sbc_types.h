@@ -32,7 +32,10 @@
 #include "data_types.h"
 
 typedef short SINT16;
-typedef long SINT32;
+/* <GBG */
+/* typedef long SINT32; */
+typedef int32_t SINT32;
+/* GBG> */
 
 #if (SBC_IPAQ_OPT == TRUE)
 
@@ -41,7 +44,7 @@ typedef long long SINT64;
 #else
 /* GBG */
 /*typedef __int64 SINT64;*/
-typedef __int64_t SINT64;
+typedef int64_t SINT64;
 /* GBG */
 
 #endif
@@ -51,7 +54,9 @@ typedef __int64_t SINT64;
 #if (SBC_FOR_EMBEDDED_LINUX == TRUE)
 typedef long long SINT64;
 #else
-typedef __int64 SINT64;
+/* GBG */
+/*typedef __int64 SINT64;*/
+typedef int64_t SINT64;
 #endif
 
 #endif

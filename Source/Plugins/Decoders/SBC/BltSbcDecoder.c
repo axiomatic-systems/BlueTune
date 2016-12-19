@@ -263,7 +263,7 @@ SbcDecoder_SetupPorts(SbcDecoder* self)
 {
     ATX_Result result;
 
-    /* create a list of input packets */
+    /* create a list of output packets */
     result = ATX_List_Create(&self->output.packets);
     if (ATX_FAILED(result)) return result;
     
@@ -486,7 +486,7 @@ SbcDecoderModule_Probe(BLT_Module*              _self,
                 return BLT_FAILURE;
             }
 
-            /* the input type should be BLT_MP4_ES_MIME_TYPE */
+            /* the input type should be SBC */
             if (constructor->spec.input.media_type->id != self->sbc_type_id) {
                 return BLT_FAILURE;
             }

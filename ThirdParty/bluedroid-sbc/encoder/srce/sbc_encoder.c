@@ -130,8 +130,8 @@ void SBC_Encoder(SBC_ENC_PARAMS *pstrEncParams)
     SINT32 *pSum, *pDiff;
 #endif
     UINT8  *pu8;
-    tSBC_FR_CB  *p_cur, *p_last;
-    UINT32       idx, tmp, tmp2;
+    /* <GBG: tSBC_FR_CB  *p_cur, *p_last;
+    UINT32       idx, tmp, tmp2; GBG> */
     register SINT32  s32NumOfSubBands = pstrEncParams->s16NumOfSubBands;
 
     pstrEncParams->pu8NextPacket = pstrEncParams->pu8Packet;
@@ -269,6 +269,8 @@ void SBC_Encoder(SBC_ENC_PARAMS *pstrEncParams)
         /* Quantize the encoded audio */
         EncPacking(pstrEncParams);
 
+/* <GBG */
+#if 0
         /* scramble the code */
         SBC_PRTC_CHK_INIT(pu8);
         SBC_PRTC_CHK_CRC(pu8);
@@ -279,6 +281,9 @@ void SBC_Encoder(SBC_ENC_PARAMS *pstrEncParams)
             printf("len: %d, idx: %d!!!!\n", pstrEncParams->u16PacketLength, sbc_prtc_cb.fr[sbc_prtc_cb.index].idx);
 #endif
         SBC_PRTC_SCRMB((&pu8[sbc_prtc_cb.base]));
+#endif 
+/* GBG> */
+        
     }
     while(--(pstrEncParams->u8NumPacketToEncode));
 

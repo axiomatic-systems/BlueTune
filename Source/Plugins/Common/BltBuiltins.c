@@ -232,6 +232,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(SbcDecoder)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_SBC_ENCODER)
+    BLT_REGISTER_BUILTIN(SbcEncoder)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL)
     BLT_REGISTER_BUILTIN(WmsProtocol)
 #endif

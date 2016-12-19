@@ -117,7 +117,7 @@
 /* -> more MIPS required for a better audio quality. comparasion with the SIG utilities shows a division by 10 of the RMS */
 /* CAUTION: It only apply in the if SBC_FAST_DCT is set to TRUE */
 #ifndef SBC_IS_64_MULT_IN_IDCT
-#define SBC_IS_64_MULT_IN_IDCT  FALSE
+#define SBC_IS_64_MULT_IN_IDCT  TRUE /* GBG: FALSE */
 #endif /*SBC_IS_64_MULT_IN_IDCT */
 
 /* set SBC_IS_64_MULT_IN_QUANTIZER to TRUE to use 64 bits multiplication in the quantizer */
@@ -138,7 +138,7 @@
 
 /* TRUE -> application should provide PCM buffer, FALSE PCM buffer reside in SBC_ENC_PARAMS */
 #ifndef SBC_NO_PCM_CPY_OPTION
-#define SBC_NO_PCM_CPY_OPTION FALSE
+#define SBC_NO_PCM_CPY_OPTION TRUE /* GBG: FALSE */
 #endif
 
 #define MINIMUM_ENC_VX_BUFFER_SIZE (8*10*2)

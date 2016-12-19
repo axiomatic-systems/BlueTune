@@ -62,6 +62,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		AC1A1C8A1DB73B67004FCF6E /* BltSbcEncoder.c in Sources */ = {isa = PBXBuildFile; fileRef = AC1A1C881DB73B67004FCF6E /* BltSbcEncoder.c */; };
+		AC1A1C8B1DB73B67004FCF6E /* BltSbcEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */; };
 		ACE4AF771DB5959C0099F1E3 /* BltSbcDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = ACE4AF751DB5958B0099F1E3 /* BltSbcDecoder.c */; };
 		ACE4AF7B1DB59E8A0099F1E3 /* BltSbcParser.c in Sources */ = {isa = PBXBuildFile; fileRef = ACE4AF791DB59C990099F1E3 /* BltSbcParser.c */; };
 		ACE4AFD41DB6DAFD0099F1E3 /* oi_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4AFA61DB6DAFD0099F1E3 /* oi_assert.h */; };
@@ -2100,6 +2102,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AC1A1C881DB73B67004FCF6E /* BltSbcEncoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltSbcEncoder.c; sourceTree = "<group>"; };
+		AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSbcEncoder.h; sourceTree = "<group>"; };
 		ACE4AF751DB5958B0099F1E3 /* BltSbcDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BltSbcDecoder.c; path = SBC/BltSbcDecoder.c; sourceTree = "<group>"; };
 		ACE4AF761DB5958B0099F1E3 /* BltSbcDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BltSbcDecoder.h; path = SBC/BltSbcDecoder.h; sourceTree = "<group>"; };
 		ACE4AF791DB59C990099F1E3 /* BltSbcParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BltSbcParser.c; path = SBC/BltSbcParser.c; sourceTree = "<group>"; };
@@ -3516,6 +3520,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		AC1A1C861DB73B67004FCF6E /* Encoders */ = {
+			isa = PBXGroup;
+			children = (
+				AC1A1C871DB73B67004FCF6E /* SBC */,
+			);
+			path = Encoders;
+			sourceTree = "<group>";
+		};
+		AC1A1C871DB73B67004FCF6E /* SBC */ = {
+			isa = PBXGroup;
+			children = (
+				AC1A1C881DB73B67004FCF6E /* BltSbcEncoder.c */,
+				AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */,
+			);
+			path = SBC;
+			sourceTree = "<group>";
+		};
 		ACE4AF741DB5957F0099F1E3 /* SBC */ = {
 			isa = PBXGroup;
 			children = (
@@ -4145,6 +4166,7 @@
 				CA50424C0C5AE52B0060E6FE /* Composite */,
 				CA5042500C5AE52B0060E6FE /* Decoders */,
 				CA5827050E68B32D006CC501 /* DynamicLoading */,
+				AC1A1C861DB73B67004FCF6E /* Encoders */,
 				CA5042600C5AE52B0060E6FE /* Filters */,
 				CA5042640C5AE52B0060E6FE /* Formatters */,
 				CA5042680C5AE52B0060E6FE /* General */,
@@ -6537,6 +6559,7 @@
 				CA5042CD0C5AE52B0060E6FE /* BltConfig.h in Headers */,
 				CA5042CF0C5AE52B0060E6FE /* BltCore.h in Headers */,
 				CA5042D00C5AE52B0060E6FE /* BltCorePriv.h in Headers */,
+				AC1A1C8B1DB73B67004FCF6E /* BltSbcEncoder.h in Headers */,
 				CA5042D10C5AE52B0060E6FE /* BltDefs.h in Headers */,
 				CA5042D20C5AE52B0060E6FE /* BltErrors.h in Headers */,
 				CA5042D30C5AE52B0060E6FE /* BltEvent.h in Headers */,
@@ -8413,6 +8436,7 @@
 				CA5043030C5AE52B0060E6FE /* FloLayerI.c in Sources */,
 				CA5043050C5AE52B0060E6FE /* FloLayerII.c in Sources */,
 				CA5043070C5AE52B0060E6FE /* FloLayerIII.c in Sources */,
+				AC1A1C8A1DB73B67004FCF6E /* BltSbcEncoder.c in Sources */,
 				CA50430B0C5AE52B0060E6FE /* FloTables.c in Sources */,
 				CA50430F0C5AE52B0060E6FE /* FloVbr.c in Sources */,
 				CA5043120C5AE52B0060E6FE /* BltDecoderClient.cpp in Sources */,
@@ -8773,11 +8797,12 @@
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_SBC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_FHG_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_SBC_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_SBC_ENCODER,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
@@ -8834,11 +8859,12 @@
 					BLT_CONFIG_MODULES_ENABLE_VORBIS_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_FLAC_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_ALAC_DECODER,
-					BLT_CONFIG_MODULES_ENABLE_SBC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_FHG_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_OPENCORE_AAC_DECODER,
 					_BLT_CONFIG_MODULES_ENABLE_MPEG_AUDIO_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_SBC_DECODER,
+					BLT_CONFIG_MODULES_ENABLE_SBC_ENCODER,
 					BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER,
 					BLT_CONFIG_MODULES_ENABLE_WAVE_FORMATTER,
 					BLT_CONFIG_MODULES_ENABLE_NULL_OUTPUT,
@@ -9305,6 +9331,7 @@
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_UNUSED_FUNCTION = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 				WARNING_CFLAGS = "";
@@ -9320,6 +9347,7 @@
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_UNUSED_FUNCTION = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
 				PRODUCT_NAME = FLAC;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../../../ThirdParty/FLAC/Distributions/flac-1.2.1/**";
 				WARNING_CFLAGS = "";
@@ -9913,6 +9941,7 @@
 				ACE4AFA11DB6DAC30099F1E3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		CA07A3420D4022EF00DC3E33 /* Build configuration list for PBXAggregateTarget "Applications" */ = {
 			isa = XCConfigurationList;

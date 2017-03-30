@@ -148,6 +148,15 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
         data_size -= chunk;
         self->input.pcm_buffer_fullness += chunk;
         
+        /* pad with zeros on the last buffer */
+        if ((BLT_MediaPacket_GetFlags(packet) & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) && data_size == 0) {
+            unsigned int padding = target_buffer_size-self->input.pcm_buffer_fullness;
+            if (padding) {
+                ATX_SetMemory(&self->input.pcm_buffer[self->input.pcm_buffer_fullness/2], 0, padding);
+            }
+            self->input.pcm_buffer_fullness = target_buffer_size;
+        }
+        
         /* if we have filled the buffer, encode it */
         if (self->input.pcm_buffer_fullness == target_buffer_size) {
             self->encoder.ps16PcmBuffer     = (SINT16*)&self->input.pcm_buffer[0];
@@ -642,9 +651,8 @@ SbcEncoderModule_Probe(BLT_Module*              _self,
                 return BLT_FAILURE;
             }
 
-            /* the output type should be unspecified, or audio/SBC */
-            if (!(constructor->spec.output.media_type->id == self->sbc_type_id) &&
-                !(constructor->spec.output.media_type->id == BLT_MEDIA_TYPE_ID_UNKNOWN)) {
+            /* the output type should be audio/SBC */
+            if (constructor->spec.output.media_type->id != self->sbc_type_id) {
                 return BLT_FAILURE;
             }
 

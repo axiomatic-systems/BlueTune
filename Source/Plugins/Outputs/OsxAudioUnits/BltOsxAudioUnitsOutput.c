@@ -44,7 +44,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.outputs.osx.audio-units")
 |   constants
 +---------------------------------------------------------------------*/
 #define BLT_OSX_AUDIO_UNITS_OUTPUT_DEFAULT_PACKET_QUEUE_SIZE    32     /* packets */
-#define BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL       100000 /* us -> 0.1 secs */
+#define BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL       50000 /* us -> 0.05 secs */
 #define BLT_OSX_AUDIO_UNITS_OUTPUT_MAX_QUEUE_WAIT_COUNT (5000000/BLT_OSX_AUDIO_UNITS_OUTPUT_SLEEP_INTERVAL) /* 5 secs */
 
 /*----------------------------------------------------------------------

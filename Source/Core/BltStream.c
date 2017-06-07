@@ -183,7 +183,7 @@ StreamNode_Create(BLT_Stream*    stream,
         }
         if (node->input.iface.any == NULL) {
             ATX_FreeMemory((void*)node);
-            return result;
+            return BLT_ERROR_INTERNAL;
         }
     }
 
@@ -222,7 +222,7 @@ StreamNode_Create(BLT_Stream*    stream,
         }
         if (node->output.iface.any == NULL) {
             ATX_FreeMemory((void*)node);
-            return result;
+            return BLT_ERROR_INTERNAL;
         }
     }
 

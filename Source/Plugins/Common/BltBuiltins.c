@@ -140,6 +140,10 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
     BLT_REGISTER_BUILTIN(AdtsParser)
 #endif
 
+#if defined(BLT_CONFIG_MODULES_ENABLE_SBC_PARSER)
+    BLT_REGISTER_BUILTIN(SbcParser)
+#endif
+
 #if defined(BLT_CONFIG_MODULES_ENABLE_DDPLUS_PARSER)
     BLT_REGISTER_BUILTIN(DolbyDigitalPlusParser)
 #endif
@@ -222,6 +226,14 @@ BLT_Builtins_RegisterModules(BLT_Core* core)
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_OSX_AUDIO_CONVERTER_DECODER)
     BLT_REGISTER_BUILTIN(OsxAudioConverterDecoder)
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_SBC_DECODER)
+    BLT_REGISTER_BUILTIN(SbcDecoder)
+#endif
+
+#if defined(BLT_CONFIG_MODULES_ENABLE_SBC_ENCODER)
+    BLT_REGISTER_BUILTIN(SbcEncoder)
 #endif
 
 #if defined(BLT_CONFIG_MODULES_ENABLE_WMS_PROTOCOL)

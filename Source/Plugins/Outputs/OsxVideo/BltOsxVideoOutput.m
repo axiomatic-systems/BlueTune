@@ -566,10 +566,13 @@ end:
 +---------------------------------------------------------------------*/
 - (void) processEvents
 {
+    dispatch_async(dispatch_get_main_queue(), ^
+    {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate dateWithTimeIntervalSinceNow:0.0001] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 	if (event) [NSApp sendEvent:event];
     [pool release];
+    });
 }
 
 /*----------------------------------------------------------------------

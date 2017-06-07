@@ -80,6 +80,7 @@ BLT_DecoderClient::~BLT_DecoderClient()
     // delete the message queue if we created it
     if (m_MessageQueueIsLocal) {
         delete m_MessageQueue;
+        m_MessageQueue = NULL;
     }
 }
 

@@ -219,6 +219,11 @@ PcmAdapter_Create(BLT_Module*              module,
         return BLT_ERROR_INVALID_PARAMETERS;
     }
 
+    /* check the media type */
+    if (constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
+        return BLT_ERROR_INVALID_MEDIA_TYPE;
+    }
+
     /* allocate memory for the object */
     self = ATX_AllocateZeroMemory(sizeof(PcmAdapter));
     if (self == NULL) {
@@ -228,11 +233,6 @@ PcmAdapter_Create(BLT_Module*              module,
 
     /* construct the inherited object */
     BLT_BaseMediaNode_Construct(&ATX_BASE(self, BLT_BaseMediaNode), module, core);
-
-    /* check the media type */
-    if (constructor->spec.output.media_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
-        return BLT_ERROR_INVALID_MEDIA_TYPE;
-    }
 
     /* construct the object */
     self->output.pcm_type = *(BLT_PcmMediaType*)constructor->spec.output.media_type;

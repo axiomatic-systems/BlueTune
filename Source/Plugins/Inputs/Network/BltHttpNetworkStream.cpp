@@ -602,7 +602,10 @@ BLT_HttpNetworkStream_Create(const char*       url,
 
     // send the request
     result = HttpInputStream_SendRequest(http_stream, 0);
-    if (NPT_FAILED(result)) return result;
+    if (NPT_FAILED(result)) {
+        HttpInputStream_Destroy(http_stream);
+        return result;
+    }
 
     // see if we can determine the media type
     HttpInputStream_GetMediaType(http_stream, core, media_type);

@@ -14,3 +14,10 @@ Build/Targets/x86-microsoft-win32-vs2015/Fluo/Debug/
 Build/Targets/x86-microsoft-win32-vs2015/SampleFilterPlugin/Debug/
 Build/Targets/x86-microsoft-win32-vs2015/Tremor/Debug/
 Build/Targets/x86-microsoft-win32-vs2015/Win32SoundcardProbe/Debug/
+*.xcscheme
+*.xcscmblueprint
+*.xcuserstate
+xcschememanagement.plist
+dgph
+Build/Targets/universal-apple-macosx/build/BlueTune.build/Debug
+Build/Targets/universal-apple-macosx/build

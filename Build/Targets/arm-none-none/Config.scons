@@ -1,0 +1,41 @@
+import platform
+
+env['BLT_RELAXED_ENV'] = env.Clone()
+LoadTool('gcc-generic', env['BLT_RELAXED_ENV'], gcc_cross_prefix='arm-none-eabi', gcc_strict=False, gcc_stop_on_warning=False)
+LoadTool('gcc-generic', env,                    gcc_cross_prefix='arm-none-eabi', gcc_strict=False, gcc_stop_on_warning=False, gcc_extra_options='--specs=nosys.specs')
+
+env.AppendUnique(CXXFLAGS = ['-fno-exceptions'])
+
+env['ATX_SYSTEM_SOURCES']={'System/StdC':'*.c', 'System/Null':'*.c'}
+env['ATX_EXTRA_LIBS']=['m']
+env['NPT_SYSTEM_SOURCES']={'System/StdC':'*.cpp', 'System/Null':'*.cpp'}
+#env['NPT_EXTRA_LIBS']=['pthread']
+env['AP4_SYSTEM_SOURCES']={'System/StdC':'*.cpp'}
+env['AP4_CPP_DEFINES']=[('AP4_PLATFORM_BYTE_ORDER','AP4_PLATFORM_BYTE_ORDER_LITTLE_ENDIAN')]
+env['MLO_CPP_DEFINES'] = ['MLO_CONFIG_FIXED']
+env['BLT_CPU_CONFIG_NO_FLOAT'] = True
+env['BLT_PLUGINS'] = ['FileInput',
+                      #'NetworkInput',
+                      #'MpegAudioDecoder',
+                      #'FlacDecoder',
+                      #'AacDecoder',
+                      'StreamPacketizer',
+                      'NullOutput',
+                      #'FileOutput',
+                      #'PacketStreamer',
+                      #'TagParser',
+                      #'DebugOutput',
+                      #'WaveParser',
+                      #'AiffParser',
+                      #'Mp4Parser',
+                      #'AdtsParser',
+                      #'WaveFormatter',
+                      #'SilenceRemover',
+                      #'GainControlFilter',
+                      #'PcmAdapter',
+                      #'AlsaOutput',
+                      'VorbisDecoder']
+env['BLT_PLUGINS_CDDA_DEVICE_TYPE'] = 'Linux'
+env['BLT_DEFAULT_AUDIO_OUTPUT']     = 'alsa:default'
+env['BLT_PLUGINS_VORBIS_LIBRARY']   = 'Tremor'
+env['BLT_PLUGINS_AAC_LIBRARY']      = 'FHG'

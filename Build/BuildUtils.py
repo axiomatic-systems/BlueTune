@@ -19,18 +19,18 @@ DefaultEnv = Environment()
 def SetDefaultEnv(env):
     global DefaultEnv
     DefaultEnv = env
-    
+
 ### Add and entry to the SourceDirMap() map
 def MapSourceDir(key, val):
     SourceDirMap[key] = val
-    
+
 ### Load an scons tool configuration for a specific configuration
 def LoadTool(name, env, **kw):
     config_path = GetBuildPath('#/Build/Tools/SCons')
     file, path, desc = imp.find_module(name, [config_path])
     module = imp.load_module(name, file, path, desc)
     module.generate(env, **kw)
-    
+
 ### Merge several lists into one, eliminating duplicate items
 def MergeListsUnique(lists):
     result = []
@@ -39,7 +39,7 @@ def MergeListsUnique(lists):
             if item not in result: result.append(item)
     return result
 
-### Return a list of name of files in a directory that match one or more patterns  
+### Return a list of name of files in a directory that match one or more patterns
 def GlobSources(directory, patterns, excluded_files=[]):
     root = GetBuildPath(GetDirPath(directory))
     files = []
@@ -108,13 +108,13 @@ def GetLibDirs(modules):
     deps = MergeListsUnique([Modules[mod].flat_link_deps for mod in modules])
     return MergeListsUnique([Modules[mod].lib_dirs for mod in modules+deps])
 
-### Return the list of objects for a list of modules and their dependents 
+### Return the list of objects for a list of modules and their dependents
 ### (and so on recursively), only if the module is of type 'Object'
 def GetObjects(modules):
     deps = MergeListsUnique([Modules[mod].flat_object_deps for mod in modules])
     return MergeListsUnique([Modules[mod].objects for mod in modules+deps])
 
-### Return the list of products for a list of modules and their dependents 
+### Return the list of products for a list of modules and their dependents
 ### (and so on recursively)
 def GetProducts(modules):
     deps = MergeListsUnique([Modules[mod].flat_link_deps for mod in modules])
@@ -133,7 +133,7 @@ Modules = {}
 class Module:
     def __init__(self, name,
                  module_type                    = None,
-                 chained_link_only_deps         = [], 
+                 chained_link_only_deps         = [],
                  chained_link_and_include_deps  = [],
                  chained_include_only_deps      = [],
                  include_dirs                   = [],
@@ -148,21 +148,21 @@ class Module:
         self.lib_dirs                      = [GetDirPath(dir) for dir in Split(lib_dirs)]
         self.include_dirs                  = Split(include_dirs)
         self.objects                       = []
-        Modules[name]                      = self        
+        Modules[name]                      = self
 
         self.flat_include_deps = FlattenIncludeDeps(self.GetIncludeDeps())
         self.flat_link_deps    = FlattenLinkDeps(self.GetLinkDeps())
         self.flat_object_deps  = FlattenObjectDeps(self.GetObjectDeps())
-            
+
     def GetLinkDeps(self):
         return self.chained_link_and_include_deps+self.chained_link_only_deps
-    
+
     def GetObjectDeps(self):
         return [dep for dep in self.chained_link_and_include_deps+self.chained_link_only_deps if Modules[dep].module_type == 'Objects']
 
     def GetIncludeDeps(self):
         return self.chained_link_and_include_deps+self.chained_include_only_deps
-    
+
 #######################################################
 # The CompiledModule class declares a code module built from source files.
 # module_type: string, selects the type of module to build
@@ -181,12 +181,12 @@ class Module:
 # build_source_files: an optional list of other files to build specified as a list of (dirname,pattern) tuples
 #
 # build_include_dirs: list of directories, relative to source_root, to add to the include search path when
-# compiling the sources. 
+# compiling the sources.
 #
 # build_include_deps: dependencies that are needed for the include path when building this module
 # but not when building its dependents.
 #
-# excluded_files: list of files 
+# excluded_files: list of files
 #
 # export_build_source_dirs: boolean flag that indicates if this module's build_source_dirs will be part of
 # its dependts' include search path.
@@ -220,18 +220,18 @@ class Module:
 #
 #######################################################
 class CompiledModule(Module):
-    def __init__(self, name, 
+    def __init__(self, name,
                  module_type                   = 'Objects',
                  source_root                   = '',
-                 build_source_dirs             = ['.'], 
-                 build_source_patterns         = ['*.c', '*.cpp'], 
+                 build_source_dirs             = ['.'],
+                 build_source_patterns         = ['*.c', '*.cpp'],
                  build_source_files            = [],
                  build_include_dirs            = [],
                  build_include_deps            = [],
                  excluded_files                = [],
                  export_build_source_dirs      = True,
                  exported_include_dirs         = [],
-                 chained_link_and_include_deps = [], 
+                 chained_link_and_include_deps = [],
                  chained_link_only_deps        = [],
                  chained_include_only_deps     = [],
                  extra_cpp_defines             = [],
@@ -243,13 +243,13 @@ class CompiledModule(Module):
 
         # build_source_dirs are relative to source_root
         if build_source_dirs:
-            build_source_dirs = [source_root+'/'+directory for directory in Split(build_source_dirs)]        
-        
+            build_source_dirs = [source_root+'/'+directory for directory in Split(build_source_dirs)]
+
         # create the superclass and store this new object in the module dictionary
-        Module.__init__(self, 
+        Module.__init__(self,
                         name,
                         module_type,
-                        chained_link_and_include_deps = chained_link_and_include_deps, 
+                        chained_link_and_include_deps = chained_link_and_include_deps,
                         chained_link_only_deps        = chained_link_only_deps,
                         chained_include_only_deps     = chained_include_only_deps,
                         include_dirs                  = Split(exported_include_dirs)+
@@ -257,9 +257,9 @@ class CompiledModule(Module):
                         libs                          = extra_libs,
                         lib_dirs                      = extra_lib_dirs)
 
-        # setup the build environment        
+        # setup the build environment
         env = environment or DefaultEnv
-   
+
         # for each source dir to build, create a BuildDir
         # to say where we want the object files to be built,
         # and compute the list of source files to build
@@ -267,7 +267,7 @@ class CompiledModule(Module):
         for directory in build_source_dirs:
             env.VariantDir(directory, GetDirPath(directory), duplicate=0)
             sources += GlobSources(directory, build_source_patterns, excluded_files)
-            
+
         # add cherry-picked files
         for entry in build_source_files:
             if type(entry) is tuple:
@@ -275,7 +275,7 @@ class CompiledModule(Module):
             else:
                 directory = entry
                 pattern = build_source_files[entry]
-                
+
             if directory.startswith('/'):
                 directory_path = directory[1:]
             else:
@@ -285,8 +285,8 @@ class CompiledModule(Module):
 
         # check that the source list is not empty
         if len(sources) == 0 and build_source_dirs:
-            raise 'Module '+name+' has no sources, build_source_dirs='+str(build_source_dirs)
-        
+            raise Exception('Module '+name+' has no sources, build_source_dirs='+str(build_source_dirs))
+
         # calculate our build include path
         my_inc_dirs  = build_include_dirs+build_source_dirs+exported_include_dirs+GetIncludeDirs(build_include_deps)
         dep_inc_dirs = GetIncludeDirs(self.chained_link_and_include_deps +
@@ -294,11 +294,11 @@ class CompiledModule(Module):
                                       self.chained_link_only_deps)
         cpp_path = [GetDirPath(dir) for dir in my_inc_dirs+dep_inc_dirs]
         if env.has_key('CPPPATH'): cpp_path = env['CPPPATH']+cpp_path
-        
+
         # compute preprocessor definitions and include path
         cpp_defines = extra_cpp_defines
         if env.has_key('CPPDEFINES'): cpp_defines = env['CPPDEFINES']+cpp_defines
-        
+
         # compile the sources
         if force_non_shared:
             generator = env.StaticObject
@@ -326,8 +326,8 @@ class CompiledModule(Module):
             self.objects = []
         else:
             raise Exception('Unknown Module Type')
-            
-        self.product = self.nodes   
+
+        self.product = self.nodes
         env.Alias(name, self.nodes)
 
 ############################################################################
@@ -340,8 +340,8 @@ class CompiledModule(Module):
 class ExecutableModule(CompiledModule):
     def __init__(self, name,
                  source_root           = '',
-                 build_source_dirs     = ['.'], 
-                 build_source_patterns = ['*.c', '*.cpp'], 
+                 build_source_dirs     = ['.'],
+                 build_source_patterns = ['*.c', '*.cpp'],
                  build_source_files    = [],
                  build_include_dirs    = [],
                  build_include_deps    = [],
@@ -355,8 +355,8 @@ class ExecutableModule(CompiledModule):
         CompiledModule.__init__(self, name,
                                 module_type                   = 'Executable',
                                 source_root                   = source_root,
-                                build_source_dirs             = build_source_dirs, 
-                                build_source_patterns         = build_source_patterns, 
+                                build_source_dirs             = build_source_dirs,
+                                build_source_patterns         = build_source_patterns,
                                 build_source_files            = build_source_files,
                                 build_include_dirs            = build_include_dirs,
                                 chained_link_only_deps        = link_and_include_deps,
@@ -366,7 +366,7 @@ class ExecutableModule(CompiledModule):
                                 extra_libs                    = extra_libs,
                                 extra_lib_dirs                = extra_lib_dirs,
                                 environment                   = environment)
-    
+
 ############################################################################
 # Subclass of Module used when building a shared library.
 #
@@ -399,22 +399,22 @@ class SharedLibraryModule(Module):
                         name,
                         module_type  = 'SharedLibrary',
                         include_dirs = exported_include_dirs)
-        
-         # setup the environment        
+
+         # setup the environment
         env = environment or DefaultEnv
-        
+
         # compute the list of objects to link
         objects = Modules[anchor_module].objects
         all_deps = [anchor_module]+link_deps
         libs = GetProducts(all_deps)+GetLibs(all_deps)+env['BLT_EXTRA_LIBS']
         lib_path = env.has_key('LIBPATH') and env['LIBPATH'] or []
         lib_path += GetLibDirs(all_deps)
-        
+
         if library_name:
             self.nodes = env.SharedLibrary(target=library_name, SHLIBPREFIX='', source=objects, LIBS=libs, LIBPATH=lib_path)
         else:
             self.nodes = env.SharedLibrary(target=name, source=objects, LIBS=libs, LIBPATH=lib_path)
-        
+
         ### we must use just the basename of the shared library here so that the dynamic linker won't
         ### try to keep the build-time root-relative path name of the lib when linking
         self.libs     = [str(self.nodes[0])[len(env['LIBPREFIX']):-len(env['SHLIBSUFFIX'])]] ## strip the lib prefix and suffix
@@ -437,7 +437,7 @@ class StaticLibraryModule(Module):
                  name,
                  module_type                   = 'StaticLibrary',
                  library_name                  = None,
-                 chained_link_and_include_deps = [], 
+                 chained_link_and_include_deps = [],
                  chained_link_only_deps        = [],
                  chained_include_only_deps     = [],
                  environment                   = None) :
@@ -445,18 +445,18 @@ class StaticLibraryModule(Module):
                         chained_link_only_deps        = chained_link_only_deps,
                         chained_include_only_deps     = chained_include_only_deps,
                         chained_link_and_include_deps = chained_link_and_include_deps)
-   
-        # setup the environment        
+
+        # setup the environment
         env = environment or DefaultEnv
-        
+
         # compute the list of objects to link
         objects   = GetObjects(chained_link_only_deps+chained_link_and_include_deps)
         self.libs = GetLibs(   chained_link_only_deps+chained_link_and_include_deps)
-        
+
         self.nodes = env.StaticLibrary(target=(library_name and library_name or name), source=objects)
         self.product = self.nodes
         env.Alias(name, self.nodes)
-        
+
 #####################################################################
 # Exports
 #####################################################################

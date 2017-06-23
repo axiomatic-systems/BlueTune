@@ -28,11 +28,11 @@ env['BLT_EXTRA_EXECUTABLE_OBJECTS'] = []
 ### target specifics
 target_config_file = env.GetBuildPath('#/Build/Targets/'+env['target']+'/Config.scons')
 if os.path.exists(target_config_file):
-    # Load the target-specific config file    
+    # Load the target-specific config file
     execfile(target_config_file)
 
 ### extra plugins
-if env.has_key('extra_plugins'): 
+if env.has_key('extra_plugins'):
     env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
 
 ### optional modules
@@ -53,11 +53,11 @@ for plugin in env['BLT_PLUGINS']:
 BLT_AAC_DECODER_PLUGIN_DIR    = ''
 BLT_AAC_DECODER_PLUGIN_EXTRAS = {}
 BLT_AAC_MODULE_CONFIG_NAME = 'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER'
-if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):  
+if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):
     env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
 ############################ select VORBIS library
-if 'VorbisDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):  
+if 'VorbisDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
     env['BLT_PLUGINS_VORBIS_LIBRARY'] = 'Vorbis'
 
 ############################# Atomix
@@ -127,7 +127,7 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
     CompiledModule(name              = 'Melo',
                    source_root       = MLO_SOURCE_ROOT,
                    extra_cpp_defines = MLO_EXTRA_CPP_DEFINES)
-    
+
 ############################ HelixAAC
 if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
     BLT_AAC_MODULE_CONFIG_NAME    = 'BLT_CONFIG_MODULES_ENABLE_HELIX_AAC_DECODER'
@@ -171,9 +171,9 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'FHG':
                    environment           = env['BLT_RELAXED_ENV'])
 
 ############################# Fluo
-if not env.has_key('FLO_DECODER_ENGINE'):  
+if not env.has_key('FLO_DECODER_ENGINE'):
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
-    
+
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
     CompiledModule(name        = 'FloDecoderEngine',
                    source_root = 'ThirdParty/mpg123/mpglib')
@@ -188,11 +188,11 @@ elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_BUILTIN'):
     fluo_decoder_deps     = []
     fluo_decoder_lib_dirs = []
     fluo_decoder_inc_dirs = []
-    
+
 fluo_extra_cpp_defines = [('FLO_DECODER_ENGINE',env['FLO_DECODER_ENGINE'])]
 if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
     fluo_extra_cpp_defines += ['FLO_CONFIG_INTEGER_DECODE']
-    
+
 CompiledModule(name                          = 'Fluo',
                source_root                   = 'Source/Fluo',
                build_include_dirs            = fluo_decoder_inc_dirs,
@@ -215,6 +215,15 @@ if 'FlacDecoder' in PluginsMap:
                    build_source_dirs  = ['src/libFLAC'],
                    build_include_dirs = [FLAC_SOURCE_ROOT+'/include', FLAC_SOURCE_ROOT+'/src/libFLAC/include'],
                    environment        = env['BLT_RELAXED_ENV'])
+
+############################ SBC
+if 'SbcDecoder' in PluginsMap:
+   BLUEDROID_SBC_SOURCE_ROOT='ThirdParty/bluedroid-sbc'
+   CompiledModule(name               = 'BluedroidSbc',
+                  source_root        = BLUEDROID_SBC_SOURCE_ROOT,
+                  build_source_dirs  = ['decoder/srce', 'encoder/srce'],
+                  build_include_dirs = [BLUEDROID_SBC_SOURCE_ROOT+'/decoder/include', BLUEDROID_SBC_SOURCE_ROOT+'/encoder/include', BLUEDROID_SBC_SOURCE_ROOT+'/gki/ulinux'],
+                  environment        = env['BLT_RELAXED_ENV'])
 
 ############################# Core
 CompiledModule(name                          = 'BltCore',
@@ -242,7 +251,7 @@ if 'WmaDecoder' in PluginsMap:
         else:
             wma_decoder_mode = 'BUILD_INT_FLOAT'
         WMA_SOURCE_ROOT = 'WMSDK/WMPK/WMA10Dec'
-        wma_extra_cpp_defines = [wma_decoder_mode, 
+        wma_extra_cpp_defines = [wma_decoder_mode,
                                  'ENABLE_LPC',
                                  'ENABLE_ALL_ENCOPT',
                                  'DISABLE_OPT',
@@ -250,7 +259,7 @@ if 'WmaDecoder' in PluginsMap:
                                  'WMA_DECPK_BUILD',
                                  'WMAAPI_NO_DRM',
                                  'WMAAPI_NO_DRM_STREAM',
-                                 'DISABLE_UES']  
+                                 'DISABLE_UES']
         if env['build_config'] == 'Release':
             wma_extra_cpp_defines.append('NDEBUG')
         MapSourceDir(WMA_SOURCE_ROOT, os.environ['BLT_WMSDK_HOME']+'/WMPK/WMA10Dec')
@@ -294,7 +303,7 @@ CompiledModule(name                          = 'BltPluginsSupport',
                                                 '/Source/Plugins/DynamicLoading':'BltDynamicPlugins.cpp'},
                exported_include_dirs         = ['Source/Plugins/Common', 'Source/Plugins/DynamicLoading'],
                chained_link_and_include_deps = ['BltCore'])
-       
+
 ############################# Plugins
 PluginsSettings = {
     'FileInput'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_FILE_INPUT',             'src_dir':'Inputs/File'              },
@@ -325,6 +334,9 @@ PluginsSettings = {
     'FfmpegDecoder'       : {'defines':'BLT_CONFIG_MODULES_ENABLE_FFMPEG_DECODER',         'src_dir':'Decoders/FFMPEG'          },
     'AacDecoder'          : {'defines': BLT_AAC_MODULE_CONFIG_NAME,                        'src_dir':BLT_AAC_DECODER_PLUGIN_DIR },
     'WmaDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WMA_DECODER',            'src_dir':BLT_WMA_DECODER_PLUGIN_DIR },
+    'SbcDecoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_SBC_DECODER',            'src_dir':'Decoders/SBC'             },
+    'SbcEncoder'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_SBC_ENCODER',            'src_dir':'Encoders/SBC'             },
+    'SbcParser'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_SBC_PARSER',             'src_dir':'Parsers/SBC'              },
     'WaveParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_WAVE_PARSER',            'src_dir':'Parsers/Wave'             },
     'AiffParser'          : {'defines':'BLT_CONFIG_MODULES_ENABLE_AIFF_PARSER',            'src_dir':'Parsers/Aiff'             },
     'TagParser'           : {'defines':'BLT_CONFIG_MODULES_ENABLE_TAG_PARSER',             'src_dir':'Parsers/Tags'             },
@@ -338,14 +350,18 @@ PluginsSettings = {
     'PacketStreamer'      : {'defines':'BLT_CONFIG_MODULES_ENABLE_PACKET_STREAMER',        'src_dir':'General/PacketStreamer'   }
 }
 PluginsExtras = {
-    'Mp4Parser':        {'dep_mods':['Bento4']},   
-    'MpegAudioDecoder': {'dep_mods':['Fluo']},   
-    'AacDecoder':       BLT_AAC_DECODER_PLUGIN_EXTRAS,   
+    'Mp4Parser':        {'dep_mods':['Bento4']},
+    'MpegAudioDecoder': {'dep_mods':['Fluo']},
+    'AacDecoder':       BLT_AAC_DECODER_PLUGIN_EXTRAS,
     'FlacDecoder':      {'inc_dirs':['ThirdParty/FLAC/Distributions/flac-1.2.0/include'],
                          'dep_mods':['FLAC']},
-    'AlsaOutput':       {'libs':['asound']},   
+    'SbcDecoder':       {'inc_dirs':['ThirdParty/bluedroid-sbc/decoder/include'],
+                          'dep_mods':['BluedroidSbc']},
+    'SbcEncoder':       {'inc_dirs':['ThirdParty/bluedroid-sbc/encoder/include', 'thirdparty/bluedroid-sbc/gki/ulinux'],
+                        'dep_mods':['BluedroidSbc']},
+    'AlsaOutput':       {'libs':['asound']},
     'AlsaInput':        {'libs':['asound']},
-    'QnxOutput':        {'libs':['asound']},   
+    'QnxOutput':        {'libs':['asound']},
     'WmaDecoder':       BLT_WMA_DECODER_PLUGIN_EXTRAS,
     'FfmpegDecoder':    {'inc_dirs':['/usr/include/ffmpeg'],'libs':['avcodec'],'env':env['BLT_RELAXED_ENV']},
     'SdlVideoOutput':   {'libs':['SDL'],'env':env['BLT_RELAXED_ENV']}
@@ -363,7 +379,7 @@ if 'VorbisDecoder' in PluginsMap:
             'dep_mods':['vorbisfile','vorbis','ogg'],
             'inc_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/include'],
             'lib_dirs':['ThirdParty/Vorbis/Targets/'+env['target']+'/lib']}
-        
+
 ### plugins
 plugins_extra_libs      = []
 plugins_extra_lib_dirs  = []
@@ -388,7 +404,7 @@ for plugin in PluginsMap:
         if 'defines'  in PluginsExtras[plugin]: extra_defines  = PluginsExtras[plugin]['defines']
         if 'env'      in PluginsExtras[plugin]: extra_env      = PluginsExtras[plugin]['env']
         if 'external' in PluginsExtras[plugin]: external       = True
-    
+
     CompiledModule(name               = 'Blt'+plugin+'Loader',
                    build_source_dirs  = [],
                    build_source_files = {'/Source/Plugins/DynamicLoading':'BltDynamicPluginTemplate.cpp'},
@@ -414,7 +430,7 @@ for plugin in PluginsMap:
                             anchor_module = 'Blt'+plugin+'Loader',
                             link_deps     = ['Blt'+plugin+'PluginStatic'])
         plugins_dynamic_modules.append('Blt'+plugin+'Plugin')
-                            
+
     else:
         ### binary plugins
         if 'libs'     in PluginsExtras[plugin]: plugins_extra_libs     += PluginsExtras[plugin]['libs']
@@ -422,7 +438,7 @@ for plugin in PluginsMap:
         if 'inc_dirs' in PluginsExtras[plugin]: plugins_inc_dirs       += PluginsExtras[plugin]['inc_dirs']
 
     if not external: plugins_static_modules.append('Blt'+plugin)
-        
+
 plugins_cpp_defines = [PluginsSettings[p]['defines'] for p in PluginsMap if PluginsMap[p] == 'static']
 plugins_cpp_defines += [('BLT_CONFIG_MODULES_DEFAULT_AUDIO_OUTPUT_NAME', '"'+env['BLT_DEFAULT_AUDIO_OUTPUT']+'"')]
 
@@ -484,7 +500,7 @@ SharedLibraryModule(name          = 'SampleFilterPlugin',
 
 ############################# BtGtk
 if env['target'] == 'x86-unknown-linux':
-    try:    
+    try:
         gtk_env = env.Clone()
         gtk_env.ParseConfig('pkg-config --silence-errors --cflags --libs gtk+-2.0')
         ExecutableModule(name                  = 'BtGtk',
@@ -499,4 +515,3 @@ if env['target'] == 'x86-unknown-linux':
 # Default Build Modules
 ################################################
 env.Default(['BtPlay', 'BtController'] + OptionalModules + plugins_dynamic_modules)
-

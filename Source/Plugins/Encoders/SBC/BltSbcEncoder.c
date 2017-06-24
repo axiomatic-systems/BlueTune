@@ -114,7 +114,7 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
     const BLT_UInt8*        data          = (const BLT_UInt8*)BLT_MediaPacket_GetPayloadBuffer(packet);
     BLT_Size                data_size     = BLT_MediaPacket_GetPayloadSize(packet);
     BLT_Result              result;
-    
+
     /* check that we're getting PCM */
     BLT_MediaPacket_GetMediaType(packet, &input_type);
     if (input_type->id != BLT_MEDIA_TYPE_ID_AUDIO_PCM) {
@@ -130,14 +130,14 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
          pcm_type->sample_rate != 48000)) {
         return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
-    
+
     /* init/re-init the encoder if the parameters have changed */
     if (pcm_type->channel_count != self->input.media_type.channel_count ||
         pcm_type->sample_rate   != self->input.media_type.sample_rate) {
         self->input.media_type = *pcm_type;
         SbcEncoder_Init(self);
     }
-    
+
     /* process the packet until we have consumed all its data */
     while (data_size) {
         unsigned int target_buffer_size = 2*pcm_type->channel_count*128;
@@ -147,7 +147,7 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
         data      += chunk;
         data_size -= chunk;
         self->input.pcm_buffer_fullness += chunk;
-        
+
         /* pad with zeros on the last buffer */
         if ((BLT_MediaPacket_GetFlags(packet) & BLT_MEDIA_PACKET_FLAG_END_OF_STREAM) && data_size == 0) {
             unsigned int padding = target_buffer_size-self->input.pcm_buffer_fullness;
@@ -156,14 +156,14 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
             }
             self->input.pcm_buffer_fullness = target_buffer_size;
         }
-        
+
         /* if we have filled the buffer, encode it */
         if (self->input.pcm_buffer_fullness == target_buffer_size) {
             self->encoder.ps16PcmBuffer     = (SINT16*)&self->input.pcm_buffer[0];
             self->encoder.pu8Packet         = (UINT8*)&self->output.sbc_frame[0];
             self->input.pcm_buffer_fullness = 0;
             SBC_Encoder(&self->encoder);
-            
+
             /* create a packet for the output */
             result = BLT_Core_CreateMediaPacket(ATX_BASE(self, BLT_BaseMediaNode).core,
                                                 self->encoder.u16PacketLength,
@@ -174,18 +174,18 @@ SbcEncoderInput_PutPacket(BLT_PacketConsumer* _self,
             ATX_CopyMemory(BLT_MediaPacket_GetPayloadBuffer(output_packet),
                            self->encoder.pu8Packet,
                            self->encoder.u16PacketLength);
-            
+
             /* copy the timestamp */
             BLT_MediaPacket_SetTimeStamp(output_packet, BLT_MediaPacket_GetTimeStamp(packet));
-            
+
             /* copy the flags */
             BLT_MediaPacket_SetFlags(output_packet, BLT_MediaPacket_GetFlags(packet));
-            
+
             /* add to the output packet list */
             ATX_List_AddData(self->output.packets, output_packet);
         }
     }
-    
+
     return BLT_SUCCESS;
 }
 
@@ -207,7 +207,7 @@ ATX_END_INTERFACE_MAP
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(SbcEncoderInput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(SbcEncoderInput,
                                          "input",
                                          PACKET,
                                          IN)
@@ -254,7 +254,7 @@ SbcEncoderOutput_GetPacket(BLT_PacketProducer* _self,
         ATX_List_RemoveItem(self->output.packets, packet_item);
         return BLT_SUCCESS;
     }
-    
+
     return BLT_ERROR_PORT_HAS_NO_DATA;
 }
 
@@ -269,7 +269,7 @@ ATX_END_GET_INTERFACE_IMPLEMENTATION
 /*----------------------------------------------------------------------
 |   BLT_MediaPort interface
 +---------------------------------------------------------------------*/
-BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(SbcEncoderOutput, 
+BLT_MEDIA_PORT_IMPLEMENT_SIMPLE_TEMPLATE(SbcEncoderOutput,
                                          "output",
                                          PACKET,
                                          OUT)
@@ -298,10 +298,10 @@ SbcEncoder_SetupPorts(SbcEncoder* self, BLT_MediaTypeId sbc_type_id)
     /* create a list of output packets */
     result = ATX_List_Create(&self->output.packets);
     if (ATX_FAILED(result)) return result;
-    
+
     /* setup the output port */
     BLT_MediaType_Init(&self->output.media_type, sbc_type_id);
-    
+
     return BLT_SUCCESS;
 }
 
@@ -320,7 +320,7 @@ SbcEncoder_Init(SbcEncoder* self)
         case 32000:
             self->encoder.s16SamplingFreq = SBC_sf32000;
             break;
-            
+
         case 44100:
             self->encoder.s16SamplingFreq = SBC_sf44100;
             break;
@@ -328,7 +328,7 @@ SbcEncoder_Init(SbcEncoder* self)
         case 48000:
             self->encoder.s16SamplingFreq = SBC_sf48000;
             break;
-            
+
         default:
             return BLT_ERROR_INVALID_MEDIA_TYPE;
     }
@@ -344,7 +344,7 @@ SbcEncoder_Init(SbcEncoder* self)
     self->encoder.u8NumPacketToEncode = 1;
 
     SBC_Encoder_Init(&self->encoder);
-    
+
     return BLT_SUCCESS;
 }
 
@@ -353,9 +353,9 @@ SbcEncoder_Init(SbcEncoder* self)
 +---------------------------------------------------------------------*/
 static BLT_Result
 SbcEncoder_Create(BLT_Module*              module,
-                  BLT_Core*                core, 
+                  BLT_Core*                core,
                   BLT_ModuleParametersType parameters_type,
-                  BLT_CString              parameters, 
+                  BLT_CString              parameters,
                   BLT_MediaNode**          object)
 {
     SbcEncoder*       self;
@@ -364,7 +364,7 @@ SbcEncoder_Create(BLT_Module*              module,
     ATX_LOG_FINE("SbcEncoder::Create");
 
     /* check parameters */
-    if (parameters == NULL || 
+    if (parameters == NULL ||
         parameters_type != BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR) {
         return BLT_ERROR_INVALID_PARAMETERS;
     }
@@ -405,13 +405,13 @@ SbcEncoder_Create(BLT_Module*              module,
 +---------------------------------------------------------------------*/
 static BLT_Result
 SbcEncoder_Destroy(SbcEncoder* self)
-{ 
+{
     ATX_LOG_FINE("SbcEncoder::Destroy");
 
     /* release any packet we may hold */
     SbcEncoderOutput_Flush(self);
     ATX_List_Destroy(self->output.packets);
-    
+
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));
 
@@ -420,7 +420,7 @@ SbcEncoder_Destroy(SbcEncoder* self)
 
     return BLT_SUCCESS;
 }
-                    
+
 /*----------------------------------------------------------------------
 |   SbcEncoder_GetPortByName
 +---------------------------------------------------------------------*/
@@ -455,7 +455,7 @@ SbcEncoder_Seek(BLT_MediaNode* _self,
 
     BLT_COMPILER_UNUSED(mode);
     BLT_COMPILER_UNUSED(point);
-    
+
     /* remove any packets in the output list */
     SbcEncoderOutput_Flush(self);
 
@@ -480,11 +480,11 @@ SbcEncoder_Activate(BLT_MediaNode* _self, BLT_Stream* stream)
         ATX_Properties* properties;
         if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context, &properties))) {
             ATX_PropertyValue property;
-            ATX_Properties_AddListener(properties, 
+            ATX_Properties_AddListener(properties,
                                        BLT_SBC_ENCODER_BITRATE_PROPERTY,
                                        &ATX_BASE(self, ATX_PropertyListener),
                                        &self->sbc_bitrate_property_listener_handle);
-            ATX_Properties_AddListener(properties, 
+            ATX_Properties_AddListener(properties,
                                        BLT_SBC_ENCODER_ALLOCATION_MODE_PROPERTY,
                                        &ATX_BASE(self, ATX_PropertyListener),
                                        &self->sbc_allocation_mode_property_listener_handle);
@@ -561,8 +561,8 @@ ATX_END_INTERFACE_MAP_EX
 /*----------------------------------------------------------------------
 |   ATX_Referenceable interface
 +---------------------------------------------------------------------*/
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SbcEncoder, 
-                                         BLT_BaseMediaNode, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SbcEncoder,
+                                         BLT_BaseMediaNode,
                                          reference_count)
 
 /*----------------------------------------------------------------------
@@ -577,9 +577,9 @@ SbcEncoder_OnPropertyChanged(ATX_PropertyListener*    _self,
 
     if (name && (value == NULL || value->type == ATX_PROPERTY_VALUE_TYPE_INTEGER)) {
         if (ATX_StringsEqual(name, BLT_SBC_ENCODER_BITRATE_PROPERTY)) {
-            self->sbc_bitrate = (unsigned int)value?value->data.integer : BLT_SBC_ENCODER_DEFAULT_BITRATE;
+            self->sbc_bitrate = (unsigned int)(value ? value->data.integer : BLT_SBC_ENCODER_DEFAULT_BITRATE);
         } else if (ATX_StringsEqual(name, BLT_SBC_ENCODER_ALLOCATION_MODE_PROPERTY)) {
-            self->sbc_allocation_mode = (unsigned int)value?value->data.integer : BLT_SBC_ENCODER_DEFAULT_ALLOCATION_MODE;
+            self->sbc_allocation_mode = (unsigned int)(value ? value->data.integer : BLT_SBC_ENCODER_DEFAULT_ALLOCATION_MODE);
         }
         SbcEncoder_Init(self);
     }
@@ -613,7 +613,7 @@ SbcEncoderModule_Attach(BLT_Module* _self, BLT_Core* core)
         "audio/SBC",
         &self->sbc_type_id);
     if (BLT_FAILED(result)) return result;
-    
+
     ATX_LOG_FINE_1("SbcEncoderModule::Attach (audio/SBC = %d)", self->sbc_type_id);
 
     return BLT_SUCCESS;
@@ -623,7 +623,7 @@ SbcEncoderModule_Attach(BLT_Module* _self, BLT_Core* core)
 |   SbcEncoderModule_Probe
 +---------------------------------------------------------------------*/
 BLT_METHOD
-SbcEncoderModule_Probe(BLT_Module*              _self, 
+SbcEncoderModule_Probe(BLT_Module*              _self,
                        BLT_Core*                core,
                        BLT_ModuleParametersType parameters_type,
                        BLT_AnyConst             parameters,
@@ -631,11 +631,11 @@ SbcEncoderModule_Probe(BLT_Module*              _self,
 {
     SbcEncoderModule* self = ATX_SELF_EX(SbcEncoderModule, BLT_BaseModule, BLT_Module);
     BLT_COMPILER_UNUSED(core);
-    
+
     switch (parameters_type) {
       case BLT_MODULE_PARAMETERS_TYPE_MEDIA_NODE_CONSTRUCTOR:
         {
-            BLT_MediaNodeConstructor* constructor = 
+            BLT_MediaNodeConstructor* constructor =
                 (BLT_MediaNodeConstructor*)parameters;
 
             /* the input and output protocols should be PACKET */
@@ -673,7 +673,7 @@ SbcEncoderModule_Probe(BLT_Module*              _self,
 
             ATX_LOG_FINE_1("SbcEncoderModule::Probe - Ok [%d]", *match);
             return BLT_SUCCESS;
-        }    
+        }
         break;
 
       default:
@@ -712,7 +712,7 @@ ATX_END_INTERFACE_MAP
 #define SbcEncoderModule_Destroy(x) \
     BLT_BaseModule_Destroy((BLT_BaseModule*)(x))
 
-ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SbcEncoderModule, 
+ATX_IMPLEMENT_REFERENCEABLE_INTERFACE_EX(SbcEncoderModule,
                                          BLT_BaseModule,
                                          reference_count)
 

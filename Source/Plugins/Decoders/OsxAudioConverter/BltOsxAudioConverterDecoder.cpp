@@ -11,7 +11,7 @@
 |   includes
 +---------------------------------------------------------------------*/
 #include "Atomix.h"
-#include "AP4.h"
+#include "Ap4.h"
 #include "Ap4Mp4AudioInfo.h"
 #include "BltConfig.h"
 #include "BltCore.h"

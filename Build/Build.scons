@@ -357,7 +357,7 @@ PluginsExtras = {
                          'dep_mods':['FLAC']},
     'SbcDecoder':       {'inc_dirs':['ThirdParty/bluedroid-sbc/decoder/include'],
                           'dep_mods':['BluedroidSbc']},
-    'SbcEncoder':       {'inc_dirs':['ThirdParty/bluedroid-sbc/encoder/include', 'Thirdparty/bluedroid-sbc/gki/ulinux'],
+    'SbcEncoder':       {'inc_dirs':['ThirdParty/bluedroid-sbc/encoder/include', 'ThirdParty/bluedroid-sbc/gki/ulinux'],
                         'dep_mods':['BluedroidSbc']},
     'AlsaOutput':       {'libs':['asound']},
     'AlsaInput':        {'libs':['asound']},

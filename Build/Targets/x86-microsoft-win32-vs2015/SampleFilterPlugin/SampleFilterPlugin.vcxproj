@@ -55,6 +55,8 @@
       <PreprocessorDefinitions>BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_SampleFilterModule_GetModuleObject; ATX_CONFIG_ENABLE_LOGGING; WIN32;_DEBUG;_WINDOWS;_USRDLL;SAMPLEFILTERPLUGIN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

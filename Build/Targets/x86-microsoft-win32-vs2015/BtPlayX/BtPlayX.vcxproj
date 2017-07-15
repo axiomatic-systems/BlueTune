@@ -55,12 +55,12 @@
       <AdditionalIncludeDirectories>..\..\..\..\Source\BlueTune;..\..\..\..\Source\Core;..\..\..\..\Source\Decoder;..\..\..\..\Source\Player;..\..\..\..\Source\Plugins\Common;..\..\..\..\Source\Plugins\DynamicLoading;..\..\..\..\Source\Plugins\Decoders\FFMPEG;..\..\..\..\Source\Plugins\Decoders\IPP;..\..\..\..\Source\Plugins\Outputs\Win32;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavcodec;..\..\..\..\ThirdParty\ffmpeg\Targets\x86-microsoft-win32\include\libavutil;..\..\..\..\..\Atomix\Source\Core;..\..\..\..\..\Neptune\Source\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;ATX_CONFIG_ENABLE_LOGGING;NPT_CONFIG_ENABLE_LOGGING;BLT_CONFIG_BTPLAYX_ENABLE_DX9_VIDEO_OUTPUT;BLT_CONFIG_BTPLAYX_ENABLE_FFMPEG_DECODER;_BLT_CONFIG_BTPLAYX_ENABLE_IPP_DECODER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>avcodec-55.lib;avutil-52.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -69,6 +69,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalOptions>/IGNORE:4006,4221 /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -90,6 +91,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalOptions>/IGNORE:4006,4221 /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

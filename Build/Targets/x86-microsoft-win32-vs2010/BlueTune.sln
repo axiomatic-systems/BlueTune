@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlueTune", "BlueTune\BlueTune.vcxproj", "{EF79D129-5B03-4A18-9F1B-E081C3AC553E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Atomix", "..\..\..\..\Atomix\Build\Targets\x86-microsoft-win32-vs2010\Atomix\Atomix.vcxproj", "{AB4D6E4D-790B-4851-8E5F-129AA6D7E56F}"
@@ -64,9 +66,7 @@ Global
 		{A95DD566-C316-4A93-B5B1-573C52A676CA}.Release|Win32.ActiveCfg = Release|Win32
 		{A95DD566-C316-4A93-B5B1-573C52A676CA}.Release|Win32.Build.0 = Release|Win32
 		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Debug|Win32.Build.0 = Debug|Win32
 		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Release|Win32.ActiveCfg = Release|Win32
-		{B35DE3D1-F9D3-4A10-952E-2042A72A1B98}.Release|Win32.Build.0 = Release|Win32
 		{13FBE6C3-725E-47E1-85D5-357CEF418B05}.Debug|Win32.ActiveCfg = Debug|Win32
 		{13FBE6C3-725E-47E1-85D5-357CEF418B05}.Debug|Win32.Build.0 = Debug|Win32
 		{13FBE6C3-725E-47E1-85D5-357CEF418B05}.Release|Win32.ActiveCfg = Release|Win32

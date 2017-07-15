@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\alloc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\bitalloc-sbc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\bitalloc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\bitstream-decode.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\decoder-oina.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\decoder-private.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\decoder-sbc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\dequant.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\framing-sbc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\framing.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\oi_codec_version.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\synthesis-8-generated.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\synthesis-dct8.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\srce\synthesis-sbc.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_analysis.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_dct.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_dct_coeffs.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_encoder.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_enc_bit_alloc_mono.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_enc_bit_alloc_ste.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_enc_coeffs.c" />
+    <ClCompile Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\srce\sbc_packing.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_assert.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_bitstream.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_bt_spec.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_codec_sbc.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_codec_sbc_private.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_common.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_cpu_dep.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_modules.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_osinterface.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_status.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_stddefs.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_string.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_time.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include\oi_utils.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include\sbc_dct.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include\sbc_encoder.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include\sbc_enc_func_declare.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include\sbc_if.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include\sbc_types.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\gki\common\gki.h" />
+    <ClInclude Include="..\..\..\..\ThirdParty\bluedroid-sbc\gki\common\gki_common.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4F7BC6D6-A314-4390-8B34-F3AA0A67E3BE}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>SBC</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include;..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include;..\..\..\..\ThirdParty\bluedroid-sbc\gki\common;..\..\..\..\ThirdParty\bluedroid-sbc\gki\ulinux;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\..\..\ThirdParty\bluedroid-sbc\decoder\include;..\..\..\..\ThirdParty\bluedroid-sbc\encoder\include;..\..\..\..\ThirdParty\bluedroid-sbc\gki\common;..\..\..\..\ThirdParty\bluedroid-sbc\gki\ulinux;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

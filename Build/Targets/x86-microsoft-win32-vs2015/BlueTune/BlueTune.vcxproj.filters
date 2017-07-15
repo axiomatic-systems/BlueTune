@@ -194,6 +194,15 @@
     <ClCompile Include="..\..\..\..\Source\Plugins\Outputs\RAOP\BltRaopOutput.cpp">
       <Filter>Source Files\Plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\Plugins\Parsers\SBC\BltSbcParser.c">
+      <Filter>Source Files\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\Plugins\Decoders\SBC\BltSbcDecoder.c">
+      <Filter>Source Files\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\Plugins\Encoders\SBC\BltSbcEncoder.c">
+      <Filter>Source Files\Plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Source\Core\BltBuiltins.h">
@@ -395,6 +404,15 @@
       <Filter>Header Files\Plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Source\Plugins\Outputs\RAOP\BltRaopOutput.h">
+      <Filter>Header Files\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Source\Plugins\Parsers\SBC\BltSbcParser.h">
+      <Filter>Header Files\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Source\Plugins\Decoders\SBC\BltSbcDecoder.h">
+      <Filter>Header Files\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Source\Plugins\Encoders\SBC\BltSbcEncoder.h">
       <Filter>Header Files\Plugins</Filter>
     </ClInclude>
   </ItemGroup>

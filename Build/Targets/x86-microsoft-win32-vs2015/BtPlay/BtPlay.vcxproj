@@ -67,6 +67,8 @@
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalOptions>/IGNORE:4006,4221,4221 %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>
+      </ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

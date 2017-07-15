@@ -78,9 +78,9 @@ extern "C" {
 /* GBG #define OI_CPU_TYPE 12 */
 /* <GBG */
 #define OI_CPU_X64 50 //*< X86_64, little-endian */
-#if defined(__i386__)
+#if defined(__i386__) || defined(_M_IX86)
 #define OI_CPU_TYPE OI_CPU_X86
-#elif defined(__x86_64__)
+#elif defined(__x86_64__) || defined(_M_X64)
 #define OI_CPU_TYPE OI_CPU_X64
 #endif
     

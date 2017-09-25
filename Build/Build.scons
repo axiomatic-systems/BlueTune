@@ -1,3 +1,4 @@
+from past.builtins import execfile
 import sys
 import os
 
@@ -32,7 +33,7 @@ if os.path.exists(target_config_file):
     execfile(target_config_file)
 
 ### extra plugins
-if env.has_key('extra_plugins'):
+if 'extra_plugins' in env:
     env.AppendUnique(BLT_PLUGINS=Split(env['extra_plugins']))
 
 ### optional modules
@@ -53,11 +54,11 @@ for plugin in env['BLT_PLUGINS']:
 BLT_AAC_DECODER_PLUGIN_DIR    = ''
 BLT_AAC_DECODER_PLUGIN_EXTRAS = {}
 BLT_AAC_MODULE_CONFIG_NAME = 'BLT_CONFIG_MODULES_ENABLE_AAC_DECODER'
-if 'AacDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_AAC_LIBRARY'):
+if 'AacDecoder' in PluginsMap and 'BLT_PLUGINS_AAC_LIBRARY' not in env:
     env['BLT_PLUGINS_AAC_LIBRARY'] = 'Melo'
 
 ############################ select VORBIS library
-if 'VorbisDecoder' in PluginsMap and not env.has_key('BLT_PLUGINS_VORBIS_LIBRARY'):
+if 'VorbisDecoder' in PluginsMap and 'BLT_PLUGINS_VORBIS_LIBRARY' not in env:
     env['BLT_PLUGINS_VORBIS_LIBRARY'] = 'Vorbis'
 
 ############################# Atomix
@@ -96,7 +97,7 @@ StaticLibraryModule(name                          = 'Neptune',
 
 ############################ Bento4
 AP4_SOURCE_ROOT = 'Bento4/Source/C++'
-AP4_EXTRA_CPP_DEFINES = env.has_key('AP4_CPP_DEFINES') and env['AP4_CPP_DEFINES'] or []
+AP4_EXTRA_CPP_DEFINES = 'AP4_CPP_DEFINES' in env and env['AP4_CPP_DEFINES'] or []
 if env['build_config'] == 'Debug':
     AP4_EXTRA_CPP_DEFINES.append('AP4_DEBUG')
 
@@ -115,12 +116,12 @@ StaticLibraryModule(name                          = 'Bento4',
 ############################ Melo
 if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Melo':
     MLO_SOURCE_ROOT = 'Melo/Source'
-    MLO_EXTRA_CPP_DEFINES = env.has_key('MLO_CPP_DEFINES') and env['MLO_CPP_DEFINES'] or []
+    MLO_EXTRA_CPP_DEFINES = 'MLO_CPP_DEFINES' in env and env['MLO_CPP_DEFINES'] or []
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/AAC'
     BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['Melo']}
     if env['build_config'] == 'Debug':
         MLO_EXTRA_CPP_DEFINES.append(['MLO_DEBUG'])
-    if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
+    if 'BLT_CPU_CONFIG_NO_FLOAT' in env:
         MLO_EXTRA_CPP_DEFINES += ['MLO_CONFIG_FIXED']
 
     MapSourceDir(MLO_SOURCE_ROOT, '#/../Melo/Source')
@@ -133,7 +134,7 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'Helix':
     BLT_AAC_MODULE_CONFIG_NAME    = 'BLT_CONFIG_MODULES_ENABLE_HELIX_AAC_DECODER'
     BLT_AAC_DECODER_PLUGIN_DIR    = 'Decoders/HelixAAC'
     BLT_AAC_DECODER_PLUGIN_EXTRAS = {'dep_mods':['HelixAAC']}
-    if env.has_key('BLT_PLUGINS_HELIX_AAC_ASM_DIR'):
+    if 'BLT_PLUGINS_HELIX_AAC_ASM_DIR' in env:
         BLT_HELIX_AAC_ASM_DIRS = env['BLT_PLUGINS_HELIX_AAC_ASM_DIR']
     else:
         BLT_HELIX_AAC_ASM_DIRS = []
@@ -171,7 +172,7 @@ if 'AacDecoder' in PluginsMap and env['BLT_PLUGINS_AAC_LIBRARY'] == 'FHG':
                    environment           = env['BLT_RELAXED_ENV'])
 
 ############################# Fluo
-if not env.has_key('FLO_DECODER_ENGINE'):
+if 'FLO_DECODER_ENGINE' not in env:
     env['FLO_DECODER_ENGINE'] = 'FLO_DECODER_ENGINE_BUILTIN';
 
 if (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_MPG123'):
@@ -190,7 +191,7 @@ elif (env['FLO_DECODER_ENGINE'] == 'FLO_DECODER_ENGINE_BUILTIN'):
     fluo_decoder_inc_dirs = []
 
 fluo_extra_cpp_defines = [('FLO_DECODER_ENGINE',env['FLO_DECODER_ENGINE'])]
-if env.has_key('BLT_CPU_CONFIG_NO_FLOAT'):
+if 'BLT_CPU_CONFIG_NO_FLOAT' in env:
     fluo_extra_cpp_defines += ['FLO_CONFIG_INTEGER_DECODE']
 
 CompiledModule(name                          = 'Fluo',
@@ -246,7 +247,7 @@ BLT_WMA_DECODER_PLUGIN_EXTRAS = {}
 BLT_WMA_DECODER_PLUGIN_DIR = None
 if 'WmaDecoder' in PluginsMap:
     if 'BLT_WMSDK_HOME' in os.environ:
-        if env.has_key('BLT_WMA_DECODER_MODE') and env['BLT_WMA_DECODER_MODE'] == 'Integer':
+        if 'BLT_WMA_DECODER_MODE' in env and env['BLT_WMA_DECODER_MODE'] == 'Integer':
             wma_decoder_mode = 'BUILD_INTEGER'
         else:
             wma_decoder_mode = 'BUILD_INT_FLOAT'

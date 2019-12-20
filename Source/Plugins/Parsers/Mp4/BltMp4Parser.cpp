@@ -115,8 +115,7 @@ class Mp4ParserLinearReader : public AP4_LinearReader
 public:
     Mp4ParserLinearReader(Mp4Parser*       parser,
                           AP4_Movie&       movie, 
-                          AP4_ByteStream*  fragment_stream = NULL, 
-                          AP4_Size         max_buffer      = AP4_LINEAR_READER_DEFAULT_BUFFER_SIZE);
+                          AP4_ByteStream*  fragment_stream = NULL);
   
     // AP4_LinearReader methods
     virtual AP4_Result ProcessTrack(AP4_Track* track);
@@ -136,9 +135,8 @@ public:
 +---------------------------------------------------------------------*/
 Mp4ParserLinearReader::Mp4ParserLinearReader(Mp4Parser*      parser,
                                              AP4_Movie&      movie, 
-                                             AP4_ByteStream* fragment_stream, 
-                                             AP4_Size        max_buffer) :
-    AP4_LinearReader(movie, fragment_stream, max_buffer),
+                                             AP4_ByteStream* fragment_stream) :
+    AP4_LinearReader(movie, fragment_stream),
     m_Parser(parser)
 {
 }
@@ -988,7 +986,7 @@ Mp4ParserOutput_GetPacket(BLT_PacketProducer* _self,
         }
         if (AP4_FAILED(result)) {
             ATX_LOG_WARNING_1("ReadSample failed (%d)", result);
-            if (result == AP4_ERROR_EOS || result == ATX_ERROR_OUT_OF_RANGE || result == AP4_ERROR_NOT_ENOUGH_SPACE) {
+            if (result == AP4_ERROR_EOS || result == ATX_ERROR_OUT_OF_RANGE) {
                 if (self->parser->input.has_fragments) {
                     return BLT_ERROR_EOS;
                 } else {

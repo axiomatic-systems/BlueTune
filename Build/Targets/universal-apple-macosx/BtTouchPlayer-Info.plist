@@ -16,6 +16,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
 	<key>NSMainNibFile</key>
 	<string>BtTouchPlayer</string>
 	<key>UISupportedInterfaceOrientations</key>

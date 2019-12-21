@@ -10,6 +10,41 @@
 #include "Neptune.h"
 #include "BtPlayerServer.h"
 
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@end
+
+@interface AppDelegate ()
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    // Override point for customization after application launch.
+    (void)application;
+    (void)launchOptions;
+    return YES;
+}
+
+
+#pragma mark - UISceneSession lifecycle
+
+
+- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options {
+    (void)application;
+    (void)connectingSceneSession;
+    (void)options;
+    return [[UISceneConfiguration alloc] initWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
+}
+
+
+- (void)application:(UIApplication *)application didDiscardSceneSessions:(NSSet<UISceneSession *> *)sceneSessions {
+    (void)application;
+    (void)sceneSessions;
+}
+
+@end
+
+
 class PlayerServerThread : public NPT_Thread
 {
 public:
@@ -38,6 +73,6 @@ public:
 int main(int argc, char *argv[])
 {
     (new PlayerServerThread(9080))->Start();
-    
-    return UIApplicationMain(argc, argv, nil, nil);
+
+    return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
 }

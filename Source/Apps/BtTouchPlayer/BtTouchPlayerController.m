@@ -100,7 +100,9 @@
 }
 
 -(void) awakeFromNib
-{        
+{
+    [super awakeFromNib];
+    
     // set the data source for the list views
     playerPropertiesView.dataSource = [[CocoaPlayerRecordList alloc]initWithTitle: @"Properties"];
     playerStreamInfoView.dataSource = [[CocoaPlayerRecordList alloc]initWithTitle: @"Stream Info"];

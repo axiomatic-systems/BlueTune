@@ -125,7 +125,8 @@ NetworkInput_Create(BLT_Module*              module,
     if (ATX_StringsEqualN(constructor->name, "tcp://", 6)) {
         /* create a TCP byte stream */
         result = BLT_TcpNetworkStream_Create(constructor->name+6, &input->stream);
-    } else if (ATX_StringsEqualN(constructor->name, "http://", 7)) {
+    } else if (ATX_StringsEqualN(constructor->name, "http://", 7) ||
+               ATX_StringsEqualN(constructor->name, "https://", 8)) {
         /* create an HTTP byte stream */
         result = BLT_HttpNetworkStream_Create(constructor->name, 
                                               core, 
@@ -383,8 +384,9 @@ NetworkInputModule_Probe(BLT_Module*              self,
             }
 
             /* check the name */
-            if (ATX_StringsEqualN(constructor->name, "tcp://", 6) ||
-                ATX_StringsEqualN(constructor->name, "http://", 7)) {
+            if (ATX_StringsEqualN(constructor->name, "tcp://", 6)  ||
+                ATX_StringsEqualN(constructor->name, "http://", 7) ||
+                ATX_StringsEqualN(constructor->name, "https://", 8)) {
                 /* this is an exact match for us */
                 *match = BLT_MODULE_PROBE_MATCH_EXACT;
             } else if (constructor->spec.input.protocol ==

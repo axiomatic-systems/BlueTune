@@ -379,26 +379,47 @@ HttpInputStream_Read(ATX_InputStream* _self,
         if (NPT_SUCCEEDED(result) && meta_size != 0) {
             char* meta_value = new char[meta_size*16+1];
             meta_value[meta_size*16] = '\0'; // terminate
+            ATX_LOG_FINE_1("reading %u bytes of metadata", meta_size*16);
             result = (*self->m_InputStream)->ReadFully(meta_value, meta_size*16);
             if (NPT_SUCCEEDED(result)) {
-                // extract the title
-                NPT_String title(meta_value);
-                int quote_1 = title.Find("StringTitle='");
-                if (quote_1) {
-                    quote_1 += 13;
-                    int quote_2 = title.Find("';", quote_1);
-                    if (quote_2) {
-                        title.SetLength(quote_2);
+                ATX_LOG_FINE_1("metadata: %s", meta_value);
 
-                        // notify of the title
-                        ATX_Properties* properties;
-                        if (self->m_Context && BLT_SUCCEEDED(BLT_Stream_GetProperties(self->m_Context, &properties))) {
-                            ATX_PropertyValue pvalue;
-                            pvalue.type = ATX_PROPERTY_VALUE_TYPE_STRING;
-                            pvalue.data.string = title.GetChars()+quote_1+1;
-                            ATX_Properties_SetProperty(properties, "Tags/Title", &pvalue);
-                        }
+                // parse key/value pais (each pair is of the form: key='value';
+                NPT_String title(meta_value);
+                for (;;) {
+                    int equal_separator = title.Find("='");
+                    if (equal_separator <= 0) {
+                        // not found, or no key
+                        break;
                     }
+                    int value_separator = title.Find("';", equal_separator);
+                    if (value_separator < equal_separator + 2) {
+                        // not found
+                        break;
+                    }
+                    NPT_String key = title.SubString(0, equal_separator);
+                    NPT_String value = title.SubString(equal_separator+2, value_separator-equal_separator-2);
+
+                    // map the key to a property name
+                    NPT_String property_name = "Tags/";
+                    if (key == "StreamTitle") {
+                        property_name += "Title";
+                    } else {
+                        property_name += "ICY/";
+                        property_name += key;
+                    }
+
+                    // notify of the title
+                    ATX_Properties* properties;
+                    if (self->m_Context && BLT_SUCCEEDED(BLT_Stream_GetProperties(self->m_Context, &properties))) {
+                        ATX_PropertyValue pvalue;
+                        pvalue.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                        pvalue.data.string = value;
+                        ATX_Properties_SetProperty(properties, property_name, &pvalue);
+                    }
+
+                    // move to the next pair
+                    title = title.SubString(value_separator + 2);
                 }
             }
             delete[] meta_value;

@@ -13,7 +13,6 @@
 			buildPhases = (
 			);
 			dependencies = (
-				CA46DD51164CC4C500E45133 /* PBXTargetDependency */,
 				CAB82A021858519C00FC4944 /* PBXTargetDependency */,
 				CAB82A041858519C00FC4944 /* PBXTargetDependency */,
 				CAB82A061858519C00FC4944 /* PBXTargetDependency */,
@@ -64,6 +63,134 @@
 /* Begin PBXBuildFile section */
 		AC1A1C8A1DB73B67004FCF6E /* BltSbcEncoder.c in Sources */ = {isa = PBXBuildFile; fileRef = AC1A1C881DB73B67004FCF6E /* BltSbcEncoder.c */; };
 		AC1A1C8B1DB73B67004FCF6E /* BltSbcEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */; };
+		AC517A7D23DA20F0001CED12 /* wmaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799123DA1FBE001CED12 /* wmaudio.h */; };
+		AC517A7E23DA20F0001CED12 /* wmaerr.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799223DA1FBE001CED12 /* wmaerr.h */; };
+		AC517A7F23DA20F0001CED12 /* wmaudio_type.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799323DA1FBE001CED12 /* wmaudio_type.h */; };
+		AC517A8023DA20F0001CED12 /* wmaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799423DA1FBE001CED12 /* wmaudio.c */; };
+		AC517A8123DA20F0001CED12 /* loadstuff.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799523DA1FBE001CED12 /* loadstuff.h */; };
+		AC517A8223DA20F0001CED12 /* wmaudio_inc.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799623DA1FBE001CED12 /* wmaudio_inc.h */; };
+		AC517A8323DA20F0001CED12 /* wmaudio_parse.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799723DA1FBE001CED12 /* wmaudio_parse.c */; };
+		AC517A8423DA20F0001CED12 /* wmaguids.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799823DA1FBE001CED12 /* wmaguids.h */; };
+		AC517A8523DA20F0001CED12 /* asfwmatypes.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51799923DA1FBE001CED12 /* asfwmatypes.h */; };
+		AC517A8623DA20F0001CED12 /* wmaudio_audec.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799A23DA1FBE001CED12 /* wmaudio_audec.c */; };
+		AC517A8723DA2107001CED12 /* msaudiopro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799C23DA1FBE001CED12 /* msaudiopro.c */; };
+		AC517A8823DA2107001CED12 /* basepluspro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799D23DA1FBE001CED12 /* basepluspro.c */; };
+		AC517A8A23DA2107001CED12 /* dectablespro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51799F23DA1FBE001CED12 /* dectablespro.c */; };
+		AC517A8B23DA2107001CED12 /* dectablesstdpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179A023DA1FBE001CED12 /* dectablesstdpro.c */; };
+		AC517A8C23DA2107001CED12 /* catchflops.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179A123DA1FBE001CED12 /* catchflops.h */; };
+		AC517A8D23DA2107001CED12 /* msaudiostd.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179A223DA1FBE001CED12 /* msaudiostd.c */; };
+		AC517A8E23DA2107001CED12 /* wavfileexio.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179A323DA1FBE001CED12 /* wavfileexio.h */; };
+		AC517A8F23DA2107001CED12 /* fastfloat.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179A423DA1FBE001CED12 /* fastfloat.h */; };
+		AC517A9023DA2107001CED12 /* lowrate_common.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179A523DA1FBE001CED12 /* lowrate_common.h */; };
+		AC517A9123DA2107001CED12 /* dectablesstd.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179A623DA1FBE001CED12 /* dectablesstd.c */; };
+		AC517A9223DA2107001CED12 /* lowrate_commonstd.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179A723DA1FBE001CED12 /* lowrate_commonstd.c */; };
+		AC517A9323DA2107001CED12 /* wmaOS.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179A823DA1FBE001CED12 /* wmaOS.h */; };
+		AC517A9523DA2107001CED12 /* msaudiotemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179AA23DA1FBE001CED12 /* msaudiotemplate.h */; };
+		AC517A9623DA2107001CED12 /* chexpro.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179AB23DA1FBE001CED12 /* chexpro.h */; };
+		AC517A9823DA2107001CED12 /* fntableimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179AD23DA1FBE001CED12 /* fntableimpl.h */; };
+		AC517A9923DA2107001CED12 /* DecTables.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179AE23DA1FBE001CED12 /* DecTables.h */; };
+		AC517A9A23DA2107001CED12 /* AutoProfile.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179AF23DA1FBE001CED12 /* AutoProfile.c */; };
+		AC517A9D23DA2107001CED12 /* downmix.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179B223DA1FBE001CED12 /* downmix.c */; };
+		AC517A9E23DA2107001CED12 /* applyreflectionv3.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179B323DA1FBE001CED12 /* applyreflectionv3.h */; };
+		AC517A9F23DA2107001CED12 /* fexdectbls.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179B423DA1FBE001CED12 /* fexdectbls.h */; };
+		AC517AA023DA2107001CED12 /* msaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179B523DA1FBE001CED12 /* msaudio.c */; };
+		AC517AA123DA2107001CED12 /* lpcstd.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179B623DA1FBE001CED12 /* lpcstd.c */; };
+		AC517AA223DA2107001CED12 /* enttblsdecv4.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179B723DA1FBE001CED12 /* enttblsdecv4.h */; };
+		AC517AA423DA2107001CED12 /* fex.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179B923DA1FBE001CED12 /* fex.h */; };
+		AC517AA523DA2107001CED12 /* configcommon.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179BA23DA1FBE001CED12 /* configcommon.c */; };
+		AC517AA623DA2107001CED12 /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179BB23DA1FBE001CED12 /* constants.h */; };
+		AC517AA723DA2107001CED12 /* lowrate_common.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179BC23DA1FBE001CED12 /* lowrate_common.c */; };
+		AC517AA823DA2107001CED12 /* wavfileexio.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179BD23DA1FBE001CED12 /* wavfileexio.c */; };
+		AC517AA923DA2107001CED12 /* drccommonpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179BE23DA1FBE001CED12 /* drccommonpro.c */; };
+		AC517AAA23DA2107001CED12 /* fft.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179BF23DA1FBE001CED12 /* fft.c */; };
+		AC517AAB23DA2107001CED12 /* basepluspro.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179C023DA1FBE001CED12 /* basepluspro.h */; };
+		AC517AAC23DA2107001CED12 /* macros.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179C123DA1FBE001CED12 /* macros.h */; };
+		AC517AAD23DA2107001CED12 /* msaudiotemplate.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C223DA1FBE001CED12 /* msaudiotemplate.c */; };
+		AC517AAE23DA2107001CED12 /* msaudiolsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C323DA1FBE001CED12 /* msaudiolsl.c */; };
+		AC517AB023DA2107001CED12 /* fntable.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179C523DA1FBE001CED12 /* fntable.h */; };
+		AC517AB123DA2107001CED12 /* chexpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C623DA1FBE001CED12 /* chexpro.c */; };
+		AC517AB223DA2107001CED12 /* msaudiostdpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C723DA1FBE001CED12 /* msaudiostdpro.c */; };
+		AC517AB323DA2107001CED12 /* lpcprolsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C823DA1FBE001CED12 /* lpcprolsl.c */; };
+		AC517AB423DA2107001CED12 /* float.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179C923DA1FBE001CED12 /* float.c */; };
+		AC517AB623DA2107001CED12 /* wmaOS.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179CB23DA1FBE001CED12 /* wmaOS.c */; };
+		AC517AB823DA2107001CED12 /* downmix.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179CD23DA1FBE001CED12 /* downmix.h */; };
+		AC517AB923DA2107001CED12 /* drccommon.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179CE23DA1FBE001CED12 /* drccommon.h */; };
+		AC517ABA23DA2107001CED12 /* dbgmacros.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179CF23DA1FBE001CED12 /* dbgmacros.h */; };
+		AC517ABB23DA2107001CED12 /* dectables.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179D023DA1FBE001CED12 /* dectables.c */; };
+		AC517ABC23DA2107001CED12 /* lpcConst.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D123DA1FBE001CED12 /* lpcConst.h */; };
+		AC517ABD23DA2107001CED12 /* msaudiotemplatedef.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D223DA1FBE001CED12 /* msaudiotemplatedef.h */; };
+		AC517ABE23DA2107001CED12 /* chexdectblspro.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D323DA1FBE001CED12 /* chexdectblspro.h */; };
+		AC517ABF23DA2107001CED12 /* lpclsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179D423DA1FBE001CED12 /* lpclsl.c */; };
+		AC517AC023DA2107001CED12 /* lpc.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179D523DA1FBE001CED12 /* lpc.c */; };
+		AC517AC123DA2107001CED12 /* pkconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D623DA1FBE001CED12 /* pkconfig.h */; };
+		AC517AC223DA2107001CED12 /* dbgmacrosimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D723DA1FBE001CED12 /* dbgmacrosimpl.h */; };
+		AC517AC323DA2107001CED12 /* fex.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179D823DA1FBE001CED12 /* fex.c */; };
+		AC517AC423DA2107001CED12 /* templateincludes.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179D923DA1FBE001CED12 /* templateincludes.h */; };
+		AC517AC523DA2107001CED12 /* msaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179DA23DA1FBF001CED12 /* msaudio.h */; };
+		AC517AC623DA2131001CED12 /* losslessdecprolsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790123DA1FBE001CED12 /* losslessdecprolsl.c */; };
+		AC517AC723DA2131001CED12 /* strmdec_wma.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790223DA1FBE001CED12 /* strmdec_wma.h */; };
+		AC517AC823DA2131001CED12 /* losslessdecpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790323DA1FBE001CED12 /* losslessdecpro.c */; };
+		AC517AC923DA2131001CED12 /* entropydec.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790423DA1FBE001CED12 /* entropydec.h */; };
+		AC517ACA23DA2131001CED12 /* huffdec.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790623DA1FBE001CED12 /* huffdec.h */; };
+		AC517ACB23DA2131001CED12 /* wmaprodecS_api.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790723DA1FBE001CED12 /* wmaprodecS_api.h */; };
+		AC517ACC23DA2131001CED12 /* baseplusdecpro.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790823DA1FBE001CED12 /* baseplusdecpro.h */; };
+		AC517ACD23DA2131001CED12 /* msaudiodec.h in Headers */ = {isa = PBXBuildFile; fileRef = AC51790923DA1FBE001CED12 /* msaudiodec.h */; };
+		AC517ACE23DA2131001CED12 /* strmdec_wma.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790A23DA1FBE001CED12 /* strmdec_wma.c */; };
+		AC517ACF23DA2131001CED12 /* losslessdeclsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790B23DA1FBE001CED12 /* losslessdeclsl.c */; };
+		AC517AD023DA2131001CED12 /* entropydec.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790C23DA1FBE001CED12 /* entropydec.c */; };
+		AC517AD123DA2131001CED12 /* entropydecprolsl.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790D23DA1FBE001CED12 /* entropydecprolsl.c */; };
+		AC517AD323DA2131001CED12 /* entropydecpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51790F23DA1FBE001CED12 /* entropydecpro.c */; };
+		AC517AD523DA2131001CED12 /* chexdecpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791123DA1FBE001CED12 /* chexdecpro.c */; };
+		AC517AD623DA2131001CED12 /* entropydecstd.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791223DA1FBE001CED12 /* entropydecstd.c */; };
+		AC517AD723DA2131001CED12 /* msaudiodec.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791323DA1FBE001CED12 /* msaudiodec.c */; };
+		AC517AD823DA2131001CED12 /* baseplusdecpro.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791423DA1FBE001CED12 /* baseplusdecpro.c */; };
+		AC517AD923DA2131001CED12 /* fexdec.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791523DA1FBE001CED12 /* fexdec.c */; };
+		AC517ADA23DA2131001CED12 /* huffdec.c in Sources */ = {isa = PBXBuildFile; fileRef = AC51791623DA1FBE001CED12 /* huffdec.c */; };
+		AC517ADB23DA215A001CED12 /* wmafmt.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179DC23DA1FBF001CED12 /* wmafmt.c */; };
+		AC517ADC23DA2164001CED12 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178F923DA1FBE001CED12 /* config.h */; };
+		AC517ADD23DA2164001CED12 /* wmafmt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FA23DA1FBE001CED12 /* wmafmt.h */; };
+		AC517ADE23DA2164001CED12 /* wmadec.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FB23DA1FBE001CED12 /* wmadec.h */; };
+		AC517ADF23DA2164001CED12 /* playropt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FC23DA1FBE001CED12 /* playropt.h */; };
+		AC517AE023DA2164001CED12 /* wmaerror.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FD23DA1FBE001CED12 /* wmaerror.h */; };
+		AC517AE123DA2164001CED12 /* AutoProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FE23DA1FBE001CED12 /* AutoProfile.h */; };
+		AC517AE223DA2164001CED12 /* configcommon.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178FF23DA1FBE001CED12 /* configcommon.h */; };
+		AC517AE323DA217F001CED12 /* win32.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179E023DA1FBF001CED12 /* win32.c */; };
+		AC517AE423DA2195001CED12 /* wmapcmacc.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179FB23DA1FBF001CED12 /* wmapcmacc.c */; };
+		AC517AE523DA2195001CED12 /* wmaerror.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179FC23DA1FBF001CED12 /* wmaerror.c */; };
+		AC517AE623DA2195001CED12 /* wmamalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179FD23DA1FBF001CED12 /* wmamalloc.c */; };
+		AC517AE723DA219D001CED12 /* pcmfmt.c in Sources */ = {isa = PBXBuildFile; fileRef = AC5179E423DA1FBF001CED12 /* pcmfmt.c */; };
+		AC517AE823DA21A9001CED12 /* wmaltrt.c in Sources */ = {isa = PBXBuildFile; fileRef = AC517A0123DA1FBF001CED12 /* wmaltrt.c */; };
+		AC517AE923DA21A9001CED12 /* wmabuffilt.c in Sources */ = {isa = PBXBuildFile; fileRef = AC517A0323DA1FBF001CED12 /* wmabuffilt.c */; };
+		AC517AEA23DA21A9001CED12 /* wmachmtx.c in Sources */ = {isa = PBXBuildFile; fileRef = AC517A0423DA1FBF001CED12 /* wmachmtx.c */; };
+		AC517AEB23DA21B7001CED12 /* wmspecstrings_adt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178E823DA1FBE001CED12 /* wmspecstrings_adt.h */; };
+		AC517AEC23DA21B7001CED12 /* wmspecstrings_undef.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178E923DA1FBE001CED12 /* wmspecstrings_undef.h */; };
+		AC517AED23DA21B7001CED12 /* wmsal.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178EA23DA1FBE001CED12 /* wmsal.h */; };
+		AC517AEE23DA21B7001CED12 /* wmspecstrings_strict.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178EB23DA1FBE001CED12 /* wmspecstrings_strict.h */; };
+		AC517AEF23DA21B7001CED12 /* wmspecstring.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178EC23DA1FBE001CED12 /* wmspecstring.h */; };
+		AC517AF023DA21C2001CED12 /* wmdsplogging.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5178F023DA1FBE001CED12 /* wmdsplogging.h */; };
+		AC517AF123DA21D7001CED12 /* wmamalloc.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179E623DA1FBF001CED12 /* wmamalloc.h */; };
+		AC517AF223DA21D7001CED12 /* msaudiofmt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179E723DA1FBF001CED12 /* msaudiofmt.h */; };
+		AC517AF323DA21D7001CED12 /* pcmfmt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179E823DA1FBF001CED12 /* pcmfmt.h */; };
+		AC517AF423DA21D7001CED12 /* wmaerrormacros.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179E923DA1FBF001CED12 /* wmaerrormacros.h */; };
+		AC517AF523DA21D7001CED12 /* wmachmtx.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179EA23DA1FBF001CED12 /* wmachmtx.h */; };
+		AC517AF623DA21D7001CED12 /* crc.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179EB23DA1FBF001CED12 /* crc.h */; };
+		AC517AF723DA21D7001CED12 /* wmawfxdefs.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179EC23DA1FBF001CED12 /* wmawfxdefs.h */; };
+		AC517AF823DA21D7001CED12 /* mmreg_.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179ED23DA1FBF001CED12 /* mmreg_.h */; };
+		AC517AF923DA21D7001CED12 /* wmatypes_ansi.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179EE23DA1FBF001CED12 /* wmatypes_ansi.h */; };
+		AC517AFA23DA21D7001CED12 /* wmapcmacc.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179EF23DA1FBF001CED12 /* wmapcmacc.h */; };
+		AC517AFB23DA21D7001CED12 /* wmaresults.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F023DA1FBF001CED12 /* wmaresults.h */; };
+		AC517AFC23DA21D7001CED12 /* wmaltrt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F123DA1FBF001CED12 /* wmaltrt.h */; };
+		AC517AFD23DA21D7001CED12 /* wmacommon.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F223DA1FBF001CED12 /* wmacommon.h */; };
+		AC517AFE23DA21D7001CED12 /* wmaassert.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F323DA1FBF001CED12 /* wmaassert.h */; };
+		AC517AFF23DA21D7001CED12 /* wmatypes_x86.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F423DA1FBF001CED12 /* wmatypes_x86.h */; };
+		AC517B0023DA21D7001CED12 /* wmabuffilt.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F523DA1FBF001CED12 /* wmabuffilt.h */; };
+		AC517B0123DA21D7001CED12 /* wmatypes.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F623DA1FBF001CED12 /* wmatypes.h */; };
+		AC517B0223DA21D7001CED12 /* wmawintypes.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F723DA1FBF001CED12 /* wmawintypes.h */; };
+		AC517B0323DA21D7001CED12 /* wmatyps.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F823DA1FBF001CED12 /* wmatyps.h */; };
+		AC517B0423DA21D7001CED12 /* wmartmacros.h in Headers */ = {isa = PBXBuildFile; fileRef = AC5179F923DA1FBF001CED12 /* wmartmacros.h */; };
+		AC517B6D23DA9D83001CED12 /* BltWmaDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50425E0C5AE52B0060E6FE /* BltWmaDecoder.c */; };
+		AC517B7023DA9E24001CED12 /* libAtomix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5043AE0C5AE6320060E6FE /* libAtomix.a */; };
+		AC517B7323DA9E56001CED12 /* libWMSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AC517A7923DA2049001CED12 /* libWMSDK.a */; };
 		ACE4AF7B1DB59E8A0099F1E3 /* BltSbcParser.c in Sources */ = {isa = PBXBuildFile; fileRef = ACE4AF791DB59C990099F1E3 /* BltSbcParser.c */; };
 		ACE4AFD41DB6DAFD0099F1E3 /* oi_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4AFA61DB6DAFD0099F1E3 /* oi_assert.h */; };
 		ACE4AFD51DB6DAFD0099F1E3 /* oi_bitstream.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4AFA71DB6DAFD0099F1E3 /* oi_bitstream.h */; };
@@ -110,6 +237,10 @@
 		ACE4B00B1DB6DDA00099F1E3 /* gki_common.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4B0021DB6DDA00099F1E3 /* gki_common.h */; };
 		ACE4B00E1DB6DDA00099F1E3 /* data_types.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4B0061DB6DDA00099F1E3 /* data_types.h */; };
 		ACE4B00F1DB6DDA00099F1E3 /* gki_int.h in Headers */ = {isa = PBXBuildFile; fileRef = ACE4B0071DB6DDA00099F1E3 /* gki_int.h */; };
+		ACEAD39823F210420043F1EA /* BltWmaDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = CA50425F0C5AE52B0060E6FE /* BltWmaDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		ACEAD39923F2104E0043F1EA /* BltWmaDecoder.c in Sources */ = {isa = PBXBuildFile; fileRef = CA50425E0C5AE52B0060E6FE /* BltWmaDecoder.c */; };
+		ACEAD39D23F22EB30043F1EA /* libBltWmaDecoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ACEAD39423F2102A0043F1EA /* libBltWmaDecoder.a */; };
+		ACEAD39E23F22F460043F1EA /* libWMSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AC517A7923DA2049001CED12 /* libWMSDK.a */; };
 		CA0487890C99E13800638991 /* BltAdtsParser.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487870C99E13800638991 /* BltAdtsParser.h */; };
 		CA04878A0C99E13800638991 /* BltAdtsParser.c in Sources */ = {isa = PBXBuildFile; fileRef = CA0487880C99E13800638991 /* BltAdtsParser.c */; };
 		CA0487EE0C99EBF900638991 /* BltCommonMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */; };
@@ -1093,6 +1224,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AC517B6E23DA9E19001CED12 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA5043A60C5AE6320060E6FE /* Atomix.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = Atomix;
+		};
+		AC517B7123DA9E48001CED12 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AC517A7823DA2049001CED12;
+			remoteInfo = WMSDK;
+		};
 		ACE369AB23AD8A07008A8F46 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CA44C4480D4522D900173F5F /* Bento4.xcodeproj */;
@@ -1484,13 +1629,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = Bento4;
-		};
-		CA46DD50164CC4C500E45133 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CA1EC0F80ED299AD0033F894;
-			remoteInfo = BtCocoaPlayer;
 		};
 		CA4DD9A3104DB7800024BC0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2106,6 +2244,163 @@
 /* Begin PBXFileReference section */
 		AC1A1C881DB73B67004FCF6E /* BltSbcEncoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BltSbcEncoder.c; sourceTree = "<group>"; };
 		AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BltSbcEncoder.h; sourceTree = "<group>"; };
+		AC5178E823DA1FBE001CED12 /* wmspecstrings_adt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmspecstrings_adt.h; sourceTree = "<group>"; };
+		AC5178E923DA1FBE001CED12 /* wmspecstrings_undef.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmspecstrings_undef.h; sourceTree = "<group>"; };
+		AC5178EA23DA1FBE001CED12 /* wmsal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmsal.h; sourceTree = "<group>"; };
+		AC5178EB23DA1FBE001CED12 /* wmspecstrings_strict.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmspecstrings_strict.h; sourceTree = "<group>"; };
+		AC5178EC23DA1FBE001CED12 /* wmspecstring.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmspecstring.h; sourceTree = "<group>"; };
+		AC5178EE23DA1FBE001CED12 /* cpudetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cpudetect.h; sourceTree = "<group>"; };
+		AC5178F023DA1FBE001CED12 /* wmdsplogging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmdsplogging.h; sourceTree = "<group>"; };
+		AC5178F523DA1FBE001CED12 /* tables_rc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tables_rc.h; sourceTree = "<group>"; };
+		AC5178F623DA1FBE001CED12 /* wmavechufftbls.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmavechufftbls.c; sourceTree = "<group>"; };
+		AC5178F723DA1FBE001CED12 /* tables_rc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tables_rc.c; sourceTree = "<group>"; };
+		AC5178F923DA1FBE001CED12 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		AC5178FA23DA1FBE001CED12 /* wmafmt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmafmt.h; sourceTree = "<group>"; };
+		AC5178FB23DA1FBE001CED12 /* wmadec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmadec.h; sourceTree = "<group>"; };
+		AC5178FC23DA1FBE001CED12 /* playropt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = playropt.h; sourceTree = "<group>"; };
+		AC5178FD23DA1FBE001CED12 /* wmaerror.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaerror.h; sourceTree = "<group>"; };
+		AC5178FE23DA1FBE001CED12 /* AutoProfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AutoProfile.h; sourceTree = "<group>"; };
+		AC5178FF23DA1FBE001CED12 /* configcommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = configcommon.h; sourceTree = "<group>"; };
+		AC51790123DA1FBE001CED12 /* losslessdecprolsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = losslessdecprolsl.c; sourceTree = "<group>"; };
+		AC51790223DA1FBE001CED12 /* strmdec_wma.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strmdec_wma.h; sourceTree = "<group>"; };
+		AC51790323DA1FBE001CED12 /* losslessdecpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = losslessdecpro.c; sourceTree = "<group>"; };
+		AC51790423DA1FBE001CED12 /* entropydec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = entropydec.h; sourceTree = "<group>"; };
+		AC51790523DA1FBE001CED12 /* wmaprodecS_api.c.disabled */ = {isa = PBXFileReference; lastKnownFileType = text; path = wmaprodecS_api.c.disabled; sourceTree = "<group>"; };
+		AC51790623DA1FBE001CED12 /* huffdec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = huffdec.h; sourceTree = "<group>"; };
+		AC51790723DA1FBE001CED12 /* wmaprodecS_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaprodecS_api.h; sourceTree = "<group>"; };
+		AC51790823DA1FBE001CED12 /* baseplusdecpro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = baseplusdecpro.h; sourceTree = "<group>"; };
+		AC51790923DA1FBE001CED12 /* msaudiodec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = msaudiodec.h; sourceTree = "<group>"; };
+		AC51790A23DA1FBE001CED12 /* strmdec_wma.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = strmdec_wma.c; sourceTree = "<group>"; };
+		AC51790B23DA1FBE001CED12 /* losslessdeclsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = losslessdeclsl.c; sourceTree = "<group>"; };
+		AC51790C23DA1FBE001CED12 /* entropydec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropydec.c; sourceTree = "<group>"; };
+		AC51790D23DA1FBE001CED12 /* entropydecprolsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropydecprolsl.c; sourceTree = "<group>"; };
+		AC51790E23DA1FBE001CED12 /* msaudiodectemplate.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = msaudiodectemplate.c.inc; sourceTree = "<group>"; };
+		AC51790F23DA1FBE001CED12 /* entropydecpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropydecpro.c; sourceTree = "<group>"; };
+		AC51791023DA1FBE001CED12 /* fexdec_lowrate.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = fexdec_lowrate.c.inc; sourceTree = "<group>"; };
+		AC51791123DA1FBE001CED12 /* chexdecpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = chexdecpro.c; sourceTree = "<group>"; };
+		AC51791223DA1FBE001CED12 /* entropydecstd.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropydecstd.c; sourceTree = "<group>"; };
+		AC51791323DA1FBE001CED12 /* msaudiodec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiodec.c; sourceTree = "<group>"; };
+		AC51791423DA1FBE001CED12 /* baseplusdecpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = baseplusdecpro.c; sourceTree = "<group>"; };
+		AC51791523DA1FBE001CED12 /* fexdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fexdec.c; sourceTree = "<group>"; };
+		AC51791623DA1FBE001CED12 /* huffdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = huffdec.c; sourceTree = "<group>"; };
+		AC51799123DA1FBE001CED12 /* wmaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaudio.h; sourceTree = "<group>"; };
+		AC51799223DA1FBE001CED12 /* wmaerr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaerr.h; sourceTree = "<group>"; };
+		AC51799323DA1FBE001CED12 /* wmaudio_type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaudio_type.h; sourceTree = "<group>"; };
+		AC51799423DA1FBE001CED12 /* wmaudio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaudio.c; sourceTree = "<group>"; };
+		AC51799523DA1FBE001CED12 /* loadstuff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = loadstuff.h; sourceTree = "<group>"; };
+		AC51799623DA1FBE001CED12 /* wmaudio_inc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaudio_inc.h; sourceTree = "<group>"; };
+		AC51799723DA1FBE001CED12 /* wmaudio_parse.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaudio_parse.c; sourceTree = "<group>"; };
+		AC51799823DA1FBE001CED12 /* wmaguids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaguids.h; sourceTree = "<group>"; };
+		AC51799923DA1FBE001CED12 /* asfwmatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asfwmatypes.h; sourceTree = "<group>"; };
+		AC51799A23DA1FBE001CED12 /* wmaudio_audec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaudio_audec.c; sourceTree = "<group>"; };
+		AC51799C23DA1FBE001CED12 /* msaudiopro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiopro.c; sourceTree = "<group>"; };
+		AC51799D23DA1FBE001CED12 /* basepluspro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = basepluspro.c; sourceTree = "<group>"; };
+		AC51799E23DA1FBE001CED12 /* drctables.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = drctables.c.inc; sourceTree = "<group>"; };
+		AC51799F23DA1FBE001CED12 /* dectablespro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dectablespro.c; sourceTree = "<group>"; };
+		AC5179A023DA1FBE001CED12 /* dectablesstdpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dectablesstdpro.c; sourceTree = "<group>"; };
+		AC5179A123DA1FBE001CED12 /* catchflops.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = catchflops.h; sourceTree = "<group>"; };
+		AC5179A223DA1FBE001CED12 /* msaudiostd.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiostd.c; sourceTree = "<group>"; };
+		AC5179A323DA1FBE001CED12 /* wavfileexio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wavfileexio.h; sourceTree = "<group>"; };
+		AC5179A423DA1FBE001CED12 /* fastfloat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fastfloat.h; sourceTree = "<group>"; };
+		AC5179A523DA1FBE001CED12 /* lowrate_common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lowrate_common.h; sourceTree = "<group>"; };
+		AC5179A623DA1FBE001CED12 /* dectablesstd.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dectablesstd.c; sourceTree = "<group>"; };
+		AC5179A723DA1FBE001CED12 /* lowrate_commonstd.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lowrate_commonstd.c; sourceTree = "<group>"; };
+		AC5179A823DA1FBE001CED12 /* wmaOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaOS.h; sourceTree = "<group>"; };
+		AC5179A923DA1FBE001CED12 /* fexdectbls.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = fexdectbls.c.inc; sourceTree = "<group>"; };
+		AC5179AA23DA1FBE001CED12 /* msaudiotemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = msaudiotemplate.h; sourceTree = "<group>"; };
+		AC5179AB23DA1FBE001CED12 /* chexpro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = chexpro.h; sourceTree = "<group>"; };
+		AC5179AC23DA1FBE001CED12 /* drcprotemplate.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = drcprotemplate.c.inc; sourceTree = "<group>"; };
+		AC5179AD23DA1FBE001CED12 /* fntableimpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fntableimpl.h; sourceTree = "<group>"; };
+		AC5179AE23DA1FBE001CED12 /* DecTables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DecTables.h; sourceTree = "<group>"; };
+		AC5179AF23DA1FBE001CED12 /* AutoProfile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AutoProfile.c; sourceTree = "<group>"; };
+		AC5179B023DA1FBE001CED12 /* msaudioprotemplate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudioprotemplate.c; sourceTree = "<group>"; };
+		AC5179B123DA1FBE001CED12 /* reverbfilter.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = reverbfilter.c.inc; sourceTree = "<group>"; };
+		AC5179B223DA1FBE001CED12 /* downmix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = downmix.c; sourceTree = "<group>"; };
+		AC5179B323DA1FBE001CED12 /* applyreflectionv3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = applyreflectionv3.h; sourceTree = "<group>"; };
+		AC5179B423DA1FBE001CED12 /* fexdectbls.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fexdectbls.h; sourceTree = "<group>"; };
+		AC5179B523DA1FBE001CED12 /* msaudio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudio.c; sourceTree = "<group>"; };
+		AC5179B623DA1FBE001CED12 /* lpcstd.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lpcstd.c; sourceTree = "<group>"; };
+		AC5179B723DA1FBE001CED12 /* enttblsdecv4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = enttblsdecv4.h; sourceTree = "<group>"; };
+		AC5179B823DA1FBE001CED12 /* chexdectblspro.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = chexdectblspro.c.inc; sourceTree = "<group>"; };
+		AC5179B923DA1FBE001CED12 /* fex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fex.h; sourceTree = "<group>"; };
+		AC5179BA23DA1FBE001CED12 /* configcommon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = configcommon.c; sourceTree = "<group>"; };
+		AC5179BB23DA1FBE001CED12 /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
+		AC5179BC23DA1FBE001CED12 /* lowrate_common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lowrate_common.c; sourceTree = "<group>"; };
+		AC5179BD23DA1FBE001CED12 /* wavfileexio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wavfileexio.c; sourceTree = "<group>"; };
+		AC5179BE23DA1FBE001CED12 /* drccommonpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = drccommonpro.c; sourceTree = "<group>"; };
+		AC5179BF23DA1FBE001CED12 /* fft.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fft.c; sourceTree = "<group>"; };
+		AC5179C023DA1FBE001CED12 /* basepluspro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = basepluspro.h; sourceTree = "<group>"; };
+		AC5179C123DA1FBE001CED12 /* macros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
+		AC5179C223DA1FBE001CED12 /* msaudiotemplate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiotemplate.c; sourceTree = "<group>"; };
+		AC5179C323DA1FBE001CED12 /* msaudiolsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiolsl.c; sourceTree = "<group>"; };
+		AC5179C423DA1FBE001CED12 /* fextemplate.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = fextemplate.c.inc; sourceTree = "<group>"; };
+		AC5179C523DA1FBE001CED12 /* fntable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fntable.h; sourceTree = "<group>"; };
+		AC5179C623DA1FBE001CED12 /* chexpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = chexpro.c; sourceTree = "<group>"; };
+		AC5179C723DA1FBE001CED12 /* msaudiostdpro.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = msaudiostdpro.c; sourceTree = "<group>"; };
+		AC5179C823DA1FBE001CED12 /* lpcprolsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lpcprolsl.c; sourceTree = "<group>"; };
+		AC5179C923DA1FBE001CED12 /* float.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = float.c; sourceTree = "<group>"; };
+		AC5179CA23DA1FBE001CED12 /* fexnoise.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = fexnoise.c.inc; sourceTree = "<group>"; };
+		AC5179CB23DA1FBE001CED12 /* wmaOS.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaOS.c; sourceTree = "<group>"; };
+		AC5179CC23DA1FBE001CED12 /* enttblsdecv4.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = enttblsdecv4.c.inc; sourceTree = "<group>"; };
+		AC5179CD23DA1FBE001CED12 /* downmix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = downmix.h; sourceTree = "<group>"; };
+		AC5179CE23DA1FBE001CED12 /* drccommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = drccommon.h; sourceTree = "<group>"; };
+		AC5179CF23DA1FBE001CED12 /* dbgmacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dbgmacros.h; sourceTree = "<group>"; };
+		AC5179D023DA1FBE001CED12 /* dectables.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dectables.c; sourceTree = "<group>"; };
+		AC5179D123DA1FBE001CED12 /* lpcConst.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lpcConst.h; sourceTree = "<group>"; };
+		AC5179D223DA1FBE001CED12 /* msaudiotemplatedef.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = msaudiotemplatedef.h; sourceTree = "<group>"; };
+		AC5179D323DA1FBE001CED12 /* chexdectblspro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = chexdectblspro.h; sourceTree = "<group>"; };
+		AC5179D423DA1FBE001CED12 /* lpclsl.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lpclsl.c; sourceTree = "<group>"; };
+		AC5179D523DA1FBE001CED12 /* lpc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = lpc.c; sourceTree = "<group>"; };
+		AC5179D623DA1FBE001CED12 /* pkconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pkconfig.h; sourceTree = "<group>"; };
+		AC5179D723DA1FBE001CED12 /* dbgmacrosimpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dbgmacrosimpl.h; sourceTree = "<group>"; };
+		AC5179D823DA1FBE001CED12 /* fex.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fex.c; sourceTree = "<group>"; };
+		AC5179D923DA1FBE001CED12 /* templateincludes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = templateincludes.h; sourceTree = "<group>"; };
+		AC5179DA23DA1FBF001CED12 /* msaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = msaudio.h; sourceTree = "<group>"; };
+		AC5179DC23DA1FBF001CED12 /* wmafmt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmafmt.c; sourceTree = "<group>"; };
+		AC5179DE23DA1FBF001CED12 /* ansiwin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ansiwin.h; sourceTree = "<group>"; };
+		AC5179E023DA1FBF001CED12 /* win32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32.c; sourceTree = "<group>"; };
+		AC5179E123DA1FBF001CED12 /* win32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = win32.h; sourceTree = "<group>"; };
+		AC5179E423DA1FBF001CED12 /* pcmfmt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = pcmfmt.c; sourceTree = "<group>"; };
+		AC5179E623DA1FBF001CED12 /* wmamalloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmamalloc.h; sourceTree = "<group>"; };
+		AC5179E723DA1FBF001CED12 /* msaudiofmt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = msaudiofmt.h; sourceTree = "<group>"; };
+		AC5179E823DA1FBF001CED12 /* pcmfmt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pcmfmt.h; sourceTree = "<group>"; };
+		AC5179E923DA1FBF001CED12 /* wmaerrormacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaerrormacros.h; sourceTree = "<group>"; };
+		AC5179EA23DA1FBF001CED12 /* wmachmtx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmachmtx.h; sourceTree = "<group>"; };
+		AC5179EB23DA1FBF001CED12 /* crc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crc.h; sourceTree = "<group>"; };
+		AC5179EC23DA1FBF001CED12 /* wmawfxdefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmawfxdefs.h; sourceTree = "<group>"; };
+		AC5179ED23DA1FBF001CED12 /* mmreg_.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mmreg_.h; sourceTree = "<group>"; };
+		AC5179EE23DA1FBF001CED12 /* wmatypes_ansi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmatypes_ansi.h; sourceTree = "<group>"; };
+		AC5179EF23DA1FBF001CED12 /* wmapcmacc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmapcmacc.h; sourceTree = "<group>"; };
+		AC5179F023DA1FBF001CED12 /* wmaresults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaresults.h; sourceTree = "<group>"; };
+		AC5179F123DA1FBF001CED12 /* wmaltrt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaltrt.h; sourceTree = "<group>"; };
+		AC5179F223DA1FBF001CED12 /* wmacommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmacommon.h; sourceTree = "<group>"; };
+		AC5179F323DA1FBF001CED12 /* wmaassert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmaassert.h; sourceTree = "<group>"; };
+		AC5179F423DA1FBF001CED12 /* wmatypes_x86.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmatypes_x86.h; sourceTree = "<group>"; };
+		AC5179F523DA1FBF001CED12 /* wmabuffilt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmabuffilt.h; sourceTree = "<group>"; };
+		AC5179F623DA1FBF001CED12 /* wmatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmatypes.h; sourceTree = "<group>"; };
+		AC5179F723DA1FBF001CED12 /* wmawintypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmawintypes.h; sourceTree = "<group>"; };
+		AC5179F823DA1FBF001CED12 /* wmatyps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmatyps.h; sourceTree = "<group>"; };
+		AC5179F923DA1FBF001CED12 /* wmartmacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wmartmacros.h; sourceTree = "<group>"; };
+		AC5179FB23DA1FBF001CED12 /* wmapcmacc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmapcmacc.c; sourceTree = "<group>"; };
+		AC5179FC23DA1FBF001CED12 /* wmaerror.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaerror.c; sourceTree = "<group>"; };
+		AC5179FD23DA1FBF001CED12 /* wmamalloc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmamalloc.c; sourceTree = "<group>"; };
+		AC5179FF23DA1FBF001CED12 /* crc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = crc.c; sourceTree = "<group>"; };
+		AC517A0123DA1FBF001CED12 /* wmaltrt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmaltrt.c; sourceTree = "<group>"; };
+		AC517A0223DA1FBF001CED12 /* chmtxtemplate.c.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = chmtxtemplate.c.inc; sourceTree = "<group>"; };
+		AC517A0323DA1FBF001CED12 /* wmabuffilt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmabuffilt.c; sourceTree = "<group>"; };
+		AC517A0423DA1FBF001CED12 /* wmachmtx.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wmachmtx.c; sourceTree = "<group>"; };
+		AC517A0623DA1FBF001CED12 /* WMAStdConfigs.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMAStdConfigs.xls; sourceTree = "<group>"; };
+		AC517A0723DA1FBF001CED12 /* ASF_Specification.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = ASF_Specification.doc; sourceTree = "<group>"; };
+		AC517A0823DA1FBF001CED12 /* wma10dec_readme.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = wma10dec_readme.doc; sourceTree = "<group>"; };
+		AC517A0923DA1FBF001CED12 /* WMAProDecoderSpec.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMAProDecoderSpec.doc; sourceTree = "<group>"; };
+		AC517A0A23DA1FBF001CED12 /* WMAProReconDomainSignalFlow.vsd */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMAProReconDomainSignalFlow.vsd; sourceTree = "<group>"; };
+		AC517A0B23DA1FBF001CED12 /* WMAStdDecoderSpec.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMAStdDecoderSpec.doc; sourceTree = "<group>"; };
+		AC517A0C23DA1FBF001CED12 /* wmaprodecoder.vsd */ = {isa = PBXFileReference; lastKnownFileType = file; path = wmaprodecoder.vsd; sourceTree = "<group>"; };
+		AC517A0D23DA1FBF001CED12 /* WMALslDecoderSpec.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMALslDecoderSpec.doc; sourceTree = "<group>"; };
+		AC517A0E23DA1FBF001CED12 /* WMADecoderPkFAQ.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = WMADecoderPkFAQ.doc; sourceTree = "<group>"; };
+		AC517A0F23DA1FBF001CED12 /* wmastddecoder.vsd */ = {isa = PBXFileReference; lastKnownFileType = file; path = wmastddecoder.vsd; sourceTree = "<group>"; };
+		AC517A1023DA1FBF001CED12 /* eula.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = eula.txt; sourceTree = "<group>"; };
+		AC517A7923DA2049001CED12 /* libWMSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWMSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACE4AF751DB5958B0099F1E3 /* BltSbcDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BltSbcDecoder.c; path = SBC/BltSbcDecoder.c; sourceTree = "<group>"; };
 		ACE4AF761DB5958B0099F1E3 /* BltSbcDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BltSbcDecoder.h; path = SBC/BltSbcDecoder.h; sourceTree = "<group>"; };
 		ACE4AF791DB59C990099F1E3 /* BltSbcParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BltSbcParser.c; path = SBC/BltSbcParser.c; sourceTree = "<group>"; };
@@ -2159,6 +2454,9 @@
 		ACE4B0061DB6DDA00099F1E3 /* data_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data_types.h; sourceTree = "<group>"; };
 		ACE4B0071DB6DDA00099F1E3 /* gki_int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gki_int.h; sourceTree = "<group>"; };
 		ACE4B0081DB6DDA00099F1E3 /* gki_ulinux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gki_ulinux.c; sourceTree = "<group>"; };
+		ACEAD39423F2102A0043F1EA /* libBltWmaDecoder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBltWmaDecoder.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACFA51CC23E7F712002A8233 /* BltWmaDecoderPlugin_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BltWmaDecoderPlugin_iOS.h; sourceTree = "<group>"; };
+		ACFA51CD23E7F712002A8233 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CA0487870C99E13800638991 /* BltAdtsParser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltAdtsParser.h; sourceTree = "<group>"; };
 		CA0487880C99E13800638991 /* BltAdtsParser.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = BltAdtsParser.c; sourceTree = "<group>"; };
 		CA0487ED0C99EBF900638991 /* BltCommonMediaTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BltCommonMediaTypes.h; sourceTree = "<group>"; };
@@ -3183,7 +3481,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AC517A7723DA2049001CED12 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ACE4AF9B1DB6DAC30099F1E3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACEAD39223F2102A0043F1EA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3286,6 +3598,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACEAD39E23F22F460043F1EA /* libWMSDK.a in Frameworks */,
+				ACEAD39D23F22EB30043F1EA /* libBltWmaDecoder.a in Frameworks */,
 				CA53C0C110A6278700950FAF /* libBlueTune.a in Frameworks */,
 				CA53C1CC10A6AA7100950FAF /* libNeptune.a in Frameworks */,
 				CA53C1D410A6AA7F00950FAF /* libAtomix.a in Frameworks */,
@@ -3333,6 +3647,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA58271A0E68B3F8006CC501 /* libBlueTune.a in Frameworks */,
+				AC517B7023DA9E24001CED12 /* libAtomix.a in Frameworks */,
+				AC517B7323DA9E56001CED12 /* libWMSDK.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3477,8 +3793,8 @@
 				CA5041D50C5AE52B0060E6FE /* Source */,
 				CA5B32C70D2DCAAE00F3D391 /* Libraries */,
 				CA5049B10C5C53440060E6FE /* ThirdParty */,
+				ACEAD39A23F229BD0043F1EA /* Modules */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
-				CA418B251950F3AD00D202E0 /* BlueTune-Node */,
 				CA13EF5B15E71BA500214EE1 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				CA1EC10E0ED29A1C0033F894 /* Resources */,
@@ -3517,6 +3833,8 @@
 				CAB4C85E18566783006EFEC1 /* CallbackInputExample */,
 				CA418B231950F3AD00D202E0 /* bluetune.node.bundle */,
 				ACE4AF9E1DB6DAC30099F1E3 /* libBluedroidSBC.a */,
+				AC517A7923DA2049001CED12 /* libWMSDK.a */,
+				ACEAD39423F2102A0043F1EA /* libBltWmaDecoder.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3536,6 +3854,346 @@
 				AC1A1C891DB73B67004FCF6E /* BltSbcEncoder.h */,
 			);
 			path = SBC;
+			sourceTree = "<group>";
+		};
+		AC5178E523DA1FBE001CED12 /* WMA10Dec */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178E623DA1FBE001CED12 /* common */,
+				AC5178F123DA1FBE001CED12 /* audio */,
+				AC517A0523DA1FBF001CED12 /* doc */,
+			);
+			name = WMA10Dec;
+			path = WMSDK/WMPK/WMA10Dec;
+			sourceTree = "<group>";
+		};
+		AC5178E623DA1FBE001CED12 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178E723DA1FBE001CED12 /* include */,
+				AC5178ED23DA1FBE001CED12 /* cpudetect */,
+				AC5178EF23DA1FBE001CED12 /* logging */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		AC5178E723DA1FBE001CED12 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178E823DA1FBE001CED12 /* wmspecstrings_adt.h */,
+				AC5178E923DA1FBE001CED12 /* wmspecstrings_undef.h */,
+				AC5178EA23DA1FBE001CED12 /* wmsal.h */,
+				AC5178EB23DA1FBE001CED12 /* wmspecstrings_strict.h */,
+				AC5178EC23DA1FBE001CED12 /* wmspecstring.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		AC5178ED23DA1FBE001CED12 /* cpudetect */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178EE23DA1FBE001CED12 /* cpudetect.h */,
+			);
+			path = cpudetect;
+			sourceTree = "<group>";
+		};
+		AC5178EF23DA1FBE001CED12 /* logging */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F023DA1FBE001CED12 /* wmdsplogging.h */,
+			);
+			path = logging;
+			sourceTree = "<group>";
+		};
+		AC5178F123DA1FBE001CED12 /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F223DA1FBE001CED12 /* wmaudio */,
+				AC5179E223DA1FBF001CED12 /* common */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
+		AC5178F223DA1FBE001CED12 /* wmaudio */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F323DA1FBE001CED12 /* v10 */,
+			);
+			path = wmaudio;
+			sourceTree = "<group>";
+		};
+		AC5178F323DA1FBE001CED12 /* v10 */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F423DA1FBE001CED12 /* encoder */,
+				AC5178F823DA1FBE001CED12 /* include */,
+				AC51790023DA1FBE001CED12 /* decoder */,
+				AC51799023DA1FBE001CED12 /* asfparse_s */,
+				AC51799B23DA1FBE001CED12 /* common */,
+				AC5179DB23DA1FBF001CED12 /* fmthlpr */,
+				AC5179DD23DA1FBF001CED12 /* win32 */,
+			);
+			path = v10;
+			sourceTree = "<group>";
+		};
+		AC5178F423DA1FBE001CED12 /* encoder */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F523DA1FBE001CED12 /* tables_rc.h */,
+				AC5178F623DA1FBE001CED12 /* wmavechufftbls.c */,
+				AC5178F723DA1FBE001CED12 /* tables_rc.c */,
+			);
+			path = encoder;
+			sourceTree = "<group>";
+		};
+		AC5178F823DA1FBE001CED12 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				AC5178F923DA1FBE001CED12 /* config.h */,
+				AC5178FA23DA1FBE001CED12 /* wmafmt.h */,
+				AC5178FB23DA1FBE001CED12 /* wmadec.h */,
+				AC5178FC23DA1FBE001CED12 /* playropt.h */,
+				AC5178FD23DA1FBE001CED12 /* wmaerror.h */,
+				AC5178FE23DA1FBE001CED12 /* AutoProfile.h */,
+				AC5178FF23DA1FBE001CED12 /* configcommon.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		AC51790023DA1FBE001CED12 /* decoder */ = {
+			isa = PBXGroup;
+			children = (
+				AC51790123DA1FBE001CED12 /* losslessdecprolsl.c */,
+				AC51790223DA1FBE001CED12 /* strmdec_wma.h */,
+				AC51790323DA1FBE001CED12 /* losslessdecpro.c */,
+				AC51790423DA1FBE001CED12 /* entropydec.h */,
+				AC51790523DA1FBE001CED12 /* wmaprodecS_api.c.disabled */,
+				AC51790623DA1FBE001CED12 /* huffdec.h */,
+				AC51790723DA1FBE001CED12 /* wmaprodecS_api.h */,
+				AC51790823DA1FBE001CED12 /* baseplusdecpro.h */,
+				AC51790923DA1FBE001CED12 /* msaudiodec.h */,
+				AC51790A23DA1FBE001CED12 /* strmdec_wma.c */,
+				AC51790B23DA1FBE001CED12 /* losslessdeclsl.c */,
+				AC51790C23DA1FBE001CED12 /* entropydec.c */,
+				AC51790D23DA1FBE001CED12 /* entropydecprolsl.c */,
+				AC51790E23DA1FBE001CED12 /* msaudiodectemplate.c.inc */,
+				AC51790F23DA1FBE001CED12 /* entropydecpro.c */,
+				AC51791023DA1FBE001CED12 /* fexdec_lowrate.c.inc */,
+				AC51791123DA1FBE001CED12 /* chexdecpro.c */,
+				AC51791223DA1FBE001CED12 /* entropydecstd.c */,
+				AC51791323DA1FBE001CED12 /* msaudiodec.c */,
+				AC51791423DA1FBE001CED12 /* baseplusdecpro.c */,
+				AC51791523DA1FBE001CED12 /* fexdec.c */,
+				AC51791623DA1FBE001CED12 /* huffdec.c */,
+			);
+			path = decoder;
+			sourceTree = "<group>";
+		};
+		AC51799023DA1FBE001CED12 /* asfparse_s */ = {
+			isa = PBXGroup;
+			children = (
+				AC51799123DA1FBE001CED12 /* wmaudio.h */,
+				AC51799223DA1FBE001CED12 /* wmaerr.h */,
+				AC51799323DA1FBE001CED12 /* wmaudio_type.h */,
+				AC51799423DA1FBE001CED12 /* wmaudio.c */,
+				AC51799523DA1FBE001CED12 /* loadstuff.h */,
+				AC51799623DA1FBE001CED12 /* wmaudio_inc.h */,
+				AC51799723DA1FBE001CED12 /* wmaudio_parse.c */,
+				AC51799823DA1FBE001CED12 /* wmaguids.h */,
+				AC51799923DA1FBE001CED12 /* asfwmatypes.h */,
+				AC51799A23DA1FBE001CED12 /* wmaudio_audec.c */,
+			);
+			path = asfparse_s;
+			sourceTree = "<group>";
+		};
+		AC51799B23DA1FBE001CED12 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				AC51799C23DA1FBE001CED12 /* msaudiopro.c */,
+				AC51799D23DA1FBE001CED12 /* basepluspro.c */,
+				AC51799E23DA1FBE001CED12 /* drctables.c.inc */,
+				AC51799F23DA1FBE001CED12 /* dectablespro.c */,
+				AC5179A023DA1FBE001CED12 /* dectablesstdpro.c */,
+				AC5179A123DA1FBE001CED12 /* catchflops.h */,
+				AC5179A223DA1FBE001CED12 /* msaudiostd.c */,
+				AC5179A323DA1FBE001CED12 /* wavfileexio.h */,
+				AC5179A423DA1FBE001CED12 /* fastfloat.h */,
+				AC5179A523DA1FBE001CED12 /* lowrate_common.h */,
+				AC5179A623DA1FBE001CED12 /* dectablesstd.c */,
+				AC5179A723DA1FBE001CED12 /* lowrate_commonstd.c */,
+				AC5179A823DA1FBE001CED12 /* wmaOS.h */,
+				AC5179A923DA1FBE001CED12 /* fexdectbls.c.inc */,
+				AC5179AA23DA1FBE001CED12 /* msaudiotemplate.h */,
+				AC5179AB23DA1FBE001CED12 /* chexpro.h */,
+				AC5179AC23DA1FBE001CED12 /* drcprotemplate.c.inc */,
+				AC5179AD23DA1FBE001CED12 /* fntableimpl.h */,
+				AC5179AE23DA1FBE001CED12 /* DecTables.h */,
+				AC5179AF23DA1FBE001CED12 /* AutoProfile.c */,
+				AC5179B023DA1FBE001CED12 /* msaudioprotemplate.c */,
+				AC5179B123DA1FBE001CED12 /* reverbfilter.c.inc */,
+				AC5179B223DA1FBE001CED12 /* downmix.c */,
+				AC5179B323DA1FBE001CED12 /* applyreflectionv3.h */,
+				AC5179B423DA1FBE001CED12 /* fexdectbls.h */,
+				AC5179B523DA1FBE001CED12 /* msaudio.c */,
+				AC5179B623DA1FBE001CED12 /* lpcstd.c */,
+				AC5179B723DA1FBE001CED12 /* enttblsdecv4.h */,
+				AC5179B823DA1FBE001CED12 /* chexdectblspro.c.inc */,
+				AC5179B923DA1FBE001CED12 /* fex.h */,
+				AC5179BA23DA1FBE001CED12 /* configcommon.c */,
+				AC5179BB23DA1FBE001CED12 /* constants.h */,
+				AC5179BC23DA1FBE001CED12 /* lowrate_common.c */,
+				AC5179BD23DA1FBE001CED12 /* wavfileexio.c */,
+				AC5179BE23DA1FBE001CED12 /* drccommonpro.c */,
+				AC5179BF23DA1FBE001CED12 /* fft.c */,
+				AC5179C023DA1FBE001CED12 /* basepluspro.h */,
+				AC5179C123DA1FBE001CED12 /* macros.h */,
+				AC5179C223DA1FBE001CED12 /* msaudiotemplate.c */,
+				AC5179C323DA1FBE001CED12 /* msaudiolsl.c */,
+				AC5179C423DA1FBE001CED12 /* fextemplate.c.inc */,
+				AC5179C523DA1FBE001CED12 /* fntable.h */,
+				AC5179C623DA1FBE001CED12 /* chexpro.c */,
+				AC5179C723DA1FBE001CED12 /* msaudiostdpro.c */,
+				AC5179C823DA1FBE001CED12 /* lpcprolsl.c */,
+				AC5179C923DA1FBE001CED12 /* float.c */,
+				AC5179CA23DA1FBE001CED12 /* fexnoise.c.inc */,
+				AC5179CB23DA1FBE001CED12 /* wmaOS.c */,
+				AC5179CC23DA1FBE001CED12 /* enttblsdecv4.c.inc */,
+				AC5179CD23DA1FBE001CED12 /* downmix.h */,
+				AC5179CE23DA1FBE001CED12 /* drccommon.h */,
+				AC5179CF23DA1FBE001CED12 /* dbgmacros.h */,
+				AC5179D023DA1FBE001CED12 /* dectables.c */,
+				AC5179D123DA1FBE001CED12 /* lpcConst.h */,
+				AC5179D223DA1FBE001CED12 /* msaudiotemplatedef.h */,
+				AC5179D323DA1FBE001CED12 /* chexdectblspro.h */,
+				AC5179D423DA1FBE001CED12 /* lpclsl.c */,
+				AC5179D523DA1FBE001CED12 /* lpc.c */,
+				AC5179D623DA1FBE001CED12 /* pkconfig.h */,
+				AC5179D723DA1FBE001CED12 /* dbgmacrosimpl.h */,
+				AC5179D823DA1FBE001CED12 /* fex.c */,
+				AC5179D923DA1FBE001CED12 /* templateincludes.h */,
+				AC5179DA23DA1FBF001CED12 /* msaudio.h */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		AC5179DB23DA1FBF001CED12 /* fmthlpr */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179DC23DA1FBF001CED12 /* wmafmt.c */,
+			);
+			path = fmthlpr;
+			sourceTree = "<group>";
+		};
+		AC5179DD23DA1FBF001CED12 /* win32 */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179DE23DA1FBF001CED12 /* ansiwin.h */,
+				AC5179DF23DA1FBF001CED12 /* decoder */,
+				AC5179E123DA1FBF001CED12 /* win32.h */,
+			);
+			path = win32;
+			sourceTree = "<group>";
+		};
+		AC5179DF23DA1FBF001CED12 /* decoder */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179E023DA1FBF001CED12 /* win32.c */,
+			);
+			path = decoder;
+			sourceTree = "<group>";
+		};
+		AC5179E223DA1FBF001CED12 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179E323DA1FBF001CED12 /* pcmfmt */,
+				AC5179E523DA1FBF001CED12 /* include */,
+				AC5179FA23DA1FBF001CED12 /* primitive */,
+				AC5179FE23DA1FBF001CED12 /* crc */,
+				AC517A0023DA1FBF001CED12 /* chanmtx */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		AC5179E323DA1FBF001CED12 /* pcmfmt */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179E423DA1FBF001CED12 /* pcmfmt.c */,
+			);
+			path = pcmfmt;
+			sourceTree = "<group>";
+		};
+		AC5179E523DA1FBF001CED12 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179E623DA1FBF001CED12 /* wmamalloc.h */,
+				AC5179E723DA1FBF001CED12 /* msaudiofmt.h */,
+				AC5179E823DA1FBF001CED12 /* pcmfmt.h */,
+				AC5179E923DA1FBF001CED12 /* wmaerrormacros.h */,
+				AC5179EA23DA1FBF001CED12 /* wmachmtx.h */,
+				AC5179EB23DA1FBF001CED12 /* crc.h */,
+				AC5179EC23DA1FBF001CED12 /* wmawfxdefs.h */,
+				AC5179ED23DA1FBF001CED12 /* mmreg_.h */,
+				AC5179EE23DA1FBF001CED12 /* wmatypes_ansi.h */,
+				AC5179EF23DA1FBF001CED12 /* wmapcmacc.h */,
+				AC5179F023DA1FBF001CED12 /* wmaresults.h */,
+				AC5179F123DA1FBF001CED12 /* wmaltrt.h */,
+				AC5179F223DA1FBF001CED12 /* wmacommon.h */,
+				AC5179F323DA1FBF001CED12 /* wmaassert.h */,
+				AC5179F423DA1FBF001CED12 /* wmatypes_x86.h */,
+				AC5179F523DA1FBF001CED12 /* wmabuffilt.h */,
+				AC5179F623DA1FBF001CED12 /* wmatypes.h */,
+				AC5179F723DA1FBF001CED12 /* wmawintypes.h */,
+				AC5179F823DA1FBF001CED12 /* wmatyps.h */,
+				AC5179F923DA1FBF001CED12 /* wmartmacros.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		AC5179FA23DA1FBF001CED12 /* primitive */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179FB23DA1FBF001CED12 /* wmapcmacc.c */,
+				AC5179FC23DA1FBF001CED12 /* wmaerror.c */,
+				AC5179FD23DA1FBF001CED12 /* wmamalloc.c */,
+			);
+			path = primitive;
+			sourceTree = "<group>";
+		};
+		AC5179FE23DA1FBF001CED12 /* crc */ = {
+			isa = PBXGroup;
+			children = (
+				AC5179FF23DA1FBF001CED12 /* crc.c */,
+			);
+			path = crc;
+			sourceTree = "<group>";
+		};
+		AC517A0023DA1FBF001CED12 /* chanmtx */ = {
+			isa = PBXGroup;
+			children = (
+				AC517A0123DA1FBF001CED12 /* wmaltrt.c */,
+				AC517A0223DA1FBF001CED12 /* chmtxtemplate.c.inc */,
+				AC517A0323DA1FBF001CED12 /* wmabuffilt.c */,
+				AC517A0423DA1FBF001CED12 /* wmachmtx.c */,
+			);
+			path = chanmtx;
+			sourceTree = "<group>";
+		};
+		AC517A0523DA1FBF001CED12 /* doc */ = {
+			isa = PBXGroup;
+			children = (
+				AC517A0623DA1FBF001CED12 /* WMAStdConfigs.xls */,
+				AC517A0723DA1FBF001CED12 /* ASF_Specification.doc */,
+				AC517A0823DA1FBF001CED12 /* wma10dec_readme.doc */,
+				AC517A0923DA1FBF001CED12 /* WMAProDecoderSpec.doc */,
+				AC517A0A23DA1FBF001CED12 /* WMAProReconDomainSignalFlow.vsd */,
+				AC517A0B23DA1FBF001CED12 /* WMAStdDecoderSpec.doc */,
+				AC517A0C23DA1FBF001CED12 /* wmaprodecoder.vsd */,
+				AC517A0D23DA1FBF001CED12 /* WMALslDecoderSpec.doc */,
+				AC517A0E23DA1FBF001CED12 /* WMADecoderPkFAQ.doc */,
+				AC517A0F23DA1FBF001CED12 /* wmastddecoder.vsd */,
+				AC517A1023DA1FBF001CED12 /* eula.txt */,
+			);
+			path = doc;
 			sourceTree = "<group>";
 		};
 		ACE4AF741DB5957F0099F1E3 /* SBC */ = {
@@ -3684,6 +4342,25 @@
 				ACE4B0081DB6DDA00099F1E3 /* gki_ulinux.c */,
 			);
 			path = ulinux;
+			sourceTree = "<group>";
+		};
+		ACEAD39A23F229BD0043F1EA /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				CA418B251950F3AD00D202E0 /* BlueTune-Node */,
+				ACFA51CB23E7F712002A8233 /* BltWmaDecoderPlugin-iOS */,
+			);
+			name = Modules;
+			path = "BltWmaDecoderPlugin-iOS";
+			sourceTree = "<group>";
+		};
+		ACFA51CB23E7F712002A8233 /* BltWmaDecoderPlugin-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				ACFA51CC23E7F712002A8233 /* BltWmaDecoderPlugin_iOS.h */,
+				ACFA51CD23E7F712002A8233 /* Info.plist */,
+			);
+			name = "BltWmaDecoderPlugin-iOS";
 			sourceTree = "<group>";
 		};
 		C6A0FF2B0290797F04C91782 /* Documentation */ = {
@@ -3927,7 +4604,8 @@
 				CA418B301950F3AD00D202E0 /* BlueTune_Node.cp */,
 				CA418B261950F3AD00D202E0 /* Supporting Files */,
 			);
-			path = "BlueTune-Node";
+			name = "BlueTune-Node";
+			path = "../BlueTune-Node";
 			sourceTree = "<group>";
 		};
 		CA418B261950F3AD00D202E0 /* Supporting Files */ = {
@@ -4582,10 +5260,11 @@
 			children = (
 				ACE4AFA21DB6DAD70099F1E3 /* BluedroidSBC */,
 				CADFC16D161929C9004F3C53 /* FhgAAC */,
-				CAD7878712A33F5E00D7EBA7 /* OpenCoreAAC */,
-				CA6434330C97197C00F67CD5 /* HelixAAC */,
 				CA5049CA0C5C53440060E6FE /* FLAC */,
+				CA6434330C97197C00F67CD5 /* HelixAAC */,
+				CAD7878712A33F5E00D7EBA7 /* OpenCoreAAC */,
 				CA504A580C5C53440060E6FE /* Vorbis */,
+				AC5178E523DA1FBE001CED12 /* WMA10Dec */,
 			);
 			name = ThirdParty;
 			path = ../../../ThirdParty;
@@ -6070,6 +6749,86 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		AC517A7523DA2049001CED12 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC517AEE23DA21B7001CED12 /* wmspecstrings_strict.h in Headers */,
+				AC517ADC23DA2164001CED12 /* config.h in Headers */,
+				AC517A9323DA2107001CED12 /* wmaOS.h in Headers */,
+				AC517ACA23DA2131001CED12 /* huffdec.h in Headers */,
+				AC517B0323DA21D7001CED12 /* wmatyps.h in Headers */,
+				AC517A7E23DA20F0001CED12 /* wmaerr.h in Headers */,
+				AC517A8C23DA2107001CED12 /* catchflops.h in Headers */,
+				AC517AE123DA2164001CED12 /* AutoProfile.h in Headers */,
+				AC517AB023DA2107001CED12 /* fntable.h in Headers */,
+				AC517B0123DA21D7001CED12 /* wmatypes.h in Headers */,
+				AC517A8E23DA2107001CED12 /* wavfileexio.h in Headers */,
+				AC517A9523DA2107001CED12 /* msaudiotemplate.h in Headers */,
+				AC517A9023DA2107001CED12 /* lowrate_common.h in Headers */,
+				AC517ACD23DA2131001CED12 /* msaudiodec.h in Headers */,
+				AC517AA623DA2107001CED12 /* constants.h in Headers */,
+				AC517ABE23DA2107001CED12 /* chexdectblspro.h in Headers */,
+				AC517AC523DA2107001CED12 /* msaudio.h in Headers */,
+				AC517AC223DA2107001CED12 /* dbgmacrosimpl.h in Headers */,
+				AC517ADD23DA2164001CED12 /* wmafmt.h in Headers */,
+				AC517AEC23DA21B7001CED12 /* wmspecstrings_undef.h in Headers */,
+				AC517AAC23DA2107001CED12 /* macros.h in Headers */,
+				AC517AFF23DA21D7001CED12 /* wmatypes_x86.h in Headers */,
+				AC517A9F23DA2107001CED12 /* fexdectbls.h in Headers */,
+				AC517ABC23DA2107001CED12 /* lpcConst.h in Headers */,
+				AC517AB823DA2107001CED12 /* downmix.h in Headers */,
+				AC517AC423DA2107001CED12 /* templateincludes.h in Headers */,
+				AC517ACC23DA2131001CED12 /* baseplusdecpro.h in Headers */,
+				AC517ADE23DA2164001CED12 /* wmadec.h in Headers */,
+				AC517AC123DA2107001CED12 /* pkconfig.h in Headers */,
+				AC517AF123DA21D7001CED12 /* wmamalloc.h in Headers */,
+				AC517AF523DA21D7001CED12 /* wmachmtx.h in Headers */,
+				AC517AFC23DA21D7001CED12 /* wmaltrt.h in Headers */,
+				AC517B0423DA21D7001CED12 /* wmartmacros.h in Headers */,
+				AC517AEF23DA21B7001CED12 /* wmspecstring.h in Headers */,
+				AC517AE023DA2164001CED12 /* wmaerror.h in Headers */,
+				AC517AE223DA2164001CED12 /* configcommon.h in Headers */,
+				AC517AF023DA21C2001CED12 /* wmdsplogging.h in Headers */,
+				AC517AEB23DA21B7001CED12 /* wmspecstrings_adt.h in Headers */,
+				AC517ADF23DA2164001CED12 /* playropt.h in Headers */,
+				AC517A8123DA20F0001CED12 /* loadstuff.h in Headers */,
+				AC517B0023DA21D7001CED12 /* wmabuffilt.h in Headers */,
+				AC517AF923DA21D7001CED12 /* wmatypes_ansi.h in Headers */,
+				AC517A9823DA2107001CED12 /* fntableimpl.h in Headers */,
+				AC517AB923DA2107001CED12 /* drccommon.h in Headers */,
+				AC517A9923DA2107001CED12 /* DecTables.h in Headers */,
+				AC517AF223DA21D7001CED12 /* msaudiofmt.h in Headers */,
+				AC517AA223DA2107001CED12 /* enttblsdecv4.h in Headers */,
+				AC517A7F23DA20F0001CED12 /* wmaudio_type.h in Headers */,
+				AC517AC923DA2131001CED12 /* entropydec.h in Headers */,
+				AC517AF723DA21D7001CED12 /* wmawfxdefs.h in Headers */,
+				AC517A8F23DA2107001CED12 /* fastfloat.h in Headers */,
+				AC517AF823DA21D7001CED12 /* mmreg_.h in Headers */,
+				AC517AED23DA21B7001CED12 /* wmsal.h in Headers */,
+				AC517AFA23DA21D7001CED12 /* wmapcmacc.h in Headers */,
+				AC517A8223DA20F0001CED12 /* wmaudio_inc.h in Headers */,
+				AC517AC723DA2131001CED12 /* strmdec_wma.h in Headers */,
+				AC517AF323DA21D7001CED12 /* pcmfmt.h in Headers */,
+				AC517AF423DA21D7001CED12 /* wmaerrormacros.h in Headers */,
+				AC517A9623DA2107001CED12 /* chexpro.h in Headers */,
+				AC517A8523DA20F0001CED12 /* asfwmatypes.h in Headers */,
+				AC517B0223DA21D7001CED12 /* wmawintypes.h in Headers */,
+				AC517A7D23DA20F0001CED12 /* wmaudio.h in Headers */,
+				AC517A8423DA20F0001CED12 /* wmaguids.h in Headers */,
+				AC517ABA23DA2107001CED12 /* dbgmacros.h in Headers */,
+				AC517AFE23DA21D7001CED12 /* wmaassert.h in Headers */,
+				AC517AFB23DA21D7001CED12 /* wmaresults.h in Headers */,
+				AC517AAB23DA2107001CED12 /* basepluspro.h in Headers */,
+				AC517ACB23DA2131001CED12 /* wmaprodecS_api.h in Headers */,
+				AC517AA423DA2107001CED12 /* fex.h in Headers */,
+				AC517AF623DA21D7001CED12 /* crc.h in Headers */,
+				AC517AFD23DA21D7001CED12 /* wmacommon.h in Headers */,
+				AC517A9E23DA2107001CED12 /* applyreflectionv3.h in Headers */,
+				AC517ABD23DA2107001CED12 /* msaudiotemplatedef.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ACE4AF9C1DB6DAC30099F1E3 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -6097,6 +6856,14 @@
 				ACE4AFF31DB6DAFD0099F1E3 /* sbc_encoder.h in Headers */,
 				ACE4AFF11DB6DAFD0099F1E3 /* sbc_dct.h in Headers */,
 				ACE4AFD81DB6DAFD0099F1E3 /* oi_codec_sbc_private.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACEAD39023F2102A0043F1EA /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACEAD39823F210420043F1EA /* BltWmaDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6661,6 +7428,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		AC517A7823DA2049001CED12 /* WMSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC517A7A23DA2049001CED12 /* Build configuration list for PBXNativeTarget "WMSDK" */;
+			buildPhases = (
+				AC517A7523DA2049001CED12 /* Headers */,
+				AC517A7623DA2049001CED12 /* Sources */,
+				AC517A7723DA2049001CED12 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WMSDK;
+			productName = WMSDK;
+			productReference = AC517A7923DA2049001CED12 /* libWMSDK.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		ACE4AF9D1DB6DAC30099F1E3 /* BluedroidSBC */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = ACE4AF9F1DB6DAC30099F1E3 /* Build configuration list for PBXNativeTarget "BluedroidSBC" */;
@@ -6676,6 +7460,23 @@
 			name = BluedroidSBC;
 			productName = BluedroidSBC;
 			productReference = ACE4AF9E1DB6DAC30099F1E3 /* libBluedroidSBC.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		ACEAD39323F2102A0043F1EA /* BltWmaDecoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ACEAD39523F2102A0043F1EA /* Build configuration list for PBXNativeTarget "BltWmaDecoder" */;
+			buildPhases = (
+				ACEAD39023F2102A0043F1EA /* Headers */,
+				ACEAD39123F2102A0043F1EA /* Sources */,
+				ACEAD39223F2102A0043F1EA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BltWmaDecoder;
+			productName = BltWmaDecoder;
+			productReference = ACEAD39423F2102A0043F1EA /* libBltWmaDecoder.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		CA0C9AF40D15D27D00E23496 /* BtPlay */ = {
@@ -6890,6 +7691,8 @@
 			);
 			dependencies = (
 				CA5827170E68B3C2006CC501 /* PBXTargetDependency */,
+				AC517B6F23DA9E19001CED12 /* PBXTargetDependency */,
+				AC517B7223DA9E48001CED12 /* PBXTargetDependency */,
 			);
 			name = BltWmaDecoderPlugin;
 			productName = BltWmaDecoderInputPlugin;
@@ -7121,11 +7924,24 @@
 			attributes = {
 				LastUpgradeCheck = 0510;
 				TargetAttributes = {
+					AC517A7823DA2049001CED12 = {
+						CreatedOnToolsVersion = 11.2.1;
+						DevelopmentTeam = 6M24L92H32;
+						ProvisioningStyle = Automatic;
+					};
 					ACE4AF9D1DB6DAC30099F1E3 = {
 						CreatedOnToolsVersion = 8.0;
 						ProvisioningStyle = Automatic;
 					};
+					ACEAD39323F2102A0043F1EA = {
+						CreatedOnToolsVersion = 11.2.1;
+						DevelopmentTeam = 9H2R85ZXNZ;
+						ProvisioningStyle = Automatic;
+					};
 					CA53C0B810A6277800950FAF = {
+						DevelopmentTeam = 74V8UQUMFJ;
+					};
+					CA5827120E68B39D006CC501 = {
 						DevelopmentTeam = 74V8UQUMFJ;
 					};
 				};
@@ -7179,6 +7995,7 @@
 				CA615D491044984E007E9E7B /* BltDolbyDigitalPlusParserPlugin */,
 				CA5827120E68B39D006CC501 /* BltWmaDecoderPlugin */,
 				CA13EF6E15E71C7000214EE1 /* SampleFilterPlugin */,
+				AC517A7823DA2049001CED12 /* WMSDK */,
 				CA0C9AF40D15D27D00E23496 /* BtPlay */,
 				CA9ED8330EAFAAFB003CE43C /* BtPlayX */,
 				CA550B9B0D1F372C00B22D72 /* BtController */,
@@ -7192,6 +8009,7 @@
 				CA53C0B810A6277800950FAF /* BtTouchPlayer */,
 				CAC91A5E1663202700201C94 /* BlueTune-Framework-OSX */,
 				CA418B221950F3AD00D202E0 /* BlueTune-Node */,
+				ACEAD39323F2102A0043F1EA /* BltWmaDecoder */,
 			);
 		};
 /* End PBXProject section */
@@ -7913,11 +8731,70 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AC517A7623DA2049001CED12 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC517ADA23DA2131001CED12 /* huffdec.c in Sources */,
+				AC517AA923DA2107001CED12 /* drccommonpro.c in Sources */,
+				AC517AA023DA2107001CED12 /* msaudio.c in Sources */,
+				AC517AC623DA2131001CED12 /* losslessdecprolsl.c in Sources */,
+				AC517A8823DA2107001CED12 /* basepluspro.c in Sources */,
+				AC517AD023DA2131001CED12 /* entropydec.c in Sources */,
+				AC517AE623DA2195001CED12 /* wmamalloc.c in Sources */,
+				AC517ACF23DA2131001CED12 /* losslessdeclsl.c in Sources */,
+				AC517AB323DA2107001CED12 /* lpcprolsl.c in Sources */,
+				AC517AD623DA2131001CED12 /* entropydecstd.c in Sources */,
+				AC517AB223DA2107001CED12 /* msaudiostdpro.c in Sources */,
+				AC517AA123DA2107001CED12 /* lpcstd.c in Sources */,
+				AC517ADB23DA215A001CED12 /* wmafmt.c in Sources */,
+				AC517AE323DA217F001CED12 /* win32.c in Sources */,
+				AC517ACE23DA2131001CED12 /* strmdec_wma.c in Sources */,
+				AC517AE923DA21A9001CED12 /* wmabuffilt.c in Sources */,
+				AC517A9A23DA2107001CED12 /* AutoProfile.c in Sources */,
+				AC517AAD23DA2107001CED12 /* msaudiotemplate.c in Sources */,
+				AC517A8723DA2107001CED12 /* msaudiopro.c in Sources */,
+				AC517A9223DA2107001CED12 /* lowrate_commonstd.c in Sources */,
+				AC517AEA23DA21A9001CED12 /* wmachmtx.c in Sources */,
+				AC517AC823DA2131001CED12 /* losslessdecpro.c in Sources */,
+				AC517AB423DA2107001CED12 /* float.c in Sources */,
+				AC517A8D23DA2107001CED12 /* msaudiostd.c in Sources */,
+				AC517A8323DA20F0001CED12 /* wmaudio_parse.c in Sources */,
+				AC517AD923DA2131001CED12 /* fexdec.c in Sources */,
+				AC517AD523DA2131001CED12 /* chexdecpro.c in Sources */,
+				AC517AC323DA2107001CED12 /* fex.c in Sources */,
+				AC517ABF23DA2107001CED12 /* lpclsl.c in Sources */,
+				AC517AD323DA2131001CED12 /* entropydecpro.c in Sources */,
+				AC517A8A23DA2107001CED12 /* dectablespro.c in Sources */,
+				AC517A8623DA20F0001CED12 /* wmaudio_audec.c in Sources */,
+				AC517AD123DA2131001CED12 /* entropydecprolsl.c in Sources */,
+				AC517A8B23DA2107001CED12 /* dectablesstdpro.c in Sources */,
+				AC517AB623DA2107001CED12 /* wmaOS.c in Sources */,
+				AC517A9D23DA2107001CED12 /* downmix.c in Sources */,
+				AC517AA823DA2107001CED12 /* wavfileexio.c in Sources */,
+				AC517AD723DA2131001CED12 /* msaudiodec.c in Sources */,
+				AC517AC023DA2107001CED12 /* lpc.c in Sources */,
+				AC517AE823DA21A9001CED12 /* wmaltrt.c in Sources */,
+				AC517AAA23DA2107001CED12 /* fft.c in Sources */,
+				AC517AA523DA2107001CED12 /* configcommon.c in Sources */,
+				AC517A8023DA20F0001CED12 /* wmaudio.c in Sources */,
+				AC517AA723DA2107001CED12 /* lowrate_common.c in Sources */,
+				AC517A9123DA2107001CED12 /* dectablesstd.c in Sources */,
+				AC517AE523DA2195001CED12 /* wmaerror.c in Sources */,
+				AC517AAE23DA2107001CED12 /* msaudiolsl.c in Sources */,
+				AC517AE423DA2195001CED12 /* wmapcmacc.c in Sources */,
+				AC517AE723DA219D001CED12 /* pcmfmt.c in Sources */,
+				AC517AD823DA2131001CED12 /* baseplusdecpro.c in Sources */,
+				AC517AB123DA2107001CED12 /* chexpro.c in Sources */,
+				AC517ABB23DA2107001CED12 /* dectables.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ACE4AF9A1DB6DAC30099F1E3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -7944,6 +8821,14 @@
 				ACE4AFF01DB6DAFD0099F1E3 /* synthesis-sbc.c in Sources */,
 				ACE4AFEC1DB6DAFD0099F1E3 /* oi_codec_version.c in Sources */,
 				ACE4AFEF1DB6DAFD0099F1E3 /* synthesis-dct8.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACEAD39123F2102A0043F1EA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACEAD39923F2104E0043F1EA /* BltWmaDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8076,6 +8961,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA1859CB0F22D1CD00CF3552 /* BltDynamicPluginTemplate.cpp in Sources */,
+				AC517B6D23DA9D83001CED12 /* BltWmaDecoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8512,6 +9398,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AC517B6F23DA9E19001CED12 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Atomix;
+			targetProxy = AC517B6E23DA9E19001CED12 /* PBXContainerItemProxy */;
+		};
+		AC517B7223DA9E48001CED12 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AC517A7823DA2049001CED12 /* WMSDK */;
+			targetProxy = AC517B7123DA9E48001CED12 /* PBXContainerItemProxy */;
+		};
 		CA07A3280D40228D00DC3E33 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CA550C940D2093D800B22D72 /* BtPlayerServer */;
@@ -8601,11 +9497,6 @@
 			isa = PBXTargetDependency;
 			name = Bento4;
 			targetProxy = CA44C4AA0D45231100173F5F /* PBXContainerItemProxy */;
-		};
-		CA46DD51164CC4C500E45133 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CA1EC0F80ED299AD0033F894 /* BtCocoaPlayer */;
-			targetProxy = CA46DD50164CC4C500E45133 /* PBXContainerItemProxy */;
 		};
 		CA5043CF0C5AE9470060E6FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8975,6 +9866,148 @@
 			};
 			name = Release;
 		};
+		AC517A7B23DA2049001CED12 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 6M24L92H32;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+					BUILD_INT_FLOAT,
+					ENABLE_LPC,
+					ENABLE_ALL_ENCOPT,
+					DISABLE_OPT,
+					BITSTREAM_CORRUPTION_ASSERTS,
+					WMA_DECPK_BUILD,
+					WMAAPI_NO_DRM,
+					WMAAPI_NO_DRM_STREAM,
+					DISABLE_UES,
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/common/include $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/common/include $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/wmaudio/v10/asfparse_s $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/wmaudio/v10/common";
+			};
+			name = Debug;
+		};
+		AC517A7C23DA2049001CED12 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 6M24L92H32;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					BUILD_INT_FLOAT,
+					ENABLE_LPC,
+					ENABLE_ALL_ENCOPT,
+					DISABLE_OPT,
+					BITSTREAM_CORRUPTION_ASSERTS,
+					WMA_DECPK_BUILD,
+					WMAAPI_NO_DRM,
+					WMAAPI_NO_DRM_STREAM,
+					DISABLE_UES,
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "$(ATOMIX_HOME)/Source/Core $(NEPTUNE_HOME)/Source/Core $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/common/include $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/common/include $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/wmaudio/v10/asfparse_s $(SRCROOT)/../../../ThirdParty/WMSDK/WMPK/WMA10Dec/audio/wmaudio/v10/common";
+			};
+			name = Release;
+		};
 		ACE4AFA01DB6DAC30099F1E3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -9046,6 +10079,119 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		ACEAD39623F2102A0043F1EA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 9H2R85ZXNZ;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		ACEAD39723F2102A0043F1EA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 9H2R85ZXNZ;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
@@ -9456,8 +10602,15 @@
 		CA5827140E68B39D006CC501 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				DEVELOPMENT_TEAM = 74V8UQUMFJ;
 				EXECUTABLE_PREFIX = "";
-				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_WmaDecoderModule_GetModuleObject";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_WmaDecoderModule_GetModuleObject",
+					ATX_CONFIG_ENABLE_LOGGING,
+				);
 				PRODUCT_NAME = BltWmaDecoderPlugin;
 			};
 			name = Debug;
@@ -9465,8 +10618,15 @@
 		CA5827150E68B39D006CC501 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				DEVELOPMENT_TEAM = 74V8UQUMFJ;
 				EXECUTABLE_PREFIX = "";
-				GCC_PREPROCESSOR_DEFINITIONS = "BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_WmaDecoderModule_GetModuleObject";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BLT_PLUGIN_TEMPLATE_MODULE_FACTORY_FUNCTION=BLT_WmaDecoderModule_GetModuleObject",
+					ATX_CONFIG_ENABLE_LOGGING,
+				);
 				PRODUCT_NAME = BltWmaDecoderPlugin;
 			};
 			name = Release;
@@ -9951,11 +11111,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AC517A7A23DA2049001CED12 /* Build configuration list for PBXNativeTarget "WMSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC517A7B23DA2049001CED12 /* Debug */,
+				AC517A7C23DA2049001CED12 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		ACE4AF9F1DB6DAC30099F1E3 /* Build configuration list for PBXNativeTarget "BluedroidSBC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				ACE4AFA01DB6DAC30099F1E3 /* Debug */,
 				ACE4AFA11DB6DAC30099F1E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ACEAD39523F2102A0043F1EA /* Build configuration list for PBXNativeTarget "BltWmaDecoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ACEAD39623F2102A0043F1EA /* Debug */,
+				ACEAD39723F2102A0043F1EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

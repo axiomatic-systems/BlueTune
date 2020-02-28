@@ -78,9 +78,19 @@ BtPlayerServer::~BtPlayerServer()
 /*----------------------------------------------------------------------
 |    BtPlayerServer::Run
 +---------------------------------------------------------------------*/
+#include "BltWmaDecoder.h"
+
 void
 BtPlayerServer::Run()
 {
+    // register a module
+//    {
+//        BLT_Module* wma_module = NULL;
+//        BLT_WmaDecoderModule_GetModuleObject(&wma_module);
+//        m_Player.RegisterModule(wma_module);
+//    }
+
+    // run in a loop
     NPT_Result result;
     do {
         result = m_Player.PumpMessage();

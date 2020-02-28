@@ -29,10 +29,18 @@ ATX_END_INTERFACE_DEFINITION
 /*----------------------------------------------------------------------
 |   jump functions
 +---------------------------------------------------------------------*/
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 BLT_Result 
 BLT_NetworkInputSource_Attach(BLT_NetworkInputSource* self, 
                               BLT_Stream*             stream);
 BLT_Result 
 BLT_NetworkInputSource_Detach(BLT_NetworkInputSource* self);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _BLT_NETWORK_INPUT_SOURCE_H_ */

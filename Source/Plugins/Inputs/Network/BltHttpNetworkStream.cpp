@@ -46,6 +46,7 @@ typedef struct {
     ATX_Cardinal              m_ReferenceCount;
     NPT_HttpClient*           m_HttpClient;
     NPT_HttpUrl*              m_Url;
+    NPT_HttpHeaders*          m_Headers;
     NPT_HttpResponse*         m_Response;
     NPT_InputStreamReference* m_InputStream;
     NPT_LargeSize             m_ContentLength;
@@ -166,6 +167,7 @@ HttpInputStream_Destroy(HttpInputStream* self)
 {
     delete self->m_HttpClient;
     delete self->m_Url;
+    delete self->m_Headers;
     delete self->m_Response;
     *self->m_InputStream = NULL;
     delete self->m_InputStream;
@@ -202,6 +204,13 @@ HttpInputStream_SendRequest(HttpInputStream* self, NPT_Position position)
 
     // add the ICY header that says we can deal with ICY metadata
     request.GetHeaders().SetHeader("icy-metadata", "1");
+
+    // add the other headers
+    NPT_List<NPT_HttpHeader*>::Iterator header = self->m_Headers->GetHeaders().GetFirstItem();
+    while (header) {
+        request.GetHeaders().AddHeader((*header)->GetName(), (*header)->GetValue());
+        ++header;
+    }
 
     // send the request
     result = self->m_HttpClient->SendRequest(request, self->m_Response);
@@ -557,6 +566,7 @@ HttpInputStream_Create(const char* url)
     stream->m_ReferenceCount  = 1;
     stream->m_HttpClient      = new NPT_HttpClient;
     stream->m_Url             = new NPT_HttpUrl(url);
+    stream->m_Headers         = new NPT_HttpHeaders();
     stream->m_Response        = NULL;
     stream->m_InputStream     = new NPT_InputStreamReference;
     stream->m_ContentLength   = 0;
@@ -581,10 +591,12 @@ HttpInputStream_Create(const char* url)
 |   BLT_HttpNetworkStream_Create
 +---------------------------------------------------------------------*/
 BLT_Result 
-BLT_HttpNetworkStream_Create(const char*       url, 
-                             BLT_Core*         core,
-                             ATX_InputStream** stream,
-                             BLT_MediaType**   media_type)
+BLT_HttpNetworkStream_Create(const char*                               url,
+                             const BLT_HttpNetworkStreamRequestHeader* headers,
+                             unsigned int                              header_count,
+                             BLT_Core*                                 core,
+                             ATX_InputStream**                         stream,
+                             BLT_MediaType**                           media_type)
 {
     BLT_Result result = BLT_FAILURE;
     ATX_Int32  min_buffer_fullness = 0;
@@ -607,18 +619,25 @@ BLT_HttpNetworkStream_Create(const char*       url,
             }
             if (ATX_SUCCEEDED(ATX_Properties_GetProperty(properties, BLT_HTTP_NETWORK_STREAM_MINIMUM_FULLNESS_PROPERTY, &value))) {
                 if (value.type == ATX_PROPERTY_VALUE_TYPE_INTEGER) {
-                    ATX_LOG_INFO_1("setting network stream minimum fullness to %d", min_buffer_fullness);
                     min_buffer_fullness = value.data.integer;
+                    ATX_LOG_INFO_1("setting network stream minimum fullness to %d", min_buffer_fullness);
                 }
             }
         }
     }
-    
+
     // create a stream object
     HttpInputStream* http_stream = HttpInputStream_Create(url);
     if (!http_stream->m_Url->IsValid()) {
         HttpInputStream_Destroy(http_stream);
         return BLT_ERROR_INVALID_PARAMETERS;
+    }
+
+    // copy the headers
+    if (headers) {
+        for (unsigned int i = 0; i < header_count; i++) {
+            http_stream->m_Headers->AddHeader(headers[i].name, headers[i].value);
+        }
     }
 
     // send the request

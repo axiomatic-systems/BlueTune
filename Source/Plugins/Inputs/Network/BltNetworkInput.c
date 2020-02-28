@@ -128,7 +128,9 @@ NetworkInput_Create(BLT_Module*              module,
     } else if (ATX_StringsEqualN(constructor->name, "http://", 7) ||
                ATX_StringsEqualN(constructor->name, "https://", 8)) {
         /* create an HTTP byte stream */
-        result = BLT_HttpNetworkStream_Create(constructor->name, 
+        result = BLT_HttpNetworkStream_Create(constructor->name,
+                                              NULL,
+                                              0,
                                               core, 
                                               &input->stream,
                                               &input->media_type);

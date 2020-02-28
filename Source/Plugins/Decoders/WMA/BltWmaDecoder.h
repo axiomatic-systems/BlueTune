@@ -29,10 +29,18 @@
 #include "BltTypes.h"
 #include "BltModule.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /*----------------------------------------------------------------------
 |   module
 +---------------------------------------------------------------------*/
 BLT_Result BLT_WmaDecoderModule_GetModuleObject(BLT_Module** module);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 /** @} */
 

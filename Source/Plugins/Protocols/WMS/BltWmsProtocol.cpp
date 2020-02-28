@@ -20,6 +20,7 @@
 #include "BltPacketProducer.h"
 #include "BltByteStreamUser.h"
 #include "BltStream.h"
+#include "BltHttpNetworkStream.h"
 
 /*----------------------------------------------------------------------
 |   logging
@@ -92,11 +93,11 @@ public:
         NPT_UInt32 m_DataRate;
         NPT_UInt16 m_LanguageIdIndex;
     };
-    WmsClient(const char* url);
+    WmsClient(const char* url, BLT_Core* core);
    ~WmsClient();
     BLT_Result Describe();
     BLT_Result Select();
-    BLT_Result Play();
+    BLT_Result Play(ATX_InputStream** stream, BLT_MediaType** media_type);
     
     // accessors
     NPT_Ordinal GetSelectedStream() const { return m_SelectedStream; }
@@ -115,6 +116,7 @@ private:
     BLT_Result ParseAsfStreamBitrateProperties(const unsigned char* asf_data, NPT_UInt64 asf_data_size);
 
     // members
+    BLT_Core*     m_Core;
     NPT_String    m_Url;
     NPT_String    m_Guid;
     NPT_String    m_UserAgent;
@@ -162,6 +164,7 @@ struct WmsProtocolOutput {
     /* members */
     BLT_Size         size;
     BLT_MediaType    media_type;
+    ATX_InputStream* stream;
     BLT_MediaPacket* packet;
 };
 
@@ -484,8 +487,9 @@ WmsAsf_GetNextObject(const unsigned char*  data,
 /*----------------------------------------------------------------------
 |   WmsClient::WmsClient
 +---------------------------------------------------------------------*/
-WmsClient::WmsClient(const char* url) :
+WmsClient::WmsClient(const char* url, BLT_Core* core) :
     m_Response(NULL),
+    m_Core(core),
     m_Url(url),
     m_UserAgent("NSPlayer/7.10.0.3059"),
     m_RequestContext(0),
@@ -817,15 +821,11 @@ WmsClient::Select()
 |   WmsClient::Play
 +---------------------------------------------------------------------*/
 BLT_Result
-WmsClient::Play()
+WmsClient::Play(ATX_InputStream** stream, BLT_MediaType** media_type)
 {
     // cleanup any previous state
     delete m_Response;
     m_Response = NULL;
-    
-    // setup a client to get the stream
-    NPT_HttpClient  client;
-    NPT_HttpRequest request(m_Url, NPT_HTTP_METHOD_GET);
     
     // setup the request headers
     NPT_String guid_header = "xClientGUID={";
@@ -850,46 +850,26 @@ WmsClient::Play()
         }
     }
     NPT_String switch_count_header = NPT_String::Format("stream-switch-count=%d", stream_switch_count);
-    
-    NPT_HttpHeaders& headers = request.GetHeaders();
-    headers.SetHeader(NPT_HTTP_HEADER_USER_AGENT, m_UserAgent);
-    headers.SetHeader("Accept", "*/*");
-    headers.AddHeader("Pragma", "xPlayStrm=1");
-    headers.AddHeader("Pragma", context_header);
-    headers.AddHeader("Pragma", guid_header);
-    headers.AddHeader("Pragma", switch_count_header);
-    headers.AddHeader("Pragma", switch_entry_header);
-    
-    NPT_Result result = client.SendRequest(request, m_Response);
-    if (NPT_FAILED(result)) return result;
 
-    switch (m_Response->GetStatusCode()) {
-        case 200:
-            break;
-
-        case 403:
-            delete m_Response;
-            m_Response = NULL;
-            return ATX_ERROR_ACCESS_DENIED;
-            
-        case 404:
-            delete m_Response;
-            m_Response = NULL;
-            return BLT_ERROR_STREAM_INPUT_NOT_FOUND;
-
-        default:
-            delete m_Response;
-            m_Response = NULL;
-            return BLT_ERROR_PROTOCOL_FAILURE;
-    }
-
-    // analyze the response type
-    if (m_Response->GetEntity()->GetContentType() != "application/x-mms-framed" &&
-        m_Response->GetEntity()->GetContentType() != "video/x-ms-wmv" &&
-        m_Response->GetEntity()->GetContentType() != "audio/x-ms-wma") {
-        ATX_LOG_WARNING_1("unexpected Play response type: %s", 
-                          m_Response->GetEntity()->GetContentType().GetChars());
-        return BLT_ERROR_PROTOCOL_FAILURE;
+    ATX_LOG_INFO_1("streaming packets from %s", m_Url.GetChars());
+    BLT_HttpNetworkStreamRequestHeader headers[] = {
+        { NPT_HTTP_HEADER_USER_AGENT, m_UserAgent         },
+        { "Accept",                   "*/*"               },
+        { "Pragma",                   "xPlayStrm=1"       },
+        { "Pragma",                   context_header      },
+        { "Pragma",                   guid_header         },
+        { "Pragma",                   switch_count_header },
+        { "Pragma",                   switch_entry_header }
+    };
+    BLT_Result result = BLT_HttpNetworkStream_Create(m_Url,
+                                                     headers,
+                                                     sizeof(headers)/sizeof(headers[0]),
+                                                     m_Core,
+                                                     stream,
+                                                     media_type);
+    if (NPT_FAILED(result)) {
+        ATX_LOG_WARNING_1("BLT_HttpNetworkStream_Create failed (%d)", result);
+        return result;
     }
 
     return BLT_SUCCESS;
@@ -969,8 +949,12 @@ WmsProtocolInput_SetStream(BLT_InputStreamUser* _self,
         return BLT_ERROR_STREAM_INPUT_NOT_FOUND;
     }
     
+    if (self->output.stream) {
+        ATX_RELEASE_OBJECT(self->output.stream);
+    }
     delete self->client;
-    self->client = new WmsClient(url);
+    ATX_LOG_FINE_1("instantiating WMS client for URL %s", url.GetChars());
+    self->client = new WmsClient(url, ATX_BASE(self, BLT_BaseMediaNode).core);
     result = self->client->Describe();
     if (BLT_FAILED(result)) {
         ATX_LOG_WARNING_1("Describe() failed (%d)", result);
@@ -985,14 +969,36 @@ WmsProtocolInput_SetStream(BLT_InputStreamUser* _self,
         self->client = NULL;
         return result;
     }
-    result = self->client->Play();
+    BLT_MediaType* mms_media_type = NULL;
+    result = self->client->Play(&self->output.stream, &mms_media_type);
     if (BLT_FAILED(result)) {
         ATX_LOG_WARNING_1("Play() failed (%d)", result);
         delete self->client;
         self->client = NULL;
         return result;
     }
-    
+
+    // analyze the response type
+    //    if (m_Response->GetEntity()->GetContentType() != "application/x-mms-framed" &&
+    //        m_Response->GetEntity()->GetContentType() != "video/x-ms-wmv" &&
+    //        m_Response->GetEntity()->GetContentType() != "audio/x-ms-wma") {
+    //        ATX_LOG_WARNING_1("unexpected Play response type: %s",
+    //                          m_Response->GetEntity()->GetContentType().GetChars());
+    //        return BLT_ERROR_PROTOCOL_FAILURE;
+    //    }
+    if (mms_media_type) {
+        BLT_MediaType_Free(mms_media_type);
+    }
+
+    // get the network source interface of the network stream
+    if (self->output.stream) {
+        BLT_NetworkInputSource* network_source = ATX_CAST(self->output.stream, BLT_NetworkInputSource);
+        if (network_source) {
+            // attach the logical stream so the network input can read properties and emit events
+            BLT_NetworkInputSource_Attach(network_source, ATX_BASE(self, BLT_BaseMediaNode).context);
+        }
+    }
+
     return BLT_SUCCESS;
 }
 
@@ -1082,12 +1088,17 @@ WmsProtocolOutput_GetPacket(BLT_PacketProducer* _self,
     *packet = NULL;
     
     // check that we have a client
-    if (self->client == NULL) return BLT_ERROR_EOS;
-    
-    NPT_InputStreamReference in_stream;
-    self->client->m_Response->GetEntity()->GetInputStream(in_stream);
+    if (self->client == NULL) {
+        return BLT_ERROR_EOS;
+    }
+
+    // check that we have a stream
+    if (!self->output.stream) {
+        return BLT_ERROR_EOS;
+    }
+
     unsigned char buffer[8];
-    in_stream->ReadFully(buffer, 4);
+    ATX_InputStream_ReadFully(self->output.stream, buffer, 4);
     if ((buffer[0]&0x7F) != 0x24) {
         ATX_LOG_WARNING("ERROR: invalid framing");
     }
@@ -1114,22 +1125,22 @@ WmsProtocolOutput_GetPacket(BLT_PacketProducer* _self,
     payload[3] = buffer[3];
     if (packet_length) {
         if (packet_type == BLT_WMS_PACKET_ID_HEADER || packet_type == BLT_WMS_PACKET_ID_DATA) {
-            in_stream->ReadFully(payload+4, 8);
+            ATX_InputStream_ReadFully(self->output.stream, payload+4, 8);
             unsigned int location_id = NPT_BytesToInt32Le(payload+4);
             unsigned int packet_length_2 = NPT_BytesToInt16Le(payload+10);
             if (packet_length_2 != packet_length) {
                 ATX_LOG_WARNING("packet length mismatch\n");
             }
             ATX_LOG_FINE_3("(%d) - AF=%d, location=%d\n", packet_length_2, buffer[5], location_id);
-            in_stream->ReadFully(payload+12, packet_length-8);
-            
+            ATX_InputStream_ReadFully(self->output.stream, payload+12, packet_length-8);
+
             /* set some of the packet flags */
             if (packet_type == BLT_WMS_PACKET_ID_HEADER) {
                 // reuse the 'incarnation' header byte to indicate the stream that was selected
                 payload[8] = self->client->GetSelectedStream();
             }
         } else {
-            in_stream->ReadFully(payload+4, packet_length);
+            ATX_InputStream_ReadFully(self->output.stream, payload+4, packet_length);
         }
     }
     
@@ -1178,7 +1189,14 @@ WmsProtocol_Destroy(WmsProtocol* self)
     delete self->client;
     
     /* release any packet we may have */
-    if (self->output.packet) BLT_MediaPacket_Release(self->output.packet);
+    if (self->output.packet) {
+        BLT_MediaPacket_Release(self->output.packet);
+    }
+
+    /* release the stream */
+    if (self->output.stream) {
+        ATX_RELEASE_OBJECT(self->output.stream);
+    }
 
     /* destruct the inherited object */
     BLT_BaseMediaNode_Destruct(&ATX_BASE(self, BLT_BaseMediaNode));

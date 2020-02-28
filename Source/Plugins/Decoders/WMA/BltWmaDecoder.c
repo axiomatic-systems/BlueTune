@@ -668,6 +668,10 @@ WmaDecoderOutput_GetPacket(BLT_PacketProducer* _self,
             ATX_LOG_FINE("no more frames, end of stream");
             result = BLT_ERROR_EOS;
             break;
+        } else if (rc == cWMA_NoMoreDataThisTime) {
+            ATX_LOG_FINE("no more data at this time");
+            result = BLT_ERROR_PORT_HAS_NO_DATA;
+            break;
         } else if (rc != cWMA_NoErr) {
             ATX_LOG_WARNING_1("WMAFileDecodeData failed (%d)", rc);
             result = BLT_FAILURE;

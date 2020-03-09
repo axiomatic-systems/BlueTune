@@ -22,3 +22,4 @@ Build/Targets/x86-unknown-linux/Debug
 Build/Targets/x86-unknown-linux/Release
 IDEWorkspaceChecks.plist
 Build/Targets/universal-apple-macosx/Debug
+WMSDK

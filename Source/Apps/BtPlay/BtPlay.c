@@ -53,6 +53,7 @@ typedef struct  {
 |    globals
 +---------------------------------------------------------------------*/
 BLTP_Options Options;
+ATX_String   RedirectUrl;
 
 /*----------------------------------------------------------------------
 |    flags
@@ -433,6 +434,15 @@ BLTP_OnStreamPropertyChanged(ATX_PropertyListener*    self,
 {
     BLT_COMPILER_UNUSED(self);
 
+    /* catch redirects */
+    if (name &&
+        ATX_StringsEqual(name, "WMS.RedirectUrl") &&
+        value &&
+        value->type == ATX_PROPERTY_VALUE_TYPE_STRING &&
+        value->data.string) {
+        ATX_String_Assign(&RedirectUrl, value->data.string);
+    }
+
     if (!(Options.verbosity & BLTP_VERBOSITY_STREAM_INFO)) return;
     
     if (name == NULL) {
@@ -784,52 +794,66 @@ main(int argc, char** argv)
             continue;
         }
 
-        /* set the input name */
-        result = BLT_Decoder_SetInput(decoder, input_name, input_type);
-        if (BLT_FAILED(result)) {
-            ATX_ConsoleOutputF("SetInput failed: %d (%s)\n", result, BLT_ResultText(result));
-            input_type = NULL;
-            continue;
-        }
-
-        /* set stream properties */
-        {
-            ATX_Properties* properties;
-            ATX_Iterator*   it;
-            void*           next;
-            BLT_Decoder_GetStreamProperties(decoder, &properties);
-            ATX_Properties_GetIterator(Options.stream_properties, &it);
-            while (ATX_SUCCEEDED(ATX_Iterator_GetNext(it, &next))) {
-                ATX_Property* property = (ATX_Property*)next;
-                ATX_Properties_SetProperty(properties, property->name, &property->value); 
-            }
-            ATX_DESTROY_OBJECT(it);
-        }
-
-        /* pump the packets */
+        /* repeat while there's a redirect */
+        ATX_Boolean redirect = ATX_FALSE;
         do {
-            /* process one packet */
-            result = BLT_Decoder_PumpPacket(decoder);
-            
-            if (result == BLT_ERROR_WOULD_BLOCK || result == BLT_ERROR_PORT_HAS_NO_DATA) {
-                /* wait a bit before we try again */
-                ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
-                //ATX_TimeInterval sleep_duration = {1,0}; /* 1s */
-                ATX_System_Sleep(&sleep_duration);
-                result = BLT_SUCCESS;
-            } else {
-                /* if a duration is specified, check if we have exceeded it */
-                if (BLT_SUCCEEDED(result)) {
-                    result = BLTP_CheckElapsedTime(decoder, Options.duration);
-                }
+            /* set the input name */
+            result = BLT_Decoder_SetInput(decoder, input_name, input_type);
+            if (BLT_FAILED(result)) {
+                ATX_ConsoleOutputF("SetInput failed: %d (%s)\n", result, BLT_ResultText(result));
+                input_type = NULL;
+                break;
             }
-        } while (BLT_SUCCEEDED(result));
-        if (Options.verbosity & BLTP_VERBOSITY_MISC) {
-            ATX_ConsoleOutputF("final result = %d (%s)\n", result, BLT_ResultText(result));
-        }
 
-        /* reset input type */
-        input_type = NULL;
+            /* set stream properties */
+            {
+                ATX_Properties* properties;
+                ATX_Iterator*   it;
+                void*           next;
+                BLT_Decoder_GetStreamProperties(decoder, &properties);
+                ATX_Properties_GetIterator(Options.stream_properties, &it);
+                while (ATX_SUCCEEDED(ATX_Iterator_GetNext(it, &next))) {
+                    ATX_Property* property = (ATX_Property*)next;
+                    ATX_Properties_SetProperty(properties, property->name, &property->value);
+                }
+                ATX_DESTROY_OBJECT(it);
+            }
+
+            /* pump the packets */
+            do {
+                /* process one packet */
+                result = BLT_Decoder_PumpPacket(decoder);
+
+                if (result == BLT_ERROR_WOULD_BLOCK || result == BLT_ERROR_PORT_HAS_NO_DATA) {
+                    /* wait a bit before we try again */
+                    ATX_TimeInterval sleep_duration = {0,10000000}; /* 10ms */
+                    //ATX_TimeInterval sleep_duration = {1,0}; /* 1s */
+                    ATX_System_Sleep(&sleep_duration);
+                    result = BLT_SUCCESS;
+                } else {
+                    /* if a duration is specified, check if we have exceeded it */
+                    if (BLT_SUCCEEDED(result)) {
+                        result = BLTP_CheckElapsedTime(decoder, Options.duration);
+                    }
+                }
+            } while (BLT_SUCCEEDED(result));
+            if (Options.verbosity & BLTP_VERBOSITY_MISC) {
+                ATX_ConsoleOutputF("final result = %d (%s)\n", result, BLT_ResultText(result));
+            }
+
+            /* reset input type */
+            input_type = NULL;
+
+            /* check for a possible redirect */
+            if (BLT_FAILED(result) && ATX_String_GetLength(&RedirectUrl)) {
+                input_name = ATX_String_GetChars(&RedirectUrl);
+                ATX_ConsoleOutputF("redirecting to %s\n", input_name);
+                redirect = ATX_TRUE;
+            } else {
+                ATX_String_Assign(&RedirectUrl, NULL);
+                redirect = ATX_FALSE;
+            }
+        } while (redirect);
     }
 
     /* drain any buffered audio */

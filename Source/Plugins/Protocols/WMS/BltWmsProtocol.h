@@ -32,6 +32,8 @@
 extern "C" {
 #endif
 
+#define BLT_WMS_STREAM_REDIRECT_URL_PROPERTY "WMS.RedirectUrl"
+
 BLT_Result BLT_WmsProtocolModule_GetModuleObject(BLT_Module** module);
 
 #if defined(__cplusplus)

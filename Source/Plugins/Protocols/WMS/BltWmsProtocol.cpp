@@ -31,6 +31,7 @@ ATX_SET_LOCAL_LOGGER("bluetune.plugins.protocols.wms")
 |   constants
 +---------------------------------------------------------------------*/
 const unsigned int BLT_WMS_ASF_MAX_STREAMS = 128;
+const BLT_Result   BLT_WMS_STREAM_REDIRECT = 1;
 
 /*----------------------------------------------------------------------
 |   types
@@ -101,6 +102,7 @@ public:
     
     // accessors
     NPT_Ordinal GetSelectedStream() const { return m_SelectedStream; }
+    const NPT_String& GetUrl() const { return m_Url; }
     
     // members
     NPT_HttpResponse* m_Response;
@@ -727,7 +729,7 @@ WmsClient::Describe()
         ATX_LOG_WARNING_1("unexpected Describe response type: %s", 
                           response->GetEntity()->GetContentType().GetChars());
         delete response;
-        return BLT_ERROR_PROTOCOL_FAILURE;
+        return BLT_WMS_STREAM_REDIRECT;
     }
     
     // get the body stream and size
@@ -957,7 +959,22 @@ WmsProtocolInput_SetStream(BLT_InputStreamUser* _self,
     self->client = new WmsClient(url, ATX_BASE(self, BLT_BaseMediaNode).core);
     result = self->client->Describe();
     if (BLT_FAILED(result)) {
-        ATX_LOG_WARNING_1("Describe() failed (%d)", result);
+        if (result == BLT_WMS_STREAM_REDIRECT) {
+            // notify any listener of what the candidate redirection URL is
+            ATX_Properties* properties;
+            if (BLT_SUCCEEDED(BLT_Stream_GetProperties(ATX_BASE(self, BLT_BaseMediaNode).context,
+                                                       &properties))) {
+                ATX_PropertyValue property_value;
+                property_value.type = ATX_PROPERTY_VALUE_TYPE_STRING;
+                property_value.data.string = (const char*)self->client->GetUrl();
+                ATX_Properties_SetProperty(properties,
+                                           BLT_WMS_STREAM_REDIRECT_URL_PROPERTY,
+                                           &property_value);
+            }
+            result = BLT_ERROR_UNSUPPORTED_FORMAT;
+        } else {
+            ATX_LOG_WARNING_1("Describe() failed (%d)", result);
+        }
         delete self->client;
         self->client = NULL;
         return result;
